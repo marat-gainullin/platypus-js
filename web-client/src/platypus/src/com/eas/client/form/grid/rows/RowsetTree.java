@@ -224,6 +224,7 @@ public class RowsetTree extends TreeAdapter<Row> {
 
 		@Override
 		public void rowsetScrolled(RowsetScrollEvent event) {
+			/* rowset current cursor position change is handled by ModelGrid
 			if (event.getOldRowIndex() >= 1 && event.getOldRowIndex() <= event.getRowset().size()) {
 				Row oldRow = event.getRowset().getRow(event.getOldRowIndex());
 				changed(oldRow);
@@ -232,6 +233,7 @@ public class RowsetTree extends TreeAdapter<Row> {
 				Row newRow = event.getRowset().getRow(event.getNewRowIndex());
 				changed(newRow);
 			}
+			*/
 		}
 
 		@Override

@@ -10,7 +10,6 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.DivBuilder;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.AbstractCellTableBuilder;
 import com.google.gwt.user.cellview.client.Column;

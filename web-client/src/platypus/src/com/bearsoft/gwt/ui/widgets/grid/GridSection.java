@@ -6,18 +6,24 @@
 package com.bearsoft.gwt.ui.widgets.grid;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableColElement;
+import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 
 /**
@@ -52,14 +58,6 @@ public class GridSection<T> extends CellTable<T> {
 	public boolean isCtrlKey() {
 		return ctrlKey;
 	}
-
-	/*
-	 * @Override public void setKeyboardSelectedRow(int row, int subrow, boolean
-	 * stealFocus) { // TODO: review keyboard cells focusing algorithm in multi
-	 * table context if (row < 0) { } else if (row >=
-	 * getVisibleRange().getLength()) { } else {
-	 * super.setKeyboardSelectedRow(row, subrow, stealFocus); } }
-	 */
 
 	public AbstractCellTable<T>[] getColumnsPartners() {
 		return columnsPartners;
@@ -189,6 +187,33 @@ public class GridSection<T> extends CellTable<T> {
 		return super.getTableHeadElement();
 	}
 
+	public <C> void redrawAllRowsInColumn(int aIndex, ListDataProvider<T> aDataProvider) {
+		if (aIndex >= 0 && aIndex < getColumnCount()) {
+			int start = getVisibleRange().getStart();
+			Column<T, C> column = (Column<T, C>) getColumn(aIndex);
+			Cell<C> cell = column.getCell();
+			List<T> data = aDataProvider.getList();
+			ProvidesKey<T> keys = getKeyProvider();
+			NodeList<TableRowElement> rows = getTableBodyElement().getRows();
+			for (int i = 0; i < rows.getLength(); i++) {
+				TableRowElement row = rows.getItem(i);
+				NodeList<TableCellElement> cells = row.getCells();
+				if (cells.getLength() > 0) {
+					TableCellElement toRerender = cells.getItem(0);
+					SafeHtmlBuilder sb = new SafeHtmlBuilder();
+					T object = data.get(start + i);
+					Cell.Context cx = new Cell.Context(start + i, aIndex, keys.getKey(object));
+					cell.render(cx, column.getValue(object), sb);
+					// Take into account, that cell builder supports some maps
+					// to cells' divs
+					// and generates them. So we have to work with first <div>
+					// in <td>.
+					toRerender.getFirstChildElement().setInnerSafeHtml(sb.toSafeHtml());
+				}
+			}
+		}
+	}
+
 	@Override
 	public TableSectionElement getTableFootElement() {
 		return super.getTableFootElement();
@@ -208,6 +233,24 @@ public class GridSection<T> extends CellTable<T> {
 		} else {
 			return null;
 		}
+	}
+
+	protected static Map<Element, GridSection<?>> sections = new HashMap<>();
+
+	public static GridSection<?> getInstance(Element aTableElement) {
+		return sections.get(aTableElement);
+	}
+
+	@Override
+	protected void onAttach() {
+		super.onAttach();
+		sections.put(getElement(), this);
+	}
+
+	@Override
+	protected void onDetach() {
+		sections.remove(getElement());
+		super.onDetach();
 	}
 
 	@Override

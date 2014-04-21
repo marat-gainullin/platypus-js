@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
+import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
@@ -27,6 +28,8 @@ import com.eas.client.model.Entity;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -65,6 +68,21 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 					return readonly || !grid.isEditable();
 				}
 
+			});
+			((RenderedPopupEditorCell<T>) getTargetCell()).setOnEditorClose(new RenderedPopupEditorCell.EditorCloser() {
+				@Override
+				public void closed(Element aTable) {
+					final GridSection<?> toFocus = GridSection.getInstance(aTable);
+					if (toFocus != null) {
+						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+							@Override
+							public void execute() {
+								toFocus.setFocus(true);
+							}
+						});
+					}
+				}
 			});
 		}
 		headerNode = new HeaderNode(new DraggableHeader<Row>("", null, this));

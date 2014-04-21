@@ -8,7 +8,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.AbstractEditableCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -31,8 +32,18 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  * @param <C>
  */
-public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
+public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C, AbstractPopupEditorCell.ViewData<C>> {
 
+	protected static class ViewData<T> {
+		String id;
+		ValueUpdater<T> updater;
+		
+		public ViewData(String aId, ValueUpdater<T> aUpdater){
+			id = aId;
+			updater = aUpdater;
+		}
+	}
+	
 	protected Widget editor;
 	protected HasValue<C> valueHost;
 	protected Focusable focusHost;
@@ -56,10 +67,11 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		if (editor instanceof HasValue<?>) {
 			valueHost = (HasValue<C>) editor;
 		} else {
-			throw new IllegalArgumentException("editor must implement interface HasValue<C>");
+			throw new IllegalArgumentException("Editor must implement interface HasValue<C>");
 		}
 		if (editor instanceof Focusable) {
 			focusHost = (Focusable) editor;
+			focusHost.setTabIndex(1);
 		}
 		editor.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 	}
@@ -73,11 +85,12 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		}
 	}
 
-	public boolean isEditing(com.google.gwt.cell.client.Cell.Context context, Element parent, C value) {
-		return editor != null && editor.isAttached();
+	public boolean isEditing(Cell.Context context, Element parent, C value) {
+		ViewData<C> viewId = getViewData(context.getKey());
+		return viewId != null;
 	}
 
-	public void startEditing(final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
+	public void startEditing(final Cell.Context context, final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
 		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
 		final PopupPanel pp = new PopupPanel(true);
 		pp.getElement().setClassName("grid-cell-editor-popup");
@@ -114,6 +127,10 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 					editorKeyUp.removeHandler();
 					pp.setWidget(null);
 					editor.removeFromParent();
+					setViewData(context.getKey(), null);
+					if (updaterRef.valueUpdater == null) {
+						setValue(context, parent, value);
+					}
 					if (onEditorClose != null)
 						onEditorClose.run();
 				}

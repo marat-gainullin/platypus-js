@@ -18,6 +18,8 @@ import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider.ExpandedColl
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.events.RowsetAdapter;
+import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.form.ControlsUtils;
@@ -33,6 +35,7 @@ import com.eas.client.form.grid.columns.RadioServiceColumn;
 import com.eas.client.form.grid.rows.RowChildrenFetcher;
 import com.eas.client.form.grid.rows.RowsetDataProvider;
 import com.eas.client.form.grid.rows.RowsetTree;
+import com.eas.client.form.grid.selection.CheckBoxesEventTranslator;
 import com.eas.client.form.grid.selection.MultiRowSelectionModel;
 import com.eas.client.form.grid.selection.SingleRowSelectionModel;
 import com.eas.client.form.published.HasComponentPopupMenu;
@@ -46,10 +49,15 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -59,6 +67,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
 
@@ -80,6 +89,22 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
 	//
 
+	protected class RowMarkerRerenderer extends RowsetAdapter{
+		
+		@Override
+		public void rowsetScrolled(RowsetScrollEvent event) {
+			if(getDataColumnCount() > 0 && getDataColumn(0) instanceof IdentityColumn){
+				if(frozenColumns > 0){
+					frozenLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
+					scrollableLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
+				}else{
+					frozenRight.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
+					scrollableRight.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
+				}
+			}
+		}
+	}
+	
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
@@ -90,6 +115,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	protected ModelElementRef paramSourceField;
 	//
 	protected Entity rowsSource;
+	protected RowMarkerRerenderer markerRerenderer = new RowMarkerRerenderer();
 	protected JavaScriptObject onRender;
 	protected PublishedComponent published;
 	protected FindWindow finder;
@@ -132,6 +158,15 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			}
 
 		}, KeyUpEvent.getType());
+		addDomHandler(new KeyDownHandler() {
+
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_F) {
+					finder.show();
+				}
+			}
+		}, KeyDownEvent.getType());
 	}
 
 	public ModelElementRef getUnaryLinkField() {
@@ -293,6 +328,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				sm = new MultiRowSelectionModel(this);
 			}
 			setSelectionModel(sm);
+			applyRowsHeaderTypeToSelectionModel();
 			if (needRefreshColumns) {
 				refreshColumns();
 				applyHeader();
@@ -440,7 +476,24 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			if (positionSelectionHandler != null)
 				positionSelectionHandler.removeHandler();
 			super.setSelectionModel(aValue);
+			applyRowsHeaderTypeToSelectionModel();
 			positionSelectionHandler = aValue.addSelectionChangeHandler(new RowsetPositionSelectionHandler(rowsSource, aValue));
+		}
+	}
+
+	protected void applyRowsHeaderTypeToSelectionModel() {
+		if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
+			CheckBoxesEventTranslator<Row> translator = new CheckBoxesEventTranslator<>(getDataColumn(0));
+			DefaultSelectionEventManager<Row> selectionEventManager = DefaultSelectionEventManager.createCustomManager(translator);
+			frozenLeft.setSelectionModel(frozenLeft.getSelectionModel(), selectionEventManager);
+			frozenRight.setSelectionModel(frozenRight.getSelectionModel(), selectionEventManager);
+			scrollableLeft.setSelectionModel(scrollableLeft.getSelectionModel(), selectionEventManager);
+			scrollableRight.setSelectionModel(scrollableRight.getSelectionModel(), selectionEventManager);
+		} else {
+			frozenLeft.setSelectionModel(frozenLeft.getSelectionModel());
+			frozenRight.setSelectionModel(frozenRight.getSelectionModel());
+			scrollableLeft.setSelectionModel(scrollableLeft.getSelectionModel());
+			scrollableRight.setSelectionModel(scrollableRight.getSelectionModel());
 		}
 	}
 
@@ -470,12 +523,14 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		if (rowsSource != aValue) {
 			if (sortHandlerReg != null)
 				sortHandlerReg.removeHandler();
+			if(rowsSource != null && rowsSource.getRowset() != null)
+				rowsSource.getRowset().removeRowsetListener(markerRerenderer);
 			rowsSource = aValue;
 			if (rowsSource != null) {
 				Runnable onResize = new Runnable() {
 					@Override
 					public void run() {
-						ModelGrid.this.getElement().<XElement>cast().unmask();
+						ModelGrid.this.getElement().<XElement> cast().unmask();
 						setupVisibleRanges();
 					}
 
@@ -488,29 +543,30 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 					}
 
 				};
-				Runnable onLoadingStart = new Runnable(){
+				Runnable onLoadingStart = new Runnable() {
 					@Override
 					public void run() {
-						ModelGrid.this.getElement().<XElement>cast().unmask();
-						ModelGrid.this.getElement().<XElement>cast().loadMask();
+						ModelGrid.this.getElement().<XElement> cast().unmask();
+						ModelGrid.this.getElement().<XElement> cast().loadMask();
 					}
 				};
-				com.bearsoft.rowset.Callback<String> onError = new com.bearsoft.rowset.Callback<String>(){
+				com.bearsoft.rowset.Callback<String> onError = new com.bearsoft.rowset.Callback<String>() {
 					@Override
 					public void run(String aResult) throws Exception {
-						ModelGrid.this.getElement().<XElement>cast().unmask();
-						ModelGrid.this.getElement().<XElement>cast().errorMask(aResult);
+						ModelGrid.this.getElement().<XElement> cast().unmask();
+						ModelGrid.this.getElement().<XElement> cast().errorMask(aResult);
 					}
+
 					@Override
 					public void cancel() {
 					}
-				}; 
+				};
 				if (isTreeConfigured()) {
 					TreeDataProvider<Row> treeDataProvider;
 					if (isLazyTreeConfigured()) {
 						RowsetTree tree = new RowsetTree(rowsSource.getRowset(), unaryLinkField.field, true, onLoadingStart, onError);
 						treeDataProvider = new TreeDataProvider<>(tree, onResize, new RowChildrenFetcher(rowsSource, (Parameter) param2GetChildren.field, paramSourceField.field));
-					} else{
+					} else {
 						RowsetTree tree = new RowsetTree(rowsSource.getRowset(), unaryLinkField.field, onLoadingStart, onError);
 						treeDataProvider = new TreeDataProvider<>(tree, onResize);
 					}
@@ -534,6 +590,8 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 					sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
 				}
 				sortHandlerReg = addColumnSortHandler(sortHandler);
+				if(rowsSource.getRowset() != null)
+					rowsSource.getRowset().addRowsetListener(markerRerenderer);
 			}
 		}
 	}
@@ -546,13 +604,13 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		published = aValue != null ? aValue.<PublishedComponent> cast() : null;
 		if (published != null) {
 			publish(this, published);
-			for(int i = 0; i < getDataColumnCount(); i++){
+			for (int i = 0; i < getDataColumnCount(); i++) {
 				Column<Row, ?> col = getDataColumn(i);
-				if(col instanceof ModelGridColumnFacade){
-					ModelGridColumnFacade fCol = (ModelGridColumnFacade)col;
-					if(fCol.getJsName() != null && !fCol.getJsName().isEmpty() && col instanceof HasPublished){
-						HasPublished pCol = (HasPublished)col;
-						published.<JsObject>cast().inject(fCol.getJsName(), pCol.getPublished());
+				if (col instanceof ModelGridColumnFacade) {
+					ModelGridColumnFacade fCol = (ModelGridColumnFacade) col;
+					if (fCol.getJsName() != null && !fCol.getJsName().isEmpty() && col instanceof HasPublished) {
+						HasPublished pCol = (HasPublished) col;
+						published.<JsObject> cast().inject(fCol.getJsName(), pCol.getPublished());
 					}
 				}
 			}
@@ -630,7 +688,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			}
 		});
 	}-*/;
-	
+
 	public JavaScriptObject getOnRender() {
 		return onRender;
 	}

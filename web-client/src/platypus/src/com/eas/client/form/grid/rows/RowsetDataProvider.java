@@ -144,6 +144,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 
 		@Override
 		public void rowsetScrolled(RowsetScrollEvent event) {
+			/* rowset current cursor position change is handled by ModelGrid
 			if(event.getOldRowIndex() >= 1 && event.getOldRowIndex() <= event.getRowset().size()){
 				Row oldRow = event.getRowset().getRow(event.getOldRowIndex());
 				validate();
@@ -157,6 +158,23 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 				Integer index = indicies.get(newRow);
 				assert index != null;
 				getList().set(index, newRow);
+				targetListCursor = index;
+			}
+			if(event.getRowset().isBeforeFirst() || event.getRowset().isAfterLast())
+				targetListCursor = null;
+				*/
+			// avoid unnecessary updates of provider's list and therefore unnecessary rendering of displays
+			if(event.getOldRowIndex() >= 1 && event.getOldRowIndex() <= event.getRowset().size()){
+				Row oldRow = event.getRowset().getRow(event.getOldRowIndex());
+				validate();
+				Integer index = indicies.get(oldRow);
+				assert index != null;
+			}
+			if(event.getNewRowIndex() >= 1 && event.getNewRowIndex() <= event.getRowset().size()){
+				Row newRow = event.getRowset().getRow(event.getNewRowIndex());
+				validate();
+				Integer index = indicies.get(newRow);
+				assert index != null;
 				targetListCursor = index;
 			}
 			if(event.getRowset().isBeforeFirst() || event.getRowset().isAfterLast())
