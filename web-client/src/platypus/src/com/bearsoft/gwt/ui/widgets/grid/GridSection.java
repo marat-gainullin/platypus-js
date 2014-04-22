@@ -187,6 +187,24 @@ public class GridSection<T> extends CellTable<T> {
 		return super.getTableHeadElement();
 	}
 
+	public TableCellElement getCell(int aRow, int aCol) {
+		NodeList<TableRowElement> rows = getTableBodyElement().getRows();
+		if(aRow >= 0 && aRow < rows.getLength()){
+			TableRowElement row = rows.getItem(aRow);
+			NodeList<TableCellElement> cells = row.getCells();
+			if(aCol >= 0 && aCol < cells.getLength()){
+				return cells.getItem(aCol);
+			}
+		}
+		return null;
+	}
+	
+	public void focusCell(int aRow, int aCol){
+		setKeyboardSelectedColumn(aCol);
+		setKeyboardSelectedRow(aRow);
+		setFocus(true);
+	}
+
 	public <C> void redrawAllRowsInColumn(int aIndex, ListDataProvider<T> aDataProvider) {
 		if (aIndex >= 0 && aIndex < getColumnCount()) {
 			int start = getVisibleRange().getStart();

@@ -2,34 +2,42 @@ package com.eas.client.form.grid;
 
 import java.util.List;
 
+import com.bearsoft.gwt.ui.containers.AnchorsPanel;
 import com.bearsoft.gwt.ui.containers.HorizontalBoxPanel;
 import com.bearsoft.gwt.ui.containers.VerticalBoxPanel;
 import com.bearsoft.gwt.ui.containers.window.ToolsCaption;
 import com.bearsoft.gwt.ui.containers.window.WindowPanel;
+import com.bearsoft.gwt.ui.containers.window.WindowPopupPanel;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.rowset.Row;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SetSelectionModel;
 
 public class FindWindow extends WindowPanel {
 
 	protected static GridMessages messages = GWT.create(GridMessages.class);
 
-	private PopupPanel popup = new PopupPanel(true, false);
+	private WindowPopupPanel popup = new WindowPopupPanel(this, true, false);
 	private Label label;
 	private TextBox field;
 	private CheckBox checkCase;
 	private CheckBox checkWhole;
-	private Button findButton;
+	private Button btnFind;
 	private Button closeButton;
 
 	private Grid<Row> grid;
@@ -39,33 +47,47 @@ public class FindWindow extends WindowPanel {
 
 	public FindWindow(Grid<Row> aGrid) {
 		super();
+		popup.setResizable(false);
+		popup.setMinimizable(false);
+		popup.setMaximizable(false);
 		ToolsCaption caption = new ToolsCaption(this, messages.heading());
 		setCaptionWidget(caption);
 		grid = aGrid;
 		initComponents();
+		setSize(345, 95);
+	}
 
-		setResizable(false);
-		setMinimizable(false);
-		setMaximizable(false);
-		setSize(400, 135);
-		popup.setWidget(this);
+	@Override
+	protected Widget getMovableTarget() {
+		return popup;
 	}
 
 	private void initComponents() {
 		label = new Label(messages.find());
 		field = new TextBox();
+		
+		field.addKeyDownHandler(new KeyDownHandler() {
+			
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+					findNext();
+				}
+			}
+		});
+		
 		checkCase = new CheckBox();
 		checkCase.setText(messages.caseSensitive());
 
 		checkWhole = new CheckBox();
 		checkWhole.setText(messages.wholeWords());
 
-		findButton = new Button(messages.findNext());
-		findButton.setPixelSize(90, 25);
+		btnFind = new Button(messages.findNext());
+		btnFind.setPixelSize(90, 25);
 		closeButton = new Button(messages.close());
 		closeButton.setPixelSize(90, 25);
 
-		findButton.addClickHandler(new ClickHandler() {
+		btnFind.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				findNext();
@@ -79,28 +101,40 @@ public class FindWindow extends WindowPanel {
 			}
 		});
 
-		HorizontalBoxPanel hBox = new HorizontalBoxPanel();
-		hBox.setHgap(5);
+		VerticalBoxPanel findBox = new VerticalBoxPanel();
+		findBox.setVgap(10);
 
-		VerticalBoxPanel vBox = new VerticalBoxPanel();
-		vBox.setVgap(10);
+		HorizontalBoxPanel settingsBox = new HorizontalBoxPanel();
+		settingsBox.setHgap(10);
+		settingsBox.add(checkCase);
+		settingsBox.add(checkWhole);
 
-		HorizontalBoxPanel hBox2 = new HorizontalBoxPanel();
-		hBox2.setHgap(10);
-		hBox2.add(checkCase);
-		hBox2.add(checkWhole);
+		findBox.add(field);
+		findBox.add(settingsBox);
 
-		vBox.add(field);
-		vBox.add(hBox2);
+		AnchorsPanel anchors = new AnchorsPanel();
 
-		hBox.add(label);
-		hBox.add(vBox);
+		anchors.add(label);
+		anchors.setWidgetLeftWidth(label, 5, Style.Unit.PX, 40, Style.Unit.PX);
+		anchors.setWidgetTopHeight(label, 5, Style.Unit.PX, 20, Style.Unit.PX);
 
-		setWidget(hBox);
+		anchors.add(findBox);
+		anchors.setWidgetLeftWidth(findBox, 50, Style.Unit.PX, 290, Style.Unit.PX);
+		anchors.setWidgetTopHeight(findBox, 5, Style.Unit.PX, 50, Style.Unit.PX);
+
+		anchors.add(btnFind);
+		anchors.setWidgetRightWidth(btnFind, 5, Style.Unit.PX, 75, Style.Unit.PX);
+		anchors.setWidgetTopHeight(btnFind, 65, Style.Unit.PX, 25, Style.Unit.PX);
+
+		anchors.add(closeButton);
+		anchors.setWidgetRightWidth(closeButton, 85, Style.Unit.PX, 75, Style.Unit.PX);
+		anchors.setWidgetTopHeight(closeButton, 65, Style.Unit.PX, 25, Style.Unit.PX);
+
+		setWidget(anchors);
 	}
 
-	private boolean findNext() {
-		List<Row> store = grid.getDataProvider().getList();
+	public boolean findNext() {
+		List<Row> data = grid.getDataProvider().getList();
 		boolean caseSensitive = checkCase.getValue();
 		boolean wholeString = checkWhole.getValue();
 		String findText = field.getText();
@@ -110,7 +144,7 @@ public class FindWindow extends WindowPanel {
 		if (!caseSensitive) {
 			findText = findText.toLowerCase();
 		}
-		if (row >= store.size()) {
+		if (row >= data.size()) {
 			row = 0;
 			col = 0;
 		} else {
@@ -125,7 +159,7 @@ public class FindWindow extends WindowPanel {
 			}
 		}
 
-		for (; row < store.size(); row++) {
+		for (; row < data.size(); row++) {
 			for (; col < grid.getDataColumnCount(); col++) {
 				if (findInnerText(grid.getViewCell(row, col), findText, caseSensitive, wholeString)) {
 					selectCell(row, col);
@@ -142,40 +176,55 @@ public class FindWindow extends WindowPanel {
 	}
 
 	private boolean findInnerText(Node aNode, String aFindText, boolean aCaseSensitive, boolean aWholeString) {
-		int cnt = aNode.getChildCount();
-		if (cnt == 0) {
-			if (aNode instanceof Element) {
-				Element element = (Element) aNode;
+		if (aNode != null) {
+			int cnt = aNode.getChildCount();
+			if (cnt == 0) {
+				if (aNode instanceof Element) {
+					Element element = (Element) aNode;
 
-				String cellText = element.getInnerText();
-				if (!aCaseSensitive) {
-					cellText = cellText.toLowerCase();
+					String cellText = element.getInnerText();
+					if (!aCaseSensitive) {
+						cellText = cellText.toLowerCase();
+					}
+
+					if (aWholeString) {
+						return cellText.equals(aFindText);
+					} else {
+						return cellText.contains(aFindText);
+					}
+				}
+			} else {
+				for (int i = 0; i < cnt; i++) {
+					if (findInnerText(aNode.getChild(i), aFindText, aCaseSensitive, aWholeString)) {
+						return true;
+					}
 				}
 
-				if (aWholeString) {
-					return cellText.equals(aFindText);
-				} else {
-					return cellText.contains(aFindText);
-				}
 			}
-		} else {
-			for (int i = 0; i < cnt; i++) {
-				if (findInnerText(aNode.getChild(i), aFindText, aCaseSensitive, aWholeString)) {
-					return true;
-				}
-			}
-
 		}
 		return false;
 	}
 
 	private void selectCell(int aRow, int aCol) {
-		// TODO; mark individual found cells (aCol parameter)
-		grid.getSelectionModel().setSelected(grid.getObject(aRow), true);
+		List<Row> data = grid.getDataProvider().getList();
+		if (grid.getSelectionModel() instanceof SetSelectionModel) {
+			SetSelectionModel<Row> ssm = (SetSelectionModel<Row>) grid.getSelectionModel();
+			ssm.clear();
+			ssm.setSelected(data.get(aRow), true);
+		}
+		TableCellElement cell = grid.getViewCell(aRow, aCol);
+		if (cell != null) {
+			cell.scrollIntoView();
+			//grid.focusViewCell(aRow, aCol);// this call leads to cell editing in subsequent enter hit
+		}
 	}
 
 	public void show() {
-		popup.show();
+		row = 0;
+		col = 0;
+		popup.center();
+		activate();
+		field.setFocus(true);
 	}
 
 }

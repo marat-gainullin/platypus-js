@@ -26,6 +26,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.StyleElement;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DragEndEvent;
@@ -481,16 +482,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 							boolean isTargetLeft = targetSection == headerLeft || targetSection == frozenLeft || targetSection == scrollableLeft || targetSection == footerLeft;
 							sourceSection = isSourceLeft ? headerLeft : headerRight;
 							targetSection = isTargetLeft ? headerLeft : headerRight;
-							/*
-							 * boolean isForeignColumn; if (isTargetLeft) {
-							 * isForeignColumn = sourceTable != headerLeft &&
-							 * sourceTable != frozenLeft && sourceTable !=
-							 * scrollableLeft && sourceTable != footerLeft; }
-							 * else { isForeignColumn = sourceTable !=
-							 * headerRight && sourceTable != frozenRight &&
-							 * sourceTable != scrollableRight && sourceTable !=
-							 * footerRight; }
-							 */
 							int generalSourceIndex = isSourceLeft ? sourceIndex : sourceIndex + frozenColumns;
 							int generalTargetIndex = isTargetLeft ? targetIndex : targetIndex + frozenColumns;
 							if (/* isForeignColumn || */generalSourceIndex != generalTargetIndex) {
@@ -504,20 +495,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 								sourceSection.clearColumnWidth(column);
 								removeColumn(generalSourceIndex);
 								addColumn(generalTargetIndex, column, width, header, footer, false);
-								/*
-								 * for (AbstractCellTable<T> partner :
-								 * targetSection.getColumnsPartners()) {
-								 * partner.insertColumn(targetIndex, column,
-								 * partner == headerLeft || partner ==
-								 * headerRight ? header : null, partner ==
-								 * footerLeft || partner == footerRight ? footer
-								 * : null); } frozenColumns =
-								 * headerLeft.getColumnCount();
-								 * targetSection.setColumnWidth(column,
-								 * width);// ColumnWidthPropagator // will //
-								 * take // care // about // any // column //
-								 * sharing.
-								 */
 								headerLeft.getWidthPropagator().changed();
 							}
 						}
@@ -525,7 +502,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 						int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
 						// Source and target tables are the same, so we can
 						// cast to DraggedColumn<T> with no care
-						setColumnWidth(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
+						setColumnWidthFromHeaderDrag(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
 					}
 				}
 			}
@@ -569,10 +546,11 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 						@Override
 						public void onValueChange(ValueChangeEvent<Boolean> event) {
 							if (Boolean.TRUE.equals(event.getValue())) {
-								aSection.showColumn(column);
+								showColumn(column);
 							} else {
-								aSection.hideColumn(column);
+								hideColumn(column);
 							}
+							Grid.this.onResize();
 						}
 
 					});
@@ -1123,6 +1101,10 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 		});
 	}
+	
+	public void setColumnWidthFromHeaderDrag(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {
+		setColumnWidth(aColumn, aWidth, aUnit);
+	}
 
 	public void setColumnWidth(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {
 		if (headerLeft.getColumnIndex(aColumn) != -1) {
@@ -1169,7 +1151,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public int getDataColumnCount() {
-		return headerLeft.getColumnCount() + headerRight.getColumnCount();
+		return (headerLeft != null ? headerLeft.getColumnCount() : 0) + (headerRight != null ? headerRight.getColumnCount() : 0);
 	}
 
 	public Column<T, ?> getDataColumn(int aIndex) {
@@ -1186,13 +1168,45 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			return null;
 	}
 
-	public Element getViewCell(int row, int col) {
-		assert false : "getViewCell is not implemented yet.";
-		return null;
+	public TableCellElement getViewCell(int aRow, int aCol) {
+		GridSection<T> targetSection;
+		if(aRow < frozenRows){
+			if(aCol < frozenColumns){
+				targetSection = frozenLeft;
+			}else{
+				aCol -= frozenColumns;
+				targetSection = frozenRight;
+			}
+		}else{
+			aRow -= frozenRows;
+			if(aCol < frozenColumns){
+				targetSection = scrollableLeft;
+			}else{
+				aCol -= frozenColumns;
+				targetSection = scrollableRight;
+			}
+		}
+		return targetSection.getCell(aRow, aCol);
 	}
-
-	public T getObject(int row) {
-		assert false : "getObject is not implemented yet.";
-		return null;
+	
+	public void focusViewCell(int aRow, int aCol) {
+		GridSection<T> targetSection;
+		if(aRow < frozenRows){
+			if(aCol < frozenColumns){
+				targetSection = frozenLeft;
+			}else{
+				aCol -= frozenColumns;
+				targetSection = frozenRight;
+			}
+		}else{
+			aRow -= frozenRows;
+			if(aCol < frozenColumns){
+				targetSection = scrollableLeft;
+			}else{
+				aCol -= frozenColumns;
+				targetSection = scrollableRight;
+			}
+		}
+		targetSection.focusCell(aRow, aCol);
 	}
 }

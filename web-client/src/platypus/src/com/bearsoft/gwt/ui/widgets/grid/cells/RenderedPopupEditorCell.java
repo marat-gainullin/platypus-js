@@ -54,11 +54,11 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		@Template("<div id=\"{0}\" class=\"{1}\" style=\"{2}\">{3}</div>")
 		public SafeHtml generate(String aId, String aCellClass, SafeStyles aStyle, SafeHtml aContent);
 	}
-	
-	public interface EditorCloser{
-		
+
+	public interface EditorCloser {
+
 		public void closed(Element aTable);
-		
+
 	}
 
 	protected CellRenderer<T> renderer;
@@ -66,7 +66,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	protected EditorCloser onEditorClose;
 
 	public RenderedPopupEditorCell(Widget aEditor) {
-		super(aEditor, BrowserEvents.CLICK, /* BrowserEvents.DBLCLICK, */BrowserEvents.KEYUP, BrowserEvents.FOCUS, BrowserEvents.BLUR);
+		super(aEditor, BrowserEvents.CLICK, /* BrowserEvents.DBLCLICK, */BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
 	}
 
 	public EditorCloser getOnEditorClose() {
@@ -144,7 +144,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 			if (viewData == null) {
 				String type = event.getType();
 				int keyCode = event.getKeyCode();
-				boolean editToggleKeys = BrowserEvents.KEYUP.equals(type) && (keyCode == KeyCodes.KEY_ENTER || keyCode == KeyCodes.KEY_F2);
+				boolean editToggleKeys = BrowserEvents.KEYDOWN.equals(type) && (keyCode == KeyCodes.KEY_ENTER || keyCode == KeyCodes.KEY_F2);
 				if (BrowserEvents.CLICK.equals(type) || editToggleKeys) {
 					// Switch to edit mode.
 					viewData = new ViewData<>(Document.get().createUniqueId(), valueUpdater);

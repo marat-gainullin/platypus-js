@@ -13,8 +13,6 @@ public interface ModelGridColumnFacade extends HasJsName {
 
 	public void setWidth(double aValue);
 
-	public void updateWidth(double aValue);
-	
 	public String getTitle();
 
 	public void setTitle(String aValue);

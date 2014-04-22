@@ -16,8 +16,8 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -37,13 +37,13 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 	protected static class ViewData<T> {
 		String id;
 		ValueUpdater<T> updater;
-		
-		public ViewData(String aId, ValueUpdater<T> aUpdater){
+
+		public ViewData(String aId, ValueUpdater<T> aUpdater) {
 			id = aId;
 			updater = aUpdater;
 		}
 	}
-	
+
 	protected Widget editor;
 	protected HasValue<C> valueHost;
 	protected Focusable focusHost;
@@ -91,6 +91,7 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 	}
 
 	public void startEditing(final Cell.Context context, final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
+		Widget oldParent = editor.getParent();
 		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
 		final PopupPanel pp = new PopupPanel(true);
 		pp.getElement().setClassName("grid-cell-editor-popup");
@@ -98,12 +99,15 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 		valueHost.setValue(value);
 		pp.setWidget(editor);
 		final Element cellElement = parent;
+		if (oldParent instanceof PopupPanel) {
+			((PopupPanel) oldParent).hide(true);
+		}
 		pp.setWidth(cellElement.getClientWidth() + "px");
 		pp.setHeight(cellElement.getClientHeight() + "px");
 		pp.setPopupPosition(cellElement.getAbsoluteLeft(), cellElement.getAbsoluteTop());
-		final HandlerRegistration editorKeyUp = editor.addDomHandler(new KeyUpHandler() {
+		final HandlerRegistration editorKeyDown = editor.addDomHandler(new KeyDownHandler() {
 			@Override
-			public void onKeyUp(KeyUpEvent event) {
+			public void onKeyDown(KeyDownEvent event) {
 				boolean enter = event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER;
 				boolean escape = event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE;
 				if (enter || escape) {
@@ -113,26 +117,28 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 					pp.hide();
 				}
 			}
-		}, KeyUpEvent.getType());
+		}, KeyDownEvent.getType());
 		pp.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
 			public void onClose(CloseEvent<PopupPanel> event) {
-				try {
-					if (updaterRef.valueUpdater != null) {
-						updaterRef.valueUpdater.update(valueHost.getValue());
+				if (editor.getParent() == pp) {
+					try {
+						if (updaterRef.valueUpdater != null) {
+							updaterRef.valueUpdater.update(valueHost.getValue());
+						}
+					} catch (Exception ex) {
+						Logger.getLogger(AbstractPopupEditorCell.class.getName()).log(Level.SEVERE, null, ex);
+					} finally {
+						editorKeyDown.removeHandler();
+						pp.setWidget(null);
+						editor.removeFromParent();
+						setViewData(context.getKey(), null);
+						if (updaterRef.valueUpdater == null) {
+							setValue(context, parent, value);
+						}
+						if (onEditorClose != null)
+							onEditorClose.run();
 					}
-				} catch (Exception ex) {
-					Logger.getLogger(AbstractPopupEditorCell.class.getName()).log(Level.SEVERE, null, ex);
-				} finally {
-					editorKeyUp.removeHandler();
-					pp.setWidget(null);
-					editor.removeFromParent();
-					setViewData(context.getKey(), null);
-					if (updaterRef.valueUpdater == null) {
-						setValue(context, parent, value);
-					}
-					if (onEditorClose != null)
-						onEditorClose.run();
 				}
 			}
 		});

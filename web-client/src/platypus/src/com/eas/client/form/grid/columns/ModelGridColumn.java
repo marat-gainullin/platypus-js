@@ -48,11 +48,12 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	protected ModelGrid grid;
 	protected String name;
 	protected double designedWidth;
+	protected double widthDelta;
 	protected boolean fixed;
 	protected boolean resizable = true;
 	protected boolean moveable = true;
 	protected boolean readonly;
-	protected boolean visible;
+	protected boolean visible = true;
 	protected boolean selectOnly;
 	protected JavaScriptObject published;
 	protected JavaScriptObject onRender;
@@ -125,7 +126,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				} else {
 					grid.getSortHandler().setComparator(this, null);
 				}
-				grid.setColumnWidth(this, designedWidth, Style.Unit.PX);
+				grid.setColumnWidth(this, getWidth(), Style.Unit.PX);
 				if (visible)
 					grid.showColumn(this);
 				else
@@ -238,25 +239,35 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		}
 	}
 
-	@Override
-	public double getWidth() {
+	public void updateVisible(boolean aValue){
+		if (visible != aValue) {
+			visible = aValue;
+		}
+	}
+	
+	public double getDesignedWidth() {
 		return designedWidth;
 	}
 
 	@Override
+	public double getWidth() {
+		return designedWidth + widthDelta;
+	}
+
+	@Override
 	public void setWidth(double aValue) {
-		if (designedWidth != aValue) {
+		if (getWidth() != aValue) {
 			designedWidth = aValue;
+			widthDelta = 0;
 			if (grid != null) {
-				grid.setColumnWidth(this, designedWidth, Style.Unit.PX);
+				grid.setColumnWidth(this, getWidth(), Style.Unit.PX);
 			}
 		}
 	}
 
-	@Override
 	public void updateWidth(double aValue) {
-		if (designedWidth != aValue) {
-			designedWidth = aValue;
+		if (getWidth() != aValue) {
+			widthDelta = Math.max(0, aValue - designedWidth);
 		}
 	}
 

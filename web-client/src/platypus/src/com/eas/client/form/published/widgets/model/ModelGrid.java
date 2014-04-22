@@ -49,10 +49,8 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.TableRowElement;
-import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -87,24 +85,25 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public static final int ONE_FIELD_ONE_QUERY_TREE_KIND = 1;
 	public static final int FIELD_2_PARAMETER_TREE_KIND = 2;
 	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
-	//
 
-	protected class RowMarkerRerenderer extends RowsetAdapter{
-		
+	public static final int SERVICE_COLUMN_WIDTH = 20;
+	
+	protected class RowMarkerRerenderer extends RowsetAdapter {
+
 		@Override
 		public void rowsetScrolled(RowsetScrollEvent event) {
-			if(getDataColumnCount() > 0 && getDataColumn(0) instanceof IdentityColumn){
-				if(frozenColumns > 0){
+			if (getDataColumnCount() > 0 && getDataColumn(0) instanceof IdentityColumn) {
+				if (frozenColumns > 0) {
 					frozenLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
 					scrollableLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
-				}else{
+				} else {
 					frozenRight.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
 					scrollableRight.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
 				}
 			}
 		}
 	}
-	
+
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
@@ -132,7 +131,6 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 
 	public ModelGrid() {
 		super(new RowKeyProvider());
-		finder = new FindWindow(this);
 		addDomHandler(new KeyUpHandler() {
 
 			@Override
@@ -163,7 +161,15 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_F) {
-					finder.show();
+					event.stopPropagation();
+					event.preventDefault();
+					ModelGrid.this.find();
+				} else if (event.getNativeKeyCode() == KeyCodes.KEY_F3) {
+					event.stopPropagation();
+					event.preventDefault();
+					if (finder != null) {
+						finder.findNext();
+					}
 				}
 			}
 		}, KeyDownEvent.getType());
@@ -305,25 +311,19 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
 				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				super.addColumn(true, 0, new CheckServiceColumn(sm), "20px", colHeader, null, false);
+				super.addColumn(true, 0, new CheckServiceColumn(sm), SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
 				sm = new SingleRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				super.addColumn(true, 0, new RadioServiceColumn(groupName, sm), "20px", colHeader, null, false);
+				super.addColumn(true, 0, new RadioServiceColumn(groupName, sm), SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
 				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource.getRowset()));
-				super.addColumn(true, 0, col, "20px", colHeader, null, false);
+				super.addColumn(true, 0, col, SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
-				/*
-				 * Header<?> identityHeader = getColumnHeader(0);
-				 * ((DraggableHeader<?>) identityHeader).setMoveable(false);
-				 * ((DraggableHeader<?>) identityHeader).setResizable(false);
-				 * setColumnWidth(col, 20, Style.Unit.PX);
-				 */
 			} else {
 				sm = new MultiRowSelectionModel(this);
 			}
@@ -380,7 +380,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	}
 
 	public void addColumn(int aIndex, ModelGridColumn<?> aColumn) {
-		addColumn(aIndex, aColumn, aColumn.getWidth() + "px", aColumn.getHeaderNode().getHeader(), null, aColumn.isVisible());
+		addColumn(aIndex, aColumn, aColumn.getWidth() + "px", aColumn.getHeaderNode().getHeader(), null, !aColumn.isVisible());
 	}
 
 	protected ModelGridColumn<?> treeIndicatorColumn;
@@ -438,11 +438,39 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	}
 
 	@Override
+	public void setColumnWidthFromHeaderDrag(Column<Row, ?> aColumn, double aWidth, Unit aUnit) {
+		super.setColumnWidth(aColumn, aWidth, aUnit);
+		if (aColumn instanceof ModelGridColumn<?>) {
+			ModelGridColumn<?> colFacade = (ModelGridColumn<?>) aColumn;
+			colFacade.setWidth(aWidth);
+		}
+	}
+
+	@Override
 	public void setColumnWidth(Column<Row, ?> aColumn, double aWidth, Unit aUnit) {
 		super.setColumnWidth(aColumn, aWidth, aUnit);
-		if (aColumn instanceof ModelGridColumnFacade) {
-			ModelGridColumnFacade colFacade = (ModelGridColumnFacade) aColumn;
+		if (aColumn instanceof ModelGridColumn<?>) {
+			ModelGridColumn<?> colFacade = (ModelGridColumn<?>) aColumn;
 			colFacade.updateWidth(aWidth);
+		}
+	}
+
+	@Override
+	public void showColumn(Column<Row, ?> aColumn) {
+		super.showColumn(aColumn);
+		if (aColumn instanceof ModelGridColumnFacade) {
+			ModelGridColumn<?> colFacade = (ModelGridColumn<?>) aColumn;
+			colFacade.updateVisible(true);
+		}else if(aColumn instanceof IdentityColumn<?> || aColumn instanceof CheckServiceColumn  || aColumn instanceof RadioServiceColumn){
+			super.setColumnWidth(aColumn, SERVICE_COLUMN_WIDTH, Style.Unit.PX);
+		}
+	}
+
+	public void hideColumn(Column<Row, ?> aColumn) {
+		super.hideColumn(aColumn);
+		if (aColumn instanceof ModelGridColumnFacade) {
+			ModelGridColumn<?> colFacade = (ModelGridColumn<?>) aColumn;
+			colFacade.updateVisible(false);
 		}
 	}
 
@@ -523,7 +551,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		if (rowsSource != aValue) {
 			if (sortHandlerReg != null)
 				sortHandlerReg.removeHandler();
-			if(rowsSource != null && rowsSource.getRowset() != null)
+			if (rowsSource != null && rowsSource.getRowset() != null)
 				rowsSource.getRowset().removeRowsetListener(markerRerenderer);
 			rowsSource = aValue;
 			if (rowsSource != null) {
@@ -590,7 +618,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 					sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
 				}
 				sortHandlerReg = addColumnSortHandler(sortHandler);
-				if(rowsSource.getRowset() != null)
+				if (rowsSource.getRowset() != null)
 					rowsSource.getRowset().addRowsetListener(markerRerenderer);
 			}
 		}
@@ -752,14 +780,60 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	}
 
 	public void find() {
+		if (finder == null) {
+			finder = new FindWindow(ModelGrid.this);
+		}
 		finder.show();
-		finder.toFront();
 	}
 
 	@Override
 	protected void onDetach() {
 		super.onDetach();
-		finder.close();
+		if(finder != null){
+			finder.close();
+		}
+	}
+
+	@Override
+	public void onResize() {
+		super.onResize();
+		if (isAttached()) {
+			double commonWidth = 0;
+			double weightedWidth = 0;
+			for (int i = 0; i < getDataColumnCount(); i++) {
+				Column<Row, ?> column = getDataColumn(i);
+				String factWidth = i < frozenColumns ? scrollableLeft.getColumnWidth(column, false) : scrollableRight.getColumnWidth(column, false);
+				if (column instanceof ModelGridColumn<?>) {
+					ModelGridColumn<?> mCol = (ModelGridColumn<?>) column;
+					if (mCol.isVisible()) {
+						double colWidth = mCol.getDesignedWidth();
+						commonWidth += colWidth;
+						if (!mCol.isFixed()) {
+							weightedWidth += colWidth;
+						}
+					}
+				} else {
+					if (factWidth != null && factWidth.endsWith("px")) {
+						double colWidth = Double.valueOf(factWidth.substring(0, factWidth.length() - 2));
+						commonWidth += colWidth;
+					}
+				}
+			}
+			double delta = (scrollableLeftContainer.getElement().getClientWidth() + scrollableRightContainer.getElement().getClientWidth()) - commonWidth;
+			if (delta < 0)
+				delta = 0;
+			for (int i = 0; i < getDataColumnCount(); i++) {
+				Column<Row, ?> column = getDataColumn(i);
+				if (column instanceof ModelGridColumn<?>) {
+					ModelGridColumn<?> mCol = (ModelGridColumn<?>) column;
+					if (mCol.isVisible() && !mCol.isFixed()) {
+						double colWidth = mCol.getDesignedWidth();
+						double newFloatWidth = colWidth + colWidth / weightedWidth * delta;
+						setColumnWidth(mCol, newFloatWidth, Style.Unit.PX);
+					}
+				}
+			}
+		}
 	}
 
 	public PublishedStyle complementPublishedStyle(PublishedStyle aStyle) {
