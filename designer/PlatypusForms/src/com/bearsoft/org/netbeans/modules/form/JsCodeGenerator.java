@@ -6,12 +6,15 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.designer.application.module.ModuleUtils;
 import java.io.IOException;
 import java.util.Iterator;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.StyledDocument;
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.ast.Assignment;
+import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
@@ -20,6 +23,7 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
+import org.openide.text.NbDocument;
 import org.openide.util.Exceptions;
 
 /**
@@ -28,33 +32,52 @@ import org.openide.util.Exceptions;
  * @author vv
  */
 public class JsCodeGenerator {
-    
+
     public static final String FORM_OBJECT_NAME = "form";//NOI18N
     public static final String THIS_OBJECT_NAME = "this";//NOI18N
+    private static final int NOT_FOUND = -1;
     private static final JsCodeGenerator INSTANCE = new JsCodeGenerator();
-    
+
     public static final JsCodeGenerator getInstance() {
         return INSTANCE;
     }
-    
+
     public void generateEventHandler(String componentName, Class<?> scriptClass, PlatypusFormDataObject dataObject) {
         if (isFormObjectExistsInJs(dataObject.getAst())) {
-            String defaultHandlerName = getDefaultEventPropertyName(scriptClass);
+            String handlerName = getDefaultEventPropertyName(scriptClass);
             int handlerPosition;
-            if (defaultHandlerName != null) {
-                handlerPosition = findHandlerPosition(componentName, defaultHandlerName, dataObject);
-                if (handlerPosition == -1) {
-                    handlerPosition = insertEventHandler(defaultHandlerName, dataObject);
+            if (handlerName != null) {
+                handlerPosition = findHandlerPosition(componentName, handlerName, dataObject);
+                try {
+                    if (handlerPosition == NOT_FOUND) {
+                        AstNode ctor = PlatypusFilesSupport.extractModuleConstructor(dataObject.getAst());
+                        int insertPosition = ctor.getAbsolutePosition() + ctor.getLength() - 1;
+                        String objAndProp = getObjectAndProp(FORM_OBJECT_NAME, componentName);
+                        insertEventHandler(objAndProp, handlerName, insertPosition, dataObject);
+                        goToEventHandler(insertPosition
+                                + ModuleUtils.getNumberOfSpacesPerIndent()
+                                + objAndProp.length()
+                                + handlerName.length()
+                                + ModuleUtils.FUNCTION_HEADER.length()
+                                + ModuleUtils.getNumberOfSpacesPerIndent()*2
+                                , dataObject);
+                    } else {
+                        goToEventHandler(handlerPosition
+                                + ModuleUtils.FUNCTION_HEADER.length()
+                                + ModuleUtils.getNumberOfSpacesPerIndent()*2
+                                , dataObject);
+                    }  
+                } catch (IOException | BadLocationException ex) {
+                    ErrorManager.getDefault().notify(ex);
                 }
-                goToEventHandler(handlerPosition, dataObject);
             }
         }
     }
-    
+
     public boolean hasDefaultEventHandler(Class<?> scriptClass) {
         return getDefaultEventPropertyName(scriptClass) != null;
     }
-    
+
     private String getDefaultEventPropertyName(Class<?> scriptClass) {
         return FormUtils.getDefaultEventPropertyName(scriptClass);
     }
@@ -72,17 +95,17 @@ public class JsCodeGenerator {
                             return true;
                         }
                     }
-                    
+
                 }
             }
         }
         return false;
     }
-    
+
     private String getFormObjectName() {
         return FORM_OBJECT_NAME;
     }
-        
+
     private int findHandlerPosition(String componentName, String handlerName, PlatypusFormDataObject dataObject) {
         AstRoot astRoot = dataObject.getAst();
         FunctionNode constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
@@ -102,7 +125,7 @@ public class JsCodeGenerator {
                                     if (componentName.equals(componentPg.getProperty().toSource())
                                             && getFormObjectName().equals(componentPg.getTarget().toSource())) {
                                         if (a.getRight() instanceof FunctionNode) {
-                                            return a.getRight().getAbsolutePosition();
+                                            return a.getLeft().getAbsolutePosition() + a.getLeft().getLength();
                                         }
                                     }
                                 }
@@ -112,17 +135,13 @@ public class JsCodeGenerator {
                 }
             }
         }
-        return -1;
+        return NOT_FOUND;
     }
-    
-    private void goToEventHandler(int handlerPosition, PlatypusFormDataObject dataObject) {
-        try {
-            getFormSupport(dataObject).openAt(getDocument(dataObject).createPosition(handlerPosition));
-        } catch (BadLocationException | IOException ex) {
-            ErrorManager.getDefault().notify(ex);
-        }
+
+    private void goToEventHandler(int handlerPosition, PlatypusFormDataObject dataObject) throws IOException, BadLocationException {
+        getFormSupport(dataObject).openAt(getDocument(dataObject).createPosition(handlerPosition));
     }
-    
+
     private Document getDocument(PlatypusFormDataObject dataObject) throws IOException {
         EditorCookie ec = dataObject.getLookup().lookup(EditorCookie.class);
         if (ec == null) {
@@ -134,12 +153,17 @@ public class JsCodeGenerator {
         }
         return doc;
     }
-    
-    private int insertEventHandler(String defaultHandlerName, PlatypusFormDataObject dataObject) {
-        return 10;
+
+    private void insertEventHandler(String objectName, String defaultHandlerName, int insertPos, PlatypusFormDataObject dataObject) throws IOException, BadLocationException {
+        String eventHandlerJS = ModuleUtils.getEventHandlerObjectJs(objectName, defaultHandlerName);
+        getDocument(dataObject).insertString(insertPos, eventHandlerJS, null);
     }
-    
+
     private PlatypusFormSupport getFormSupport(PlatypusFormDataObject dataObject) {
         return dataObject.getLookup().lookup(PlatypusFormSupport.class);
+    }
+
+    private String getObjectAndProp(String formObj, String componentName) {
+        return String.format("%s.%s.", formObj, componentName);//NOI18N
     }
 }

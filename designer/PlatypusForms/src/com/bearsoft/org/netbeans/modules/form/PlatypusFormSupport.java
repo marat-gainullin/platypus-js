@@ -81,6 +81,7 @@ import org.openide.cookies.PrintCookie;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.text.*;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.UserQuestionException;
 import org.openide.windows.*;
@@ -214,7 +215,11 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
         handler.requestActive(handler.getPerspectives()[JS_ELEMENT_INDEX]);
 
-        openAt(pos, -1).getComponent().requestActive();
+        try {
+            openAt(pos, pos.getColumn()).getComponent().requestActive();
+        } catch (IOException ex) {
+            ErrorManager.getDefault().notify(ex);
+        }
     }
 
     @Override

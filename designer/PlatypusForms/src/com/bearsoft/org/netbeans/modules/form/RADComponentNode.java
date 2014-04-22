@@ -73,6 +73,7 @@ import org.openide.util.datatransfer.PasteType;
 public class RADComponentNode extends FormNode
         implements RADComponentCookie, FormPropertyCookie {
 
+    private static final DefaultRADAction DEFAULT_ACTION = new DefaultRADAction();
     private final static MessageFormat nodeNameFormat
             = new MessageFormat(
                     FormUtils.getBundleString("FMT_ComponentNodeName")); // NOI18N
@@ -192,7 +193,7 @@ public class RADComponentNode extends FormNode
     
     @Override
     public Action getPreferredAction() {
-        return new DefaultRADAction();
+        return DEFAULT_ACTION;
     }
 
     @Override

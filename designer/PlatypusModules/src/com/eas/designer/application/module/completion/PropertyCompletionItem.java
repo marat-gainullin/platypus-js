@@ -46,13 +46,13 @@ public class PropertyCompletionItem extends JsCompletionItem {
     public void defaultAction(JTextComponent component) {
         try {
             StyledDocument doc = (StyledDocument) component.getDocument();
-            String tabs = getLineTabs(doc, startOffset);
+            String tabs = ModuleUtils.getLineTabs(doc, startOffset);
             doc.remove(startOffset, endOffset - startOffset);
-            boolean insertEventAssignmentTemplate = propBox.eventClass != null && isLineEndClear(doc, endOffset);
-            doc.insertString(startOffset, insertEventAssignmentTemplate ? ModuleUtils.getEventHandler(text, tabs) : text, null);
+            boolean insertEventAssignmentTemplate = propBox.eventClass != null && ModuleUtils.isLineEndClear(doc, endOffset);
+            doc.insertString(startOffset, insertEventAssignmentTemplate ? ModuleUtils.getEventHandlerJs(text, tabs) : text, null);
             Completion.get().hideAll();
             if (insertEventAssignmentTemplate) {
-                component.setCaretPosition(ModuleUtils.getEventTemplateCaretPosition(startOffset, text, tabs));
+                component.setCaretPosition(getEventTemplateCaretPosition(startOffset, text, tabs));
             }
         } catch (BadLocationException ex) {
             ErrorManager.getDefault().notify(ex);
@@ -63,57 +63,12 @@ public class PropertyCompletionItem extends JsCompletionItem {
     public int getSortPriority() {
         return SORT_PRIORITY;
     }
-
-
-
-    private static String getLineTabs(StyledDocument doc, int startOffset) {
-        int i = startOffset;
-        String s;
-        try {
-            do {
-
-                s = doc.getText(i, 1);
-                if ((i > 0 && !"\n".equals(s))) {//NOI18N
-                    i--;
-                } else {
-                    break;
-                }
-
-            } while (true);
-            StringBuilder tabs = new StringBuilder();
-            i++;
-            do {
-                s = doc.getText(i, 1);
-                if (" ".equals(s) || "\t".equals(s)) {//NOI18N
-                    tabs.append(s);
-                } else if (Character.isJavaIdentifierPart(s.charAt(0))) {
-                    break;
-                }
-                i++;
-
-            } while (i < doc.getLength());
-            return tabs.toString();
-        } catch (BadLocationException ex) {
-            throw new RuntimeException(ex);//should never happen
-        }
-    }
-
-    private static boolean isLineEndClear(StyledDocument doc, int pos) {
-        String s;
-        int i = pos;
-        try {
-            do {
-                s = doc.getText(i, 1);
-                if ("\n".equals(s)) {//NOI18N
-                    return true;
-                } else if (Character.isJavaIdentifierPart(s.charAt(0))) {
-                    return false;
-                }
-                i++;
-            } while (i < doc.getLength());
-            return false;
-        } catch (BadLocationException ex) {
-            throw new RuntimeException(ex);
-        }
+    
+    public static int getEventTemplateCaretPosition(int startOffset, String handlerName, String tabs) {
+        return startOffset 
+                + handlerName.length() 
+                + ModuleUtils.FUNCTION_HEADER.length() 
+                + tabs.length() 
+                + ModuleUtils.getNumberOfSpacesPerIndent();
     }
 }
