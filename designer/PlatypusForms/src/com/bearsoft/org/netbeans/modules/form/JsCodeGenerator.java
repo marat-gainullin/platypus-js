@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.StyledDocument;
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
@@ -23,8 +22,6 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
-import org.openide.text.NbDocument;
-import org.openide.util.Exceptions;
 
 /**
  * The code generator to produce JS code for the form source.

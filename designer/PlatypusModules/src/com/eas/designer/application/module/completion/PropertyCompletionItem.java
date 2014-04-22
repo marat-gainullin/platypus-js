@@ -48,7 +48,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
             StyledDocument doc = (StyledDocument) component.getDocument();
             String tabs = ModuleUtils.getLineTabs(doc, startOffset);
             doc.remove(startOffset, endOffset - startOffset);
-            boolean insertEventAssignmentTemplate = propBox.eventClass != null && ModuleUtils.isLineEndClear(doc, endOffset);
+            boolean insertEventAssignmentTemplate = propBox.eventClass != null && ModuleUtils.isLineEndClear(doc, startOffset);
             doc.insertString(startOffset, insertEventAssignmentTemplate ? ModuleUtils.getEventHandlerJs(text, tabs) : text, null);
             Completion.get().hideAll();
             if (insertEventAssignmentTemplate) {
@@ -64,7 +64,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
         return SORT_PRIORITY;
     }
     
-    public static int getEventTemplateCaretPosition(int startOffset, String handlerName, String tabs) {
+    private static int getEventTemplateCaretPosition(int startOffset, String handlerName, String tabs) {
         return startOffset 
                 + handlerName.length() 
                 + ModuleUtils.FUNCTION_HEADER.length() 

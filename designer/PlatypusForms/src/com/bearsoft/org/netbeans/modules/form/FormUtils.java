@@ -59,8 +59,6 @@ import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.text.DbText;
 import com.eas.designer.application.module.ModuleUtils;
 import com.eas.gui.JDropDownButton;
-import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptObj;
 import java.awt.*;
 import java.beans.*;
 import java.io.*;
@@ -131,6 +129,8 @@ public class FormUtils {
     static final Object PROP_HIDDEN = new Object();
     static final String PROP_REQUIRES_PARENT = "thisPropertyRequiresParent"; // NOI18N
     static final String PROP_REQUIRES_CHILDREN = "thisPropertyRequiresChildren"; // NOI18N
+    static final String ACTION_PERFORMED_EVENT_HANDLER_NAME = "onActionPerformed";//NOI18N
+    static final String ON_MOUSE_CLICKED_EVENT_HANDLER_NAME = "onMouseClicked";//NOI18N
     private static final Map<String, Class<?>> eventsNames2scriptEventsClasses = new HashMap<>();
     
     /**
@@ -679,7 +679,8 @@ public class FormUtils {
     private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> swingClasses2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> layoutClasses2PlatypusContainerClasses = new HashMap<>();
-
+    private static final Map<Class<?>, String> componentClasses2DefaultEventHandlers = new HashMap<>();
+    
     private static class Panel extends com.eas.client.forms.api.Container<JPanel> {
     }
 
@@ -687,6 +688,7 @@ public class FormUtils {
         initScriptNames2PlatypusApiClasses();
         initLayoutClasses2PlatypusContainerClasses();
         intitEventsNames2ScriptEventClasses();
+        initComponentClasses2DefaultEventHandlers();
         swingClasses2PlatypusApiClasses.put(JLabel.class, com.eas.client.forms.api.components.Label.class);
         swingClasses2PlatypusApiClasses.put(JButton.class, com.eas.client.forms.api.components.Button.class);
         swingClasses2PlatypusApiClasses.put(JCheckBox.class, com.eas.client.forms.api.components.CheckBox.class);
@@ -744,7 +746,17 @@ public class FormUtils {
     }
 
     private static void intitEventsNames2ScriptEventClasses() {
-        eventsNames2scriptEventsClasses.put("onMouseClicked", MouseEvent.class);
+        eventsNames2scriptEventsClasses.put(ON_MOUSE_CLICKED_EVENT_HANDLER_NAME, MouseEvent.class);
+    }
+    
+    private static void initComponentClasses2DefaultEventHandlers() {
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.Button.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.CheckBox.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.RadioButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.TextField.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.MenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.Label.class, ON_MOUSE_CLICKED_EVENT_HANDLER_NAME);
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -763,7 +775,7 @@ public class FormUtils {
     }
 
     public static  String getDefaultEventPropertyName(Class<?> componentClass) {
-        return "onActionPerformed";//NOI18N
+        return componentClasses2DefaultEventHandlers.get(componentClass);
     }
     
     /**

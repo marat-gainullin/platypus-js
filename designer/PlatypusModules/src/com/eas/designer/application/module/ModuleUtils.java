@@ -130,7 +130,7 @@ public class ModuleUtils {
         String s;
         int i = pos;
         try {
-            do {
+            while (i < doc.getLength()) {
                 s = doc.getText(i, 1);
                 if ("\n".equals(s)) {//NOI18N
                     return true;
@@ -138,8 +138,8 @@ public class ModuleUtils {
                     return false;
                 }
                 i++;
-            } while (i < doc.getLength());
-            return false;
+            }
+            return true;
         } catch (BadLocationException ex) {
             throw new RuntimeException(ex);
         }
