@@ -132,7 +132,7 @@ public class ModuleUtils {
         try {
             while (i < doc.getLength()) {
                 s = doc.getText(i, 1);
-                if ("\n".equals(s)) {//NOI18N
+                if ("\r".equals(s) || "\n".equals(s)) {//NOI18N
                     return true;
                 } else if (Character.isJavaIdentifierPart(s.charAt(0))) {
                     return false;
@@ -144,8 +144,7 @@ public class ModuleUtils {
             throw new RuntimeException(ex);
         }
     }
-    
-    
+        
     public static String getIndent() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < getNumberOfSpacesPerIndent();i++) {
