@@ -92,7 +92,7 @@ public class ControlEventsIProxy implements MouseListener,
                 public Object run(Context cx) throws Exception {
                     Function handler = handlers.get(aEventId);
                     if (handler != null && eventThis != null) {
-                        return ScriptUtils.js2Java(handler.call(cx, eventThis, eventThis, new Object[]{anEvent}));
+                        return ScriptUtils.js2Java(handler.call(cx, handler, eventThis, new Object[]{anEvent}));
                     } else {
                         return null;
                     }
