@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.api;
 
+import static com.eas.client.forms.api.Component.checkEventsProxy;
 import com.eas.client.forms.api.components.ComponentWrapper;
 import com.eas.client.forms.api.components.model.ModelComponentWrapper;
 import com.eas.client.forms.api.containers.ContainerWrapper;
@@ -70,7 +71,6 @@ import javax.swing.JDesktopPane;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -186,6 +186,7 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
     public void visit(TextPaneDesignInfo epdi) {
         result = ComponentWrapper.wrap((JTextPane) target);
     }
+
     @Override
     public void visit(EditorPaneDesignInfo epdi) {
         result = ComponentWrapper.wrap((JEditorPane) target);
@@ -307,6 +308,10 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
 
     public static void setJsWrapper(Component<?> aComp, NativeJavaHostObject aWrapper) {
         aComp.setJsWrapper(aWrapper);
+        ControlEventsIProxy proxy = checkEventsProxy(aComp.getDelegate());
+        if (proxy != null) {
+            proxy.setEventThis(aWrapper);
+        }
     }
 
     public static ControlEventsIProxy getEventsProxy(Component<?> aComp) {

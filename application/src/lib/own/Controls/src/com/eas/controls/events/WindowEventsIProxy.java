@@ -4,7 +4,6 @@
  */
 package com.eas.controls.events;
 
-import com.eas.controls.FormEventsExecutor;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.Frame;
 import java.awt.Window;
@@ -35,14 +34,14 @@ public class WindowEventsIProxy extends ControlEventsIProxy implements
     public static final int windowDeactivated = CONTROL_EVENT_LAST + 8;
     protected boolean opened;
 
-    public WindowEventsIProxy(FormEventsExecutor aExecutor) {
-        super(aExecutor);
+    public WindowEventsIProxy() {
+        super();
     }
 
     @Override
     public void registerEvents() {
         super.registerEvents();
-        if (executor != null && mHandlee != null) {
+        if (mHandlee != null) {
             if (mHandlee instanceof Window) {
                 ((Window) mHandlee).addWindowListener(this);
                 ((Window) mHandlee).addWindowStateListener(this);

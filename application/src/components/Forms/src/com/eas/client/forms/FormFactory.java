@@ -25,7 +25,7 @@ public class FormFactory extends DbSwingFactory {
 
     @Override
     protected ControlEventsIProxy createEventsProxy() {
-        return new FormEventsIProxy(eventsExecutor);
+        return new FormEventsIProxy();
     }
 
     @Override

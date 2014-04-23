@@ -1353,7 +1353,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         alwaysOnTop = formDoc.getFormDesignInfo().isAlwaysOnTop();
         locationByPlatform = formDoc.getFormDesignInfo().isLocationByPlatform();
         designedViewSize = formDoc.getFormDesignInfo().getDesignedPreferredSize();
-        windowHandler = new FormWindowEventsIProxy(this);
+        windowHandler = new FormWindowEventsIProxy();
         final DbSwingFactory factory = new FormFactory(this, model);
         final FormDesignInfo fdi = formDoc.getFormDesignInfo();//.copy();
         fdi.accept(factory);

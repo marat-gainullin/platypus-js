@@ -4,7 +4,6 @@
  */
 package com.eas.controls.events;
 
-import com.eas.controls.FormEventsExecutor;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.Component;
@@ -66,18 +65,12 @@ public class ControlEventsIProxy implements MouseListener,
     public static final int componentAdded = 22;
     public static final int componentRemoved = 23;
     protected static final int CONTROL_EVENT_LAST = componentRemoved;
-    protected Component mHandlee = null;
-    protected FormEventsExecutor executor;
+    protected Component mHandlee;
     protected Scriptable eventThis;
     protected Map<Integer, Function> handlers = new HashMap<>();
 
     public ControlEventsIProxy() {
         super();
-    }
-
-    public ControlEventsIProxy(FormEventsExecutor aExecutor) {
-        this();
-        executor = aExecutor;
     }
 
     public Scriptable getEventThis() {
@@ -98,17 +91,8 @@ public class ControlEventsIProxy implements MouseListener,
                 @Override
                 public Object run(Context cx) throws Exception {
                     Function handler = handlers.get(aEventId);
-                    if (handler != null) {
-                        if (executor != null) {
-                            return executor.executeEvent(handler, eventThis != null ? eventThis : executor, ScriptUtils.javaToJS(anEvent, handler));
-                        } else {
-                            FormEventsExecutor fExecutor = lookupExecutor(handler);
-                            if (fExecutor != null) {
-                                return fExecutor.executeEvent(handler, eventThis != null ? eventThis : fExecutor, ScriptUtils.javaToJS(anEvent, handler));
-                            } else {
-                                return null;
-                            }
-                        }
+                    if (handler != null && eventThis != null) {
+                        return ScriptUtils.js2Java(handler.call(cx, eventThis, eventThis, new Object[]{anEvent}));
                     } else {
                         return null;
                     }
@@ -118,10 +102,6 @@ public class ControlEventsIProxy implements MouseListener,
             Logger.getLogger(ControlEventsIProxy.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
-    }
-
-    protected FormEventsExecutor lookupExecutor(Scriptable aScope) {
-        return null;
     }
 
     public void setHandlee(Component aHandlee) {

@@ -680,7 +680,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     }
 
     protected ControlEventsIProxy createEventsProxy() {
-        return new ControlEventsIProxy(eventsExecutor);
+        return new ControlEventsIProxy();
     }
 
     protected void processControlEvents(final ControlDesignInfo aInfo) {

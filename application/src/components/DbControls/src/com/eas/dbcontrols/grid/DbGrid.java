@@ -1015,7 +1015,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public void setRowsHeaderType(int aValue) {
-        rowsHeaderType = aValue;
+        if (rowsHeaderType != aValue) {
+            rowsHeaderType = aValue;
+            if (!isRuntime()) {
+                initializeDesign();
+            }
+        }
     }
 
     @Undesignable
@@ -1228,7 +1233,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 if (header.isEmpty() || header.get(0) == null || !(header.get(0) instanceof FixedDbGridColumn)) {
                     header.add(0, new FixedDbGridColumn(fixedWidth, rowsHeaderType));// Space enough for two icons
                 }
-                fixedColumns++;
             }
             fixedColumns = convertFixedColumns2Leaves(header, fixedColumns);
 
@@ -1532,11 +1536,24 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
                         }
                     };
-                    Map<TableColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header, true);
+                    List<DbGridColumn> headerCopy = new ArrayList<>();
+                    headerCopy.addAll(header);
+                    if (rowsHeaderType != DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE) {
+                        int fixedWidth = 18;
+                        if (rowsHeaderType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX
+                                || rowsHeaderType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON) {
+                            fixedWidth += 4;
+                        }
+                        // This place is very special, because editing while configuring takes place.
+                        headerCopy.add(0, new FixedDbGridColumn(fixedWidth, rowsHeaderType));// Space enough for two icons
+                    }
+                    Map<TableColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, headerCopy, true);
                     for (int i = 0; i < columnModel.getColumnCount(); i++) {
                         TableColumn tc = columnModel.getColumn(i);
                         tc.setCellEditor(null);
-                        tc.setCellRenderer(new DefaultTableCellRenderer());
+                        if (!(tc instanceof RowHeaderTableColumn)) {
+                            tc.setCellRenderer(new DefaultTableCellRenderer());
+                        }
                     }
                     columnModel.setSelectionModel(selectionModel);
                     columnModel.setColumnSelectionAllowed(true);

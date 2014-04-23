@@ -68,3 +68,6 @@ com.google.gdt.eclipse.core.prefs
 /application/src/lib/own/Rowsets/nbproject/private/
 
 /application/src/lib/own/CommonUtils/nbproject/private/
+/application/src/components/Forms/nbproject/private/
+/application/src/components/DbControls/nbproject/private/
+/application/src/lib/own/Controls/nbproject/private/

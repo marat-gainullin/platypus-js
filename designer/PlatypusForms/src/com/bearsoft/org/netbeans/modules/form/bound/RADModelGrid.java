@@ -44,12 +44,7 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
 
         public Object onRender(Object evt);
     }
-    /*
-    public interface ModelGridListener extends ModelControlListener {
 
-        public Object onRender(Object aRowId, Object aColumnId, Object aCell, Object aRow);
-    }
-    */ 
     protected List<RADModelGridColumn> columns = new ArrayList<>();
     protected boolean fireRawColumnsChanges = true;
 

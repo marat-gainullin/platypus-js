@@ -483,15 +483,6 @@ public class DatabaseMdCache implements DbMetadataCache {
             return tabledComments;
         }
 
-        /*
-         @Override
-         protected Fields cloneEntry(Fields source) {
-         if (source != null) {
-         return source.copy();
-         }
-         return null;
-         }
-         */
     }
 
     @Override
@@ -558,15 +549,5 @@ public class DatabaseMdCache implements DbMetadataCache {
             }
             return null;
         }
-
-        /*
-         @Override
-         protected DbTableIndexes cloneEntry(DbTableIndexes source) {
-         if (source != null) {
-         return source.copy();
-         }
-         return null;
-         }
-         */
     }
 }
