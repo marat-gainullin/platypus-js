@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Марат
+ * @author mg
  */
 public class ParameterTest {
 

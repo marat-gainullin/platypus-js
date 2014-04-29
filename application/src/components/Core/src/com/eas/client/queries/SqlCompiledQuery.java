@@ -28,7 +28,6 @@ public class SqlCompiledQuery {
 
     protected DbClient client;
     protected String databaseId;
-    protected String sessionId;
     protected String entityId;
     protected String sqlClause;
     protected Parameters parameters;// 1 - Based    
@@ -151,28 +150,9 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
-    /**
-     *
-     * @param destFields поля полученные из базы данных.
-     * @param sourceFields поля предсказанные Platypus.
-     */
-    /*
-    protected void mergeFields(Fields destFields, Fields sourceFields) {
-        if (sourceFields != null && destFields != null) {
-            for (int i = 1; i <= sourceFields.getFieldsCount(); i++) {
-                Field srcField = sourceFields.get(i);
-                Field rowsetField = destFields.get(srcField.getName());
-                if (rowsetField != null) {
-                    rowsetField.assignFrom(srcField);
-                }
-            }
-        }
-    }
-    */ 
-
     private void createFlow() throws Exception {
         if (client != null) {
-            flow = client.createFlowProvider(databaseId, sessionId, entityId, sqlClause, expectedFields, readRoles, writeRoles);
+            flow = client.createFlowProvider(databaseId, entityId, sqlClause, expectedFields, readRoles, writeRoles);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
         }
@@ -258,14 +238,6 @@ public class SqlCompiledQuery {
     public void setDatabaseId(String aValue) throws Exception {
         databaseId = aValue;
         createFlow();
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String aSessionId) {
-        sessionId = aSessionId;
     }
 
     public String getEntityId() {

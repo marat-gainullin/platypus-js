@@ -23,7 +23,6 @@ import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
@@ -42,8 +41,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Undefined;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
@@ -133,65 +131,60 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         writer.flush();
     }
 
-    public static void putValue(ProtoWriter writer, int nullValueTag, int undefinedValueTag, int functionValueTag, int typeTag, int nameTag, String aArgumentName, int valueTag, Object arg) throws IOException, Exception {
+    public static void putValue(ProtoWriter writer, Object arg) throws IOException, Exception {
         if (arg == null) {
-            writer.put(nullValueTag);
+            writer.put(RequestsTags.TAG_NULL_ARGUMENT);
         } else if (arg instanceof Undefined) {
-            writer.put(undefinedValueTag);
-        } else if (arg instanceof Function) {
-            writer.put(functionValueTag);
+            writer.put(RequestsTags.TAG_UNDEFINED_ARGUMENT);
         } else {
-            if (aArgumentName != null && !aArgumentName.isEmpty()) {
-                writer.put(nameTag, aArgumentName);
-            }
             ExecuteServerModuleMethodRequest.ArgumentType at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(arg);
             if (at == null) {
                 throw new IllegalArgumentException(arg.toString());
             }
-            writer.put(typeTag, at.getTypeID());
+            writer.put(RequestsTags.TAG_ARGUMENT_TYPE, at.getTypeID());
             switch (at) {
                 case BIG_DECIMAL:
-                    writer.put(valueTag, (BigDecimal) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (BigDecimal) arg);
                     break;
                 case BIG_INTEGER:
-                    writer.put(valueTag, new BigDecimal((BigInteger) arg));
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, new BigDecimal((BigInteger) arg));
                     break;
                 case BOOLEAN:
-                    writer.put(valueTag, ((Boolean) arg).booleanValue() ? 1 : 0);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Boolean) arg ? 1 : 0);
                     break;
                 case BYTE:
-                    writer.put(valueTag, (Byte) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Byte) arg);
                     break;
                 case CHARACTER:
-                    writer.put(valueTag, ((Character) arg).toString());
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ((Character) arg).toString());
                     break;
                 case DATE:
-                    writer.put(valueTag, (Date) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Date) arg);
                     break;
                 case DOUBLE:
-                    writer.put(valueTag, (Double) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Double) arg);
                     break;
                 case FLOAT:
-                    writer.put(valueTag, ((Float) arg).doubleValue());
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ((Float) arg).doubleValue());
                     break;
                 case INTEGER:
-                    writer.put(valueTag, (Integer) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Integer) arg);
                     break;
                 case LONG:
-                    writer.put(valueTag, (Long) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Long) arg);
                     break;
                 case SHORT:
-                    writer.put(valueTag, ((Short) arg).intValue());
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ((Short) arg).intValue());
                     break;
                 case STRING:
-                    writer.put(valueTag, (String) arg);
+                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (String) arg);
                     break;
                 case OBJECT:
                     if (arg instanceof Rowset) {
                         RowsetJsonWriter jsonWriter = new RowsetJsonWriter((Rowset) arg);
-                        writer.put(valueTag, jsonWriter.write());
+                        writer.put(RequestsTags.TAG_ARGUMENT_VALUE, jsonWriter.write());
                     } else {
-                        writer.put(valueTag, (String) ScriptUtils.toJson(arg));
+                        writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (String) ScriptUtils.toJson(arg));
                     }
                     break;
             }
@@ -204,7 +197,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.put(RequestsTags.TAG_METHOD_NAME, rq.getMethodName());
         for (Object arg : rq.getArguments()) {
-            putValue(writer, RequestsTags.TAG_NULL_ARGUMENT, RequestsTags.TAG_UNDEFINED_ARGUMENT, RequestsTags.TAG_FUNCTION_RESULT, RequestsTags.TAG_ARGUMENT_TYPE, RequestsTags.TAG_ARGUMENT_NAME, null, RequestsTags.TAG_ARGUMENT_VALUE, arg);
+            putValue(writer, arg);
         }
         writer.flush();
     }
@@ -309,18 +302,6 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     public void visit(AppElementRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_APP_ELEMENT_ID, rq.getAppElementId());
-        writer.flush();
-    }
-
-    @Override
-    public void visit(ExecuteServerReportRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
-        if (rq.getArguments() != null && rq.getArguments().length > 0) {
-            for (ExecuteServerReportRequest.NamedArgument arg : rq.getArguments()) {
-                putValue(writer, RequestsTags.TAG_NULL_ARGUMENT, RequestsTags.TAG_UNDEFINED_ARGUMENT, RequestsTags.TAG_FUNCTION_RESULT, RequestsTags.TAG_ARGUMENT_TYPE, RequestsTags.TAG_ARGUMENT_NAME, arg.getName(), RequestsTags.TAG_ARGUMENT_VALUE, arg.getValue());
-            }
-        }
         writer.flush();
     }
 }

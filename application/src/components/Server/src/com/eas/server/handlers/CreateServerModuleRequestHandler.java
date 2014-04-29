@@ -4,19 +4,20 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.reports.ReportDocument;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.CreateServerModuleResponse;
 import com.eas.script.JsDoc;
+import com.eas.script.ScriptUtils;
 import com.eas.server.*;
 import java.security.AccessControlException;
-import java.util.concurrent.ExecutorService;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -30,62 +31,64 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
 
     @Override
     public Response handle2() throws Exception {
-        String moduleId = getRequest().getModuleName();
-        if (moduleId == null || moduleId.isEmpty()) {
+        String moduleName = getRequest().getModuleName();
+        if (moduleName == null || moduleName.isEmpty()) {
             throw new Exception("Module name is missing. Unnamed server modules are not allowed.");
         }
         // Let's check the module is already created
-        ServerScriptRunner serverModule = getServerCore().getSessionManager().getSystemSession().getModule(moduleId);
+        JSObject serverModule = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
         if (serverModule == null) {
-            serverModule = getSession().getModule(moduleId);
+            serverModule = getSession().getModule(moduleName);
         }
-        if (serverModule == null) {
-            serverModule = runModule(getServerCore(), getSession(), moduleId);
-            Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with id {1} on request {2}", new Object[]{getRequest().getModuleName(), serverModule.getModuleId(), getRequest().getID()});
-        }
+        Set<String> functionProps = new HashSet<>();
         boolean permitted = true;
         try {
-            serverModule.checkPrincipalPermission();
+            ScriptDocument scriptDoc = getServerCore().getDocuments().getScriptDocument(moduleName);
+            if (serverModule == null) {
+                serverModule = runModule(scriptDoc, moduleName);
+                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with id {1} on request {2}", new Object[]{getRequest().getModuleName(), moduleName, getRequest().getID()});
+            }
+            checkPrincipalPermission(scriptDoc.getModuleAllowedRoles(), moduleName);
+            final JSObject funSource = serverModule;
+            funSource.keySet().stream().forEach((String aKey) -> {
+                Object oFun = funSource.getMember(aKey);
+                if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                    functionProps.add(aKey);
+                }
+            });
         } catch (AccessControlException ex) {
             permitted = false;
         }
-        return new CreateServerModuleResponse(getRequest().getID(), serverModule.getModuleId(), serverModule.getFunctionsNames(), serverModule instanceof ServerReportRunner, permitted);
+        return new CreateServerModuleResponse(getRequest().getID(), moduleName, functionProps, permitted);
     }
-
-    static ServerScriptRunner runModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
-        ServerScriptRunner serverModule = null;
-        ScriptDocument scriptDoc = aServerCore.getDocuments().compileScriptDocument(aModuleId);
-        if (scriptDoc != null) {
-            if (scriptDoc instanceof ReportDocument) {
-                serverModule = new ServerReportRunner(
-                        aServerCore,
-                        aSession,
-                        aModuleId,
-                        ScriptRunner.initializePlatypusStandardLibScope(),
-                        aServerCore,
-                        aServerCore,
-                        new Object[]{});
-            } else {
-                serverModule = new ServerScriptRunner(
-                        aServerCore,
-                        aSession,
-                        aModuleId,
-                        ScriptRunner.initializePlatypusStandardLibScope(),
-                        aServerCore,
-                        aServerCore,
-                        new Object[]{});
+  /**
+     * Checks module roles.
+     *
+     * @param anAllowedRoles
+     * @param aModuleName
+     * @throws Exception
+     */
+    public void checkPrincipalPermission(Set<String> anAllowedRoles, String aModuleName) throws Exception {
+        if (anAllowedRoles != null && !anAllowedRoles.isEmpty()) {
+            PlatypusPrincipal principal = getServerCore().getPrincipal();
+            if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
+                throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
+                        aModuleName,
+                        principal != null ? principal.getName() : null));
             }
+        }
+    }
+    
+    static JSObject runModule(ScriptDocument scriptDoc, String aModuleName) throws Exception {
+        JSObject serverModule = null;
+        if (scriptDoc != null) {
+            if (!scriptDoc.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
+            }
+            serverModule = ScriptUtils.createModule(aModuleName);
         } else {
-            throw new IllegalArgumentException(String.format("Can't obtain content of %s", aModuleId));
+            throw new IllegalArgumentException(String.format("Can't obtain content of %s", aModuleName));
         }
-        if (!serverModule.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
-            throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleId));//NOI18N
-        }
-        if (serverModule.getModel() instanceof ApplicationDbModel) {
-            ((ApplicationDbModel) serverModule.getModel()).setSessionId(aSession.getId());
-        }
-        serverModule.execute();
-
         return serverModule;
     }
 }

@@ -10,7 +10,7 @@ import com.eas.script.ScriptFunction;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -31,7 +31,7 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
-    public CheckMenuItem(String aText, boolean aSelected, Function aActionPerformedHandler) {
+    public CheckMenuItem(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JCheckBoxMenuItem(aText, aSelected));
         setOnActionPerformed(aActionPerformedHandler);

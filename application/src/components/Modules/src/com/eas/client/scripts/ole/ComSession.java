@@ -7,19 +7,19 @@ package com.eas.client.scripts.ole;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import org.jinterop.dcom.common.JIException;
 import org.jinterop.dcom.core.IJIComObject;
 import org.jinterop.dcom.core.JIComServer;
 import org.jinterop.dcom.core.JIProgId;
 import org.jinterop.dcom.core.JISession;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  * Representation of an active session with a COM server.
  * 
  * @author vv
  */
-public class ComSession extends ScriptableObject {
+public class ComSession extends AbstractJSObject {
 
     private JISession session;
     private JIComServer comServer;
@@ -31,7 +31,7 @@ public class ComSession extends ScriptableObject {
      */
     public ComSession(String domain, String userName, String password) {
         super();
-        super.defineFunctionProperties(new String[]{"destroy", "createObject"}, ComSession.class, ScriptableObject.READONLY);//NOI18N
+        //super.defineFunctionProperties(new String[]{"destroy", "createObject"}, ComSession.class, ScriptableObject.READONLY);//NOI18N
         session = JISession.createSession(domain, userName, password);
 
     }

@@ -5,34 +5,27 @@
 package com.eas.designer.explorer.project;
 
 import com.eas.client.AppCache;
-import com.eas.client.Client;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.ScriptedDatabasesClient;
-import com.eas.client.application.ClientCompiledScriptDocuments;
+import com.eas.client.application.ClientScriptDocuments;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.PrincipalHost;
-import com.eas.client.login.SystemPlatypusPrincipal;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.scripts.CompiledScriptDocuments;
-import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptRunner;
+import com.eas.client.scripts.ScriptDocuments;
+import com.eas.client.scripts.ScriptDocumentsHost;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.Deployer;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectInformation;
+import com.eas.designer.application.utils.DatabaseConnections;
+import com.eas.designer.application.utils.DatabaseConnectionsListener;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.project.ui.PlatypusProjectCustomizerProvider;
-import com.eas.designer.application.utils.DatabaseConnections;
-import com.eas.designer.application.utils.DatabaseConnectionsListener;
-import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
@@ -53,7 +46,6 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import org.mozilla.javascript.Context;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.DatabaseException;
@@ -90,7 +82,7 @@ import org.openide.windows.InputOutput;
  *
  * @author mg
  */
-public class PlatypusProjectImpl implements PlatypusProject {
+public class PlatypusProjectImpl implements PlatypusProject, ScriptDocumentsHost {
 
     public final RequestProcessor RP = new RequestProcessor(PlatypusProjectImpl.class);
 
@@ -113,6 +105,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     private ClassPath sourceRoot;
     private final Set<PlatypusProject.ClientChangeListener> clientListeners = new HashSet<>();
     private final SearchFilter searchFilter;
+    private ScriptDocuments documents;
 
     public PlatypusProjectImpl(FileObject aProjectDir, ProjectState aState) throws Exception {
         super();
@@ -163,31 +156,14 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false) {
-            protected CompiledScriptDocuments documents = new ClientCompiledScriptDocuments(this);
-
-            @Override
-            protected ScriptRunner createModule(Context cx, String aModuleName) throws Exception {
-                ScriptRunner created = new ScriptRunner(aModuleName, (Client) this, ScriptUtils.getScope(), new PrincipalHost() {
-                    @Override
-                    public PlatypusPrincipal getPrincipal() {
-                        return new SystemPlatypusPrincipal();
-                    }
-                }, new CompiledScriptDocumentsHost() {
-                    @Override
-                    public CompiledScriptDocuments getDocuments() {
-                        return documents;
-                    }
-
-                    @Override
-                    public void defineJsClass(String string, ApplicationElement ae) {
-                        throw new UnsupportedOperationException("Javascript classes defining is not supported within a designer."); //To change body of generated methods, choose Tools | Templates.
-                    }
-                }, new Object[]{});
-                return created;
-            }
-        };
+        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false, this);
+        documents = new ClientScriptDocuments(client);
         deployer = new Deployer(FileUtil.toFile(projectDir), client);
+    }
+
+    @Override
+    public ScriptDocuments getDocuments() {
+        return documents;
     }
 
     @Override

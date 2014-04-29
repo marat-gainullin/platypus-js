@@ -7,10 +7,10 @@ package com.eas.dbcontrols;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.gui.CascadedStyle;
+import com.eas.script.HasPublished;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Interface for scalar data aware control. Scalar control views and edits a
@@ -20,7 +20,7 @@ import org.mozilla.javascript.Scriptable;
  * @see InitializingMethod
  * @author mg
  */
-public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCellEditor {
+public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCellEditor, HasPublished {
 
     public void configure() throws Exception;
 
@@ -82,7 +82,7 @@ public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCell
      */
     public void setStandalone(boolean aStandalone);
 
-    public void extraCellControls(Function aSelectFunction, boolean nullable) throws Exception;
+    public void extraCellControls(JSObject aSelectFunction, boolean nullable) throws Exception;
 
     public boolean haveNullerAction();
 
@@ -105,19 +105,15 @@ public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCell
 
     public void setDatamodelElement(ModelElementRef aValue) throws Exception;
 
-    public Function getOnSelect();
+    public JSObject getOnSelect();
 
-    public void setOnSelect(Function aValue) throws Exception;
+    public void setOnSelect(JSObject aValue) throws Exception;
 
-    public Function getOnRender();
+    public JSObject getOnRender();
 
-    public void setOnRender(Function aValue);
+    public void setOnRender(JSObject aValue);
 
     public boolean isSelectOnly();
 
     public void setSelectOnly(boolean aValue);
-
-    public void setEventsThis(Scriptable aValue);
-
-    public Scriptable getEventsThis();
 }

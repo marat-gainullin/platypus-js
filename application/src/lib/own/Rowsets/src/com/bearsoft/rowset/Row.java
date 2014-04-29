@@ -6,6 +6,7 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.script.HasPublished;
 import java.beans.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -15,7 +16,7 @@ import java.util.*;
  *
  * @author mg
  */
-public class Row extends Object {
+public class Row implements HasPublished {
 
     protected Fields fields;
     protected Converter converter = new RowsetConverter();
@@ -27,7 +28,7 @@ public class Row extends Object {
     protected List<Object> originalValues = new ArrayList<>();
     protected List<Object> currentValues = new ArrayList<>();
     protected Insert insertChange;
-    protected Object tag;
+    protected Object published;
 
     /**
      * Row's POJO-like constructor.
@@ -488,11 +489,13 @@ public class Row extends Object {
         converter = aValue;
     }
 
-    public Object getTag() {
-        return tag;
+    @Override
+    public Object getPublished() {
+        return published;
     }
 
-    public void setTag(Object aTag) {
-        tag = aTag;
+    @Override
+    public void setPublished(Object aTag) {
+        published = aTag;
     }
 }

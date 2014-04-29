@@ -6,13 +6,13 @@ package com.eas.client.forms.api.events;
 
 import com.eas.client.forms.api.Component;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
 import java.util.EventObject;
 import javax.swing.JComponent;
 
 /**
  *
  * @author mg
+ * @param <E>
  */
 public abstract class Event<E extends EventObject> {
 
@@ -27,7 +27,7 @@ public abstract class Event<E extends EventObject> {
             + "/**\n"
             + "* The source component object of the event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SOURCE_JS_DOC)
     public Component<?> getSource() {
         Object oSource = delegate.getSource();
@@ -45,9 +45,9 @@ public abstract class Event<E extends EventObject> {
 
     protected static Component<?> lookupApiComponent(JComponent aComp) {
         JComponent comp = aComp;
-        while (comp.getParent() != null && comp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME) == null) {
+        while (comp.getParent() != null && comp.getClientProperty(Component.WRAPPER_PROP_NAME) == null) {
             comp = (JComponent) comp.getParent();
         }
-        return (Component<?>)comp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME);
+        return (Component<?>) comp.getClientProperty(Component.WRAPPER_PROP_NAME);
     }
 }

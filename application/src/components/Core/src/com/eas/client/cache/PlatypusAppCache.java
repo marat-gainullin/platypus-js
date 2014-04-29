@@ -1,15 +1,20 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 
 package com.eas.client.cache;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
+import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
+import java.io.File;
 
 /**
  *
@@ -27,6 +32,16 @@ public class PlatypusAppCache extends AppElementsCache{
     @Override
     public String getApplicationPath() {
         return client.getUrl();
+    }
+
+    @Override
+    public String translateScriptPath(String aName) throws Exception {
+        String res = generatePath(aName) + File.separator;
+        ApplicationElement appElement = get(aName);
+        if(appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE){
+            res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+        }
+        return res;
     }
 
     @Override

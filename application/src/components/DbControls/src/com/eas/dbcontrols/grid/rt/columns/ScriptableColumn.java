@@ -11,29 +11,32 @@ import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
 import com.eas.gui.CascadedStyle;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ScriptableColumn {
+public class ScriptableColumn implements HasPublished {
 
     protected MultiLevelHeader header;
     protected GridColumnsGroup group;
     protected TableColumnModel viewModel;
     protected RowsetsModel rowsModel;
+    // design
     protected DbGridColumn designColumn;
+    // runtime
     protected ModelColumn modelColumn;
+    // view
     protected TableColumn viewColumn;
-    protected Scriptable published;
+    protected Object published;
     protected int viewIndex = -1;
     protected boolean visible;
     // Temporarily stored values involved in columns show/hide process.
@@ -198,41 +201,43 @@ public class ScriptableColumn {
     }
 
     @ScriptFunction(jsDoc = "On select column event.")
-    public Function getOnSelect() {
+    public JSObject getOnSelect() {
         return modelColumn.getSelectHandler();
     }
 
     @ScriptFunction
-    public void setOnSelect(Function aHandler) throws Exception {
+    public void setOnSelect(JSObject aHandler) throws Exception {
         modelColumn.setSelectHandler(aHandler);
     }
 
     @ScriptFunction(jsDoc = "On render column event.")
-    public Function getOnRender() {
+    public JSObject getOnRender() {
         return modelColumn.getCellsHandler();
     }
 
     @ScriptFunction
-    public void setOnRender(Function aHandler) {
+    public void setOnRender(JSObject aHandler) {
         modelColumn.setCellsHandler(aHandler);
     }
 
-    public Scriptable getPublished() {
+    @Override
+    public Object getPublished() {
         return published;
     }
 
-    public void setPublished(Scriptable jsColumn) {
+    @Override
+    public void setPublished(Object jsColumn) {
         published = jsColumn;
         if (viewColumn != null) {
             if (viewColumn.getCellEditor() instanceof ScalarDbControl) {
-                ((ScalarDbControl) viewColumn.getCellEditor()).setEventsThis(published);
+                ((ScalarDbControl) viewColumn.getCellEditor()).setPublished(published);
             }
             if (viewColumn.getCellRenderer() instanceof ScalarDbControl) {
-                ((ScalarDbControl) viewColumn.getCellRenderer()).setEventsThis(published);
+                ((ScalarDbControl) viewColumn.getCellRenderer()).setPublished(published);
             }
         }
         if (modelColumn != null) {
-            modelColumn.setEventsThis(published);
+            modelColumn.setPublished(published);
         }
     }
 }

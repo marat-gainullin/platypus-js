@@ -31,7 +31,6 @@ import com.eas.dbcontrols.grid.rt.veers.ColumnsSource;
 import com.eas.gui.CascadedStyle;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -184,7 +183,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
 
         public TreeTestState() throws Exception {
             rowsRowset = initRowset();
-            model = new RowsetsTreedModel(null, rowsRowset, 9, null, null);
+            model = new RowsetsTreedModel(null, rowsRowset, 9, null);
             front = new TableFront2TreedModel(model);
             TableColumnModel columns = new DefaultTableColumnModel();
             tbl = new JTable(new CachingTableModel(front), columns);
@@ -244,7 +243,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
             columnsSources.put(s1Rowset, Collections.singletonList(new ColumnsSource(s1ToglueGroup, s1ToGlue, loc1, 2, cells1Loc, cells1Rowset, 4, new CellDataCellRendererFactory(), null, null)));
             columnsSources.put(s2Rowset, Collections.singletonList(new ColumnsSource(s2ToglueGroup, s2ToGlue, loc2, 2, cells2Loc, cells2Rowset, 4, new CellDataCellRendererFactory(), null, null)));
 
-            ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, model, columnsSources, null, new ArrayList(), null);
+            ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, model, columnsSources, null, new ArrayList());
             riddler.fill();
 
             int commonColumnsCount = rowsRowset.getFields().getFieldsCount() + s1Rowset.size() + s2Rowset.size();
@@ -481,7 +480,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
                 try {
                     Rowset rowset = initRowset();
                     TableColumnModel columns = new DefaultTableColumnModel();
-                    RowsetsTreedModel data = new RowsetsTreedModel(null, rowset, 9, null, null);
+                    RowsetsTreedModel data = new RowsetsTreedModel(null, rowset, 9, null);
 
                     for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
                         FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -526,7 +525,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     columnsSources.put(s1Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s1ToGlueToIndex), loc1, 2, cells1Loc, cells1Rowset, 4, new CellDataCellRendererFactory(), null, null)));
                     columnsSources.put(s2Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s2ToGlueToIndex), loc2, 2, cells2Loc, cells2Rowset, 4, new CellDataCellRendererFactory(), null, null)));
 
-                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList(), null);
+                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList());
                     riddler.fill();
 
                     int commonColumnsCount = rowset.getFields().getFieldsCount() + s1Rowset.size() + s2Rowset.size();
@@ -631,7 +630,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
                 try {
                     Rowset rowset = initRowset();
                     TableColumnModel columns = new DefaultTableColumnModel();
-                    RowsetsTableModel data = new RowsetsTableModel(null, rowset, null, null);
+                    RowsetsTableModel data = new RowsetsTableModel(null, rowset, null);
 
                     for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
                         FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -702,7 +701,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     columnsSources.put(s1Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s1ToGlueToIndex), loc1, 2, cells1Loc, cells1Rowset, 4, new CellDataCellRendererFactory(), null, null)));
                     columnsSources.put(s2Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s2ToGlueToIndex), loc2, 2, cells2Loc, cells2ValuesRowset, 4, new CellDataCellRendererFactory(), null, null)));
 
-                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList(), null);
+                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList());
                     riddler.fill();
 
                     int commonColumnsCount = rowset.getFields().getFieldsCount() + s1Rowset.size() + s2Rowset.size();

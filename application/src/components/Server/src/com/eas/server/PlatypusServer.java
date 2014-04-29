@@ -117,7 +117,7 @@ public class PlatypusServer extends PlatypusServerCore {
     private String findAcceptorModule(String aProtocol) throws Exception {
         String lastAcceptor = null;
         for (String taskModuleId : tasks) {
-            ScriptDocument sDoc = scriptDocuments.compileScriptDocument(taskModuleId);
+            ScriptDocument sDoc = scriptDocuments.getScriptDocument(taskModuleId);
             if (sDoc != null) {
                 boolean isAcceptor = false;
                 Set<String> protocols = new HashSet<>();

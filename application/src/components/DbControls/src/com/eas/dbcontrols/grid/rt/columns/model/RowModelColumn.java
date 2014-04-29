@@ -11,7 +11,7 @@ import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.HasStyle;
 import com.eas.dbcontrols.grid.rt.veers.CellsRowsetsListener;
 import java.util.List;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Table's model's column, corresponding to particular row of column's rowset.
@@ -45,13 +45,19 @@ public class RowModelColumn extends ModelColumn {
      * If <code>aCellsLocator</code>'s rowset and <code>aCellsValuesRowset</code> are the same, than <code>aCellsLocator</code>'s rowset will not be repositioned.
      * In such case, values will be simply gotten from <code>aCellsValuesRowset</code>.
      * @param aCellsValuesFieldIndex Field index of cells values in <code>aCellsValuesRowset</code>. Index is 1-based.
+     * @param aOnRender
+     * @param aOnSelect
+     * @param aReadOnly
+     * @param aStyleHost
+     * @param aView
+     * @param aEditor
      * @see Row
      * @see Locator
      * @see Rowset
      * @see #isActual() 
      */
-    public RowModelColumn(Locator aColumnsRowsetLocator, Row aRow, int aColTitleFieldIndex, Locator aCellsLocator, Rowset aCellsValuesRowset, int aCellsValuesFieldIndex, Function aCellsHander, Function aSelectHandler, boolean aReadOnly, HasStyle aStyleHost, ScalarDbControl aView, ScalarDbControl aEditor) {
-        super(aColumnsRowsetLocator.getRowset(), aCellsHander, aSelectHandler, aReadOnly, aStyleHost, aView, aEditor);
+    public RowModelColumn(Locator aColumnsRowsetLocator, Row aRow, int aColTitleFieldIndex, Locator aCellsLocator, Rowset aCellsValuesRowset, int aCellsValuesFieldIndex, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, HasStyle aStyleHost, ScalarDbControl aView, ScalarDbControl aEditor) {
+        super(aColumnsRowsetLocator.getRowset(), aOnRender, aOnSelect, aReadOnly, aStyleHost, aView, aEditor);
         row = aRow;
         columnsLocator = aColumnsRowsetLocator;
         colTitleFieldIndex = aColTitleFieldIndex;

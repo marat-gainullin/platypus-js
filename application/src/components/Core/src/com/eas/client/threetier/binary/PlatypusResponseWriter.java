@@ -20,7 +20,6 @@ import com.eas.client.threetier.requests.CreateServerModuleResponse;
 import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
@@ -171,21 +170,9 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerReportRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getResult() == null) {
-            writer.put(RequestsTags.TAG_NULL_RESULT);
-        } else {
-            writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getResult());
-        }
-        writer.put(RequestsTags.TAG_FORMAT, rsp.getFormat());
-        writer.flush();
-    }
-
-    @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        PlatypusRequestWriter.putValue(writer, RequestsTags.TAG_NULL_RESULT, RequestsTags.TAG_UNDEFINED_RESULT, RequestsTags.TAG_FUNCTION_RESULT, RequestsTags.TAG_RESULT_TYPE, RequestsTags.TAG_ARGUMENT_NAME, null, RequestsTags.TAG_RESULT_VALUE, rsp.getResult());
+        PlatypusRequestWriter.putValue(writer, rsp.getResult());
         writer.flush();
     }
 

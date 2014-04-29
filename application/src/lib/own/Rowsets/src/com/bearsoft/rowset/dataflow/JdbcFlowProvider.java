@@ -8,7 +8,6 @@ import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -46,7 +45,6 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      *
      * @param aJdbcSourceTag Jdbc source key value. It may be long number or
      * string identifier.
-     * @param aSessionId
      * @param aDataSource A DataSource instance, that would supply resources for
      * use them by flow dataSource in single operations, like retriving data of
      * applying data changes.
@@ -57,8 +55,8 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * a jdbc datasource.
      * @see DataSource
      */
-    public JdbcFlowProvider(JKT aJdbcSourceTag, String aSessionId, DataSource aDataSource, Converter aConverter, String aClause, Fields aExpectedFields) {
-        super(aJdbcSourceTag, aSessionId, aClause);
+    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, Converter aConverter, String aClause, Fields aExpectedFields) {
+        super(aJdbcSourceTag, aClause);
         dataSource = aDataSource;
         converter = aConverter;
         expectedFields = aExpectedFields;

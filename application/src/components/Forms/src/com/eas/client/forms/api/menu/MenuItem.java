@@ -11,7 +11,7 @@ import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -32,7 +32,7 @@ public class MenuItem extends Component<JMenuItem> {
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "actionPerformed"})
-    public MenuItem(String aText, Icon aIcon, Function aActionPerformedHandler) {
+    public MenuItem(String aText, Icon aIcon, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JMenuItem(aText, aIcon));
         setOnActionPerformed(aActionPerformedHandler);

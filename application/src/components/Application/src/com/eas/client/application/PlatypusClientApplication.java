@@ -1,55 +1,52 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
+
+
 package com.eas.client.application;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.*;
-import com.eas.client.forms.FormRunner;
-import com.eas.client.forms.FormRunnerPrototype;
 import com.eas.client.login.*;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.ContextHost;
-import com.eas.client.reports.ReportRunner;
-import com.eas.client.reports.ReportRunnerPrototype;
-import com.eas.client.reports.ServerReportProxyPrototype;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.*;
 import com.eas.client.threetier.PlatypusClient;
-import com.eas.debugger.jmx.server.Breakpoints;
-import com.eas.debugger.jmx.server.Debugger;
-import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.script.ScriptUtils;
 import java.awt.EventQueue;
 import java.beans.ExceptionListener;
 import java.io.File;
-import java.lang.management.ManagementFactory;
 import java.util.logging.*;
 import java.util.prefs.Preferences;
-import javax.management.ObjectName;
 import javax.security.auth.login.FailedLoginException;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
  * @author pk, mg refactoring
  */
-public class PlatypusClientApplication implements ExceptionListener, PrincipalHost, ContextHost, CompiledScriptDocumentsHost {
+public class PlatypusClientApplication implements ExceptionListener, PrincipalHost, ContextHost, ScriptDocumentsHost {
 
     public static final String CMD_SWITCHS_PREFIX = "-";
     // command line switches
-    public static final String MODULES_SCRIPT_NAME = "Modules";
     public static final String APPELEMENT_CMD_SWITCH = "appelement";
-    // login switchs
     public static final String URL_CMD_SWITCH = "url";
+    // container switches
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    // login switchs
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
     // security switches
@@ -62,7 +59,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
     public static final String BAD_DB_CREDENTIALS_MSG = "Bad database credentials.  May be bad db connection settings (url, dbuser, dbpassword).";
     public static final String BAD_APP_CREDENTIALS_MSG = "Bad application credentials.";
-    public static final String APP_ELEMENT_MISSING_MSG = "Application element name missing. Nothing to do, so exit.";
+    public static final String APP_ELEMENT_MISSING_MSG = "Script to be executed is missing. Nothing to do, so exit.";
     public static final String CLIENT_REQUIRED_AFTER_LOGIN_MSG = "After successfull login there must be a client.";
     public static final String MISSING_SUCH_APP_ELEMENT_MSG = "Application element with name specified (%s) is absent. Nothing to do, so exit.";
     public static final String NON_RUNNABLE_APP_ELEMENT_MSG = "Application element specified (%s) is of non-runnable type. Nothing to do, so exit.";
@@ -77,9 +74,9 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected Client client;
     protected PlatypusPrincipal principal;
     protected AppCache appCache;
-    protected CompiledScriptDocuments scriptDocuments;
+    protected ScriptDocuments scriptDocuments;
     protected ScriptsCache scriptsCache;
-    protected String appElementId;
+    protected String startScriptPath;
     protected boolean needInitialBreak;
     // auto login
     protected String url;
@@ -152,7 +149,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     private boolean tryToAppLogin() throws Exception {
-        Client lclient = ClientFactory.getInstance(url, defDatasource);
+        Client lclient = ClientFactory.getInstance(url, defDatasource, this);
         try {
             return appLogin(lclient, user, password);
         } catch (Exception ex) {
@@ -284,7 +281,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 }
             } else if ((CMD_SWITCHS_PREFIX + APPELEMENT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    appElementId = args[i + 1];
+                    startScriptPath = args[i + 1];
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("syntax: -appElement <application element id>");
@@ -306,73 +303,43 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
 
     protected void run() throws Exception {
         checkUserHome();
-        if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
-            Debugger debugger = Debugger.initialize(needInitialBreak);
-            registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
-            registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
-        }
+        ScriptUtils.init();
         // Start working
         if (login()) {
             assert client != null : CLIENT_REQUIRED_AFTER_LOGIN_MSG;
             appCache = client.getAppCache();
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache.getApplicationPath());
             scriptsCache = new ScriptsCache(this);
-            scriptDocuments = new ClientCompiledScriptDocuments(client);
-            if (appElementId == null) {
-                appElementId = client.getStartAppElement();
-            }
-            ScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
-            ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
-            ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
-            ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
-            FormRunnerPrototype.init(ScriptUtils.getScope(), true);
+            scriptDocuments = new ClientScriptDocuments(client);
             PlatypusScriptedResource.init(client, getInstance(), getInstance());
-            ScriptUtils.getScope().defineProperty(MODULES_SCRIPT_NAME, scriptsCache, ScriptableObject.READONLY);
-
-            runFirstAction();
+            runStartScript();
         }
     }
 
-    protected void registerMBean(String aName, Object aBean) throws Exception {
-        // Get the platform MBeanServer
-        // Uniquely identify the MBeans and register them with the platform MBeanServer
-        ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
-    }
-
-    protected void runFirstAction() throws Exception {
-        if (appElementId != null) {
-            ApplicationElement appElement = client.getAppCache().get(appElementId);
+    protected void runStartScript() throws Exception {
+        if (startScriptPath != null) {
+            ApplicationElement appElement = client.getAppCache().get(startScriptPath);
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_FORM) {
-                    final FormRunner form = new FormRunner(appElementId, client, FormRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                form.displayAsFrame();
-                            } catch (Exception ex) {
-                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+                    EventQueue.invokeLater(() -> {
+                        try {
+                            PlatypusScriptedResource.executeScriptResource(appElement.getId());
+                        } catch (Exception ex) {
+                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
                     // When all windows are disposed, java VM exit automatically.
-                } else if (appElement.getType() == ClientConstants.ET_REPORT) {
-                    ReportRunner report = new ReportRunner(appElementId, client, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
-                    report.show();
-                    exit(0);
-                } else if (appElement.getType() == ClientConstants.ET_COMPONENT) {
-                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
-                    script.execute();
-                    exit(0);
-                } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
-                    ScriptRunner.executeResource(appElement.getId());
+                } else if (appElement.getType() == ClientConstants.ET_REPORT
+                        || appElement.getType() == ClientConstants.ET_COMPONENT
+                        || appElement.getType() == ClientConstants.ET_RESOURCE) {
+                    PlatypusScriptedResource.executeScriptResource(appElement.getId());
                 } else {
-                    Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(NON_RUNNABLE_APP_ELEMENT_MSG, appElementId));
+                    Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(NON_RUNNABLE_APP_ELEMENT_MSG, startScriptPath));
                     // no actions, so just exit.
                     exit(0);
                 }
             } else {
-                Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(MISSING_SUCH_APP_ELEMENT_MSG, appElementId));
+                Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(MISSING_SUCH_APP_ELEMENT_MSG, startScriptPath));
                 // no actions, so just exit.
                 exit(0);
             }
@@ -407,65 +374,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     @Override
-    public CompiledScriptDocuments getDocuments() {
+    public ScriptDocuments getDocuments() {
         return scriptDocuments;
-    }
-
-    @Override
-    public void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
-        try {
-            ScriptDocument sDoc = scriptDocuments.compileScriptDocument(aClassName);
-            switch (aAppElement.getType()) {
-                case ClientConstants.ET_COMPONENT: {
-                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
-                        @Override
-                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
-                            try {
-                                ScriptRunner runner = new ScriptRunner(client, scope, PlatypusClientApplication.this, PlatypusClientApplication.this);
-                                runner.loadApplicationElement(aClassName, args);
-                                return runner;
-                            } catch (Exception ex) {
-                                throw new IllegalStateException(ex);
-                            }
-                        }
-                    };
-                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Module", ScriptUtils.getScope()));
-                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
-                }
-                break;
-                case ClientConstants.ET_FORM: {
-                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
-                        @Override
-                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
-                            try {
-                                return new FormRunner(aClassName, client, scope, PlatypusClientApplication.this, PlatypusClientApplication.this, args);
-                            } catch (Exception ex) {
-                                throw new IllegalStateException(ex);
-                            }
-                        }
-                    };
-                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Form", ScriptUtils.getScope()));
-                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
-                }
-                break;
-                case ClientConstants.ET_REPORT: {
-                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
-                        @Override
-                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
-                            try {
-                                return new ReportRunner(aClassName, client, scope, PlatypusClientApplication.this, PlatypusClientApplication.this, args);
-                            } catch (Exception ex) {
-                                throw new IllegalStateException(ex);
-                            }
-                        }
-                    };
-                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Report", ScriptUtils.getScope()));
-                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
-                }
-                break;
-            }
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
     }
 }

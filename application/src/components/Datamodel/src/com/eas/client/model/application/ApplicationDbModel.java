@@ -19,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -28,7 +27,6 @@ import org.mozilla.javascript.Scriptable;
  */
 public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, ApplicationDbParametersEntity, DbClient, SqlQuery> {
 
-    protected String sessionId;
     protected Map<String, List<Change>> changeLogs = new HashMap<>();
 
     public ApplicationDbModel() {
@@ -39,14 +37,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public ApplicationDbModel(DbClient aClient) {
         this();
         setClient(aClient);
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String aSessionId) {
-        sessionId = aSessionId;
     }
 
     @Override
@@ -120,14 +110,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     @Override
-    public boolean save(Function aCallback) throws Exception {
+    public boolean save(JSObject aCallback) throws Exception {
         return super.save(aCallback);
     }
 
     @Override
     public int commit() throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
-            for(Change change : changeLog){
+            for (Change change : changeLog) {
                 change.trusted = true;
             }
         }
@@ -154,7 +144,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void rolledback() throws Exception {
     }
 
-    public void requery(Function aOnSuccess) throws Exception {
+    public void requery(JSObject aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
 
@@ -167,10 +157,10 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     @Override
-    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
-        for (List<Change> changeLog : changeLogs.values()) {
+    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
-        }
+        });
         super.requery(aOnSuccess, aOnFailure);
     }
 
@@ -183,7 +173,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return changeLog;
     }
 
-    public synchronized Scriptable createEntity(String aSqlText) throws Exception {
+    public synchronized ApplicationDbEntity createEntity(String aSqlText) throws Exception {
         return createEntity(aSqlText, null);
     }
 
@@ -196,7 +186,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
-    public synchronized Scriptable createEntity(String aSqlText, String aDatasourceName) throws Exception {
+    public synchronized ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
@@ -208,7 +198,8 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         modelEntity.setQuery(query);
         modelEntity.prepareRowsetByQuery();
-        return modelEntity.defineProperties();// .schema collection will be empty if query is not a select
+        // .schema collection will be empty if query is not a select
+        return modelEntity;
     }
 
     @ScriptFunction(jsDoc = ""

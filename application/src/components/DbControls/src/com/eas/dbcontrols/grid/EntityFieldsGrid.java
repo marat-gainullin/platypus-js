@@ -21,7 +21,6 @@ import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.dbcontrols.DbControlDesignInfo;
 import com.eas.dbcontrols.DbControlPanel;
 import com.eas.dbcontrols.DbControlsUtils;
@@ -457,9 +456,9 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
         }
     }
 
-    public void setQuery(ScriptableRowset<?> aValue) throws Exception {
+    public void setQuery(ApplicationEntity<?, ?, ?> aValue) throws Exception {
         if (aValue != null) {
-            setEntity(aValue.getEntity());
+            setEntity(aValue);
         } else {
             unbind();
         }
@@ -561,7 +560,7 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                                     dateDesignInfo.setDateFormat(DbDate.HH_MM_SS);
                                 }
                             }
-                            DbSwingFactory factory = new DbSwingFactory(null, null);
+                            DbSwingFactory factory = new DbSwingFactory(null);
                             cdi.accept(factory);
                             assert factory.getComp() instanceof ScalarDbControl;
                             ScalarDbControl control = (ScalarDbControl) factory.getComp();

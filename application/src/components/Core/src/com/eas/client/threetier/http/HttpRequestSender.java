@@ -265,12 +265,4 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
         execute(rq);
         assert rq.getResponse() != null : String.format(RESPONSE_MISSING_MSG, rq.getClass().getSimpleName());
     }
-
-    @Override
-    public void visit(ExecuteServerReportRequest rq) throws Exception {
-        conn.setMethod(PlatypusHttpConstants.HTTP_METHOD_POST);
-        conn.putParam(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName());
-        execute(rq);
-        assert rq.getResponse() != null : String.format(RESPONSE_MISSING_MSG, rq.getClass().getSimpleName());
-    }
 }

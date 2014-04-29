@@ -56,7 +56,7 @@ public class CreateServerModuleResponseTest
     {
         System.out.println("getModuleID");
         Set<String> funcs = Collections.emptySet();
-        CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), "Test module ID", funcs, false, true);
+        CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), "Test module ID", funcs, true);
         String expResult = "Test module ID";
         String result = instance.getModuleName();
         assertEquals(expResult, result);
@@ -72,7 +72,7 @@ public class CreateServerModuleResponseTest
         System.out.println("writeData");
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         Set<String> funcs = Collections.emptySet();
-        CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), "Test module ID", funcs, false, true);
+        CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), "Test module ID", funcs, true);
         PlatypusResponseWriter bodyWriter = new PlatypusResponseWriter(outStream);
         instance.accept(bodyWriter);
         ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
@@ -93,7 +93,7 @@ public class CreateServerModuleResponseTest
         ProtoWriter writer = new ProtoWriter(outStream);
         writer.put(RequestsTags.TAG_MODULE_ID, "Test module ID");
         writer.flush();
-        CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), null, null,  false, true);
+        CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), null, null, true);
         PlatypusResponseReader bodyReader = new PlatypusResponseReader(outStream.toByteArray());
         instance.accept(bodyReader);
         assertEquals("Test module ID", instance.getModuleName());

@@ -12,7 +12,6 @@ import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.script.RowHostObject;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
@@ -20,20 +19,17 @@ import com.eas.dbcontrols.grid.rt.columns.model.RowModelColumn;
 import com.eas.dbcontrols.grid.rt.veers.CellsRowsetsListener;
 import com.eas.dbcontrols.grid.rt.veers.ColumnRowsetListener;
 import com.eas.gui.CascadedStyle;
-import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public abstract class RowsetsModel {
 
@@ -46,24 +42,14 @@ public abstract class RowsetsModel {
     protected ApplicationEntity<?, ?, ?> rowsEntity;
     protected Rowset rowsRowset;
     protected Locator pkLocator;
-    protected Scriptable scriptScope;
-    protected Function generalCellsHandler;
+    protected JSObject generalOnRender;
 
-    public RowsetsModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, Scriptable aScriptScope, Function aGeneralCellsHandler) {
+    public RowsetsModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, JSObject aGeneralCellsHandler) {
         super();
         rowsEntity = aRowsEntity;
         rowsRowset = aRowsRowset;
         pkLocator = createPkLocator();
-        scriptScope = aScriptScope;
-        generalCellsHandler = aGeneralCellsHandler;
-    }
-
-    public Scriptable getScriptScope() {
-        return scriptScope;
-    }
-
-    public void setScriptScope(Scriptable aValue) {
-        scriptScope = aValue;
+        generalOnRender = aGeneralCellsHandler;
     }
 
     public Locator getPkLocator() {
@@ -270,21 +256,21 @@ public abstract class RowsetsModel {
     }
 
     /**
-     * Returns a row of cell's values rowset, bound to
-     * <code>rCol</code>
+     * Returns a row of cell's values rowset, bound to <code>rCol</code>
      *
      * @param rCol RowModelColumn instance.
      * @param aRow Row instance, typically from rows rowset.
+     * @param aForceInsert
      * @return Row instance, the cell's value will be achieved from.
      * @throws Exception
      * @see RowModelColumn
      * @see Row
      */
-    protected Row achieveCellRow(RowModelColumn rCol, Row rRow, boolean aForceInsert) throws Exception {
+    protected Row achieveCellRow(RowModelColumn rCol, Row aRow, boolean aForceInsert) throws Exception {
         Row cRow = rCol.getRow();
         Locator cellsLocator = rCol.getCellsLocator();
-        if (cRow != null && rRow != null && cellsLocator != null) {
-            Object[] rKeys = rRow.getPKValues();
+        if (cRow != null && aRow != null && cellsLocator != null) {
+            Object[] rKeys = aRow.getPKValues();
             Object[] cKeys = cRow.getPKValues();
             if (rKeys.length == 0) {
                 throw new IllegalStateException("Row key is not found for " + rowsEntity.getFormattedNameAndTitle());
@@ -369,8 +355,7 @@ public abstract class RowsetsModel {
     }
 
     /**
-     * Converts
-     * <code>ModelColumn</code> instance to model column index.
+     * Converts <code>ModelColumn</code> instance to model column index.
      *
      * @param aCol <code>ModelColumn</code> instance to convert.
      * @return Model column index.
@@ -493,26 +478,19 @@ public abstract class RowsetsModel {
     }
 
     private CellData complementCellData(final CellData aCellData, final Row aRow, final ModelColumn aColumn) throws Exception {
-        Function handler = aColumn.getCellsHandler();
-        if (handler == null) {
-            handler = generalCellsHandler;
+        JSObject lOnRender = aColumn.getCellsHandler();
+        if (lOnRender == null) {
+            lOnRender = generalOnRender;
         }
-        if (scriptScope != null && handler != null) {
-            final Function lhandler = handler;
-            ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
-                @Override
-                public Object run(Context cx) throws Exception {
-                    Object rowPkValue = getRowPkValue4Script(aRow);
-                    Object colPkValue = null;
-                    if (aColumn instanceof RowModelColumn) {
-                        RowModelColumn rmc = (RowModelColumn) aColumn;
-                        colPkValue = getRowPkValue4Script(rmc.getRow());
-                    }
-                    Scriptable calcedThis = aColumn.getEventsThis() != null ? aColumn.getEventsThis() : scriptScope;
-                    lhandler.call(cx, scriptScope, calcedThis, new Object[]{new CellRenderEvent(calcedThis, rowPkValue, colPkValue, aCellData, RowHostObject.publishRow(scriptScope, aRow, rowsEntity))});
-                    return null;
-                }
-            });
+        if (lOnRender != null) {
+            Object rowPkValue = getRowPkValue4Script(aRow);
+            Object colPkValue = null;
+            if (aColumn instanceof RowModelColumn) {
+                RowModelColumn rmc = (RowModelColumn) aColumn;
+                colPkValue = getRowPkValue4Script(rmc.getRow());
+            }
+            CellRenderEvent event = new CellRenderEvent(aColumn, rowPkValue, colPkValue, aCellData, aRow);
+            lOnRender.call(aColumn.getPublished(), new Object[]{event.getPublished()});
         }
         return aCellData;
     }
@@ -524,11 +502,11 @@ public abstract class RowsetsModel {
         }
     }
 
-    public Function getGeneralCellsHandler() {
-        return generalCellsHandler;
+    public JSObject getGeneralOnRender() {
+        return generalOnRender;
     }
 
-    public void setGeneralCellsHandler(Function aValue) {
-        generalCellsHandler = aValue;
+    public void setGeneralOnRender(JSObject aValue) {
+        generalOnRender = aValue;
     }
 }

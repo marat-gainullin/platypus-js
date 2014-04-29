@@ -11,7 +11,7 @@ import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -42,14 +42,14 @@ public class Button extends Component<JButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
-    public Button(String aText, Icon aIcon, int aIconTextGap, Function aActionPerformedHandler) {
+    public Button(String aText, Icon aIcon, int aIconTextGap, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JButton(aText, aIcon));
         delegate.setIconTextGap(aIconTextGap);
         setOnActionPerformed(aActionPerformedHandler);
     }
 
-    public Button(String aText, Icon aIcon, Function aActionPerformedHandler) {
+    public Button(String aText, Icon aIcon, JSObject aActionPerformedHandler) {
         this(aText, aIcon, 4, aActionPerformedHandler);
     }
 

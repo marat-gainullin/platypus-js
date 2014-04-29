@@ -27,12 +27,13 @@ public class FilteredAppElementRequestHandler extends SessionRequestHandler<Filt
 
     @Override
     protected Response handle2() throws Exception {
-        AppElementsFilter.Filtered filtered = getServerCore().getBrowsersFilter().get(getRequest().getAppElementId());
-        if (filtered != null) {
-            if (filtered.rolesAllowed != null && !getServerCore().getPrincipal().hasAnyRole(filtered.rolesAllowed)) {
+        AppElementsFilter.FilteredXml filteredXml = getServerCore().getBrowsersFilter().get(getRequest().getAppElementId());
+        if (filteredXml != null) {
+            if (filteredXml.rolesAllowed != null && !getServerCore().getPrincipal().hasAnyRole(filteredXml.rolesAllowed)) {
                 throw new AccessControlException(String.format(AppElementRequestHandler.ACCESS_DENIED_MSG, getRequest().getAppElementId(), getRequest().getAppElementId(), getServerCore().getPrincipal().getName()));
             } else {
-                return new FilteredAppElementRequest.FilteredResponse(filtered);
+                String translatedScriptPath = getServerCore().getDatabasesClient().getAppCache().translateScriptPath(getRequest().getAppElementId());
+                return new FilteredAppElementRequest.FilteredResponse(filteredXml, translatedScriptPath);
             }
         } else {
             appElementHandler.run();

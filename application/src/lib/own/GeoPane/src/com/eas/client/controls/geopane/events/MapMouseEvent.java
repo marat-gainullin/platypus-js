@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client.controls.geopane.events;
 
+import com.eas.script.HasPublished;
 import com.vividsolutions.jts.geom.Geometry;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -14,14 +14,15 @@ import javax.swing.SwingUtilities;
  *
  * @author mg
  */
-public class MapMouseEvent {
+public class MapMouseEvent implements HasPublished{
 
     protected MouseEvent awtEvent;
     protected Geometry cartesianPoint;
     protected Geometry geoPoint;
+    //
+    protected Object published;
 
-    public MapMouseEvent(MouseEvent aAwtEvent, Geometry aCartesianPoint, Geometry aGeoPoint)
-    {
+    public MapMouseEvent(MouseEvent aAwtEvent, Geometry aCartesianPoint, Geometry aGeoPoint) {
         super();
         awtEvent = aAwtEvent;
         cartesianPoint = aCartesianPoint;
@@ -40,28 +41,33 @@ public class MapMouseEvent {
         return geoPoint;
     }
 
-    public boolean isLeftButtton()
-    {
+    public boolean isLeftButtton() {
         return SwingUtilities.isLeftMouseButton(awtEvent);
     }
 
-    public boolean isRightButtton()
-    {
+    public boolean isRightButtton() {
         return SwingUtilities.isRightMouseButton(awtEvent);
     }
 
-    public boolean isMiddleButtton()
-    {
+    public boolean isMiddleButtton() {
         return SwingUtilities.isMiddleMouseButton(awtEvent);
     }
 
-    public boolean isControlDown()
-    {
+    public boolean isControlDown() {
         return awtEvent.isControlDown();
     }
 
-    public boolean isShiftDown()
-    {
+    public boolean isShiftDown() {
         return awtEvent.isShiftDown();
+    }
+    
+    @Override
+    public Object getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 }

@@ -6,15 +6,13 @@ import java.util.Set;
 public class CreateServerModuleResponse extends Response {
 
     private String moduleName;
-    private Set<String> functionsNames;
-    private boolean report;
-    private boolean permitted;
+    private final Set<String> functionsNames;
+    private final boolean permitted;
 
-    public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean isReport, boolean isPermitted) {
+    public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean isPermitted) {
         super(aRequestId);
         moduleName = aModuleName;
         functionsNames = aFunctionsNames;
-        report = isReport;
         permitted = isPermitted;
     }
 
@@ -28,13 +26,6 @@ public class CreateServerModuleResponse extends Response {
 
     public Set<String> getFunctionsNames() {
         return functionsNames;
-    }
-
-    /**
-     * @return the report
-     */
-    public boolean isReport() {
-        return report;
     }
 
     public boolean isPermitted() {

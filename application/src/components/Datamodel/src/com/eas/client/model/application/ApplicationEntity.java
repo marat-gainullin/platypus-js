@@ -5,6 +5,7 @@
 package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Converter;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
@@ -14,34 +15,34 @@ import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.filters.Filter;
+import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.ordering.HashOrderer.TaggedList;
+import com.bearsoft.rowset.sorting.RowsComparator;
+import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.SQLUtils;
-import com.eas.client.events.ScriptSourcedEvent;
+import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Entity;
 import com.eas.client.model.GuiCallback;
 import com.eas.client.model.Relation;
-import com.eas.client.model.script.RowHostObject;
-import com.eas.client.model.script.RowsetHostObject;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.EventMethod;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.util.ListenerRegistration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -50,28 +51,34 @@ import org.mozilla.javascript.ScriptableObject;
  * @param <Q>
  * @param <E>
  */
-public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, Q extends Query<?>, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements RowsetListener {
+public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, Q extends Query<?>, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
 
+    public static final String BAD_FIELD_NAME_MSG = "Bad field name %s";
+    public static final String BAD_FIND_AGRUMENTS_MSG = "Bad find agruments";
+    public static final String BAD_FIND_ARGUMENT_MSG = "Argument at index %d must be a rowset's field.";
+    public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but %d found.";
+    public static final String CANT_CONVERT_TO_MSG = "Can't convert to %s, substituting with null.";
     // for runtime
-    protected Function onBeforeChange;
-    protected Function onAfterChange;
-    protected Function onBeforeScroll;
-    protected Function onAfterScroll;
-    protected Function onBeforeInsert;
-    protected Function onAfterInsert;
-    protected Function onBeforeDelete;
-    protected Function onAfterDelete;
-    protected Function onRequeried;
-    protected Function onFiltered;
+    protected JSObject onBeforeChange;
+    protected JSObject onAfterChange;
+    protected JSObject onBeforeScroll;
+    protected JSObject onAfterScroll;
+    protected JSObject onBeforeInsert;
+    protected JSObject onAfterInsert;
+    protected JSObject onBeforeDelete;
+    protected JSObject onAfterDelete;
+    protected JSObject onRequeried;
+    protected JSObject onFiltered;
     //
-    protected Function instanceConstructor;
-    protected RowsetHostObject<E> sRowsetWrap;
-    protected Map<String, ScriptableObject> ormDefinitions = new HashMap<>();
+    protected JSObject instanceConstructor;
+    protected Object published;
+    protected Map<String, Object> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
     protected transient Rowset rowset;
     protected transient boolean filteredWhileAjusting;
     protected transient Filter rowsetFilter;
     protected transient boolean userFiltering;
+    protected Map<List<Integer>, Locator> userLocators = new HashMap<>();
     // to preserve relation order
     protected transient List<Relation<E>> rtInFilterRelations;
     protected transient int updatingCounter = 0;
@@ -89,7 +96,730 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         super(aQueryId);
     }
 
-    public void putOrmDefinition(String aName, ScriptableObject aDefinition) {
+    private Locator checkUserLocator(List<Integer> constraints) throws IllegalStateException {
+        Locator loc = userLocators.get(constraints);
+        if (loc == null) {
+            loc = rowset.createLocator();
+            loc.beginConstrainting();
+            try {
+                for (int colIdx : constraints) {
+                    loc.addConstraint(colIdx);
+                }
+            } finally {
+                loc.endConstrainting();
+            }
+            userLocators.put(constraints, loc);
+        }
+        return loc;
+    }
+
+    // Find and positioning interface
+    private static final String FIND_JSDOC = ""
+            + "/**\n"
+            + "* Finds rows using field -- field value pairs.\n"
+            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
+    public List<Row> find(Object... values) throws Exception {
+        List<Row> found = new ArrayList<>();
+        if (values != null && values.length > 0 && values.length % 2 == 0) {
+            Fields fields = rowset.getFields();
+            Converter converter = rowset.getConverter();
+            List<Integer> constraints = new ArrayList<>();
+            List<Object> keyValues = new ArrayList<>();
+            for (int i = 0; i < values.length - 1; i += 2) {
+                if (values[i] != null && values[i] instanceof Field) {
+                    Field field = (Field) values[i];
+                    int colIndex = fields.find(field.getName());
+                    if (colIndex > 0) {
+                        constraints.add(colIndex);
+                    } else {
+                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIELD_NAME_MSG, field.getName()));
+                    }
+                    Object keyValue = ScriptUtils.toJava(values[i + 1]);
+                    if (converter != null) {
+                        try {
+                            keyValue = converter.convert2RowsetCompatible(keyValue, field.getTypeInfo());
+                        } catch (Exception ex) {
+                            Logger.getLogger(ApplicationEntity.class.getName()).warning(String.format(CANT_CONVERT_TO_MSG, field.getTypeInfo().getSqlTypeName()));
+                            keyValue = null;
+                        }
+                    }
+                    keyValues.add(keyValue);
+                } else {
+                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIND_ARGUMENT_MSG, i));
+                }
+            }
+            if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
+                Locator loc = checkUserLocator(constraints);
+                if (loc.find(keyValues.toArray())) {
+                    TaggedList<RowWrap> subSet = loc.getSubSet();
+                    for (RowWrap rw : subSet) {
+                        found.add(rw.getRow());
+                    }
+                }
+            }
+        } else {
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
+        }
+        return found;
+    }
+
+    private static final String FIND_BY_ID_JSDOC = ""
+            + "/**\n"
+            + "* Finds row by its key. Key must a single property.\n"
+            + "* @param key the unique identifier of the row.\n"
+            + "* @return a row object or <code>null</code> if nothing is found.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = FIND_BY_ID_JSDOC, params = {"key"})
+    public Row findById(Object aValue) throws Exception {
+        Rowset rs = getRowset();
+        Fields fields = rs.getFields();
+        List<Field> pks = fields.getPrimaryKeys();
+        if (pks.size() == 1) {
+            List<Row> res = find(pks.get(0), aValue);
+            if (res != null && !res.isEmpty()) {
+                return res.get(0);
+            } else {
+                return null;
+            }
+        } else {
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_PRIMARY_KEYS_MSG, pks.size()));
+        }
+        return null;
+    }
+    private static final String SCROLL_TO_JSDOC = ""
+            + "/**\n"
+            + "* Sets the rowset cursor to the specified row.\n"
+            + "* @param row the row to position the entity cursor.\n"
+            + "* @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = SCROLL_TO_JSDOC, params = {"row"})
+    public boolean scrollTo(Row aRow) throws Exception {
+        if (aRow != null) {
+            List<Integer> constraints = aRow.getFields().getPrimaryKeysIndicies();
+            Locator loc = checkUserLocator(constraints);
+            List<Object> values = new ArrayList<>();
+            for (Integer colIndx : constraints) {
+                values.add(aRow.getColumnObject(colIndx));
+            }
+            return loc.find(values.toArray()) && loc.first();
+        } else {
+            return false;
+        }
+    }
+
+    // Rowset scroll interface
+    private static final String BEFORE_FIRST_JSDOC = ""
+            + "/**\n"
+            + "* Moves the rowset cursor to the position before the first row.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = BEFORE_FIRST_JSDOC)
+    public void beforeFirst() throws Exception {
+        rowset.beforeFirst();
+    }
+    private static final String AFTER_LAST_JSDOC = ""
+            + "/**\n"
+            + "* Moves the rowset cursor to the position after the last row.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = AFTER_LAST_JSDOC)
+    public void afterLast() throws Exception {
+        rowset.afterLast();
+    }
+    private static final String BOF_JSDOC = ""
+            + "/**\n"
+            + "* Checks if cursor in the position before the first row.\n"
+            + "* @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = BOF_JSDOC)
+    public boolean bof() throws Exception {
+        return rowset.isBeforeFirst();
+    }
+    private static final String EOF_JSDOC = ""
+            + "/**\n"
+            + "* Checks if cursor in the position before the first row.\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EOF_JSDOC)
+    public boolean eof() throws Exception {
+        return rowset.isAfterLast();
+    }
+    private static final String FIRST_JSDOC = ""
+            + "/**\n"
+            + "* Moves the rowset cursor to the first row.\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = FIRST_JSDOC)
+    public boolean first() throws Exception {
+        return rowset.first();
+    }
+    private static final String NEXT_JSDOC = ""
+            + "/**\n"
+            + "* Moves the rowset cursor to the next row.\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = NEXT_JSDOC)
+    public boolean next() throws Exception {
+        return rowset.next();
+    }
+    private static final String PREV_JSDOC = ""
+            + "/**\n"
+            + "* Moves the rowset cursor to the privious row.\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = PREV_JSDOC)
+    public boolean prev() throws Exception {
+        return rowset.previous();
+    }
+    private static final String LAST_JSDOC = ""
+            + "/**\n"
+            + "* Moves the rowset cursor to the last row.\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = LAST_JSDOC)
+    public boolean last() throws Exception {
+        return rowset.last();
+    }
+    private static final String POS_JSDOC = ""
+            + "/**\n"
+            + "* Positions the rowset cursor on the specified row number. Row number is 1-based.\n"
+            + "* @param index the row index to check, starting form <code>1</code>.\n"
+            + "* @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = POS_JSDOC, params = {"index"})
+    public boolean pos(int recordIndex) throws Exception {
+        return rowset.absolute(recordIndex);
+    }
+    private static final String GET_ROW_JSDOC = ""
+            + "/**\n"
+            + "* Gets the row at specified index.\n"
+            + "* @param index the row index, starting form <code>1</code>.\n"
+            + "* @return the row object or <code>null</code> if no row object have found at the specified index.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = GET_ROW_JSDOC, params = {"index"})
+    public Row getRow(int aIndex) throws Exception {
+        return rowset.getRow(aIndex);
+    }
+
+    private static final String CURSOR_JSDOC = ""
+            + "/**\n"
+            + "* Gets the row at cursor position.\n"
+            + "* @return the row object or <code>null</code> if cursor is before first or after last position.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CURSOR_JSDOC)
+    public Row getCursor() throws Exception {
+        return rowset.getCurrentRow();
+    }
+
+    private static final String EMPTY_JSDOC = ""
+            + "/**\n"
+            + "* Checks if the rowset is empty.\n"
+            + "* @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EMPTY_JSDOC)
+    public boolean isEmpty() throws Exception {
+        return rowset.isEmpty();
+    }
+
+    private static final String SIZE_JSDOC = ""
+            + "/**\n"
+            + "* The rowset size.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = SIZE_JSDOC)
+    public int getSize() throws Exception {
+        return rowset.size();
+    }
+
+    // Table-pattern API
+    public Locator createLocator(Object... constraints) throws Exception {
+        if (constraints != null && constraints.length > 0) {
+            Locator loc = rowset.createLocator();
+            loc.beginConstrainting();
+            try {
+                for (int i = 0; i < constraints.length; i++) {
+                    if (constraints[i] instanceof Double) {
+                        Double d = (Double) constraints[i];
+                        if (Math.abs(Math.round(d) - d) < 1e-10) {
+                            Long lFieldIndex = Math.round(d);
+                            if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
+                                loc.addConstraint(lFieldIndex.intValue());
+                            } else {
+                                throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
+                            }
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
+                        }
+                    } else if (constraints[i] instanceof Field) {
+                        Field field = (Field) constraints[i];
+                        int colIndex = rowset.getFields().find(field.getName());
+                        if (colIndex > 0) {
+                            loc.addConstraint(colIndex);
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 1) + String.format(" field name %s not found.", field.getName()));
+                        }
+                    } else {
+                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field instance.");
+                    }
+                }
+            } finally {
+                loc.endConstrainting();
+            }
+            if (!loc.isEmpty()) {
+                return loc;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+    private static final String CREATE_FILTER_JSDOC = ""
+            + "/**\n"
+            + "* Creates an instace of filter object to filter rowset data in-place using specified constraints objects.\n"
+            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @return a comparator object.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CREATE_FILTER_JSDOC, params = {"pairs"})
+    public Filter createFilter(Object... constraints) throws Exception {
+        if (constraints != null && constraints.length > 0) {
+            Filter hf = rowset.createFilter();
+            hf.beginConstrainting();
+            try {
+                for (int i = 0; i < constraints.length; i++) {
+                    if (constraints[i] instanceof Double) {
+                        Double d = (Double) constraints[i];
+                        if (Math.abs(Math.round(d) - d) < 1e-10) {
+                            Long lFieldIndex = Math.round(d);
+                            if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
+                                hf.addConstraint(lFieldIndex.intValue());
+                            } else {
+                                throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
+                            }
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
+                        }
+                    } else if (constraints[i] instanceof Field) {
+                        Field rsFmd = (Field) constraints[i];
+                        int colIndex = rowset.getFields().find(rsFmd.getName());
+                        if (colIndex > 0) {
+                            hf.addConstraint(colIndex);
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
+                        }
+                    } else {
+                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
+                    }
+                }
+            } finally {
+                hf.endConstrainting();
+            }
+            if (!hf.isEmpty()) {
+                hf.build();
+                return hf;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+    private static final String CREATE_SORTER_JSDOC = ""
+            + "/**\n"
+            + "* Creates an instance of comparator object using specified constraints objects.\n"
+            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC)
+    public RowsComparator createSorting(Object... constraints) throws Exception {
+        if (constraints != null && constraints.length > 0) {
+            List<SortingCriterion> criteria = new ArrayList<>();
+            for (int i = 0; i < constraints.length; i += 2) {
+                int colIndex = 0;
+                if (constraints[i] instanceof Double) {
+                    Double d = (Double) constraints[i];
+                    if (Math.abs(Math.round(d) - d) < 1e-10) {
+                        Long lFieldIndex = Math.round(d);
+                        if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
+                            colIndex = lFieldIndex.intValue();
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
+                        }
+                    } else {
+                        throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
+                    }
+                } else if (constraints[i] instanceof Field) {
+                    Field rsFmd = (Field) constraints[i];
+                    colIndex = rowset.getFields().find(rsFmd.getName());
+                    if (colIndex <= 0) {
+                        throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
+                    }
+                } else {
+                    throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
+                }
+                if (colIndex > 0) {
+                    boolean ascending = true;
+                    if (constraints.length > i + 1) {
+                        if (constraints[i + 1] instanceof Boolean) {
+                            ascending = (Boolean) constraints[i + 1];
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 2) + " ascending/descending order argument is invalid. It must be a boolean value");
+                        }
+                    }
+                    criteria.add(new SortingCriterion(colIndex, ascending));
+                } else {
+                    throw new RowsetException(String.valueOf(i + 1) + " invalid arguments.");
+                }
+            }
+            return new RowsComparator(criteria);
+        }
+        return null;
+    }
+    private static final String ACTIVE_FILTER_JSDOC = ""
+            + "/**\n"
+            + "* Entity's active <code>Filter</code> object.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ACTIVE_FILTER_JSDOC)
+    public Filter getActiveFilter() throws Exception {
+        return rowset.getActiveFilter();
+    }
+
+    public void execute(JSObject aOnSuccess) throws Exception {
+        execute(aOnSuccess, null);
+    }
+    private static final String EXECUTE_JSDOC = ""
+            + "/**\n"
+            + "* Refreshes rowset, only if any of its parameters has changed.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
+    public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
+        try {
+            if (getQuery().isManual()) {
+                getQuery().setManual(false);
+                try {
+                    execute();
+                } finally {
+                    getQuery().setManual(true);
+                }
+            } else {
+                execute();
+            }
+            if (aOnSuccess != null) {
+                executeScriptEvent(aOnSuccess, new PublishedSourcedEvent(this));
+            }
+        } catch (final Exception ex) {
+            if (aOnFailure != null) {
+                aOnFailure.call(getPublished(), new Object[]{ex.getMessage()});
+            } else {
+                throw ex;
+            }
+        }
+    }
+    private static final String ENQEUE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Enqueues DML SQL clause (e.g. UPDATE, DELETE) provided in this entity query.\n"
+            + "* Provide query parameters if required. To commit the transaction invoke @see executeUpdate.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ENQEUE_UPDATE_JSDOC)
+    public abstract void enqueueUpdate() throws Exception;
+    
+    private static final String EXECUTE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Applies the updates into the database and commits the transaction.\n"
+            + "* To enqueue updates use @see enqueueUpdate method.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
+    public abstract int executeUpdate() throws Exception;
+
+    // Requery interface
+    public void requery() throws Exception {
+        //checkModelExecuted();
+        if (getQuery().isManual()) {
+            getQuery().setManual(false);
+            try {
+                refresh();
+            } finally {
+                getQuery().setManual(true);
+            }
+        } else {
+            refresh();
+        }
+    }
+
+    public void requery(JSObject aOnSuccess) throws Exception {
+        requery(aOnSuccess, null);
+    }
+    private static final String REQUERY_JSDOC = ""
+            + "/**\n"
+            + "* Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
+    public void requery(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
+        try {
+            //checkModelExecuted();
+            if (getQuery().isManual()) {
+                getQuery().setManual(false);
+                try {
+                    refresh();
+                } finally {
+                    getQuery().setManual(true);
+                }
+            } else {
+                refresh();
+            }
+            if (aOnSuccess != null) {
+                executeScriptEvent(aOnSuccess, new PublishedSourcedEvent(this));
+            }
+        } catch (final Exception ex) {
+            if (aOnFailure != null) {
+                aOnFailure.call(getPublished(), new Object[]{ex.getMessage()});
+            } else {
+                throw ex;
+            }
+        }
+    }
+
+    // modify interface
+    private static final String INSERT_JSDOC = ""
+            + "/**\n"
+            + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
+            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = INSERT_JSDOC)
+    public void insert(Object... requiredFields) throws Exception {
+        if (requiredFields != null) {
+            for (int i = 0; i < requiredFields.length; i++) {
+                requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
+            }
+        }
+        rowset.insert(requiredFields);
+    }
+
+    public boolean delete() throws Exception {
+        int oldCount = rowset.size();
+        if (oldCount > 0) {
+            rowset.delete();
+        }
+        return oldCount != rowset.size();
+    }
+    private static final String DELETE_ALL_JSDOC = ""
+            + "/**\n"
+            + "* Deletes all rows in the rowset.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = DELETE_ALL_JSDOC)
+    public boolean deleteAll() throws Exception {
+        rowset.deleteAll();
+        return rowset.isEmpty();
+    }
+
+    private static final String DELETE_ROW_AT_CURSOR_JSDOC = ""
+            + "/**\n"
+            + " * Deletes the row at the cursor position.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = DELETE_ROW_AT_CURSOR_JSDOC)
+    public boolean deleteRow() throws Exception {
+        return delete();
+    }
+
+    private static final String DELETE_ROW_BY_INDEX_JSDOC = ""
+            + "/**\n"
+            + " * Deletes the row by cursor position.\n"
+            + " * @param aCusorPos row position in terms of cursor API. 1-based.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = DELETE_ROW_BY_INDEX_JSDOC, params = {"aCusorPos"})
+    public boolean deleteRow(int aCursorIndex) throws Exception {
+        if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
+            rowset.deleteAt(aCursorIndex);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static final String DELETE_ROW_BY_ROW_JSDOC = ""
+            + "/**\n"
+            + " * Deletes the row passed in.\n"
+            + " * @param aRow A row to be deleted.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = DELETE_ROW_BY_ROW_JSDOC, params = {"aRow"})
+    public boolean deleteRow(Row aRow) throws Exception {
+        if (aRow != null) {
+            int oldSize = rowset.size();
+            rowset.delete(Collections.singleton(aRow));
+            int newSize = rowset.size();
+            return oldSize > newSize;
+        } else {
+            return false;
+        }
+    }
+    
+    private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + "* Experimental. The constructor funciton for the entity's data array elements.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
+    public JSObject getElementClass() {
+        return getInstanceConstructor();
+    }
+
+    @ScriptFunction
+    public void setElementClass(JSObject aValue) {
+        setInstanceConstructor(aValue);
+    }
+    
+    private static final String ON_CHANGED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after the entity data change.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
+    public JSObject getOnChanged() {
+        return getOnAfterChange();
+    }
+
+    @ScriptFunction
+    public void setOnChanged(JSObject aValue) {
+        setOnAfterChange(aValue);
+    }
+    private static final String ON_DELETED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after an entity row has been deleted.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
+    public JSObject getOnDeleted() {
+        return getOnAfterDelete();
+    }
+
+    @ScriptFunction
+    public void setOnDeleted(JSObject aValue) {
+        setOnAfterDelete(aValue);
+    }
+    private static final String ON_INSERTED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after an entity row has been inserted.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
+    public JSObject getOnInserted() {
+        return getOnAfterInsert();
+    }
+
+    @ScriptFunction
+    public void setOnInserted(JSObject aValue) {
+        setOnAfterInsert(aValue);
+    }
+    private static final String ON_SCROLLED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after the cursor position changed.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.CursorPositionChangedEvent.class)
+    public JSObject getOnScrolled() {
+        return getOnAfterScroll();
+    }
+
+    @ScriptFunction
+    public void setOnScrolled(JSObject aValue) {
+        setOnAfterScroll(aValue);
+    }
+    private static final String WILL_CHANGE_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured before the entity data change.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
+    public JSObject getWillChange() {
+        return getOnBeforeChange();
+    }
+
+    @ScriptFunction
+    public void setWillChange(JSObject aValue) {
+        setOnBeforeChange(aValue);
+    }
+    private static final String WILL_DELETE_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured before an entity row has been deleted.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
+    public JSObject getWillDelete() {
+        return getOnBeforeDelete();
+    }
+
+    @ScriptFunction
+    public void setWillDelete(JSObject aValue) {
+        setOnBeforeDelete(aValue);
+    }
+    private static final String WILL_INSERT_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured before an entity row has been inserted.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
+    public JSObject getWillInsert() {
+        return getOnBeforeInsert();
+    }
+
+    @ScriptFunction
+    public void setWillInsert(JSObject aValue) {
+        setOnBeforeInsert(aValue);
+    }
+    private static final String WILL_SCROLL_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured before the cursor position changed.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.CursorPositionWillChangeEvent.class)
+    public JSObject getWillScroll() {
+        return getOnBeforeScroll();
+    }
+
+    @ScriptFunction
+    public void setWillScroll(JSObject aValue) {
+        setOnBeforeScroll(aValue);
+    }
+    
+    public void putOrmDefinition(String aName, JSObject aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormDefinitions.containsKey(aName)) {
                 ormDefinitions.put(aName, aDefinition);
@@ -99,15 +829,15 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public Map<String, ScriptableObject> getOrmDefinitions() {
+    public Map<String, Object> getOrmDefinitions() {
         return Collections.unmodifiableMap(ormDefinitions);
     }
 
-    public Function getInstanceConstructor() {
+    public JSObject getInstanceConstructor() {
         return instanceConstructor;
     }
 
-    public void setInstanceConstructor(Function aValue) {
+    public void setInstanceConstructor(JSObject aValue) {
         instanceConstructor = aValue;
     }
 
@@ -118,8 +848,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public RowsetHostObject<E> getRowsetWrap() {
-        return sRowsetWrap;
+    @Override
+    public Object getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 
     /**
@@ -127,6 +863,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
      *
      * @return Cursor substitute entity.
      */
+    @ScriptFunction(jsDoc = ""
+            + "/**"
+            + " * Returns cursor-substitute entity.\n"
+            + " * Sunstitute's cursor is used when in original entity's cursor some field's value is null."
+            + "/*")
     public E getSubstitute() {
         return substitute;
     }
@@ -167,102 +908,116 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
      */
     protected abstract List<Change> getChangeLog() throws Exception;
 
-    public Function getOnAfterChange() {
+    public JSObject getOnAfterChange() {
         return onAfterChange;
     }
 
-    public Function getOnAfterDelete() {
+    public JSObject getOnAfterDelete() {
         return onAfterDelete;
     }
 
-    public Function getOnAfterInsert() {
+    public JSObject getOnAfterInsert() {
         return onAfterInsert;
     }
 
-    public Function getOnAfterScroll() {
+    public JSObject getOnAfterScroll() {
         return onAfterScroll;
     }
 
-    public Function getOnBeforeChange() {
+    public JSObject getOnBeforeChange() {
         return onBeforeChange;
     }
 
-    public Function getOnBeforeDelete() {
+    public JSObject getOnBeforeDelete() {
         return onBeforeDelete;
     }
 
-    public Function getOnBeforeInsert() {
+    public JSObject getOnBeforeInsert() {
         return onBeforeInsert;
     }
 
-    public Function getOnBeforeScroll() {
+    public JSObject getOnBeforeScroll() {
         return onBeforeScroll;
     }
 
-    public Function getOnFiltered() {
+    public JSObject getOnFiltered() {
         return onFiltered;
     }
 
-    public Function getOnRequeried() {
+    private static final String ON_REQUIRED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after the entity data have been required.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
+    @EventMethod(eventClass = PublishedSourcedEvent.class)
+    public JSObject getOnRequeried() {
         return onRequeried;
     }
 
-    public void setOnAfterChange(Function aValue) {
-        Function oldValue = onAfterChange;
+    public void setOnAfterChange(JSObject aValue) {
+        JSObject oldValue = onAfterChange;
         onAfterChange = aValue;
         changeSupport.firePropertyChange("onAfterChange", oldValue, aValue);
     }
 
-    public void setOnAfterDelete(Function aValue) {
-        Function oldValue = onAfterDelete;
+    public void setOnAfterDelete(JSObject aValue) {
+        JSObject oldValue = onAfterDelete;
         onAfterDelete = aValue;
         changeSupport.firePropertyChange("onAfterDelete", oldValue, aValue);
     }
 
-    public void setOnAfterInsert(Function aValue) {
-        Function oldValue = onAfterInsert;
+    public void setOnAfterInsert(JSObject aValue) {
+        JSObject oldValue = onAfterInsert;
         onAfterInsert = aValue;
         changeSupport.firePropertyChange("onAfterInsert", oldValue, aValue);
     }
 
-    public void setOnAfterScroll(Function aValue) {
-        Function oldValue = onAfterScroll;
+    public void setOnAfterScroll(JSObject aValue) {
+        JSObject oldValue = onAfterScroll;
         onAfterScroll = aValue;
         changeSupport.firePropertyChange("onAfterScroll", oldValue, aValue);
     }
 
-    public void setOnBeforeChange(Function aValue) {
-        Function oldValue = onBeforeChange;
+    public void setOnBeforeChange(JSObject aValue) {
+        JSObject oldValue = onBeforeChange;
         onBeforeChange = aValue;
         changeSupport.firePropertyChange("onBeforeChange", oldValue, aValue);
     }
 
-    public void setOnBeforeDelete(Function aValue) {
-        Function oldValue = onBeforeDelete;
+    public void setOnBeforeDelete(JSObject aValue) {
+        JSObject oldValue = onBeforeDelete;
         onBeforeDelete = aValue;
         changeSupport.firePropertyChange("onBeforeDelete", oldValue, aValue);
     }
 
-    public void setOnBeforeInsert(Function aValue) {
-        Function oldValue = onBeforeInsert;
+    public void setOnBeforeInsert(JSObject aValue) {
+        JSObject oldValue = onBeforeInsert;
         onBeforeInsert = aValue;
         changeSupport.firePropertyChange("onBeforeInsert", oldValue, aValue);
     }
 
-    public void setOnBeforeScroll(Function aValue) {
-        Function oldValue = onBeforeScroll;
+    public void setOnBeforeScroll(JSObject aValue) {
+        JSObject oldValue = onBeforeScroll;
         onBeforeScroll = aValue;
         changeSupport.firePropertyChange("onBeforeScroll", oldValue, aValue);
     }
 
-    public void setOnFiltered(Function aValue) {
-        Function oldValue = onFiltered;
+    private static final String ON_FILTERED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after the filter have been applied to the entity.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
+    @EventMethod(eventClass = PublishedSourcedEvent.class)
+    public void setOnFiltered(JSObject aValue) {
+        JSObject oldValue = onFiltered;
         onFiltered = aValue;
         changeSupport.firePropertyChange("onFiltered", oldValue, aValue);
     }
 
-    public void setOnRequeried(Function aValue) {
-        Function oldValue = onRequeried;
+    public void setOnRequeried(JSObject aValue) {
+        JSObject oldValue = onRequeried;
         onRequeried = aValue;
         changeSupport.firePropertyChange("onRequeried", oldValue, aValue);
     }
@@ -276,16 +1031,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
+    private static final String BEGIN_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Disables automatic model update on parameters change, @see endUpdate method.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = BEGIN_UPDATE_JSDOC)
     public void beginUpdate() {
         updatingCounter++;
     }
 
+    private static final String END_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Enables automatic model update on parameters change, @see beginUpdate method.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = END_UPDATE_JSDOC)
     public void endUpdate() throws Exception {
         assert updatingCounter > 0;
         updatingCounter--;
         if (updatingCounter == 0) {
             internalExecuteChildren(false);
-            model.pumpScriptEvents();
         }
     }
 
@@ -312,7 +1078,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         setExecutedRecursivly(false);
         boolean lexecuted = internalExecute(true);
         internalExecuteChildren(true);
-        model.pumpScriptEvents();
         return lexecuted;
     }
 
@@ -321,7 +1086,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             setExecutedRecursivly(false);
             boolean lexecuted = internalExecute(false);
             internalExecuteChildren(false);
-            model.pumpScriptEvents();
             return lexecuted;
         } else {
             return false;
@@ -452,7 +1216,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             executed = oldExecuted;
         }
         internalExecuteChildren(true);
-        model.pumpScriptEvents();
     }
 
     protected void executeChildren() throws Exception {
@@ -464,7 +1227,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
         executed = true;
         internalExecuteChildren(false);
-        model.pumpScriptEvents();
     }
 
     protected void internalExecuteChildren(boolean refresh) throws Exception {
@@ -529,24 +1291,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             entity.internalExecute(refresh);
         }
         return childrenToExecute;
-    }
-
-    public Scriptable defineProperties() throws Exception {
-        if (model.getScriptThis() != null && model.getScriptThis() instanceof ScriptableObject) {
-            if (name != null && !name.isEmpty()) {
-                ScriptableRowset<E> sRowset = new ScriptableRowset<>((E) this);
-                sRowsetWrap = new RowsetHostObject<>(sRowset, model.getPublished());
-                // var m = new Module1(); m.model.entity1
-                model.getPublished().defineProperty(name, sRowsetWrap);
-                // deprecated
-                ScriptableObject moduleThis = (ScriptableObject) model.getScriptThis();
-                /* var m = new Module1(); m.entity1 */
-                moduleThis.defineProperty(name, sRowsetWrap, ScriptableObject.READONLY);
-                //
-                return sRowsetWrap;
-            }
-        }
-        return null;
     }
 
     @Override
@@ -658,7 +1402,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
             Parameter p = selfParameters.get(i);
             boolean oldModified = p.isModified();
-            p.setValue(ScriptUtils.js2Java(p.getValue()));
+            p.setValue(ScriptUtils.toJava(p.getValue()));
             p.setModified(oldModified);
         }
         //
@@ -695,6 +1439,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                                 if (pValue == null) {
                                     pValue = leftParameter.getDefaultValue();
                                 }
+                                pValue = ScriptUtils.toJava(pValue);
                             } else {
                                 Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
                             }
@@ -848,21 +1593,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public Object executeScriptEvent(final Function aHandler, final ScriptSourcedEvent aEvent) {
+    public Object executeScriptEvent(final JSObject aHandler, final PublishedSourcedEvent aEvent) {
         Object res = null;
         if (aHandler != null) {
             try {
-                final Scriptable scope = model.getScriptThis();
-                if (scope != null) {
-                    model.fireScriptEventExecuting((E) this, scope, aHandler, aEvent);
-                    res = ScriptUtils.inContext(new ScriptAction() {
-                        @Override
-                        public Object run(Context cx) throws Exception {
-                            Object[] args = new Object[]{ScriptUtils.javaToJS(aEvent, scope)};
-                            return aHandler.call(cx, scope, sRowsetWrap != null ? sRowsetWrap : scope, args);
-                        }
-                    });
-                }
+                model.fireScriptEventExecuting(aEvent);
+                return ScriptUtils.toJava(aHandler.call(getPublished(), new Object[]{aEvent.getPublished()}));
             } catch (Exception ex) {
                 if (!(ex instanceof IllegalStateException) || ex.getMessage() == null || !ex.getMessage().equals("break")) {
                     if (ex.getMessage() != null) {
@@ -877,17 +1613,25 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         return res;
     }
 
-    private void enqueueScriptEvent(Function aHandler, ScriptSourcedEvent aEvent) {
-        model.enqueueScriptEvent((E) this, aHandler, aEvent);
-    }
+    public static class CursorPositionWillChangeEvent extends PublishedSourcedEvent {
 
-    public static class CursorPositionWillChangeEvent extends ScriptSourcedEvent {
-
+        protected int oldIndex;
         protected int newIndex;
 
-        public CursorPositionWillChangeEvent(Scriptable aSource, int newIndex) {
+        public CursorPositionWillChangeEvent(HasPublished aSource, int aOldIndex, int aNewIndex) {
             super(aSource);
-            this.newIndex = newIndex;
+            oldIndex = aOldIndex;
+            newIndex = aNewIndex;
+        }
+
+        private static final String OLD_INDEX_JSDOC = ""
+                + "/**\n"
+                + "* Cursor position the cursor is still on.\n"
+                + "*/";
+
+        @ScriptFunction(jsDoc = OLD_INDEX_JSDOC)
+        public int getOldIndex() {
+            return oldIndex;
         }
 
         private static final String NEW_INDEX_JSDOC = ""
@@ -899,15 +1643,18 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         public int getNewIndex() {
             return newIndex;
         }
+
     }
 
-    public static class CursorPositionChangedEvent extends CursorPositionWillChangeEvent {
+    public static class CursorPositionChangedEvent extends PublishedSourcedEvent {
 
         protected int oldIndex;
+        protected int newIndex;
 
-        public CursorPositionChangedEvent(Scriptable aSource, int oldIndex, int newIndex) {
-            super(aSource, newIndex);
-            this.oldIndex = oldIndex;
+        public CursorPositionChangedEvent(HasPublished aSource, int aOldIndex, int aNewIndex) {
+            super(aSource);
+            oldIndex = aOldIndex;
+            newIndex = aNewIndex;
         }
 
         @ScriptFunction(jsDoc = ""
@@ -917,6 +1664,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         public int getOldIndex() {
             return oldIndex;
         }
+
+        private static final String NEW_INDEX_JSDOC = ""
+                + "/**\n"
+                + "* Cursor position the cursor has been set on.\n"
+                + "*/";
+
+        @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
+        public int getNewIndex() {
+            return newIndex;
+        }
+
     }
 
     @Override
@@ -927,18 +1685,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             model.addSavedRowIndex((E) this, aEvent.getOldRowIndex());
         } else {
             try {
-                res = ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Boolean run(Context cx) throws Exception {
-                        // call script method
-                        Object sRes = executeScriptEvent(onBeforeScroll, new CursorPositionWillChangeEvent(sRowsetWrap, aEvent.getNewRowIndex()));
-                        if (sRes != null && sRes instanceof Boolean) {
-                            return (Boolean) sRes;
-                        } else {
-                            return true;
-                        }
-                    }
-                });
+                // call script method
+                Object sRes = executeScriptEvent(onBeforeScroll, new CursorPositionWillChangeEvent(this, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
+                if (sRes != null && sRes instanceof Boolean) {
+                    return (Boolean) sRes;
+                } else {
+                    return true;
+                }
             } catch (Exception ex) {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -953,11 +1706,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             try {
                 if (!model.isAjusting()) {
                     // call script method
-                    enqueueScriptEvent(onAfterScroll, new CursorPositionChangedEvent(sRowsetWrap, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
+                    executeScriptEvent(onAfterScroll, new CursorPositionChangedEvent(this, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
                 }
                 if (!executing) {
                     internalExecuteChildren(false);
-                    model.pumpScriptEvents();
                 }
             } catch (Exception ex) {
                 Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -965,17 +1717,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public static class EntityInstanceChangeEvent extends ScriptSourcedEvent {
+    public static class EntityInstanceChangeEvent extends PublishedSourcedEvent {
 
         protected Field field;
         protected Object oldValue;
         protected Object newValue;
 
-        public EntityInstanceChangeEvent(Scriptable aSource, Field field, Object oldValue, Object newValue) {
+        public EntityInstanceChangeEvent(HasPublished aSource, Field aField, Object aOldValue, Object aNewValue) {
             super(aSource);
-            this.field = field;
-            this.oldValue = oldValue;
-            this.newValue = newValue;
+            field = aField;
+            oldValue = aOldValue;
+            newValue = aNewValue;
         }
 
         public Field getField() {
@@ -1018,7 +1770,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 + "*/";
 
         @ScriptFunction(jsDoc = OBJECT_JSDOC)
-        public Scriptable getObject() {
+        public HasPublished getObject() {
             return source;
         }
     }
@@ -1034,17 +1786,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             if (field != null) {
                 try {
                     // call script method
-                    res = ScriptUtils.inContext(new ScriptAction() {
-                        @Override
-                        public Boolean run(Context cx) throws Exception {
-                            Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptThis(), aEvent.getChangedRow(), ApplicationEntity.this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptThis()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptThis())));
-                            if (sRes != null && sRes instanceof Boolean) {
-                                return (Boolean) sRes;
-                            } else {
-                                return true;
-                            }
-                        }
-                    });
+                    Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(aEvent.getChangedRow(), field, aEvent.getOldValue(), aEvent.getNewValue()));
+                    if (sRes != null && sRes instanceof Boolean) {
+                        return (Boolean) sRes;
+                    } else {
+                        return true;
+                    }
                 } catch (Exception ex) {
                     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -1062,27 +1809,20 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             if (lfields != null) {
                 final Field field = lfields.get(aEvent.getFieldIndex());
                 if (field != null) {
-                    ScriptUtils.inContext(new ScriptAction() {
-                        @Override
-                        public Object run(Context cx) throws Exception {
-                            enqueueScriptEvent(onAfterChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptThis(), aEvent.getChangedRow(), ApplicationEntity.this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptThis()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptThis())));
-                            return null;
-                        }
-                    });
+                    executeScriptEvent(onAfterChange, new EntityInstanceChangeEvent(aEvent.getChangedRow(), field, aEvent.getOldValue(), aEvent.getNewValue()));
                 }
             }
             internalExecuteChildren(false, aEvent.getFieldIndex());
-            model.pumpScriptEvents();
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public static class EntityInstanceInsert extends ScriptSourcedEvent {
+    public static class EntityInstanceInsert extends PublishedSourcedEvent {
 
-        protected RowHostObject inserted;
+        protected Row inserted;
 
-        public EntityInstanceInsert(Scriptable source, RowHostObject inserted) {
+        public EntityInstanceInsert(HasPublished source, Row inserted) {
             super(source);
             this.inserted = inserted;
         }
@@ -1093,7 +1833,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 + "*/";
 
         @ScriptFunction(jsDoc = INSERTED_JSDOC)
-        public RowHostObject getInserted() {
+        public Row getInserted() {
             return inserted;
         }
 
@@ -1103,7 +1843,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 + "*/";
 
         @ScriptFunction(jsDoc = OBJECT_JSDOC)
-        public RowHostObject getObject() {
+        public Row getObject() {
             return inserted;
         }
     }
@@ -1114,30 +1854,25 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         // call script method
         assert !model.isAjusting();
         try {
-            res = ScriptUtils.inContext(new ScriptAction() {
-                @Override
-                public Boolean run(Context cx) throws Exception {
-                    Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
-                    if (sRes != null && sRes instanceof Boolean) {
-                        return (Boolean) sRes;
-                    } else {
-                        return true;
-                    }
-                }
-            });
+            Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(this, event.getRow()));
+            if (sRes != null && sRes instanceof Boolean) {
+                return (Boolean) sRes;
+            } else {
+                return true;
+            }
         } catch (Exception ex) {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
         return res;
     }
 
-    public static class EntityInstanceDelete extends ScriptSourcedEvent {
+    public static class EntityInstanceDelete extends PublishedSourcedEvent {
 
-        protected RowHostObject deleted;
+        protected Row deleted;
 
-        public EntityInstanceDelete(Scriptable source, RowHostObject deleted) {
-            super(source);
-            this.deleted = deleted;
+        public EntityInstanceDelete(HasPublished aSource, Row aDeleted) {
+            super(aSource);
+            deleted = aDeleted;
         }
 
         private static final String DELETED_JSDOC = ""
@@ -1146,7 +1881,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 + "*/";
 
         @ScriptFunction(jsDoc = DELETED_JSDOC)
-        public RowHostObject getDeleted() {
+        public Row getDeleted() {
             return deleted;
         }
     }
@@ -1157,17 +1892,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         // call script method
         assert !model.isAjusting();
         try {
-            res = ScriptUtils.inContext(new ScriptAction() {
-                @Override
-                public Boolean run(Context cx) throws Exception {
-                    Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
-                    if (sRes != null && sRes instanceof Boolean) {
-                        return (Boolean) sRes;
-                    } else {
-                        return true;
-                    }
-                }
-            });
+            Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(this, event.getRow()));
+            if (sRes != null && sRes instanceof Boolean) {
+                return (Boolean) sRes;
+            } else {
+                return true;
+            }
         } catch (Exception ex) {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1180,15 +1910,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            ScriptUtils.inContext(new ScriptAction() {
-                @Override
-                public Object run(Context cx) throws Exception {
-                    enqueueScriptEvent(onAfterInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
-                    return null;
-                }
-            });
+            executeScriptEvent(onAfterInsert, new EntityInstanceInsert(this, event.getRow()));
             internalExecuteChildren(false);
-            model.pumpScriptEvents();
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1200,15 +1923,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            ScriptUtils.inContext(new ScriptAction() {
-                @Override
-                public Object run(Context cx) throws Exception {
-                    enqueueScriptEvent(onAfterDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
-                    return null;
-                }
-            });
+            executeScriptEvent(onAfterDelete, new EntityInstanceDelete(this, event.getRow()));
             internalExecuteChildren(false);
-            model.pumpScriptEvents();
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1219,11 +1935,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         try {
             // call script method
             if (!model.isAjusting()) {
-                enqueueScriptEvent(onFiltered, new ScriptSourcedEvent(sRowsetWrap));
+                executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
             }
             if (!executing) {
                 internalExecuteChildren(false);
-                model.pumpScriptEvents();
             }
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1235,11 +1950,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         try {
             // call script method
             if (!model.isAjusting()) {
-                enqueueScriptEvent(onFiltered, new ScriptSourcedEvent(sRowsetWrap));
+                executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
             }
             if (!executing) {
                 internalExecuteChildren(false);
-                model.pumpScriptEvents();
             }
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1257,11 +1971,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
             // call script method
             if (!model.isAjusting()) {
-                enqueueScriptEvent(onRequeried, new ScriptSourcedEvent(sRowsetWrap));
+                executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
             }
             if (!executing) {
                 internalExecuteChildren(false);
-                model.pumpScriptEvents();
             }
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1273,11 +1986,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         try {
             // call script method
             if (!model.isAjusting()) {
-                enqueueScriptEvent(onRequeried, new ScriptSourcedEvent(sRowsetWrap));
+                executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
             }
             if (!executing) {
                 internalExecuteChildren(false);
-                model.pumpScriptEvents();
             }
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);

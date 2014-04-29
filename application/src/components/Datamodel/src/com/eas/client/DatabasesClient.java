@@ -216,7 +216,6 @@ public class DatabasesClient implements DbClient {
      * provider creation in two tier or three tier applications.
      *
      * @param aDatasourceId
-     * @param aSessionId
      * @param aEntityId
      * @param aSqlClause
      * @param aExpectedFields
@@ -226,8 +225,8 @@ public class DatabasesClient implements DbClient {
      * @throws Exception
      */
     @Override
-    public FlowProvider createFlowProvider(String aDatasourceId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDatasourceId, aSessionId, aEntityId, obtainDataSource(aDatasourceId), getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
+    public FlowProvider createFlowProvider(String aDatasourceId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        return new PlatypusJdbcFlowProvider(this, aDatasourceId, aEntityId, obtainDataSource(aDatasourceId), getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {

@@ -1,6 +1,51 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.dbcontrols.grid.rt.veers;
 
@@ -8,9 +53,8 @@ import com.bearsoft.gui.grid.columns.TableColumnHandler;
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.locators.Locator;
-import com.eas.dbcontrols.ScalarDbControl;
 import javax.swing.table.TableColumn;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Class, intended to hold general information about veer columns organization.
@@ -30,8 +74,8 @@ public class ColumnsSource {
     // values field index
     protected int cellsValuesFieldIndex;
     protected TableColumnHandler rowsColumnsHandler;
-    protected Function cellsHandler;
-    protected Function selectHandler;
+    protected JSObject onRender;
+    protected JSObject onSelect;
 
     /**
      * Rows model columns source constructor.
@@ -48,13 +92,15 @@ public class ColumnsSource {
      * In such case, values will be simply gotten from <code>aCellsValuesRowset</code>.
      * @param aCellsValuesFieldIndex Field index of cells values in <code>aCellsValuesRowset</code>. Index is 1-based.
      * @param aRowsColumnsHandler Handler of new created table columns. Handling may be any neccesary work, but typically it is cell renderer and cell editor creation.
+     * @param aOnRender
+     * @param aOnSelect
      * @see TableColumn
      * @see Locator
      * @see Rowset
      * @see TableColumnHandler
      * @see GridColumnsGroup
      */
-    public ColumnsSource(GridColumnsGroup aGroup, TableColumn aAnchorViewColumn, Locator aColumnsLocator, int aColumnsTitleColIndex, Locator aCellsLocator, Rowset aCellsValuesRowset, int aCellsValuesFieldIndex, TableColumnHandler aRowsColumnsHandler, Function aCellsHandler, Function aSelectHandler) {
+    public ColumnsSource(GridColumnsGroup aGroup, TableColumn aAnchorViewColumn, Locator aColumnsLocator, int aColumnsTitleColIndex, Locator aCellsLocator, Rowset aCellsValuesRowset, int aCellsValuesFieldIndex, TableColumnHandler aRowsColumnsHandler, JSObject aOnRender, JSObject aOnSelect) {
         super();
         group = aGroup;
         anchorViewColumn = aAnchorViewColumn;
@@ -65,8 +111,8 @@ public class ColumnsSource {
         cellsValuesRowset = aCellsValuesRowset;
         cellsValuesFieldIndex = aCellsValuesFieldIndex;
         rowsColumnsHandler = aRowsColumnsHandler;
-        cellsHandler = aCellsHandler;
-        selectHandler = aSelectHandler;
+        onRender = aOnRender;
+        onSelect = aOnSelect;
     }
 
     public GridColumnsGroup getGroup() {
@@ -101,12 +147,12 @@ public class ColumnsSource {
         return cellsValuesFieldIndex;
     }
 
-    public Function getCellsHandler() {
-        return cellsHandler;
+    public JSObject getOnRender() {
+        return onRender;
     }
 
-    public Function getSelectHandler() {
-        return selectHandler;
+    public JSObject getOnSelect() {
+        return onSelect;
     }
 
     public boolean isReadOnly() {

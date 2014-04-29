@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.application;
 
-import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.dataflow.TransactionListener;
@@ -12,21 +11,16 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
-import com.eas.client.events.ScriptSourcedEvent;
-import com.eas.client.model.Entity;
+import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelScriptEventsListener;
 import com.eas.client.model.ModelScriptEventsSupport;
 import com.eas.client.model.Relation;
-import com.eas.client.model.script.ApplicationModelHostObject;
-import com.eas.client.model.script.ScriptEvent;
-import com.eas.client.model.script.ScriptableRowset;
+import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.util.ListenerRegistration;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -39,10 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
 
 /**
@@ -58,9 +49,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
-    protected List<ScriptEvent<E>> scriptEventsQueue = new ArrayList<>();
-    private boolean pumpingScriptEvents = false;
-    protected ModelScriptEventsSupport<E> scriptEventsSupport = new ModelScriptEventsSupport<>();
+    protected ModelScriptEventsSupport scriptEventsSupport = new ModelScriptEventsSupport();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
@@ -74,49 +63,39 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    public void setScriptThis(Scriptable aScriptScope) throws Exception {
-        Scriptable oldValue = scriptThis;
-        super.setScriptThis(aScriptScope);
-        if (scriptThis != null && scriptThis instanceof ScriptableObject) {
-            ((ScriptableObject) scriptThis).defineProperty(Entity.MODEL_PROPERTY, new ApplicationModelHostObject(aScriptScope, this), ScriptableObject.READONLY);
-            for (E ent : entities.values()) {
-                if (ent != null) {
-                    ent.defineProperties();
-                }
-            }
-            if (parametersEntity != null) {
-                parametersEntity.defineProperties();
-            }
-            //
-            for (ReferenceRelation<E> aRelation : referenceRelations) {
-                String scalarPropertyName = aRelation.getScalarPropertyName();
-                if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-                    scalarPropertyName = aRelation.getRightEntity().getName();
-                }
-                if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-                    aRelation.getLeftEntity().putOrmDefinition(
-                            scalarPropertyName,
-                            ScriptUtils.scalarPropertyDefinition(
-                                    aRelation.getRightEntity().getRowsetWrap(),
-                                    aRelation.getRightField().getName(),
-                                    aRelation.getLeftField().getName()));
-                }
-                String collectionPropertyName = aRelation.getCollectionPropertyName();
-                if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-                    collectionPropertyName = aRelation.getLeftEntity().getName();
-                }
-                if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-                    aRelation.getRightEntity().putOrmDefinition(
-                            collectionPropertyName,
-                            ScriptUtils.collectionPropertyDefinition(
-                                    aRelation.getLeftEntity().getRowsetWrap(),
-                                    aRelation.getRightField().getName(),
-                                    aRelation.getLeftField().getName()));
-                }
-            }
-            //////////////////
-        }
-        changeSupport.firePropertyChange("scriptScope", oldValue, scriptThis);
+    public void setPublished(Object aValue) {
+        Object oldValue = published;
+        super.setPublished(aValue);
+        /*
+         if (published != null && published instanceof ScriptableObject) {
+         for (ReferenceRelation<E> aRelation : referenceRelations) {
+         String scalarPropertyName = aRelation.getScalarPropertyName();
+         if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+         scalarPropertyName = aRelation.getRightEntity().getName();
+         }
+         if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+         aRelation.getLeftEntity().putOrmDefinition(
+         scalarPropertyName,
+         ScriptUtils.scalarPropertyDefinition(
+         (Scriptable) aRelation.getRightEntity().getPublished(),
+         aRelation.getRightField().getName(),
+         aRelation.getLeftField().getName()));
+         }
+         String collectionPropertyName = aRelation.getCollectionPropertyName();
+         if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+         collectionPropertyName = aRelation.getLeftEntity().getName();
+         }
+         if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+         aRelation.getRightEntity().putOrmDefinition(
+         collectionPropertyName,
+         ScriptUtils.collectionPropertyDefinition(
+         (Scriptable) aRelation.getLeftEntity().getPublished(),
+         aRelation.getRightField().getName(),
+         aRelation.getLeftField().getName()));
+         }
+         }
+         }
+         */
     }
 
     @Override
@@ -198,63 +177,16 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return ApplicationModel2XmlDom.transform(this);
     }
 
-    /**
-     * Pumps all enqueued script events. At this moment, this method does
-     * nothing, because enqueueScriptEvent is not wherever called. Thus,
-     * postponed events are disabled because of browser client compatibility.
-     */
-    public void pumpScriptEvents() {
-        if (!pumpingScriptEvents && runtime) {
-            pumpingScriptEvents = true;
-            try {
-                // while executing events, the scriptEventsQueue may be filled again!
-                while (!scriptEventsQueue.isEmpty()) {
-                    // create new vector to preserve concurrent modification
-                    // filling the scriptEventsQueue while executing events is legal!
-                    ArrayList<ScriptEvent<E>> lQueue = new ArrayList<>();
-                    lQueue.addAll(scriptEventsQueue);
-                    // while executing events, the scriptEventsQueue may be filled again!
-                    scriptEventsQueue.clear();
-                    // invoke events in occurance order
-                    for (int i = 0; i < lQueue.size(); i++) {
-                        ScriptEvent<E> entry = lQueue.get(i);
-                        assert entry != null;
-                        try {
-                            entry.invoke();
-                        } catch (Exception ex) {
-                            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-                assert scriptEventsQueue.isEmpty();
-            } finally {
-                pumpingScriptEvents = false;
-            }
-        }
-    }
-
-    public void enqueueScriptEvent(E aEntity, Function aHandler, ScriptSourcedEvent aEvent) {
-        if (aHandler != null) {
-            ScriptEvent<E> entry = new ScriptEvent<>(aEntity, aHandler, aEvent);
-            scriptEventsSupport.fireScriptEventEnqueueing(aEntity, aHandler, aEvent);
-            scriptEventsQueue.add(entry);
-        }
-    }
-
-    public void addScriptEventsListener(ModelScriptEventsListener<E> l) {
+    public void addScriptEventsListener(ModelScriptEventsListener l) {
         scriptEventsSupport.addListener(l);
     }
 
-    public void removeScriptEventsListener(ModelScriptEventsListener<E> l) {
+    public void removeScriptEventsListener(ModelScriptEventsListener l) {
         scriptEventsSupport.removeListener(l);
     }
 
-    public void fireScriptEventEnqueueing(E aEntity, Function aHandler, ScriptSourcedEvent aEvent) {
-        scriptEventsSupport.fireScriptEventEnqueueing(aEntity, aHandler, aEvent);
-    }
-
-    public void fireScriptEventExecuting(E aEntity, Scriptable aScope, Function aHandler, ScriptSourcedEvent aEvent) {
-        scriptEventsSupport.fireScriptEventExecuting(aEntity, aScope, aHandler, aEvent);
+    public void fireScriptEventExecuting(PublishedSourcedEvent aEvent) {
+        scriptEventsSupport.fireScriptEventExecuting(aEvent);
     }
 
     public void beginSavingCurrentRowIndexes() {
@@ -300,18 +232,12 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
-    public boolean save(final Function aCallback) throws Exception {
+    public boolean save(final JSObject aCallback) throws Exception {
         try {
             commit();
             saved();
             if (aCallback != null) {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        aCallback.call(cx, scriptThis, scriptThis, new Object[]{});
-                        return null;
-                    }
-                });
+                aCallback.call(getPublished(), new Object[]{});
             }
         } catch (Exception ex) {
             rolledback();
@@ -359,27 +285,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
-    public void requery(final Function aOnSuccess, final Function aOnFailure) throws Exception {
+    public void requery(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
         try {
             executeRootEntities(true);
             if (aOnSuccess != null) {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
-                        return null;
-                    }
-                });
+                aOnSuccess.call(getPublished(), new Object[]{});
             }
         } catch (final Exception ex) {
             if (aOnFailure != null) {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
-                        return null;
-                    }
-                });
+                aOnFailure.call(getPublished(), new Object[]{ex.getMessage()});
             } else {
                 throw ex;
             }
@@ -390,7 +304,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         execute(null, null);
     }
 
-    public void execute(Function aOnSuccess) throws Exception {
+    public void execute(JSObject aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
     private static final String EXECUTE_JSDOC = ""
@@ -401,27 +315,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
-    public void execute(final Function aOnSuccess, final Function aOnFailure) throws Exception {
+    public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
         try {
             executeRootEntities(false);
             if (aOnSuccess != null) {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
-                        return null;
-                    }
-                });
+                aOnSuccess.call(getPublished(), new Object[]{});
             }
         } catch (final Exception ex) {
             if (aOnFailure != null) {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
-                        return null;
-                    }
-                });
+                aOnFailure.call(getPublished(), new Object[]{ex.getMessage()});
             } else {
                 throw ex;
             }
@@ -448,7 +350,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         while (!childrenToExecute.isEmpty()) {
             childrenToExecute = ApplicationEntity.internalExecuteChildrenImpl(refresh, childrenToExecute);
         }
-        pumpScriptEvents();
     }
 
     public boolean isEntityRowIndexStateSaved(E entity) {
@@ -507,7 +408,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-    public synchronized Scriptable createQuery(String aQueryId) throws Exception {
+    public synchronized E createQuery(String aQueryId) throws Exception {
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
         return loadEntity(aQueryId);
     }
@@ -519,7 +420,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
-    public synchronized Scriptable loadEntity(String aQueryId) throws Exception {
+    public synchronized E loadEntity(String aQueryId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating an entity");
         }
@@ -527,11 +428,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryId(aQueryId);
         entity.validateQuery();
-        //addEntity(entity); To avoid memory leaks you should not add the entity in the model!
-        return entity.defineProperties();
+        return entity;
     }
 
-    public synchronized Scriptable createQuery(ScriptableRowset<E> aLeftScriptableRowset, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
+    public synchronized E createQuery(E aLeftEntity, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
@@ -540,23 +440,21 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         rightEntity.setQueryId(aRightQueryId);
         addEntity(rightEntity);
         // filter relation
-        Relation<E> rel = new Relation<>(aLeftScriptableRowset.getEntity(), aLeftField, rightEntity, aRightField);
+        Relation<E> rel = new Relation<>(aLeftEntity, aLeftField, rightEntity, aRightField);
         addRelation(rel);
         // parameters bypass relations
-        Parameters params = aLeftScriptableRowset.getEntity().getQuery().getParameters();
+        Parameters params = aLeftEntity.getQuery().getParameters();
         assert params != null;
         for (int i = 1; i <= params.getParametersCount(); i++) {
             Parameter p = (Parameter) params.get(i);
-            Relation<E> pRel = new Relation<>(aLeftScriptableRowset.getEntity(), p, rightEntity, rightEntity.getQuery().getParameters().get(p.getName()));
+            Relation<E> pRel = new Relation<>(aLeftEntity, p, rightEntity, rightEntity.getQuery().getParameters().get(p.getName()));
             addRelation(pRel);
         }
-        return rightEntity.defineProperties();
+        return rightEntity;
     }
 
-    public synchronized void deleteQuery(Object oQuery) {
-        if (oQuery != null && oQuery instanceof ScriptableRowset<?>) {
-            ScriptableRowset<E> sRowset = (ScriptableRowset<E>) oQuery;
-            E entity2Delete = sRowset.getEntity();
+    public synchronized void deleteQuery(E entity2Delete) {
+        if (entity2Delete != null) {
             Set<Relation<E>> rels = entity2Delete.getInOutRelations();
             if (rels != null) {
                 for (Relation<E> rel : rels) {

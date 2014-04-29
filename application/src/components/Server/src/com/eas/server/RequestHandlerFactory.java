@@ -129,9 +129,4 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     public void visit(AppElementRequest rq) throws Exception {
         handler = new AppElementRequestHandler(serverCore, session, rq);
     }
-
-    @Override
-    public void visit(ExecuteServerReportRequest rq) throws Exception {
-        handler = new ExecuteServerReportRequestHandler(serverCore, session, rq);
-    }
 }

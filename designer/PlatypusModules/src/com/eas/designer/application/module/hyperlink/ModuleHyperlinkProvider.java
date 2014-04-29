@@ -5,7 +5,6 @@
 package com.eas.designer.application.module.hyperlink;
 
 import com.eas.client.cache.PlatypusFilesSupport;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
@@ -20,21 +19,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
-import org.mozilla.javascript.Node;
-import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.ExpressionStatement;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.Name;
-import org.mozilla.javascript.ast.NewExpression;
-import org.mozilla.javascript.ast.NodeVisitor;
-import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.ScriptNode;
-import org.mozilla.javascript.ast.StringLiteral;
-import org.mozilla.javascript.ast.VariableDeclaration;
-import org.mozilla.javascript.ast.VariableInitializer;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.ir.Node;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
@@ -71,16 +58,16 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         if (doc == null) {
             return false;
         }
-        AstRoot tree = getAst(doc);
+        FunctionNode tree = getAst(doc);
         if (tree == null) {
             return false;
         }
-        AstNode node = AstUtlities.getOffsetNode(tree, offset);
-        if (node == null || !(node instanceof Name)) {
+        Node node = AstUtlities.getOffsetNode(tree, offset);
+        if (node == null || !(node instanceof IdentNode)) {
             return false;
         }
-        startOffset = node.getAbsolutePosition();
-        endOffset = node.getAbsolutePosition() + node.getLength();
+        startOffset = node.getStart();
+        endOffset = node.getFinish();
         return true;
     }
 
@@ -109,7 +96,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         return NbBundle.getMessage(ModuleHyperlinkProvider.class, "NM_GoToDeclaration");
     }
 
-    private AstRoot getAst(Document doc) {
+    private FunctionNode getAst(Document doc) {
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject dataObject = null;
         try {
@@ -133,14 +120,17 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
     }
 
     private DeclarationLocation findDeclarationLocation(Document doc, int offset, AtomicBoolean cancel) throws DataObjectNotFoundException, FileStateInvalidException {
-        AstRoot tree = getAst(doc);
+        FunctionNode tree = getAst(doc);
         if (tree == null) {
             return DeclarationLocation.NONE;
         }
-        AstNode node = AstUtlities.getOffsetNode(tree, offset);
-        if (node == null || !(node instanceof Name)) {
+        Node node = AstUtlities.getOffsetNode(tree, offset);
+        if (node == null || !(node instanceof IdentNode)) {
             return DeclarationLocation.NONE;
         }
+        assert false : "Refactoring is needed";
+        return null;
+        /*
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
@@ -171,7 +161,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
             return DeclarationLocation.NONE;
         }
         if (identifiersPath.size() == 1) {
-            AstNode declarationNode = findLocalDeclaration(node, identifiersPath.get(0));
+            Node declarationNode = findLocalDeclaration(node, identifiersPath.get(0));
             if (declarationNode != null) {
                 return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
             } else {
@@ -192,15 +182,16 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                 offset = 0;
             }
             String name = identifiersPath.get(identifiersPath.size() - 1);
-            AstNode declarationNode = findModuleThisPropertyDeclaration(appElementDataObject.getAst(), name);
+            Node declarationNode = findModuleThisPropertyDeclaration(appElementDataObject.getAst(), name);
             if (declarationNode != null) {
                 return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
             }
             return DeclarationLocation.NONE;
         }
+                */
     }
-
-    private void makePath(AstNode node) {
+/*
+    private void makePath(Node node) {
         identifiersPath = new ArrayList<>();
         if (node.getParent() instanceof PropertyGet) {
             if (((PropertyGet) node.getParent()).getLeft() == node) {
@@ -311,7 +302,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
         return null;
     }
-
+*/
     private static boolean openLocation(DeclarationLocation location) {
         if (location != DeclarationLocation.NONE && location.dataObject != null) {
             return open(location.dataObject, location.offset);

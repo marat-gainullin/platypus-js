@@ -10,9 +10,9 @@ package com.eas.client.chart;
  */
 public class SeriesProperties implements Comparable<Object> {
 
-    private String xAxisProperty = null;
-    private String yAxisProperty = null;
-    private String title = null;
+    private String xAxisProperty;
+    private String yAxisProperty;
+    private String title;
 
     public SeriesProperties(String pXAxisProperty, String pYAxisProperty, String pSeriesTitle) {
         xAxisProperty = pXAxisProperty;

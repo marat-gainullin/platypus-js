@@ -1,6 +1,9 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.cache;
 
@@ -414,6 +417,16 @@ public class FilesAppCache extends AppElementsCache {
 
     private String calcSrcPath() {
         return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT;
+    }
+
+    @Override
+    public String translateScriptPath(String aName) throws Exception {
+        String res = calcSrcPath() + File.separator + aName;
+        ApplicationElement appElement = get(aName);
+        if(appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE){
+            res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+        }
+        return res;
     }
 
     protected synchronized void clearFamiliesByPathPrefix(String aPathPrefix) {

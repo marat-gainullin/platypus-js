@@ -7,9 +7,11 @@ package com.eas.client;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.cache.AppElementsCache;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
+import java.io.File;
 
 /**
  *
@@ -37,6 +39,16 @@ public class DatabaseAppCache extends AppElementsCache {
     @Override
     public String getApplicationPath() {
         return appDatabaseJndiUrl;
+    }
+
+    @Override
+    public String translateScriptPath(String aName) throws Exception {
+        String res = generatePath(aName) + File.separator;
+        ApplicationElement appElement = get(aName);
+        if (appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE) {
+            res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+        }
+        return res;
     }
 
     @Override

@@ -10,7 +10,6 @@ import com.bearsoft.org.netbeans.modules.form.PersistenceException;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
@@ -29,7 +28,7 @@ public class FormCompletionContext extends ModuleCompletionContext {
     private static final Class EVENT_WRAPPER_CLASS = com.eas.client.forms.api.events.EventsWrapper.class;
     private static final String EVENTS_WRAPPER_METHOD_NAME = "wrap";//NOI18N
 
-    public FormCompletionContext(PlatypusModuleDataObject dataObject, Class<? extends ScriptRunner> aClass) {
+    public FormCompletionContext(PlatypusModuleDataObject dataObject, Class<? extends Object> aClass) {
         super(dataObject, aClass);
     }
 

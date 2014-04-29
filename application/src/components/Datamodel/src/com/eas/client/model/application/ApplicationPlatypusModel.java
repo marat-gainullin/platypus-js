@@ -10,7 +10,7 @@ import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -59,7 +59,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             + " * In this case, application can call model.save() another time to save the changes.\n"
             + " * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().\n")
     @Override
-    public boolean save(Function aCallback) throws Exception {
+    public boolean save(JSObject aCallback) throws Exception {
         client.getChangeLog().addAll(changeLog);
         return super.save(aCallback);
     }
@@ -89,7 +89,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             + "/**\n"
             + " * Requeries model data with callback.\n"
             + " */")
-    public void requery(Function aOnSuccess) throws Exception {
+    public void requery(JSObject aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
 
@@ -98,7 +98,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             + " * Requeries model data with callback.\n"
             + " */")
     @Override
-    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
+    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         changeLog.clear();
         super.requery(aOnSuccess, aOnFailure);
     }

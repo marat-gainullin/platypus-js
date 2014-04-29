@@ -1,6 +1,9 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.chart;
 
@@ -16,14 +19,10 @@ import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.eas.client.forms.api.Component;
-import com.eas.client.model.script.ScriptableRowset;
 import java.awt.Color;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -32,8 +31,7 @@ import org.mozilla.javascript.Scriptable;
 public abstract class AbstractChart extends Component<ChartPanel> implements RowsetListener {
 
     public static Color[] seriesColors = new Color[]{new Color(194, 0, 36), new Color(240, 165, 10), new Color(32, 68, 186)};
-    protected ScriptableRowset<?> sRowset;
-    protected Scriptable sObject;
+    protected JSObject data;
     protected JFreeChart chart;
     protected ChartPanel chartPanel;
 
@@ -44,46 +42,17 @@ public abstract class AbstractChart extends Component<ChartPanel> implements Row
         setDelegate(chartPanel);
     }
 
-    public Object getData() {
-        return sRowset != null ? sRowset.getEntity().getRowsetWrap() : sObject;
+    public JSObject getData() {
+        return data;
     }
 
-    public void setData(Object aValue) {
-        if (aValue instanceof ScriptableRowset<?>) {
-            setData((ScriptableRowset<?>) aValue);
-        } else if (aValue instanceof NativeArray) {
-            setData((NativeArray) aValue);
-        } else {
-            setData((ScriptableRowset<?>) null);
-            setData((NativeArray) null);
-        }
-        if (chartPanel != null && chartPanel.isDisplayable()) {
-            fireDataChanged();
-        }
-    }
-
-    protected void setData(ScriptableRowset<?> aRowset) {
-        if (aRowset != null) {
-            sObject = null;
-        }
-        try {
-            if (sRowset != null) {
-                sRowset.unwrap().removeRowsetListener(this);
+    protected void setData(JSObject aValue) {
+        if (data != aValue) {
+            data = aValue;
+            if (chartPanel != null && chartPanel.isDisplayable()) {
+                fireDataChanged();
             }
-            sRowset = aRowset;
-            if (sRowset != null) {
-                sRowset.unwrap().addRowsetListener(this);
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(AbstractChart.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    protected void setData(NativeArray aSObject) {
-        if (aSObject != null) {
-            setData((ScriptableRowset<?>) null);
-        }
-        sObject = aSObject;
     }
 
     public void dataWillChange() {

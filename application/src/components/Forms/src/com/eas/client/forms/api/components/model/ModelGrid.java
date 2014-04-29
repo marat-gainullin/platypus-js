@@ -4,15 +4,15 @@
  */
 package com.eas.client.forms.api.components.model;
 
+import com.bearsoft.rowset.Row;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.events.RenderEvent;
-import com.eas.client.model.script.RowHostObject;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -127,13 +127,13 @@ public class ModelGrid extends Component<DbGrid> {
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
     @EventMethod(eventClass = RenderEvent.class)
-    public Function getOnRender() {
-        return delegate.getGeneralRowFunction();
+    public JSObject getOnRender() {
+        return delegate.getGeneralOnRender();
     }
 
     @ScriptFunction
-    public void setOnRender(Function aValue) {
-        delegate.setGeneralRowFunction(aValue);
+    public void setOnRender(JSObject aValue) {
+        delegate.setGeneralOnRender(aValue);
     }
     private static final String EDITABLE_JSDOC = ""
             + "/**\n"
@@ -183,7 +183,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = SELECTED_JSDOC)
-    public Scriptable getSelected() throws Exception {
+    public List<Row> getSelected() throws Exception {
         return delegate.getSelected();
     }
     private static final String SELECT_JSDOC = ""
@@ -192,7 +192,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = SELECT_JSDOC)
-    public void select(RowHostObject aRow) throws Exception {
+    public void select(Row aRow) throws Exception {
         delegate.select(aRow);
     }
     private static final String UNSELECT_JSDOC = ""
@@ -202,7 +202,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = UNSELECT_JSDOC, params = {"row"})
-    public void unselect(RowHostObject aRow) throws Exception {
+    public void unselect(Row aRow) throws Exception {
         delegate.unselect(aRow);
     }
     private static final String FIND_SOMETHING_JSDOC = ""
@@ -235,7 +235,7 @@ public class ModelGrid extends Component<DbGrid> {
     }
 
     @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC)
-    public boolean makeVisible(RowHostObject aRow) throws Exception {
+    public boolean makeVisible(Row aRow) throws Exception {
         return delegate.makeVisible(aRow);
     }
     private static final String MAKE_VISIBLE_JSDOC = ""
@@ -246,7 +246,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC)
-    public boolean makeVisible(RowHostObject aRow, boolean need2Select) throws Exception {
+    public boolean makeVisible(Row aRow, boolean need2Select) throws Exception {
         return delegate.makeVisible(aRow, need2Select);
     }
     private static final String CELLS_JSDOC = ""
@@ -256,7 +256,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = CELLS_JSDOC)
-    public Scriptable getCells() throws Exception {
+    public Object[] getCells() throws Exception {
         return delegate.getCells();
     }
     private static final String SELECTED_CELLS_JSDOC = ""
@@ -266,7 +266,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = SELECTED_CELLS_JSDOC)
-    public Scriptable getSelectedCells() throws Exception {
+    public Object[] getSelectedCells() throws Exception {
         return delegate.getSelectedCells();
     }
     private static final String COLUMNS_CELLS_JSDOC = ""
@@ -275,7 +275,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = COLUMNS_CELLS_JSDOC)
-    public Scriptable getColumns() throws Exception {
-        return delegate.getColumnsScriptView();
+    public List<Object> getColumns() throws Exception {
+        return delegate.getColumns();
     }
 }

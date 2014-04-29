@@ -24,22 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.Block;
-import org.mozilla.javascript.ast.ExpressionStatement;
-import org.mozilla.javascript.ast.FunctionCall;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.Name;
-import org.mozilla.javascript.ast.NewExpression;
-import org.mozilla.javascript.ast.NodeVisitor;
-import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.ScriptNode;
-import org.mozilla.javascript.ast.KeywordLiteral;
-import org.mozilla.javascript.ast.VariableDeclaration;
-import org.mozilla.javascript.ast.VariableInitializer;
+import jdk.nashorn.internal.ir.FunctionNode;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
@@ -132,15 +117,19 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
-        AstRoot tree = aDataObject.getAst();
-        AstNode offsetNode = AstUtlities.getOffsetNode(tree, offset);
+        FunctionNode tree = aDataObject.getAst();
+        jdk.nashorn.internal.ir.Node offsetNode = AstUtlities.getOffsetNode(tree, offset);
         CompletionMode codeCompletionInfo = isInNewExpression(offsetNode, text) ? CompletionMode.CONSTRUCTORS : CompletionMode.VARIABLES_AND_FUNCTIONS;
         return new JsCodeCompletionScopeInfo(offsetNode, codeCompletionInfo);
     }
 
-    private static boolean isInNewExpression(AstNode aNode, String txt) {
+    private static boolean isInNewExpression(jdk.nashorn.internal.ir.Node aNode, String txt) {
+        assert false : "Refactoring is needed";
+        return false;
+        /*
         return (aNode != null) && ((aNode instanceof NewExpression && (txt == null || txt.isEmpty()))
                 || (aNode instanceof Name && aNode.getParent() instanceof NewExpression));
+        */
     }
 
     public static ModuleCompletionContext getModuleCompletionContext(Project project, String appElementId) {
@@ -160,17 +149,19 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
+        assert false : "Refactoring is needed";
+        /*
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Class clazz = scp.getClassByName(fieldName);
             if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
                 return new CompletionContext(clazz);
             }
         }
-        AstRoot astRoot = parentModuleContext.dataObject.getAst();
+        FunctionNode astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
-            AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
-            AstNode currentNode = offsetNode;
-            AstNode parentScope = null;
+            jdk.nashorn.internal.ir.Node offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
+            jdk.nashorn.internal.ir.Node currentNode = offsetNode;
+            jdk.nashorn.internal.ir.Node parentScope = null;
             for (;;) {//up to the root node  
                 if (currentNode instanceof ScriptNode) {
                     if (parentScope == null) {
@@ -193,6 +184,7 @@ public class ModuleCompletionContext extends CompletionContext {
                 }
             }
         }
+            */
         return null;
     }
 
@@ -222,10 +214,10 @@ public class ModuleCompletionContext extends CompletionContext {
 
     public static class JsCodeCompletionScopeInfo {
 
-        public final AstNode scope;
+        public final jdk.nashorn.internal.ir.Node scope;
         public final CompletionMode mode;
 
-        public JsCodeCompletionScopeInfo(AstNode aScope, CompletionMode aMode) {
+        public JsCodeCompletionScopeInfo(jdk.nashorn.internal.ir.Node aScope, CompletionMode aMode) {
             scope = aScope;
             mode = aMode;
         }
@@ -233,15 +225,15 @@ public class ModuleCompletionContext extends CompletionContext {
 
     private static class FindModuleElementSupport {
 
-        private final AstNode moduleConstructorScope;
-        private final AstNode parentScope;
-        private final AstNode lookupScope;
+        private final jdk.nashorn.internal.ir.Node moduleConstructorScope;
+        private final jdk.nashorn.internal.ir.Node parentScope;
+        private final jdk.nashorn.internal.ir.Node lookupScope;
 
         private final String fieldName;
         private final ModuleCompletionContext parentContext;
         private CompletionContext ctx;
 
-        public FindModuleElementSupport(AstNode aModuleConstructor, AstNode aParentNode, AstNode aLookupScope, String aFieldName, ModuleCompletionContext aParentContext) {
+        public FindModuleElementSupport(jdk.nashorn.internal.ir.Node aModuleConstructor, jdk.nashorn.internal.ir.Node aParentNode, jdk.nashorn.internal.ir.Node aLookupScope, String aFieldName, ModuleCompletionContext aParentContext) {
             moduleConstructorScope = aModuleConstructor;
             parentScope = aParentNode;
             lookupScope = aLookupScope;
@@ -250,6 +242,8 @@ public class ModuleCompletionContext extends CompletionContext {
         }
 
         public CompletionContext findContext() {
+            assert false : "Refactoring is needed";
+            /*
             lookupScope.visit(new NodeVisitor() {
                 @Override
                 public boolean visit(AstNode an) {
@@ -395,6 +389,7 @@ public class ModuleCompletionContext extends CompletionContext {
                     return true;
                 }
             });
+                    */
             return ctx;
         }
 

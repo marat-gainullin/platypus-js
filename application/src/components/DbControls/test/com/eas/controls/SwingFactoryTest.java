@@ -37,7 +37,7 @@ public class SwingFactoryTest {
     }
 
     private JFrame displayAsFrame(FormDesignInfo form) {
-        SwingFactory factory = new SwingFactory(null);
+        SwingFactory factory = new SwingFactory();
         form.accept(factory);
         JPanel rootContainer = factory.getResult();
         JFrame frame = new JFrame();

@@ -1,6 +1,9 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.server;
 
@@ -8,7 +11,7 @@ import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.reports.store.Dom2ReportDocument;
-import com.eas.client.scripts.CompiledScriptDocuments;
+import com.eas.client.scripts.ScriptDocuments;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import org.w3c.dom.Document;
@@ -17,9 +20,9 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class ServerCompiledScriptDocuments extends CompiledScriptDocuments {
+public class ServerScriptDocuments extends ScriptDocuments {
 
-    public ServerCompiledScriptDocuments(Client aClient) {
+    public ServerScriptDocuments(Client aClient) {
         super(aClient);
     }
 

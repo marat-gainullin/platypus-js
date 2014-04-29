@@ -7,7 +7,6 @@ package com.eas.dbcontrols.visitors;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.ControlsUtils;
-import com.eas.controls.FormEventsExecutor;
 import com.eas.controls.visitors.SwingFactory;
 import com.eas.dbcontrols.DbControlDesignInfo;
 import com.eas.dbcontrols.DbControlPanel;
@@ -47,8 +46,8 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
 
     protected ApplicationModel<?, ?, ?, ?> model;
 
-    public DbSwingFactory(FormEventsExecutor aEventsExecutor, ApplicationModel<?, ?, ?, ?> aModel) {
-        super(aEventsExecutor);
+    public DbSwingFactory(ApplicationModel<?, ?, ?, ?> aModel) {
+        super();
         model = aModel;
     }
 

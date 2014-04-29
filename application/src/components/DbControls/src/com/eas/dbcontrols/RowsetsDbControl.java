@@ -5,11 +5,13 @@
 
 package com.eas.dbcontrols;
 
+import com.eas.script.HasPublished;
+
 /**
  * Interace for multiple rowsets data aware control.
  * Multiple rowsets controls views and edits multiple rowsets at the same time. Example is DbMap.
  * @author mg
  */
-public interface RowsetsDbControl extends DbControl{
+public interface RowsetsDbControl extends DbControl, HasPublished{
 
 }

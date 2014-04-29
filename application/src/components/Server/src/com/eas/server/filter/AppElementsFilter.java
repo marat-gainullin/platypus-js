@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.server.filter;
 
 import com.eas.client.AppCache;
@@ -25,115 +21,44 @@ import org.w3c.dom.*;
  */
 public class AppElementsFilter {
 
-    public class Filtered {
+    public class FilteredXml {
 
-        public Set<String> rolesAllowed;// Only module roles are expected to be in filtered application elements
+        public Set<String> rolesAllowed;// Only module roles are expected to be in filteredXml application elements
         public String content;
-        public String script;
 
-        public Filtered(String aContent, String aScript, Set<String> aRolesAllowed) {
+        public FilteredXml(String aContent, Set<String> aRolesAllowed) {
             super();
             content = aContent;
-            script = aScript;
             rolesAllowed = aRolesAllowed;
         }
     }
     public static final String SECURITY_VIOLATION_TEMPLATE = "function %s(){ throw 'Access to %s for %s denied! Contact your system administrator please.' }";
-    /*
-     protected static String[] topLevelModulePropertiesAndMethods = new String[]{
-     "model", "principal", "applicationElementId"
-     };
-     protected static String[] topLevelFormPropertiesAndMethods = new String[]{
-     "view", "formKey", "defaultCloseOperation",
-     "icon", "title",
-     "resizable", "minimized", "maximized", "minimizable", "maximizable",
-     "minimize", "maximize", "restore", "toFront",
-     "undecorated", "opacity", "alwaysOnTop",
-     "locationByPlatform", "left", "top", "width", "height",
-     "onWindowOpened", "onWindowClosing", "onWindowClosed", "onWindowMinimized",
-     "onWindowRestored", "onWindowMaximized", "onWindowActivated", "onWindowDeactivated",
-     "show", "showModal", "showOnPanel", "showInternalFrame", "close"
-     };
-     */
-    public static final String BROWSER_SELF_TEMPLATE = ""
-            + "try{"
-            + "Object.defineProperty(this, \"applicationElementId\", {"
-            + "    get:function() {"
-            + "        return '%s';"
-            + "    }"
-            + "});"
-            + "var ___appElement = window.platypus.getCached(this.applicationElementId);";
-    public static final String BROWSER_MODEL_READ_TEMPLATE = "window.platypus.readModel(___appElement, this);";
-    public static final String BROWSER_FORM_READ_TEMPLATE = "window.platypus.readForm(___appElement, this);";
-    //public static final String BROWSER_REPORT_READ_TEMPLATE = "window.platypus.readReport(___appElement, this);";
-    public static final String BROWSER_SOURCE_BODY = ""
-            + "%s";
-    public static final String BROWSER_SOURCE_TAIL = ""
-            + "this.model.runtime = true;"
-            + "} catch(e) {"
-            + "    if(window.console && e != null){"
-            + "        window.console.log(e.toString());"
-            + "        if(e.stack)"
-            + "            window.console.log(e.stack);"
-            + "    }"
-            + "}";
-    public static final String BROWSER_GLOBAL_APPENDIX = "\n;"
-            + "(function(){"
-            + "    var appElement = '%s';"
-            + "    if(!window.platypusModulesConstructors)"
-            + "        window.platypusModulesConstructors = {};"
-            + "    var constr = %s;"
-            + "    window.platypusModulesConstructors[appElement] = constr;"
-            + "    var F = function() {"
-            + "    };"
-            + "    F.prototype = %s.prototype;"
-            + "    constr.prototype = new F();"
-            + "    constr.prototype.constructor = constr;"
-            + "    constr.superclass = %s.prototype;"
-            + "})();";
-    /*
-     public static final String BROWSER_MODULE_TEMPLATE = ""
-     + "function %s()"// Module name
-     + "{"
-     + BROWSER_SELF_TEMPLATE
-     + BROWSER_MODEL_READ_TEMPLATE
-     + BROWSER_SOURCE_BODY
-     + BROWSER_SOURCE_TAIL;
-     public static final String BROWSER_FORM_TEMPLATE = ""
-     + "function %s()"// Module name
-     + "{"
-     + BROWSER_SELF_TEMPLATE
-     + BROWSER_MODEL_READ_TEMPLATE
-     + BROWSER_FORM_READ_TEMPLATE
-     + BROWSER_SOURCE_BODY
-     + "this.handled = true;"
-     + BROWSER_SOURCE_TAIL;
-     */
+
     public static final String DEPENDENCY_TAG_NAME = "dependency";
     public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
     public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
     protected PlatypusServerCore serverCore;
-    protected final Map<String, ActualCacheEntry<Filtered>> filtered = new HashMap<>();
+    protected final Map<String, ActualCacheEntry<FilteredXml>> filteredXml = new HashMap<>();
 
     public AppElementsFilter(PlatypusServerCore aServerCore) {
         serverCore = aServerCore;
     }
 
-    public synchronized void remove(String aAppElement) {
-        filtered.remove(aAppElement);
+    public synchronized void removeXml(String aAppElement) {
+        filteredXml.remove(aAppElement);
     }
 
-    public synchronized void clear() {
-        filtered.clear();
+    public synchronized void clearXml() {
+        filteredXml.clear();
     }
 
-    public synchronized Filtered get(String aAppElementId) throws Exception {
+    public synchronized FilteredXml get(String aAppElementId) throws Exception {
         AppCache cache = serverCore.getDatabasesClient().getAppCache();
-        ActualCacheEntry<Filtered> filteredEntry = filtered.get(aAppElementId);
-        Filtered filteredAppElement = filteredEntry != null ? filteredEntry.getValue() : null;
+        ActualCacheEntry<FilteredXml> filteredEntry = filteredXml.get(aAppElementId);
+        FilteredXml filteredAppElement = filteredEntry != null ? filteredEntry.getValue() : null;
         if (filteredEntry != null && filteredAppElement != null && !cache.isActual(aAppElementId, filteredEntry.getTxtContentSize(), filteredEntry.getTxtContentCrc32())) {
             filteredAppElement = null;
-            filtered.remove(aAppElementId);
+            filteredXml.remove(aAppElementId);
             cache.remove(aAppElementId);
         }
         if (filteredAppElement == null) {
@@ -141,7 +66,7 @@ public class AppElementsFilter {
             if (appElement != null) {
                 filteredAppElement = filter(appElement);
                 if (filteredAppElement != null) {
-                    filtered.put(aAppElementId, new ActualCacheEntry<>(filteredAppElement, appElement.getTxtContentLength(), appElement.getTxtCrc32()));
+                    filteredXml.put(aAppElementId, new ActualCacheEntry<>(filteredAppElement, appElement.getTxtContentLength(), appElement.getTxtCrc32()));
                 }
             }
         }
@@ -158,17 +83,16 @@ public class AppElementsFilter {
 
     /**
      * Performs some mutations of a xml content dom. Adds dependencies. Stripes
-     * put <source/>tag and so on.
+     * put &lt;source&gt; tag and so on.
      *
-     * @param aAppElement Appelement, whoose content dom to mutated.
+     * @param anAppElement Appelement, whoose content dom to mutated.
      * @return
      * @throws Exception
      */
-    protected Filtered filter(ApplicationElement aAppElement) throws Exception {
-        if (aAppElement != null && (aAppElement.getType() == ClientConstants.ET_FORM || aAppElement.getType() == ClientConstants.ET_COMPONENT || aAppElement.getType() == ClientConstants.ET_REPORT)) {
-            aAppElement = aAppElement.copy();// because of mutations of xml content dom, made by this code.
-            String probableScript = null;
-            Document doc = aAppElement.getContent();
+    protected FilteredXml filter(ApplicationElement anAppElement) throws Exception {
+        if (anAppElement != null && (anAppElement.getType() == ClientConstants.ET_FORM || anAppElement.getType() == ClientConstants.ET_COMPONENT || anAppElement.getType() == ClientConstants.ET_REPORT)) {
+            anAppElement = anAppElement.copy();// Because of mutations of xml, made by this code.
+            Document doc = anAppElement.getContent();
             if (doc != null) {
                 ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);
                 scriptDoc.readScriptAnnotations();
@@ -183,59 +107,17 @@ public class AppElementsFilter {
                     Node docNode = docNodes.item(i);
                     switch (docNode.getNodeName()) {
                         case ApplicationElement.SCRIPT_SOURCE_TAG_NAME:
-                            String appSource = docNode.getTextContent();
-                            DependenciesWalker dependecies = new DependenciesWalker(appSource, serverCore.getDatabasesClient().getAppCache());
-                            dependecies.walk();
-                            ScriptDocument sideEffectsAdder = new ScriptDocument(aAppElement.getId(), null, appSource);
-                            sideEffectsAdder.readScriptAnnotations();
-                            switch (aAppElement.getType()) {
-                                case ClientConstants.ET_COMPONENT: {
-                                    probableScript = sideEffectsAdder.filterSource(
-                                            String.format(BROWSER_SELF_TEMPLATE, aAppElement.getId())
-                                            + BROWSER_MODEL_READ_TEMPLATE,
-                                            BROWSER_SOURCE_TAIL) + String.format(BROWSER_GLOBAL_APPENDIX, aAppElement.getId(), aAppElement.getId(), "Module", "Module");
-                                    /*
-                                     for (String topLevelVarMethod : topLevelModulePropertiesAndMethods) {
-                                     transformer.addExternalVariable(topLevelVarMethod);
-                                     }
-                                     
-                                     String constructorName = checkModuleName("Module", moduleId);
-                                     probableScript = String.format(BROWSER_MODULE_TEMPLATE,
-                                     constructorName, moduleId, source+"\n ; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Module", "Module");
-                                     * */
-                                }
-                                break;
-                                case ClientConstants.ET_FORM: {
-                                    probableScript = sideEffectsAdder.filterSource(
-                                            String.format(BROWSER_SELF_TEMPLATE, aAppElement.getId())
-                                            + BROWSER_MODEL_READ_TEMPLATE
-                                            + BROWSER_FORM_READ_TEMPLATE,
-                                            "this.handled = true;"
-                                            + BROWSER_SOURCE_TAIL) + String.format(BROWSER_GLOBAL_APPENDIX, aAppElement.getId(), aAppElement.getId(), "Form", "Form");
-                                    /*
-                                     for (String topLevelVarMethod : topLevelModulePropertiesAndMethods) {
-                                     transformer.addExternalVariable(topLevelVarMethod);
-                                     }
-                                     for (String topLevelVarMethod : topLevelFormPropertiesAndMethods) {
-                                     transformer.addExternalVariable(topLevelVarMethod);
-                                     }
-                                     addAsExternals(doc.getElementsByTagName("widget"), transformer);
-                                     addAsExternals(doc.getElementsByTagName("nonvisual"), transformer);
-                                     
-                                     String constructorName = checkModuleName("Form", moduleId);
-                                     probableScript = String.format(BROWSER_FORM_TEMPLATE,
-                                     constructorName, moduleId, source+"\n ; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Form", "Form");
-                                     * */
-                                }
-                                break;
-                                default:
-                                    throw new Exception("Application element of unexpected type occured. Only Modules and Forms are allowed be requested by browser.");
+                            if (anAppElement.getType() != ClientConstants.ET_COMPONENT && anAppElement.getType() != ClientConstants.ET_FORM) {
+                                throw new Exception("Application element of unexpected type occured. Only Modules and Forms are allowed be requested by browser.");
                             }
+                            String appSource = docNode.getTextContent();
+                            DependenciesWalker depsWalker = new DependenciesWalker(appSource, serverCore.getDatabasesClient().getAppCache());
+                            depsWalker.walk();
                             docNode.getParentNode().removeChild(docNode);
 
-                            dependencies = dependecies.getDependencies();
-                            queryDependencies = dependecies.getQueryDependencies();
-                            serverDependencies = dependecies.getServerDependencies();
+                            dependencies = depsWalker.getDependencies();
+                            queryDependencies = depsWalker.getQueryDependencies();
+                            serverDependencies = depsWalker.getServerDependencies();
                             break;
                         case Model2XmlDom.DATAMODEL_TAG_NAME:
                             NodeList entitiesNodes = docNode.getChildNodes();
@@ -259,7 +141,7 @@ public class AppElementsFilter {
                         case "layout": {
                             String title = ((Element) docNode).getAttribute("title");
                             if (title == null || title.isEmpty()) {
-                                ((Element) docNode).setAttribute("title", aAppElement.getName());
+                                ((Element) docNode).setAttribute("title", anAppElement.getName());
                             }
                         }
                         break;
@@ -286,7 +168,7 @@ public class AppElementsFilter {
                         rootNode.appendChild(depencyNode);
                     }
                 }
-                return new Filtered(XmlDom2String.transform(doc), probableScript, checkResourceKindAndRoles(aAppElement, scriptDoc));
+                return new FilteredXml(XmlDom2String.transform(doc), checkResourceKindAndRoles(anAppElement, scriptDoc));
             } else {
                 return null;
             }
@@ -318,21 +200,4 @@ public class AppElementsFilter {
         scriptDoc.readScriptAnnotations();
         return scriptDoc.getModuleAllowedRoles();
     }
-
-    /*
-     private void addAsExternals(NodeList widgets, ScriptTransformer transformer) throws DOMException {
-     if (widgets != null) {
-     for (int w = 0; w < widgets.getLength(); w++) {
-     Node widget = widgets.item(w);
-     if (widget instanceof Element) {
-     assert widget.getAttributes() != null;
-     Node name = widget.getAttributes().getNamedItem("name");
-     if (name != null) {
-     transformer.addExternalVariable(name.getNodeValue());
-     }
-     }
-     }
-     }
-     }
-     */
 }

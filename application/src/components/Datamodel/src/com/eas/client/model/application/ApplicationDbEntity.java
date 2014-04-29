@@ -37,6 +37,16 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
+    public void enqueueUpdate() throws Exception {
+        getQuery().compile().enqueueUpdate();
+    }
+
+    @Override
+    public int executeUpdate() throws Exception {
+        return model.getClient().executeUpdate(getQuery().compile());
+    }
+
+    @Override
     protected List<Change> getChangeLog() throws Exception {
         validateQuery();
         String dbId = tableName != null ? tableDbId : query != null ? query.getDbId() : null;
@@ -47,7 +57,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     protected void refreshRowset() throws Exception {
         if (query != null) {
             SqlCompiledQuery compiled = query.compile();
-            compiled.setSessionId(model.getSessionId());
             Parameters rowsetParams = compiled.getParameters();
             if (rowsetParams != null) {
                 rowset.refresh(rowsetParams);
@@ -93,7 +102,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         }
         if (query != null) {
             SqlCompiledQuery compiled = query.compile();
-            compiled.setSessionId(model.getSessionId());
             rowset = compiled.prepareRowset();
             if (tableName != null && !tableName.isEmpty()) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
                 DbMetadataCache mdCache = model.getClient().getDbMetadataCache(query.getDbId());

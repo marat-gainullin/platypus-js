@@ -18,7 +18,7 @@ import com.eas.gui.Cursor;
 import com.eas.gui.CursorFactory;
 import com.eas.gui.Font;
 import com.eas.script.EventMethod;
-import com.eas.script.NativeJavaHostObject;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import java.awt.Color;
@@ -29,22 +29,23 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  * @param <D> a Swing component delegate type
  */
-public abstract class Component<D extends JComponent> {
+public abstract class Component<D extends JComponent> implements HasPublished {
 
+    public static final String WRAPPER_PROP_NAME = "p-script-api-wrapper";
     protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
 
     protected Font font;
     protected Cursor cursor;
     protected String errorMessage;
     protected D delegate;
-    protected NativeJavaHostObject jsWrapper;
+    protected Object published;
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
@@ -255,13 +256,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseClicked() {
+    public JSObject getOnMouseClicked() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseClicked) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseClicked(Function aValue) {
+    public void setOnMouseClicked(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseClicked, aValue);
@@ -275,13 +276,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseDragged() {
+    public JSObject getOnMouseDragged() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseDragged) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseDragged(Function aValue) {
+    public void setOnMouseDragged(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseDragged, aValue);
@@ -295,13 +296,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseEntered() {
+    public JSObject getOnMouseEntered() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseEntered) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseEntered(Function aValue) {
+    public void setOnMouseEntered(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseEntered, aValue);
@@ -315,13 +316,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseExited() {
+    public JSObject getOnMouseExited() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseExited) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseExited(Function aValue) {
+    public void setOnMouseExited(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseExited, aValue);
@@ -335,13 +336,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseMoved() {
+    public JSObject getOnMouseMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseMoved) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseMoved(Function aValue) {
+    public void setOnMouseMoved(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseMoved, aValue);
@@ -355,13 +356,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMousePressed() {
+    public JSObject getOnMousePressed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mousePressed) : null;
     }
 
     @ScriptFunction
-    public void setOnMousePressed(Function aValue) {
+    public void setOnMousePressed(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mousePressed, aValue);
@@ -375,13 +376,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseReleased() {
+    public JSObject getOnMouseReleased() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseReleased) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseReleased(Function aValue) {
+    public void setOnMouseReleased(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseReleased, aValue);
@@ -395,13 +396,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
-    public Function getOnMouseWheelMoved() {
+    public JSObject getOnMouseWheelMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.mouseWheelMoved) : null;
     }
 
     @ScriptFunction
-    public void setOnMouseWheelMoved(Function aValue) {
+    public void setOnMouseWheelMoved(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, aValue);
@@ -415,13 +416,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
     @EventMethod(eventClass = ActionEvent.class)
-    public Function getOnActionPerformed() {
+    public JSObject getOnActionPerformed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.actionPerformed) : null;
     }
 
     @ScriptFunction
-    public void setOnActionPerformed(Function aValue) {
+    public void setOnActionPerformed(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.actionPerformed, aValue);
@@ -435,13 +436,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
-    public Function getOnComponentHidden() {
+    public JSObject getOnComponentHidden() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentHidden) : null;
     }
 
     @ScriptFunction
-    public void setOnComponentHidden(Function aValue) {
+    public void setOnComponentHidden(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentHidden, aValue);
@@ -455,13 +456,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
-    public Function getOnComponentMoved() {
+    public JSObject getOnComponentMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentMoved) : null;
     }
 
     @ScriptFunction
-    public void setOnComponentMoved(Function aValue) {
+    public void setOnComponentMoved(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentMoved, aValue);
@@ -475,13 +476,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
-    public Function getOnComponentResized() {
+    public JSObject getOnComponentResized() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentResized) : null;
     }
 
     @ScriptFunction
-    public void setOnComponentResized(Function aValue) {
+    public void setOnComponentResized(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentResized, aValue);
@@ -495,13 +496,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
-    public Function getOnComponentShown() {
+    public JSObject getOnComponentShown() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentShown) : null;
     }
 
     @ScriptFunction
-    public void setOnComponentShown(Function aValue) {
+    public void setOnComponentShown(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentShown, aValue);
@@ -515,13 +516,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
-    public Function getOnFocusGained() {
+    public JSObject getOnFocusGained() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.focusGained) : null;
     }
 
     @ScriptFunction
-    public void setOnFocusGained(Function aValue) {
+    public void setOnFocusGained(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.focusGained, aValue);
@@ -535,13 +536,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
-    public Function getOnFocusLost() {
+    public JSObject getOnFocusLost() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.focusLost) : null;
     }
 
     @ScriptFunction
-    public void setOnFocusLost(Function aValue) {
+    public void setOnFocusLost(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.focusLost, aValue);
@@ -555,13 +556,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
-    public Function getOnKeyPressed() {
+    public JSObject getOnKeyPressed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.keyPressed) : null;
     }
 
     @ScriptFunction
-    public void setOnKeyPressed(Function aValue) {
+    public void setOnKeyPressed(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.keyPressed, aValue);
@@ -575,13 +576,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
-    public Function getOnKeyReleased() {
+    public JSObject getOnKeyReleased() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.keyReleased) : null;
     }
 
     @ScriptFunction
-    public void setOnKeyReleased(Function aValue) {
+    public void setOnKeyReleased(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.keyReleased, aValue);
@@ -595,13 +596,13 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
-    public Function getOnKeyTyped() {
+    public JSObject getOnKeyTyped() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.keyTyped) : null;
     }
 
     @ScriptFunction
-    public void setOnKeyTyped(Function aValue) {
+    public void setOnKeyTyped(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
@@ -724,16 +725,18 @@ public abstract class Component<D extends JComponent> {
     protected void setDelegate(D aDelegate) {
         delegate = aDelegate;
         if (delegate != null) {
-            delegate.putClientProperty(ScriptUtils.WRAPPER_PROP_NAME, this);
+            delegate.putClientProperty(WRAPPER_PROP_NAME, this);
         }
     }
 
-    protected NativeJavaHostObject getJsWrapper() {
-        return jsWrapper;
+    @Override
+    public Object getPublished() {
+        return published;
     }
 
-    protected void setJsWrapper(NativeJavaHostObject aValue) {
-        jsWrapper = aValue;
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 
     // Native API
@@ -759,17 +762,17 @@ public abstract class Component<D extends JComponent> {
 
     protected static Component<?> lookupApiComponent(JComponent aComp) {
         JComponent comp = aComp;
-        while (comp.getParent() != null && comp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME) == null) {
+        while (comp.getParent() != null && comp.getClientProperty(WRAPPER_PROP_NAME) == null) {
             comp = (JComponent) comp.getParent();
         }
-        return (Component<?>) comp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME);
+        return (Component<?>) comp.getClientProperty(WRAPPER_PROP_NAME);
     }
 
     protected static Container<?> getContainerWrapper(java.awt.Component aComponent) {
         JComponent aComp = aComponent instanceof JComponent ? (JComponent) aComponent : null;
-        if (aComp != null && (aComp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME) == null
-                || aComp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME) instanceof Container)) {
-            return (Container<?>) aComp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME);
+        if (aComp != null && (aComp.getClientProperty(WRAPPER_PROP_NAME) == null
+                || aComp.getClientProperty(WRAPPER_PROP_NAME) instanceof Container)) {
+            return (Container<?>) aComp.getClientProperty(WRAPPER_PROP_NAME);
         } else {
             return null;
         }
@@ -777,9 +780,9 @@ public abstract class Component<D extends JComponent> {
 
     protected static Component<?> getComponentWrapper(java.awt.Component aComponent) {
         JComponent aComp = aComponent instanceof JComponent ? (JComponent) aComponent : null;
-        if (aComp != null && (aComp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME) == null
-                || aComp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME) instanceof Component)) {
-            return (Component<?>) aComp.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME);
+        if (aComp != null && (aComp.getClientProperty(WRAPPER_PROP_NAME) == null
+                || aComp.getClientProperty(WRAPPER_PROP_NAME) instanceof Component)) {
+            return (Component<?>) aComp.getClientProperty(WRAPPER_PROP_NAME);
         } else {
             return null;
         }

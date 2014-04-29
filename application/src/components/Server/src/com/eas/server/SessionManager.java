@@ -103,11 +103,7 @@ public class SessionManager {
     public synchronized Session remove(String sessionId) {
         Session removed = sessions.remove(sessionId);
         if (removed != null) {
-            try {
-                removed.cleanup();
-            } catch (IOException ex) {
-                Logger.getLogger(SessionManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            removed.cleanup();
         }
         return removed;
     }

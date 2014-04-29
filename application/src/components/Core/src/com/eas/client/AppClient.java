@@ -73,7 +73,9 @@ public interface AppClient extends Client, PrincipalHost {
      * information about query.
      *
      * @param aEntityId - Entity application element identifier.
+     * @param aExpectedFields
      * @return New data flow provider instance.
+     * @throws java.lang.Exception
      */
     public FlowProvider createFlowProvider(String aEntityId, Fields aExpectedFields) throws Exception;
 
@@ -127,7 +129,6 @@ public interface AppClient extends Client, PrincipalHost {
      *
      * @param entityId Идентификатор сущности в базе данных приложения.
      * @param params Параметры передаваемые в запрос для исполнения.
-     * @return Возвращает число обработанных кортежей.
      * @throws Exception
      */
     public void enqueueUpdate(String entityId, Parameters params) throws Exception;

@@ -5,17 +5,13 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.designer.application.module.parser.AstUtlities;
-import com.eas.script.JsParser;
+import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.text.BadLocationException;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.ElementGet;
-import org.mozilla.javascript.ast.KeywordLiteral;
-import org.mozilla.javascript.ast.Name;
-import org.mozilla.javascript.ast.NodeVisitor;
-import org.mozilla.javascript.ast.PropertyGet;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.Node;
+import jdk.nashorn.internal.runtime.Source;
 import org.netbeans.modules.editor.NbEditorDocument;
 
 /**
@@ -29,7 +25,7 @@ public class CompletionPoint {
     private List<CompletionToken> completionTokens;
     private int caretBeginWordOffset;
     private int caretEndWordOffset;
-    private AstRoot astRoot;
+    private FunctionNode astRoot;
 
     public String getFilter() {
         return filter;
@@ -47,13 +43,14 @@ public class CompletionPoint {
         return caretEndWordOffset;
     }
 
-    public AstRoot getAstRoot() {
+    public FunctionNode getAstRoot() {
         return astRoot;
     }
 
     public static CompletionPoint createInstance(NbEditorDocument doc, int caretOffset) throws Exception {
         final CompletionPoint cp = new CompletionPoint();
         if (caretOffset > 0) {
+            FunctionNode fn;
             char caretPositionChar = doc.getChars(caretOffset, 1)[0];
             char preCaretPositionChar = doc.getChars(caretOffset - 1, 1)[0];
             boolean inBetweenSentence = false;
@@ -61,9 +58,9 @@ public class CompletionPoint {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
                 String docStr = doc.getText(0, doc.getLength());
-                cp.astRoot = JsParser.parse(afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr);
-                AstNode offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
-                final AstNode subRoot = getCompletionSubtree(offsetNode);
+                cp.astRoot = ScriptUtils.parseJs(new Source("", afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr));
+                Node offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
+                final Node subRoot = getCompletionSubtree(offsetNode);
                 if (subRoot != null) {
                     List<CompletionToken> ctxTokens = getContextTokens(subRoot);
                     List<CompletionToken> offsetTokens = afterDotCaretPosintion ? ctxTokens : getOffsetTokens(ctxTokens, offsetNode);
@@ -80,8 +77,10 @@ public class CompletionPoint {
         return cp;
     }
 
-    public static List<CompletionToken> getContextTokens(final AstNode subRoot) {
+    public static List<CompletionToken> getContextTokens(final Node subRoot) {
         final List<CompletionToken> ctx = new ArrayList<>();
+        assert false : "Refactoriung is needed";
+        /*
         subRoot.visit(new NodeVisitor() {
             @Override
             public boolean visit(AstNode an) {
@@ -118,10 +117,11 @@ public class CompletionPoint {
                 return an instanceof PropertyGet || an instanceof ElementGet;
             }
         });
+                */
         return ctx;
     }
 
-    private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, AstNode offsetNode) {
+    private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, Node offsetNode) {
          final List<CompletionToken> tokens = new ArrayList<>();
         for (CompletionToken token : contextTokens) {
             if (token.node != offsetNode) {
@@ -140,7 +140,10 @@ public class CompletionPoint {
         return sb.toString();
     }
 
-    private static AstNode getCompletionSubtree(AstNode node) {
+    private static Node getCompletionSubtree(Node node) {
+        assert false : "Refactoriung is needed";
+        return null;
+        /*
         if (node instanceof Name
                 || node instanceof KeywordLiteral
                 || node instanceof ElementGet
@@ -153,6 +156,7 @@ public class CompletionPoint {
         } else {
             return null;
         }
+                */
     }
 
     private static int getStartWordOffset(NbEditorDocument aDoc, int caretOffset) throws Exception {
@@ -182,9 +186,9 @@ public class CompletionPoint {
 
         public final String name;
         public final CompletionTokenType type;
-        public final AstNode node;
+        public final Node node;
 
-        public CompletionToken(String aName, CompletionTokenType aType, AstNode aNode) {
+        public CompletionToken(String aName, CompletionTokenType aType, Node aNode) {
             name = aName;
             type = aType;
             node = aNode;

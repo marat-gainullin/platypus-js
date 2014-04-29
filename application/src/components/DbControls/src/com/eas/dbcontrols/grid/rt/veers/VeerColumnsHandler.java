@@ -14,12 +14,9 @@ import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.rt.DummyCellEditor;
 import com.eas.dbcontrols.grid.rt.columns.model.RowModelColumn;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
-import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableColumn;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -41,7 +38,7 @@ public class VeerColumnsHandler implements TableColumnHandler {
         try {
             DbControlDesignInfo controldi = designColumn.getCellDesignInfo().getCellControlInfo();
             assert controldi != null;
-            DbSwingFactory rendererFactory = new DbSwingFactory(null, null);
+            DbSwingFactory rendererFactory = new DbSwingFactory();
             controldi.accept(rendererFactory);
             assert rendererFactory.getComp() instanceof ScalarDbControl;
             ScalarDbControl rendererControl = (ScalarDbControl) rendererFactory.getComp();
@@ -54,7 +51,7 @@ public class VeerColumnsHandler implements TableColumnHandler {
                 rCol.setView(rendererControl);
             }
             if (designColumn.isEditable()) {
-                DbSwingFactory editorFactory = new DbSwingFactory(null, null);
+                DbSwingFactory editorFactory = new DbSwingFactory();
                 controldi.accept(editorFactory);
                 assert editorFactory.getComp() instanceof ScalarDbControl;
                 ScalarDbControl editorControl = (ScalarDbControl) editorFactory.getComp();

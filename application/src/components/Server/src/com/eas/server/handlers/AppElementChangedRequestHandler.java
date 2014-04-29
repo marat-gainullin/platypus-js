@@ -35,7 +35,7 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
         // Выгрузим все загруженные серверные модули
         unregisterAllModules();
         // Очистим кэш компиляции скриптовых модулей
-        getServerCore().getDocuments().clearCompiledScriptDocuments();
+        getServerCore().getDocuments().clear();
         // Очистим все закэшированные элементы приложения
         // Очистим информацию об элементах приложения и метаданных базы данных
         // Очистим так же все скомпилированные запросы
@@ -58,7 +58,7 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
             sEntry.getValue().unregisterModule(getRequest().getEntityId());
         }
         // Кэш компиляции скриптовых модулей
-        getServerCore().getDocuments().removeCompiledScriptDocument(getRequest().getEntityId());
+        getServerCore().getDocuments().removeScriptDocument(getRequest().getEntityId());
         // Элементы приложения, которые закэшировались из-за серверных модулей
         getServerCore().getDatabasesClient().appEntityChanged(getRequest().getEntityId());
         // Поднимем фоновые серверные модули заново

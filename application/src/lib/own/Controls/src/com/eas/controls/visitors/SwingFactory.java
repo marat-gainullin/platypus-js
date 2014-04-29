@@ -10,7 +10,6 @@ import com.eas.controls.ControlsDesignInfoVisitor;
 import com.eas.controls.ControlsUtils;
 import com.eas.controls.DesignInfo;
 import com.eas.controls.FormDesignInfo;
-import com.eas.controls.FormEventsExecutor;
 import com.eas.controls.HtmlContentEditorKit;
 import com.eas.controls.containers.DesktopDesignInfo;
 import com.eas.controls.containers.LayersDesignInfo;
@@ -102,8 +101,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
 
     protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
 
-    // initialized from client code
-    protected FormEventsExecutor eventsExecutor;
     // generated while working
     protected Map<String, ControlDesignInfo> controlDesignInfos = new HashMap<>();
     protected Map<String, JComponent> components = new HashMap<>();
@@ -114,16 +111,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     protected Component comp;
     // results
     protected JPanel result;
-
-    /**
-     * Constructor for entire form creation
-     *
-     * @param aEventsExecutor
-     */
-    public SwingFactory(FormEventsExecutor aEventsExecutor) {
-        super();
-        eventsExecutor = aEventsExecutor;
-    }
 
     /**
      * Constructor for partial form creation. One by one control by it's design
@@ -674,15 +661,13 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     }
 
     protected ControlEventsIProxy createEventsProxy() {
-        return new ControlEventsIProxy(eventsExecutor);
+        return new ControlEventsIProxy();
     }
 
     protected void processControlEvents(final ControlDesignInfo aInfo) {
         assert comp != null;
-        if (eventsExecutor != null) {
-            final ControlEventsIProxy proxy = createEventsProxy();
-            proxy.setHandlee(comp);
-        }
+        final ControlEventsIProxy proxy = createEventsProxy();
+        proxy.setHandlee(comp);
     }
 
     protected void visitControl(ControlDesignInfo aInfo) {

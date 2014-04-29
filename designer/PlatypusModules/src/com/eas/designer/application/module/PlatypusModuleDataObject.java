@@ -11,16 +11,15 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
-import com.eas.script.JsParser;
 import com.eas.designer.application.project.PlatypusProject;
-import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.datamodel.nodes.ModelNode;
+import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
+import com.eas.script.ScriptUtils;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.beans.PropertyChangeEvent;
@@ -28,9 +27,8 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.swing.text.Document;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.Name;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.runtime.Source;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
@@ -95,7 +93,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
     private transient boolean astIsValid;
-    private transient AstRoot ast;
+    private transient FunctionNode ast;
 
     public PlatypusModuleDataObject(FileObject aJsFile, MultiFileLoader loader) throws Exception {
         super(aJsFile, loader);
@@ -108,19 +106,19 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     @Override
-    public synchronized AstRoot getAst() {
+    public synchronized FunctionNode getAst() {
         validateAst();
         return ast;
     }
 
     @Override
-    public synchronized void setAst(AstRoot anAstRoot) {
+    public synchronized void setAst(FunctionNode anAstRoot) {
         ast = anAstRoot;
         astIsValid = (ast != null);
     }
 
     public ModuleCompletionContext getCompletionContext() {
-        return new ModuleCompletionContext(this, ScriptRunner.class);
+        return new ModuleCompletionContext(this, Object.class);
     }
 
     protected void validateAst() {
@@ -133,7 +131,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             }
             if (doc != null) {
                 try {
-                    AstRoot parseResult = JsParser.parse(doc.getText(0, doc.getLength()));
+                    FunctionNode parseResult = ScriptUtils.parseJs(new Source("", doc.getText(0, doc.getLength())));
                     if (parseResult != null) {
                         astIsValid = true;
                         ast = parseResult;
@@ -284,15 +282,13 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     private String getCopyModuleContent(Project project, String aJsContent) {
-        AstRoot jsRoot = JsParser.parse(aJsContent);
-        FunctionNode func = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
-        if (func != null) {
-            Name consructorName = func.getFunctionName();
-            String oldName = consructorName.getIdentifier();
+        FunctionNode constructorFunc = PlatypusFilesSupport.extractModuleConstructor(aJsContent);
+        if (constructorFunc != null) {
+            String oldName = constructorFunc.getName();
             String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(project, oldName);
-            StringBuilder sb = new StringBuilder(aJsContent.substring(0, consructorName.getAbsolutePosition()));
+            StringBuilder sb = new StringBuilder(aJsContent.substring(0, constructorFunc.getStart()));
             sb.append(newName);
-            sb.append(aJsContent.substring(consructorName.getAbsolutePosition() + oldName.length()));
+            sb.append(aJsContent.substring(constructorFunc.getStart() + oldName.length()));
             return sb.toString();
         } else {
             return aJsContent;

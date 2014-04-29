@@ -24,10 +24,11 @@ import org.w3c.dom.NodeList;
  */
 public class Dom2FormDocument extends Dom2ScriptDocument {
 
-    private static DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    private DocumentBuilder documentBuilder;
+    private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    private final DocumentBuilder documentBuilder;
 
     protected Dom2FormDocument() throws ParserConfigurationException {
+        super();
         documentBuilder = builderFactory.newDocumentBuilder();
     }
 

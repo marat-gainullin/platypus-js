@@ -1,10 +1,10 @@
 package com.eas.server.httpservlet;
 
-import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.Query;
@@ -14,6 +14,8 @@ import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
+import com.eas.client.threetier.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.client.threetier.binary.PlatypusResponseWriter;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
@@ -24,9 +26,6 @@ import com.eas.server.*;
 import com.eas.server.filter.AppElementsFilter;
 import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
-import com.eas.client.threetier.RowsetJsonConstants;
-import com.eas.client.threetier.RowsetJsonWriter;
-import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.net.URLConnection;
@@ -42,10 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.xml.XMLObject;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Platypus HTTP servlet implementation
@@ -75,7 +71,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
-    public static final String CREATE_MODULE_RESPONSE_IS_REPORT_PROP = "isReport";
     public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
     private PlatypusServerCore serverCore;
     private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
@@ -236,20 +231,16 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
     }
 
-    private static String moduleResponseToJson(Set<String> functionsNames, boolean isReport, boolean isPermitted) {
+    private static String moduleResponseToJson(Set<String> functionsNames, boolean isPermitted) {
         return (new StringBuilder())
                 .append("{")
                 .append("\"").append(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP).append("\"")
                 .append(":")
                 .append("[").append(functionsNames.isEmpty() ? "" : "\"").append(StringUtils.join("\", \"", functionsNames.toArray(new String[]{}))).append(functionsNames.isEmpty() ? "" : "\"").append("]")
                 .append(",")
-                .append("\"").append(CREATE_MODULE_RESPONSE_IS_REPORT_PROP).append("\"")
-                .append(":")
-                .append(Boolean.valueOf(isReport).toString())
-                .append(",")
                 .append("\"").append(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP).append("\"")
                 .append(":")
-                .append(Boolean.valueOf(isPermitted).toString())
+                .append(isPermitted)
                 .append("}")
                 .toString();
     }
@@ -435,7 +426,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
                 CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
                 makeResponseNotCacheable(aHttpResponse);
-                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport(), csmr.isPermitted()), aHttpResponse);
+                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isPermitted()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 final Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
                 makeResponseNotCacheable(aHttpResponse);
@@ -443,35 +434,32 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
                 } else if (result instanceof String) {
                     writeResponse((String) result, aHttpResponse, TEXT_CONTENTTYPE);
-                } else if (result instanceof NativeObject) {
+                } else if (result instanceof JSObject) {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
-                } else if (result instanceof XMLObject) {
-                    writeResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
                 } else if (result != null) {
-                    ScriptUtils.inContext(new ScriptAction() {
-                        @Override
-                        public Object run(Context cx) throws Exception {
-                            writeJsonResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
-                            return null;
-                        }
-                    });
+                    writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), aHttpResponse);
                 }
             } else if (aPlatypusResponse instanceof AppQueryResponse) {
                 Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();
                 makeResponseNotCacheable(aHttpResponse);
                 writeResponse(query, aHttpResponse);
             } else if (aPlatypusResponse instanceof FilteredAppElementRequest.FilteredResponse) {
+                FilteredAppElementRequest.FilteredResponse resp = (FilteredAppElementRequest.FilteredResponse) aPlatypusResponse;
                 makeResponseNotCacheable(aHttpResponse);
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
-                    writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredScript(), aHttpResponse);
+                    String docsRoot = aHttpRequest.getServletContext().getRealPath("/");
+                    String scriptPath = resp.getScriptPath();
+                    if(scriptPath.startsWith(docsRoot)){
+                        String newScriptUri = scriptPath.substring(docsRoot.length());
+                        String redirectLocation = aHttpResponse.encodeRedirectURL(newScriptUri);
+                        aHttpResponse.sendRedirect(redirectLocation);
+                    }
                 } else {
-                    writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredContent(), aHttpResponse);
+                    writeJsonResponse(resp.getFilteredContent(), aHttpResponse);
                 }
             } else if (aPlatypusResponse instanceof StartAppElementRequest.Response) {
                 String appElementIdToSend = ((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId();
                 writeJsonResponse(appElementIdToSend != null ? ("\"" + appElementIdToSend + "\"") : "null", aHttpResponse);
-            } else if (aPlatypusResponse instanceof ExecuteServerReportRequest.Response) {
-                writeExcelResponse(((ExecuteServerReportRequest.Response) aPlatypusResponse).getResult(), ((ExecuteServerReportRequest.Response) aPlatypusResponse).getFormat(), aHttpResponse);
             } else if (aPlatypusResponse instanceof AppElementRequest.Response) {
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {
                     AppElementRequest.Response appElementResponse = (AppElementRequest.Response) aPlatypusResponse;
@@ -518,13 +506,13 @@ public class PlatypusHttpServlet extends HttpServlet {
         if (handler instanceof ExecuteServerModuleMethodRequestHandler) {
             ((ExecuteServerModuleMethodRequestHandler) handler).setExecuteEventsCallback(new ExecuteServerModuleMethodRequestHandler.ExecuteEventsCallback() {
                 @Override
-                public void beforeExecute(ServerScriptRunner ssr) {
-                    ssr.defineProperty(HTTP_HOST_OBJECT_NAME, HttpScriptContext.getInstance(ssr, aHttpRequest, aHttpResponse), ScriptableObject.READONLY);
+                public void beforeExecute(JSObject ssr) {
+                    //ssr.defineProperty(HTTP_HOST_OBJECT_NAME, HttpScriptContext.getInstance(ssr, aHttpRequest, aHttpResponse), ScriptableObject.READONLY);
                 }
 
                 @Override
-                public void afterExecute(ServerScriptRunner ssr) {
-                    ssr.delete(HTTP_HOST_OBJECT_NAME);
+                public void afterExecute(JSObject ssr) {
+                    //ssr.delete(HTTP_HOST_OBJECT_NAME);
                 }
             });
         }

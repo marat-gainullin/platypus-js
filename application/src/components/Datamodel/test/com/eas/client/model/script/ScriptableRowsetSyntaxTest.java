@@ -14,7 +14,6 @@ import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.script.ScriptUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.mozilla.javascript.*;
 
 /**
  *
@@ -120,8 +119,8 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
         Double paramValue = new Double(98.597878f);
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel dm = new ApplicationDbModel(client);
-            Parameters params = dm.getParameters();
+            ApplicationDbModel model = new ApplicationDbModel(client);
+            Parameters params = model.getParameters();
             Parameter param = (Parameter) params.createNewField("param1");
             param.setTypeInfo(DataTypeInfo.DOUBLE);
             param.setValue(paramValue);
@@ -133,24 +132,18 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
             param3.setTypeInfo(DataTypeInfo.VARCHAR);
             params.add(param3);
             assertEquals(params.getParametersCount(), 3);
-            final ApplicationDbEntity entity11 = dm.newGenericEntity();
+            final ApplicationDbEntity entity11 = model.newGenericEntity();
             entity11.setQueryId("128015347915605");
-            dm.addEntity(entity11);
+            model.addEntity(entity11);
             entity11.setName(entityName);
 
-            ContextFactory cf = ContextFactory.getGlobal();
-            Context cx = cf.enterContext();
-            try {
-                Scriptable scope = cx.newObject(ScriptUtils.getScope());
-                dm.setRuntime(true);
-                dm.setScriptThis(scope);
-                // let's compile test script
-                Script script = cx.compileString(aSource, "rowsetSyntaxTest", 0, null);
-                script.exec(cx, scope);
-                assertEquals(0.56, param.getValue());
-            } finally {
-                Context.exit();
-            }
+            Scriptable scope = cx.newObject(ScriptUtils.getScope());
+            model.requery();
+            model.setScriptThis(scope);
+            // let's compile test script
+            Script script = cx.compileString(aSource, "rowsetSyntaxTest", 0, null);
+            script.exec(cx, scope);
+            assertEquals(0.56, param.getValue());
         }
     }
 

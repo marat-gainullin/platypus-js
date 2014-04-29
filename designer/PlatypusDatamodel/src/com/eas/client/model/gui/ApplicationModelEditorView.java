@@ -20,7 +20,6 @@ import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.client.model.gui.view.model.ModelView;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.client.utils.scalableui.ScaleListener;
 import com.eas.gui.JDropDownButton;
@@ -175,7 +174,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
     protected void registerUndoListeners() {
         modelView.addUndoableEditListener(undoListener);
     }
-
+/*
     public boolean isNamePresent(Object aHost, String aName) {
         if (aHost == null || aHost instanceof ApplicationDbModel) {
             if (aName.equals(ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME) || aName.equals(ApplicationDbModel.PARAMETERS_SCRIPT_NAME)) {
@@ -264,7 +263,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
         }
         return null;
     }
-
+*/
     public void rerouteConnectors() {
         modelView.rerouteConnectors();
     }

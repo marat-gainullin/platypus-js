@@ -43,7 +43,7 @@ public class PositioningPacketReciever implements PacketReciever {
     public Object received(PositioningPacket aPacket) throws Exception {
         Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
         if (result != null) {
-             result = ScriptUtils.js2Java(result);
+             result = ScriptUtils.toJava(result);
             assert result instanceof String;
             send(aPacket, (String) result);
         }

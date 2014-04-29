@@ -4,16 +4,13 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.script.ScriptEvent;
+import com.eas.client.events.PublishedSourcedEvent;
 
 /**
  *
  * @author mg
  */
-public interface ModelScriptEventsListener<E extends ApplicationEntity<?, ?, E>> {
+public interface ModelScriptEventsListener {
 
-    public void eventEnqueueing(ScriptEvent<E> anEvent);
-
-    public void eventExecuting(ScriptEvent<E> anEvent);
+    public void eventExecuting(PublishedSourcedEvent anEvent);
 }

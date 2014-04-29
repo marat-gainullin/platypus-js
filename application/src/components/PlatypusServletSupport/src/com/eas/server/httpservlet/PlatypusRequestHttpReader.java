@@ -27,7 +27,6 @@ import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
@@ -240,31 +239,6 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     public void visit(AppElementRequest rq) throws Exception {
         assert isResourceUri(rqUri): MUST_BE_RESOURCE_MSG;
         rq.setAppElementId(rqUri.substring(RESOURCES_URI.length() + 1));
-    }
-
-    @Override
-    public void visit(ExecuteServerReportRequest rq) throws Exception {
-        if (isApiUri(rqUri)) {
-            String moduleName = httpRequest.getParameter(PlatypusHttpRequestParams.MODULE_NAME);
-            if (httpRequest.getParameterMap().size() > 1) {
-                List<ExecuteServerReportRequest.NamedArgument> args = new ArrayList<>();
-                for (Entry<String, String[]> ent : httpRequest.getParameterMap().entrySet()) {
-                    if (!ent.getKey().equals(PlatypusHttpRequestParams.MODULE_NAME)) {
-                        Object value = null;
-                        if (ent.getValue().length > 0) {
-                            value = tryParseJson(ent.getValue()[0]);
-                        }
-                        args.add(new ExecuteServerReportRequest.NamedArgument(ent.getKey(), value));
-                    }
-                }
-                rq.setArguments(args.toArray(new ExecuteServerReportRequest.NamedArgument[]{}));
-            }
-            rq.setModuleName(moduleName);
-        } else {
-            // binary
-            PlatypusRequestReader bodyReader = new PlatypusRequestReader(getRequestContent(httpRequest));
-            rq.accept(bodyReader);
-        }
     }
 
     private Parameters decodeQueryParams(String aQueryId, HttpServletRequest aRequest) throws RowsetException, IOException, UnsupportedEncodingException, Exception {

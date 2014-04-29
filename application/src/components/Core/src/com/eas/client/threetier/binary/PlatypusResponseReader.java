@@ -20,7 +20,6 @@ import com.eas.client.threetier.requests.CreateServerModuleResponse;
 import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
@@ -40,7 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mozilla.javascript.Undefined;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
@@ -130,22 +129,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerReportRequest.Response rsp) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (input.containsChild(RequestsTags.TAG_NULL_RESULT)) {
-            rsp.setResult(null);
-        } else if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
-            ProtoNode nd = input.getChild(RequestsTags.TAG_RESULT_VALUE);
-            ByteArrayOutputStream st = new ByteArrayOutputStream();
-            st.write(nd.getData(), nd.getOffset(), nd.getSize());
-            rsp.setResult(st.toByteArray());
-        }
-        if (input.containsChild(RequestsTags.TAG_FORMAT)) {
-            rsp.setFormat(input.getChild(RequestsTags.TAG_FORMAT).getString());
-        }
-    }
-
-    @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         final Iterator<ProtoNode> it = input.iterator();
@@ -160,7 +143,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                     rsp.setResult(null);
                     break;
                 case RequestsTags.TAG_UNDEFINED_RESULT:
-                    rsp.setResult(Undefined.instance);
+                    rsp.setResult(Undefined.getUndefined());
                     break;
                 case RequestsTags.TAG_RESULT_VALUE:
                     assert at != null;

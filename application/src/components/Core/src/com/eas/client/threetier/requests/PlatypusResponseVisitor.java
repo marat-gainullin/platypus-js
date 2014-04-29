@@ -31,8 +31,6 @@ public interface PlatypusResponseVisitor {
 
     public void visit(IsAppElementActualRequest.Response rsp) throws Exception;
 
-    public void visit(ExecuteServerReportRequest.Response rsp) throws Exception;
-
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception;
 
     public void visit(DisposeServerModuleRequest.Response rsp) throws Exception;

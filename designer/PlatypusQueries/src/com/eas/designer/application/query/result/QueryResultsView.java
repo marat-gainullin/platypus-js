@@ -27,8 +27,6 @@ import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
-import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Toolkit;
@@ -53,7 +51,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.NamedParameter;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
-import org.mozilla.javascript.Context;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.DialogDescriptor;
@@ -173,26 +170,20 @@ public class QueryResultsView extends javax.swing.JPanel {
      */
     private boolean initModel() throws Exception {
         model = new ApplicationDbModel(client);
-        return ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Boolean run(Context cntxt) throws Exception {
-                model.setScriptThis(ScriptUtils.getScope());
-                model.setParameters(parameters);
-                setupQueryEntityBySql();
-                setModelRelations();
-                // enable dataworks
-                if (queryEntity.getQuery().isCommand()) {
-                    queryEntity.getQuery().setManual(true);
-                    model.setRuntime(true);
-                    int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
-                    showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
-                    return false;
-                } else {
-                    model.setRuntime(true);
-                    return true;
-                }
-            }
-        });
+        model.setParameters(parameters);
+        setupQueryEntityBySql();
+        setModelRelations();
+        // enable dataworks
+        if (queryEntity.getQuery().isCommand()) {
+            queryEntity.getQuery().setManual(true);
+            model.setRuntime(true);
+            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
+            showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
+            return false;
+        } else {
+            model.setRuntime(true);
+            return true;
+        }
     }
 
     private void setupQueryEntityBySql() throws Exception {

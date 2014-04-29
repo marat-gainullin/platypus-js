@@ -21,19 +21,21 @@ public class FilteredAppElementRequest extends AppElementRequest {
 
     public static class FilteredResponse extends com.eas.client.threetier.Response {
 
-        protected AppElementsFilter.Filtered filtered;
+        protected AppElementsFilter.FilteredXml filtered;
+        protected String scriptPath;
 
-        public FilteredResponse(AppElementsFilter.Filtered aFiltered) throws Exception {
+        public FilteredResponse(AppElementsFilter.FilteredXml aFiltered, String aScriptPath) throws Exception {
             super(-1L);
             filtered = aFiltered;
+            scriptPath = aScriptPath;
+        }
+
+        public String getScriptPath() {
+            return scriptPath;
         }
 
         public String getFilteredContent() {
             return filtered.content;
-        }
-
-        public String getFilteredScript() {
-            return filtered.script;
         }
 
         @Override

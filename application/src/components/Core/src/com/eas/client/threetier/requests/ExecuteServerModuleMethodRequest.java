@@ -11,7 +11,7 @@ import com.eas.script.ScriptUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -36,7 +36,7 @@ public class ExecuteServerModuleMethodRequest extends Request {
         }
         arguments = aArguments;
         for (int i = 0; i < arguments.length; i++) {
-            arguments[i] = ScriptUtils.js2Java(arguments[i]);
+            arguments[i] = ScriptUtils.toJava(arguments[i]);
         }
     }
 
@@ -103,7 +103,7 @@ public class ExecuteServerModuleMethodRequest extends Request {
         }
 
         public static ArgumentType getArgumentType(Object value) {
-            if (value instanceof Scriptable || value instanceof Rowset) {
+            if (value instanceof JSObject || value instanceof Rowset) {
                 return ArgumentType.OBJECT;
             } else {
                 for (ArgumentType at : values()) {
@@ -122,7 +122,7 @@ public class ExecuteServerModuleMethodRequest extends Request {
 
         public Response(long requestID, Object aResult) {
             super(requestID);
-            result = ScriptUtils.js2Java(aResult);
+            result = ScriptUtils.toJava(aResult);
         }
 
         public Object getResult() {

@@ -15,7 +15,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -47,14 +47,14 @@ public class DropDownButton extends Component<JDropDownButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
-    public DropDownButton(String aText, Icon aIcon, int aIconTextGap, Function aActionPerformedHandler) {
+    public DropDownButton(String aText, Icon aIcon, int aIconTextGap, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JDropDownButton(aText, aIcon));
         delegate.setIconTextGap(aIconTextGap);
         setOnActionPerformed(aActionPerformedHandler);
     }
 
-    public DropDownButton(String aText, Icon aIcon, Function aActionPerformedHandler) {
+    public DropDownButton(String aText, Icon aIcon, JSObject aActionPerformedHandler) {
         this(aText, aIcon, 4, aActionPerformedHandler);
     }
     

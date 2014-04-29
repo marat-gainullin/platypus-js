@@ -75,7 +75,7 @@ public class Parameter extends Field {
     /**
      * Copy constructor of parameter using base field information.
      *
-     * @param aSourceParam Source of created parameter.
+     * @param aSourceField Source of created parameter.
      */
     public Parameter(Field aSourceField) {
         super(aSourceField);
@@ -101,6 +101,7 @@ public class Parameter extends Field {
      * @param obj The another object to test the equality.
      * @return If this Parameter is equal to another parameter object.
      */
+    @Override
     public boolean isEqual(Object obj) {
         if (obj == null) {
             return false;
@@ -220,7 +221,7 @@ public class Parameter extends Field {
     /**
      * Sets the default value of the parameter.
      *
-     * @param defaultValue A value to be set as the default value
+     * @param aValue A value to be set as the default value
      */
     @ScriptFunction
     public void setDefaultValue(Object aValue) {
@@ -291,25 +292,25 @@ public class Parameter extends Field {
      *
      * @throws Exception if operation fails.
      */
-    public void setValueByString(String str) throws Exception {
-        if (str != null) {
+    public void setValueByString(String aValue) throws Exception {
+        if (aValue != null) {
             if (getTypeInfo() != null) {
                 if (getTypeInfo().javaClassName.equals(String.class.getName())) {
-                    value = str;
+                    value = aValue;
                 } else if (getTypeInfo().javaClassName.equals(java.math.BigDecimal.class.getName())) {
-                    value = new BigDecimal(str);
+                    value = new BigDecimal(aValue);
                 } else if (getTypeInfo().javaClassName.equals(Float.class.getName())) {
-                    value = Float.valueOf(str);
+                    value = Float.valueOf(aValue);
                 } else if (getTypeInfo().javaClassName.equals(Double.class.getName())) {
-                    value = Double.valueOf(str);
+                    value = Double.valueOf(aValue);
                 } else if (getTypeInfo().javaClassName.equals(Short.class.getName())) {
-                    value = Short.valueOf(str);
+                    value = Short.valueOf(aValue);
                 } else if (getTypeInfo().javaClassName.equals(Integer.class.getName())) {
-                    value = Integer.valueOf(str);
+                    value = Integer.valueOf(aValue);
                 } else if (getTypeInfo().javaClassName.equals(Boolean.class.getName())) {
-                    value = Boolean.valueOf(str);
+                    value = Boolean.valueOf(aValue);
                 } else if (getTypeInfo().javaClassName.equals(java.util.Date.class.getName())) {
-                    value = new java.util.Date(Long.valueOf(str));
+                    value = new java.util.Date(Long.valueOf(aValue));
                 } else {
                     throw new IllegalStateException();
                 }

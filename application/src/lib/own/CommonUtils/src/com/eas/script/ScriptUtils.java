@@ -1,29 +1,28 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.script;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mozilla.javascript.CompilerEnvirons;
-import org.mozilla.javascript.ConsString;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.ErrorReporter;
-import org.mozilla.javascript.EvaluatorException;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.IdScriptableObject;
-import org.mozilla.javascript.ImporterTopLevel;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.Parser;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.Undefined;
-import org.mozilla.javascript.WrapFactory;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.xml.XMLObject;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.api.scripting.URLReader;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.objects.Global;
+import jdk.nashorn.internal.objects.NativeBoolean;
+import jdk.nashorn.internal.objects.NativeDate;
+import jdk.nashorn.internal.objects.NativeNumber;
+import jdk.nashorn.internal.objects.NativeString;
+import jdk.nashorn.internal.parser.Parser;
+import jdk.nashorn.internal.runtime.ErrorManager;
+import jdk.nashorn.internal.runtime.JSType;
+import jdk.nashorn.internal.runtime.ScriptEnvironment;
+import jdk.nashorn.internal.runtime.Source;
+import jdk.nashorn.internal.runtime.Undefined;
+import jdk.nashorn.internal.runtime.options.Options;
 
 /**
  *
@@ -31,29 +30,39 @@ import org.mozilla.javascript.xml.XMLObject;
  */
 public class ScriptUtils {
 
-    public static final String WRAPPER_PROP_NAME = "wrapperComponent";
-    protected static final String toDateFuncSource = ""
-            + "function toJsDate(aJavaDate){ return aJavaDate != null?new Date(aJavaDate.time):null; }"
-            + "";
+    //public static final String WRAPPER_PROP_NAME = "wrapperComponent";
+    /*
+     protected static final String toDateFuncSource = ""
+     + "Java.type(\"com.eas.script.ScriptUtils\").set("
+     + "function toJsDate(aJavaDate){ return aJavaDate != null ? new Date(aJavaDate.time) : null;"
+     + "});";
+     */
     protected static final String parseJsonFuncSource = ""
-            + "function parseJson(str){ return JSON.parse(str); }"
-            + "";
+            + "Java.type(\"com.eas.script.ScriptUtils\").setParseJsonFunc("
+            + "function (str){ return JSON.parse(str);"
+            + "});";
     protected static final String writeJsonFuncSource = ""
-            + "function writeJson(aObj){ return JSON.stringify(aObj); }"
-            + "";
-    protected static final String toXMLStringFuncSource = ""
-            + "function toXMLString(aObj){ return aObj.toXMLString(); }"
-            + "";
+            + "Java.type(\"com.eas.script.ScriptUtils\").setWriteJsonFunc("
+            + "function (aObj){ return JSON.stringify(aObj);"
+            + "});";
+    /*
+     protected static final String toXMLStringFuncSource = ""
+     + "Java.type(\"com.eas.script.ScriptUtils\").setToXMLStringFunc("
+     + "function toXMLString(aObj){ return aObj.toXMLString();"
+     + "});";
+     */
     protected static final String extendFuncSource = ""
-            + "function extend(Child, Parent) {"
+            + "Java.type(\"com.eas.script.ScriptUtils\").setExtendFunc("
+            + "function (Child, Parent) {"
             + "  var F = function() {"
             + "  };"
             + "  F.prototype = Parent.prototype;"
             + "  Child.prototype = new F();"
             + "  Child.prototype.constructor = Child;"
             + "  Child.superclass = Parent.prototype;"
-            + "}";
+            + "});";
     protected static final String scalarDefFuncSource = ""
+            + "Java.type(\"com.eas.script.ScriptUtils\").setScalarDefFunc("
             + "function(targetEntity, targetFieldName, sourceFieldName){"
             + "    var _self = this;"
             + "    _self.enumerable = true;"
@@ -65,9 +74,10 @@ public class ScriptUtils {
             + "    _self.set = function(aValue){"
             + "        this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;"
             + "    };"
-            + "}"
+            + "});"
             + "";
     protected static final String collectionDefFuncSource = ""
+            + "Java.type(\"com.eas.script.ScriptUtils\").setCollectionDefFunc("
             + "function(sourceEntity, targetFieldName, sourceFieldName){"
             + "    var _self = this;"
             + "    _self.enumerable = true;"
@@ -86,100 +96,111 @@ public class ScriptUtils {
             + "            return emptyCollection;"
             + "        }"
             + "    };"
-            + "}"
+            + "});"
             + "";
-    protected static Function toDateFunc;
-    protected static Function parseJsonFunc;
-    protected static Function writeJsonFunc;
-    protected static Function toXMLStringFunc;
-    protected static Function extendFunc;
-    protected static Function scalarDefFunc;
-    protected static Function collectionDefFunc;
-    protected static ScriptableObject topLevelScope;
 
-    static class EnhancedJavaAccessContextFactory extends ContextFactory {
+    //protected static JSObject toDateFunc;
+    protected static JSObject parseJsonFunc;
+    protected static JSObject writeJsonFunc;
+    //protected static JSObject toXMLStringFunc;
+    protected static JSObject extendFunc;
+    protected static JSObject scalarDefFunc;
+    protected static JSObject collectionDefFunc;
+    protected static ScriptEngine engine;
 
-        @Override
-        public boolean hasFeature(Context cx, int featureIndex) {
-            return featureIndex == Context.FEATURE_ENHANCED_JAVA_ACCESS ? true : super.hasFeature(cx, featureIndex);
-        }
-
-        @Override
-        protected Context makeContext() {
-            Context cx = super.makeContext();
-            if (wrapFactory != null) {
-                cx.setWrapFactory(wrapFactory);
-            }
-            cx.getWrapFactory().setJavaPrimitiveWrap(false);
-            return cx;
-        }
-    }
-
-    static {
-        ContextFactory.initGlobal(new EnhancedJavaAccessContextFactory());
-    }
-
-    private static void init() {
-        if (topLevelScope == null) {
+    public static void init() {
+        if (engine == null) {
+            engine = new ScriptEngineManager().getEngineByName("nashorn");
             try {
-                inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        topLevelScope = new ImporterTopLevel(cx);
-                        toDateFunc = cx.compileFunction(topLevelScope, toDateFuncSource, "toDateFunc", 0, null);
-                        parseJsonFunc = cx.compileFunction(topLevelScope, parseJsonFuncSource, "parseJsonFunc", 0, null);
-                        writeJsonFunc = cx.compileFunction(topLevelScope, writeJsonFuncSource, "writeJsonFunc", 0, null);
-                        toXMLStringFunc = cx.compileFunction(topLevelScope, toXMLStringFuncSource, "toXMLStringFunc", 0, null);
-                        extendFunc = cx.compileFunction(topLevelScope, extendFuncSource, "extendFunc", 0, null);
-                        scalarDefFunc = cx.compileFunction(topLevelScope, scalarDefFuncSource, "scalarDefFunc", 0, null);
-                        collectionDefFunc = cx.compileFunction(topLevelScope, collectionDefFuncSource, "collectionDefFunc", 0, null);
-                        return topLevelScope;
-                    }
-                });
+                //engine.eval(toDateFuncSource);
+                //assert toDateFunc != null;
+                engine.eval(parseJsonFuncSource);
+                assert parseJsonFunc != null;
+                engine.eval(writeJsonFuncSource);
+                assert writeJsonFunc != null;
+                //engine.eval(toXMLStringFuncSource);
+                //assert toXMLStringFunc != null;
+                engine.eval(extendFuncSource);
+                assert extendFunc != null;
+                engine.eval(scalarDefFuncSource);
+                assert scalarDefFunc != null;
+                engine.eval(collectionDefFuncSource);
+                assert collectionDefFunc != null;
+                engine.eval("load(\"classpath:platypus.js\")");
             } catch (Exception ex) {
                 Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
-    protected static WrapFactory wrapFactory;
 
-    public static WrapFactory getWrapFactory() {
-        return wrapFactory;
-    }
-
-    public static void setWrapFactory(WrapFactory aValue) {
-        wrapFactory = aValue;
-    }
-
-    /**
-     * Returns a global singleton js top-level scope. This scope is created once
-     * per program.
-     *
-     * @return An instance of ScriptableObject
-     */
-    public static ScriptableObject getScope() {
-        init();
-        return topLevelScope;
-    }
-
-    public static Object js2Java(Object aValue) throws EvaluatorException {
-        if (aValue instanceof IdScriptableObject) {
-            IdScriptableObject scrO = (IdScriptableObject) aValue;
-            String lClassName = scrO.getClassName();
-            if (lClassName != null && !lClassName.isEmpty()) {
-                if (lClassName.equals(java.lang.Boolean.class.getSimpleName())) {
-                    aValue = scrO.getDefaultValue(null);
-                } else if (lClassName.equals(java.lang.Number.class.getSimpleName())) {
-                    aValue = scrO.getDefaultValue(null);
-                } else if (lClassName.equals(java.lang.String.class.getSimpleName())) {
-                    aValue = Context.jsToJava(aValue, java.lang.String.class);
-                } else if (lClassName.equals(java.util.Date.class.getSimpleName())) {
-                    aValue = Context.jsToJava(aValue, java.util.Date.class);
-                    aValue = new java.sql.Date(((java.util.Date) aValue).getTime());
-                }
+    public static boolean isValidJsIdentifier(final String aName) {
+        if (aName != null && !aName.trim().isEmpty()) {
+            try {
+                return parseJs(new Source(null, String.format("function %s() {}", aName))) != null;
+            } catch (Exception ex) {
+                return false;
             }
-        } else if (aValue instanceof NativeJavaObject) {
-            aValue = ((NativeJavaObject) aValue).unwrap();
+        }
+        return false;
+    }
+
+    public static FunctionNode parseJs(Source aSource) {
+        Options options = new Options(null);
+        ScriptEnvironment env = new ScriptEnvironment(options, null, null);
+        ErrorManager errors = new ErrorManager();
+        Parser p = new Parser(env, aSource, errors);
+        return p.parse();
+    }
+
+    public static Object exec(URL aSource) throws ScriptException {
+        return engine.eval(new URLReader(aSource), engine.getContext());
+    }
+
+    public static Object exec(String aSource) throws ScriptException {
+        return engine.eval(aSource, engine.getContext());
+    }
+
+    public static void setParseJsonFunc(JSObject aValue) {
+        assert parseJsonFunc == null;
+        parseJsonFunc = aValue;
+    }
+
+    public static void setWriteJsonFunc(JSObject aValue) {
+        assert writeJsonFunc == null;
+        writeJsonFunc = aValue;
+    }
+
+    /*
+     public static void setToXMLStringFunc(JSObject aValue) {
+     assert toXMLStringFunc == null;
+     toXMLStringFunc = aValue;
+     }
+     */
+    public static void setExtendFunc(JSObject aValue) {
+        assert extendFunc == null;
+        extendFunc = aValue;
+    }
+
+    public static void setScalarDefFunc(JSObject aValue) {
+        assert scalarDefFunc == null;
+        scalarDefFunc = aValue;
+    }
+
+    public static void setCollectionDefFunc(JSObject aValue) {
+        assert collectionDefFunc == null;
+        collectionDefFunc = aValue;
+    }
+
+    public static Object toJava(Object aValue) {
+        aValue = ScriptObjectMirror.unwrap(aValue, Global.instance());
+        if (aValue instanceof NativeDate) {
+            return NativeDate.valueOf(aValue);
+        } else if (aValue instanceof NativeString) {
+            aValue = NativeString.valueOf(aValue);
+        } else if (aValue instanceof NativeNumber) {
+            aValue = NativeNumber.valueOf(aValue);
+        } else if (aValue instanceof NativeBoolean) {
+            aValue = NativeBoolean.valueOf(aValue);
         } else if (aValue instanceof Undefined) {
             aValue = null;
         }
@@ -193,148 +214,66 @@ public class ScriptUtils {
             if (Math.abs(Math.round(dbl) - dbl) < 1.0e-20f) {
                 aValue = Math.round(dbl);
             }
-        } else if (aValue instanceof ConsString) {
-            return ((ConsString) aValue).toString();
         }
         return aValue;
     }
 
-    public static Object javaToJS(Object aValue, Scriptable aScope) {
-        if (aValue instanceof Date) {
-            return toDateFunc.call(Context.getCurrentContext(), topLevelScope, null, new Object[]{Context.javaToJS(aValue, aScope)});
-        } else if (aValue instanceof Number) {
-            return Double.valueOf(((Number) aValue).doubleValue());
-        } else if (aValue instanceof String) {
-            return aValue;
-        } else if (aValue instanceof Boolean) {
-            return aValue;
+    public static Object toJs(Object aValue) {
+        if (aValue instanceof Date) {// force js boxing of date, because of absence js literal of date value
+            return ScriptObjectMirror.wrap(NativeDate.construct(true, null, ((Date) aValue).getTime()), Global.instance());
+        } else if (aValue instanceof HasPublished) {
+            return ((HasPublished) aValue).getPublished();
         } else {
-            return Context.javaToJS(aValue, aScope);
+            return aValue;
         }
+    }
+
+    public static Object[] toJs(Object[] aArray) {
+        Object[] publishedArgs = new Object[aArray.length];
+        for (int i = 0; i < aArray.length; i++) {
+            publishedArgs[i] = ScriptUtils.toJs(aArray[i]);
+        }
+        return publishedArgs;
     }
 
     public static Object parseJson(String json) {
-        init();
-        Context cx = Context.enter();
-        try {
-            return parseJsonFunc.call(cx, topLevelScope, null, new Object[]{json});
-        } finally {
-            Context.exit();
-        }
+        assert parseJsonFunc != null : SCRIPT_NOT_INITIALIZED;
+        return parseJsonFunc.call(null, new Object[]{json});
     }
+    protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script function are not initialized.";
 
     public static String toJson(Object aObj) {
-        init();
-        Context cx = Context.enter();
-        try {
-            return (String) writeJsonFunc.call(cx, topLevelScope, null, new Object[]{aObj});
-        } finally {
-            Context.exit();
+        return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
+    }
+
+    /*
+     public static String toXMLString(XMLObject aObj) {
+     assert toXMLStringFunc != null : SCRIPT_NOT_INITIALIZED;
+     return JSType.toString(toXMLStringFunc.call(null, new Object[]{aObj}));
+     }
+     */
+    public static void extend(JSObject aChild, JSObject aParent) {
+        assert extendFunc != null : SCRIPT_NOT_INITIALIZED;
+        extendFunc.call(null, new Object[]{aChild, aParent});
+    }
+
+    public static JSObject scalarPropertyDefinition(JSObject targetEntity, String targetFieldName, String sourceFieldName) {
+        assert scalarDefFunc != null : SCRIPT_NOT_INITIALIZED;
+        return (JSObject) ScriptObjectMirror.wrap(scalarDefFunc.newObject(new Object[]{targetEntity, targetFieldName, sourceFieldName}), Global.instance());
+    }
+
+    public static JSObject collectionPropertyDefinition(JSObject sourceEntity, String targetFieldName, String sourceFieldName) {
+        assert collectionDefFunc != null : SCRIPT_NOT_INITIALIZED;
+        return (JSObject) ScriptObjectMirror.wrap(collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName}), Global.instance());
+    }
+
+    public static JSObject createModule(String aModuleName) throws ScriptException {
+        Object oConstructor = ScriptObjectMirror.wrap(Global.instance().get(aModuleName), Global.instance());
+        if (oConstructor instanceof JSObject && ((JSObject) oConstructor).isFunction()) {
+            JSObject jsConstructor = (JSObject) oConstructor;
+            return (JSObject) jsConstructor.newObject(new Object[]{});
+        } else {
+            return null;
         }
-    }
-
-    public static String toXMLString(XMLObject aObj) {
-        init();
-        Context cx = Context.enter();
-        try {
-            return (String) toXMLStringFunc.call(cx, topLevelScope, null, new Object[]{aObj});
-        } finally {
-            Context.exit();
-        }
-    }
-
-    public static void extend(Function aChild, Function aParent) {
-        init();
-        Context cx = Context.enter();
-        try {
-            extendFunc.call(cx, topLevelScope, null, new Object[]{aChild, aParent});
-        } finally {
-            Context.exit();
-        }
-    }
-
-    public static ScriptableObject scalarPropertyDefinition(Scriptable targetEntity, String targetFieldName, String sourceFieldName) {
-        init();
-        Context cx = Context.enter();
-        try {
-            return (ScriptableObject) scalarDefFunc.construct(cx, topLevelScope, new Object[]{targetEntity, targetFieldName, sourceFieldName});
-        } finally {
-            Context.exit();
-        }
-    }
-
-    public static ScriptableObject collectionPropertyDefinition(Scriptable sourceEntity, String targetFieldName, String sourceFieldName) {
-        init();
-        Context cx = Context.enter();
-        try {
-            return (ScriptableObject) collectionDefFunc.construct(cx, topLevelScope, new Object[]{sourceEntity, targetFieldName, sourceFieldName});
-        } finally {
-            Context.exit();
-        }
-    }
-
-    public static AstRoot parseJs(String aSource) throws EvaluatorException {
-        CompilerEnvirons compilerEnv = CompilerEnvirons.ideEnvirons();
-        compilerEnv.setRecordingLocalJsDocComments(true);
-        compilerEnv.setRecoverFromErrors(false);
-        ErrorReporter compilationErrorReporter = compilerEnv.getErrorReporter();
-        Parser p = new Parser(compilerEnv, compilationErrorReporter);
-        return p.parse(aSource, "", 0); //NOI18N      
-    }
-
-    public static boolean isValidJsIdentifier(final String aName) {
-        if (aName != null && !aName.trim().isEmpty()) {
-            init();
-            try {
-                return inContext(new ScriptAction() {
-                    @Override
-                    public Boolean run(Context cx) {
-                        return cx.compileFunction(topLevelScope, String.format("function %s() {}", aName), null, 0, null) != null; //NOI18N
-                    }
-                });
-            } catch (Exception ex) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public interface ScriptAction {
-
-        public <T> T run(Context cx) throws Exception;
-    }
-
-    public static <T> T inContext(ScriptAction aAction) throws Exception {
-        if (aAction != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = Context.enter();
-            }
-            try {
-                return aAction.<T>run(cx);
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
-            }
-        }
-        return null;
-    }
-
-    public static String toString(Object value) {
-        return Context.toString(value);
-    }
-
-    public static void putThreadLocal(String aName, Object aValue) {
-        Context.getCurrentContext().putThreadLocal(aName, aValue);
-    }
-
-    public static Object getThreadLocal(String aName) {
-        return Context.getCurrentContext().getThreadLocal(aName);
-    }
-
-    public static void removeThreadLocal(String aName) {
-        Context.getCurrentContext().removeThreadLocal(aName);
     }
 }

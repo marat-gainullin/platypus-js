@@ -7,7 +7,7 @@ package com.eas.client.forms.api.components.model;
 import com.eas.client.controls.geopane.JGeoPane;
 import com.eas.client.forms.api.Component;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
-import com.eas.client.model.script.ScriptableRowset;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.map.DbMap;
 import com.eas.dbcontrols.map.mousetools.MouseTools;
 import com.eas.script.ScriptFunction;
@@ -16,8 +16,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import java.util.List;
 import java.util.Map;
+import jdk.nashorn.api.scripting.JSObject;
 import org.geotools.map.Layer;
-import org.mozilla.javascript.Function;
 
 /**
  *
@@ -157,12 +157,12 @@ public class ModelMap extends Component<DbMap> {
             + "*/";
     
     @ScriptFunction(jsDoc = ON_EVENT_JSDOC)
-    public Function getOnEvent() {
+    public JSObject getOnEvent() {
         return delegate.getOnEvent();
     }
 
     @ScriptFunction
-    public void setOnEvent(Function aValue) {
+    public void setOnEvent(JSObject aValue) {
         delegate.setOnEvent(aValue);
     }
 
@@ -177,7 +177,7 @@ public class ModelMap extends Component<DbMap> {
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_LAYER_JSDOC, params = {"layerTitle", "rowset", "geometryClass", "styleAttributes"})
-    public Layer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
+    public Layer addLayer(String aLayerTitle, ApplicationEntity<?, ?, ?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
         return delegate.addLayer(aLayerTitle, aRowset, aGeometryClass, aStyleAttributes);
     }
 

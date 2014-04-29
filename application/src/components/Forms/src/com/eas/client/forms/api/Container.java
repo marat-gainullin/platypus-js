@@ -12,7 +12,7 @@ import java.awt.event.ContainerEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComponent;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -89,13 +89,13 @@ public abstract class Container<D extends JComponent> extends Component<D> {
 
     @ScriptFunction(jsDoc = ON_COMPONENT_ADDED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)
-    public Function getOnComponentAdded() {
+    public JSObject getOnComponentAdded() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentAdded) : null;
     }
     
     @ScriptFunction
-    public void setOnComponentAdded(Function aValue) {
+    public void setOnComponentAdded(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentAdded, aValue);
@@ -109,13 +109,13 @@ public abstract class Container<D extends JComponent> extends Component<D> {
 
     @ScriptFunction(jsDoc = ON_COMPONENT_REMOVED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)
-    public Function getOnComponentRemoved() {
+    public JSObject getOnComponentRemoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentRemoved) : null;
     }
 
     @ScriptFunction
-    public void setOnComponentRemoved(Function aValue) {
+    public void setOnComponentRemoved(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentRemoved, aValue);

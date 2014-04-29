@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.dbcontrols.grid.rt;
 
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -12,6 +11,7 @@ import com.eas.dbcontrols.grid.DbGridCellDesignInfo;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;
 import static org.junit.Assert.*;
 import org.junit.Test;
+
 /**
  *
  * @author mg
@@ -19,8 +19,7 @@ import org.junit.Test;
 public class DbGridCellDesignInfoTest {
 
     @Test
-    public void assignEqualsTest()
-    {
+    public void assignEqualsTest() {
         DbGridCellDesignInfo ethalon = new DbGridCellDesignInfo();
         DbGridCellDesignInfo sample1 = new DbGridCellDesignInfo();
         DbGridCellDesignInfo sample2 = new DbGridCellDesignInfo();
@@ -28,7 +27,6 @@ public class DbGridCellDesignInfoTest {
         assertTrue(ethalon.isEqual(sample2));
 
         DbControlDesignInfo controlInfo = new DbLabelDesignInfo();
-        controlInfo.setSelectFunction("labelSelectFunction");
         ModelElementRef rowsKeyFieldRef = new ModelElementRef();
         rowsKeyFieldRef.setEntityId(IDGenerator.genID());
         ModelElementRef cellValueRef = new ModelElementRef();
@@ -47,13 +45,13 @@ public class DbGridCellDesignInfoTest {
         assertEquals(cellValueRef, sample2.getCellValueField());
         assertEquals(columnsKeyFieldRef, sample2.getColumnsKeyField());
         assertEquals(rowsKeyFieldRef, sample2.getRowsKeyField());
-        
+
         assertTrue(sample1.isEqual(sample2));
 
         assertFalse(ethalon.isEqual(sample1));
         assertFalse(ethalon.isEqual(sample2));
         sample2.assign(ethalon);
-        
+
         assertTrue(ethalon.isEqual(sample2));
     }
 }

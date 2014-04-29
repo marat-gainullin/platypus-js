@@ -5,12 +5,9 @@
 package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.forms.FormRunner;
 import com.eas.client.model.ModelElementRef;
 import com.eas.dbcontrols.combo.DbCombo;
 import com.eas.script.ScriptFunction;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Wrapper;
 
 /**
  *
@@ -33,32 +30,23 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String VALUE_FIELD_JSDOC = ""
             + "/**\n"
             + "* Value field of the component.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = VALUE_FIELD_JSDOC)
     public Field getValueField() {
-        if (delegate.getScriptScope() instanceof FormRunner) {
-            return delegate.getValueField() != null ? delegate.getValueField().getField() : null;
-        } else {
-            return null;
-        }
+        return delegate.getValueField() != null ? delegate.getValueField().getField() : null;
     }
 
     @ScriptFunction
     public void setValueField(Field aField) throws Exception {
-        if (aField == null || (aField.getTag() instanceof Scriptable && aField.getTag() instanceof Wrapper)) {
-            if (getValueField() != aField) {
-                if (aField != null) {
-                    checkModel(aField);
-                }
-                ModelElementRef modelRef = fieldToModelRef(aField);
-                delegate.setValueField(modelRef);
-                invalidate();
-            }
+        if (getValueField() != aField) {
+            ModelElementRef modelRef = fieldToModelRef(aField);
+            delegate.setValueField(modelRef);
+            invalidate();
         }
     }
 
@@ -66,26 +54,18 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
             + "/**\n"
             + "* Display field of the component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = DISPLAY_FIELD_JSDOC)
     public Field getDisplayField() {
-        if (delegate.getScriptScope() instanceof FormRunner) {
-            return delegate.getDisplayField() != null ? delegate.getDisplayField().getField() : null;
-        } else {
-            return null;
-        }
+        return delegate.getDisplayField() != null ? delegate.getDisplayField().getField() : null;
     }
 
     @ScriptFunction
     public void setDisplayField(Field aField) throws Exception {
-        if (aField == null || (aField.getTag() instanceof Scriptable && aField.getTag() instanceof Wrapper)) {
-            if (getDisplayField() != aField) {
-                if (aField != null) {
-                    checkModel(aField);
-                }
-                ModelElementRef modelRef = fieldToModelRef(aField);
-                delegate.setDisplayField(modelRef);
-                invalidate();
-            }
+        if (getDisplayField() != aField) {
+            ModelElementRef modelRef = fieldToModelRef(aField);
+            delegate.setDisplayField(modelRef);
+            invalidate();
         }
     }
 
@@ -93,6 +73,7 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
             + "/**\n"
             + "* Determines if component shown as list.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = LIST_JSDOC)
     public boolean getList() throws Exception {
         return delegate.isList();
@@ -108,6 +89,7 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
             + "/**\n"
             + "* Determines if component is editable.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {
         return delegate.isEditable();
@@ -117,7 +99,7 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
     public void setEditable(boolean aValue) {
         delegate.setEditable(aValue);
     }
-    
+
     @ScriptFunction
     public String getEmptyText() {
         return delegate.getEmptyText();

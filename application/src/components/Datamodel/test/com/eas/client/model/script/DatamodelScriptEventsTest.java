@@ -7,19 +7,14 @@ package com.eas.client.model.script;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelScriptEventsListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationEntity.EntityInstanceChangeEvent;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.mozilla.javascript.BaseFunction;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 
 /**
  *

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.dbcontrols.grid;
 
 import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
@@ -36,11 +32,9 @@ import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.ModelEntityParameterRef;
 import com.eas.client.model.ModelEntityRef;
 import com.eas.client.model.ParametersRowset;
+import com.eas.client.model.RowsetMissingException;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.script.RowHostObject;
-import com.eas.client.model.script.RowsetHostObject;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.dbcontrols.*;
 import com.eas.dbcontrols.combo.DbCombo;
 import com.eas.dbcontrols.date.DbDate;
@@ -63,7 +57,6 @@ import com.eas.dbcontrols.grid.rt.veers.VeerColumnsHandler;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
-import com.eas.script.NativeJavaHostObject;
 import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
 import java.awt.*;
@@ -84,16 +77,25 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
 public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContainer {
+
+    protected Object published;
+
+    @Override
+    public Object getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
+    }
 
     @Override
     public void beginUpdate() {
@@ -562,8 +564,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     protected TablesFocusManager tablesFocusManager = new TablesFocusManager();
     protected TablesMousePropagator tablesMousePropagator = new TablesMousePropagator();
     protected ApplicationEntity<?, ?, ?> rowsEntity;
-    protected Scriptable scriptScope;
-    protected Scriptable eventThis;
     // design
     protected List<DbGridColumn> header = new ArrayList<>();
     protected int rowsHeight = 20;
@@ -585,7 +585,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     protected Map<Rowset, List<ColumnsSource>> lcolumnsSources = new HashMap<>();
     protected Map<Rowset, List<ColumnsSource>> rcolumnsSources = new HashMap<>();
     protected Set<Row> processedRows = new HashSet<>();
-    protected Function generalRowFunction;
+    protected JSObject generalOnRender;
     protected int rowsHeaderType = DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL;
     protected int fixedRows;
     protected int fixedColumns;
@@ -773,18 +773,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return deletable;
     }
 
-    @Undesignable
-    public Scriptable getEventThis() {
-        return eventThis;
-    }
-
-    public void setEventThis(Scriptable aValue) {
-        eventThis = aValue;
-        if (rowsModel != null) {
-            rowsModel.setScriptScope(eventThis);
-        }
-    }
-
     public GridTable getTopLeftTable() {
         return tlTable;
     }
@@ -809,29 +797,19 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return columnsSelectionModel;
     }
 
-    public Scriptable getSelected() throws Exception {
-        List<Object> selectedRows = new ArrayList<>();
+    public List<Row> getSelected() throws Exception {
+        List<Row> selectedRows = new ArrayList<>();
         if (deepModel != null) {// design time is only the case
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
                     Row row = index2Row(rowSorter.convertRowIndexToModel(i));
-                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptThis(), row, rowsEntity);
-                    selectedRows.add(rowFacade);
+                    selectedRows.add(row);
                 }
             }
         }
-        return Context.getCurrentContext().newArray(model.getScriptThis(), selectedRows.toArray(new Object[]{}));
+        return selectedRows;
     }
 
-    /*
-     * public ScriptableSelection getSelection() throws Exception { List<Row>
-     * selectedRows = new ArrayList<>(); if (deepModel != null) {// design time
-     * is only the case for (int i = 0; i < deepModel.getRowCount(); i++) { if
-     * (rowsSelectionModel.isSelectedIndex(i)) { Row row =
-     * index2Row(rowSorter.convertRowIndexToModel(i)); selectedRows.add(row); }
-     * } } return new ScriptableSelection(selectedRows); }
-     *
-     */
     @Override
     public void setComponentPopupMenu(JPopupMenu aPopup) {
         super.setComponentPopupMenu(aPopup);
@@ -1019,12 +997,15 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     @Undesignable
-    public Function getGeneralRowFunction() {
-        return generalRowFunction;
+    public JSObject getGeneralOnRender() {
+        return generalOnRender;
     }
 
-    public void setGeneralRowFunction(Function aValue) {
-        generalRowFunction = aValue;
+    public void setGeneralOnRender(JSObject aValue) {
+        generalOnRender = aValue;
+        if (rowsModel != null) {
+            rowsModel.setGeneralOnRender(aValue);
+        }
     }
 
     public void insertRow() {
@@ -1228,7 +1209,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     final int paramSourceFieldIndex = DbControlsUtils.resolveFieldIndex(model, paramSourceField);
 
                     int parentColIndex = rowsRowset.getFields().find(unaryLinkField.getFieldName());
-                    rowsModel = new RowsetsTreedModel(rowsEntity, rowsRowset, parentColIndex, eventThis != null ? eventThis : scriptScope, generalRowFunction) {
+                    rowsModel = new RowsetsTreedModel(rowsEntity, rowsRowset, parentColIndex, generalOnRender) {
                         @Override
                         public boolean isLeaf(Row anElement) {
                             if (param != null && paramSourceFieldIndex != 0)// lazy tree
@@ -1247,7 +1228,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     }
                     rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
                 } else {
-                    rowsModel = new RowsetsTableModel(rowsEntity, rowsRowset, eventThis != null ? eventThis : scriptScope, generalRowFunction);
+                    rowsModel = new RowsetsTableModel(rowsEntity, rowsRowset, generalOnRender);
                     deepModel = (TableModel) rowsModel;
                     rowSorter = new TabularRowsSorter<>((RowsetsTableModel) deepModel, rowsSelectionModel);
                 }
@@ -1399,7 +1380,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     public CascadedStyle getStyle() {
                         return style;
                     }
-                }, scriptableColumns, scriptScope != null ? scriptScope.get(getName(), scriptScope) : null);
+                }, scriptableColumns);
                 lriddler.setLeftConstraint(leftColsConstraint);
                 lriddler.setRightConstraint(rightColsConstraint);
                 lriddler.fill();
@@ -1409,7 +1390,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     public CascadedStyle getStyle() {
                         return style;
                     }
-                }, scriptableColumns, scriptScope != null ? scriptScope.get(getName(), scriptScope) : null);
+                }, scriptableColumns);
                 rriddler.fill();
 
                 lheader.setNeightbour(rheader);
@@ -1419,7 +1400,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 lheader.regenerate();
                 rheader.regenerate();
                 rowsRowset.addRowsetListener(scrollReflector);
-                configureScriptScope();
                 configureActions();
             }
             applyEnabled();
@@ -1503,7 +1483,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     };
                     Rowset rowsRowset = new ParametersRowset(new com.bearsoft.rowset.metadata.Parameters());
-                    rowsModel = new RowsetsTableModel(null, rowsRowset, null, null) {
+                    rowsModel = new RowsetsTableModel(null, rowsRowset, null) {
                         @Override
                         public int getRowCount() {
                             return 10;
@@ -1724,10 +1704,8 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return processedRows.contains(aRow);
     }
 
-    public void select(RowHostObject aRow) throws Exception {
-        if (aRow != null) {
-            selectRow(aRow.unwrap());
-        }
+    public void select(Row aRow) throws Exception {
+        selectRow(aRow);
     }
 
     public void selectRow(Row aRow) throws Exception {
@@ -1751,10 +1729,8 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         }
     }
 
-    public void unselect(RowHostObject aRow) throws Exception {
-        if (aRow != null) {
-            unselectRow(aRow.unwrap());
-        }
+    public void unselect(Row aRow) throws Exception {
+        unselectRow(aRow);
     }
 
     public void unselectRow(Row aRow) throws Exception {
@@ -1784,12 +1760,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         findSomethingAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "startFinding", 0));
     }
 
-    public boolean ensureFetched(ScriptableRowset<?> aRowset, Field aParentField, Object aTargetId) throws Exception {
+    public boolean ensureFetched(ApplicationEntity<?, ?, ?> aEntity, Field aParentField, Object aTargetId) throws Exception {
         if (deepModel instanceof TableFront2TreedModel) {
             TableFront2TreedModel<Row> front = (TableFront2TreedModel<Row>) deepModel;
             if (front.unwrap() instanceof RowsetsTreedModel) {
                 RowsetsTreedModel rModel = (RowsetsTreedModel) front.unwrap();
-                Rowset r = aRowset.unwrap();
+                Rowset r = aEntity.getRowset();
                 if (!rowsModel.getPkLocator().getFields().isEmpty()) {
                     int pkColIndex = rowsModel.getPkLocator().getFields().get(0);
                     int parentColIndex = r.getFields().find(aParentField.getName());
@@ -1820,22 +1796,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             } else {
                 return false;
             }
-        } else {
-            return false;
-        }
-    }
-
-    public boolean makeVisible(RowHostObject aRow) throws Exception {
-        if (aRow != null) {
-            return makeVisible(aRow.unwrap());
-        } else {
-            return false;
-        }
-    }
-
-    public boolean makeVisible(RowHostObject aRow, boolean need2Select) throws Exception {
-        if (aRow != null) {
-            return makeVisible(aRow.unwrap(), need2Select);
         } else {
             return false;
         }
@@ -1890,7 +1850,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public boolean makeVisible(Object aId, boolean need2Select) throws Exception {
-        aId = ScriptUtils.js2Java(aId);
+        aId = ScriptUtils.toJava(aId);
         aId = rowsModel.getRowsRowset().getConverter().convert2RowsetCompatible(aId, rowsModel.getRowsRowset().getFields().get(rowsModel.getPkLocator().getFields().get(0)).getTypeInfo());
         if (rowsModel.getPkLocator().find(aId)) {
             return makeVisible(rowsModel.getPkLocator().getRow(0), need2Select);
@@ -1995,30 +1955,27 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             String[] row = aCells[i];
             Object[] o = new Object[row.length];
             System.arraycopy(row, 0, o, 0, row.length);
-            cells[i] = Context.getCurrentContext().newArray(model.getScriptThis(), o);
+            cells[i] = o;
         }
         return cells;
     }
 
-    public Scriptable getCells() {
+    public Object[] getCells() {
         Object[] cells = convertView(getGridView(false, false));
-        return Context.getCurrentContext().newArray(model.getScriptThis(), cells);
+        return cells;
     }
 
-    public Scriptable getSelectedCells() {
+    public Object[] getSelectedCells() {
         Object[] selectedCells = convertView(getGridView(true, false));
-        return Context.getCurrentContext().newArray(model.getScriptThis(), selectedCells);
+        return selectedCells;
     }
 
-    public Scriptable getColumnsScriptView() {
-        if (eventThis != null) {
-            List<Object> columns = new ArrayList<>();
-            for (ScriptableColumn scrCol : scriptableColumns) {
-                columns.add(scrCol.getPublished());
-            }
-            return Context.getCurrentContext().newArray(model.getScriptThis(), columns.toArray());
+    public List<Object> getColumns() {
+        List<Object> columns = new ArrayList<>();
+        for (ScriptableColumn scrCol : scriptableColumns) {
+            columns.add(scrCol.getPublished());
         }
-        return null;
+        return columns;
     }
 
     private String[][] getGridView(boolean selectedOnly, boolean isData) {
@@ -2598,30 +2555,8 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         }
     }
 
-    protected void configureScriptScope() {
-        if (scriptScope != null && scriptScope instanceof ScriptableObject) {
-            for (ScriptableColumn scrCol : scriptableColumns) {
-                if (eventThis instanceof NativeJavaHostObject && scrCol.getName() != null && !scrCol.getName().isEmpty()) {
-                    eventThis.delete(scrCol.getName());
-                    Object jsColumn = Context.javaToJS(scrCol, eventThis);
-                    assert jsColumn instanceof Scriptable;
-                    scrCol.setPublished((Scriptable) jsColumn);
-                    ((NativeJavaHostObject) eventThis).defineProperty(scrCol.getName(), jsColumn);
-                }
-            }
-        }
-    }
-
     public CascadedStyle getStyle() {
         return style;
-    }
-
-    public Scriptable getScriptScope() {
-        return scriptScope;
-    }
-
-    public void setScriptScope(Scriptable aScope) {
-        scriptScope = aScope;
     }
 
     @Override
@@ -2646,12 +2581,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         }
     }
 
-    public void fillByRowset(RowsetHostObject<?> aRowset) throws Exception {
-        fillByRowset(aRowset, this, getWidth() - 20);
+    public void fillByRowset(ApplicationEntity<?, ?, ?> aEntity) throws Exception {
+        fillByRowset(aEntity, this, getWidth() - 20);
     }
 
-    public static void fillByRowset(RowsetHostObject<?> aRowset, DbGrid aGrid, int aWidth) throws Exception {
-        fillByEntity(((ScriptableRowset) aRowset.unwrap()).getEntity(), aGrid, aWidth);
+    public static void fillByRowset(ApplicationEntity<?, ?, ?> aEntity, DbGrid aGrid, int aWidth) throws Exception {
+        fillByEntity(aEntity, aGrid, aWidth);
     }
 
     public static void fillByEntity(ApplicationEntity<?, ?, ?> aEntity, DbGrid aGrid, int aWidth) throws Exception {
@@ -2659,7 +2594,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         queryEntityRef.setEntityId(aEntity.getEntityId());
         Rowset rowset = aEntity.getRowset();
         if (rowset == null) {
-            throw new Exception("SQL Error (see log)");
+            throw new RowsetMissingException();
         }
         int rowsetColumnsCount = rowset.getFields().getFieldsCount();
         List<DbGridColumn> colVector = new ArrayList<>(rowset.getFields().getFieldsCount());
@@ -2707,15 +2642,5 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         aGrid.setRowsDatasource(queryEntityRef);
         aGrid.setHeader(colVector);
         aGrid.configure();
-    }
-
-    @Undesignable
-    public Function getOnCellRender() {
-        return generalRowFunction;
-    }
-
-    public void setOnCellRender(Function aValue) {
-        generalRowFunction = aValue;
-        rowsModel.setGeneralCellsHandler(aValue);
     }
 }

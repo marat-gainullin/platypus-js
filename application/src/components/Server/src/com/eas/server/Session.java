@@ -9,13 +9,14 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.threetier.Response;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  * A client session
@@ -36,7 +37,7 @@ public class Session implements PrincipalHost {
     private PlatypusPrincipal principal;// re-login for the same session is allowed in EE servers
     private final long ctime;
     private final AtomicLong atime = new AtomicLong();
-    private final Map<String, ServerScriptRunner> activeModules = new HashMap<>();
+    private final Map<String, JSObject> modulesInstances = new HashMap<>();
     private final Map<Long, Response> pendingResponses = new HashMap<>();
     private int maxInactiveInterval = 3600000; // 1 hour
     /*
@@ -49,33 +50,27 @@ public class Session implements PrincipalHost {
     /**
      * Creates a new session with given session id.
      *
+     * @param aServerCore
      * @param aSessionId unique session id.
-     * @param aUser specifies username of the owner of this session.
+     * @param aPrincipal
      */
-    public Session(PlatypusServerCore aServer, String aSessionId, PlatypusPrincipal aPrincipal) {
+    public Session(PlatypusServerCore aServerCore, String aSessionId, PlatypusPrincipal aPrincipal) {
         sessionId = aSessionId;
         ctime = System.currentTimeMillis();
         atime.set(ctime);
-        serverCore = aServer;
+        serverCore = aServerCore;
         setPrincipal(aPrincipal);
     }
 
     /**
      * Deletes all resources belonging to this session.
      */
-    public synchronized void cleanup() throws IOException {
+    public synchronized void cleanup() {
         // server modules
-        activeModules.clear();
+        modulesInstances.clear();
         // request's responses
         pendingResponses.clear();
         // data in client's transaction
-        try {
-            if (serverCore != null) { // this check is only for tests
-                serverCore.getDatabasesClient().rollback();
-            }
-        } catch (Exception ex) {
-            throw new IOException(ex);
-        }
     }
 
     /**
@@ -159,30 +154,32 @@ public class Session implements PrincipalHost {
     /**
      * Returns server module by name.
      *
-     * @param aModuleName
+     * @param aName
      * @return
      */
-    public ServerScriptRunner getModule(String aModuleName) {
-        synchronized (activeModules) {
-            return activeModules.get(aModuleName);
+    public JSObject getModule(String aName) {
+        synchronized (modulesInstances) {
+            return modulesInstances.get(aName);
         }
     }
 
-    public void registerModule(ServerScriptRunner aModule) {
-        synchronized (activeModules) {
-            activeModules.put(aModule.getApplicationElementId(), aModule);
+    public void registerModule(JSObject aModule) {
+        synchronized (modulesInstances) {
+            JSObject c = (JSObject) aModule.getMember("constructor");
+            String name = JSType.toString(c.getMember("name"));
+            modulesInstances.put(name, aModule);
         }
     }
 
     public void unregisterModule(String aModuleName) {
-        synchronized (activeModules) {
-            activeModules.remove(aModuleName);
+        synchronized (modulesInstances) {
+            modulesInstances.remove(aModuleName);
         }
     }
 
     public void unregisterModules() {
-        synchronized (activeModules) {
-            activeModules.clear();
+        synchronized (modulesInstances) {
+            modulesInstances.clear();
         }
     }
 

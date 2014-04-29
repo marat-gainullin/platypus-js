@@ -10,6 +10,7 @@
 package com.bearsoft.rowset.metadata;
 
 import com.bearsoft.rowset.utils.CollectionEditingSupport;
+import com.eas.script.HasPublished;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 
@@ -18,7 +19,7 @@ import java.util.*;
  * copy operations. Supports factory method for new fields creation. Supports
  * field search, operations with primary and foreign keys.
  */
-public class Fields {
+public class Fields implements HasPublished {
 
     private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
     protected String tableDescription;
@@ -27,7 +28,7 @@ public class Fields {
     protected Map<String, Integer> fieldsHash;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
-    protected Object tag;
+    protected Object published;
 
     /**
      * The default constructor.
@@ -110,8 +111,7 @@ public class Fields {
     }
 
     /**
-     * Returns if the
-     * <code>Fields</code> contains no fields.
+     * Returns if the <code>Fields</code> contains no fields.
      *
      * @return <code>True</code> if this instance contains no fields.
      */
@@ -131,8 +131,8 @@ public class Fields {
     }
 
     /**
-     * Returns table description if this
-     * <code>Fields</code> instance represents database table fields set.
+     * Returns table description if this <code>Fields</code> instance represents
+     * database table fields set.
      *
      * @return Table description.
      */
@@ -141,8 +141,8 @@ public class Fields {
     }
 
     /**
-     * Sets the table description if this
-     * <code>Fields</code> instance represents database table fields set.
+     * Sets the table description if this <code>Fields</code> instance
+     * represents database table fields set.
      *
      * @param aValue Table description value.
      */
@@ -166,8 +166,7 @@ public class Fields {
 
     /**
      * Generates and returns new(unique) field name for this fields set. New
-     * name will start with
-     * <code>aPrefix</code> value.
+     * name will start with <code>aPrefix</code> value.
      *
      * @param aPrefix A string value new name will start with.
      * @return New(unique) field name for this fields set.
@@ -345,8 +344,7 @@ public class Fields {
     }
 
     /**
-     * Adds particular
-     * <code>Field</code> instance to this fields set.
+     * Adds particular <code>Field</code> instance to this fields set.
      *
      * @param aField A <code>Field</code> to add.
      * @return <code>True</code> if adding have succeded.
@@ -362,8 +360,8 @@ public class Fields {
     }
 
     /**
-     * Adds particular
-     * <code>Field</code> instance to this fields set at the specified position.
+     * Adds particular <code>Field</code> instance to this fields set at the
+     * specified position.
      *
      * @param index An index at which aField is to be added, starting on 1.
      * @param aField A <code>Field</code> to add.
@@ -377,8 +375,7 @@ public class Fields {
     }
 
     /**
-     * Removes a particular
-     * <code>Field</code> instance from this fields set.
+     * Removes a particular <code>Field</code> instance from this fields set.
      *
      * @param aField <code>Field</code> instance to remove.
      * @return <code>True</code> if removing succeded.
@@ -432,8 +429,8 @@ public class Fields {
     }
 
     /**
-     * Returns
-     * <code>Field</code> instance at the specified index. Index is 1 based.
+     * Returns <code>Field</code> instance at the specified index. Index is 1
+     * based.
      *
      * @param index Index of <code>Field</code> instance you are interested in.
      * @return <code>Field</code> instance at the specified index. If wrong
@@ -447,8 +444,7 @@ public class Fields {
     }
 
     /**
-     * Returns
-     * <code>Field</code> instance with the specified name.
+     * Returns <code>Field</code> instance with the specified name.
      *
      * @param aFieldName Field name of <code>Field</code> instance you are
      * interested in.
@@ -463,8 +459,8 @@ public class Fields {
     }
 
     /**
-     * Returns ordinal position of
-     * <code>Field</code> instance with the specified name.
+     * Returns ordinal position of <code>Field</code> instance with the
+     * specified name.
      *
      * @param aFieldName Field name of <code>Field</code> instance you are
      * interested in.
@@ -484,8 +480,7 @@ public class Fields {
     }
 
     /**
-     * Test if this
-     * <code>Fields</code> object contains a field with the
+     * Test if this <code>Fields</code> object contains a field with the
      * <code>aFieldName</code> name.
      *
      * @param aFieldName Name to test.
@@ -496,8 +491,7 @@ public class Fields {
     }
 
     /**
-     * Copies this
-     * <code>Fields</code> instance, creating a new one.
+     * Copies this <code>Fields</code> instance, creating a new one.
      *
      * @return New instance of <code>Fields</code>.
      * @see #copy()
@@ -508,8 +502,7 @@ public class Fields {
     }
 
     /**
-     * Copies this
-     * <code>Fields</code> instance, creating a new one.
+     * Copies this <code>Fields</code> instance, creating a new one.
      *
      * @return New instance of <code>Fields</code>.
      * @see #clone()
@@ -527,11 +520,13 @@ public class Fields {
         return fields;
     }
 
-    public Object getTag() {
-        return tag;
+    @Override
+    public Object getPublished() {
+        return published;
     }
 
-    public void setTag(Object aTag) {
-        tag = aTag;
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 }

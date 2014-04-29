@@ -4,6 +4,8 @@
  */
 package com.eas.client.scripts.ole;
 
+import com.eas.script.ScriptUtils;
+import javax.script.ScriptException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -11,17 +13,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
 
 /**
  *
  * @author vv
  */
 public class ComObjectTest {
-
-    Context cx;
-    Scriptable scope;
 
     public ComObjectTest() {
     }
@@ -51,11 +48,9 @@ public class ComObjectTest {
      */
     @Ignore
     @Test
-    public void testOleAutomationScripting() {
-        cx = Context.enter();
+    public void testOleAutomationScripting() throws ScriptException {
         String s = null;
         try {
-            scope = cx.initStandardObjects();
             s = "Logger = java.util.logging.Logger.getLogger(\"Application\");\n";
             s += "Logger.info('OLE automation scripting test');\n";
             s += "ComSession = com.eas.client.scripts.ole.ComSession;\n";
@@ -96,11 +91,10 @@ public class ComObjectTest {
         } finally {
             s = "session.destroy();\n";
             evaluateString(s);
-            Context.exit();
         }
     }
 
-    private Object evaluateString(String str) {
-        return cx.evaluateString(scope, str, "<cmd>", 1, null);
+    private Object evaluateString(String str) throws ScriptException {
+        return ScriptUtils.exec(str);
     }
 }

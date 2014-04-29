@@ -5,7 +5,6 @@
 package com.eas.client.forms;
 
 import com.eas.client.scripts.PlatypusScriptedResource;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.resources.images.IconCache;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;

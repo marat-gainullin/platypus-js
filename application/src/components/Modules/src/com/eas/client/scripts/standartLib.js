@@ -174,32 +174,6 @@ Function.prototype.invokeBackground = function() {
     });
 };
 
-/**
- * This is a stub for dynamically loaded modules, since J2SE client
- * allways loads them dynamically and synchronously.
- */
-function require(deps, aOnSuccess, aOnFailure) {
-    try{
-        if (deps) {
-            if (Array.isArray(deps)) {
-                for (var i = 0; i < deps.length; i++) {
-                    com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
-                }
-            } else {
-                com.eas.client.scripts.ScriptRunner.executeResource(deps);
-            }
-        }
-        if (aOnSuccess) {
-            aOnSuccess();
-        }
-    }catch(e){
-        if(aOnFailure)
-            aOnFailure(e);
-        else
-            throw e;
-    }
-}
-
 function readString(aFileName, aEncoding) {
     var encoding = DEFAULT_ENCODING;
     if (aEncoding) {

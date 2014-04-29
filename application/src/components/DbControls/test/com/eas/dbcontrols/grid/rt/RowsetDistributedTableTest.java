@@ -26,7 +26,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -93,7 +92,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
                     rowsEntity.setRowset(rowsRowset);
                     model.addEntity(rowsEntity);
                     TableColumnModel columnModel = new DefaultTableColumnModel();
-                    RowsetsTableModel tableViewModel = new RowsetsTableModel(null, rowsRowset, null, null);
+                    RowsetsTableModel tableViewModel = new RowsetsTableModel(null, rowsRowset, null);
                     TableRowSorter sorter = new TableRowSorter(tableViewModel);
                     for (int i = 1; i <= rowsRowset.getFields().getFieldsCount(); i++) {
                         Rowset colRowset = initRowset();
@@ -171,7 +170,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
                     rowsEntity.setRowset(rowsRowset);
                     model.addEntity(rowsEntity);
                     TableColumnModel columnModel = new DefaultTableColumnModel();
-                    RowsetsTableModel tableViewModel = new RowsetsTableModel(null, rowsRowset, null, null);
+                    RowsetsTableModel tableViewModel = new RowsetsTableModel(null, rowsRowset, null);
                     TableRowSorter sorter = new TableRowSorter(tableViewModel);
                     for (int i = 1; i <= rowsRowset.getFields().getFieldsCount(); i++) {
                         Rowset colRowset = initRowset();

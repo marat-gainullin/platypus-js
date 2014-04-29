@@ -4,17 +4,14 @@
  */
 package com.eas.client.application;
 
-import com.eas.client.DbClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.login.SystemPlatypusPrincipal;
-import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.scripts.CompiledScriptDocuments;
-import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptRunner;
+import com.eas.client.scripts.ScriptDocuments;
+import com.eas.client.scripts.ScriptDocumentsHost;
 import com.eas.client.settings.DbConnectionSettings;
+import com.eas.script.ScriptUtils;
 import org.junit.Test;
 
 /**
@@ -41,30 +38,26 @@ public class ApplicationScriptsTest {
         }
     }
 
-    protected static class TestScriptDocumentsHost implements CompiledScriptDocumentsHost {
+    protected static class TestScriptDocumentsHost implements ScriptDocumentsHost {
 
-        protected CompiledScriptDocuments scriptDocuments;
+        protected ScriptDocuments scriptDocuments;
 
-        public TestScriptDocumentsHost(CompiledScriptDocuments aScriptDocuments) {
+        public TestScriptDocumentsHost(ScriptDocuments aScriptDocuments) {
             scriptDocuments = aScriptDocuments;
         }
 
         @Override
-        public CompiledScriptDocuments getDocuments() {
+        public ScriptDocuments getDocuments() {
             return scriptDocuments;
-        }
-
-        @Override
-        public void defineJsClass(String string, ApplicationElement ae) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 
     public static void scriptTest(String aModuleId) throws Exception {
         System.out.println("starting script test for the " + aModuleId + ". Expecting some exceptions while failure.");
         try (DatabasesClientWithResource resource = initDevelopTestClient()) {
-            ScriptRunner script = new ScriptRunner(aModuleId, resource.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), new TestPrincipalHost(), new TestScriptDocumentsHost(new ClientCompiledScriptDocuments(resource.getClient())), new Object[]{});
-            script.execute();
+            ScriptUtils.createModule(aModuleId);
+            //ScriptRunner script = new ScriptRunner(aModuleId, resource.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), new TestPrincipalHost(), new TestScriptDocumentsHost(new ClientCompiledScriptDocuments(resource.getClient())), new Object[]{});
+            //script.execute();
         }
         System.out.println("script test for " + aModuleId + " has been completed successfully!");
     }

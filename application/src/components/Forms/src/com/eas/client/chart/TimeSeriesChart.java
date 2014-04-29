@@ -4,9 +4,6 @@
  */
 package com.eas.client.chart;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.eas.client.model.script.RowHostObject;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.scripts.ScriptColor;
 import com.eas.script.ScriptUtils;
 import java.text.DecimalFormat;
@@ -14,14 +11,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.AbstractXYDataset;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -31,20 +27,10 @@ public class TimeSeriesChart extends AbstractLineChart {
 
     public static final String TIMESTAMP_FORMAT = "dd.MM.yyyy hh:mm:ss";
     private SimpleDateFormat xAxisLabelFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
-    private String title;
-    private String xLabel;
-    private String yLabel;
+    private final String title;
+    private final String xLabel;
+    private final String yLabel;
 
-    public TimeSeriesChart(String pTitle, String pXAxisLabel, String pYAxisLabel, ScriptableRowset<?> pRowset) {
-        this(pTitle, pXAxisLabel, pYAxisLabel);
-        setData(pRowset);
-    }
-
-    public TimeSeriesChart(String pTitle, String pXAxisLabel, String pYAxisLabel, NativeArray aArray) {
-        this(pTitle, pXAxisLabel, pYAxisLabel);
-        setData(aArray);
-    }
-    
     public TimeSeriesChart(String pTitle, String pXAxisLabel, String pYAxisLabel) {
         super();
         title = pTitle;
@@ -68,13 +54,9 @@ public class TimeSeriesChart extends AbstractLineChart {
             @Override
             public int getItemCount(int series) {
                 try {
-                    if (sRowset != null) {
-                        return sRowset.getSize();
-                    } else {
-                        Object oLength = sObject.get("length", sObject);
-                        if (oLength instanceof Number) {
-                            return ((Number) oLength).intValue();
-                        }
+                    Object oLength = data.getMember("length");
+                    if (oLength instanceof Number) {
+                        return ((Number) oLength).intValue();
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(TimeSeriesChart.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,20 +69,14 @@ public class TimeSeriesChart extends AbstractLineChart {
                 SeriesProperties curSeries = seriesByIndex(aSeries);
                 if (curSeries != null) {
                     try {
-                        if (sRowset != null) {
-                            RowHostObject row = sRowset.getRow(aItem + 1);
-                            int fldIndex = sRowset.getFields().find(curSeries.getXAxisProperty());
-                            Date date = (Date) sRowset.unwrap().getConverter().convert2JdbcCompatible(row.getColumnObject(fldIndex), DataTypeInfo.TIMESTAMP);
-                            return date.getTime();
-                        } else {
-                            Object oItem = sObject.get(aItem, sObject);
-                            if (oItem instanceof Scriptable) {
-                                Scriptable sItem = (Scriptable) oItem;
-                                Object ox = ScriptUtils.js2Java(sItem.get(curSeries.getXAxisProperty(), sItem));
-                                if (ox instanceof Date) {
-                                    return ((Date) ox).getTime();
-                                }else if(ox instanceof Number)
-                                    return (Number)ox;
+                        Object oItem = data.getSlot(aItem);
+                        if (oItem instanceof JSObject) {
+                            JSObject sItem = (JSObject) oItem;
+                            Object ox = ScriptUtils.toJava(sItem.getMember(curSeries.getXAxisProperty()));
+                            if (ox instanceof Date) {
+                                return ((Date) ox).getTime();
+                            } else if (ox instanceof Number) {
+                                return (Number) ox;
                             }
                         }
                     } catch (Exception ex) {
@@ -115,19 +91,14 @@ public class TimeSeriesChart extends AbstractLineChart {
                 SeriesProperties curSeries = seriesByIndex(aSeries);
                 if (curSeries != null) {
                     try {
-                        if (sRowset != null) {
-                            RowHostObject row = sRowset.getRow(aItem + 1);
-                            int fldIndex = sRowset.getFields().find(curSeries.getYAxisProperty());
-                            return (Number) sRowset.unwrap().getConverter().convert2JdbcCompatible(row.getColumnObject(fldIndex), DataTypeInfo.DECIMAL);
-                        } else {
-                            Object oItem = sObject.get(aItem, sObject);
-                            if (oItem instanceof Scriptable) {
-                                Scriptable sItem = (Scriptable) oItem;
-                                Object oy = ScriptUtils.js2Java(sItem.get(curSeries.getYAxisProperty(), sItem));
-                                if (oy instanceof Date) {
-                                    return ((Date) oy).getTime();
-                                }else if(oy instanceof Number)
-                                    return (Number)oy;
+                        Object oItem = data.getSlot(aItem);
+                        if (oItem instanceof JSObject) {
+                            JSObject sItem = (JSObject) oItem;
+                            Object oy = ScriptUtils.toJava(sItem.getMember(curSeries.getYAxisProperty()));
+                            if (oy instanceof Date) {
+                                return ((Date) oy).getTime();
+                            } else if (oy instanceof Number) {
+                                return (Number) oy;
                             }
                         }
                     } catch (Exception ex) {
@@ -178,16 +149,17 @@ public class TimeSeriesChart extends AbstractLineChart {
     }
 
     @Override
-    public void setData(Object aValue) {
-        if(getData() != aValue)
+    public void setData(JSObject aValue) {
+        if (getData() != aValue) {
             chart = null;
+        }
         super.setData(aValue);
     }
 
     @Override
     protected void fireDataChanged() {
         createChart();
-        chart.fireChartChanged();        
+        chart.fireChartChanged();
         super.fireDataChanged();
     }
 }

@@ -16,14 +16,9 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
-import com.eas.script.NativeJavaHostObject;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import com.eas.script.HasPublished;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Document;
 
 /**
@@ -33,7 +28,7 @@ import org.w3c.dom.Document;
  * @param <Q> Query generic type.
  * @author mg
  */
-public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> implements PropertyChangeListener {
+public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> implements HasPublished {
 
     public static final long PARAMETERS_ENTITY_ID = -1L;
     public static final String PARAMETERS_SCRIPT_NAME = "params";
@@ -46,8 +41,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
-    protected Scriptable scriptThis;
-    protected NativeJavaHostObject published;
+    protected Object published;
     protected boolean runtime;
     protected int ajustingCounter;
     protected Runnable resolver;
@@ -329,20 +323,14 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         return aEntity.getInOutRelations();
     }
 
-    public Scriptable getScriptThis() {
-        return scriptThis;
-    }
-
-    public void setScriptThis(Scriptable aScriptObject) throws Exception {
-        scriptThis = aScriptObject;
-    }
-
-    public NativeJavaHostObject getPublished() {
+    @Override
+    public Object getPublished() {
         return published;
     }
 
-    public void setPublished(NativeJavaHostObject published) {
-        this.published = published;
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 
     public int getAjustingCounter() {
@@ -479,25 +467,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             }
         }
         return false;
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt != null && evt.getPropertyName() != null) {
-            try {
-                if (!(evt.getSource() instanceof Entity<?, ?, ?>)
-                        && !(evt.getSource() instanceof Model<?, ?, ?, ?>)) {
-                    if (evt.getPropertyName().equals("scriptScope")) {
-                        setScriptThis((Scriptable) evt.getNewValue());
-                    }
-                    if (evt.getPropertyName().equals("runtime")) {
-                        setRuntime((Boolean) evt.getNewValue());
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     public boolean isRelationsAgressiveCheck() {

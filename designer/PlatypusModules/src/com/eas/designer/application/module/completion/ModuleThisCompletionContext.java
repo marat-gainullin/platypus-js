@@ -19,18 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.mozilla.javascript.Node;
-import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ExpressionStatement;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.Name;
-import org.mozilla.javascript.ast.NodeVisitor;
-import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.Symbol;
-import org.mozilla.javascript.ast.VariableDeclaration;
-import org.mozilla.javascript.ast.VariableInitializer;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.Node;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -90,6 +80,8 @@ public class ModuleThisCompletionContext extends CompletionContext {
 
     public static Set<String> getThisAliases(FunctionNode moduleConstructor) {
         Set<String> aliases = new HashSet<>();
+        assert false : "Refactoring is needed";
+        /*        
         Iterator<Node> i = moduleConstructor.getBody().iterator();
         while (i.hasNext()) {
             Node n = i.next();
@@ -103,16 +95,20 @@ public class ModuleThisCompletionContext extends CompletionContext {
                 }
             }
         }
+                */
         return aliases;
     }
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         addItem(resultSet, point.getFilter(), new BeanCompletionItem(ApplicationDbModel.class, MODEL_SCRIPT_NAME, MODEL_PROPERTY_JS_DOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         if (enableJsElementsCompletion) {
+            assert false: "Refactoring is needed. May be add getConstructor() method to dataObject ";
+            /*
             ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()));
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {
                 addItem(resultSet, point.getFilter(), i);
             }
+                    */
         }
     }
 
@@ -149,6 +145,8 @@ public class ModuleThisCompletionContext extends CompletionContext {
 
         private void scan(final CompletionPoint point, final Set<String> thisAliases) {
             if (moduleConstructor.getBody() != null) {
+                assert false: "Refactoring is needed.";
+                /*
                 moduleConstructor.getBody().visit(new NodeVisitor() {
                     @Override
                     public boolean visit(AstNode an) {
@@ -183,6 +181,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
                         return false;
                     }
                 });
+                        */
             }
         }
     }

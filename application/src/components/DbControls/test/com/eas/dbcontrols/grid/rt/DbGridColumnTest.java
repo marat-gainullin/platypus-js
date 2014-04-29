@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.dbcontrols.grid.rt;
 
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -26,8 +25,7 @@ import org.junit.Test;
 public class DbGridColumnTest {
 
     @Test
-    public void assignEqualsTest()
-    {
+    public void assignEqualsTest() {
         DbGridColumn ethalon = new DbGridColumn();
         DbGridColumn sample1 = new DbGridColumn();
         DbGridColumn sample2 = new DbGridColumn();
@@ -61,13 +59,11 @@ public class DbGridColumnTest {
         // plain properties
         sample1.setHeaderStyle(style1);
         sample1.setCellDesignInfo(cellDesign);
-        sample1.setCellFunction("sampleScriptFunction");
         sample1.setReadonly(true);
         sample1.setEnabled(false);
         style1.setFont(DbControlsUtils.toFont(Font.decode(Font.SANS_SERIF)));
         sample1.setName("column_1");
         sample1.setPlain(false);
-        sample1.setSelectFunction("sampleSelectScriptFunction");
         sample1.setSelectOnly(true);
         sample1.setSubstitute(true);
         sample1.setTitle("column_1_title");
@@ -75,7 +71,6 @@ public class DbGridColumnTest {
         sample1.setWidth(7895);
 
         sample2.assign(sample1);
-
 
         assertEquals(cellsDsRef, sample2.getCellsDatasource());
         assertEquals(columnsDsRef, sample2.getColumnsDatasource());
@@ -85,13 +80,11 @@ public class DbGridColumnTest {
 
         assertEquals(sample2.getBackground(), Color.blue);
         assertTrue(sample2.getCellDesignInfo().isEqual(cellDesign));
-        assertEquals(sample2.getCellFunction(), "sampleScriptFunction");
         assertEquals(sample2.isReadonly(), true);
         assertEquals(sample2.isEnabled(), false);
         assertTrue(sample2.getHeaderStyle().getFont().isEqual(DbControlsUtils.toFont(Font.decode(Font.SANS_SERIF))));
         assertEquals(sample2.getName(), "column_1");
         assertEquals(sample2.isPlain(), false);
-        assertEquals(sample2.getSelectFunction(), "sampleSelectScriptFunction");
         assertEquals(sample2.isSelectOnly(), true);
         assertTrue(sample2.getHeaderStyle().isEqual(style1));
         assertEquals(sample2.isSubstitute(), true);

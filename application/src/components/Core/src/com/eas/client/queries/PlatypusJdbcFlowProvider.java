@@ -40,8 +40,8 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
-    public PlatypusJdbcFlowProvider(DbClient aClient, String aJdbcSourceId, String aSessionId, String aEntityId, DataSource aDataSource, DbMetadataCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        super(aJdbcSourceId, aSessionId, aDataSource, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
+    public PlatypusJdbcFlowProvider(DbClient aClient, String aJdbcSourceId, String aEntityId, DataSource aDataSource, DbMetadataCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        super(aJdbcSourceId, aDataSource, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
         entityId = aEntityId;
         client = aClient;
         cache = aCache;

@@ -11,15 +11,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import org.mozilla.javascript.Node;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.ExpressionStatement;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.VariableDeclaration;
-import org.mozilla.javascript.ast.VariableInitializer;
+import jdk.nashorn.internal.ir.FunctionNode;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 
@@ -40,6 +32,8 @@ public class JsCodeGenerator {
     }
 
     public void generateEventHandler(String componentName, Class<?> scriptClass, PlatypusFormDataObject dataObject) {
+        assert false: "Refactoring is needed.";
+        /*
         if (isFormObjectExistsInJs(dataObject.getAst())) {
             String handlerName = getDefaultEventPropertyName(scriptClass);
             int handlerPosition;
@@ -47,8 +41,8 @@ public class JsCodeGenerator {
                 handlerPosition = findHandlerPosition(componentName, handlerName, dataObject);
                 try {
                     if (handlerPosition == NOT_FOUND) {
-                        AstNode ctor = PlatypusFilesSupport.extractModuleConstructor(dataObject.getAst());
-                        int insertPosition = ctor.getAbsolutePosition() + ctor.getLength() - 1;
+                        FunctionNode ctor = PlatypusFilesSupport.extractModuleConstructor(dataObject.getAst());
+                        int insertPosition = ctor.getFinish() - 1;
                         String objAndProp = getObjectAndProp(FORM_OBJECT_NAME, componentName);
                         insertEventHandler(objAndProp, handlerName, insertPosition, dataObject);
                         goToEventHandler(insertPosition
@@ -69,6 +63,7 @@ public class JsCodeGenerator {
                 }
             }
         }
+        */
     }
 
     public boolean hasDefaultEventHandler(Class<?> scriptClass) {
@@ -79,7 +74,9 @@ public class JsCodeGenerator {
         return FormUtils.getDefaultEventPropertyName(scriptClass);
     }
     
-    private boolean isFormObjectExistsInJs(AstRoot astRoot) {
+    private boolean isFormObjectExistsInJs(FunctionNode astRoot) {
+        assert false: "Refactoring is needed.";
+        /*
         FunctionNode constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
         if (constructor != null && constructor.getBody() != null) {
             Iterator<Node> constructorTopLevelNodes = constructor.getBody().iterator();
@@ -96,6 +93,7 @@ public class JsCodeGenerator {
                 }
             }
         }
+        */
         return false;
     }
 
@@ -103,6 +101,7 @@ public class JsCodeGenerator {
         return FORM_OBJECT_NAME;
     }
 
+    /*
     private int findHandlerPosition(String componentName, String handlerName, PlatypusFormDataObject dataObject) {
         AstRoot astRoot = dataObject.getAst();
         FunctionNode constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
@@ -134,7 +133,7 @@ public class JsCodeGenerator {
         }
         return NOT_FOUND;
     }
-
+*/
     private void goToEventHandler(int handlerPosition, PlatypusFormDataObject dataObject) throws IOException, BadLocationException {
         getFormSupport(dataObject).openAt(getDocument(dataObject).createPosition(handlerPosition));
     }

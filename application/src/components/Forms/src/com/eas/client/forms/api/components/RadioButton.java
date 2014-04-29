@@ -10,7 +10,7 @@ import com.eas.client.forms.api.containers.ButtonGroup;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JRadioButton;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -29,7 +29,7 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
-    public RadioButton(String aText, boolean aSelected, Function aActionPerformedHandler) {
+    public RadioButton(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JRadioButton(aText, aSelected));
         setOnActionPerformed(aActionPerformedHandler);

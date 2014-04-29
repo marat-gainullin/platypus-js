@@ -5,6 +5,7 @@
 package com.eas.client.scripts;
 
 import com.eas.gui.CascadedStyle;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import java.awt.Color;
@@ -16,8 +17,10 @@ import java.awt.Color;
 @ScriptObj(name = "Color", jsDoc = "/**\n"
         + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
         + "*/")
-public class ScriptColor extends java.awt.Color {
+public class ScriptColor extends java.awt.Color implements HasPublished{
 
+    protected Object published;
+    
     @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
             + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space."
             + "* @param red Red compontent (optional)\n"
@@ -43,6 +46,16 @@ public class ScriptColor extends java.awt.Color {
 
     public ScriptColor(String aEncoded) {
         this(Color.decode(aEncoded));
+    }
+
+    @Override
+    public Object getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 
     @ScriptFunction

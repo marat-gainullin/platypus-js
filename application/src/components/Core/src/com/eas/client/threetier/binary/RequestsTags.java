@@ -68,8 +68,6 @@ public class RequestsTags extends CoreTags{
     //IsAppElementActualRequest
     public static final int TAG_TEXT_SIZE = 32;
     public static final int TAG_TEST_CRC32 = 33;
-    //ExecuteServerReportRequest
-    public static final int TAG_ARGUMENT_NAME = 34;
     /**
      * ******************* responses tags *************************************
      */
@@ -101,9 +99,6 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_ROLE = 52;
     //IsAppElementActualRequest.Response
     public static final int TAG_ACTUAL = 53;
-    //GetServerModulePropertyRequest.Response
-    public static final int TAG_FUNCTION_RESULT = 54;
-    //ExecuteServerReportRequest.Response
     //CreateServerModuleResponse
     public static final int TAG_MODULE_ID = 55;
     //CommitRequest.Response

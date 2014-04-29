@@ -43,6 +43,4 @@ public interface PlatypusRequestVisitor {
     public void visit(IsAppElementActualRequest rq) throws Exception;
     
     public void visit(AppElementRequest rq) throws Exception;
-       
-    public void visit(ExecuteServerReportRequest rq) throws Exception;
 }

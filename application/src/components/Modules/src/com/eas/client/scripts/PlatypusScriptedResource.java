@@ -2,6 +2,34 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.scripts;
 
@@ -13,7 +41,9 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
+import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -24,6 +54,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -44,7 +76,7 @@ public class PlatypusScriptedResource {
     protected static Client client;
     protected static AppCache cache;
     protected static PrincipalHost principalHost;
-    protected static CompiledScriptDocumentsHost scriptDocumentsHost;
+    protected static ScriptDocumentsHost scriptDocumentsHost;
 
     /**
      * Initializes a static fields.
@@ -54,7 +86,7 @@ public class PlatypusScriptedResource {
      * @param aScriptDocumentsHost Scripts host
      * @throws Exception If something goes wrong
      */
-    public static void init(Client aClient, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aScriptDocumentsHost) throws Exception {
+    public static void init(Client aClient, PrincipalHost aPrincipalHost, ScriptDocumentsHost aScriptDocumentsHost) throws Exception {
         assert cache == null : "Platypus application resources may be initialized only once.";
         client = aClient;
         cache = client.getAppCache();
@@ -76,7 +108,7 @@ public class PlatypusScriptedResource {
      *
      * @return Script documents host instance
      */
-    public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
+    public static ScriptDocumentsHost getScriptDocumentsHost() {
         return scriptDocumentsHost;
     }
 
@@ -122,14 +154,7 @@ public class PlatypusScriptedResource {
                 if (cache == null) {
                     throw new IllegalStateException("Platypus application resources have to be initialized first.");
                 }
-
-                String resourceId = translateResourcePath(aResourceId);
-                /*
-                 File test = new File(resourceId);
-                 if (test.exists()) {
-                 return FileUtils.readBytes(test);
-                 } else {
-                 */
+                String resourceId = normalizeResourcePath(aResourceId);
                 ApplicationElement appElement = cache.get(resourceId);
                 if (appElement != null) {
                     if (appElement.getType() == ClientConstants.ET_RESOURCE) {
@@ -139,7 +164,7 @@ public class PlatypusScriptedResource {
                             appElement = cache.get(resourceId);
                         }
                     } else {
-                        throw new ScriptRunner.NotResourceException(resourceId);
+                        throw new NotResourceException(resourceId);
                     }
                 }
                 if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
@@ -238,28 +263,47 @@ public class PlatypusScriptedResource {
     }
     public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to {0}";
 
-    protected static String translateResourcePath(String aPath) throws Exception {
-        /*
-         File test = new File(aPath);
-         if (test.exists()) {
-         // it seems, that id is a real file path
-         return test.getPath();
-         } else {
-         */
+    protected static String normalizeResourcePath(String aPath) throws Exception {
         if (aPath.startsWith("/")) {
             throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
         }
         if (aPath.startsWith("..") || aPath.startsWith(".")) {
-            /*
-             EvaluatorException ex = Context.reportRuntimeError("_");
-             ScriptStackElement[] stack = ex.getScriptStack();
-             traverse stack to reach non platypusStandardLib script and use it as base path
-             */
             throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
         }
         URI uri = new URI(null, null, aPath, null);
         return uri.normalize().getPath();
-        //}
+    }
+
+    @ScriptFunction(params = {"aResourceName"}, jsDoc = ""
+            + "/**\n"
+            + "* Translates an application element name into local path name.\n"
+            + "* Takes into account file cache in case of in-database application storage."
+            + "* Bypasses http[s] urls."
+            + "* Extension is omitted to give client code a chance to load various parts of an"
+            + "application element (e.g. js source file or model definition or form/report template)."
+            + "* @param aResourceName an relative path to the resource in an application.\n"
+            + "* @return The local path name to the application element files without extension.\n"
+            + "*/")
+    public static String translateScriptPath(String aResourceId) throws Exception {
+        if (aResourceId != null && !aResourceId.isEmpty()) {
+            Matcher htppMatcher = pattern.matcher(aResourceId);
+            if (htppMatcher.matches()) {
+                return aResourceId;
+            } else {
+                if (cache == null) {
+                    throw new IllegalStateException("Platypus application resources have to be initialized first.");
+                }
+                String resourceId = normalizeResourcePath(aResourceId);
+                String appElementCachedPath = cache.translateScriptPath(resourceId);
+                if (appElementCachedPath != null) {
+                    return appElementCachedPath;
+                } else {
+                    throw new IllegalArgumentException(String.format("Resource %s not found", aResourceId));
+                }
+            }
+        } else {
+            return null;
+        }
     }
 
     protected static Client getClient() {
@@ -279,5 +323,62 @@ public class PlatypusScriptedResource {
         }
         url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
         return url;
+    }
+    
+    protected static class NotResourceException extends Exception {
+
+        protected String resourceId;
+
+        public NotResourceException() {
+            super();
+        }
+
+        public NotResourceException(String aResourceId) {
+            super(aResourceId + " is not a platypus resource. Hint: may be it is regular platypus module.");
+            resourceId = aResourceId;
+        }
+
+        public String getResourceId() {
+            return resourceId;
+        }
+    }
+    
+    /**
+     * Accounting of already executed scripts. Allows to avoid reexecution.
+     */
+    protected static Set<String> executedScriptResources = new HashSet<>();
+
+    /**
+     * Executes a plain js resource.
+     *
+     * @param aResourceId
+     * @throws Exception
+     */
+    public static void executeScriptResource(final String aResourceId) throws Exception {
+        final String resourceId = PlatypusScriptedResource.normalizeResourcePath(aResourceId);
+        if (!executedScriptResources.contains(resourceId)) {
+            try {
+                String sourcePath = PlatypusScriptedResource.translateScriptPath(resourceId);
+                if (sourcePath != null) {
+                    URL sourceUrl;
+                    File test = new File(sourcePath);
+                    if (test.exists()) {
+                        sourceUrl = test.toURI().toURL();
+                    } else {
+                        sourceUrl = new URL(sourcePath);
+                    }
+                    ScriptUtils.exec(sourceUrl);
+                } else {
+                    throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
+                }
+            } catch (NotResourceException ex) {
+                // Silently return.
+                // There are cases, when require is called with regular platypus module id.
+                // In such case, we have to ignore require call in SE client, server and servlet (because of automatic dependecies resolution),
+                // and perform standard actions for html5 browser client.
+                return;
+            }
+            executedScriptResources.add(resourceId);
+        }
     }
 }

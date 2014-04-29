@@ -4,9 +4,7 @@
  */
 package com.eas.controls.events;
 
-import com.eas.controls.FormEventsExecutor;
 import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.*;
@@ -20,9 +18,7 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -66,62 +62,38 @@ public class ControlEventsIProxy implements MouseListener,
     public static final int componentAdded = 22;
     public static final int componentRemoved = 23;
     protected static final int CONTROL_EVENT_LAST = componentRemoved;
-    protected Component mHandlee = null;
-    protected FormEventsExecutor executor;
-    protected Scriptable eventThis;
-    protected Map<Integer, Function> handlers = new HashMap<>();
+    protected Component mHandlee;
+    protected JSObject eventThis;
+    protected Map<Integer, JSObject> handlers = new HashMap<>();
 
     public ControlEventsIProxy() {
         super();
     }
 
-    public ControlEventsIProxy(FormEventsExecutor aExecutor) {
-        this();
-        executor = aExecutor;
-    }
-
-    public Scriptable getEventThis() {
+    public JSObject getEventThis() {
         return eventThis;
     }
 
-    public void setEventThis(Scriptable aValue) {
+    public void setEventThis(JSObject aValue) {
         eventThis = aValue;
     }
 
-    public Map<Integer, Function> getHandlers() {
+    public Map<Integer, JSObject> getHandlers() {
         return handlers;
     }
 
     protected Object executeEvent(final int aEventId, final Object anEvent) {
         try {
-            return ScriptUtils.inContext(new ScriptAction() {
-                @Override
-                public Object run(Context cx) throws Exception {
-                    Function handler = handlers.get(aEventId);
-                    if (handler != null) {
-                        if (executor != null) {
-                            return executor.executeEvent(handler, eventThis != null ? eventThis : executor, ScriptUtils.javaToJS(anEvent, handler));
-                        } else {
-                            FormEventsExecutor fExecutor = lookupExecutor(handler);
-                            if (fExecutor != null) {
-                                return fExecutor.executeEvent(handler, eventThis != null ? eventThis : fExecutor, ScriptUtils.javaToJS(anEvent, handler));
-                            } else {
-                                return null;
-                            }
-                        }
-                    } else {
-                        return null;
-                    }
-                }
-            });
+            JSObject handler = handlers.get(aEventId);
+            if (handler != null) {
+                return ScriptUtils.toJava(handler.call(eventThis, new Object[]{ScriptUtils.toJs(anEvent)}));
+            } else {
+                return null;
+            }
         } catch (Exception ex) {
             Logger.getLogger(ControlEventsIProxy.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
-    }
-
-    protected FormEventsExecutor lookupExecutor(Scriptable aScope) {
-        return null;
     }
 
     public void setHandlee(Component aHandlee) {

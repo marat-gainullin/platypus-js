@@ -4,11 +4,8 @@
  */
 package com.eas.client.forms.api;
 
-import com.eas.client.forms.FormRunnerPrototype;
 import com.eas.client.forms.api.events.EventsWrapper;
-import com.eas.controls.FormEventsExecutor;
 import com.eas.controls.events.ControlEventsIProxy;
-import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -18,15 +15,6 @@ public class FormEventsIProxy extends ControlEventsIProxy {
 
     public FormEventsIProxy() {
         super();
-    }
-
-    public FormEventsIProxy(FormEventsExecutor aExecutor) {
-        super(aExecutor);
-    }
-
-    @Override
-    protected FormEventsExecutor lookupExecutor(Scriptable aScope) {
-        return FormRunnerPrototype.lookupFormEventsExecutor(aScope);
     }
 
     @Override

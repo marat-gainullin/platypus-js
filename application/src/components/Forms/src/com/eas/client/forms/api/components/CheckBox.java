@@ -7,7 +7,7 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.Component;
 import com.eas.script.ScriptFunction;
 import javax.swing.JCheckBox;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -34,7 +34,7 @@ public class CheckBox extends Component<JCheckBox> {
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected",  "actionPerformed"})
-    public CheckBox(String aText, boolean aSelected, Function aActionPerformedHandler) {
+    public CheckBox(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JCheckBox(aText, aSelected));
         setOnActionPerformed(aActionPerformedHandler);

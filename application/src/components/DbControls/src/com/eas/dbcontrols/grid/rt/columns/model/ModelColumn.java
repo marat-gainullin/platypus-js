@@ -8,30 +8,30 @@ import com.bearsoft.rowset.Rowset;
 import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.HasStyle;
 import com.eas.gui.CascadedStyle;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import com.eas.script.HasPublished;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * The base clas for table's model's column classes.
  *
  * @author mg
  */
-public class ModelColumn implements HasStyle {
+public class ModelColumn implements HasStyle, HasPublished {
 
-    protected Function cellsHandler;
-    protected Function selectHandler;
+    protected JSObject onRender;
+    protected JSObject onSelect;
     protected Rowset rowset;
     protected boolean readOnly;
     protected HasStyle styleHost;
-    protected Scriptable eventsThis;
+    protected Object published;
     protected ScalarDbControl view;
     protected ScalarDbControl editor;
 
-    public ModelColumn(Rowset aRowset, Function aCellsHandler, Function aSelectHandler, boolean aReadOnly, HasStyle aStyleHost, ScalarDbControl aView, ScalarDbControl aEditor) {
+    public ModelColumn(Rowset aRowset, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, HasStyle aStyleHost, ScalarDbControl aView, ScalarDbControl aEditor) {
         super();
         rowset = aRowset;
-        cellsHandler = aCellsHandler;
-        selectHandler = aSelectHandler;
+        onRender = aOnRender;
+        onSelect = aOnSelect;
         readOnly = aReadOnly;
         styleHost = aStyleHost;
         view = aView;
@@ -74,25 +74,25 @@ public class ModelColumn implements HasStyle {
      *
      * @return
      */
-    public Function getCellsHandler() {
-        return cellsHandler;
+    public JSObject getCellsHandler() {
+        return onRender;
     }
 
-    public void setCellsHandler(Function aValue) {
-        cellsHandler = aValue;
+    public void setCellsHandler(JSObject aValue) {
+        onRender = aValue;
     }
 
     /**
      * Returns script handler, used for select a value of the cell.
      */
-    public Function getSelectHandler() {
-        return selectHandler;
+    public JSObject getSelectHandler() {
+        return onSelect;
     }
 
-    public void setSelectHandler(Function aValue) throws Exception {
-        selectHandler = aValue;
+    public void setSelectHandler(JSObject aValue) throws Exception {
+        onSelect = aValue;
         if (editor != null) {
-            editor.extraCellControls(selectHandler, editor.haveNullerAction());
+            editor.extraCellControls(onSelect, editor.haveNullerAction());
         }
     }
 
@@ -104,11 +104,13 @@ public class ModelColumn implements HasStyle {
         readOnly = aValue;
     }
 
-    public Scriptable getEventsThis() {
-        return eventsThis;
+    @Override
+    public Object getPublished() {
+        return published;
     }
 
-    public void setEventsThis(Scriptable aValue) {
-        eventsThis = aValue;
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 }

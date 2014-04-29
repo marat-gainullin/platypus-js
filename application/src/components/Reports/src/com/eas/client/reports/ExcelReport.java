@@ -1,6 +1,9 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.reports;
 
@@ -14,7 +17,6 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
@@ -26,16 +28,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import jdk.nashorn.api.scripting.JSObject;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.*;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
@@ -46,13 +45,12 @@ public class ExcelReport {
     public static final String FIXED_SIZE_COLLECTION_FLAG_NAME = "fixed";
     public static final String REPORT_DYNA_CLASS_PREFIX = "PlatypusReportClass_";
     protected ApplicationModel<?, ?, ?, ?> model;
-    protected ScriptableObject so;
+    protected JSObject scriptData;
     protected CompactBlob template;
     protected boolean validTemplate = true;
     protected boolean templateModified;
     protected String templatePath;
-    private String format;
-    protected Map<String, ScriptableRowset<?>> fakeRowsetes = new HashMap<>();
+    protected String format;
     protected Map<String, Object> generated;
 
     /**
@@ -61,19 +59,25 @@ public class ExcelReport {
     public ExcelReport() {
         super();
     }
-    
+
     public ExcelReport(String aFormat) {
         super();
         format = aFormat;
     }
 
-    public ExcelReport(ApplicationModel<?, ?, ?, ?> aModel, ScriptableObject aSo) {
+    public ExcelReport(ApplicationModel<?, ?, ?, ?> aModel, JSObject aScriptData, String aFormat) {
         super();
         model = aModel;
-        so = aSo;
-        if (so instanceof ReportRunner) {
-            format = ((ReportRunner) so).format;
-        }
+        format = aFormat;
+        scriptData = aScriptData;
+    }
+
+    public JSObject getScriptData() {
+        return scriptData;
+    }
+
+    public void setScriptData(JSObject aValue) {
+        scriptData = aValue;
     }
 
     public CompactBlob getTemplate() throws Exception {
@@ -88,14 +92,6 @@ public class ExcelReport {
             templatePath = null;
             templateModified = true;
         }
-    }
-
-    public void put(String aName, ScriptableRowset<?> aRowset) {
-        fakeRowsetes.put(aName, aRowset);
-    }
-
-    public void remove(String aName) {
-        fakeRowsetes.remove(aName);
     }
 
     public void execute(String aPath2Save) throws Exception {
@@ -235,7 +231,7 @@ public class ExcelReport {
             try (InputStream is = template.getBinaryStream()) {
                 XLSTransformer transformer = new XLSTransformer();
                 transformer.registerRowProcessor(new ExcelRowProcessor());
-                generateRowsetsNamedMap(transformer);
+                generateDataNamedMap(transformer);
                 return transformer.transformXLS(is, generated);
             }
         } else {
@@ -243,74 +239,72 @@ public class ExcelReport {
         }
     }
 
+    private static boolean isPrimitive(Object aValue) {
+        aValue = ScriptUtils.toJava(aValue);
+        return aValue instanceof Number || aValue instanceof Boolean
+                || aValue instanceof Date || aValue instanceof String
+                || aValue == null;
+    }
+
     private Object wrapScriptableObject(Object aSubject) {
-        if (aSubject instanceof List) {
-            return wrapScriptableList((List<Object>) aSubject);
-        } else if (aSubject instanceof Map) {
-            return wrapScriptableMap((Map) aSubject);
-        } else {
-            return ScriptUtils.js2Java(aSubject);
-        }
-    }
-
-    private DynaBean wrapScriptableMap(Map<?, ?> aSubject) {
-        List<DynaProperty> props = new ArrayList<>();
-        for (Object subjectKey : aSubject.keySet()) {
-            if (subjectKey instanceof String) {
-                DynaProperty dp = new DynaProperty((String) subjectKey);
-                props.add(dp);
-            }
-        }
-        DynaClass subjectClass = new BasicDynaClass(REPORT_DYNA_CLASS_PREFIX + String.valueOf(IDGenerator.genID()), null, props.toArray(new DynaProperty[]{}));
-        BasicDynaBean bean = new BasicDynaBean(subjectClass);
-        for (Object oe : aSubject.entrySet()) {
-            bean.set((String) ((Entry) oe).getKey(), wrapScriptableObject(((Entry) oe).getValue()));
-        }
-        return bean;
-    }
-
-    private List<Object> wrapScriptableList(List<Object> aSubject) {
-        List<Object> wrappedList = new ArrayList<>();
-        for (Object le : aSubject) {
-            if (le instanceof List<?>) {
-                wrappedList.add(wrapScriptableList((List<Object>) le));
-            } else if (le instanceof Map<?, ?>) {
-                wrappedList.add(wrapScriptableMap((Map<?, ?>) le));
+        if (isPrimitive(aSubject)) {
+            return ScriptUtils.toJava(aSubject);
+        } else if (aSubject instanceof JSObject) {
+            JSObject jsSubject = (JSObject) aSubject;
+            if (jsSubject.isArray()) {
+                return wrapScriptArray(jsSubject);
             } else {
-                wrappedList.add(wrapScriptableObject(le));
+                List<DynaProperty> props = new ArrayList<>();
+                for (String subjectKey : jsSubject.keySet()) {
+                    DynaProperty dp = new DynaProperty(subjectKey);
+                    props.add(dp);
+                }
+                DynaClass subjectClass = new BasicDynaClass(REPORT_DYNA_CLASS_PREFIX + String.valueOf(IDGenerator.genID()), null, props.toArray(new DynaProperty[]{}));
+                BasicDynaBean bean = new BasicDynaBean(subjectClass);
+                for (DynaProperty prop : props) {
+                    bean.set(prop.getName(), wrapScriptableObject(jsSubject.getMember(prop.getName())));
+                }
+                return bean;
             }
+        } else {
+            return null;
+        }
+    }
+
+    private List<Object> wrapScriptArray(JSObject aSubject) {
+        List<Object> wrappedList = new ArrayList<>();
+        Number length = (Number) aSubject.getMember("length");
+        for (int i = 0; i < length.intValue(); i++) {
+            Object le = aSubject.getSlot(i);
+            wrappedList.add(wrapScriptableObject(le));
         }
         return wrappedList;
     }
 
-    private void generateRowsetsNamedMap(XLSTransformer aTransformer) throws Exception {
-        if (model != null && so != null) {
-            generated = new HashMap<>();
-            for (Object sid : so.getIds()) {
-                if (sid instanceof String) {
-                    Object subject = so.get(sid);
-                    if (!(subject instanceof Function)) {
-                        if (subject instanceof List<?>) {
-                            List<?> wrappedList = wrapScriptableList((List<Object>) subject);
-                            generated.put((String) sid, wrappedList);
-                            if (subject instanceof Scriptable) {
-                                Scriptable scrSubject = (Scriptable) subject;
-                                Object oFixed = scrSubject.get(FIXED_SIZE_COLLECTION_FLAG_NAME, scrSubject);
-                                if (Boolean.TRUE.equals(oFixed)) {
-                                    aTransformer.markAsFixedSizeCollection((String) sid);
-                                }
-                            }
-                        } else if (subject instanceof Map) {
-                            DynaBean bean = wrapScriptableMap((Map) subject);
-                            generated.put((String) sid, bean);
-                        } else if(subject instanceof Number || subject instanceof Boolean ||
-                                subject instanceof Date || subject instanceof String ||
-                                subject == null) {// Atomic values
-                            generated.put((String) sid, ScriptUtils.js2Java(subject));
+    private void generateDataNamedMap(XLSTransformer aTransformer) throws Exception {
+        generated = new HashMap<>();
+        if (scriptData != null) {
+            for (String sid : scriptData.keySet()) {
+                Object subject = scriptData.getMember(sid);
+                if (isPrimitive(subject)) {// Atomic values
+                    generated.put(sid, ScriptUtils.toJava(subject));
+                } else if (subject instanceof JSObject) {// Non-atomic values
+                    JSObject jsSubject = (JSObject) subject;
+                    if (jsSubject.isArray()) {
+                        List<?> wrappedList = wrapScriptArray(jsSubject);
+                        generated.put((String) sid, wrappedList);
+                        Object oFixed = ScriptUtils.toJava(jsSubject.hasMember(FIXED_SIZE_COLLECTION_FLAG_NAME) ? jsSubject.getMember(FIXED_SIZE_COLLECTION_FLAG_NAME) : null);
+                        if (Boolean.TRUE.equals(oFixed)) {
+                            aTransformer.markAsFixedSizeCollection((String) sid);
                         }
+                    } else {
+                        Object wrapped = wrapScriptableObject(jsSubject);
+                        generated.put((String) sid, wrapped);
                     }
                 }
             }
+        }
+        if (model != null) {
             for (ApplicationEntity<?, ?, ?> entity : model.getAllEntities().values()) {
                 if (entity != null) {
                     String ldsName = entity.getName();
@@ -334,24 +328,6 @@ public class ExcelReport {
                     }
                 }
             }
-            for (Entry<String, ScriptableRowset<?>> entry : fakeRowsetes.entrySet()) {
-                if (entry != null) {
-                    String lName = entry.getKey();
-                    if (entry.getValue() != null
-                            && entry.getValue().getEntity() != null
-                            && entry.getValue().getEntity().getRowset() != null) {
-                        Rowset rowset = entry.getValue().getEntity().getRowset();
-                        rowset.beforeFirst();
-                        RowSetDynaClass cls = new RowSetDynaClass(new ResultSetImpl(rowset, rowset.getConverter()), false);
-                        generated.put(lName, cls.getRows());
-                        if (!rowset.isEmpty()) {
-                            rowset.first();
-                        }
-                    }
-                }
-            }
-        } else {
-            throw new Exception("Model is absent. Can't deal with null.");
         }
     }
 
@@ -407,11 +383,11 @@ public class ExcelReport {
     public boolean isTemplateModified() {
         return templateModified;
     }
-    
-    public void setTemplateModified(boolean aValue){
+
+    public void setTemplateModified(boolean aValue) {
         templateModified = aValue;
     }
-    
+
     protected boolean canCreateTemplateFile() {
         assert templatePath != null;
         File file = new File(templatePath);

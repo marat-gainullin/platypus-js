@@ -8,7 +8,7 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.HasStyle;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Model's column, bound with some additional information about how to achieve
@@ -29,9 +29,15 @@ public class FieldModelColumn extends ModelColumn {
      * @param aRowset Rowset instance to be used as data source of the model's
      * column.
      * @param aColumnIndex Rowset's field index.
+     * @param aCellsHander
+     * @param aSelectHandler
+     * @param aReadOnly
+     * @param aStyleHost
+     * @param aView
+     * @param aEditor
      * @see Rowset
      */
-    public FieldModelColumn(Rowset aRowset, int aColumnIndex, Function aCellsHander, Function aSelectHandler, boolean aReadOnly, HasStyle aStyleHost, ScalarDbControl aView, ScalarDbControl aEditor) {
+    public FieldModelColumn(Rowset aRowset, int aColumnIndex, JSObject aCellsHander, JSObject aSelectHandler, boolean aReadOnly, HasStyle aStyleHost, ScalarDbControl aView, ScalarDbControl aEditor) {
         super(aRowset, aCellsHander, aSelectHandler, aReadOnly, aStyleHost, aView, aEditor);
         rowsetField = aColumnIndex;
     }

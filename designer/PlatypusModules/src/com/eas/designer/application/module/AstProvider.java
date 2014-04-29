@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.module;
 
-import org.mozilla.javascript.ast.AstRoot;
+import jdk.nashorn.internal.ir.FunctionNode;
 
 /**
  *
@@ -12,8 +12,8 @@ import org.mozilla.javascript.ast.AstRoot;
  */
 public interface AstProvider {
     
-    AstRoot getAst();
+    FunctionNode getAst();
     
-    void setAst(AstRoot anAstRoot);
+    void setAst(FunctionNode anAstRoot);
     
 }

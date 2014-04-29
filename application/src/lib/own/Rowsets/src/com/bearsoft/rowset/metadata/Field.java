@@ -9,6 +9,7 @@
  */
 package com.bearsoft.rowset.metadata;
 
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeSupport;
 
@@ -25,7 +26,7 @@ import java.beans.PropertyChangeSupport;
  *
  * @author mg
  */
-public class Field {
+public class Field implements HasPublished {
 
     public static int UNDEFINED_FILED_INDEX = -1;
     // Our user-supplied information
@@ -46,7 +47,7 @@ public class Field {
     protected String tableName;
     protected String schemaName;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-    protected Object tag;
+    protected Object published;
     public static final String PK_PROPERTY = "pk";
     public static final String STRONG4INSERT_PROPERTY = "strong4Insert";
     public static final String FK_PROPERTY = "fk";
@@ -176,7 +177,7 @@ public class Field {
      * Sets foreign key specification to this field, making it the reference to
      * some table.
      *
-     * @param fk Foreign key specification to be set to this field.
+     * @param aValue Foreign key specification to be set to this field.
      */
     public void setFk(ForeignKeySpec aValue) {
         ForeignKeySpec oldValue = fk;
@@ -201,7 +202,7 @@ public class Field {
     /**
      * Sets readonly flag to this field.
      *
-     * @param readonly Flag to be set to this field.
+     * @param aValue Flag to be set to this field.
      */
     @ScriptFunction
     public void setReadonly(boolean aValue) {
@@ -352,7 +353,7 @@ public class Field {
     /**
      * Sets the field's type description
      *
-     * @param typeInfo The filed's type description
+     * @param aValue The filed's type description
      * @see DataTypeInfo
      */
     @ScriptFunction
@@ -509,7 +510,7 @@ public class Field {
     /**
      * Sets the field's signed state.
      *
-     * @param signed Field's signed flag.
+     * @param aValue Field's signed flag.
      */
     @ScriptFunction
     public void setSigned(boolean aValue) {
@@ -535,7 +536,7 @@ public class Field {
     /**
      * Sets the field's nullable state.
      *
-     * @param nullable Field's nullable flag.
+     * @param aValue Field's nullable flag.
      */
     @ScriptFunction
     public void setNullable(boolean aValue) {
@@ -659,11 +660,13 @@ public class Field {
         return sb.toString();
     }
 
-    public Object getTag() {
-        return tag;
+    @Override
+    public Object getPublished() {
+        return published;
     }
 
-    public void setTag(Object aValue) {
-        tag = aValue;
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 }

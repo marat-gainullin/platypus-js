@@ -12,7 +12,7 @@ import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -101,13 +101,13 @@ public class TabbedPane extends Container<JTabbedPane> {
     
     @ScriptFunction(jsDoc = ON_STATE_CHANGED_JSDOC)
     @EventMethod(eventClass = ChangeEvent.class)
-    public Function getOnStateChanged() {
+    public JSObject getOnStateChanged() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.stateChanged) : null;
     }
 
     @ScriptFunction
-    public void setOnStateChanged(Function aValue) {
+    public void setOnStateChanged(JSObject aValue) {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.stateChanged, aValue);

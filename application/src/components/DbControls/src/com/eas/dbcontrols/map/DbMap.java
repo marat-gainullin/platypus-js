@@ -18,7 +18,6 @@ import com.eas.client.controls.geopane.events.GeoPaneViewpointListener;
 import com.eas.client.controls.geopane.events.MapClickedEvent;
 import com.eas.client.controls.geopane.events.ViewpointScaledEvent;
 import com.eas.client.controls.geopane.events.ViewpointTranslatedEvent;
-import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.GisUtilities;
 import com.eas.client.geo.PointSymbol;
 import com.eas.client.geo.RowsetFeatureDescriptor;
@@ -29,8 +28,6 @@ import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.client.model.ModelEntityRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.script.RowHostObject;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.dbcontrols.DbControl;
 import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.dbcontrols.IconCache;
@@ -39,8 +36,10 @@ import com.eas.dbcontrols.map.actions.ClearSelectionAction;
 import com.eas.dbcontrols.map.actions.DeleteAction;
 import com.eas.dbcontrols.map.mousetools.MouseTools;
 import com.eas.design.Undesignable;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptUtils;
 import com.eas.store.PropertiesSimpleFactory;
+import com.eas.util.gis.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -64,6 +63,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import jdk.nashorn.api.scripting.JSObject;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
@@ -75,10 +75,6 @@ import org.geotools.map.Layer;
 import org.geotools.map.MapContent;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.styling.Style;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -156,12 +152,12 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     private ProjectedCRS projectedCrs;
     protected MouseTools tools;
     private String backingUrl;
-    private Scriptable scriptScope;
-    private Scriptable eventThis;
+    private Object published;
     protected SelectionDataStore selectionStore;
     protected List<SelectionEntry> emptySelectionList = new ArrayList<>();
     protected final DatamodelDataStore dataStore = new DatamodelDataStore();
-    protected Function eventHandler;
+    protected JSObject onEvent;
+    protected JSObject onToolTip;
     protected String mapTitle;
     protected List<RowsetFeatureDescriptor> features = new ArrayList<>();
     protected String crsWkt;
@@ -169,6 +165,16 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public DbMap() {
         setLayout(new BorderLayout());
         initializeDesign();
+    }
+
+    @Override
+    public Object getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 
     @Override
@@ -210,23 +216,6 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         }
     }
 
-    public Scriptable getScriptScope() {
-        return scriptScope;
-    }
-
-    public void setScriptScope(Scriptable aValue) {
-        scriptScope = aValue;
-    }
-
-    @Undesignable
-    public Scriptable getEventThis() {
-        return eventThis;
-    }
-
-    public void setEventThis(Scriptable aValue) {
-        eventThis = aValue;
-    }
-
     @Override
     public boolean isRuntime() {
         return model != null && model.isRuntime();
@@ -237,12 +226,12 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     @Undesignable
-    public Function getMapEventListener() {
-        return eventHandler;
+    public JSObject getMapEventListener() {
+        return onEvent;
     }
 
-    public void setMapEventListener(Function aValue) {
-        eventHandler = aValue;
+    public void setMapEventListener(JSObject aValue) {
+        onEvent = aValue;
     }
 
     public String getMapTitle() {
@@ -302,13 +291,12 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
                         mapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
                     }
                 }
-                
 
                 selectionStore = new SelectionDataStore(projectedCrs.getBaseCRS());
                 screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_PHANTOM_TYPE_NAME), GisUtilities.buildSelectionPhantomStyle()));
                 screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_TYPE_NAME), GisUtilities.buildSelectionStyle()));
                 screenMapContext.layers().get(screenMapContext.layers().size() - 1).setSelected(true);
-                
+
                 logger.fine("Setting up the geo pane."); //NOI18N
                 if (backingUrl != null) {
                     pane = new JGeoPane(mapContext, activeMapContext, screenMapContext, backingUrl);
@@ -345,7 +333,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public ProjectedCRS createProjectedCrs() throws FactoryException {
         if (crsWkt != null && !crsWkt.isEmpty()) {
             CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(null);
-            return  (ProjectedCRS)crsFactory.createFromWKT(crsWkt);
+            return (ProjectedCRS) crsFactory.createFromWKT(crsWkt);
         } else {
             return null;
         }
@@ -356,17 +344,17 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
      * instance.
      *
      * @param aLayerTitle Title of created layer.
-     * @param aRowset ScriptableRowset instance, the new layer will be based on.
+     * @param aEntity ScriptableRowset instance, the new layer will be based on.
      * @param aGeometryClass Class of the geometry to be used in new layer.
      * @param aStyleAttributes
      * @return MapLayer instance, just created.
      * @throws java.lang.Exception
      */
-    public Layer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
+    public Layer addLayer(String aLayerTitle, ApplicationEntity<?, ?, ?> aEntity, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
         Layer layer;
         MapContent lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
-            RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aRowset.getEntity(), new ModelEntityRef(aRowset.getEntity().getEntityId()));
+            RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aEntity, new ModelEntityRef(aEntity.getEntityId()));
             newFeatureDescriptor.setActive(true);
             newFeatureDescriptor.setGeometryBindingClass(aGeometryClass);
             newFeatureDescriptor.setCrsWkt(projectedCrs.getBaseCRS().toWKT());
@@ -428,7 +416,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     public Layer[] removeAllLayers() {
-        List<Layer>lightweightLayers;
+        List<Layer> lightweightLayers;
         MapContent lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
             lightweightLayers = lightweightMapContext.layers();
@@ -571,8 +559,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     /**
-     * Tests if
-     * <code>aHitPoint</code> intersects any of shapes.
+     * Tests if <code>aHitPoint</code> intersects any of shapes.
      *
      * @param aHitPoint Point to test with. The point must be in geo
      * coordiantes.
@@ -611,8 +598,8 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     /**
-     * Tests if
-     * <code>aHitPoint</code> intersects any of already selected shapes.
+     * Tests if <code>aHitPoint</code> intersects any of already selected
+     * shapes.
      *
      * @param aHitPoint Point to test with. The point must be in geo
      * coordiantes.
@@ -730,16 +717,10 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         pane.getActionMap().put(aAction.getClass().getSimpleName(), aAction);
     }
 
-    public void fireScriptEvent(final Object aEvent) {
-        if (eventHandler != null && (eventThis != null || scriptScope != null)) {
+    public void fireScriptEvent(final HasPublished aEvent) {
+        if (onEvent != null && published != null) {
             try {
-                ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        eventHandler.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{aEvent});
-                        return null;
-                    }
-                });
+                onEvent.call(published, new Object[]{aEvent.getPublished()});
             } catch (Exception ex) {
                 Logger.getLogger(DbMap.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -747,9 +728,8 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     public String beforeToolTipShow(Row aRow, ApplicationEntity<?, ?, ?> aEntity) throws Exception {
-        Object func = scriptScope.get(BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, scriptScope);
-        if (func != null && func instanceof Function) {
-            Object result = ScriptUtils.js2Java(ScriptableObject.callMethod(scriptScope, BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, new Object[]{RowHostObject.publishRow(scriptScope, aRow, aEntity)}));
+        if (onToolTip != null) {
+            Object result = ScriptUtils.toJava(onToolTip.call(published, new Object[]{aRow != null ? aRow.getPublished() : null}));
             if (result instanceof String) {
                 return (String) result;
             }
@@ -757,14 +737,12 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         return null;
     }
 
-    ;
-
     @Undesignable
-    public Function getOnEvent() {
-        return eventHandler;
+    public JSObject getOnEvent() {
+        return onEvent;
     }
 
-    public void setOnEvent(Function aValue) {
-        eventHandler = aValue;
+    public void setOnEvent(JSObject aValue) {
+        onEvent = aValue;
     }
 }

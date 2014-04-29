@@ -13,7 +13,7 @@ import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -37,14 +37,14 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
-    public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, Function aActionPerformedHandler) {
+    public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JToggleButton(aText, aIcon, aSelected));
         delegate.setIconTextGap(aIconTextGap);
         setOnActionPerformed(aActionPerformedHandler);
     }
 
-    public ToggleButton(String aText, Icon aIcon, boolean aSelected, Function aActionPerformedHandler) {
+    public ToggleButton(String aText, Icon aIcon, boolean aSelected, JSObject aActionPerformedHandler) {
         this(aText, aIcon, aSelected, 4, aActionPerformedHandler);
     }
 

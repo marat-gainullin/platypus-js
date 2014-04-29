@@ -4,10 +4,11 @@
  */
 package com.eas.client.application;
 
-import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.scripts.ScriptRunnerPrototype;
+import com.eas.client.metadata.ApplicationElement;
+import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 public class ScriptsCache {
     
-    protected Map<String, ScriptRunner> cache = new HashMap<>();
+    protected Map<String, JSObject> cache = new HashMap<>();
     protected PlatypusClientApplication app;
 
     public ScriptsCache(PlatypusClientApplication aApp) {
@@ -23,20 +24,19 @@ public class ScriptsCache {
         app = aApp;
     }
 
-    public synchronized ScriptRunner get(String aModuleId) throws Exception {        
-        ScriptRunner runner = cache.get(aModuleId);
-        if(runner != null && !app.getClient().getAppCache().isActual(runner.getApplicationElementId(), runner.getTxtContentLength(), runner.getTxtCrc32())){
-            runner = null;
+    public synchronized JSObject get(String aModuleId) throws Exception {        
+        JSObject instance = cache.get(aModuleId);
+        ApplicationElement appElement = app.getClient().getAppCache().get(aModuleId);
+        if(instance != null && !app.getClient().getAppCache().isActual(aModuleId, appElement.getTxtContentLength(), appElement.getTxtCrc32())){
+            instance = null;
             cache.remove(aModuleId);
-            app.getClient().getAppCache().remove(aModuleId);
         }
-        if (runner == null) {
-            runner = new ScriptRunner(aModuleId, app.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), app, app, new Object[]{});
-            runner.setPrototype(ScriptRunnerPrototype.getInstance());
-            runner.execute();
-            cache.put(aModuleId, runner);
+        if (instance == null) {
+            instance = ScriptUtils.createModule(aModuleId);
+            //runner = new ScriptRunner(aModuleId, app.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), app, app, new Object[]{});
+            cache.put(aModuleId, instance);
         }
-        return runner;
+        return instance;
     }
 
     public synchronized void clear() {

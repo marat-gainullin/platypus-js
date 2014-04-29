@@ -22,7 +22,6 @@ import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import static com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest.ArgumentType.STRING;
-import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
@@ -42,7 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.mozilla.javascript.Undefined;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
@@ -212,7 +211,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     args.add(null);
                     break;
                 case RequestsTags.TAG_UNDEFINED_ARGUMENT:
-                    args.add(Undefined.instance);
+                    args.add(Undefined.getUndefined());
                     break;
                 case RequestsTags.TAG_ARGUMENT_TYPE:
                     at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(node.getInt());
@@ -363,41 +362,5 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
             throw new ProtoReaderException("No application element id");
         }
         rq.setAppElementId(input.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
-    }
-
-    @Override
-    public void visit(ExecuteServerReportRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        ExecuteServerModuleMethodRequest.ArgumentType at = null;
-        String name = "";
-        final List<ExecuteServerReportRequest.NamedArgument> args = new ArrayList<>();
-        final Iterator<ProtoNode> it = input.iterator();
-        while (it.hasNext()) {
-            final ProtoNode node = it.next();
-            switch (node.getNodeTag()) {
-                case RequestsTags.TAG_MODULE_NAME:
-                    rq.setModuleName(node.getString());
-                    break;
-                case RequestsTags.TAG_ARGUMENT_NAME:
-                    name = node.getString();
-                    break;
-                case RequestsTags.TAG_NULL_ARGUMENT:
-                    args.add(new ExecuteServerReportRequest.NamedArgument(name, null));
-                    break;
-                case RequestsTags.TAG_UNDEFINED_ARGUMENT:
-                    args.add(new ExecuteServerReportRequest.NamedArgument(name, Undefined.instance));
-                    break;
-                case RequestsTags.TAG_ARGUMENT_TYPE:
-                    at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(node.getInt());
-                    break;
-                case RequestsTags.TAG_ARGUMENT_VALUE: {
-                    assert at != null : "Argument type is not known";
-                    args.add(new ExecuteServerReportRequest.NamedArgument(name, getValue(node, at)));
-                    break;
-                }
-            }
-        }
-        ExecuteServerReportRequest.NamedArgument[] result = new ExecuteServerReportRequest.NamedArgument[0];
-        rq.setArguments(args.toArray(result));
     }
 }

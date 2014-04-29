@@ -6,26 +6,16 @@ package com.eas.client.application;
 
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
-import com.eas.client.forms.FormRunner;
-import com.eas.client.forms.FormRunnerPrototype;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.reports.ReportRunner;
-import com.eas.client.reports.ReportRunnerPrototype;
-import com.eas.client.reports.ServerReportProxyPrototype;
-import com.eas.client.scripts.CompiledScriptDocuments;
-import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.scripts.ScriptRunnerPrototype;
-import com.eas.client.scripts.ServerScriptProxyPrototype;
+import com.eas.client.scripts.ScriptDocuments;
+import com.eas.client.scripts.ScriptDocumentsHost;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import java.security.AccessControlException;
+import jdk.nashorn.api.scripting.JSObject;
 import org.junit.*;
 import static org.junit.Assert.*;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
 
 /**
  *
@@ -64,11 +54,11 @@ public class ScriptRunnerSecurityTest {
     public static final String UNKNOWN_TEST_TYPE_MESSAGE = "Unknown test type";
     public static AppClient nativeClient;
     public static AppClient httpClient;
-    private static CompiledScriptDocuments scriptDocuments;
-    private static CompiledScriptDocumentsHost scriptDocumentsHost;
-    private static ScriptRunner unsecureScriptRunner;
-    private static ScriptRunner secureScriptRunner;
-    private static ScriptRunner secureFunctionScriptRunner;
+    private static ScriptDocuments scriptDocuments;
+    private static ScriptDocumentsHost scriptDocumentsHost;
+    private static JSObject unsecureScriptRunner;
+    private static JSObject secureScriptRunner;
+    private static JSObject secureFunctionScriptRunner;
 
     public ScriptRunnerSecurityTest() {
     }
@@ -82,22 +72,12 @@ public class ScriptRunnerSecurityTest {
         if (nativeClient == null) {
             nativeClient = new PlatypusNativeClient("platypus://localhost:8500/");
             httpClient = new PlatypusHttpClient("http://localhost:8080/application/");
-            scriptDocumentsHost = new CompiledScriptDocumentsHost() {
+            scriptDocumentsHost = new ScriptDocumentsHost() {
                 @Override
-                public CompiledScriptDocuments getDocuments() {
+                public ScriptDocuments getDocuments() {
                     return scriptDocuments;
                 }
-
-                @Override
-                public void defineJsClass(String aClassName, ApplicationElement aAppElement) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
             };
-            ScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
-            ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
-            ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
-            ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
-            FormRunnerPrototype.init(ScriptUtils.getScope(), true);
         }
     }
 
@@ -194,7 +174,7 @@ public class ScriptRunnerSecurityTest {
     }
 
     public static void setupScriptDocuments(AppClient client) {
-        scriptDocuments = new ClientCompiledScriptDocuments(client);
+        scriptDocuments = new ClientScriptDocuments(client);
     }
 
     private void setupModules(int moduleType, AppClient client) throws Exception {
@@ -212,14 +192,17 @@ public class ScriptRunnerSecurityTest {
         }
     }
 
-    private ScriptRunner getModule(int moduleType, SecurityTestType testType, AppClient client) throws Exception {
+    private JSObject getModule(int moduleType, SecurityTestType testType, AppClient client) throws Exception {
         switch (moduleType) {
             case ClientConstants.ET_COMPONENT:
-                return new ScriptRunner(getComponentAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
+                return ScriptUtils.createModule(getComponentAppElementId(testType));
+                //return new ScriptRunner(getComponentAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
             case ClientConstants.ET_FORM:
-                return new FormRunner(getFormAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
+                return ScriptUtils.createModule(getFormAppElementId(testType));
+                //return new FormRunner(getFormAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
             case ClientConstants.ET_REPORT:
-                return new ReportRunner(getReportAppelementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
+                return ScriptUtils.createModule(getReportAppElementId(testType));
+                //return new ReportRunner(getReportAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
         }
         throw new IllegalArgumentException(UNKNOWN_MODULE_TYPE_MESSAGE);//NOI18N
     }
@@ -248,7 +231,7 @@ public class ScriptRunnerSecurityTest {
         throw new IllegalArgumentException(UNKNOWN_TEST_TYPE_MESSAGE);
     }
 
-    private static String getReportAppelementId(SecurityTestType testType) {
+    private static String getReportAppElementId(SecurityTestType testType) {
         switch (testType) {
             case UNSECURE:
                 return UNSECURE_REPORT_ID;
@@ -260,26 +243,20 @@ public class ScriptRunnerSecurityTest {
         throw new IllegalArgumentException(UNKNOWN_TEST_TYPE_MESSAGE);
     }
 
-    private void assertHasPermissionExecuteMethod(final ScriptRunner aRunner, final boolean hasPermission) throws Exception {
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                if (hasPermission) {
-                    Function fun = (Function) aRunner.get("test");
-                    Object result = fun.call(cx, aRunner, aRunner, new Object[0]);
-                    assertNotNull(result);
-                    assertEquals(result, "test");
-                } else {
-                    try {
-                        Function fun = (Function) aRunner.get("test");
-                        Object result = fun.call(cx, aRunner, aRunner, new Object[0]);
-                        fail("Access permission assertion failed");
-                    } catch (Exception ex) {
-                        assertTrue(ex instanceof AccessControlException);
-                    }
-                }
-                return null;
+    private void assertHasPermissionExecuteMethod(final JSObject aRunner, final boolean hasPermission) throws Exception {
+        if (hasPermission) {
+            JSObject fun = (JSObject) aRunner.getMember("test");
+            Object result = fun.call(aRunner, new Object[]{});
+            assertNotNull(result);
+            assertEquals(result, "test");
+        } else {
+            try {
+                JSObject fun = (JSObject) aRunner.getMember("test");
+                Object result = fun.call(aRunner, new Object[]{});
+                fail("Access permission assertion failed");
+            } catch (Exception ex) {
+                assertTrue(ex instanceof AccessControlException);
             }
-        });
+        }
     }
 }

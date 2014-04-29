@@ -21,7 +21,6 @@ public abstract class DatabaseFlowProvider<JKT> implements FlowProvider {
     protected static final String BAD_REFRESH_NEXTPAGE_CHAIN_MSG = "The call of refresh() method is allowed only for non paged flow providers or as the first call in the refresh() -> nextPage() -> nextPage() -> ... calls chain";
     protected static final String BAD_NEXTPAGE_REFRESH_CHAIN_MSG = "The call of nextPage() method is allowed only for paged flow providers as the subsequent calls in the refresh() -> nextPage() -> nextPage() -> ... calls chain";
     protected JKT jdbcSourceTag;
-    protected String sessionId;
     protected String clause;
     protected int pageSize = NO_PAGING_PAGE_SIZE;
 
@@ -29,13 +28,11 @@ public abstract class DatabaseFlowProvider<JKT> implements FlowProvider {
      * A flow provider, intended to support jdbc data sources.
      * @param aClause A sql clause, provider should use to achieve PreparedStatement instance to use it in the
      * result set querying process.
-     * @param aSessionId
      * @param aJdbcSourceTag Jdbc source key value. It may be long number or string identifier.
      */
-    public DatabaseFlowProvider(JKT aJdbcSourceTag, String aSessionId, String aClause) {
+    public DatabaseFlowProvider(JKT aJdbcSourceTag, String aClause) {
         super();
         jdbcSourceTag = aJdbcSourceTag;
-        sessionId = aSessionId;
         clause = aClause;
         assert clause != null : "Flow provider cant't exist without a selecting sql clause";
     }

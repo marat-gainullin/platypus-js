@@ -9,21 +9,13 @@ import com.eas.client.DbClient;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.HashSet;
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Script;
-import org.mozilla.javascript.ScriptableObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -34,36 +26,7 @@ import org.xml.sax.SAXException;
  */
 public class BaseTest {
 
-    public static final Set<String> eventsBeforeNames = new HashSet<>();
-    public static final Set<String> eventsAfterNames = new HashSet<>();
-
-    static {
-        eventsBeforeNames.add(Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME);
-        eventsBeforeNames.add(Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME);
-        eventsBeforeNames.add(Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME);
-        eventsBeforeNames.add(Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME);
-
-        eventsAfterNames.add(Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME);
-        eventsAfterNames.add(Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME);
-        eventsAfterNames.add(Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME);
-        eventsAfterNames.add(Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME);
-        eventsAfterNames.add(Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME);
-        eventsAfterNames.add(Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME);
-    }
     public static final String RESOURCES_PREFIX = "/com/eas/client/model/resources/";
-    public static final String DUMMY_HANDLER_NAME = "dummyHandler";
-    public static final String MODEL_SCRIPT_SOURCE = "var t = 0; function " + DUMMY_HANDLER_NAME + "(){var yu = 75;}\n"
-            + "function " + Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME + "(){}\n"
-            + "function " + Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME + "(){}\n";
-    protected static ScriptableObject dummyScriptableObject = null;
 
     public static DatabasesClientWithResource initDevelopTestClient() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
@@ -100,31 +63,6 @@ public class BaseTest {
         ApplicationDbModel model = new ApplicationDbModel(aClient);
         model.accept(new XmlDom2ApplicationModel(modelDoc));
         return model;
-    }
-
-    public static synchronized Function getDummyHandler(String aHandlerName) throws Exception {
-        return (Function) getDummyScriptableObject().get(aHandlerName, getDummyScriptableObject());
-    }
-
-    public static synchronized ScriptableObject getDummyScriptableObject() throws Exception {
-        if (dummyScriptableObject == null) {
-            dummyScriptableObject = new ScriptableObject(ScriptUtils.getScope(), ScriptUtils.getScope()) {
-                @Override
-                public String getClassName() {
-                    return "DummyTestScriptableObject";
-                }
-            };
-            ScriptUtils.inContext(new ScriptAction() {
-                @Override
-                public Object run(Context cx) throws Exception {
-                    cx.setOptimizationLevel(-1);
-                    Script lScript = cx.compileString(MODEL_SCRIPT_SOURCE, "dummyTestScript", 0, null);
-                    lScript.exec(cx, dummyScriptableObject);
-                    return null;
-                }
-            });
-        }
-        return dummyScriptableObject;
     }
 
     @Test

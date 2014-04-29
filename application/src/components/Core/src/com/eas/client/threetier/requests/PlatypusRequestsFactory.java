@@ -15,11 +15,9 @@ import java.io.IOException;
  * @author mg
  */
 public class PlatypusRequestsFactory {
-    
-    public static Request create(long aRequestId, int aType) throws IOException, ProtoReaderException
-    {
-        switch (aType)
-        {
+
+    public static Request create(long aRequestId, int aType) throws IOException, ProtoReaderException {
+        switch (aType) {
             case Requests.rqHello:
                 return new HelloRequest(aRequestId);
             case Requests.rqLogin:
@@ -54,8 +52,6 @@ public class PlatypusRequestsFactory {
                 return new IsUserInRoleRequest(aRequestId);
             case Requests.rqStartAppElement:
                 return new StartAppElementRequest(aRequestId);
-            case Requests.rqExecuteReport:
-                return new ExecuteServerReportRequest(aRequestId);
             default:
                 return null;
         }

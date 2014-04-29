@@ -14,10 +14,9 @@ import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.ScriptFunction;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.Undefined;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
+import jdk.nashorn.internal.runtime.ScriptRuntime;
 
 /**
  *
@@ -51,7 +50,7 @@ public class AbsolutePane extends Container<JPanel> {
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
-    public void add(Component<?> aComp, Scriptable aAnchors) {
+    public void add(Component<?> aComp, JSObject aAnchors) {
         if (aComp != null) {
             JComponent comp = unwrap(aComp);
             delegate.add(comp);
@@ -69,27 +68,16 @@ public class AbsolutePane extends Container<JPanel> {
         }
     }
 
-    protected MarginConstraints scriptable2AbsoluteConstraints(Scriptable aAnchors) {
-        Object oLeft = aAnchors.get("left", aAnchors);
-        if (oLeft instanceof Undefined || oLeft == ScriptableObject.NOT_FOUND) {
-            oLeft = null;
-        }
-        Object oWidth = aAnchors.get("width", aAnchors);
-        if (oWidth instanceof Undefined || oWidth == ScriptableObject.NOT_FOUND) {
-            oWidth = null;
-        }
-        Object oTop = aAnchors.get("top", aAnchors);
-        if (oTop instanceof Undefined || oTop == ScriptableObject.NOT_FOUND) {
-            oTop = null;
-        }
-        Object oHeight = aAnchors.get("height", aAnchors);
-        if (oHeight instanceof Undefined || oHeight == ScriptableObject.NOT_FOUND) {
-            oHeight = null;
-        }
-        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? Context.toString(oLeft) : null);
-        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? Context.toString(oWidth) : null);
-        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? Context.toString(oTop) : null);
-        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? Context.toString(oHeight) : null);
+    protected MarginConstraints scriptable2AbsoluteConstraints(JSObject aAnchors) {
+        Object oLeft = aAnchors.hasMember("left") ? aAnchors.getMember("left") : null;
+        Object oWidth = aAnchors.hasMember("width") ? aAnchors.getMember("width") : null;
+        Object oTop = aAnchors.hasMember("top") ? aAnchors.getMember("top") : null;
+        Object oHeight = aAnchors.hasMember("height") ? aAnchors.getMember("height") : null;
+        
+        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? JSType.toString(oLeft) : null);
+        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? JSType.toString(oWidth) : null);
+        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? JSType.toString(oTop) : null);
+        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? JSType.toString(oHeight) : null);
         return new MarginConstraints(left, top, null, null, width, height);
     }
 

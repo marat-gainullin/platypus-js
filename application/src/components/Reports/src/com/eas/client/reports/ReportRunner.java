@@ -5,62 +5,66 @@
 package com.eas.client.reports;
 
 import com.bearsoft.rowset.compacts.CompactBlob;
-import com.eas.client.Client;
-import com.eas.client.events.ScriptSourcedEvent;
-import com.eas.client.login.PrincipalHost;
-import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptRunner;
+import com.eas.client.events.PublishedSourcedEvent;
+import com.eas.client.model.application.ApplicationModel;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ReportRunner extends ScriptRunner {
+public class ReportRunner implements HasPublished {
 
-    public static final String BEFORE_RENDER_HANDLER_NAME = "onBeforeRender"; //NOI18N
     protected byte[] template;
-    private Function onBeforeRender;
+    protected ApplicationModel<?, ?, ?, ?> model;
+    protected JSObject scriptData;
+    protected JSObject onBeforeRender;
     protected String format;
+    //
+    protected Object published;
 
-    public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
-        super(aReportId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
-        setPrototype(ReportRunnerPrototype.getInstance());
+    public ReportRunner(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat) {
+        super();
+        template = aTemplate;
+        model = aModel;
+        format = aFormat;
     }
 
     @Override
-    protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
-        assert scriptDoc instanceof ReportDocument;
-        template = ((ReportDocument) scriptDoc).getTemplate();
-        format = ((ReportDocument) scriptDoc).getFormat();
-        super.prepare(scriptDoc, args);
+    public Object getPublished() {
+        return published;
     }
 
     @Override
-    protected void shrink() throws Exception {
-        template = null;
-        super.shrink();
+    public void setPublished(Object aValue) {
+        published = aValue;
     }
 
-    @Override
-    public String getClassName() {
-        return ReportRunner.class.getName();
+    public JSObject getScriptData() {
+        return scriptData;
     }
 
-    @Override
-    protected void definePropertiesAndMethods() {
-        super.definePropertiesAndMethods();
-        defineFunctionProperties(new String[]{
-            "show",
-            "print",
-            "save"}, ReportRunner.class, EMPTY);
-        defineProperty(BEFORE_RENDER_HANDLER_NAME, ReportRunner.class, EMPTY);
+    public void setScriptData(JSObject aValue) {
+        scriptData = aValue;
     }
+
+    private static final String ON_BEFORE_RENDER_JSDOC = ""
+            + "/**\n"
+            + " * onBeforeRender event handler is invoked before template processing.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = ON_BEFORE_RENDER_JSDOC)
+    public JSObject getOnBeforeRender() {
+        return onBeforeRender;
+    }
+
+    @ScriptFunction()
+    public void setOnBeforeRender(JSObject aValue) {
+        onBeforeRender = aValue;
+    }
+
     private static final String SHOW_JSDOC = ""
             + "/**\n"
             + " * Shows report as Excel application.\n"
@@ -69,9 +73,8 @@ public class ReportRunner extends ScriptRunner {
     @ScriptFunction(jsDoc = SHOW_JSDOC)
     public void show() throws Exception {
         if (template != null) {
-            execute();
             invokeOnBeforeRender();
-            ExcelReport xlsReport = new ExcelReport(model, this);
+            ExcelReport xlsReport = new ExcelReport(model, scriptData, format);
             xlsReport.setTemplate(new CompactBlob(template));
             xlsReport.show();
         }
@@ -84,19 +87,24 @@ public class ReportRunner extends ScriptRunner {
     @ScriptFunction(jsDoc = PRINT_JSDOC)
     public void print() throws Exception {
         if (template != null) {
-            execute();
             invokeOnBeforeRender();
-            ExcelReport xlsReport = new ExcelReport(model, this);
+            ExcelReport xlsReport = new ExcelReport(model, scriptData, format);
             xlsReport.setTemplate(new CompactBlob(template));
             xlsReport.print();
         }
     }
 
+    private static final String SAVE_JSDOC = ""
+            + "/**\n"
+            + " * Saves the report at a specified location.\n"
+            + " * @param aFileName Name of a file, the generated report should be save in."
+            + " */";
+
+    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"aFileName"})
     public void save(String aFileName) throws Exception {
         if (template != null) {
-            execute();
             invokeOnBeforeRender();
-            ExcelReport xlsReport = new ExcelReport(model, this);
+            ExcelReport xlsReport = new ExcelReport(model, scriptData, format);
             xlsReport.setTemplate(new CompactBlob(template));
             xlsReport.save(aFileName);
         }
@@ -106,14 +114,9 @@ public class ReportRunner extends ScriptRunner {
      * Invokes handler for the Report pre-render event
      */
     private void invokeOnBeforeRender() throws Exception {
-        ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                if (onBeforeRender != null) {
-                    onBeforeRender.call(cx, ReportRunner.this, ReportRunner.this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(ReportRunner.this), ReportRunner.this)});
-                }
-                return null;
-            }
-        });
+        if (onBeforeRender != null) {
+            PublishedSourcedEvent event = new PublishedSourcedEvent(ReportRunner.this);
+            onBeforeRender.call(this, new Object[]{event.getPublished()});
+        }
     }
 }

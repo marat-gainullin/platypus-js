@@ -54,12 +54,12 @@ public class FormattedField extends Component<JFormattedTextField> {
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     public Object getValue() {
-        return ScriptUtils.javaToJS(delegate.getValue(), jsWrapper);
+        return delegate.getValue();
     }
 
     @ScriptFunction
     public void setValue(Object aValue) {
-        delegate.setValue(ScriptUtils.js2Java(aValue));
+        delegate.setValue(ScriptUtils.toJava(aValue));
     }
     private static final String FORMAT_JSDOC = ""
             + "/**\n"

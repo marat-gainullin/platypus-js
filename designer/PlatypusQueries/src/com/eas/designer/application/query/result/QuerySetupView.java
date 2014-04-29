@@ -2,12 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
-/*
- * QuerySetupView2.java
- *
- * Created on Apr 3, 2012, 9:56:24 AM
- */
 package com.eas.designer.application.query.result;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
@@ -19,8 +13,6 @@ import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.result.QueryResultsView.PageSizeItem;
-import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -43,7 +35,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.NamedParameter;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
-import org.mozilla.javascript.Context;
 import org.netbeans.modules.editor.NbEditorDocument;
 import org.openide.DialogDescriptor;
 import org.openide.text.CloneableEditorSupport;
@@ -197,20 +188,13 @@ public class QuerySetupView extends javax.swing.JPanel {
 
     private void initParametersView() throws Exception {
         paramsModel = new ApplicationDbModel();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cntxt) throws Exception {
-                paramsModel.setScriptThis(ScriptUtils.getScope());
-                paramsModel.setParameters(parentView.getParameters().copy());
-                paramsModel.setRuntime(true);
-                parametersGrid = new EntityFieldsGrid();
-                parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
-                parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N
-                parametersGrid.setEntity(paramsModel.getParametersEntity());
-                topPanel.add(new JScrollPane(parametersGrid), BorderLayout.CENTER);
-                return null;
-            }
-        });
+        paramsModel.setParameters(parentView.getParameters().copy());
+        paramsModel.setRuntime(true);
+        parametersGrid = new EntityFieldsGrid();
+        parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
+        parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N
+        parametersGrid.setEntity(paramsModel.getParametersEntity());
+        topPanel.add(new JScrollPane(parametersGrid), BorderLayout.CENTER);
     }
 
     private void initSqlEditor() throws BadLocationException {
@@ -265,7 +249,7 @@ public class QuerySetupView extends javax.swing.JPanel {
                         "Document:" + aPane.getDocument() // NOI18N
                         + " implementing NbDocument.CustomEditor may not" // NOI18N
                         + " return null component" // NOI18N
-                        );
+                );
             }
             return customComponent;
         }

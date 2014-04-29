@@ -27,5 +27,4 @@ public class Requests
     public static final int rqDbTableChanged = 16;
     public static final int rqIsUserInRole = 17;
     public static final int rqLogout = 18;
-    public static final int rqExecuteReport = 19;
 }

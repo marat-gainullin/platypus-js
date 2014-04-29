@@ -6,8 +6,6 @@ package com.eas.client.threetier.http;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.PlatypusClientSecurityTest;
-import com.eas.client.settings.PlatypusConnectionSettings;
-import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -49,23 +47,7 @@ public class PlatypusHttpClientExecuteServerReportTest {
     @Test
     public void testExecuteServerReport() throws Exception {
         System.out.println("executeServerReport");
-        ExecuteServerReportRequest rq = new ExecuteServerReportRequest(IDGenerator.genID(), MODULE_NAME);
-        client.executeRequest(rq);
-        byte[] result = ((ExecuteServerReportRequest.Response) rq.getResponse()).getResult();
-        assertNotNull(result);
-        assertTrue(result.length == 18432);
+        fail("There should be a test of ordinary server method call with report response.");
     }
 
-    @Test
-    public void testExecuteServerReportWithSetParams() throws Exception {
-        System.out.println("executeServerReportWithSetParams");
-        ExecuteServerReportRequest srq = new ExecuteServerReportRequest(IDGenerator.genID(), MODULE_NAME);
-        ExecuteServerReportRequest.NamedArgument[] args = {new ExecuteServerReportRequest.NamedArgument("id", 124772775584390l)};
-        srq.setArguments(args);
-        client.executeRequest(srq);
-        byte[] res = ((ExecuteServerReportRequest.Response) srq.getResponse()).getResult();
-        assertNotNull(res);
-        assertTrue(res.length == 17408);
-
-    }
 }

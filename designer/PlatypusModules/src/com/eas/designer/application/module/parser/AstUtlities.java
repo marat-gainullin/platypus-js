@@ -4,8 +4,7 @@
  */
 package com.eas.designer.application.module.parser;
 
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.NodeVisitor;
+import jdk.nashorn.internal.ir.Node;
 
 /**
  *
@@ -13,31 +12,34 @@ import org.mozilla.javascript.ast.NodeVisitor;
  */
 public class AstUtlities {
 
-    public static boolean isInNode(AstNode node, int offset) {
-        int startPosition = node.getAbsolutePosition();
-        int endPosition = node.getAbsolutePosition() + node.getLength();
+    public static boolean isInNode(Node node, int offset) {
+        int startPosition = node.getStart();
+        int endPosition = node.getFinish();
         return startPosition <= offset
                 && offset <= endPosition;
     }
 
-    public static AstNode getOffsetNode(AstNode node, final int offset) {
+    public static Node getOffsetNode(Node node, final int offset) {
         GetOffsetNodeVisitorSupport vs = new GetOffsetNodeVisitorSupport(node, offset);
-        AstNode offsetNode = vs.getOffsetNode();
+        Node offsetNode = vs.getOffsetNode();
         return offsetNode != null ? offsetNode : node;
     }
 
     private static class GetOffsetNodeVisitorSupport {
         
-        private AstNode root;
+        private Node root;
         private int offset;
-        private AstNode offsetNode;
+        private Node offsetNode;
 
-        public GetOffsetNodeVisitorSupport(AstNode root, int offset) {
+        public GetOffsetNodeVisitorSupport(Node root, int offset) {
             this.root = root;
             this.offset = offset;
         }
 
-        public AstNode getOffsetNode() {
+        public Node getOffsetNode() {
+            assert false : "Refactoring is needed";
+            return null;
+            /*
             root.visit(new NodeVisitor() {
                 
                 @Override
@@ -50,6 +52,7 @@ public class AstUtlities {
                 }
             });
             return offsetNode;
+                    */
         }
     }
 }

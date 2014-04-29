@@ -66,7 +66,6 @@ public interface DbClient extends Client {
     /**
      * Creates and returns new data flow provider, setted up with settings passed through parameters
      * @param aDatasourceId Datasource JNDI name. May be null for default database.
-     * @param aSessionId Session identifier. May be null for system session.
      * @param aEntityId Data entity identifier. Table name or query identifier. Table name is allowed in two-tier mode only.
      * @param aSqlClause Query text for execute as select.
      * @param aExpectedFields Fields instance to be used as rowset's fields. If it is null, than database driven fields will be used as rowset's fields.
@@ -75,7 +74,7 @@ public interface DbClient extends Client {
      * @return Data flow provider instance created.
      * @throws java.lang.Exception
      */
-    public FlowProvider createFlowProvider(String aDatasourceId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
+    public FlowProvider createFlowProvider(String aDatasourceId,String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
 
     /**
      * Returns metadata cache for the specified database.

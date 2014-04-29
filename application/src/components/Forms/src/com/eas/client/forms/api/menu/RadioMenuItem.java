@@ -12,7 +12,7 @@ import com.eas.script.ScriptFunction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
-import org.mozilla.javascript.Function;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -40,7 +40,7 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
-    public RadioMenuItem(String aText, boolean aSelected, Function aActionPerformedHandler) {
+    public RadioMenuItem(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JRadioButtonMenuItem(aText, aSelected));
         setOnActionPerformed(aActionPerformedHandler);

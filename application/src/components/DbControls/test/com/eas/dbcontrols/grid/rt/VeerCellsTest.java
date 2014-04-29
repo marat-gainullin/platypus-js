@@ -160,7 +160,7 @@ public class VeerCellsTest extends GridBaseTest {
                 try {
                     Rowset rowset = initRowset();
                     TableColumnModel columns = new DefaultTableColumnModel();
-                    RowsetsTableModel data = new RowsetsTableModel(null, rowset, null, null);
+                    RowsetsTableModel data = new RowsetsTableModel(null, rowset, null);
 
                     for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
                         FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -214,7 +214,7 @@ public class VeerCellsTest extends GridBaseTest {
                     columnsSources.put(s1Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s1ToGlueToIndex), loc1, 2, cells1Loc, cells1Rowset, 4, new CellDataCellRendererFactory(), null, null)));
                     columnsSources.put(s2Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s2ToGlueToIndex), loc2, 2, cells2Loc, cells2Rowset, 4, new CellDataCellRendererFactory(), null, null)));
 
-                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList(), null);
+                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList());
                     riddler.fill();
 
                     int commonColumnsCount = rowset.getFields().getFieldsCount() + s1Rowset.size() + s2Rowset.size();
@@ -317,7 +317,7 @@ public class VeerCellsTest extends GridBaseTest {
                 try {
                     Rowset rowset = initRowset();
                     TableColumnModel columns = new DefaultTableColumnModel();
-                    RowsetsTableModel data = new RowsetsTableModel(null, rowset, null, null);
+                    RowsetsTableModel data = new RowsetsTableModel(null, rowset, null);
 
                     for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
                         FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -388,7 +388,7 @@ public class VeerCellsTest extends GridBaseTest {
                     columnsSources.put(s1Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s1ToGlueToIndex), loc1, 2, cells1Loc, cells1Rowset, 4, new CellDataCellRendererFactory(), null, null)));
                     columnsSources.put(s2Rowset, Collections.singletonList(new ColumnsSource(null, columns.getColumn(s2ToGlueToIndex), loc2, 2, cells2Loc, cells2ValuesRowset, 4, new CellDataCellRendererFactory(), null, null)));
 
-                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList(), null);
+                    ColumnsRiddler riddler = new ColumnsRiddler(null, columns, null, data, columnsSources, null, new ArrayList());
                     riddler.fill();
 
                     int commonColumnsCount = rowset.getFields().getFieldsCount() + s1Rowset.size() + s2Rowset.size();

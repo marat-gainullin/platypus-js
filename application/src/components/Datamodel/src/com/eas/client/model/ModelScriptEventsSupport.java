@@ -4,44 +4,30 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.events.ScriptSourcedEvent;
-import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.script.ScriptEvent;
+import com.eas.client.events.PublishedSourcedEvent;
 import java.util.HashSet;
 import java.util.Set;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
 
 /**
  *
  * @author mg
  */
-public class ModelScriptEventsSupport<E extends ApplicationEntity<?, ?, E>> {
+public class ModelScriptEventsSupport {
 
-    protected Set<ModelScriptEventsListener<E>> listeners = new HashSet<>();
+    protected Set<ModelScriptEventsListener> listeners = new HashSet<>();
 
-    public void addListener(ModelScriptEventsListener<E> aListener) {
+    public void addListener(ModelScriptEventsListener aListener) {
         listeners.add(aListener);
     }
 
-    public boolean removeListener(ModelScriptEventsListener<E> aListener) {
+    public boolean removeListener(ModelScriptEventsListener aListener) {
         return listeners.remove(aListener);
     }
 
-    public void fireScriptEventEnqueueing(E aEntity, Function aHandler, ScriptSourcedEvent aEvent) {
+    public void fireScriptEventExecuting(PublishedSourcedEvent aEvent) {
         if (!listeners.isEmpty()) {
-            ScriptEvent<E> event = new ScriptEvent<>(aEntity, aHandler, aEvent);
-            for (ModelScriptEventsListener<E> l : listeners) {
-                l.eventEnqueueing(event);
-            }
-        }
-    }
-
-    public void fireScriptEventExecuting(E aEntity, Scriptable aScope, Function aHandler, ScriptSourcedEvent aEvent) {
-        if (!listeners.isEmpty()) {
-            ScriptEvent<E> event = new ScriptEvent<>(aEntity, aScope, aHandler, aEvent);
-            for (ModelScriptEventsListener<E> l : listeners) {
-                l.eventExecuting(event);
+            for (ModelScriptEventsListener l : listeners) {
+                l.eventExecuting(aEvent);
             }
         }
     }

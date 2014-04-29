@@ -13,8 +13,7 @@ import java.util.Set;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Table model, getting and setting data to an arbitrary rowset. Gets data from
@@ -30,10 +29,12 @@ public class RowsetsTableModel extends RowsetsModel implements TableModel {
     /**
      * Constructor, accepting a rows rowset.
      *
+     * @param aRowsEntity
      * @param aRowsRowset Rowset, serves as rows source.
+     * @param aOnRender
      */
-    public RowsetsTableModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, Scriptable aScriptScope, Function aCellsHandler) {
-        super(aRowsEntity, aRowsRowset, aScriptScope, aCellsHandler);
+    public RowsetsTableModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, JSObject aOnRender) {
+        super(aRowsEntity, aRowsRowset, aOnRender);
         rowsRowsetListener = new TabularRowsRowsetListener(this);
         rowsRowset.addRowsetListener(rowsRowsetListener);
     }

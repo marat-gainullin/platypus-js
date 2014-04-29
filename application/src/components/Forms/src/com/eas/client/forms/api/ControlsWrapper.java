@@ -61,7 +61,6 @@ import com.eas.dbcontrols.spin.DbSpinDesignInfo;
 import com.eas.dbcontrols.text.DbText;
 import com.eas.dbcontrols.text.DbTextDesignInfo;
 import com.eas.gui.JDropDownButton;
-import com.eas.script.NativeJavaHostObject;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -70,7 +69,6 @@ import javax.swing.JDesktopPane;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -299,14 +297,6 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
     @Override
     public void visit(PopupDesignInfo pdi) {
         result = MenuWrapper.wrap((JPopupMenu) target);
-    }
-
-    public static NativeJavaHostObject getJsWrapper(Component<?> aComp) {
-        return aComp.getJsWrapper();
-    }
-
-    public static void setJsWrapper(Component<?> aComp, NativeJavaHostObject aWrapper) {
-        aComp.setJsWrapper(aWrapper);
     }
 
     public static ControlEventsIProxy getEventsProxy(Component<?> aComp) {

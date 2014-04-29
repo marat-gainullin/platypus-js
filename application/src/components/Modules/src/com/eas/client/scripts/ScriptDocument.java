@@ -6,12 +6,15 @@ package com.eas.client.scripts;
 
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.scripts.store.ScriptDocument2Dom;
+import com.eas.script.AnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptUtils;
 import java.util.*;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.ast.*;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.runtime.Source;
 import org.w3c.dom.Document;
 
 /**
@@ -29,8 +32,8 @@ public class ScriptDocument {
     protected long txtCrc32;
     private ApplicationModel<?, ?, ?, ?> model;
     private String scriptSource;
-    private Function constructor;
-    private AstRoot ast;
+    private JSObject constructor;
+    private FunctionNode ast;
     private FunctionNode firstFunction;
     private final Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
@@ -109,11 +112,11 @@ public class ScriptDocument {
         return depencies;
     }
 
-    public Function getFunction() {
+    public JSObject getFunction() {
         return constructor;
     }
 
-    public void setFunction(Function aFunction) {
+    public void setFunction(JSObject aFunction) {
         constructor = aFunction;
     }
 
@@ -137,22 +140,10 @@ public class ScriptDocument {
         return moduleAnnotations != null ? Collections.unmodifiableList(moduleAnnotations) : null;
     }
 
-    public String filterSource() {
-        return filterSource(null, null);
-    }
-
-    public String filterSource(String bodyPreCode, String bodyPostCode) {
-        if (firstFunction == null) {
-            throw new IllegalStateException("Missing first function in " + String.valueOf(entityId) + ". May be bad source?");
-        }
-        int functionsCaptureInsertAt = firstFunction.getAbsolutePosition() + firstFunction.getLength() - 1;
-        if (bodyPreCode == null) {
-            return scriptSource.substring(0, functionsCaptureInsertAt) + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
-        } else {
-            AstNode body = firstFunction.getBody();
-            int bodyPreCodeInsertAt = body.getAbsolutePosition() + 1;
-            return scriptSource.substring(0, bodyPreCodeInsertAt) + bodyPreCode + scriptSource.substring(bodyPreCodeInsertAt, functionsCaptureInsertAt) + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
-        }
+    public boolean hasModuleAnnotation(String anAnnotation) {
+        return moduleAnnotations != null && moduleAnnotations.stream().anyMatch((Tag aTag) -> {
+            return aTag.getName().equals(anAnnotation);
+        });
     }
 
     /**
@@ -172,38 +163,40 @@ public class ScriptDocument {
         if (ast == null) {
             moduleAnnotations = new ArrayList<>();
             propertyAllowedRoles.clear();
-            ast = ScriptUtils.parseJs(scriptSource);
+            Source source = new Source("", scriptSource);
+            ast = ScriptUtils.parseJs(source);
             firstFunction = null;
-            ast.visit(new NodeVisitor() {
+            ast.accept(new AnnotationsMiner(source) {
+
                 @Override
-                public boolean visit(AstNode node) {
-                    if (firstFunction == null && node instanceof FunctionNode && node.getParent() == ast.getAstRoot()) {
-                        firstFunction = (FunctionNode) node;
+                public boolean enterFunctionNode(FunctionNode functionNode) {
+                    if (firstFunction == null && functionNode != ast) {
+                        firstFunction = functionNode;
                     }
-                    if (node.getJsDoc() != null) {
-                        if (node instanceof Assignment) {
-                            Assignment as = (Assignment) node;
-                            if (as.getLeft() instanceof PropertyGet) {
-                                PropertyGet pg = (PropertyGet) as.getLeft();
-                                Name n = pg.getProperty();
-                                readPropertyRoles(n.getIdentifier(), node.getJsDoc());
-                            }
-                        }
-                        if (node instanceof FunctionNode && node.getParent() == ast.getAstRoot()) {
-                            JsDoc jsDoc = new JsDoc(node.getJsDocNode().getValue());
-                            jsDoc.parseAnnotations();
-                            for (Tag tag : jsDoc.getAnnotations()) {
-                                moduleAnnotations.add(tag);
-                                if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                                    for (String role : tag.getParams()) {
-                                        moduleAllowedRoles.add(role);
-                                    }
+                    return super.enterFunctionNode(functionNode);
+                }
+
+                @Override
+                protected void commentedFunction(FunctionNode aFunction, String aComment) {
+                    if (firstFunction == aFunction) {
+                        JsDoc jsDoc = new JsDoc(aComment);
+                        jsDoc.parseAnnotations();
+                        for (Tag tag : jsDoc.getAnnotations()) {
+                            moduleAnnotations.add(tag);
+                            if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                                for (String role : tag.getParams()) {
+                                    moduleAllowedRoles.add(role);
                                 }
                             }
                         }
                     }
-                    return true;
                 }
+
+                @Override
+                protected void commentedProperty(IdentNode aProperty, String aComment) {
+                    readPropertyRoles(aProperty.getPropertyName(), aComment);
+                }
+
             });
         }
     }

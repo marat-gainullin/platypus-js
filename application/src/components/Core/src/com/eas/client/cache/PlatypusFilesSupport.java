@@ -5,23 +5,22 @@
 package com.eas.client.cache;
 
 import com.eas.client.ClientConstants;
+import com.eas.script.AnnotationsMiner;
 import com.eas.script.JsDoc;
-import com.eas.script.JsParser;
+import com.eas.script.ScriptUtils;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.mozilla.javascript.EvaluatorException;
-import org.mozilla.javascript.Node;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.FunctionNode;
+import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.runtime.Source;
 
 /**
  *
@@ -33,63 +32,63 @@ public class PlatypusFilesSupport {
     private static final String NAMED_ANNOTATION_PATTERN_FIRST_PART = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
     private static final String NAMED_ANNOTATION_PATTERN_SECOND_PART = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
 
+    protected static class NodesContext {
+
+        int functions;
+        int annotatedConstructors;
+        FunctionNode result;
+    }
+
     public static String extractModuleConstructorName(String aJsContent) {
-        try {
-            AstRoot parseResult = JsParser.parse(aJsContent);
-            return extractModuleConstructorName(parseResult);
-        } catch (EvaluatorException ex) {
-            return null;
-        }
+        FunctionNode fn = extractModuleConstructor(aJsContent);
+        return fn != null ? fn.getName() : null;
     }
 
-    public static String extractModuleConstructorName(AstRoot jsRoot) {
-        FunctionNode func = extractModuleConstructor(jsRoot);
-        return func != null ? func.getFunctionName().getIdentifier() : null;
-    }
+    public static FunctionNode extractModuleConstructor(String aJsContent) {
+        Source source = new Source("", aJsContent);
+        final FunctionNode jsRoot = ScriptUtils.parseJs(source);
+        final NodesContext cx = new NodesContext();
+        jsRoot.accept(new AnnotationsMiner(source) {
 
-    public static FunctionNode extractModuleConstructor(AstRoot jsRoot) {
-        if (jsRoot != null) {
-            Iterator<Node> nodes = jsRoot.iterator();
-            int functions = 0;
-            int annotatedConstructors = 0;
-            FunctionNode result = null;
-            while (nodes.hasNext()) {
-                Node node = nodes.next();
-                if (node instanceof FunctionNode) {
-                    FunctionNode fn = (FunctionNode) node;
-                    if (fn.getFunctionName() != null
-                            && fn.getFunctionName().getIdentifier() != null
-                            && !(fn.getFunctionName().getIdentifier().isEmpty())) {            
-                        if (functions == 0) {
-                            result = fn;
-                        }
-                        functions++;
-                        if (fn.getJsDoc() != null) {
-                            JsDoc jsDoc = new JsDoc(fn.getJsDoc());
-                            if (jsDoc.containsModuleAnnotation()) {                       
-                                result = fn;
-                                annotatedConstructors++;
-                            }
-                        }
+            @Override
+            public boolean enterFunctionNode(FunctionNode fn) {
+                if (fn != jsRoot && fn.getName() != null && !fn.getName().isEmpty()) {
+                    if (cx.functions == 0) {
+                        cx.result = fn;
                     }
+                    cx.functions++;
+                }
+                return super.enterFunctionNode(fn);
+            }
+
+            @Override
+            protected void commentedFunction(FunctionNode fn, String aComment) {
+                JsDoc jsDoc = new JsDoc(aComment);
+                if (jsDoc.containsModuleAnnotation()) {
+                    cx.result = fn;
+                    cx.annotatedConstructors++;
                 }
             }
-            if (annotatedConstructors == 1) {
-                return result;
-            } else if (functions == 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).finer("Single function is found in the module - considered as a module's constructor.");
-                return result;
-            } else if (functions == 0) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");         
-            } else if (annotatedConstructors > 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("More than one annotated constructor found.");
-            } else if (annotatedConstructors == 0 && functions > 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No annotated constructors and more than one plain function found.");
+
+            @Override
+            protected void commentedProperty(IdentNode aProperty, String aComment) {
+                // no op here
             }
-            return null;
-        } else {
-            throw new NullPointerException("Ast root is null.");
+
+        });
+        if (cx.annotatedConstructors == 1) {
+            return cx.result;
+        } else if (cx.functions == 1) {
+            Logger.getLogger(PlatypusFilesSupport.class.getName()).finer("Single function is found in the module - considered as a module's constructor.");
+            return cx.result;
+        } else if (cx.functions == 0) {
+            Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");
+        } else if (cx.annotatedConstructors > 1) {
+            Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("More than one annotated constructor found.");
+        } else if (cx.annotatedConstructors == 0 && cx.functions > 1) {
+            Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No annotated constructors and more than one plain function found.");
         }
+        return null;
     }
 
     public static String getAppElementIdByAnnotation(File aFile) {
@@ -138,7 +137,7 @@ public class PlatypusFilesSupport {
         }
         return null;
     }
-    
+
     public static String replaceAnnotationValue(String aContent, String aAnnotationName, String aValue) {
         Pattern pattern = Pattern.compile(getAnnotatedDocRegexStr(aAnnotationName));
         Matcher matcher = pattern.matcher(aContent);

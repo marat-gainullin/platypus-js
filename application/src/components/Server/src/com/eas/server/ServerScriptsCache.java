@@ -4,9 +4,10 @@
  */
 package com.eas.server;
 
-import com.eas.client.scripts.ScriptRunner;
+import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 public class ServerScriptsCache {
 
-    protected Map<String, ServerScriptRunner> cache = new HashMap<>();
+    protected Map<String, JSObject> cache = new HashMap<>();
     protected PlatypusServerCore serverCore;
 
     public ServerScriptsCache(PlatypusServerCore aServerCore) {
@@ -22,25 +23,14 @@ public class ServerScriptsCache {
         serverCore = aServerCore;
     }
 
-    public synchronized ServerScriptRunner get(String aModuleId) throws Exception {
-        ServerScriptRunner runner = cache.get(aModuleId);
-        if (runner != null && !serverCore.getDatabasesClient().getAppCache().isActual(runner.getApplicationElementId(), runner.getTxtContentLength(), runner.getTxtCrc32())) {
-            runner = null;
-            cache.remove(aModuleId);
-            serverCore.getDatabasesClient().getAppCache().remove(aModuleId);
+    public synchronized JSObject get(String aModuleId) throws Exception {
+        // TODO: isActual ?
+        JSObject instance = cache.get(aModuleId);
+        if (instance == null) {
+            instance = ScriptUtils.createModule(aModuleId);
+            cache.put(aModuleId, instance);
         }
-        if (runner == null) {
-            runner = new ServerScriptRunner(serverCore,
-                    serverCore.getSessionManager().getSystemSession(),
-                    aModuleId, ScriptRunner.initializePlatypusStandardLibScope(),
-                    serverCore,
-                    serverCore,
-                    new Object[]{});
-            runner.setPrototype(ServerScriptRunnerPrototype.getInstance());
-            runner.execute();
-            cache.put(aModuleId, runner);
-        }
-        return runner;
+        return instance;
     }
 
     public synchronized void clear() {

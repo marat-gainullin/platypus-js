@@ -7,7 +7,7 @@ package com.eas.designer.application.module.completion;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.script.ScriptableRowset;
+import com.eas.client.model.application.ApplicationEntity;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import static com.eas.designer.application.module.completion.CompletionContext.isPropertyGet;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
@@ -26,7 +26,7 @@ public class EntityCompletionContext extends CompletionContext {
     ApplicationDbEntity entity;
 
     public EntityCompletionContext(ApplicationDbEntity anEntity) {
-        super(ScriptableRowset.class);
+        super(ApplicationEntity.class);
         entity = anEntity;
     }
 

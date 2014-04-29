@@ -176,14 +176,11 @@ public class Filter extends HashOrderer {
                             if (filterApplied) {
                                 filterApplied = false;
                             }
-
                             Filter activeFilter = rowset.getActiveFilter();
                             boolean foreignFilter = activeFilter == null || activeFilter != this;
-
                             if (foreignFilter && activeFilter != null) {
                                 activeFilter.cancelFilter();
                             }
-
                             if (!filterApplied) {
                                 boolean wasBeforeFirst = rowset.isBeforeFirst();
                                 boolean wasAfterLast = rowset.isAfterLast();
@@ -294,16 +291,13 @@ public class Filter extends HashOrderer {
     @Override
     public void build() throws RowsetException {   // check to avoid filter on filter
         if (!constrainting) {
-            if (!isAnyFilterInstalled()) {
-                ordered.clear();
-                List<Row> rows = getRowsetRows();
-                if (rows != null) {
-                    for (int i = 0; i < rows.size(); i++) {
-                        add(rows.get(i));
-                    }
+            ordered.clear();
+            assert rowset != null;
+            List<Row> rows = rowset.getOriginal();
+            if (rows != null) {
+                for (int i = 0; i < rows.size(); i++) {
+                    add(rows.get(i));
                 }
-            } else {
-                throw new RowsetException(CANT_BUILD_FILTER_ON_FILTER);
             }
         } else {
             throw new RowsetException(CANT_BUILD_FILTER_WHILE_CONSTRAINTING);

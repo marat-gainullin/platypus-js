@@ -10,24 +10,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ScriptRuntime;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.TopLevel;
-import org.mozilla.javascript.UniqueTag;
 
 /**
  *
  * @author vv
  */
-public class HttpScriptContext extends ScriptableObject {
+public class HttpScriptContext {
 
     public final static String REQUEST_PROP_NAME = "request";//NOI18N
     public final static String RESPONSE_PROP_NAME = "response";//NOI18N
@@ -35,6 +27,7 @@ public class HttpScriptContext extends ScriptableObject {
     private Request request;
     private Response response;
 
+    /*
     public static HttpScriptContext getInstance(Scriptable scope, HttpServletRequest aHttpRequest, HttpServletResponse aHttpResponse) {
         HttpScriptContext sc = new HttpScriptContext();
         ScriptRuntime.setBuiltinProtoAndParent(sc, scope, TopLevel.Builtins.Object);
@@ -44,7 +37,7 @@ public class HttpScriptContext extends ScriptableObject {
         sc.defineProperty(RESPONSE_PROP_NAME, HttpScriptContext.class, READONLY);
         return sc;
     }
-
+*/
     private static final String REQUEST_JS_DOC = "/**\n"
             + "* HTTP request, when invoked by HTTP protocol.\n"
             + "*/";
@@ -63,12 +56,8 @@ public class HttpScriptContext extends ScriptableObject {
         return response;
     }
 
-    @Override
-    public String getClassName() {
-        return HTTP_JS_CLASS_NAME;
-    }
 
-    public static class Request extends ScriptableObject {
+    public static class Request {
 
         private final static String AUTH_TYPE_PROP_NAME = "authType";//NOI18N
         private final static String CHARACTER_ENCODING_PROP_NAME = "characterEncoding";//NOI18N
@@ -102,7 +91,7 @@ public class HttpScriptContext extends ScriptableObject {
         private Cookies cookies;
         private RequestHeaders headers;
         private Params params;
-
+/*
         public static Request getInstance(Scriptable scope, HttpServletRequest aHttpRequest) {
             Request r = new Request();
             r.httpRequest = aHttpRequest;
@@ -141,10 +130,9 @@ public class HttpScriptContext extends ScriptableObject {
             r.defineProperty(SERVER_NAME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(SERVER_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(SECURE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            ScriptRuntime.setBuiltinProtoAndParent(r, scope, TopLevel.Builtins.Object);
             return r;
         }
-
+*/
         private static final String AUTH_TYPE_JS_DOC = "/**\n"
                 + "* The name of the protection authentication scheme.\n"
                 + "*/";
@@ -409,14 +397,9 @@ public class HttpScriptContext extends ScriptableObject {
         public boolean getSecure() {
             return httpRequest.isSecure();
         }
-
-        @Override
-        public String getClassName() {
-            return REQUEST_JS_CLASS_NAME;
-        }
     }
 
-    public static class Response extends ScriptableObject {
+    public static class Response {
 
         private final static String HEADERS_PROP_NAME = "headers";//NOI18N
         private final static String STATUS_PROP_NAME = "status";//NOI18N
@@ -430,7 +413,7 @@ public class HttpScriptContext extends ScriptableObject {
         private final static String RESPONSE_JS_CLASS_NAME = "Response";//NOI18N
         private HttpServletResponse httpResponse;
         private ResponseHeaders headers;
-
+/*
         public static Response getInstance(Scriptable scope, HttpServletResponse aHttpResponse) {
             Response r = new Response();
             r.httpResponse = aHttpResponse;
@@ -450,7 +433,7 @@ public class HttpScriptContext extends ScriptableObject {
             ScriptRuntime.setBuiltinProtoAndParent(r, scope, TopLevel.Builtins.Object);
             return r;
         }
-
+*/
         private static final String STATUS_JS_DOC = "/**\n"
                 + "* The current status code of this response.\n"
                 + "*/";
@@ -576,6 +559,7 @@ public class HttpScriptContext extends ScriptableObject {
 
         @ScriptFunction(jsDoc = ADD_COOKIE_JS_DOC, params = {"cookie"})
         public void addCookie(Object obj) {
+            /*
             if (obj instanceof Scriptable) {
                 Scriptable cookieObj = (Scriptable) obj;
                 Object name = cookieObj.get(Cookie.NAME_PROP_NAME, cookieObj);
@@ -616,12 +600,9 @@ public class HttpScriptContext extends ScriptableObject {
                 }
 
             }
+            */
         }
 
-        @Override
-        public String getClassName() {
-            return RESPONSE_JS_CLASS_NAME;
-        }
     }
 
     private static Integer parseInt(String str) {
@@ -632,10 +613,10 @@ public class HttpScriptContext extends ScriptableObject {
         }
     }
 
-    public static class Cookies extends ScriptableObject {
+    public static class Cookies {
 
         private final static String COOKIES_JS_CLASS_NAME = "Cookies";//NOI18N
-
+/*
         public static Cookies getInstance(Scriptable scope, HttpServletRequest httpRequest) {
             Cookies cookies = new Cookies();
             javax.servlet.http.Cookie[] httpCookies = httpRequest.getCookies();
@@ -650,17 +631,13 @@ public class HttpScriptContext extends ScriptableObject {
             ScriptRuntime.setBuiltinProtoAndParent(cookies, scope, TopLevel.Builtins.Object);
             return cookies;
         }
-
-        @Override
-        public String getClassName() {
-            return COOKIES_JS_CLASS_NAME;
-        }
+*/
     }
 
-    public static class RequestHeaders extends ScriptableObject {
+    public static class RequestHeaders {
 
         private final static String REQUEST_HEADERS_JS_CLASS_NAME = "RequestHeaders";//NOI18N
-
+/*
         public static RequestHeaders getInstance(Scriptable scope, HttpServletRequest httpRequest) {
             RequestHeaders headers = new RequestHeaders();
             Enumeration<String> headerNames = httpRequest.getHeaderNames();
@@ -672,19 +649,15 @@ public class HttpScriptContext extends ScriptableObject {
             ScriptRuntime.setBuiltinProtoAndParent(headers, scope, TopLevel.Builtins.Object);
             return headers;
         }
-
-        @Override
-        public String getClassName() {
-            return REQUEST_HEADERS_JS_CLASS_NAME;
-        }
+*/
     }
 
-    public static class ResponseHeaders extends ScriptableObject {
+    public static class ResponseHeaders {
 
         private final static String RESPONSE_HEADERS_JS_CLASS_NAME = "ResponseHeaders";//NOI18N
         private HttpServletResponse httpResponse;
         private boolean externalUpdateEnabled;
-
+/*
         public static ResponseHeaders getInstance(Scriptable aScope, HttpServletResponse aHttpResponse) {
             ResponseHeaders headers = new ResponseHeaders();
             headers.httpResponse = aHttpResponse;
@@ -708,17 +681,13 @@ public class HttpScriptContext extends ScriptableObject {
                 }
             }
         }
-
-        @Override
-        public String getClassName() {
-            return RESPONSE_HEADERS_JS_CLASS_NAME;
-        }
+*/
     }
 
-    public static class Params extends ScriptableObject {
+    public static class Params {
 
         private final static String PARAMS_JS_CLASS_NAME = "Params";//NOI18N
-
+/*
         private static Params getInstance(Scriptable scope, HttpServletRequest httpRequest) {
             Params params = new Params();
             for (String paramName : httpRequest.getParameterMap().keySet()) {
@@ -726,29 +695,16 @@ public class HttpScriptContext extends ScriptableObject {
                 if (paramValues.length == 1) {
                     params.defineProperty(paramName, httpRequest.getParameter(paramName), READONLY);
                 } else {
-                    params.defineProperty(paramName, javaToJS(paramValues, scope), READONLY);
+                    params.defineProperty(paramName, ScriptUtils.toJs(paramValues, scope), READONLY);
                 }
             }
             ScriptRuntime.setBuiltinProtoAndParent(params, scope, TopLevel.Builtins.Object);
             return params;
         }
-
-        private static Object javaToJS(Object obj, Scriptable scope) {
-            Context cx = Context.enter();
-            try {
-                return Context.javaToJS(obj, scope);
-            } finally {
-                Context.exit();
-            }
-        }
-
-        @Override
-        public String getClassName() {
-            return PARAMS_JS_CLASS_NAME;
-        }
+*/
     }
 
-    public static class Cookie extends ScriptableObject {
+    public static class Cookie {
 
         private final static String NAME_PROP_NAME = "name";//NOI18N
         private final static String VALUE_PROP_NAME = "value";//NOI18N
@@ -760,7 +716,7 @@ public class HttpScriptContext extends ScriptableObject {
         private final static String VERSION_PROP_NAME = "version";//NOI18N
         private final static String COOKIE_JS_CLASS_NAME = "Cookie";//NOI18N
         private javax.servlet.http.Cookie cookie;
-
+/*
         public Cookie(javax.servlet.http.Cookie aCookie) {
             cookie = aCookie;
             defineProperty(COMMENT_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
@@ -772,11 +728,7 @@ public class HttpScriptContext extends ScriptableObject {
             defineProperty(VALUE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
             defineProperty(VERSION_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
         }
-
-        @Override
-        public String getClassName() {
-            return COOKIE_JS_CLASS_NAME;
-        }
+*/
 
         private static final String COMMENT_JS_DOC = "/**\n"
                 + "* The comment describing the purpose of this cookie, or <code>null</code> if the cookie has no comment.\n"

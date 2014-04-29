@@ -6,7 +6,6 @@ package com.eas.client.forms;
 
 import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.controls.FormEventsExecutor;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import java.util.logging.Level;
@@ -19,13 +18,13 @@ import javax.swing.Icon;
  */
 public class FormFactory extends DbSwingFactory {
 
-    public FormFactory(FormEventsExecutor aEventsExecutor, ApplicationModel<?, ?, ?, ?> aModel) {
-        super(aEventsExecutor, aModel);
+    public FormFactory(ApplicationModel<?, ?, ?, ?> aModel) {
+        super(aModel);
     }
 
     @Override
     protected ControlEventsIProxy createEventsProxy() {
-        return new FormEventsIProxy(eventsExecutor);
+        return new FormEventsIProxy();
     }
 
     @Override

@@ -55,7 +55,7 @@ public class PlatypusServerRecivedPacketTest {
         ports.put(TEST_PORT + 1, "asc6");
         Set<String> modules = new HashSet<>();
         modules.add("Asc6Acceptor");//"asc6"
-        server = new PlatypusServer(new ScriptedDatabasesClient(new DatabaseAppCache("jndi://testDb"), "testDb", true), sslContext, addresses, ports, null, null, null, modules, null);
+        server = new PlatypusServer(new ScriptedDatabasesClient(new DatabaseAppCache("jndi://testDb"), "testDb", true, null), sslContext, addresses, ports, null, null, null, modules, null);
         server.start();
     }
 

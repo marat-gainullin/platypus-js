@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -39,8 +38,8 @@ public class RowsetsTreedModel extends RowsetsModel implements TreedModel<Row> {
     protected int parentFieldIndex;
     protected TreedRowsRowsetListener rowsRowsetListener;
 
-    public RowsetsTreedModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, int aParentFieldIndex, Scriptable aScriptScope, Function aCellsHandler) {
-        super(aRowsEntity, aRowsRowset, aScriptScope, aCellsHandler);
+    public RowsetsTreedModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, int aParentFieldIndex, JSObject aOnRender) {
+        super(aRowsEntity, aRowsRowset, aOnRender);
         parentFieldIndex = aParentFieldIndex;
         parentLocator = rowsRowset.createParentLocator(parentFieldIndex, pkLocator);
         parentLocator.beginConstrainting();

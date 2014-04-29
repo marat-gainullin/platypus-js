@@ -4,28 +4,20 @@
  */
 package com.eas.client.scripts.ole;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import org.jinterop.dcom.common.JIException;
 import org.jinterop.dcom.core.IJIComObject;
 import org.jinterop.dcom.core.JIVariant;
 import org.jinterop.dcom.impls.JIObjectFactory;
 import org.jinterop.dcom.impls.automation.IJIDispatch;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.FunctionObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
  * @author vv
  */
-public class ComObject extends ScriptableObject {
+public class ComObject extends AbstractJSObject {
 
     private static final String PROPERTY_GET_DELEGATE_NAME = "propertyGetDelegate";
     private static final String FUNCTION_DELEGATE_NAME = "functionCallDelegate";
@@ -34,6 +26,7 @@ public class ComObject extends ScriptableObject {
     IJIDispatch dispatch;
 
     private ComObject(IJIComObject aComObject) throws JIException {
+        super();
         comObject = aComObject;
         dispatch = (IJIDispatch) JIObjectFactory.narrowObject((IJIComObject) comObject.queryInterface(IJIDispatch.IID));
     }
@@ -48,46 +41,47 @@ public class ComObject extends ScriptableObject {
     }
 
     @Override
-    public Object get(String name, Scriptable start) {
-        Object nativeGot = super.get(name, start);
-        if (nativeGot == Scriptable.NOT_FOUND) {
+    public Object getMember(String name) {
+        if(super.hasMember(name))
+            return super.getMember(name);
+        else{
             try {
                 int dispId = dispatch.getIDsOfNames(name);
-                return functionGet(name, start, true);
+                return functionGet(name, true);
             } catch (JIException ex) {
-                //no op
+                return null;
             }
         }
-        return nativeGot;
     }
 
     @Override
-    public Object get(int index, Scriptable start) {
-        Object nativeGot = super.get(index, start);
-        if (nativeGot == Scriptable.NOT_FOUND) {
+    public Object getSlot(int index) {
+        if(super.hasSlot(index))
+            return super.getSlot(index);
+        else{
             try {
                 int dispId = dispatch.getIDsOfNames(INDEXED_COLLECTIONS_PROPERTY_NAME);
                 return propertyGet(dispId, new Object[]{new Integer(index)});
             } catch (JIException ex) {
                 Logger.getLogger(ComObject.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
             }
         }
-        return nativeGot;
     }
 
     @Override
-    public void put(String name, Scriptable start, Object value) {
+    public void setMember(String name, Object value) {
         try {
             int dispId = dispatch.getIDsOfNames(name);
             propertyPut(dispId, value);
         } catch (JIException ex) {
-            super.put(name, start, value);
+            super.setMember(name, value);
         }
     }
 
     @Override
-    public boolean has(String name, Scriptable start) {
-        return super.has(name, start) || hasComMethod(name);
+    public boolean hasMember(String name) {
+        return super.hasMember(name) || hasComMethod(name);
     }
 
     private boolean hasComMethod(String name) {
@@ -105,19 +99,22 @@ public class ComObject extends ScriptableObject {
         return unwrapVariantArray(resultVariant);
     }
 
-    private Object functionGet(String name, Scriptable start, boolean isProperty) {
+    private Object functionGet(String name, boolean isProperty) {
+        /*
         Method functionDelegate = null;
         try {
             String delegateName = isProperty ? PROPERTY_GET_DELEGATE_NAME : FUNCTION_DELEGATE_NAME;
-            functionDelegate = ComObject.class.getMethod(delegateName, Context.class, Scriptable.class, Object[].class, Function.class);
+            functionDelegate = ComObject.class.getMethod(delegateName, Object[].class, Function.class);
         } catch (NoSuchMethodException | SecurityException ex) {
             Logger.getLogger(ComObject.class.getName()).log(Level.SEVERE, null, ex);
         }
         FunctionObject func = new FunctionObject(name, functionDelegate, start);
         super.put(name, func, start);
         return func;
+                */
+        return null;
     }
-
+/*
     public static Object propertyGetDelegate(Context cx, Scriptable thisObj, Object[] args, Function funObj) throws JIException {
         ComObject thisComObject = (ComObject) thisObj;
         JIVariant[] resultVariant = null;
@@ -134,7 +131,7 @@ public class ComObject extends ScriptableObject {
         JIVariant[] resultVariant = thisComObject.dispatch.callMethodA(((FunctionObject) funObj).getFunctionName(), wrapObjectArray(args));
         return unwrapVariantArray(resultVariant);
     }
-
+*/
     private void propertyPut(int dispId, Object value) throws JIException {
         dispatch.put(dispId, wrapObject(value));
     }

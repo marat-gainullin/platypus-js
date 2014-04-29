@@ -29,7 +29,6 @@ import com.eas.dbcontrols.grid.rt.columns.model.RowModelColumn;
 import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
 import com.eas.gui.CascadedStyle;
-import com.eas.script.NativeJavaHostObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
@@ -39,11 +38,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
 
 /**
  * Helper class, intended to manage table's columns in the view and model
@@ -114,7 +110,7 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
             return vCol;
         }
     }
-    private static String COLUMN_NAME = "Column";
+    private static final String COLUMN_NAME = "Column";
     protected Map<TableColumn, GridColumnsGroup> leavesToGroups;
     protected TableColumnModel view;
     protected MultiLevelHeader leveledHeader;
@@ -127,9 +123,8 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
     private List<ScriptableColumn> scriptableColumns;
     private Map<TableColumn, ScriptableColumn> columnsStore = new HashMap<>();
     private int fixedColumns;
-    private NativeJavaHostObject hostObject;
 
-    public ColumnsRiddler(Map<TableColumn, GridColumnsGroup> aLeavesToGroups, TableColumnModel aView, MultiLevelHeader aHeader, RowsetsModel aModel, Map<Rowset, List<ColumnsSource>> aColumnsSources, HasStyle aStyleHost, List<ScriptableColumn> aScriptableColumns, Object aHostObject) {
+    public ColumnsRiddler(Map<TableColumn, GridColumnsGroup> aLeavesToGroups, TableColumnModel aView, MultiLevelHeader aHeader, RowsetsModel aModel, Map<Rowset, List<ColumnsSource>> aColumnsSources, HasStyle aStyleHost, List<ScriptableColumn> aScriptableColumns) {
         super();
         leavesToGroups = aLeavesToGroups;
         view = aView;
@@ -139,9 +134,6 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
         columnsSources = aColumnsSources;
         styleHost = aStyleHost;
         scriptableColumns = aScriptableColumns;
-        if (aHostObject != null && aHostObject instanceof NativeJavaHostObject) {
-            hostObject = (NativeJavaHostObject) aHostObject;
-        }
         installColumnsSourcesListeners();
     }
 
@@ -158,25 +150,6 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
             }
         }
         return fixedCount;
-    }
-
-    private void removeScriptableColumn(ScriptableColumn aColumn) {
-        if (hostObject != null) {
-            if (aColumn != null && aColumn.getName() != null && !aColumn.getName().isEmpty()) {
-                hostObject.delete(aColumn.getName());
-            }
-        }
-    }
-
-    private void defineScriptableColumn(ScriptableColumn aColumn) {
-        if (hostObject != null) {
-            if (aColumn != null && aColumn.getName() != null && !aColumn.getName().isEmpty()) {
-                Object jsColumn = Context.javaToJS(aColumn, hostObject);
-                assert jsColumn instanceof Scriptable;
-                aColumn.setPublished((Scriptable) jsColumn);
-                hostObject.defineProperty(aColumn.getName(), jsColumn);
-            }
-        }
     }
 
     public LinearConstraint getLeftConstraint() {
@@ -269,7 +242,6 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
                     // remove from view
                     view.removeColumn(viewCol);
                     ScriptableColumn scriptableColumn = columnsStore.get(viewCol);
-                    removeScriptableColumn(scriptableColumn);
                     scriptableColumns.remove(scriptableColumn);
                     columnsStore.remove(viewCol);
                     // mark for removing from model
@@ -322,7 +294,7 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
                 if (!colsRows.contains(rows.get(i))) {
                     int localIndexToAddTo = i;
                     Row colRow = rows.get(i);
-                    RowModelColumn rCol = new RowModelColumn(colSource.getColumnsLocator(), colRow, colSource.getColumnsTitleColIndex(), colSource.getCellsLocator(), colSource.getCellsValuesRowset(), colSource.getCellsValuesFieldIndex(), colSource.getCellsHandler(), colSource.getSelectHandler(), colSource.isReadOnly(), this, null, null);
+                    RowModelColumn rCol = new RowModelColumn(colSource.getColumnsLocator(), colRow, colSource.getColumnsTitleColIndex(), colSource.getCellsLocator(), colSource.getCellsValuesRowset(), colSource.getCellsValuesFieldIndex(), colSource.getOnRender(), colSource.getOnSelect(), colSource.isReadOnly(), this, null, null);
                     model.addColumn(rCol);
                     added++;
                     TableColumn vCol = new TableColumn();
@@ -355,7 +327,6 @@ public class ColumnsRiddler extends RowsetAdapter implements HasStyle {
                     } else {
                         scriptableColumns.add(curentPos, scriptColumn);
                     }
-                    defineScriptableColumn(scriptColumn);
                     columnsStore.put(vCol, scriptColumn);
                 }
             }

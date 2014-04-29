@@ -29,6 +29,17 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     }
 
     @Override
+    public void enqueueUpdate() throws Exception {
+        model.getClient().enqueueUpdate(getQueryId(), getQuery().getParameters());
+    }
+
+    @Override
+    public int executeUpdate() throws Exception {
+        model.getClient().enqueueUpdate(getQueryId(), getQuery().getParameters());
+        return 0;
+    }
+
+    @Override
     protected List<Change> getChangeLog() throws Exception {
         return model.getChangeLog();
     }

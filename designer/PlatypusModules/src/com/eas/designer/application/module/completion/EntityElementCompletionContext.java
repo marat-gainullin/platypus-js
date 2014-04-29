@@ -7,7 +7,7 @@ package com.eas.designer.application.module.completion;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.script.ScriptableRowset;
+import com.eas.client.model.application.ApplicationEntity;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
@@ -20,7 +20,7 @@ public class EntityElementCompletionContext extends CompletionContext {
     ApplicationDbEntity entity;
 
     public EntityElementCompletionContext(ApplicationDbEntity anEntity) {
-        super(ScriptableRowset.class);
+        super(ApplicationEntity.class);
         entity = anEntity;
     }
 

@@ -10,8 +10,6 @@ import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.designer.debugger.DebuggerEnvironment;
-import com.eas.designer.debugger.DebuggerUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
@@ -109,21 +107,25 @@ public class ProjectRunner {
                 Future<Integer> runningProgram = start(project, appElementId, true);
                 if (runningProgram != null) {
                     try {
+                        /* attach debugger to the running client program
                         DebuggerEnvironment clientEnv = new DebuggerEnvironment(project);
                         clientEnv.host = LOCAL_HOSTNAME;
                         clientEnv.port = project.getSettings().getDebugClientPort();
                         clientEnv.runningProgram = runningProgram;
                         clientEnv.runningElement = project.getSettings().getRunElement();
                         DebuggerUtils.attachDebugger(clientEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
+                                */
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
                         if (project.getSettings().getRunAppServerType() == AppServerType.PLATYPUS_SERVER) {
                             try {
+                                /* attach debugger to the running server program
                                 DebuggerEnvironment serverEnv = new DebuggerEnvironment(project);
                                 serverEnv.host = LOCAL_HOSTNAME;
                                 serverEnv.port = project.getSettings().getDebugServerPort();
                                 serverEnv.runningProgram = null;
                                 serverEnv.runningElement = null;
                                 DebuggerUtils.attachDebugger(serverEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
+                                        */
                                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                             } catch (Exception ex) {
                                 ErrorManager.getDefault().notify(ex);
@@ -149,7 +151,7 @@ public class ProjectRunner {
             } else {
                 try {
                     binDir = PlatypusPlatform.getPlatformBinDirectory();
-                } catch (        PlatformHomePathException | IllegalStateException ex1) {
+                } catch (PlatformHomePathException | IllegalStateException ex1) {
                     io.getErr().println(ex1.getMessage());
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Specify_Platypus_Platform_Path"));//NOI18N
                     return null;

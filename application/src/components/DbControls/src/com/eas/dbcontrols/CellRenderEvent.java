@@ -5,22 +5,22 @@
 package com.eas.dbcontrols;
 
 import com.bearsoft.gui.grid.data.CellData;
-import com.eas.client.events.ScriptSourcedEvent;
-import com.eas.client.model.script.RowHostObject;
-import org.mozilla.javascript.Scriptable;
+import com.bearsoft.rowset.Row;
+import com.eas.client.events.PublishedSourcedEvent;
+import com.eas.script.HasPublished;
 
 /**
  *
  * @author mg
  */
-public class CellRenderEvent extends ScriptSourcedEvent {
+public class CellRenderEvent extends PublishedSourcedEvent {
 
     protected Object id;
     protected Object columnId;
     protected CellData cell;
-    protected RowHostObject object;
+    protected Row object;
 
-    public CellRenderEvent(Scriptable source, Object id, Object columnId, CellData cell, RowHostObject object) {
+    public CellRenderEvent(HasPublished source, Object id, Object columnId, CellData cell, Row object) {
         super(source);
         this.columnId = columnId;
         this.id = id;
@@ -40,7 +40,7 @@ public class CellRenderEvent extends ScriptSourcedEvent {
         return cell;
     }
 
-    public RowHostObject getObject() {
+    public Row getObject() {
         return object;
     }
 }

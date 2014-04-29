@@ -10,11 +10,6 @@ import com.eas.client.ClientFactory;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.PlatypusScriptedResource;
-import com.eas.client.scripts.ScriptRunner;
-import com.eas.debugger.jmx.server.Breakpoints;
-import com.eas.debugger.jmx.server.Debugger;
-import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -28,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.management.ObjectName;
 import javax.net.ssl.*;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
@@ -207,20 +201,14 @@ public class ServerMain {
         }
         SSLContext ctx = createSSLContext();
         AppCache appCache = ClientFactory.obtainTwoTierAppCache(url, new ServerTasksScanner(tasks));
-        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true);
-        // Apply debugging facility
-        if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
-            Debugger debugger = Debugger.initialize(false);
-            registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
-            registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
-        }
+        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true, null);
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
         server.setAnonymousEnabled(anonymousEnabled);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
+        appDbClient.setDocumentsHost(server);
         PlatypusScriptedResource.init(appDbClient, server, server);
-        ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, server.getScriptsCache(), ScriptableObject.READONLY);
-
+        //
         server.start();
     }
 

@@ -1,35 +1,27 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.forms;
 
-import com.eas.client.Client;
-import com.eas.client.events.ScriptSourcedEvent;
+import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.client.forms.api.FormWindowEventsIProxy;
 import com.eas.client.forms.api.components.DesktopPane;
-import com.eas.client.login.PrincipalHost;
-import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptRunner;
+import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
-import com.eas.controls.FormEventsExecutor;
-import com.eas.controls.containers.PanelDesignInfo;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.events.WindowEventsIProxy;
-import com.eas.controls.wrappers.ButtonGroupWrapper;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.map.DbMap;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.resources.images.IconCache;
 import com.eas.script.EventMethod;
-import com.eas.script.NativeJavaHostObject;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
-import com.eas.script.ScriptUtils.ScriptAction;
+import com.eas.script.ScriptObj;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
@@ -37,30 +29,36 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import org.mozilla.javascript.*;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class FormRunner extends ScriptRunner implements FormEventsExecutor {
+@ScriptObj(name = "Form", jsDoc = "/**\n"
+        + "* Application form.\n"
+        + "*/")
+public class FormRunner implements HasPublished {
 
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
     public static final String VIEW_SCRIPT_NAME = "view";
-    protected static ScriptableObject platypusGuiLibScope;
     protected static final Map<String, FormRunner> showingForms = new HashMap<>();
-    protected static Function onChange = null;
+    protected static JSObject onChange;
 
+    private static final String SHOWN_JSDOC = ""
+            + "/**\n"
+            + " * The array of application's shown forms.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = SHOWN_JSDOC)
     public static FormRunner[] getShownForms() {
         synchronized (FormRunner.class) {
             List<FormRunner> notNullForms = new ArrayList<>();
@@ -73,39 +71,31 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
+    private static final String SHOWN_FORM_JSDOC = ""
+            + "/**\n"
+            + " * Gets a shown form by its key.\n"
+            + " * @param key a form key identifier\n"
+            + " * @return a form from the open forms registry\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = SHOWN_FORM_JSDOC, params = {"key"})
     public static FormRunner getShownForm(String aFormKey) {
         synchronized (FormRunner.class) {
             return showingForms.get(aFormKey);
         }
     }
 
-    public static Function getOnChange() {
+    private static final String ON_CHANGE_JSDOC = ""
+            + "/**\n"
+            + " * The shown forms registry change event handler function.\n"
+            + " */";
+    @ScriptFunction(jsDoc = ON_CHANGE_JSDOC)
+    public static JSObject getOnChange() {
         return onChange;
     }
 
-    public static void setOnChange(Function aValue) {
+    public static void setOnChange(JSObject aValue) {
         onChange = aValue;
-    }
-
-    protected static void initializePlatypusGuiLibScope() throws IOException {
-        if (platypusGuiLibScope == null) {
-            try {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        // Fix from rsp! Let's initialize library functions
-                        // in top-level scope.
-                        //platypusGuiLibScope = (ScriptableObject) context.newObject(platypusStandardLibScope);
-                        //platypusGuiLibScope.setPrototype(platypusStandardLibScope);
-                        platypusGuiLibScope = platypusStandardLibScope;
-                        importScriptLibrary("/com/eas/client/forms/gui.js", "gui", cx, platypusGuiLibScope);
-                        return null;
-                    }
-                });
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
-        }
     }
 
     private void checkUndecorated(RootPaneContainer topContainer) {
@@ -122,13 +112,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     protected void showingFormsChanged() {
         if (onChange != null) {
             try {
-                ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        onChange.call(cx, FormRunner.this, FormRunnerPrototype.getInstance().getConstructor(), new Object[]{ScriptUtils.javaToJS(new ScriptSourcedEvent(FormRunner.this), FormRunner.this)});
-                        return null;
-                    }
-                });
+                PublishedSourcedEvent event = new PublishedSourcedEvent(this);
+                onChange.call(published, new Object[]{event.getPublished()});
             } catch (Exception ex) {
                 Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -195,40 +180,46 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     protected Dimension formSize;
     protected Dimension windowDecorSize = new Dimension();
     protected WindowEventsIProxy windowHandler;
-    // Runtime 
-    protected JPanel form;
+    // runtime 
+    protected ApplicationModel<?, ?, ?, ?> model;
+    protected JPanel view;
     protected Map<String, JComponent> components;
     protected String formKey;
+    protected Object published;
     // frequent runtime
     protected Container surface;
     protected Object closeCallbackParameter;
 
-    static {
-        try {
-            initializePlatypusStandardLibScope();
-            assert standardObjectsScope != null;
-            assert platypusStandardLibScope != null;
-            initializePlatypusGuiLibScope();
-        } catch (Exception ex) {
-            Logger.getLogger(ScriptRunner.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public FormRunner(String aFormKey, FormDocument aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+        super();
+        formKey = aFormKey;
+        model = aModel;
+        prepareForm(aDocument);
     }
 
-    public FormRunner(String aFormId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
-        super(aFormId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
-        setPrototype(FormRunnerPrototype.getInstance());
-        formKey = aFormId;
+    public ApplicationModel<?, ?, ?, ?> getModel() {
+        return model;
     }
-    
+
     // Script interface
-    
+    @Override
+    public Object getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        published = aValue;
+    }
+
     private static final String SHOW_JSDOC = ""
             + "/**\n"
             + " * Shows the form as an ordinary window.\n"
             + " */";
 
     /**
-     * Script method showing the form as ordinary frame
+     * Script method showing the view as ordinary frame
+     *
      * @throws Exception an exception if something goes wrong
      */
     @ScriptFunction(jsDoc = SHOW_JSDOC)
@@ -236,7 +227,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         displayAsFrame();
     }
 
-    public Object showDialog(Function onOkModalResult) throws Exception {
+    public Object showDialog(JSObject onOkModalResult) throws Exception {
         return showModal(onOkModalResult);
     }
 
@@ -247,14 +238,14 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
 
     /**
-     * Script method showing the form as modal dialog
+     * Script method showing the view as modal dialog
      *
      * @param onOkModalResult a callback handler function
      * @return value of the modalResult property
      * @throws Exception an exception if something goes wrong
      */
     @ScriptFunction(params = {"callback"}, jsDoc = SHOW_MODAL_JSDOC)
-    public Object showModal(Function onOkModalResult) throws Exception {
+    public Object showModal(JSObject onOkModalResult) throws Exception {
         return displayAsDialog(onOkModalResult);
     }
 
@@ -265,54 +256,46 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
 
     /**
-     * Script method showing the form as an internal frame.
+     * Script method showing the view as an internal frame.
      *
-     * @param desktopObject Should be an instance of JDesktopPane
+     * @param aDesktop Should be an instance of JDesktopPane
      * @throws Exception an exception if something goes wrong
      */
     @ScriptFunction(params = {"desktop"}, jsDoc = SHOW_INTERNAL_FRAME_JSDOC)
-    public void showInternalFrame(Object desktopObject) throws Exception {
-        DesktopPane desktopPane;
-        if (desktopObject instanceof NativeJavaObject) {
-            desktopObject = Context.jsToJava(desktopObject, DesktopPane.class);
-        }
-        if (desktopObject instanceof DesktopPane) {
-            desktopPane = (DesktopPane) desktopObject;
-        } else {
-            throw new IllegalArgumentException("argument should be instance of DesktopPane, not " + desktopObject);
-        }
-        displayAsInternalFrame(desktopPane);
+    public void showInternalFrame(DesktopPane aDesktop) throws Exception {
+        displayAsInternalFrame(aDesktop);
     }
 
-    private static final String SHOW_ON_PANEL_FRAME_JSDOC = ""
-            + "/**\n"
-            + " * Script method showing the form in embedded mode on the panel.\n"
-            + " * @param panel the parent panel\n"
-            + " */";
+    /*
+     private static final String SHOW_ON_PANEL_FRAME_JSDOC = ""
+     + "/**\n"
+     + " * Script method showing the view in embedded mode on the panel.\n"
+     + " * @param panel the parent panel\n"
+     *///        + " */";
+/*
+     @ScriptFunction(params = {"panel"}, jsDoc = SHOW_ON_PANEL_FRAME_JSDOC)
+     public void showOnPanel(Object aParent) throws Exception {
+     com.eas.client.forms.api.Container<?> hostPanel;
+     if (aParent != null) {
+     if (aParent instanceof NativeJavaObject) {
+     aParent = Context.jsToJava(aParent, com.eas.client.forms.api.Container.class);
+     }
+     if (aParent instanceof com.eas.client.forms.api.Container<?>) {
+     hostPanel = (com.eas.client.forms.api.Container<?>) aParent;
+     } else {
+     throw new IllegalArgumentException("argument should be instance of Container, not " + aParent.getClass().getName());
+     }
+     } else {
+     throw new IllegalArgumentException("argument should be not null");
+     }
+     displayOnContainer(ControlsWrapper.unwrap(hostPanel));
+     }
 
-    @ScriptFunction(params = {"panel"}, jsDoc = SHOW_ON_PANEL_FRAME_JSDOC)
-    public void showOnPanel(Object aParent) throws Exception {
-        com.eas.client.forms.api.Container<?> hostPanel;
-        if (aParent != null) {
-            if (aParent instanceof NativeJavaObject) {
-                aParent = Context.jsToJava(aParent, com.eas.client.forms.api.Container.class);
-            }
-            if (aParent instanceof com.eas.client.forms.api.Container<?>) {
-                hostPanel = (com.eas.client.forms.api.Container<?>) aParent;
-            } else {
-                throw new IllegalArgumentException("argument should be instance of Container, not " + aParent.getClass().getName());
-            }
-        } else {
-            throw new IllegalArgumentException("argument should be not null");
-        }
-        displayOnContainer(ControlsWrapper.unwrap(hostPanel));
-    }
-
-    //TODO is redundant method?
-    public String getFormId() {
-        return getApplicationElementId();
-    }
-
+     //TODO is redundant method?
+     public String getFormId() {
+     return getApplicationElementId();
+     }
+     */
     private static final String FORM_KEY_JSDOC = ""
             + "/**\n"
             + " * The form key. Used to identify a form instance. Initialy set to the form's application element name.\n"
@@ -363,28 +346,9 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         return isFrameVisible() || isDialogVisible() || isInternalFrameVisible();
     }
 
-    public JDialog getDialog(Function onOkModalResult) throws Exception {
-        showDialog(onOkModalResult);
-        assert surface instanceof JDialog;
-        return (JDialog) surface;
-    }
-
-    public JInternalFrame getInternalFrame(Object desktopObject) throws Exception {
-        showInternalFrame(desktopObject);
-        assert surface instanceof JInternalFrame;
-        return (JInternalFrame) surface;
-    }
-
-    public JFrame getFrame() throws Exception {
-        show();
-        assert surface instanceof JFrame;
-        return (JFrame) surface;
-    }
-
     public void displayAsFrame() throws Exception {
         if (surface == null) {
             close(null);
-            execute();
             final JFrame frame = new JFrame() {
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
@@ -410,12 +374,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             checkUndecorated(frame);
             frame.setAlwaysOnTop(alwaysOnTop);
             frame.setLocationByPlatform(locationByPlatform);
-            frame.getContentPane().add(form, BorderLayout.CENTER);
+            frame.getContentPane().add(view, BorderLayout.CENTER);
             // add window listener
             // for unknown reasons, control events are also working
             windowHandler.setHandlee(frame);
             //
-            Function windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
+            JSObject windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
             windowHandler.getHandlers().remove(WindowEventsIProxy.windowOpened);
             try {
                 synchronized (FormRunner.class) {
@@ -462,7 +426,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     public void displayAsInternalFrame(DesktopPane aDesktop) throws Exception {
         if (surface == null) {
             close(null);
-            execute();
             JInternalFrame internalFrame = new PlatypusInternalFrame(this) {
                 @Override
                 public void doDefaultCloseAction() {
@@ -484,13 +447,13 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             internalFrame.setClosable(true);
             internalFrame.setIconifiable(true);
             internalFrame.setMaximizable(true);
-            internalFrame.getContentPane().add(form, BorderLayout.CENTER);
+            internalFrame.getContentPane().add(view, BorderLayout.CENTER);
 
             // add window listener
             // for unknown reasons, control events are also working
             windowHandler.setHandlee(internalFrame);
             //
-            Function windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
+            JSObject windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
             windowHandler.getHandlers().remove(WindowEventsIProxy.windowOpened);
             try {
                 synchronized (FormRunner.class) {
@@ -534,10 +497,9 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    public Object displayAsDialog(final Function onOkModalResult) throws Exception {
+    public Object displayAsDialog(final JSObject onOkModalResult) throws Exception {
         if (surface == null) {
             close(null);
-            execute();
             JDialog dialog = new JDialog() {
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
@@ -598,7 +560,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             }
             checkUndecorated(dialog);
             dialog.setLocationByPlatform(locationByPlatform);
-            dialog.getContentPane().add(form, BorderLayout.CENTER);
+            dialog.getContentPane().add(view, BorderLayout.CENTER);
             dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 
             // add window listener
@@ -610,21 +572,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             final Object selected = closeCallbackParameter;
             surface = null;
             closeCallbackParameter = null;
-            if (onOkModalResult != null && selected != Context.getUndefinedValue()) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ScriptUtils.inContext(new ScriptAction() {
-                                @Override
-                                public Object run(Context cx) throws Exception {
-                                    onOkModalResult.call(cx, FormRunner.this, FormRunner.this, new Object[]{selected});
-                                    return null;
-                                }
-                            });
-                        } catch (Exception ex) {
-                            Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+            if (onOkModalResult != null) {
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        onOkModalResult.call(published, new Object[]{selected});
+                    } catch (Exception ex) {
+                        Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 });
             }
@@ -633,51 +586,52 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             return null;
         }
     }
+    /*
+     public void displayOnContainer(java.awt.Container aTarget) throws Exception {
+     if (surface == null) {
+     close(null);
+     if (aTarget.getLayout() != null) {// TODO: remove this code when script moving/resizing will be clear.
+     aTarget.setLayout(new BorderLayout());
+     }
+     if (aTarget.getLayout() instanceof BorderLayout) {
+     aTarget.add(view, BorderLayout.CENTER);
+     }
+     surface = aTarget;
+     windowDecorSize = new Dimension();
+     windowHandler.windowOpened(new WindowEvent(new JFrame(), WindowEvent.WINDOW_OPENED));
+     aTarget.invalidate();
+     view.invalidate();
+     aTarget.validate();
+     aTarget.repaint();
+     if (surface.getLayout() == null) {
+     if (formSize != null) {
+     view.setSize(formSize);
+     } else if (designedViewSize != null) {
+     view.setSize(designedViewSize);
+     }
+     formSize = view.getSize();
+     if (formLocation != null) {
+     view.setLocation(formLocation);
+     }
+     }
+     designedViewSize = view.getSize();
+     formLocation = view.getLocation();
+     surface.addComponentListener(new ComponentAdapter() {
+     @Override
+     public void componentMoved(ComponentEvent e) {
+     formLocation = surface.getLocation();
+     }
 
-    public void displayOnContainer(java.awt.Container aTarget) throws Exception {
-        if (surface == null) {
-            close(null);
-            execute();
-            if (aTarget.getLayout() != null) {// TODO: remove this code when script moving/resizing will be clear.
-                aTarget.setLayout(new BorderLayout());
-            }
-            if (aTarget.getLayout() instanceof BorderLayout) {
-                aTarget.add(form, BorderLayout.CENTER);
-            }
-            surface = aTarget;
-            windowDecorSize = new Dimension();
-            windowHandler.windowOpened(new WindowEvent(new JFrame(), WindowEvent.WINDOW_OPENED));
-            aTarget.invalidate();
-            form.invalidate();
-            aTarget.validate();
-            aTarget.repaint();
-            if (surface.getLayout() == null) {
-                if (formSize != null) {
-                    form.setSize(formSize);
-                } else if (designedViewSize != null) {
-                    form.setSize(designedViewSize);
-                }
-                formSize = form.getSize();
-                if (formLocation != null) {
-                    form.setLocation(formLocation);
-                }
-            }
-            designedViewSize = form.getSize();
-            formLocation = form.getLocation();
-            surface.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentMoved(ComponentEvent e) {
-                    formLocation = surface.getLocation();
-                }
+     @Override
+     public void componentResized(ComponentEvent e) {
+     formSize = surface.getSize();
+     designedViewSize = surface.getSize();
+     }
+     });
+     }
+     }
+     */
 
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    formSize = surface.getSize();
-                    designedViewSize = surface.getSize();
-                }
-            });
-        }
-    }
     private static final String CLOSE_JSDOC = ""
             + "/**\n"
             + " * Closes this form.\n"
@@ -697,8 +651,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 } else {
                     windowHandler.windowClosing(new WindowEvent(new JFrame(), WindowEvent.WINDOW_CLOSING));
                     windowHandler.windowClosed(new WindowEvent(new JFrame(), WindowEvent.WINDOW_CLOSED));
-                    form.invalidate();
-                    surface.remove(form);
+                    view.invalidate();
+                    surface.remove(view);
                     surface.validate();
                     surface.repaint();
                 }
@@ -961,23 +915,21 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
 
     @ScriptFunction(jsDoc = ICON_JSDOC)
-    public Object getIcon() {
+    public ImageIcon getIcon() {
         return icon;
     }
 
     @ScriptFunction
-    public void setIcon(Object aValue) {
-        if (aValue instanceof Wrapper && ((Wrapper) aValue).unwrap() instanceof ImageIcon) {
-            icon = (ImageIcon) ((Wrapper) aValue).unwrap();
-            if (surface instanceof JDialog) {
-                ((JDialog) surface).setIconImage(icon != null ? icon.getImage() : null);
-            }
-            if (surface instanceof JInternalFrame) {
-                ((JInternalFrame) surface).setFrameIcon(icon);
-            }
-            if (surface instanceof JFrame) {
-                ((JFrame) surface).setIconImage(icon != null ? icon.getImage() : null);
-            }
+    public void setIcon(ImageIcon aValue) {
+        icon = aValue;
+        if (surface instanceof JDialog) {
+            ((JDialog) surface).setIconImage(icon != null ? icon.getImage() : null);
+        }
+        if (surface instanceof JInternalFrame) {
+            ((JInternalFrame) surface).setFrameIcon(icon);
+        }
+        if (surface instanceof JFrame) {
+            ((JFrame) surface).setIconImage(icon != null ? icon.getImage() : null);
         }
     }
 
@@ -1124,7 +1076,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             ((JFrame) surface).setOpacity(opacity);
         }
     }
- 
+
     private static final String ALWAYS_ON_TOP_JSDOC = ""
             + "/**\n"
             + " * Determines whether this window should always be above other windows.\n"
@@ -1177,15 +1129,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>before open</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_OPENED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowOpened() {
+    public JSObject getOnWindowOpened() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowOpened(Function aValue) {
+    public void setOnWindowOpened(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowOpened, aValue);
         }
@@ -1195,15 +1147,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>before close</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSING_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowClosing() {
+    public JSObject getOnWindowClosing() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosing) : null;
     }
 
     @ScriptFunction()
-    public void setOnWindowClosing(Function aValue) {
+    public void setOnWindowClosing(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowClosing, aValue);
         }
@@ -1213,15 +1165,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after close</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowClosed() {
+    public JSObject getOnWindowClosed() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosed) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowClosed(Function aValue) {
+    public void setOnWindowClosed(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowClosed, aValue);
         }
@@ -1231,15 +1183,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after minimize</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_MINIMIZED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowMinimized() {
+    public JSObject getOnWindowMinimized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowIconified) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowMinimized(Function aValue) {
+    public void setOnWindowMinimized(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowIconified, aValue);
         }
@@ -1249,15 +1201,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after restore</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_RESTORED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowRestored() {
+    public JSObject getOnWindowRestored() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowRestored) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowRestored(Function aValue) {
+    public void setOnWindowRestored(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowRestored, aValue);
         }
@@ -1267,15 +1219,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after maximize</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_MAXIMIZED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowMaximized() {
+    public JSObject getOnWindowMaximized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowMaximized) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowMaximized(Function aValue) {
+    public void setOnWindowMaximized(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowMaximized, aValue);
         }
@@ -1285,15 +1237,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after activate</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_ACTIVATED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowActivated() {
+    public JSObject getOnWindowActivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowActivated) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowActivated(Function aValue) {
+    public void setOnWindowActivated(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowActivated, aValue);
         }
@@ -1303,171 +1255,83 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after deactivate</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_DEACTIVATED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
-    public Function getOnWindowDeactivated() {
+    public JSObject getOnWindowDeactivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowDeactivated) : null;
     }
 
     @ScriptFunction
-    public void setOnWindowDeactivated(Function aValue) {
+    public void setOnWindowDeactivated(JSObject aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowDeactivated, aValue);
         }
     }
 
-    @Override
-    protected void shrink() throws Exception {
-        close(null);
-        if (windowHandler != null) {
-            windowHandler.setHandlee(null);
-        }
-        windowHandler = null;
-        form = null;
-        components = null;
-        super.shrink();
-    }
-
-    @Override
-    protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
-        prepareRoles(scriptDoc);
-        prepareModel(scriptDoc);
-        prepareForm(scriptDoc);
-        prepareScript(scriptDoc, args);
-    }
-
-    protected void prepareForm(ScriptDocument scriptDoc) throws Exception {
-        assert scriptDoc instanceof FormDocument;
-        FormDocument formDoc = (FormDocument) scriptDoc;
-        defaultCloseOperation = formDoc.getFormDesignInfo().getDefaultCloseOperation();
-        icon = IconCache.getIcon(formDoc.getFormDesignInfo().getIconImage());
-        title = formDoc.getFormDesignInfo().getTitle();
+    private void prepareForm(FormDocument aDocument) throws Exception {
+        defaultCloseOperation = aDocument.getFormDesignInfo().getDefaultCloseOperation();
+        icon = IconCache.getIcon(aDocument.getFormDesignInfo().getIconImage());
+        title = aDocument.getFormDesignInfo().getTitle();
         if (title == null || title.isEmpty()) {
-            title = formDoc.getTitle();
+            title = aDocument.getTitle();
         }
-        resizable = formDoc.getFormDesignInfo().isResizable();
-        undecorated = formDoc.getFormDesignInfo().isUndecorated();
-        opacity = formDoc.getFormDesignInfo().getOpacity();
-        alwaysOnTop = formDoc.getFormDesignInfo().isAlwaysOnTop();
-        locationByPlatform = formDoc.getFormDesignInfo().isLocationByPlatform();
-        designedViewSize = formDoc.getFormDesignInfo().getDesignedPreferredSize();
-        windowHandler = new FormWindowEventsIProxy(this);
-        final DbSwingFactory factory = new FormFactory(this, model);
-        final FormDesignInfo fdi = formDoc.getFormDesignInfo();//.copy();
+        resizable = aDocument.getFormDesignInfo().isResizable();
+        undecorated = aDocument.getFormDesignInfo().isUndecorated();
+        opacity = aDocument.getFormDesignInfo().getOpacity();
+        alwaysOnTop = aDocument.getFormDesignInfo().isAlwaysOnTop();
+        locationByPlatform = aDocument.getFormDesignInfo().isLocationByPlatform();
+        designedViewSize = aDocument.getFormDesignInfo().getDesignedPreferredSize();
+        windowHandler = new FormWindowEventsIProxy();
+        final DbSwingFactory factory = new FormFactory(model);
+        final FormDesignInfo fdi = aDocument.getFormDesignInfo();//.copy();
         fdi.accept(factory);
-        form = factory.getResult();
+        view = factory.getResult();
         components = new HashMap<>();
         components.putAll(factory.getNonvisuals());
         components.putAll(factory.getComponents());
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                for (Entry<String, JComponent> entry : components.entrySet()) {
-                    if (form != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
-                        defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
-                    }
-                }
-                for (Entry<String, JComponent> entry : components.entrySet()) {
-                    if (form != entry.getValue() && (entry.getValue() instanceof ButtonGroupWrapper)) {
-                        defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
-                    }
-                }
-                FormRunner.super.delete(VIEW_SCRIPT_NAME);
-                ControlsWrapper viewWrapper = new ControlsWrapper(form);
-                (new PanelDesignInfo()).accept(viewWrapper);
-                defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), FormRunner.this), READONLY);
-                return null;
-            }
-        });
+        /*
+         for (Entry<String, JComponent> entry : components.entrySet()) {
+         if (view != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
+         defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+         }
+         }
+         for (Entry<String, JComponent> entry : components.entrySet()) {
+         if (view != entry.getValue() && (entry.getValue() instanceof ButtonGroupWrapper)) {
+         defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+         }
+         }
+         FormRunner.super.delete(VIEW_SCRIPT_NAME);
+         ControlsWrapper viewWrapper = new ControlsWrapper(view);
+         (new PanelDesignInfo()).accept(viewWrapper);
+         defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), FormRunner.this), READONLY);
+         */
     }
 
-    @Override
-    public String getClassName() {
-        return FormRunner.class.getName();
-    }
-
-    @Override
-    protected void definePropertiesAndMethods() {
-        super.definePropertiesAndMethods();
-        defineFunctionProperties(new String[]{
-            "show",
-            "showModal",
-            "showOnPanel",
-            "showInternalFrame",
-            "close",
-            "minimize",
-            "maximize",
-            "restore",
-            "toFront"
-        }, FormRunner.class, EMPTY);
-        defineProperty("formKey", FormRunner.class, EMPTY);
-        defineProperty("visible", FormRunner.class, READONLY);
-        defineProperty("left", FormRunner.class, EMPTY);
-        defineProperty("top", FormRunner.class, EMPTY);
-        defineProperty("width", FormRunner.class, EMPTY);
-        defineProperty("height", FormRunner.class, EMPTY);
-        defineProperty("minimized", FormRunner.class, READONLY);
-        defineProperty("maximized", FormRunner.class, READONLY);
-        defineProperty("minimizable", FormRunner.class, EMPTY);
-        defineProperty("maximizable", FormRunner.class, EMPTY);
-        defineProperty("defaultCloseOperation", FormRunner.class, EMPTY);
-        defineProperty("icon", FormRunner.class, EMPTY);
-        defineProperty("title", FormRunner.class, EMPTY);
-        defineProperty("resizable", FormRunner.class, EMPTY);
-        defineProperty("undecorated", FormRunner.class, EMPTY);
-        defineProperty("opacity", FormRunner.class, EMPTY);
-        defineProperty("alwaysOnTop", FormRunner.class, EMPTY);
-        defineProperty("locationByPlatform", FormRunner.class, EMPTY);
-        defineProperty("onWindowOpened", FormRunner.class, EMPTY);
-        defineProperty("onWindowClosing", FormRunner.class, EMPTY);
-        defineProperty("onWindowClosed", FormRunner.class, EMPTY);
-        defineProperty("onWindowMinimized", FormRunner.class, EMPTY);
-        defineProperty("onWindowRestored", FormRunner.class, EMPTY);
-        defineProperty("onWindowMaximized", FormRunner.class, EMPTY);
-        defineProperty("onWindowActivated", FormRunner.class, EMPTY);
-        defineProperty("onWindowDeactivated", FormRunner.class, EMPTY);
-    }
-
-    @Override
-    public Object executeEvent(final Function aHandler, final Scriptable aEventThis, final Object anEvent) {
-        // The components map must be filled before any event can occur.
-        if (components != null && aHandler != null) {
-            try {
-                return ScriptUtils.inContext(new ScriptAction() {
-                    @Override
-                    public Object run(Context cx) throws Exception {
-                        return ScriptUtils.js2Java(aHandler.call(cx, FormRunner.this, aEventThis, new Object[]{anEvent}));
-                    }
-                });
-            } catch (Exception ex) {
-                Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, ex.getMessage());
-            }
-        }
-        return Context.getUndefinedValue();
-    }
-
-    protected static NativeJavaHostObject publishComponent(JComponent aComp, Scriptable aScope, ControlDesignInfo aDesignInfo) {
+    /*
+     public Object executeEvent(final JSObject aHandler, final JSObject aEventThis, final Object anEvent) {
+     // The components map must be filled before any event can occur.
+     if (components != null && aHandler != null) {
+     try {
+     return ScriptUtils.toJava(aHandler.call(aEventThis, new Object[]{anEvent}));
+     } catch (Exception ex) {
+     Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, ex.getMessage());
+     }
+     }
+     return null;
+     }
+     */
+    protected static Object publishComponent(JComponent aComp, ControlDesignInfo aDesignInfo) {
         ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
         aDesignInfo.accept(apiWrapper);
-        Object published = ScriptUtils.javaToJS(apiWrapper.getResult() != null ? apiWrapper.getResult() : aComp, aScope);
-        NativeJavaHostObject res = (published instanceof NativeJavaHostObject) ? (NativeJavaHostObject) published : null;
+        JSObject published = null;// TODO: implement publish
         ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(apiWrapper.getResult());
         if (eventsProxy != null) {
-            eventsProxy.setEventThis(res);
+            eventsProxy.setEventThis(published);
         }
-        if (aComp instanceof DbControlPanel) {
-            ((DbControlPanel) aComp).setScriptScope(aScope);
-            ((DbControlPanel) aComp).setEventsThis(res);
+        if (aComp instanceof HasPublished) {
+            ((HasPublished) aComp).setPublished(published);
         }
-        if (aComp instanceof DbGrid) {
-            ((DbGrid) aComp).setScriptScope(aScope);
-            ((DbGrid) aComp).setEventThis(res);
-        }
-        if (aComp instanceof DbMap) {
-            ((DbMap) aComp).setScriptScope(aScope);
-            ((DbMap) aComp).setEventThis(res);
-        }
-        return res;
+        return published;
     }
 }

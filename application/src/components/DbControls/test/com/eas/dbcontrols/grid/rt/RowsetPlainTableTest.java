@@ -54,7 +54,7 @@ public class RowsetPlainTableTest extends GridBaseTest {
                 try {
                     Rowset rowset = initRowset();
                     TableColumnModel columnModel = new DefaultTableColumnModel();
-                    RowsetsTableModel model = new RowsetsTableModel(null, rowset, null, null);
+                    RowsetsTableModel model = new RowsetsTableModel(null, rowset, null);
                     TableRowSorter sorter = new TableRowSorter(model);
                     for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
                         FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -119,7 +119,7 @@ public class RowsetPlainTableTest extends GridBaseTest {
                 try {
                     Rowset rowset = initRowset();
                     TableColumnModel columnModel = new DefaultTableColumnModel();
-                    RowsetsTableModel model = new RowsetsTableModel(null, rowset, null, null);
+                    RowsetsTableModel model = new RowsetsTableModel(null, rowset, null);
                     TableRowSorter sorter = new TableRowSorter(model);
                     for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
                         FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
