@@ -37,8 +37,8 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
         super();
     }
 
-    public FieldsEntity(DbSchemeModel dm) {
-        super(dm);
+    public FieldsEntity(DbSchemeModel aModel) {
+        super(aModel);
     }
 
     public FieldsEntity(String aSqlId) {
@@ -154,7 +154,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     @Override
     public void validateQuery() throws Exception {
         if (query == null && tableName != null) {
-            query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient(), false);
+            query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient(), true);
         }
     }
 }

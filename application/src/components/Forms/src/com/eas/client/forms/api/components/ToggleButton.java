@@ -32,11 +32,12 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
             + "* Toggle button component.\n"
             + "* @param text the text for the component (optional)\n"
             + "* @param icon the icon for the component (optional)\n"
+            + "* @param selected the selected state of the button (optional)\n"
             + "* @param iconTextGap the text gap (optional)\n"
             + "* @param actionPerformed the function for the action performed handler (optional)\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "selected", "iconTextGap", "actionPerformed"})
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, Function aActionPerformedHandler) {
         super();
         setDelegate(new JToggleButton(aText, aIcon, aSelected));

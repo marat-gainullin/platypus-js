@@ -14,17 +14,16 @@ import org.mozilla.javascript.Function;
  * @author mg
  */
 public class CheckBox extends Component<JCheckBox> {
-    
-    protected CheckBox(JCheckBox aDelegate)
-    {
+
+    protected CheckBox(JCheckBox aDelegate) {
         super();
         setDelegate(aDelegate);
     }
-    
+
     public CheckBox(String aText, boolean aSelected) {
         this(aText, aSelected, null);
     }
-    
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Check box component. \n"
@@ -33,7 +32,7 @@ public class CheckBox extends Component<JCheckBox> {
             + "* @param actionPerformed the function for the action performed (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected",  "actionPerformed"})
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, Function aActionPerformedHandler) {
         super();
         setDelegate(new JCheckBox(aText, aSelected));
@@ -47,41 +46,32 @@ public class CheckBox extends Component<JCheckBox> {
     public CheckBox() {
         this(null, false);
     }
-    
+
     private static final String TEXT_JSDOC = ""
             + "/**\n"
             + "* Text of the check box."
             + "*/";
-    
-    @ScriptFunction(jsDoc=TEXT_JSDOC)
+
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
     }
 
-    /*
-    public Icon getIcon() {
-        return delegate.getIcon();
-    }
-
-    public void setIcon(Icon aValue) {
-        delegate.setIcon(aValue);
-    }
-*/
     private static final String SELECTED_JSDOC = ""
             + "/**\n"
             + "* Determines whether this component is selected."
             + "*/";
-    
-    @ScriptFunction(jsDoc=SELECTED_JSDOC)
+
+    @ScriptFunction(jsDoc = SELECTED_JSDOC)
     public boolean getSelected() {
         return delegate.isSelected();
     }
-    
+
     @ScriptFunction
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);

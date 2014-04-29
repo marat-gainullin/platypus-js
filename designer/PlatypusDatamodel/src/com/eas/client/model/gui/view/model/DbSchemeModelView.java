@@ -345,7 +345,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         public CreateTableAction() {
             super();
             putValue(Action.LARGE_ICON_KEY, IconCache.getIcon("24x24/newTable.png"));
-            setEnabled(false);
         }
 
         @Override

@@ -93,6 +93,7 @@ import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.text.JTextComponent;
+import org.mozilla.javascript.Function;
 
 /**
  *
@@ -679,7 +680,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     }
 
     protected ControlEventsIProxy createEventsProxy() {
-        return new ControlEventsIProxy(eventsExecutor);
+        return new ControlEventsIProxy();
     }
 
     protected void processControlEvents(final ControlDesignInfo aInfo) {
@@ -690,29 +691,120 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
             handlersResolvers.add(new Runnable() {
                 @Override
                 public void run() {
-                    proxy.getHandlers().put(ControlEventsIProxy.actionPerformed, eventsExecutor.getHandler(aInfo.getActionPerformed()));
-                    proxy.getHandlers().put(ControlEventsIProxy.propertyChange, eventsExecutor.getHandler(aInfo.getPropertyChange()));
-                    proxy.getHandlers().put(ControlEventsIProxy.stateChanged, eventsExecutor.getHandler(aInfo.getStateChanged()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentHidden, eventsExecutor.getHandler(aInfo.getComponentHidden()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentMoved, eventsExecutor.getHandler(aInfo.getComponentMoved()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentResized, eventsExecutor.getHandler(aInfo.getComponentResized()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentShown, eventsExecutor.getHandler(aInfo.getComponentShown()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentAdded, eventsExecutor.getHandler(aInfo.getComponentAdded()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentRemoved, eventsExecutor.getHandler(aInfo.getComponentRemoved()));
-                    proxy.getHandlers().put(ControlEventsIProxy.focusGained, eventsExecutor.getHandler(aInfo.getFocusGained()));
-                    proxy.getHandlers().put(ControlEventsIProxy.focusLost, eventsExecutor.getHandler(aInfo.getFocusLost()));
-                    proxy.getHandlers().put(ControlEventsIProxy.itemStateChanged, eventsExecutor.getHandler(aInfo.getItemStateChanged()));
-                    proxy.getHandlers().put(ControlEventsIProxy.keyPressed, eventsExecutor.getHandler(aInfo.getKeyPressed()));
-                    proxy.getHandlers().put(ControlEventsIProxy.keyReleased, eventsExecutor.getHandler(aInfo.getKeyReleased()));
-                    proxy.getHandlers().put(ControlEventsIProxy.keyTyped, eventsExecutor.getHandler(aInfo.getKeyTyped()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseClicked, eventsExecutor.getHandler(aInfo.getMouseClicked()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseDragged, eventsExecutor.getHandler(aInfo.getMouseDragged()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseEntered, eventsExecutor.getHandler(aInfo.getMouseEntered()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseExited, eventsExecutor.getHandler(aInfo.getMouseExited()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseMoved, eventsExecutor.getHandler(aInfo.getMouseMoved()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mousePressed, eventsExecutor.getHandler(aInfo.getMousePressed()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseReleased, eventsExecutor.getHandler(aInfo.getMouseReleased()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, eventsExecutor.getHandler(aInfo.getMouseWheelMoved()));
+                    Function actionPerformedHandler = eventsExecutor.getHandler(aInfo.getActionPerformed());
+                    if (actionPerformedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.actionPerformed, actionPerformedHandler);
+                    }
+
+                    Function propertyChangeHandler = eventsExecutor.getHandler(aInfo.getPropertyChange());
+                    if (propertyChangeHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.propertyChange, propertyChangeHandler);
+                    }
+
+                    Function stateChangeHandler = eventsExecutor.getHandler(aInfo.getStateChanged());
+                    if (stateChangeHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.stateChanged, stateChangeHandler);
+                    }
+
+                    Function componentHiddenHandler = eventsExecutor.getHandler(aInfo.getComponentHidden());
+                    if (componentHiddenHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.componentHidden, componentHiddenHandler);
+                    }
+
+                    Function componentMovedHandler = eventsExecutor.getHandler(aInfo.getComponentMoved());
+                    if (componentMovedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.componentMoved, componentMovedHandler);
+                    }
+
+                    Function componentResizedHandler = eventsExecutor.getHandler(aInfo.getComponentResized());
+                    if (componentResizedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.componentResized, componentResizedHandler);
+                    }
+
+                    Function componentShownHandler = eventsExecutor.getHandler(aInfo.getComponentShown());
+                    if (componentShownHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.componentShown, componentShownHandler);
+                    }
+
+                    Function componentAddedHandler = eventsExecutor.getHandler(aInfo.getComponentAdded());
+                    if (componentAddedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.componentAdded, componentAddedHandler);
+                    }
+
+                    Function componentRemovedHandler = eventsExecutor.getHandler(aInfo.getComponentRemoved());
+                    if (componentRemovedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.componentRemoved, componentRemovedHandler);
+                    }
+
+                    Function focusGainedHandler = eventsExecutor.getHandler(aInfo.getFocusGained());
+                    if (focusGainedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.focusGained, focusGainedHandler);
+                    }
+
+                    Function focusLostHandler = eventsExecutor.getHandler(aInfo.getFocusLost());
+                    if (focusLostHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.focusLost, focusLostHandler);
+                    }
+
+                    Function itemStateChanged = eventsExecutor.getHandler(aInfo.getItemStateChanged());
+                    if (itemStateChanged != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.itemStateChanged, itemStateChanged);
+                    }
+
+                    Function keyPressedHandler = eventsExecutor.getHandler(aInfo.getKeyPressed());
+                    if (keyPressedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.keyPressed, keyPressedHandler);
+                    }
+
+                    Function keyReleasedHandler = eventsExecutor.getHandler(aInfo.getKeyReleased());
+                    if (keyReleasedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.keyReleased, keyReleasedHandler);
+                    }
+
+                    Function keyTypedHandler = eventsExecutor.getHandler(aInfo.getKeyTyped());
+                    if (keyTypedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.keyTyped, keyTypedHandler);
+                    }
+
+                    Function mouseClickedHandler = eventsExecutor.getHandler(aInfo.getMouseClicked());
+                    if (mouseClickedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseClicked, mouseClickedHandler);
+                    }
+
+                    Function mouseDraggedHandler = eventsExecutor.getHandler(aInfo.getMouseDragged());
+                    if (mouseDraggedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseDragged, mouseDraggedHandler);
+                    }
+
+                    Function mouseEnteredHandler = eventsExecutor.getHandler(aInfo.getMouseEntered());
+                    if (mouseEnteredHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseEntered, mouseEnteredHandler);
+                    }
+
+                    Function mouseExitedHandler = eventsExecutor.getHandler(aInfo.getMouseExited());
+                    if (mouseExitedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseExited, mouseExitedHandler);
+                    }
+
+                    Function mouseMovedHandler = eventsExecutor.getHandler(aInfo.getMouseMoved());
+                    if (mouseMovedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseMoved, mouseMovedHandler);
+                    }
+
+                    Function mousePressedHandler = eventsExecutor.getHandler(aInfo.getMousePressed());
+                    if (mousePressedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mousePressed, mousePressedHandler);
+                    }
+
+                    Function mouseReleasedHandler = eventsExecutor.getHandler(aInfo.getMouseReleased());
+                    if (mouseReleasedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseReleased, mouseReleasedHandler);
+                    }
+
+                    Function mouseWheelMovedHandler = eventsExecutor.getHandler(aInfo.getMouseWheelMoved());
+                    if (mouseWheelMovedHandler != null) {
+                        proxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, mouseWheelMovedHandler);
+                    }
                 }
             });
         }
