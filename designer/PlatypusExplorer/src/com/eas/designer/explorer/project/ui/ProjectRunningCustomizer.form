@@ -67,7 +67,7 @@
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="chDbAppSources" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
-                              <Component id="cbEnableAnonymous" min="-2" pref="195" max="-2" attributes="0"/>
+                              <Component id="cbEnableUserLogin" min="-2" pref="195" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -108,7 +108,7 @@
               <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="chDbAppSources" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cbEnableAnonymous" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="cbEnableUserLogin" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
@@ -515,21 +515,16 @@
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="cbEnableSecurity" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblJ2eeServer" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblContext" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
-                                  <Component id="txtContext" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                              <Component id="btnManageServers" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="lblJ2eeServer" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblContext" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
+                          <Component id="txtContext" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="btnManageServers" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="102" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -548,9 +543,7 @@
                           <Component id="lblContext" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtContext" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cbEnableSecurity" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="144" max="32767" attributes="0"/>
+                      <EmptySpace pref="188" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -585,16 +578,6 @@
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtContextActionPerformed"/>
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtContextFocusLost"/>
-              </Events>
-            </Component>
-            <Component class="javax.swing.JCheckBox" name="cbEnableSecurity">
-              <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableSecurity.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableSecurityActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JButton" name="btnManageServers">
@@ -696,14 +679,14 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAddDatasourceActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="cbEnableAnonymous">
+    <Component class="javax.swing.JCheckBox" name="cbEnableUserLogin">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableAnonymous.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableUserLogin.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableAnonymousActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableUserLoginActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>
