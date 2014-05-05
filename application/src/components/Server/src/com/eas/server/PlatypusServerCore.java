@@ -95,7 +95,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient databasesClient;
-    protected ServerScriptsCache scriptsCache;
     protected ServerScriptDocuments scriptDocuments;
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
@@ -104,7 +103,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     public PlatypusServerCore(ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
         sessionManager = new SessionManager(this);
-        scriptsCache = new ServerScriptsCache(this);
         scriptDocuments = new ServerScriptDocuments(databasesClient);
         browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
@@ -129,10 +127,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
 
     public String getDefaultAppElement() {
         return defaultAppElement;
-    }
-
-    public ServerScriptsCache getScriptsCache() {
-        return scriptsCache;
     }
 
     public boolean isUserInApplicationRole(String aUser, String aRole) throws Exception {
@@ -224,7 +218,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
             }
             if (!stateless) {
                 try {
-                    JSObject module = scriptsCache.get(aModuleId);
+                    JSObject module = ScriptUtils.getModule(aModuleId);
                     if (module != null) {
                         sessionManager.getSystemSession().registerModule(module);
                         Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleId));
