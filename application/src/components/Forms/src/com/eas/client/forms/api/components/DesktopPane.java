@@ -1,10 +1,13 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.forms.api.components;
 
-import com.eas.client.forms.FormRunner;
+import com.eas.client.forms.Form;
 import com.eas.client.forms.PlatypusInternalFrame;
 import com.eas.client.forms.api.Component;
 import com.eas.script.ScriptFunction;
@@ -90,8 +93,8 @@ public class DesktopPane extends Component<JDesktopPane> {
             + "*/";
 
     @ScriptFunction(jsDoc = FORMS_JSDOC)
-    public FormRunner[] getForms() {
-        List<FormRunner> forms = new ArrayList<>();
+    public Form[] getForms() {
+        List<Form> forms = new ArrayList<>();
         for (JInternalFrame f : delegate.getAllFrames()) {
             if (f instanceof PlatypusInternalFrame) {
                 PlatypusInternalFrame pif = (PlatypusInternalFrame) f;
@@ -100,6 +103,6 @@ public class DesktopPane extends Component<JDesktopPane> {
                 }
             }
         }
-        return forms.toArray(new FormRunner[]{});
+        return forms.toArray(new Form[]{});
     }
 }

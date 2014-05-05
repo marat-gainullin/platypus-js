@@ -91,10 +91,10 @@ public abstract class AnnotationsMiner extends NodeVisitor<LexicalContext> {
 
     @Override
     public boolean enterBinaryNode(BinaryNode binaryNode) {
-        if (scopeLevel == 1 && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+        if (scopeLevel == 2 && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
             if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                 AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
-                if (left.getBase().getSymbol().isThis()) {
+                if (left.getBase() instanceof IdentNode && "this".equals(((IdentNode)left.getBase()).getName())) {
                     long ft = left.getBase().getToken();
                     if (prevComments.containsKey(ft)) {
                         long prevComment = prevComments.get(ft);

@@ -6,6 +6,7 @@ package com.eas.client.scripts;
 
 /**
  * Environment contract interface for <code>ScriptDocuments</code>
+ *
  * @author mg
  */
 public interface ScriptDocumentsHost {

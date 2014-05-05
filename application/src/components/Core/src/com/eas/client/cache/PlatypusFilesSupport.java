@@ -52,7 +52,7 @@ public class PlatypusFilesSupport {
 
             @Override
             public boolean enterFunctionNode(FunctionNode fn) {
-                if (fn != jsRoot && fn.getName() != null && !fn.getName().isEmpty()) {
+                if (fn != jsRoot && !fn.isAnonymous()) {
                     if (cx.functions == 0) {
                         cx.result = fn;
                     }
