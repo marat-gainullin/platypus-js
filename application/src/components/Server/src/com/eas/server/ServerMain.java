@@ -10,6 +10,7 @@ import com.eas.client.ClientFactory;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.PlatypusScriptedResource;
+import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -193,6 +194,7 @@ public class ServerMain {
      */
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
+        ScriptUtils.init();
         // tasks from command-line
         Set<String> tasks = new HashSet<>();
         parseArgs(args, tasks);

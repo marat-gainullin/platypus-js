@@ -8,20 +8,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.objects.NativeBoolean;
-import jdk.nashorn.internal.objects.NativeDate;
-import jdk.nashorn.internal.objects.NativeNumber;
-import jdk.nashorn.internal.objects.NativeString;
 import jdk.nashorn.internal.parser.Parser;
 import jdk.nashorn.internal.runtime.ErrorManager;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptEnvironment;
 import jdk.nashorn.internal.runtime.Source;
-import jdk.nashorn.internal.runtime.Undefined;
 import jdk.nashorn.internal.runtime.options.Options;
 
 /**
@@ -30,76 +23,9 @@ import jdk.nashorn.internal.runtime.options.Options;
  */
 public class ScriptUtils {
 
-    //public static final String WRAPPER_PROP_NAME = "wrapperComponent";
-    /*
-     protected static final String toDateFuncSource = ""
-     + "Java.type(\"com.eas.script.ScriptUtils\").set("
-     + "function toJsDate(aJavaDate){ return aJavaDate != null ? new Date(aJavaDate.time) : null;"
-     + "});";
-     */
-    protected static final String parseJsonFuncSource = ""
-            + "Java.type(\"com.eas.script.ScriptUtils\").setParseJsonFunc("
-            + "function (str){ return JSON.parse(str);"
-            + "});";
-    protected static final String writeJsonFuncSource = ""
-            + "Java.type(\"com.eas.script.ScriptUtils\").setWriteJsonFunc("
-            + "function (aObj){ return JSON.stringify(aObj);"
-            + "});";
-    /*
-     protected static final String toXMLStringFuncSource = ""
-     + "Java.type(\"com.eas.script.ScriptUtils\").setToXMLStringFunc("
-     + "function toXMLString(aObj){ return aObj.toXMLString();"
-     + "});";
-     */
-    protected static final String extendFuncSource = ""
-            + "Java.type(\"com.eas.script.ScriptUtils\").setExtendFunc("
-            + "function (Child, Parent) {"
-            + "  var F = function() {"
-            + "  };"
-            + "  F.prototype = Parent.prototype;"
-            + "  Child.prototype = new F();"
-            + "  Child.prototype.constructor = Child;"
-            + "  Child.superclass = Parent.prototype;"
-            + "});";
-    protected static final String scalarDefFuncSource = ""
-            + "Java.type(\"com.eas.script.ScriptUtils\").setScalarDefFunc("
-            + "function(targetEntity, targetFieldName, sourceFieldName){"
-            + "    var _self = this;"
-            + "    _self.enumerable = true;"
-            + "    _self.configurable = false;"
-            + "    _self.get = function(){"
-            + "        var found = targetEntity.find(targetEntity.schema[targetFieldName], this[sourceFieldName]);"
-            + "        return found.length == 0 ? null : (found.length == 1 ? found[0] : found);"
-            + "    };"
-            + "    _self.set = function(aValue){"
-            + "        this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;"
-            + "    };"
-            + "});"
-            + "";
-    protected static final String collectionDefFuncSource = ""
-            + "Java.type(\"com.eas.script.ScriptUtils\").setCollectionDefFunc("
-            + "function(sourceEntity, targetFieldName, sourceFieldName){"
-            + "    var _self = this;"
-            + "    _self.enumerable = true;"
-            + "    _self.configurable = false;"
-            + "    _self.get = function(){"
-            + "        var res = sourceEntity.find(sourceEntity.schema[sourceFieldName], this[targetFieldName]);"
-            + "        if(res && res.length > 0){"
-            + "            return res;"
-            + "        }else{"
-            + "            var emptyCollectionPropName = '-x-empty-collection-'+sourceFieldName;"
-            + "            var emptyCollection = this[emptyCollectionPropName];"
-            + "            if(!emptyCollection){"
-            + "                emptyCollection = [];"
-            + "                this[emptyCollectionPropName] = emptyCollection;"
-            + "            }"
-            + "            return emptyCollection;"
-            + "        }"
-            + "    };"
-            + "});"
-            + "";
-
-    //protected static JSObject toDateFunc;
+    protected static JSObject toPrimitiveFunc;
+    protected static JSObject lookupInGlobalFunc;
+    protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
     protected static JSObject writeJsonFunc;
     //protected static JSObject toXMLStringFunc;
@@ -112,22 +38,8 @@ public class ScriptUtils {
         if (engine == null) {
             engine = new ScriptEngineManager().getEngineByName("nashorn");
             try {
-                //engine.eval(toDateFuncSource);
-                //assert toDateFunc != null;
-                engine.eval(parseJsonFuncSource);
-                assert parseJsonFunc != null;
-                engine.eval(writeJsonFuncSource);
-                assert writeJsonFunc != null;
-                //engine.eval(toXMLStringFuncSource);
-                //assert toXMLStringFunc != null;
-                engine.eval(extendFuncSource);
-                assert extendFunc != null;
-                engine.eval(scalarDefFuncSource);
-                assert scalarDefFunc != null;
-                engine.eval(collectionDefFuncSource);
-                assert collectionDefFunc != null;
-                engine.eval("load(\"classpath:platypus.js\")");
-            } catch (Exception ex) {
+                engine.eval("load('classpath:platypus.js');");
+            } catch (ScriptException ex) {
                 Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -136,7 +48,7 @@ public class ScriptUtils {
     public static boolean isValidJsIdentifier(final String aName) {
         if (aName != null && !aName.trim().isEmpty()) {
             try {
-                return parseJs(new Source(null, String.format("function %s() {}", aName))) != null;
+                return parseJs(new Source("", String.format("function %s() {}", aName))) != null;
             } catch (Exception ex) {
                 return false;
             }
@@ -158,6 +70,21 @@ public class ScriptUtils {
 
     public static Object exec(String aSource) throws ScriptException {
         return engine.eval(aSource, engine.getContext());
+    }
+
+    public static void setToPrimitiveFunc(JSObject aValue) {
+        assert toPrimitiveFunc == null;
+        toPrimitiveFunc = aValue;
+    }
+
+    public static void setLookupInGlobalFunc(JSObject aValue) {
+        assert lookupInGlobalFunc == null;
+        lookupInGlobalFunc = aValue;
+    }
+
+    public static void setToDateFunc(JSObject aValue) {
+        assert toDateFunc == null;
+        toDateFunc = aValue;
     }
 
     public static void setParseJsonFunc(JSObject aValue) {
@@ -192,35 +119,15 @@ public class ScriptUtils {
     }
 
     public static Object toJava(Object aValue) {
-        aValue = ScriptObjectMirror.unwrap(aValue, Global.instance());
-        if (aValue instanceof NativeDate) {
-            return NativeDate.valueOf(aValue);
-        } else if (aValue instanceof NativeString) {
-            aValue = NativeString.valueOf(aValue);
-        } else if (aValue instanceof NativeNumber) {
-            aValue = NativeNumber.valueOf(aValue);
-        } else if (aValue instanceof NativeBoolean) {
-            aValue = NativeBoolean.valueOf(aValue);
-        } else if (aValue instanceof Undefined) {
-            aValue = null;
-        }
-        if (aValue instanceof Float) {
-            Float fl = (Float) aValue;
-            if (Math.abs(Math.round(fl) - fl) < 1.0e-20f) {
-                aValue = Math.round(fl);
-            }
-        } else if (aValue instanceof Double) {
-            Double dbl = (Double) aValue;
-            if (Math.abs(Math.round(dbl) - dbl) < 1.0e-20f) {
-                aValue = Math.round(dbl);
-            }
-        }
+        assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
+        aValue = toPrimitiveFunc.call(null, new Object[]{aValue});
         return aValue;
     }
 
     public static Object toJs(Object aValue) {
         if (aValue instanceof Date) {// force js boxing of date, because of absence js literal of date value
-            return ScriptObjectMirror.wrap(NativeDate.construct(true, null, ((Date) aValue).getTime()), Global.instance());
+            assert toDateFunc != null : SCRIPT_NOT_INITIALIZED;
+            return toDateFunc.call(null, aValue);
         } else if (aValue instanceof HasPublished) {
             return ((HasPublished) aValue).getPublished();
         } else {
@@ -259,16 +166,16 @@ public class ScriptUtils {
 
     public static JSObject scalarPropertyDefinition(JSObject targetEntity, String targetFieldName, String sourceFieldName) {
         assert scalarDefFunc != null : SCRIPT_NOT_INITIALIZED;
-        return (JSObject) ScriptObjectMirror.wrap(scalarDefFunc.newObject(new Object[]{targetEntity, targetFieldName, sourceFieldName}), Global.instance());
+        return (JSObject) scalarDefFunc.newObject(new Object[]{targetEntity, targetFieldName, sourceFieldName});
     }
 
     public static JSObject collectionPropertyDefinition(JSObject sourceEntity, String targetFieldName, String sourceFieldName) {
         assert collectionDefFunc != null : SCRIPT_NOT_INITIALIZED;
-        return (JSObject) ScriptObjectMirror.wrap(collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName}), Global.instance());
+        return (JSObject) collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName});
     }
 
     public static JSObject createModule(String aModuleName) throws ScriptException {
-        Object oConstructor = ScriptObjectMirror.wrap(Global.instance().get(aModuleName), Global.instance());
+        Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});
         if (oConstructor instanceof JSObject && ((JSObject) oConstructor).isFunction()) {
             JSObject jsConstructor = (JSObject) oConstructor;
             return (JSObject) jsConstructor.newObject(new Object[]{});
