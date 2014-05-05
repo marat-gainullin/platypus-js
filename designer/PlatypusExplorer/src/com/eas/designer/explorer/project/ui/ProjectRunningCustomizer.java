@@ -134,8 +134,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     if (projectSettings.getServerContext() != null) {
                         txtContext.setText(projectSettings.getServerContext());
                     }
-                    cbEnableSecurity.setSelected(projectSettings.isWebSecurityEnabled());
-                    cbEnableAnonymous.setSelected(projectSettings.isJ2SEAnonymousAccessEnabled());
+                    cbEnableUserLogin.setSelected(projectSettings.isSecurityRealmEnabled());
                     spClientDebugPort.setValue(projectSettings.getDebugClientPort());
                     spServerDebugPort.setValue(projectSettings.getDebugServerPort());
                     checkRunClientServerConfiguration();
@@ -192,7 +191,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private void checkRunClientServerConfiguration() {
         boolean invalid = isInvalidRunClientServerConfiguration();
         lblClientServerMessage.setVisible(invalid);
-        cbEnableAnonymous.setEnabled(!invalid && !AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem()));
     }
 
     private boolean isInvalidRunClientServerConfiguration() {
@@ -289,7 +287,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         cbj2eeServer = new javax.swing.JComboBox();
         lblContext = new javax.swing.JLabel();
         txtContext = new javax.swing.JTextField();
-        cbEnableSecurity = new javax.swing.JCheckBox();
         btnManageServers = new javax.swing.JButton();
         chDbAppSources = new javax.swing.JCheckBox();
         cbClientType = new javax.swing.JComboBox();
@@ -301,7 +298,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         cbConnections = new javax.swing.JComboBox();
         lblDefDatasource = new javax.swing.JLabel();
         btnAddDatasource = new javax.swing.JButton();
-        cbEnableAnonymous = new javax.swing.JCheckBox();
+        cbEnableUserLogin = new javax.swing.JCheckBox();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -571,7 +568,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblServerPort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServerVmOptions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblServerOptions, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
+                    .addComponent(lblServerOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 76, Short.MAX_VALUE)
                     .addComponent(lblServerLogLevel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServerDebugPort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(10, 10, 10)
@@ -641,13 +638,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
-        cbEnableSecurity.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbEnableSecurity.text")); // NOI18N
-        cbEnableSecurity.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbEnableSecurityActionPerformed(evt);
-            }
-        });
-
         btnManageServers.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.btnManageServers.text")); // NOI18N
         btnManageServers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -662,17 +652,14 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             .addGroup(j2eeServerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cbEnableSecurity)
-                    .addGroup(j2eeServerPanelLayout.createSequentialGroup()
-                        .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblJ2eeServer)
-                            .addComponent(lblContext))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cbj2eeServer, 0, 242, Short.MAX_VALUE)
-                            .addComponent(txtContext))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnManageServers)))
+                    .addComponent(lblJ2eeServer)
+                    .addComponent(lblContext))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cbj2eeServer, 0, 242, Short.MAX_VALUE)
+                    .addComponent(txtContext))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnManageServers)
                 .addGap(102, 102, 102))
         );
         j2eeServerPanelLayout.setVerticalGroup(
@@ -687,9 +674,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblContext)
                     .addComponent(txtContext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbEnableSecurity)
-                .addContainerGap(144, Short.MAX_VALUE))
+                .addContainerGap(188, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.j2eeServerPanel.TabConstraints.tabTitle"), j2eeServerPanel); // NOI18N
@@ -740,11 +725,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
-        cbEnableAnonymous.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbEnableAnonymous.text")); // NOI18N
-        cbEnableAnonymous.setOpaque(false);
-        cbEnableAnonymous.addActionListener(new java.awt.event.ActionListener() {
+        cbEnableUserLogin.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbEnableUserLogin.text")); // NOI18N
+        cbEnableUserLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbEnableAnonymousActionPerformed(evt);
+                cbEnableUserLoginActionPerformed(evt);
             }
         });
 
@@ -780,7 +764,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(chDbAppSources)
                                 .addGap(38, 38, 38)
-                                .addComponent(cbEnableAnonymous, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(cbEnableUserLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addComponent(tabbedPane)
@@ -811,7 +795,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGap(7, 7, 7)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chDbAppSources)
-                    .addComponent(cbEnableAnonymous))
+                    .addComponent(cbEnableUserLogin))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbNotStartServer)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -936,10 +920,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         projectSettings.setServerContext(txtContext.getText());
     }//GEN-LAST:event_txtContextFocusLost
 
-    private void cbEnableSecurityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbEnableSecurityActionPerformed
-        projectSettings.setSecurityRealmEnabled(cbEnableSecurity.isSelected());
-    }//GEN-LAST:event_cbEnableSecurityActionPerformed
-
     private void cbj2eeServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbj2eeServerActionPerformed
         Object selectedItem = cbj2eeServer.getSelectedItem();
         if (selectedItem != null) {
@@ -1011,9 +991,9 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         setupConnectionsModel();
     }//GEN-LAST:event_btnAddDatasourceActionPerformed
 
-    private void cbEnableAnonymousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbEnableAnonymousActionPerformed
-        projectSettings.setJ2SEAnonymousAccessEnabled(cbEnableAnonymous.isSelected());
-    }//GEN-LAST:event_cbEnableAnonymousActionPerformed
+    private void cbEnableUserLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbEnableUserLoginActionPerformed
+        projectSettings.setSecurityRealmEnabled(cbEnableUserLogin.isSelected());
+    }//GEN-LAST:event_cbEnableUserLoginActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddDatasource;
@@ -1023,8 +1003,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JComboBox cbClientLogLevel;
     private javax.swing.JComboBox cbClientType;
     private javax.swing.JComboBox cbConnections;
-    private javax.swing.JCheckBox cbEnableAnonymous;
-    private javax.swing.JCheckBox cbEnableSecurity;
+    private javax.swing.JCheckBox cbEnableUserLogin;
     private javax.swing.JCheckBox cbNotStartServer;
     private javax.swing.JComboBox cbServerLogLevel;
     private javax.swing.JComboBox cbj2eeServer;
