@@ -110,6 +110,11 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         validateAst();
         return ast;
     }
+    
+    @Override
+    public FunctionNode getConstructor() {
+        return null;
+    }
 
     @Override
     public synchronized void setAst(FunctionNode anAstRoot) {
@@ -131,7 +136,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             }
             if (doc != null) {
                 try {
-                    FunctionNode parseResult = ScriptUtils.parseJs(new Source("", doc.getText(0, doc.getLength())));
+                    FunctionNode parseResult = ScriptUtils.parseJs(new Source("", doc.getText(0, doc.getLength())));//NOI18N
                     if (parseResult != null) {
                         astIsValid = true;
                         ast = parseResult;

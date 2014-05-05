@@ -14,6 +14,8 @@ public interface AstProvider {
     
     FunctionNode getAst();
     
+    FunctionNode getConstructor();
+    
     void setAst(FunctionNode anAstRoot);
     
 }
