@@ -45,10 +45,12 @@ public class PlatypusFilesSupport {
     }
 
     public static FunctionNode extractModuleConstructor(String aJsContent) {
-        Source source = new Source("", aJsContent);
-        final FunctionNode jsRoot = ScriptUtils.parseJs(source);
+        return extractModuleConstructor(ScriptUtils.parseJs(aJsContent));
+    }
+    
+    public static FunctionNode extractModuleConstructor(FunctionNode jsRoot) {
         final NodesContext cx = new NodesContext();
-        jsRoot.accept(new AnnotationsMiner(source) {
+        jsRoot.accept(new AnnotationsMiner(jsRoot.getSource()) {
 
             @Override
             public boolean enterFunctionNode(FunctionNode fn) {

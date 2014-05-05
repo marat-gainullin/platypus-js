@@ -49,7 +49,7 @@ public class ScriptUtils {
     public static boolean isValidJsIdentifier(final String aName) {
         if (aName != null && !aName.trim().isEmpty()) {
             try {
-                FunctionNode astRoot = parseJs(new Source("", String.format("function %s() {}", aName)));
+                FunctionNode astRoot = parseJs(String.format("function %s() {}", aName));
                 return astRoot != null && !astRoot.getBody().getStatements().isEmpty();
             } catch (Exception ex) {
                 return false;
@@ -58,14 +58,15 @@ public class ScriptUtils {
         return false;
     }
 
-    public static FunctionNode parseJs(Source aSource) {
+    public static FunctionNode parseJs(String aJsContent) {
+        Source source = new Source("", aJsContent);//NOI18N
         Options options = new Options(null);
         ScriptEnvironment env = new ScriptEnvironment(options, null, null);
         ErrorManager errors = new ErrorManager();
-        Parser p = new Parser(env, aSource, errors);
+        Parser p = new Parser(env, source, errors);
         return p.parse();
     }
-
+    
     public static Object exec(URL aSource) throws ScriptException {
         return engine.eval(new URLReader(aSource), engine.getContext());
     }

@@ -103,7 +103,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
             DataObject dObject = DataObject.find(fo);
             if (dObject instanceof PlatypusModuleDataObject) {
                 dataObject = (PlatypusModuleDataObject) dObject;
-                return dataObject.getAst();
+                return dataObject.getAstRoot();
             }
         } catch (DataObjectNotFoundException ex) {
             Exceptions.printStackTrace(ex);

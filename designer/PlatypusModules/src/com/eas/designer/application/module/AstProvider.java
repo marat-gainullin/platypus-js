@@ -12,10 +12,10 @@ import jdk.nashorn.internal.ir.FunctionNode;
  */
 public interface AstProvider {
     
-    FunctionNode getAst();
+    FunctionNode getAstRoot();
+    
+    void setAstRoot(FunctionNode anAstRoot);
     
     FunctionNode getConstructor();
-    
-    void setAst(FunctionNode anAstRoot);
     
 }

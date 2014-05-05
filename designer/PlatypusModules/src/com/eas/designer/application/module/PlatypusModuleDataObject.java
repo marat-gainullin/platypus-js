@@ -93,7 +93,8 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
     private transient boolean astIsValid;
-    private transient FunctionNode ast;
+    private transient FunctionNode astRoot;
+    private transient FunctionNode constructor;
 
     public PlatypusModuleDataObject(FileObject aJsFile, MultiFileLoader loader) throws Exception {
         super(aJsFile, loader);
@@ -106,20 +107,22 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     @Override
-    public synchronized FunctionNode getAst() {
+    public synchronized FunctionNode getAstRoot() {
         validateAst();
-        return ast;
+        return astRoot;
+    }
+    
+    @Override
+    public synchronized void setAstRoot(FunctionNode anAstRoot) {
+        astRoot = anAstRoot;
+        constructor = astRoot != null ? PlatypusFilesSupport.extractModuleConstructor(astRoot) : null;
+        astIsValid = (astRoot != null);
     }
     
     @Override
     public FunctionNode getConstructor() {
-        return null;
-    }
-
-    @Override
-    public synchronized void setAst(FunctionNode anAstRoot) {
-        ast = anAstRoot;
-        astIsValid = (ast != null);
+        validateAst();
+        return constructor;
     }
 
     public ModuleCompletionContext getCompletionContext() {
@@ -136,10 +139,11 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             }
             if (doc != null) {
                 try {
-                    FunctionNode parseResult = ScriptUtils.parseJs(new Source("", doc.getText(0, doc.getLength())));//NOI18N
+                    FunctionNode parseResult = ScriptUtils.parseJs(doc.getText(0, doc.getLength()));
                     if (parseResult != null) {
                         astIsValid = true;
-                        ast = parseResult;
+                        astRoot = parseResult;
+                        constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
                     } else {
                         astIsValid = false;
                     }
@@ -171,7 +175,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         model = null;
         modelNode = null;
         astIsValid = false;
-        ast = null;
+        astRoot = null;
     }
 
     public FileObject getModelFile() {

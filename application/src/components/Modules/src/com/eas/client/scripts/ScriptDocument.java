@@ -158,9 +158,8 @@ public class ScriptDocument {
         if (ast == null) {
             moduleAnnotations = new ArrayList<>();
             propertyAllowedRoles.clear();
-            Source source = new Source("", scriptSource);
-            ast = ScriptUtils.parseJs(source);
-            ast.accept(new AnnotationsMiner(source) {
+            ast = ScriptUtils.parseJs(scriptSource);
+            ast.accept(new AnnotationsMiner(ast.getSource()) {
 
                 @Override
                 protected void commentedFunction(FunctionNode aFunction, String aComment) {

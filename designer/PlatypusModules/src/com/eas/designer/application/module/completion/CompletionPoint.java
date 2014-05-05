@@ -58,7 +58,7 @@ public class CompletionPoint {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
                 String docStr = doc.getText(0, doc.getLength());
-                cp.astRoot = ScriptUtils.parseJs(new Source("", afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr));
+                cp.astRoot = ScriptUtils.parseJs(afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr);
                 Node offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
                 final Node subRoot = getCompletionSubtree(offsetNode);
                 if (subRoot != null) {

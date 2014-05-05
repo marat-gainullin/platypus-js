@@ -31,7 +31,6 @@ import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.LiteralNode;
 import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.runtime.Source;
 
 /**
  *
@@ -68,7 +67,7 @@ public class DependenciesWalker {
     }
 
     public void walk() {
-        sourceRoot = ScriptUtils.parseJs(new Source("", source));
+        sourceRoot = ScriptUtils.parseJs(source);
         sourceRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
 
             private final Stack<CallNode> calls = new Stack<>();
