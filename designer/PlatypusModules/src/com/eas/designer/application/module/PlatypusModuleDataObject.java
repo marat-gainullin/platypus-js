@@ -26,9 +26,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.runtime.Source;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
@@ -111,14 +111,14 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         validateAst();
         return astRoot;
     }
-    
+
     @Override
     public synchronized void setAstRoot(FunctionNode anAstRoot) {
         astRoot = anAstRoot;
         constructor = astRoot != null ? PlatypusFilesSupport.extractModuleConstructor(astRoot) : null;
         astIsValid = (astRoot != null);
     }
-    
+
     @Override
     public FunctionNode getConstructor() {
         validateAst();
@@ -138,18 +138,20 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 Exceptions.printStackTrace(ex);
             }
             if (doc != null) {
+                FunctionNode parseResult = null;
                 try {
-                    FunctionNode parseResult = ScriptUtils.parseJs(doc.getText(0, doc.getLength()));
-                    if (parseResult != null) {
-                        astIsValid = true;
-                        astRoot = parseResult;
-                        constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
-                    } else {
-                        astIsValid = false;
-                    }
-                } catch (Exception ex) {
+                    parseResult = ScriptUtils.parseJs(doc.getText(0, doc.getLength()));
+                } catch (BadLocationException ex) {
                     //no op
                 }
+                if (parseResult != null) {
+                    astIsValid = true;
+                    astRoot = parseResult;
+                    constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+                } else {
+                    astIsValid = false;
+                }
+
             }
         }
     }
