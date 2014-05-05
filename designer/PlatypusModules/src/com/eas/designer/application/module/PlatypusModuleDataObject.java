@@ -148,7 +148,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                         astIsValid = false;
                     }
                 } catch (Exception ex) {
-                    // no op
+                    //no op
                 }
             }
         }
