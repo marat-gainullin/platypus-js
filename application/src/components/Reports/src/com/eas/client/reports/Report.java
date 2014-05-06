@@ -1,6 +1,9 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.reports;
 
@@ -15,7 +18,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ReportRunner implements HasPublished {
+public class Report implements HasPublished {
 
     protected byte[] template;
     protected ApplicationModel<?, ?, ?, ?> model;
@@ -25,7 +28,7 @@ public class ReportRunner implements HasPublished {
     //
     protected Object published;
 
-    public ReportRunner(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat) {
+    public Report(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat) {
         super();
         template = aTemplate;
         model = aModel;
@@ -115,7 +118,7 @@ public class ReportRunner implements HasPublished {
      */
     private void invokeOnBeforeRender() throws Exception {
         if (onBeforeRender != null) {
-            PublishedSourcedEvent event = new PublishedSourcedEvent(ReportRunner.this);
+            PublishedSourcedEvent event = new PublishedSourcedEvent(Report.this);
             onBeforeRender.call(this, new Object[]{event.getPublished()});
         }
     }

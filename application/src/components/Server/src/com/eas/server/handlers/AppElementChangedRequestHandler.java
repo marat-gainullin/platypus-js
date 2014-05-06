@@ -9,7 +9,6 @@ import com.eas.client.threetier.requests.AppElementChangedRequest.Response;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import com.eas.server.SessionRequestHandler;
-import java.util.Map.Entry;
 
 /**
  *
@@ -46,17 +45,15 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
     }
 
     public void unregisterAllModules() {
-        for (Entry<String, Session> sEntry : getSessionManager().entrySet()) {
+        getSessionManager().entrySet().stream().forEach((sEntry) -> {
             sEntry.getValue().unregisterModules();
-        }
-        getServerCore().getScriptsCache().clear();
+        });
     }
 
     public void handleApplicationElementChanged() throws Exception {
-        // Загруженные серверные модули надо выгрузить, если изменения касаются их
-        for (Entry<String, Session> sEntry : getSessionManager().entrySet()) {
+        getSessionManager().entrySet().stream().forEach((sEntry) -> {
             sEntry.getValue().unregisterModule(getRequest().getEntityId());
-        }
+        });
         // Кэш компиляции скриптовых модулей
         getServerCore().getDocuments().removeScriptDocument(getRequest().getEntityId());
         // Элементы приложения, которые закэшировались из-за серверных модулей

@@ -54,14 +54,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                transactionListeners.remove(aListener);
-            }
+        return () -> {
+            transactionListeners.remove(aListener);
         };
     }
 
+    public E[] entities(){
+        return (E[])entities.values().toArray();
+    }
+    
     @Override
     public void setPublished(Object aValue) {
         Object oldValue = published;

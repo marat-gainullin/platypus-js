@@ -30,8 +30,8 @@ import org.w3c.dom.NodeList;
 public class Dom2ScriptDocument {
 
     public static final String BAD_ROOT_TAGS_MSG = "In platypus documents should be only one root tag";
-    private static DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    private DocumentBuilder documentBuilder;
+    private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    private final DocumentBuilder documentBuilder;
 
     public static ScriptDocument dom2ScriptDocument(Client aClient, Document aDom) throws Exception {
         Dom2ScriptDocument domReader = new Dom2ScriptDocument();
@@ -39,6 +39,7 @@ public class Dom2ScriptDocument {
     }
 
     protected Dom2ScriptDocument() throws ParserConfigurationException {
+        super();
         documentBuilder = builderFactory.newDocumentBuilder();
     }
 
@@ -66,11 +67,11 @@ public class Dom2ScriptDocument {
                     dmDom.appendChild(dmDom.importNode(tag, true));
                     if (aClient instanceof PlatypusClient) {
                         ApplicationPlatypusModel pModel = new ApplicationPlatypusModel((PlatypusClient) aClient);
-                        pModel.accept(new XmlDom2ApplicationModel<ApplicationPlatypusEntity>(dmDom));
+                        pModel.accept(new XmlDom2ApplicationModel<>(dmDom));
                         model = pModel;
                     } else if (aClient instanceof DbClient) {
                         ApplicationDbModel dbModel = new ApplicationDbModel((DbClient) aClient);
-                        dbModel.accept(new XmlDom2ApplicationModel<ApplicationDbEntity>(dmDom));
+                        dbModel.accept(new XmlDom2ApplicationModel<>(dmDom));
                         model = dbModel;
                     } else {
                         assert false : "Unknown type of client found, while creating an application model";

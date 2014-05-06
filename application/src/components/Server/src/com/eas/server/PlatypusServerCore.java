@@ -95,7 +95,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient databasesClient;
-    protected ServerScriptsCache scriptsCache;
     protected ServerScriptDocuments scriptDocuments;
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
@@ -104,7 +103,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     public PlatypusServerCore(ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
         sessionManager = new SessionManager(this);
-        scriptsCache = new ServerScriptsCache(this);
         scriptDocuments = new ServerScriptDocuments(databasesClient);
         browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
@@ -129,10 +127,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
 
     public String getDefaultAppElement() {
         return defaultAppElement;
-    }
-
-    public ServerScriptsCache getScriptsCache() {
-        return scriptsCache;
     }
 
     public boolean isUserInApplicationRole(String aUser, String aRole) throws Exception {
@@ -199,13 +193,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     /**
      * Starts a server task, initializing it with supplied module annotations.
      *
-     * @param aModuleId Module identifier, specifying a module for the task
+     * @param aModuleName Module identifier, specifying a module for the task
      * @return Success status
      * @throws java.lang.Exception
      */
-    public boolean startServerTask(String aModuleId) throws Exception {
-        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleId));
-        ScriptDocument sDoc = scriptDocuments.getScriptDocument(aModuleId);
+    public boolean startServerTask(String aModuleName) throws Exception {
+        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleName));
+        ScriptDocument sDoc = scriptDocuments.getScriptDocument(aModuleName);
         if (sDoc != null) {
             boolean stateless = false;
             for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
@@ -214,35 +208,35 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
                         stateless = true;
                         break;
                     case JsDoc.Tag.AUTHORIZER_TAG:
-                        extraAuthorizers.add(aModuleId);
+                        extraAuthorizers.add(aModuleName);
                         break;
                     case JsDoc.Tag.VALIDATOR_TAG:
                         stateless = true;
-                        databasesClient.addValidator(aModuleId, tag.getParams());
+                        databasesClient.addValidator(aModuleName, tag.getParams());
                         break;
                 }
             }
             if (!stateless) {
                 try {
-                    JSObject module = scriptsCache.get(aModuleId);
+                    JSObject module = ScriptUtils.getCachedModule(aModuleName);
                     if (module != null) {
                         sessionManager.getSystemSession().registerModule(module);
-                        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleId));
+                        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleName));
                         return true;
                     } else {
-                        Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (may be bad class name). Skipping it.", aModuleId));
+                        Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (may be bad class name). Skipping it.", aModuleName));
                         return false;
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Resident task \"%s\" caused an error: %s. Skipping it.", aModuleId, ex.getMessage()));
+                    Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Resident task \"%s\" caused an error: %s. Skipping it.", aModuleName, ex.getMessage()));
                     return false;
                 }
             } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer, validator or as an acceptor.", aModuleId));
+                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer, validator or as an acceptor.", aModuleName));
                 return false;
             }
         } else {
-            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (no module). Skipping it.", aModuleId));
+            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (no module). Skipping it.", aModuleName));
             return false;
         }
     }

@@ -14,6 +14,7 @@ import java.util.*;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.runtime.Source;
 import org.w3c.dom.Document;
 
@@ -34,8 +35,7 @@ public class ScriptDocument {
     private String scriptSource;
     private JSObject constructor;
     private FunctionNode ast;
-    private FunctionNode firstFunction;
-    private final Set<String> depencies = new HashSet<>();
+    //private final Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
     /**
      * User roles that have access to all module's functions, if empty all users
@@ -107,11 +107,11 @@ public class ScriptDocument {
         scriptSource = aScriptSource;
         ast = null;
     }
-
+/*
     public Set<String> getDepencies() {
         return depencies;
     }
-
+*/
     public JSObject getFunction() {
         return constructor;
     }
@@ -152,11 +152,6 @@ public class ScriptDocument {
      * @name annotation are the 'module annotations'. Annotations, followed by
      * any property assignment are the 'property annotations'. Property
      * annotations will be taken into account while accessing through modules.
-     * WARNING!!! This method is suited for analyzing of plain scripts, e.g.
-     * platypus modules constructors bodies. If scriptSource will be reshaped
-     * into form of: function Module1(){ this.member = ...}, than this method
-     * should be refactored to take into account inner scope of top-level
-     * function.
      */
     public void readScriptAnnotations() {
         assert scriptSource != null : "Javascript source can't be null";
@@ -165,28 +160,19 @@ public class ScriptDocument {
             propertyAllowedRoles.clear();
             Source source = new Source("", scriptSource);
             ast = ScriptUtils.parseJs(source);
-            firstFunction = null;
             ast.accept(new AnnotationsMiner(source) {
 
                 @Override
-                public boolean enterFunctionNode(FunctionNode functionNode) {
-                    if (firstFunction == null && functionNode != ast) {
-                        firstFunction = functionNode;
-                    }
-                    return super.enterFunctionNode(functionNode);
-                }
-
-                @Override
                 protected void commentedFunction(FunctionNode aFunction, String aComment) {
-                    if (firstFunction == aFunction) {
+                    if (scopeLevel == 2) {
                         JsDoc jsDoc = new JsDoc(aComment);
                         jsDoc.parseAnnotations();
                         for (Tag tag : jsDoc.getAnnotations()) {
                             moduleAnnotations.add(tag);
                             if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                                for (String role : tag.getParams()) {
+                                tag.getParams().stream().forEach((role) -> {
                                     moduleAllowedRoles.add(role);
-                                }
+                                });
                             }
                         }
                     }

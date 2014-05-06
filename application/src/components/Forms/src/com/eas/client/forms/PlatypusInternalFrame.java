@@ -12,15 +12,15 @@ import javax.swing.JInternalFrame;
  */
 public class PlatypusInternalFrame extends JInternalFrame{
     
-    protected FormRunner owner;
+    protected Form owner;
     
-    public PlatypusInternalFrame(FormRunner aOwner)
+    public PlatypusInternalFrame(Form aOwner)
     {
         super();
         owner = aOwner;
     }
 
-    public FormRunner getOwner() {
+    public Form getOwner() {
         return owner;
     }
 }

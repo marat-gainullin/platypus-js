@@ -188,16 +188,16 @@ public interface PlatypusProjectSettings {
     boolean isNotStartServer();
 
     /**
-     * Checks if security realm to be configured on J2EE server startup.
+     * Checks if security realm is enabled.
      *
      * @return true to enable configure security realm
      */
-    boolean isWebSecurityEnabled();
-
-    public boolean isJ2SEAnonymousAccessEnabled();
+    boolean isSecurityRealmEnabled();
     
-    public void setJ2SEAnonymousAccessEnabled(boolean  aValue);
-    
+    /**
+     * Saves the project settings.
+     * @throws Exception if something goes wrong
+     */
     void save() throws Exception;
 
     /**

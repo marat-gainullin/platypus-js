@@ -4,6 +4,12 @@
  *//*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.eas.client.forms;
 
@@ -45,12 +51,12 @@ import jdk.nashorn.api.scripting.JSObject;
 @ScriptObj(name = "Form", jsDoc = "/**\n"
         + "* Application form.\n"
         + "*/")
-public class FormRunner implements HasPublished {
+public class Form implements HasPublished {
 
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
     public static final String VIEW_SCRIPT_NAME = "view";
-    protected static final Map<String, FormRunner> showingForms = new HashMap<>();
+    protected static final Map<String, Form> showingForms = new HashMap<>();
     protected static JSObject onChange;
 
     private static final String SHOWN_JSDOC = ""
@@ -59,15 +65,15 @@ public class FormRunner implements HasPublished {
             + " */";
     
     @ScriptFunction(jsDoc = SHOWN_JSDOC)
-    public static FormRunner[] getShownForms() {
-        synchronized (FormRunner.class) {
-            List<FormRunner> notNullForms = new ArrayList<>();
-            for (FormRunner f : showingForms.values()) {
+    public static Form[] getShownForms() {
+        synchronized (Form.class) {
+            List<Form> notNullForms = new ArrayList<>();
+            for (Form f : showingForms.values()) {
                 if (f != null) {
                     notNullForms.add(f);
                 }
             }
-            return notNullForms.toArray(new FormRunner[]{});
+            return notNullForms.toArray(new Form[]{});
         }
     }
 
@@ -79,8 +85,8 @@ public class FormRunner implements HasPublished {
             + " */";
     
     @ScriptFunction(jsDoc = SHOWN_FORM_JSDOC, params = {"key"})
-    public static FormRunner getShownForm(String aFormKey) {
-        synchronized (FormRunner.class) {
+    public static Form getShownForm(String aFormKey) {
+        synchronized (Form.class) {
             return showingForms.get(aFormKey);
         }
     }
@@ -115,7 +121,7 @@ public class FormRunner implements HasPublished {
                 PublishedSourcedEvent event = new PublishedSourcedEvent(this);
                 onChange.call(published, new Object[]{event.getPublished()});
             } catch (Exception ex) {
-                Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -125,8 +131,8 @@ public class FormRunner implements HasPublished {
         @Override
         public void windowClosed(WindowEvent e) {
             surface = null;
-            synchronized (FormRunner.class) {
-                showingForms.remove(FormRunner.this.getFormKey());
+            synchronized (Form.class) {
+                showingForms.remove(Form.this.getFormKey());
                 showingFormsChanged();
             }
         }
@@ -142,8 +148,8 @@ public class FormRunner implements HasPublished {
         @Override
         public void internalFrameClosed(InternalFrameEvent e) {
             surface = null;
-            synchronized (FormRunner.class) {
-                showingForms.remove(FormRunner.this.getFormKey());
+            synchronized (Form.class) {
+                showingForms.remove(Form.this.getFormKey());
                 showingFormsChanged();
             }
         }
@@ -190,7 +196,7 @@ public class FormRunner implements HasPublished {
     protected Container surface;
     protected Object closeCallbackParameter;
 
-    public FormRunner(String aFormKey, FormDocument aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public Form(String aFormKey, FormDocument aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         super();
         formKey = aFormKey;
         model = aModel;
@@ -309,7 +315,7 @@ public class FormRunner implements HasPublished {
     @ScriptFunction()
     public void setFormKey(String aValue) {
         if (formKey == null ? aValue != null : !formKey.equals(aValue)) {
-            synchronized (FormRunner.class) {
+            synchronized (Form.class) {
                 showingForms.remove(formKey);
                 formKey = aValue;
                 if (isInOpenedWindow()) {
@@ -382,7 +388,7 @@ public class FormRunner implements HasPublished {
             JSObject windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
             windowHandler.getHandlers().remove(WindowEventsIProxy.windowOpened);
             try {
-                synchronized (FormRunner.class) {
+                synchronized (Form.class) {
                     showingForms.put(formKey, this);
                 }
                 frame.setVisible(true);
@@ -456,7 +462,7 @@ public class FormRunner implements HasPublished {
             JSObject windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
             windowHandler.getHandlers().remove(WindowEventsIProxy.windowOpened);
             try {
-                synchronized (FormRunner.class) {
+                synchronized (Form.class) {
                     showingForms.put(formKey, this);
                 }
                 ControlsWrapper.unwrap(aDesktop).add(internalFrame);
@@ -534,8 +540,8 @@ public class FormRunner implements HasPublished {
                                 }
                             });
 
-                            synchronized (FormRunner.class) {
-                                showingForms.put(formKey, FormRunner.this);
+                            synchronized (Form.class) {
+                                showingForms.put(formKey, Form.this);
                             }
                             surface.revalidate();
                             surface.repaint();
@@ -577,7 +583,7 @@ public class FormRunner implements HasPublished {
                     try {
                         onOkModalResult.call(published, new Object[]{selected});
                     } catch (Exception ex) {
-                        Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 });
             }
@@ -1293,18 +1299,18 @@ public class FormRunner implements HasPublished {
         /*
          for (Entry<String, JComponent> entry : components.entrySet()) {
          if (view != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
-         defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+         defineProperty(entry.getKey(), publishComponent(entry.getValue(), Form.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
          }
          }
          for (Entry<String, JComponent> entry : components.entrySet()) {
          if (view != entry.getValue() && (entry.getValue() instanceof ButtonGroupWrapper)) {
-         defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+         defineProperty(entry.getKey(), publishComponent(entry.getValue(), Form.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
          }
          }
-         FormRunner.super.delete(VIEW_SCRIPT_NAME);
+         Form.super.delete(VIEW_SCRIPT_NAME);
          ControlsWrapper viewWrapper = new ControlsWrapper(view);
          (new PanelDesignInfo()).accept(viewWrapper);
-         defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), FormRunner.this), READONLY);
+         defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), Form.this), READONLY);
          */
     }
 
@@ -1315,7 +1321,7 @@ public class FormRunner implements HasPublished {
      try {
      return ScriptUtils.toJava(aHandler.call(aEventThis, new Object[]{anEvent}));
      } catch (Exception ex) {
-     Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, ex.getMessage());
+     Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage());
      }
      }
      return null;

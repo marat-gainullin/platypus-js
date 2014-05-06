@@ -200,7 +200,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                     project.getProjectDirectory().toURI().toASCIIString()));
         }
 
-        if (project.getSettings().isJ2SEAnonymousAccessEnabled()) {
+        if (!project.getSettings().isSecurityRealmEnabled()) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.ANONYMOUS_ON_CMD_SWITCH);
         }
 

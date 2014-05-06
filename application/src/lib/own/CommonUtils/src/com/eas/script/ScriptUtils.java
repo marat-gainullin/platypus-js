@@ -25,6 +25,7 @@ public class ScriptUtils {
 
     protected static JSObject toPrimitiveFunc;
     protected static JSObject lookupInGlobalFunc;
+    protected static JSObject getModuleFunc;
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
     protected static JSObject writeJsonFunc;
@@ -48,7 +49,8 @@ public class ScriptUtils {
     public static boolean isValidJsIdentifier(final String aName) {
         if (aName != null && !aName.trim().isEmpty()) {
             try {
-                return parseJs(new Source("", String.format("function %s() {}", aName))) != null;
+                FunctionNode astRoot = parseJs(new Source("", String.format("function %s() {}", aName)));
+                return astRoot != null && !astRoot.getBody().getStatements().isEmpty();
             } catch (Exception ex) {
                 return false;
             }
@@ -80,6 +82,11 @@ public class ScriptUtils {
     public static void setLookupInGlobalFunc(JSObject aValue) {
         assert lookupInGlobalFunc == null;
         lookupInGlobalFunc = aValue;
+    }
+
+    public static void setGetModuleFunc(JSObject aValue) {
+        assert getModuleFunc == null;
+        getModuleFunc = aValue;
     }
 
     public static void setToDateFunc(JSObject aValue) {
@@ -119,8 +126,10 @@ public class ScriptUtils {
     }
 
     public static Object toJava(Object aValue) {
-        assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
-        aValue = toPrimitiveFunc.call(null, new Object[]{aValue});
+        if (aValue instanceof JSObject) {
+            assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
+            aValue = toPrimitiveFunc.call(null, new Object[]{aValue});
+        }
         return aValue;
     }
 
@@ -174,7 +183,8 @@ public class ScriptUtils {
         return (JSObject) collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName});
     }
 
-    public static JSObject createModule(String aModuleName) throws ScriptException {
+    public static JSObject createModule(String aModuleName) {
+        assert lookupInGlobalFunc != null;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});
         if (oConstructor instanceof JSObject && ((JSObject) oConstructor).isFunction()) {
             JSObject jsConstructor = (JSObject) oConstructor;
@@ -182,5 +192,10 @@ public class ScriptUtils {
         } else {
             return null;
         }
+    }
+
+    public static JSObject getCachedModule(String aModuleName) {
+        assert getModuleFunc != null;
+        return (JSObject) getModuleFunc.call(null, new Object[]{aModuleName});
     }
 }

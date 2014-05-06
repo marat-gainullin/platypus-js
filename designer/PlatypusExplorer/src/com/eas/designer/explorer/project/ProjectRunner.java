@@ -284,7 +284,7 @@ public class ProjectRunner {
                     io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().toURI().toASCIIString()));//NOI18N
                 }
 
-                if (project.getSettings().isJ2SEAnonymousAccessEnabled()) {
+                if (!project.getSettings().isSecurityRealmEnabled()) {
                     arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.ANONYMOUS_ON_CMD_SWITCH);
                 }
 
@@ -429,7 +429,7 @@ public class ProjectRunner {
     }
 
     public static boolean isConnectionValid(DatabaseConnection connection) {
-        return connection.getDisplayName() != null && !connection.getDisplayName().isEmpty() && !connection.getDisplayName().contains(" ")
+        return connection.getDisplayName() != null && !connection.getDisplayName().isEmpty() && !connection.getDisplayName().contains(" ") //NOI18N
                 && connection.getDatabaseURL() != null && !connection.getDatabaseURL().isEmpty()
                 && connection.getUser() != null && !connection.getUser().isEmpty()
                 && connection.getPassword() != null && !connection.getPassword().isEmpty();

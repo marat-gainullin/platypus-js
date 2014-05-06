@@ -11,6 +11,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
+
 package com.eas.server.filter;
 
 import com.eas.client.AppCache;
@@ -37,6 +39,7 @@ import jdk.nashorn.internal.runtime.Source;
  */
 public class DependenciesWalker {
 
+    public static final String REQUIRE_FUNCTION_NAME = "require";
     public static final String MODULES = "Modules";
     public static final String GET = "get";
     public static final String MODEL = "model";
@@ -67,11 +70,8 @@ public class DependenciesWalker {
     public void walk() {
         sourceRoot = ScriptUtils.parseJs(new Source("", source));
         sourceRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
-            public static final String REQUIRE_FUNCTION_NAME = "require";
 
-            private Stack<CallNode> calls = new Stack<>();
-            private Stack<LiteralNode<?>> arrays = new Stack<>();
-            private Stack<AccessNode> accesses = new Stack<>();
+            private final Stack<CallNode> calls = new Stack<>();
 
             @Override
             public boolean enterCallNode(CallNode callNode) {
@@ -86,39 +86,27 @@ public class DependenciesWalker {
             }
 
             @Override
-            public boolean enterAccessNode(AccessNode accessNode) {
-                accesses.push(accessNode);
-                return super.enterAccessNode(accessNode);
-            }
-
-            @Override
-            public Node leaveAccessNode(AccessNode accessNode) {
-                accesses.pop();
-                return super.leaveAccessNode(accessNode);
-            }
-
-            @Override
             public boolean enterLiteralNode(LiteralNode<?> literalNode) {
                 if (literalNode.getType().isString() && !calls.empty()) {
                     String value = literalNode.getString();
                     CallNode lastCall = calls.peek();
-                    boolean singleArg = lastCall.getArgs().size() == 1 && lastCall.getArgs().get(0) == literalNode;
+                    boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
+                    boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
                     Expression fe = lastCall.getFunction();
-                    String funcName = fe.getSymbol() != null ? fe.getSymbol().getName() : null;
-                    if (funcName != null && !funcName.isEmpty()) {
+                    if (fe instanceof IdentNode) {
+                        String funcName = ((IdentNode) fe).getName();
                         if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
-                            if (!arrays.empty()) {
-                                LiteralNode<?> a = arrays.peek();
-                                if (lastCall.getArgs().get(0) == a
-                                        && Arrays.asList(a.getArray()).contains(literalNode)) {
+                            if (arrayAtFirstArg) {
+                                LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
+                                if (Arrays.asList(a.getArray()).contains(literalNode)) {
                                     dynamicDependencies.add(value);
                                 }
                             }
-                            if (singleArg) {
+                            if (atFirstArg) {
                                 dynamicDependencies.add(value);
                             }
-                        } else if (lastCall.isNew() && singleArg) {
-                            switch (fe.getSymbol().getName()) {                                
+                        } else if (/*lastCall.isNew() && */atFirstArg) {
+                            switch (funcName) {
                                 case FORM:
                                 case MODULE:
                                     putDependence(value);
@@ -129,38 +117,27 @@ public class DependenciesWalker {
                                     putServerDependence(value);
                                     break;
                             }
-                        }else if((GET.equals(funcName) || LOAD_ENTITY.equals(funcName))
-                                && singleArg
-                                && !accesses.empty()){
-                            AccessNode lastAccess = accesses.peek();
-                            if(lastAccess.getProperty().getSymbol() == fe.getSymbol()){
-                                if(lastAccess.getBase().getSymbol() != null){
-                                    String baseName = lastAccess.getBase().getSymbol().getName();
-                                    if(null != baseName)switch (baseName) {
-                                        case MODULES:
-                                            putDependence(value);
-                                            break;
-                                        case MODEL:
-                                            putQueryDependence(value);
-                                            break;
-                                    }
+                        }
+                    } else if (fe instanceof AccessNode) {
+                        AccessNode lastAccess = (AccessNode) fe;
+                        if (lastAccess.getBase() instanceof IdentNode && lastAccess.getProperty() instanceof IdentNode) {
+                            String baseName = ((IdentNode) lastAccess.getBase()).getName();
+                            String funcName = ((IdentNode) lastAccess.getProperty()).getName();
+                            if ((GET.equals(funcName) || LOAD_ENTITY.equals(funcName))
+                                    && atFirstArg) {
+                                switch (baseName) {
+                                    case MODULES:
+                                        putDependence(value);
+                                        break;
+                                    case MODEL:
+                                        putQueryDependence(value);
+                                        break;
                                 }
                             }
                         }
                     }
                 }
-                if (literalNode.getType().isArray()) {
-                    arrays.push(literalNode);
-                }
                 return super.enterLiteralNode(literalNode);
-            }
-
-            @Override
-            public Node leaveLiteralNode(LiteralNode<?> literalNode) {
-                if (literalNode.getType().isArray()) {
-                    arrays.pop();
-                }
-                return super.leaveLiteralNode(literalNode);
             }
 
             @Override

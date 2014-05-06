@@ -1,18 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 package com.eas.client.application;
 
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -75,7 +60,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected PlatypusPrincipal principal;
     protected AppCache appCache;
     protected ScriptDocuments scriptDocuments;
-    protected ScriptsCache scriptsCache;
     protected String startScriptPath;
     protected boolean needInitialBreak;
     // auto login
@@ -309,7 +293,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             assert client != null : CLIENT_REQUIRED_AFTER_LOGIN_MSG;
             appCache = client.getAppCache();
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache.getApplicationPath());
-            scriptsCache = new ScriptsCache(this);
             scriptDocuments = new ClientScriptDocuments(client);
             PlatypusScriptedResource.init(client, getInstance(), getInstance());
             runStartScript();
