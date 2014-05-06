@@ -48,7 +48,7 @@ public abstract class PlatypusClient implements AppClient {
     // Certificated storage type
     public static final String DEFAULT_CETRS_STORE_TYPE = "JKS";
     // Ssl protocol
-    public static final String DEFAULT_SSL_PROTOCOL = "TLSv1.2";
+    public static final String DEFAULT_SSL_PROTOCOL = "TLS";
     //
     public static final String DEFAULT_TRUST_ALGORITHM = "PKIX";
     // configuration paths

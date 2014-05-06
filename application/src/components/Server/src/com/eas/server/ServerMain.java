@@ -334,7 +334,7 @@ public class ServerMain {
     }
 
     public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        SSLContext context = SSLContext.getInstance("TLSv1.2");
+        SSLContext context = SSLContext.getInstance("TLS");
         context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
         return context;
     }
