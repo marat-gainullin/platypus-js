@@ -26,7 +26,7 @@ import org.opengis.feature.type.FeatureType;
  */
 public class RowsFeatureReaderTest extends GeoBaseTest {
 
-    private ApplicationDbModel datamodel;
+    private ApplicationDbModel model;
     private DatamodelDataStore ds;
 
     public RowsFeatureReaderTest() {
@@ -38,15 +38,15 @@ public class RowsFeatureReaderTest extends GeoBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        datamodel = new ApplicationDbModel(dbClient);
-        datamodel.setRuntime(true);
+        model = new ApplicationDbModel(dbClient);
+        model.requery();
         final Map<String, RowsetFeatureDescriptor> map = new HashMap<>();
-        ApplicationDbEntity e = datamodel.newGenericEntity();
+        ApplicationDbEntity e = model.newGenericEntity();
         e.regenerateId();
         e.setTableName("COLA_MARKETS");
         e.validateQuery();
         assertNotNull(e.getRowset());
-        datamodel.addEntity(e);
+        model.addEntity(e);
         map.put(e.getTableName(), new RowsetFeatureDescriptor(e.getTableName(), e));
         ds = new DatamodelDataStore();
         ds.setFeatureDescriptors(map);
@@ -78,7 +78,7 @@ public class RowsFeatureReaderTest extends GeoBaseTest {
     @Test
     public void testNext() throws Exception {
         System.out.println("next");
-        final Rowset rowset = datamodel.getEntityByTableName("COLA_MARKETS").getRowset();
+        final Rowset rowset = model.getEntityByTableName("COLA_MARKETS").getRowset();
         rowset.beforeFirst();
         final int rowsetSize = rowset.size();
         // RowsFeatureReader positions rowset at beforeFirst on its creation.
@@ -103,7 +103,7 @@ public class RowsFeatureReaderTest extends GeoBaseTest {
     @Test
     public void testHasNext() throws Exception {
         System.out.println("hasNext");
-        final Rowset rowset = datamodel.getEntityByTableName("COLA_MARKETS").getRowset();
+        final Rowset rowset = model.getEntityByTableName("COLA_MARKETS").getRowset();
         final int rowsetSize = rowset.size();
         final RowsFeatureReader reader = (RowsFeatureReader) ds.getFeatureReader("COLA_MARKETS");
         for (int i = 0; i < rowsetSize; i++) {

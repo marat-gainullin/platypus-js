@@ -34,7 +34,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 @RunWith(JMock.class)
 public class DatamodelEntityFeatureSourceTest extends GeoBaseTest {
 
-    private ApplicationDbModel datamodel;
+    private ApplicationDbModel model;
     private HashMap<String, RowsetFeatureDescriptor> map;
     private DatamodelDataStore dataStore;
     private Mockery context = new JUnit4Mockery();
@@ -48,13 +48,13 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        datamodel = new ApplicationDbModel(dbClient);
-        datamodel.setRuntime(true);
+        model = new ApplicationDbModel(dbClient);
+        model.requery();
         map = new HashMap<>();
-        ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
+        ApplicationDbEntity e = new ApplicationDbEntity(model);
         e.regenerateId();
         e.setTableName("COLA_MARKETS");
-        datamodel.addEntity(e);
+        model.addEntity(e);
         e.validateQuery();
         final Rowset rowset = e.getRowset();
         assertNotNull(rowset);

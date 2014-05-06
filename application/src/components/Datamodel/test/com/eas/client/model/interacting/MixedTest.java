@@ -141,7 +141,7 @@ public class MixedTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     Map<Long, Integer> counts = state.gatherRowCounts();
 
@@ -279,7 +279,7 @@ public class MixedTest extends BaseTest {
                     try {
                         ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
                         model.setScriptThis(BaseTest.getDummyScriptableObject());
-                        model.setRuntime(true);
+                        model.requery();
                         ModelState state = new ModelState(model);
                         listenerOf1Layer = null;
                         listenerOf2Layer = null;
@@ -345,7 +345,7 @@ public class MixedTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
 
                     Rowset velRs = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -391,7 +391,7 @@ public class MixedTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
 
                     DataScriptEventsListener scriptListener1 = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_PO_VELICHINE);

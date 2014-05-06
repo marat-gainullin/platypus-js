@@ -189,7 +189,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     private void initParametersView() throws Exception {
         paramsModel = new ApplicationDbModel();
         paramsModel.setParameters(parentView.getParameters().copy());
-        paramsModel.setRuntime(true);
+        paramsModel.requery();
         parametersGrid = new EntityFieldsGrid();
         parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
         parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N

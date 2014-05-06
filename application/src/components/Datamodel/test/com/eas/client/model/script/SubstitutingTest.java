@@ -25,24 +25,24 @@ public class SubstitutingTest extends BaseTest {
         System.out.println("dataSubstitutingTest");
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel dm = new ApplicationDbModel(client);
-            ApplicationDbEntity entity1 = dm.newGenericEntity();
+            ApplicationDbModel model = new ApplicationDbModel(client);
+            ApplicationDbEntity entity1 = model.newGenericEntity();
             entity1.setQueryId("128015347915605");
             entity1.setName("entity1");
 
-            ApplicationDbEntity entity2 = dm.newGenericEntity();
+            ApplicationDbEntity entity2 = model.newGenericEntity();
             entity2.setQueryId("128015347915605");
             entity2.setName("entity2");
 
-            dm.addEntity(entity1);
-            dm.addEntity(entity2);
+            model.addEntity(entity1);
+            model.addEntity(entity2);
 
             ContextFactory cf = ContextFactory.getGlobal();
             Context cx = cf.enterContext();
             try {
                 ScriptableObject scope = ScriptUtils.getScope();
-                dm.setScriptThis(scope);
-                dm.setRuntime(true);
+                model.setScriptThis(scope);
+                model.requery();
 
                 Scriptable jsSr1 = (Scriptable) scope.get("entity1", scope);
                 Scriptable jsSr2 = (Scriptable) scope.get("entity2", scope);

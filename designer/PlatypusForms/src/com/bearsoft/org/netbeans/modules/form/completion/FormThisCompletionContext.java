@@ -14,7 +14,7 @@ import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.RADVisualFormContainer;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
-import com.eas.client.forms.FormRunner;
+import com.eas.client.forms.Form;
 import com.eas.client.forms.api.components.model.ModelGrid;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
@@ -41,7 +41,7 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         super.applyCompletionItems(point, offset, resultSet);
         ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(getParentContext().getDataObject(), offset, point.getFilter());
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), FormRunner.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
+            addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
             fillComponents(point, resultSet);
         }
     }
@@ -52,7 +52,7 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         if (completionContext != null) {
             return completionContext;
         }
-        if (FormRunner.VIEW_SCRIPT_NAME.equals(token.name)) {
+        if (Form.VIEW_SCRIPT_NAME.equals(token.name)) {
             Class<?> conainerClass = getPlaypusContainerClass();
             if (conainerClass != null) {
                 return new CompletionContext(conainerClass);

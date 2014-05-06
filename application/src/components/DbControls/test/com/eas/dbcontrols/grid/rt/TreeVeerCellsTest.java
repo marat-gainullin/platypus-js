@@ -680,19 +680,19 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     Rowset cells2ValuesRowset = new Rowset(cells2Fields);
                     fillInRowset(cells2ValuesRowset, cells2TestData);
 
-                    ApplicationDbModel dm = new ApplicationDbModel(new DummyTestDbClient());
-                    assertNotNull(dm);
-                    dm.setRuntime(true);
-                    ApplicationDbEntity cells2Entity = dm.newGenericEntity();
-                    dm.addEntity(cells2Entity);
+                    ApplicationDbModel model = new ApplicationDbModel(new DummyTestDbClient());
+                    assertNotNull(model);
+                    model.requery();
+                    ApplicationDbEntity cells2Entity = model.newGenericEntity();
+                    model.addEntity(cells2Entity);
                     cells2Entity.setQuery(new DummyTestSqlQuery());
                     cells2Entity.setRowset(cells2Rowset);
-                    ApplicationDbEntity cells2ValuesEntity = dm.newGenericEntity();
-                    dm.addEntity(cells2ValuesEntity);
+                    ApplicationDbEntity cells2ValuesEntity = model.newGenericEntity();
+                    model.addEntity(cells2ValuesEntity);
                     cells2ValuesEntity.setQuery(new DummyTestSqlQuery());
                     cells2ValuesEntity.setRowset(cells2ValuesRowset);
                     Relation colRelation = new Relation(cells2Entity, cells2Rowset.getFields().get(1), cells2ValuesEntity, cells2ValuesRowset.getFields().get(1));
-                    dm.addRelation(colRelation);
+                    model.addRelation(colRelation);
 
                     int s1ToGlueToIndex = 1;
                     int s2ToGlueToIndex = 3;
