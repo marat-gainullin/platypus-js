@@ -1,18 +1,44 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *//*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
+
+
 package com.eas.client.cache;
 
 import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -23,35 +49,45 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     public static final String PROPERTY_REQUIRED_MSG = "Property %s is required";
     public static final String APP_ELEMENT_PROPERTIES_FILE_NAME = ".properties";
     public static final String APP_ELEMENT_TXT_CONTENT_FILE_NAME = ".txt";
+    public static final String APP_ELEMENT_SOURCE_FILE_NAME = ".js";
     public static final String APP_ELEMENT_BIN_CONTENT_FILE_NAME = ".bin";
-    protected String CACHED_ENTITIES_PATH;
+    protected String basePath;
 
     public AppElementsCache(String aAppNameHash) throws Exception {
+        this(aAppNameHash, null);
+    }
+    
+    public AppElementsCache(String aAppNameHash, String aBasePath) throws Exception {
         super();
-        initializeFileCache(aAppNameHash);
+        if (aBasePath != null && !aBasePath.isEmpty()) {
+            basePath = aBasePath;
+        } else {
+            basePath = basePathInUserProfile(aAppNameHash);
+        }
     }
 
-    protected void initializeFileCache(String aAppNameHash) throws Exception {
+    public static String basePathInUserProfile(String aAppNameHash) throws Exception {
         //Make file cache directories
-        CACHED_ENTITIES_PATH = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
-        if (!CACHED_ENTITIES_PATH.endsWith(File.separator)) {
-            CACHED_ENTITIES_PATH += File.separator;
+        String basePath = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
+        if (!basePath.endsWith(File.separator)) {
+            basePath += File.separator;
         }
-        CACHED_ENTITIES_PATH += ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME;
-        File newDir = new File(CACHED_ENTITIES_PATH);
+        basePath += ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME;
+        File newDir = new File(basePath);
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        CACHED_ENTITIES_PATH += File.separator + ClientConstants.ENTITIES_CACHE_DIRECTORY_NAME;
-        newDir = new File(CACHED_ENTITIES_PATH);
+        basePath += File.separator + ClientConstants.ENTITIES_CACHE_DIRECTORY_NAME;
+        newDir = new File(basePath);
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        CACHED_ENTITIES_PATH += File.separator + aAppNameHash;
-        newDir = new File(CACHED_ENTITIES_PATH);
+        basePath += File.separator + aAppNameHash;
+        newDir = new File(basePath);
         if (!newDir.exists()) {
             newDir.mkdir();
         }
+        return basePath;
     }
 
     /**
@@ -61,7 +97,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
      * @return Generated and created path name.
      */
     protected String generatePath(String aAppelementName) {
-        String pathName = CACHED_ENTITIES_PATH + File.separator + String.valueOf(Math.abs(aAppelementName.hashCode()) % 100);
+        String pathName = basePath + File.separator + String.valueOf(Math.abs(aAppelementName.hashCode()) % 100);
         File path = new File(pathName);
         if (!path.exists()) {
             path.mkdir();
@@ -110,7 +146,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     }
 
     private void string2File(File aFile, String aValue) throws UnsupportedEncodingException, FileNotFoundException, IOException {
-        byte[] buffer = aValue.getBytes("UTF-16LE");
+        byte[] buffer = aValue.getBytes(SettingsConstants.COMMON_ENCODING);
         try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(aFile))) {
             out.write(buffer);
             out.flush();
@@ -120,10 +156,10 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     protected void putToFileCache(ApplicationElement aAppElement) {
         synchronized (lock) {
             if (aAppElement != null) {
-                String entityId = aAppElement.getId();
+                String appElementName = aAppElement.getId();
                 try {
-                    removeFromFileCache(entityId);
-                    String entityDirectory = generatePath(entityId);
+                    removeFromFileCache(appElementName);
+                    String entityDirectory = generatePath(appElementName);
                     File cachedEntityFile = new File(entityDirectory);
                     File propsFile = new File(entityDirectory + File.separator + APP_ELEMENT_PROPERTIES_FILE_NAME);
                     File txtFile = new File(entityDirectory + File.separator + APP_ELEMENT_TXT_CONTENT_FILE_NAME);
@@ -139,7 +175,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                         StringBuilder propsString = new StringBuilder();
                         propsString.append(ClientConstants.F_MDENT_ID);
                         propsString.append("=");
-                        propsString.append(entityId);
+                        propsString.append(appElementName);
                         propsString.append(ClientConstants.CRLF);
                         String lName = aAppElement.getName();
                         if (lName != null) {
@@ -179,12 +215,23 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                         } else {
                             if (aAppElement.getContent() != null) {
                                 string2File(txtFile, XmlDom2String.transform(aAppElement.getContent()));
+                                if (aAppElement.getType() == ClientConstants.ET_COMPONENT
+                                        || aAppElement.getType() == ClientConstants.ET_FORM
+                                        || aAppElement.getType() == ClientConstants.ET_REPORT) {
+                                    NodeList sources = aAppElement.getContent().getDocumentElement().getElementsByTagName("source");
+                                    assert sources != null;
+                                    assert sources.getLength() == 1;
+                                    Node source = sources.item(0);
+                                    File jsFile = new File(entityDirectory + File.separator + appElementName + APP_ELEMENT_SOURCE_FILE_NAME);
+                                    jsFile.createNewFile();
+                                    string2File(jsFile, source.getTextContent());
+                                }
                             }
                         }
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
-                    removeFromFileCache(entityId);
+                    removeFromFileCache(appElementName);
                 }
             }
         }
@@ -198,6 +245,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                 File propsFile = new File(cachedPath + File.separator + APP_ELEMENT_PROPERTIES_FILE_NAME);
                 File txtFile = new File(cachedPath + File.separator + APP_ELEMENT_TXT_CONTENT_FILE_NAME);
                 File binaryFile = new File(cachedPath + File.separator + APP_ELEMENT_BIN_CONTENT_FILE_NAME);
+                File jsFile = new File(cachedPath + File.separator + aId + APP_ELEMENT_SOURCE_FILE_NAME);
                 if (txtFile.exists()) {
                     txtFile.delete();
                 }
@@ -206,6 +254,9 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                 }
                 if (propsFile.exists()) {
                     propsFile.delete();
+                }
+                if (jsFile.exists()) {
+                    jsFile.delete();
                 }
                 if (cachedPathDirectory.exists()) {
                     String[] filesNames = cachedPathDirectory.list();
@@ -229,7 +280,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
             int read = bin.read(buffer);
             assert read == buffer.length;
         }
-        return new String(buffer, "UTF-16LE");
+        return new String(buffer, SettingsConstants.COMMON_ENCODING);
     }
 
     protected ApplicationElement getFromFileCache(String aId) throws Exception {

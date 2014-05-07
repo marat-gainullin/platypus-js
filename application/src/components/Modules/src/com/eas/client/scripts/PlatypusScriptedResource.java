@@ -11,6 +11,7 @@ import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -338,7 +339,11 @@ public class PlatypusScriptedResource {
                 if (test.exists()) {
                     sourceUrl = test.toURI().toURL();
                 } else {
-                    sourceUrl = new URL(sourcePath);
+                    try {
+                        sourceUrl = new URL(sourcePath);
+                    } catch (MalformedURLException ex) {
+                        throw new FileNotFoundException(sourcePath);
+                    }
                 }
                 URLReader reader = new URLReader(sourceUrl, SettingsConstants.COMMON_ENCODING);
                 StringBuilder read = new StringBuilder();
