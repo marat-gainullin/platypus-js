@@ -13,7 +13,7 @@
  */
 
 
-package com.eas.server.filter;
+package com.eas.client.scripts;
 
 import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
@@ -49,6 +49,7 @@ public class DependenciesWalker {
     public static final String FORM = "Form";
     public static final String REPORT = "Report";
     public static final String SERVER_REPORT = "ServerReport";
+    private final Set<String> localFunctions = new HashSet<>();
     private final Set<String> dependencies = new HashSet<>();
     private final Set<String> queryDependencies = new HashSet<>();
     private final Set<String> serverDependencies = new HashSet<>();
@@ -150,7 +151,7 @@ public class DependenciesWalker {
                             if (appElement.getType() == ClientConstants.ET_COMPONENT || appElement.getType() == ClientConstants.ET_FORM) {
                                 putDependence(name);
                             } else {
-                                Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, "Several application elements with same constructor ({0}) are found.", appElement.getName());
+                                Logger.getLogger(DependenciesWalker.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript indentifier {0} found that is the same with non-module application element).", appElement.getName());
                             }
                         }// ordinary script class
                     } catch (Exception ex) {
@@ -159,7 +160,26 @@ public class DependenciesWalker {
                 }
                 return super.enterIdentNode(identNode);
             }
+
+            private int scopeLevel;
+
+            @Override
+            public boolean enterFunctionNode(FunctionNode functionNode) {
+                scopeLevel++;
+                if (scopeLevel == 2 && !functionNode.isAnonymous()) {
+                    localFunctions.add(functionNode.getName());
+                }
+                return super.enterFunctionNode(functionNode);
+            }
+
+            @Override
+            public Node leaveFunctionNode(FunctionNode functionNode) {
+                scopeLevel--;
+                return super.leaveFunctionNode(functionNode);
+            }
+
         });
+        dependencies.removeAll(localFunctions);
         dependencies.removeAll(dynamicDependencies);
         serverDependencies.removeAll(dynamicDependencies);
     }

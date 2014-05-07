@@ -5,6 +5,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.store.Model2XmlDom;
+import com.eas.client.scripts.DependenciesWalker;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.server.PlatypusServerCore;

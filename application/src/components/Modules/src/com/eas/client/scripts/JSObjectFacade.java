@@ -3,23 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client.scripts;
 
 import java.util.Collection;
 import java.util.Set;
 import jdk.nashorn.api.scripting.JSObject;
 
-
 /**
  *
  * @author mg
  */
-public class JSObjectFacade implements JSObject{
+public class JSObjectFacade implements JSObject {
 
     protected JSObject delegate;
-    
-    public JSObjectFacade(JSObject aDelegate){
+
+    public JSObjectFacade(JSObject aDelegate) {
         super();
         delegate = aDelegate;
     }
@@ -122,5 +120,5 @@ public class JSObjectFacade implements JSObject{
     public double toNumber() {
         return delegate.toNumber();
     }
-        
+
 }
