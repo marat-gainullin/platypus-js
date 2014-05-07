@@ -128,7 +128,7 @@ public class QueringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     int parIndex = model.getParametersEntity().getRowset().getFields().find("P_ID");
                     model.getParametersEntity().getRowset().updateObject(parIndex, PROIZVODSTVENNIE_OS);
@@ -253,7 +253,7 @@ public class QueringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
 
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -291,7 +291,7 @@ public class QueringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
 
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -341,7 +341,7 @@ public class QueringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
                     int pkColIndex = rowset.getFields().find("ID");
@@ -448,7 +448,7 @@ public class QueringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
 
                     ModelState state = new ModelState(model);
 
@@ -596,7 +596,7 @@ public class QueringTest extends BaseTest {
                     try {
                         ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                         model.setScriptThis(BaseTest.getDummyScriptableObject());
-                        model.setRuntime(true);
+                        model.requery();
 
                         ModelState state = new ModelState(model);
 

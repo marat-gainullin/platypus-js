@@ -81,7 +81,7 @@ public class RelationsTest extends BaseTest {
 
             assertEquals(model.getRelations().size(), 9);
 
-            model.setRuntime(true);
+            model.requery();
             // pks control section
             assertEquals(1, entity11.getFields().getPrimaryKeys().size());
             assertEquals(1, entity21.getFields().getPrimaryKeys().size());

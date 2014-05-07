@@ -42,7 +42,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
     protected Object published;
-    protected boolean runtime;
     protected int ajustingCounter;
     protected Runnable resolver;
     protected GuiCallback guiCallback;
@@ -437,16 +436,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             }
         }
         return false;
-    }
-
-    public void setRuntime(boolean aValue) throws Exception {
-        boolean oldValue = runtime;
-        runtime = aValue;
-        changeSupport.firePropertyChange("runtime", oldValue, runtime);
-    }
-
-    public boolean isRuntime() {
-        return runtime;
     }
 
     public abstract boolean isTypeSupported(int type) throws Exception;

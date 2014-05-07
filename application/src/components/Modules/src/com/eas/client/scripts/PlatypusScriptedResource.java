@@ -11,6 +11,7 @@ import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -29,6 +30,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.URLReader;
 
 /**
  *
@@ -291,7 +294,7 @@ public class PlatypusScriptedResource {
         url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
         return url;
     }
-    
+
     protected static class NotResourceException extends Exception {
 
         protected String resourceId;
@@ -309,7 +312,7 @@ public class PlatypusScriptedResource {
             return resourceId;
         }
     }
-    
+
     /**
      * Accounting of already executed scripts. Allows to avoid reexecution.
      */
@@ -322,30 +325,62 @@ public class PlatypusScriptedResource {
      * @throws Exception
      */
     public static void executeScriptResource(final String aResourceId) throws Exception {
+        executeScriptResource(aResourceId, null);
+    }
+
+    public static void executeScriptResource(final String aResourceId, SecuredJSConstructor aPrevConstrVersion) throws Exception {
         final String resourceId = PlatypusScriptedResource.normalizeResourcePath(aResourceId);
-        if (!executedScriptResources.contains(resourceId)) {
-            try {
-                String sourcePath = PlatypusScriptedResource.translateScriptPath(resourceId);
-                if (sourcePath != null) {
-                    URL sourceUrl;
-                    File test = new File(sourcePath);
-                    if (test.exists()) {
-                        sourceUrl = test.toURI().toURL();
-                    } else {
-                        sourceUrl = new URL(sourcePath);
-                    }
-                    ScriptUtils.exec(sourceUrl);
-                } else {
-                    throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
-                }
-            } catch (NotResourceException ex) {
-                // Silently return.
-                // There are cases, when require is called with regular platypus module id.
-                // In such case, we have to ignore require call in SE client, server and servlet (because of automatic dependecies resolution),
-                // and perform standard actions for html5 browser client.
-                return;
-            }
+        if (!executedScriptResources.contains(resourceId) || aPrevConstrVersion != null) {
             executedScriptResources.add(resourceId);
+            String sourcePath = PlatypusScriptedResource.translateScriptPath(resourceId);
+            if (sourcePath != null) {
+                URL sourceUrl;
+                File test = new File(sourcePath);
+                if (test.exists()) {
+                    sourceUrl = test.toURI().toURL();
+                } else {
+                    try {
+                        sourceUrl = new URL(sourcePath);
+                    } catch (MalformedURLException ex) {
+                        throw new FileNotFoundException(sourcePath);
+                    }
+                }
+                URLReader reader = new URLReader(sourceUrl, SettingsConstants.COMMON_ENCODING);
+                StringBuilder read = new StringBuilder();
+                char[] buffer = new char[1024 * 4];// 4kb
+                int readCount = 0;
+                while (readCount != -1) {
+                    readCount = reader.read(buffer);
+                    if (readCount != -1) {
+                        read.append(buffer, 0, readCount);
+                    }
+                }
+                DependenciesWalker walker = new DependenciesWalker(read.toString(), cache);
+                walker.walk();
+                for (String aDependence : walker.getDependencies()) {
+                    executeScriptResource(aDependence);
+                }
+                ScriptUtils.exec(sourceUrl);
+                ScriptDocument doc;
+                try {
+                    doc = scriptDocumentsHost.getDocuments().getScriptDocument(resourceId);
+                } catch (Exception ex) {
+                    doc = null;
+                }
+                if (doc != null) {
+                    JSObject nativeConstr = ScriptUtils.lookupInGlobal(doc.getEntityId());
+                    SecuredJSConstructor securedContr;
+                    if (aPrevConstrVersion != null) {
+                        securedContr = aPrevConstrVersion;
+                        aPrevConstrVersion.replace(nativeConstr, doc.getTxtContentLength(), doc.getTxtCrc32(), doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles());
+                    } else {
+                        securedContr = new SecuredJSConstructor(nativeConstr, doc.getEntityId(), doc.getTxtContentLength(), doc.getTxtCrc32(), cache, scriptDocumentsHost.getDocuments(), doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles(), getPrincipalHost());
+                    }
+                    ScriptUtils.putInGlobal(doc.getEntityId(), securedContr);
+                }
+            } else {
+                throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
+            }
         }
     }
 }

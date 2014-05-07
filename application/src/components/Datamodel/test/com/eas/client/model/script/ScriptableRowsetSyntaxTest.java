@@ -158,25 +158,25 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
         Double paramValue = new Double(98.597878f);
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel dm = new ApplicationDbModel(client);
-            Parameters params = dm.getParameters();
+            ApplicationDbModel model = new ApplicationDbModel(client);
+            Parameters params = model.getParameters();
             Parameter param = (Parameter) params.createNewField(paramName);
             param.setTypeInfo(DataTypeInfo.DOUBLE);
             param.setValue(paramValue);
             params.add(param);
 
             assertEquals(params.getParametersCount(), 1);
-            final ApplicationDbEntity entity11 = dm.newGenericEntity();
+            final ApplicationDbEntity entity11 = model.newGenericEntity();
             entity11.setQueryId("128015347915605");
-            dm.addEntity(entity11);
+            model.addEntity(entity11);
             entity11.setName(entityName);
 
             ContextFactory cf = ContextFactory.getGlobal();
             Context cx = cf.enterContext();
             try {
                 Scriptable scope = cx.newObject(ScriptUtils.getScope());
-                dm.setRuntime(true);
-                dm.setScriptThis(scope);
+                model.requery();
+                model.setScriptThis(scope);
 
                 RowsetHostObject srEntity = (RowsetHostObject) scope.get(entityName, scope);
                 assertNotNull(srEntity);

@@ -14,7 +14,6 @@ import java.util.*;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.runtime.Source;
 import org.w3c.dom.Document;
 

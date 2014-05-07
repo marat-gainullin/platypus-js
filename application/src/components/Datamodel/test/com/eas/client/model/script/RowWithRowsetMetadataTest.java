@@ -36,17 +36,17 @@ public class RowWithRowsetMetadataTest extends BaseTest {
         String entityName = "entity1";
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel dm = new ApplicationDbModel(client);
-            final ApplicationDbEntity entity11 = dm.newGenericEntity();
+            ApplicationDbModel model = new ApplicationDbModel(client);
+            final ApplicationDbEntity entity11 = model.newGenericEntity();
             entity11.setQueryId("128015347915605");
-            dm.addEntity(entity11);
+            model.addEntity(entity11);
             entity11.setName(entityName);
             ContextFactory cf = ContextFactory.getGlobal();
             Context cx = cf.enterContext();
             try {
                 ScriptableObject scope = ScriptUtils.getScope();
-                dm.setRuntime(true);
-                dm.setScriptThis(scope);
+                model.requery();
+                model.setScriptThis(scope);
                 // let's compile test script
                 Script script = cx.compileString(SCRIPT_TEST_SOURCE, "rowWithRowsetFieldsTest", 0, null);
                 script.exec(cx, scope);

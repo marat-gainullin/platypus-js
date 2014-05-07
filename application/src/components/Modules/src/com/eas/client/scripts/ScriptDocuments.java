@@ -36,11 +36,6 @@ public abstract class ScriptDocuments {
     public synchronized ScriptDocument getScriptDocument(String aAppElementId) throws Exception {
         ActualCacheEntry<ScriptDocument> scriptDocEntry = documents.get(aAppElementId);
         ScriptDocument scriptDoc = scriptDocEntry != null ? scriptDocEntry.getValue() : null;
-        if (scriptDocEntry != null && scriptDoc != null && !client.getAppCache().isActual(aAppElementId, scriptDocEntry.getTxtContentSize(), scriptDocEntry.getTxtContentCrc32())) {
-            scriptDoc = null;
-            documents.remove(aAppElementId);
-            client.getAppCache().remove(aAppElementId);
-        }
         if (scriptDoc == null) {
             final ApplicationElement appElement = client.getAppCache().get(aAppElementId);
             if (appElement != null) {

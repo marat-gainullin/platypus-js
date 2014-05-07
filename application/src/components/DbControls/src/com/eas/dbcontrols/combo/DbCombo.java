@@ -312,21 +312,21 @@ public class DbCombo extends DbControlPanel implements DbControl {
                             displayFromScript = displayCache.get(aValue);
                         } else {
                             /*
-                            CellData cd = new CellData(styleValue, aValue, achiveDisplayValue(aValue));
-                            CellRenderEvent event = new CellRenderEvent(eventThis != null ? eventThis : scriptThis, null, null, cd, null);
-                            Object retValue = ScriptUtils.toJava(getOnRender().call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{event.getPublished()}));
-                            if (Boolean.TRUE.equals(retValue)) {
-                                try {
-                                    aValue = ScriptUtils.js2Java(cd.data);
-                                    displayFromScript = ScriptUtils.js2Java(cd.display);
-                                    if (displayFromScript != null) {
-                                        displayCache.put(aValue, displayFromScript);
-                                    }
-                                } catch (Exception ex) {
-                                    Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            }
-                            */ 
+                             CellData cd = new CellData(styleValue, aValue, achiveDisplayValue(aValue));
+                             CellRenderEvent event = new CellRenderEvent(eventThis != null ? eventThis : scriptThis, null, null, cd, null);
+                             Object retValue = ScriptUtils.toJava(getOnRender().call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{event.getPublished()}));
+                             if (Boolean.TRUE.equals(retValue)) {
+                             try {
+                             aValue = ScriptUtils.js2Java(cd.data);
+                             displayFromScript = ScriptUtils.js2Java(cd.display);
+                             if (displayFromScript != null) {
+                             displayCache.put(aValue, displayFromScript);
+                             }
+                             } catch (Exception ex) {
+                             Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
+                             }
+                             }
+                             */
                         }
                     }
                     if (displayFromScript != null) {
@@ -708,34 +708,32 @@ public class DbCombo extends DbControlPanel implements DbControl {
 
     @Override
     protected void initializeEditor() {
-        if (isRuntime()) {
-            try {
-                internalBind();
-                if (kind != InitializingMethod.EDITOR) {
-                    kind = InitializingMethod.EDITOR;
-                    createLocator();
-                    removeAll();
-                    setLayout(new BorderLayout());
-                    addIconLabel();
-                    if (isList()) {
-                        initCombo();
-                    } else {
-                        nonListRendererEditor = new SemiBorderTextField(borderless);
-                        if (borderless) {
-                            setBorder(null);
-                        }
-                        add(nonListRendererEditor, BorderLayout.CENTER);
-                        nonListRendererEditor.setEditable(false);
-                        nonListRendererEditor.setOpaque(false);
-                        nonListRendererEditor.setInheritsPopupMenu(true);
-                        //nonListRendererEditor.setOpaque(standalone && cdi.isOpaque());
-                        checkEvents(nonListRendererEditor);
+        try {
+            internalBind();
+            if (kind != InitializingMethod.EDITOR) {
+                kind = InitializingMethod.EDITOR;
+                createLocator();
+                removeAll();
+                setLayout(new BorderLayout());
+                addIconLabel();
+                if (isList()) {
+                    initCombo();
+                } else {
+                    nonListRendererEditor = new SemiBorderTextField(borderless);
+                    if (borderless) {
+                        setBorder(null);
                     }
-                    super.initializeEditor();
+                    add(nonListRendererEditor, BorderLayout.CENTER);
+                    nonListRendererEditor.setEditable(false);
+                    nonListRendererEditor.setOpaque(false);
+                    nonListRendererEditor.setInheritsPopupMenu(true);
+                    //nonListRendererEditor.setOpaque(standalone && cdi.isOpaque());
+                    checkEvents(nonListRendererEditor);
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
+                super.initializeEditor();
             }
+        } catch (Exception ex) {
+            Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -840,9 +838,9 @@ public class DbCombo extends DbControlPanel implements DbControl {
     public boolean isFieldContentModified() {
         return !standalone;
     }
-    
+
     protected String emptyText;
-    
+
     public String getEmptyText() {
         return emptyText;
     }

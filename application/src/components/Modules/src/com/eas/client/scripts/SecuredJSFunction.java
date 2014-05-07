@@ -18,21 +18,24 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class SecuredJSObject extends SecuredJSObjectFacade {
+public class SecuredJSFunction extends SecuredJSObjectFacade {
 
-    public SecuredJSObject(JSObject aDelegate, String aAppElementId, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
+    protected String name;
+
+    public SecuredJSFunction(String aName, JSObject aDelegate, String aAppElementId, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
         super(aDelegate, aAppElementId, aModuleAllowedRoles, aPropertiesAllowedRoles, aPrincipalHost);
+        name = aName;
+    }
+    @Override
+    public Object call(Object thiz, Object... args) {
+        checkPropertyPermission(name, args);
+        return super.call(thiz, args);
     }
 
     @Override
-    public Object getMember(String name) {
-        Object res = super.getMember(name);
-        if (res instanceof JSObject && ((JSObject) res).isFunction()) {
-            return new SecuredJSFunction(name, (JSObject) res, appElementId, moduleAllowedRoles, propertiesAllowedRoles, principalHost);
-        } else {
-            checkPropertyPermission(name);
-            return res;
-        }
+    public Object newObject(Object... args) {
+        checkPropertyPermission(name, args);
+        return super.newObject(args);
     }
 
 }

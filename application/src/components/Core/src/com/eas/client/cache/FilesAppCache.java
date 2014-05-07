@@ -164,13 +164,6 @@ public class FilesAppCache extends AppElementsCache {
     }
 
     @Override
-    protected void initializeFileCache(String aAppNameHash) throws Exception {
-        if (secondCacheEnabled) {
-            super.initializeFileCache(aAppNameHash);
-        }
-    }
-
-    @Override
     protected ApplicationElement getFromFileCache(String aId) throws Exception {
         if (secondCacheEnabled) {
             return super.getFromFileCache(aId);

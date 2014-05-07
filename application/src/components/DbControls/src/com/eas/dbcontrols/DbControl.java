@@ -25,12 +25,6 @@ public interface DbControl extends PropertyChangeListener {
     public static final int EXTRA_BUTTON_WIDTH = 18;
 
     /**
-     * Returns runtime status.
-     * @return Runtime status flag.
-     */
-    public boolean isRuntime();
-
-    /**
      * Returns the working datamodel.
      * @return Datamodel instance.
      * @see Datamodel

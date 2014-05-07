@@ -134,7 +134,7 @@ public class FilteringTest extends BaseTest {
                     System.out.println("Test of filtering process with key values of various types, but same values");
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
                     int pkColIndex = rowset.getFields().find("ID");
@@ -229,7 +229,7 @@ public class FilteringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
                     int pkColIndex = rowset.getFields().find("ID");
@@ -284,7 +284,7 @@ public class FilteringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     Map<Long, Integer> counts = state.gatherRowCounts();
 
@@ -402,7 +402,7 @@ public class FilteringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
 
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -440,7 +440,7 @@ public class FilteringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
 
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -490,7 +490,7 @@ public class FilteringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
                     ModelState state = new ModelState(model);
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
                     int pkColIndex = rowset.getFields().find("ID");
@@ -596,7 +596,7 @@ public class FilteringTest extends BaseTest {
                 public Object run(Context cx) throws Exception {
                     ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                     model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+                    model.requery();
 
                     ModelState state = new ModelState(model);
 
@@ -738,7 +738,7 @@ public class FilteringTest extends BaseTest {
                     try {
                         ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                         model.setScriptThis(BaseTest.getDummyScriptableObject());
-                        model.setRuntime(true);
+                        model.requery();
 
                         ModelState state = new ModelState(model);
 

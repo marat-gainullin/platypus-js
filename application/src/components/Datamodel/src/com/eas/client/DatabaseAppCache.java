@@ -7,7 +7,6 @@ package com.eas.client;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.cache.AppElementsCache;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
@@ -45,8 +44,10 @@ public class DatabaseAppCache extends AppElementsCache {
     public String translateScriptPath(String aName) throws Exception {
         String res = generatePath(aName) + File.separator;
         ApplicationElement appElement = get(aName);
-        if (appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE) {
-            res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+        if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
+            res += APP_ELEMENT_BIN_CONTENT_FILE_NAME;
+        }else{
+            res += aName + APP_ELEMENT_SOURCE_FILE_NAME;
         }
         return res;
     }
