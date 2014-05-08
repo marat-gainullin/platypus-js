@@ -52,7 +52,7 @@ public class PlatypusFilesSupport {
 
             @Override
             public boolean enterFunctionNode(FunctionNode fn) {
-                if (fn != jsRoot && !fn.isAnonymous()) {
+                if (scopeLevel == 1 && fn != jsRoot && !fn.isAnonymous()) {
                     if (cx.functions == 0) {
                         cx.result = fn;
                     }
@@ -63,10 +63,12 @@ public class PlatypusFilesSupport {
 
             @Override
             protected void commentedFunction(FunctionNode fn, String aComment) {
-                JsDoc jsDoc = new JsDoc(aComment);
-                if (jsDoc.containsModuleAnnotation()) {
-                    cx.result = fn;
-                    cx.annotatedConstructors++;
+                if (scopeLevel == 2) {
+                    JsDoc jsDoc = new JsDoc(aComment);
+                    if (jsDoc.containsModuleAnnotation()) {
+                        cx.result = fn;
+                        cx.annotatedConstructors++;
+                    }
                 }
             }
 

@@ -190,7 +190,6 @@ public class PlatypusServer extends PlatypusServerCore {
 
     private void initializeAndBindPlatypusAcceptor(InetSocketAddress s) throws IOException, Exception {
         final SslFilter sslFilter = new SslFilter(sslContext);
-        
         Integer numWorkerThreads = portsNumWorkerThreads != null ? portsNumWorkerThreads.get(s.getPort()) : null;
         if (numWorkerThreads == null || numWorkerThreads == 0) {
             numWorkerThreads = DEFAULT_EXECUTOR_POOL_SIZE;

@@ -75,7 +75,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
         if (!path.exists()) {
             path.mkdir();
         }
-        pathName += File.separator + aAppelementName;
+        pathName += File.separator + aAppelementName + File.separator + aAppelementName;
         pathName = pathName.replace('/', File.separatorChar);
         return pathName;
     }
