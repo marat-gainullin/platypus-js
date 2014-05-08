@@ -18,7 +18,7 @@ public class JsDoc {
     private String body;
     private String[] lines;
     private Tag tag;
-    private List<Tag> tags = new ArrayList<>();
+    private final List<Tag> tags = new ArrayList<>();
 
     public JsDoc(String aBody) {
         if (aBody == null) {
@@ -37,9 +37,6 @@ public class JsDoc {
     }
 
     public List<Tag> getAnnotations() {
-        if (tags == null) {
-            return null;
-        }
         return Collections.unmodifiableList(tags);
     }
 

@@ -106,11 +106,12 @@ public class ScriptDocument {
         scriptSource = aScriptSource;
         ast = null;
     }
-/*
-    public Set<String> getDepencies() {
-        return depencies;
-    }
-*/
+    /*
+     public Set<String> getDepencies() {
+     return depencies;
+     }
+     */
+
     public JSObject getFunction() {
         return constructor;
     }
@@ -153,7 +154,7 @@ public class ScriptDocument {
      * annotations will be taken into account while accessing through modules.
      */
     public void readScriptAnnotations() {
-        assert scriptSource != null : "Javascript source can't be null";
+        assert scriptSource != null : "JavaScript source can't be null";
         if (ast == null) {
             moduleAnnotations = new ArrayList<>();
             propertyAllowedRoles.clear();
@@ -166,14 +167,14 @@ public class ScriptDocument {
                     if (scopeLevel == 2) {
                         JsDoc jsDoc = new JsDoc(aComment);
                         jsDoc.parseAnnotations();
-                        for (Tag tag : jsDoc.getAnnotations()) {
+                        jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
                             moduleAnnotations.add(tag);
                             if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
                                 tag.getParams().stream().forEach((role) -> {
                                     moduleAllowedRoles.add(role);
                                 });
                             }
-                        }
+                        });
                     }
                 }
 
