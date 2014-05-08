@@ -256,8 +256,8 @@ public class PlatypusScriptedResource {
             + "*/")
     public static String translateScriptPath(String aResourceId) throws Exception {
         if (aResourceId != null && !aResourceId.isEmpty()) {
-            Matcher htppMatcher = pattern.matcher(aResourceId);
-            if (htppMatcher.matches()) {
+            Matcher httpMatcher = pattern.matcher(aResourceId);
+            if (httpMatcher.matches()) {
                 return aResourceId;
             } else {
                 if (cache == null) {

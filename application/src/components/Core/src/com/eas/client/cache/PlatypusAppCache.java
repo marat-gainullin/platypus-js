@@ -36,7 +36,7 @@ public class PlatypusAppCache extends AppElementsCache{
 
     @Override
     public String translateScriptPath(String aName) throws Exception {
-        String res = generatePath(aName) + File.separator;
+        String res = generatePath(aName); // + File.separator;
         ApplicationElement appElement = get(aName);
         if(appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE){
             res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
