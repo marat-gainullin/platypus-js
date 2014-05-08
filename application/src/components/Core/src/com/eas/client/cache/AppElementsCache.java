@@ -75,9 +75,21 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
         if (!path.exists()) {
             path.mkdir();
         }
-        pathName += File.separator + aAppelementName + File.separator + aAppelementName;
+        pathName += File.separator + aAppelementName;
         pathName = pathName.replace('/', File.separatorChar);
         return pathName;
+    }
+
+    @Override
+    public String translateScriptPath(String aName) throws Exception {
+        String res = generatePath(aName) + File.separator;
+        ApplicationElement appElement = get(aName);
+        if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
+            res += APP_ELEMENT_BIN_CONTENT_FILE_NAME;
+        }else{
+            res += aName + APP_ELEMENT_SOURCE_FILE_NAME;
+        }
+        return res;
     }
 
     @Override

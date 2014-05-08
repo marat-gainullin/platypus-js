@@ -41,18 +41,6 @@ public class DatabaseAppCache extends AppElementsCache {
     }
 
     @Override
-    public String translateScriptPath(String aName) throws Exception {
-        String res = generatePath(aName) + File.separator;
-        ApplicationElement appElement = get(aName);
-        if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
-            res += APP_ELEMENT_BIN_CONTENT_FILE_NAME;
-        }else{
-            res += aName + APP_ELEMENT_SOURCE_FILE_NAME;
-        }
-        return res;
-    }
-
-    @Override
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32) throws Exception {
         SqlQuery query = new SqlQuery(client, String.format(ACTUALITY_QUERY_TEXT, ClientConstants.F_MDENT_ID, ClientConstants.F_MDENT_CONTENT_TXT_SIZE, ClientConstants.F_MDENT_CONTENT_TXT_CRC32, ClientConstants.T_MTD_ENTITIES, ClientConstants.F_MDENT_ID, ClientConstants.APP_ELEMENT_SQL_PARAM_NAME));
         query.putParameter(ClientConstants.APP_ELEMENT_SQL_PARAM_NAME, DataTypeInfo.VARCHAR, aId);
