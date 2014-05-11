@@ -10,7 +10,6 @@ import com.eas.client.cache.AppElementsCache;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import java.io.File;
 
 /**
  *

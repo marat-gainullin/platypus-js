@@ -722,17 +722,17 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     verifyColumns(columns, s2Rowset, s2ToGlueToIndex + s1Rowset.size() + 1, 2);
 
                     // TODO: make some nodes expanded
-                    TableModel model = tbl.getModel();
+                    TableModel rtModel = tbl.getModel();
                     //model to rowsets test section 1
                     for (int c = 9; c <= 15; c++) {
                         for (int r = 0; r <= 2; r++) {
-                            Object val = model.getValueAt(r, c);
+                            Object val = rtModel.getValueAt(r, c);
                             assertTrue(val instanceof CellData);
                             val = ((CellData) val).getData();
                             assertTrue(val instanceof String);
                             String sVal = (String) val;
                             assertFalse(sVal.endsWith("_"));
-                            model.setValueAt(sVal + "_", r, c);
+                            rtModel.setValueAt(sVal + "_", r, c);
                         }
                     }
                     // verify...1
@@ -778,7 +778,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     // verify...
                     for (int c = 9; c <= 15; c++) {
                         for (int r = 0; r <= 2; r++) {
-                            Object val = model.getValueAt(r, c);
+                            Object val = rtModel.getValueAt(r, c);
                             assertTrue(val instanceof CellData);
                             val = ((CellData) val).getData();
                             assertTrue(val instanceof String);

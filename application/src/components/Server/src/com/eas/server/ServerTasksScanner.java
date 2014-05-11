@@ -25,6 +25,7 @@ public class ServerTasksScanner implements FilesAppCache.ScanCallback {
     private final Set<String> tasks;
 
     public ServerTasksScanner(Set<String> aTasks) {
+        super();
         tasks = aTasks;
     }
 

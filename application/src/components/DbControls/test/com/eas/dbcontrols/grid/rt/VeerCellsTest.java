@@ -408,18 +408,18 @@ public class VeerCellsTest extends GridBaseTest {
                     verifyColumns(columns, s1Rowset, s1ToGlueToIndex + 1, 2);
                     verifyColumns(columns, s2Rowset, s2ToGlueToIndex + s1Rowset.size() + 1, 2);
 
-                    TableModel model = tbl.getModel();
+                    TableModel rtModel = tbl.getModel();
                     //model to rowsets test section 1
                     for (int c = 9; c <= 15; c++) {
                         for (int r = 0; r <= 2; r++) {
-                            Object val = model.getValueAt(r, c);
+                            Object val = rtModel.getValueAt(r, c);
                             assertTrue(val instanceof CellData);
                             val = ((CellData) val).getData();
                             assertTrue(val instanceof String);
-                            model.getValueAt(r, c);
+                            rtModel.getValueAt(r, c);
                             String sVal = (String) val;
                             assertFalse(sVal.endsWith("_"));
-                            model.setValueAt(sVal + "_", r, c);
+                            rtModel.setValueAt(sVal + "_", r, c);
                         }
                     }
                     // verify...1
@@ -465,7 +465,7 @@ public class VeerCellsTest extends GridBaseTest {
                     // verify...
                     for (int c = 9; c <= 15; c++) {
                         for (int r = 0; r <= 2; r++) {
-                            Object val = model.getValueAt(r, c);
+                            Object val = rtModel.getValueAt(r, c);
                             assertTrue(val instanceof CellData);
                             val = ((CellData) val).getData();
                             assertTrue(val instanceof String);
