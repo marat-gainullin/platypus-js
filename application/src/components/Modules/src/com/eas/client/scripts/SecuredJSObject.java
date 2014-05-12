@@ -35,4 +35,14 @@ public class SecuredJSObject extends SecuredJSObjectFacade {
         }
     }
 
+    @Override
+    public void setMember(String name, Object value) {
+        if (value instanceof JSObject && ((JSObject) value).isFunction()) {
+            super.setMember(name, value);
+        } else {
+            checkPropertyPermission(name);
+            super.setMember(name, value);
+        }
+    }
+
 }

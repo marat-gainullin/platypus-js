@@ -13,7 +13,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.xml.dom.Source2XmlDom;
 import java.io.UnsupportedEncodingException;
@@ -137,17 +136,6 @@ public class ApplicationElement {
         return 0;
     }
 
-    public void setTxtContent(String aValue) {
-        if (aValue != null && !aValue.isEmpty()) {
-            content = Source2XmlDom.transform(aValue);
-            txtContentLength = Integer.valueOf(aValue.length()).longValue();
-            txtCrc32 = calcTxtCrc32(aValue);
-        } else {
-            content = null;
-            txtContentLength = txtCrc32 = (aValue != null) ? 0l : null;
-        }
-    }
-
     public Document getContent() {
         return content;
     }
@@ -221,22 +209,21 @@ public class ApplicationElement {
         Fields lmd = aRowset.getFields();
         if (lmd != null) {
             String txtContent = null;
-            byte[] binaryContent = null;
             for (int f = 1; f <= lmd.getFieldsCount(); f++) {
                 String colName = lmd.get(f).getName();
-                Object colValue = aRowset.getObject(f);
                 if (ClientConstants.F_MDENT_ID.equalsIgnoreCase(colName)) {
                     aElement.setId(aRowset.getString(f));
                 } else if (ClientConstants.F_MDENT_NAME.equalsIgnoreCase(colName)) {
-                    aElement.setName((String) colValue);
+                    aElement.setName(aRowset.getString(f));
                 } else if (ClientConstants.F_MDENT_TYPE.equalsIgnoreCase(colName)) {
-                    aElement.setType(SQLUtils.extractIntegerFromJDBCObject(colValue));
+                    aElement.setType(aRowset.getInt(f));
                 } else if (ClientConstants.F_MDENT_CONTENT_TXT_CRC32.equalsIgnoreCase(colName)) {
-                    Long dbCrc32 = SQLUtils.extractLongFromJDBCObject(colValue);
+                    Long dbCrc32 = aRowset.getLong(f);
                     aElement.setTxtCrc32(dbCrc32 == null ? 0 : dbCrc32);
                 } else if (ClientConstants.F_MDENT_PARENT_ID.equalsIgnoreCase(colName)) {
                     aElement.setParentId(aRowset.getString(f));
                 } else if (ClientConstants.F_MDENT_CONTENT_TXT.equalsIgnoreCase(colName)) {
+                    Object colValue = aRowset.getObject(f);
                     if (colValue instanceof String) {
                         txtContent = (String) colValue;
                     } else if (colValue instanceof Clob) {
@@ -256,7 +243,7 @@ public class ApplicationElement {
                 UUDecoder decoder = new UUDecoder();
                 aElement.setBinaryContent(decoder.decodeBuffer(txtContent));
             } else {
-                aElement.setTxtContent(txtContent);
+                aElement.setContent(Source2XmlDom.transform(txtContent));
             }
         }
         return aElement;

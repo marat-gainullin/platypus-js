@@ -43,10 +43,11 @@ public class Dom2ScriptDocument {
         documentBuilder = builderFactory.newDocumentBuilder();
     }
 
+    /*
     protected String rootTagName() {
         return ApplicationElement.SCRIPT_ROOT_TAG_NAME;
     }
-
+*/
     public ScriptDocument parseDom(Client aClient, Document aDom) throws Exception {
         String scriptSource = null;
         ApplicationModel<?, ?, ?, ?> model = null;
