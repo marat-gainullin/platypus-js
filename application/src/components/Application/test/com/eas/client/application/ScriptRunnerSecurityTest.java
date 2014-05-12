@@ -6,9 +6,6 @@ package com.eas.client.application;
 
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
-import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.scripts.ScriptDocuments;
-import com.eas.client.scripts.ScriptDocumentsHost;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.script.ScriptUtils;
@@ -54,8 +51,6 @@ public class ScriptRunnerSecurityTest {
     public static final String UNKNOWN_TEST_TYPE_MESSAGE = "Unknown test type";
     public static AppClient nativeClient;
     public static AppClient httpClient;
-    private static ScriptDocuments scriptDocuments;
-    private static ScriptDocumentsHost scriptDocumentsHost;
     private static JSObject unsecureScriptRunner;
     private static JSObject secureScriptRunner;
     private static JSObject secureFunctionScriptRunner;
@@ -72,12 +67,6 @@ public class ScriptRunnerSecurityTest {
         if (nativeClient == null) {
             nativeClient = new PlatypusNativeClient("platypus://localhost:8500/");
             httpClient = new PlatypusHttpClient("http://localhost:8080/application/");
-            scriptDocumentsHost = new ScriptDocumentsHost() {
-                @Override
-                public ScriptDocuments getDocuments() {
-                    return scriptDocuments;
-                }
-            };
         }
     }
 
@@ -173,12 +162,7 @@ public class ScriptRunnerSecurityTest {
         UNSECURE, SECURE, SECURE_FUNCTION;
     }
 
-    public static void setupScriptDocuments(AppClient client) {
-        scriptDocuments = new ClientScriptDocuments(client);
-    }
-
     private void setupModules(int moduleType, AppClient client) throws Exception {
-        setupScriptDocuments(client);
         client.login(USER1_NAME, USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
         try {
             unsecureScriptRunner = getModule(moduleType, SecurityTestType.UNSECURE, client);

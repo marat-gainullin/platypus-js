@@ -38,7 +38,7 @@ public class AppElementFiles {
     public final static String DATAMODEL_TAG_NAME = "datamodel";
     public final static String CHECK_OPTIONAL_TAG_EXCEPTION_MSG = "In Platypus documents should be one or zero tags: ";
     public final static String CHECK_REQUIRED_TAG_EXCEPTION_MSG = "In Platypus documents should be exactly one tag: ";
-    public final static String WRONG_ROOT_ELEMENT_EXCEPTION_MSG = "Wrong root element: %s for application element id: %s";
+    public final static String WRONG_ROOT_ELEMENT_EXCEPTION_MSG = "Wrong root element: %s for application element: %s";
     public final static String CREATE_FILE_EXCEPTION_MSG = "Error creating file: ";
     private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     private final String parentDirectoryAppElementId;
@@ -71,8 +71,8 @@ public class AppElementFiles {
                     appElement.setParentId(parentDirectoryAppElementId);
                     appElement.setContent(getAppElementContent(appElementType));
                     String accumulatedText = accumulator.toString();
-                    accumulatedText = accumulatedText.replaceAll("\r", "\n");// mac style
                     accumulatedText = accumulatedText.replaceAll(ClientConstants.CRLF, "\n");// windows style
+                    accumulatedText = accumulatedText.replaceAll("\r", "\n");// mac style
                     // WARNING! The accumulatedText is changed every time the underliyng files change
                     // but it is not exact text representation of content DOM.
                     appElement.setTxtContentLength((long) accumulatedText.length());
@@ -334,7 +334,7 @@ public class AppElementFiles {
                         if (ApplicationElement.QUERY_ROOT_TAG_NAME.equals(rootElement.getNodeName())) {
                             createQueryFiles(parentDirectory, appElement, rootElement, documentBuilder);
                         } else {
-                            throw new AppElementFilesException("Wrong root element: " + rootElement.getNodeName() + " for application element id: " + appElement.getId()); // NOI18N  
+                            throw new AppElementFilesException(String.format(WRONG_ROOT_ELEMENT_EXCEPTION_MSG, rootElement.getNodeName(), appElement.getId())); // NOI18N  
                         }
                         break;
                     case ClientConstants.ET_DB_SCHEME:
@@ -397,19 +397,13 @@ public class AppElementFiles {
         } else {
             saveFile(parentDirectory, appElement.getName(), PlatypusFiles.DIALECT_EXTENSION, "");
         }
-        //Remove Sql and Sql dialect nodes and export XML
         NodeList sqlSourceNodes = rootNode.getElementsByTagName(ApplicationElement.SQL_TAG_NAME);
         if (sqlSourceNodes.getLength() != 1) {
             throw new AppElementFilesException(CHECK_REQUIRED_TAG_EXCEPTION_MSG + ApplicationElement.SQL_TAG_NAME);
         }
-        rootNode.removeChild(sqlSourceNodes.item(0));
         NodeList dialectSourceNodes = rootNode.getElementsByTagName(ApplicationElement.FULL_SQL_TAG_NAME);
-        if (sqlSourceNodes.getLength() > 1) {
+        if (dialectSourceNodes.getLength() > 1) {
             throw new AppElementFilesException(CHECK_OPTIONAL_TAG_EXCEPTION_MSG + ApplicationElement.FULL_SQL_TAG_NAME);
-        }
-        Node dialectNode = dialectSourceNodes.item(0);
-        if (dialectNode != null) {
-            rootNode.removeChild(dialectSourceNodes.item(0));
         }
         contentNodes = rootNode.getElementsByTagName(ApplicationElement.OUTPUT_FIELDS_TAG_NAME);
         contentNode = contentNodes.item(0);
@@ -433,11 +427,11 @@ public class AppElementFiles {
     private static void saveExportedElementFile(File parentDirectory, String name, String ext, String tagName, Element node, DocumentBuilder documentBuilder) throws AppElementFilesException, IOException {
         Document doc = documentBuilder.newDocument();
         doc.setXmlStandalone(true);
-        NodeList importNodes = node.getElementsByTagName(tagName);
-        Node importNode = importNodes.item(0);
-        if (importNode != null) {
-            doc.adoptNode(importNode);
-            doc.appendChild(importNode);
+        NodeList nodesToImport = node.getElementsByTagName(tagName);
+        Node nodeToImport = nodesToImport.item(0);
+        if (nodeToImport != null) {
+            Node importedNode = doc.importNode(nodeToImport, true);
+            doc.appendChild(importedNode);
             saveFile(parentDirectory, name, ext, XmlDom2String.transform(doc));
         }
     }
@@ -445,8 +439,8 @@ public class AppElementFiles {
     private static void saveXml2File(File parentDirectory, String fileName, String aExt, Element rootElement, DocumentBuilder documentBuilder) throws IOException, AppElementFilesException {
         Document doc = documentBuilder.newDocument();
         doc.setXmlStandalone(true);
-        doc.adoptNode(rootElement);
-        doc.appendChild(rootElement);
+        Node importedNode = doc.importNode(rootElement, true);
+        doc.appendChild(importedNode);
         saveFile(parentDirectory, fileName, aExt, XmlDom2String.transform(doc));
     }
 

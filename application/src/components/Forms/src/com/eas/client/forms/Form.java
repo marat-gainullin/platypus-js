@@ -196,7 +196,7 @@ public class Form implements HasPublished {
     protected Container surface;
     protected Object closeCallbackParameter;
 
-    public Form(String aFormKey, FormDocument aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public Form(String aFormKey, FormDesignInfo aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         super();
         formKey = aFormKey;
         model = aModel;
@@ -1275,22 +1275,22 @@ public class Form implements HasPublished {
         }
     }
 
-    private void prepareForm(FormDocument aDocument) throws Exception {
-        defaultCloseOperation = aDocument.getFormDesignInfo().getDefaultCloseOperation();
-        icon = IconCache.getIcon(aDocument.getFormDesignInfo().getIconImage());
-        title = aDocument.getFormDesignInfo().getTitle();
+    private void prepareForm(FormDesignInfo aDocument) throws Exception {
+        defaultCloseOperation = aDocument.getDefaultCloseOperation();
+        icon = IconCache.getIcon(aDocument.getIconImage());
+        title = aDocument.getTitle();
         if (title == null || title.isEmpty()) {
             title = aDocument.getTitle();
         }
-        resizable = aDocument.getFormDesignInfo().isResizable();
-        undecorated = aDocument.getFormDesignInfo().isUndecorated();
-        opacity = aDocument.getFormDesignInfo().getOpacity();
-        alwaysOnTop = aDocument.getFormDesignInfo().isAlwaysOnTop();
-        locationByPlatform = aDocument.getFormDesignInfo().isLocationByPlatform();
-        designedViewSize = aDocument.getFormDesignInfo().getDesignedPreferredSize();
+        resizable = aDocument.isResizable();
+        undecorated = aDocument.isUndecorated();
+        opacity = aDocument.getOpacity();
+        alwaysOnTop = aDocument.isAlwaysOnTop();
+        locationByPlatform = aDocument.isLocationByPlatform();
+        designedViewSize = aDocument.getDesignedPreferredSize();
         windowHandler = new FormWindowEventsIProxy();
         final DbSwingFactory factory = new FormFactory(model);
-        final FormDesignInfo fdi = aDocument.getFormDesignInfo();//.copy();
+        final FormDesignInfo fdi = aDocument;//.copy();
         fdi.accept(factory);
         view = factory.getResult();
         components = new HashMap<>();
@@ -1314,19 +1314,6 @@ public class Form implements HasPublished {
          */
     }
 
-    /*
-     public Object executeEvent(final JSObject aHandler, final JSObject aEventThis, final Object anEvent) {
-     // The components map must be filled before any event can occur.
-     if (components != null && aHandler != null) {
-     try {
-     return ScriptUtils.toJava(aHandler.call(aEventThis, new Object[]{anEvent}));
-     } catch (Exception ex) {
-     Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage());
-     }
-     }
-     return null;
-     }
-     */
     protected static Object publishComponent(JComponent aComp, ControlDesignInfo aDesignInfo) {
         ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
         aDesignInfo.accept(apiWrapper);

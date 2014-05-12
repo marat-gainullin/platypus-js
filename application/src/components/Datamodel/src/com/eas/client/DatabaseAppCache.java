@@ -32,6 +32,7 @@ public class DatabaseAppCache extends AppElementsCache {
         appDatabaseJndiUrl = aAppDatabaseJndiUrl;
         datasourceName = appDatabaseJndiUrl.substring(APP_URL_PREFIX.length(), appDatabaseJndiUrl.length());
         client = new DatabasesClient(null, datasourceName, false);
+        
     }
 
     @Override

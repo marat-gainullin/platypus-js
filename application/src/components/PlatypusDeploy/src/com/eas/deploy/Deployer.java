@@ -287,7 +287,9 @@ public class Deployer extends BaseDeployer {
     }
 
     private void traverseSources(File dir, String aParentDirectoryAppElementId) throws IOException {
-        assert dir.isDirectory();
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new FileNotFoundException(dir.getPath() + " - it must exist and it must be a directory.");
+        }
         Map<String, AppElementFiles> appElementsFileGroups = new HashMap<>();
         for (String filename : dir.list()) {
             File child = new File(dir, filename);

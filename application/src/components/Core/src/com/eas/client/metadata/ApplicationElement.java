@@ -65,11 +65,7 @@ public class ApplicationElement {
         name = sName != null ? new String(sName.toCharArray()) : "";
         order = aSource.getOrder();
         type = aSource.getType();
-        if (aSource.getContent() != null) {
-            content = (Document) aSource.getContent().cloneNode(true);
-        } else {
-            content = null;
-        }
+        content = aSource.getContent() != null ? (Document) aSource.getContent().cloneNode(true) : null;
         txtContentLength = aSource.getTxtContentLength();
         txtCrc32 = aSource.getTxtCrc32();
     }
@@ -104,6 +100,10 @@ public class ApplicationElement {
 
     public void setType(int aValue) {
         type = aValue;
+    }
+
+    public boolean isModule() {
+        return type == ClientConstants.ET_COMPONENT || type == ClientConstants.ET_FORM || type == ClientConstants.ET_REPORT;
     }
 
     public double getOrder() {

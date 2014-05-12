@@ -9,6 +9,7 @@ import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.visitors.DbSchemeModelVisitor;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -19,6 +20,11 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity> implements 
     public XmlDom2DbSchemeModel(Document aDoc) {
         super();
         doc = aDoc;
+    }
+
+    public XmlDom2DbSchemeModel(Element aTag) {
+        super();
+        modelElement = aTag;
     }
 
     public static DbSchemeModel transform(DbClient aClient, Document aDoc) throws Exception {

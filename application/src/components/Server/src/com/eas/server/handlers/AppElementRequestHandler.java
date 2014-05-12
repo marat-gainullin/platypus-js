@@ -81,14 +81,13 @@ public class AppElementRequestHandler extends SessionRequestHandler<AppElementRe
         Set<String> rolesAllowed = null;
         if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
             if (aAppElement.getName() != null && (aAppElement.getName().endsWith(".js") || aAppElement.getName().endsWith(".json"))) {
-                ScriptDocument scriptDoc = new ScriptDocument(null, new String(aAppElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING));
+                ScriptDocument scriptDoc = new ScriptDocument(new String(aAppElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING));
                 scriptDoc.readScriptAnnotations();
                 rolesAllowed = scriptDoc.getModuleAllowedRoles();
             }
         } else {
             Document doc = aAppElement.getContent();
-            ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(getServerCore().getDatabasesClient(), doc);
-            scriptDoc.readScriptAnnotations();
+            ScriptDocument scriptDoc = Dom2ScriptDocument.transform(doc);
             rolesAllowed = scriptDoc.getModuleAllowedRoles();
         }
         if (rolesAllowed != null && !getSession().getPrincipal().hasAnyRole(rolesAllowed)) {

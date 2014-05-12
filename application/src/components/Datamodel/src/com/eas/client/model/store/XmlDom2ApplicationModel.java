@@ -27,6 +27,11 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         doc = aDoc;
     }
 
+    public XmlDom2ApplicationModel(Element aTag) {
+        super();
+        modelElement = aTag;
+    }
+    
     @Override
     public void visit(ApplicationModel<E, ?, ?, ?> aModel) {
         readModel(aModel);

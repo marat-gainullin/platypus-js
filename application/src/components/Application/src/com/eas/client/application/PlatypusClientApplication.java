@@ -23,7 +23,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  *
  * @author pk, mg refactoring
  */
-public class PlatypusClientApplication implements ExceptionListener, PrincipalHost, ContextHost, ScriptDocumentsHost {
+public class PlatypusClientApplication implements ExceptionListener, PrincipalHost, ContextHost {
 
     public static final String CMD_SWITCHS_PREFIX = "-";
     // command line switches
@@ -59,7 +59,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected Client client;
     protected PlatypusPrincipal principal;
     protected AppCache appCache;
-    protected ScriptDocuments scriptDocuments;
     protected String startScriptPath;
     protected boolean needInitialBreak;
     // auto login
@@ -133,7 +132,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     private boolean tryToAppLogin() throws Exception {
-        Client lclient = ClientFactory.getInstance(url, defDatasource, this);
+        Client lclient = ClientFactory.getInstance(url, defDatasource);
         try {
             return appLogin(lclient, user, password);
         } catch (Exception ex) {
@@ -293,8 +292,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             assert client != null : CLIENT_REQUIRED_AFTER_LOGIN_MSG;
             appCache = client.getAppCache();
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache.getApplicationPath());
-            scriptDocuments = new ClientScriptDocuments(client);
-            PlatypusScriptedResource.init(client, getInstance(), getInstance());
+            PlatypusScriptedResource.init(client, getInstance());
             runStartScript();
         }
     }
@@ -354,10 +352,5 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             return dbClient.getDbMetadataCache(null).getConnectionSchema();
         }
         return null;
-    }
-
-    @Override
-    public ScriptDocuments getDocuments() {
-        return scriptDocuments;
     }
 }

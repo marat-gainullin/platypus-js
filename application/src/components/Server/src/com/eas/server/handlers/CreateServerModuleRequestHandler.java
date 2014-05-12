@@ -4,8 +4,12 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.AppCache;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.ScriptDocument;
+import com.eas.client.scripts.SecuredJSConstructor;
+import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.CreateServerModuleResponse;
@@ -43,12 +47,15 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
         Set<String> functionProps = new HashSet<>();
         boolean permitted = true;
         try {
-            ScriptDocument scriptDoc = getServerCore().getDocuments().getScriptDocument(moduleName);
             if (serverModule == null) {
-                serverModule = runModule(scriptDoc, moduleName);
+                serverModule = runModule(getServerCore().getDatabasesClient().getAppCache(), moduleName);
                 Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with id {1} on request {2}", new Object[]{getRequest().getModuleName(), moduleName, getRequest().getID()});
             }
-            checkPrincipalPermission(scriptDoc.getModuleAllowedRoles(), moduleName);
+            JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
+            if(jsConstr != null && jsConstr instanceof SecuredJSConstructor){
+                SecuredJSConstructor casted = (SecuredJSConstructor)jsConstr;
+                checkPrincipalPermission(casted.getModuleAllowedRoles(), moduleName);
+            }
             final JSObject funSource = serverModule;
             funSource.keySet().stream().forEach((String aKey) -> {
                 Object oFun = funSource.getMember(aKey);
@@ -61,7 +68,8 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
         }
         return new CreateServerModuleResponse(getRequest().getID(), moduleName, functionProps, permitted);
     }
-  /**
+
+    /**
      * Checks module roles.
      *
      * @param anAllowedRoles
@@ -78,16 +86,21 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
             }
         }
     }
-    
-    static JSObject runModule(ScriptDocument scriptDoc, String aModuleName) throws Exception {
+
+    static JSObject runModule(AppCache aAppCache, String aModuleName) throws Exception {
         JSObject serverModule = null;
+        ScriptDocument scriptDoc = null;
+        ApplicationElement appElement = aAppCache.get(aModuleName);
+        if (appElement != null && appElement.isModule()) {
+            scriptDoc = Dom2ScriptDocument.transform(appElement.getContent());
+        }
         if (scriptDoc != null) {
             if (!scriptDoc.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                 throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
             }
             serverModule = ScriptUtils.createModule(aModuleName);
         } else {
-            throw new IllegalArgumentException(String.format("Can't obtain content of %s", aModuleName));
+            throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", aModuleName));
         }
         return serverModule;
     }

@@ -24,14 +24,12 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SecuredJSConstructor extends SecuredJSObjectFacade {
 
     protected AppCache cache;
-    protected ScriptDocuments documents;
     protected long sourceLength;
     protected long sourceCRC32;
 
-    public SecuredJSConstructor(JSObject aDelegate, String aAppElementId, long aSourceLength, long aSourceCRC32, AppCache aCache, ScriptDocuments aDocuments, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
+    public SecuredJSConstructor(JSObject aDelegate, String aAppElementId, long aSourceLength, long aSourceCRC32, AppCache aCache, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
         super(aDelegate, aAppElementId, aModuleAllowedRoles, aPropertiesAllowedRoles, aPrincipalHost);
         cache = aCache;
-        documents = aDocuments;
         sourceLength = aSourceLength;
         sourceCRC32 = aSourceCRC32;
     }
@@ -42,6 +40,10 @@ public class SecuredJSConstructor extends SecuredJSObjectFacade {
         propertiesAllowedRoles = aPropertiesAllowedRoles;
         sourceLength = aSourceLength;
         sourceCRC32 = aSourceCRC32;
+    }
+
+    public Set<String> getModuleAllowedRoles() {
+        return moduleAllowedRoles;
     }
 
     @Override
@@ -72,7 +74,6 @@ public class SecuredJSConstructor extends SecuredJSObjectFacade {
         try {
             if (!cache.isActual(appElementId, sourceLength, sourceCRC32)) {
                 cache.remove(appElementId);
-                documents.removeScriptDocument(appElementId);
                 PlatypusScriptedResource.executeScriptResource(appElementId, this);
             }
         } catch (Exception ex) {

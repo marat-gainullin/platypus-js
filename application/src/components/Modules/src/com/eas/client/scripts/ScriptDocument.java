@@ -4,8 +4,6 @@
  */
 package com.eas.client.scripts;
 
-import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.scripts.store.ScriptDocument2Dom;
 import com.eas.script.AnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
@@ -15,7 +13,6 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.runtime.Source;
-import org.w3c.dom.Document;
 
 /**
  * Implementation service support for script related tasks. It is cached and
@@ -30,11 +27,10 @@ public class ScriptDocument {
     private String title;
     protected long txtContentLength;
     protected long txtCrc32;
-    private ApplicationModel<?, ?, ?, ?> model;
+    ///////////////////////////
     private String scriptSource;
     private JSObject constructor;
     private FunctionNode ast;
-    //private final Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
     /**
      * User roles that have access to all module's functions, if empty all users
@@ -47,25 +43,16 @@ public class ScriptDocument {
      */
     private Map<String, Set<String>> propertyAllowedRoles = new HashMap<>();
 
-    public ScriptDocument(ApplicationModel<?, ?, ?, ?> aModel, String aSource) {
+    public ScriptDocument(String aSource) {
         super();
-        model = aModel;
         scriptSource = aSource;
     }
 
-    public ScriptDocument(String aEntityId, ApplicationModel<?, ?, ?, ?> aModel, String aSource) {
-        this(aModel, aSource);
+    public ScriptDocument(String aEntityId, String aSource) {
+        this(aSource);
         entityId = aEntityId;
     }
-
-    public ApplicationModel<?, ?, ?, ?> getModel() {
-        return model;
-    }
-
-    public void setModel(ApplicationModel<?, ?, ?, ?> aModel) {
-        model = aModel;
-    }
-
+    
     public String getEntityId() {
         return entityId;
     }
@@ -204,9 +191,5 @@ public class ScriptDocument {
                 }
             }
         }
-    }
-
-    public Document toDom() throws Exception {
-        return ScriptDocument2Dom.scriptDocument2Dom(this);
     }
 }

@@ -155,7 +155,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                         if (cachedEntityFile.mkdirs()) {
                             AppElementFiles.createAppElementFiles(new File(entityPath), aAppElement);
                         }
-                    } catch (Exception ex) {
+                    } catch (AppElementFilesException ex) {
                         Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
                         removeFromFileCache(appElementName);
                     }
@@ -198,11 +198,15 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
             } else {
                 String appElementDirPath = generateAppElementPath(aAppElementName);
                 File appElementDir = new File(appElementDirPath);
-                AppElementFiles files = new AppElementFiles("");
-                for (String fName : appElementDir.list()) {
-                    files.addFile(new File(appElementDirPath + File.separator + fName));
+                if (appElementDir.exists()) {
+                    AppElementFiles files = new AppElementFiles("");
+                    for (String fName : appElementDir.list()) {
+                        files.addFile(new File(appElementDirPath + File.separator + fName));
+                    }
+                    return files.getApplicationElement();
+                } else {
+                    return null;
                 }
-                return files.getApplicationElement();
             }
         }
     }

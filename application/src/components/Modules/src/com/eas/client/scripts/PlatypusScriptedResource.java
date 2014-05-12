@@ -5,6 +5,7 @@ import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
@@ -46,22 +47,19 @@ public class PlatypusScriptedResource {
     protected static Client client;
     protected static AppCache cache;
     protected static PrincipalHost principalHost;
-    protected static ScriptDocumentsHost scriptDocumentsHost;
 
     /**
      * Initializes a static fields.
      *
      * @param aClient Client instance
      * @param aPrincipalHost Login support
-     * @param aScriptDocumentsHost Scripts host
      * @throws Exception If something goes wrong
      */
-    public static void init(Client aClient, PrincipalHost aPrincipalHost, ScriptDocumentsHost aScriptDocumentsHost) throws Exception {
+    public static void init(Client aClient, PrincipalHost aPrincipalHost) throws Exception {
         assert cache == null : "Platypus application resources may be initialized only once.";
         client = aClient;
         cache = client.getAppCache();
         principalHost = aPrincipalHost;
-        scriptDocumentsHost = aScriptDocumentsHost;
     }
 
     /**
@@ -71,15 +69,6 @@ public class PlatypusScriptedResource {
      */
     public static PrincipalHost getPrincipalHost() {
         return principalHost;
-    }
-
-    /**
-     * Gets script documents host.
-     *
-     * @return Script documents host instance
-     */
-    public static ScriptDocumentsHost getScriptDocumentsHost() {
-        return scriptDocumentsHost;
     }
 
     /**
@@ -276,7 +265,7 @@ public class PlatypusScriptedResource {
         }
     }
 
-    protected static Client getClient() {
+    public static Client getClient() {
         return client;
     }
 
@@ -361,22 +350,18 @@ public class PlatypusScriptedResource {
                     executeScriptResource(aDependence);
                 }
                 ScriptUtils.exec(sourceUrl);
-                ScriptDocument doc;
-                try {
-                    doc = scriptDocumentsHost.getDocuments().getScriptDocument(resourceId);
-                } catch (Exception ex) {
-                    doc = null;
-                }
-                if (doc != null) {
-                    JSObject nativeConstr = ScriptUtils.lookupInGlobal(doc.getEntityId());
+                ApplicationElement appElement = cache.get(resourceId);
+                if (appElement != null && appElement.isModule()) {
+                    ScriptDocument doc = Dom2ScriptDocument.transform(appElement.getContent());
+                    JSObject nativeConstr = ScriptUtils.lookupInGlobal(appElement.getId());
                     SecuredJSConstructor securedContr;
                     if (aPrevConstrVersion != null) {
                         securedContr = aPrevConstrVersion;
-                        aPrevConstrVersion.replace(nativeConstr, doc.getTxtContentLength(), doc.getTxtCrc32(), doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles());
+                        aPrevConstrVersion.replace(nativeConstr, appElement.getTxtContentLength(), appElement.getTxtCrc32(), doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles());
                     } else {
-                        securedContr = new SecuredJSConstructor(nativeConstr, doc.getEntityId(), doc.getTxtContentLength(), doc.getTxtCrc32(), cache, scriptDocumentsHost.getDocuments(), doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles(), getPrincipalHost());
+                        securedContr = new SecuredJSConstructor(nativeConstr, appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), cache, doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles(), getPrincipalHost());
                     }
-                    ScriptUtils.putInGlobal(doc.getEntityId(), securedContr);
+                    ScriptUtils.putInGlobal(appElement.getId(), securedContr);
                 }
             } else {
                 throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
