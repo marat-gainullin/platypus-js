@@ -6,7 +6,7 @@
  * @validator DataSource1, DataSource2
  */ 
 function ${appElementName}(){
-    var self = this, model = this.model;
+    var self = this, model = P.loadModel(this.constructor.name);
     
     /**
      * Method for validating of changes log to be applied within a particular datasources.
@@ -18,6 +18,6 @@ function ${appElementName}(){
     this.validate = function(aLog, aDatasource) {
         // TODO: place your validation code here
         
-        Logger.info("${appElementName}. aLog.length: " + aLog.length + "; aDatasource: " + aDatasource + ";");
+        P.Logger.info("${appElementName}. aLog.length: " + aLog.length + "; aDatasource: " + aDatasource + ";");
     };
 }

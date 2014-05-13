@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
-import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;
 import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
@@ -45,14 +44,13 @@ public class PlatypusReportLayoutView extends TopComponent implements MultiViewE
 
     protected void initEditorView() throws Exception {
         setLayout(new BorderLayout());
-        ReportDesignerPanel panel = new ReportDesignerPanel(new Runnable() {
+        ReportDesignerPanel panel = new ReportDesignerPanel(dataObject, new Runnable() {
             @Override
             public void run() {
                 dataObject.getLookup().lookup(PlatypusReportSupport.class).notifyModified();
             }
         });
         add(panel, BorderLayout.CENTER);
-        panel.setData(dataObject.getLayoutData());
     }
 
     @Override

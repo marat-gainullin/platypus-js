@@ -34,7 +34,6 @@ public class ServerTasksScanner implements FilesAppCache.ScanCallback {
         if ("js".equalsIgnoreCase(FileUtils.getFileExtension(file))) {
             try {
                 ScriptDocument doc = new ScriptDocument(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING));
-                doc.readScriptAnnotations();
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     for (JsDoc.Tag tag : annotations) {

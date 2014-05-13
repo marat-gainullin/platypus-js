@@ -18,9 +18,7 @@ public class Dom2ScriptDocument {
 
     public static ScriptDocument transform(Document aDom) throws Exception {
         Dom2ScriptDocument domReader = new Dom2ScriptDocument();
-        ScriptDocument doc = domReader.findAndParseTag(aDom);
-        doc.readScriptAnnotations();
-        return doc;
+        return domReader.findAndParseTag(aDom);
     }
 
     protected Dom2ScriptDocument() throws ParserConfigurationException {

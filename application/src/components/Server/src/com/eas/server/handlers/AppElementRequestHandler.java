@@ -82,7 +82,6 @@ public class AppElementRequestHandler extends SessionRequestHandler<AppElementRe
         if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
             if (aAppElement.getName() != null && (aAppElement.getName().endsWith(".js") || aAppElement.getName().endsWith(".json"))) {
                 ScriptDocument scriptDoc = new ScriptDocument(new String(aAppElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING));
-                scriptDoc.readScriptAnnotations();
                 rolesAllowed = scriptDoc.getModuleAllowedRoles();
             }
         } else {

@@ -23,14 +23,16 @@ import jdk.nashorn.internal.runtime.Source;
  */
 public class ScriptDocument {
 
-    private String entityId;
-    private String title;
-    protected long txtContentLength;
-    protected long txtCrc32;
+    /*
+     private String entityId;
+     private String title;
+     protected long txtContentLength;
+     protected long txtCrc32;
+     private String scriptSource;
+     private JSObject constructor;
+     private FunctionNode ast;
+     */
     ///////////////////////////
-    private String scriptSource;
-    private JSObject constructor;
-    private FunctionNode ast;
     private List<Tag> moduleAnnotations;
     /**
      * User roles that have access to all module's functions, if empty all users
@@ -45,67 +47,63 @@ public class ScriptDocument {
 
     public ScriptDocument(String aSource) {
         super();
-        scriptSource = aSource;
-    }
-
-    public ScriptDocument(String aEntityId, String aSource) {
-        this(aSource);
-        entityId = aEntityId;
-    }
-    
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(String aEntityId) {
-        entityId = aEntityId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String aValue) {
-        title = aValue;
-    }
-
-    public long getTxtContentLength() {
-        return txtContentLength;
-    }
-
-    public void setTxtContentLength(long aValue) {
-        txtContentLength = aValue;
-    }
-
-    public long getTxtCrc32() {
-        return txtCrc32;
-    }
-
-    public void setTxtCrc32(long aValue) {
-        txtCrc32 = aValue;
-    }
-
-    public String getScriptSource() {
-        return scriptSource;
-    }
-
-    public void setScriptSource(String aScriptSource) {
-        scriptSource = aScriptSource;
-        ast = null;
+        readScriptAnnotations(aSource);
     }
     /*
-     public Set<String> getDepencies() {
-     return depencies;
+     public ScriptDocument(String aEntityId, String aSource) {
+     this(aSource);
+     entityId = aEntityId;
+     }
+    
+     public String getEntityId() {
+     return entityId;
+     }
+
+     public void setEntityId(String aEntityId) {
+     entityId = aEntityId;
+     }
+
+     public String getTitle() {
+     return title;
+     }
+
+     public void setTitle(String aValue) {
+     title = aValue;
+     }
+
+     public long getTxtContentLength() {
+     return txtContentLength;
+     }
+
+     public void setTxtContentLength(long aValue) {
+     txtContentLength = aValue;
+     }
+
+     public long getTxtCrc32() {
+     return txtCrc32;
+     }
+
+     public void setTxtCrc32(long aValue) {
+     txtCrc32 = aValue;
+     }
+
+     public String getScriptSource() {
+     return scriptSource;
+     }
+
+     public void setScriptSource(String aScriptSource) {
+     scriptSource = aScriptSource;
+     ast = null;
+     }
+
+     public JSObject getFunction() {
+     return constructor;
+     }
+
+     public void setFunction(JSObject aFunction) {
+     constructor = aFunction;
      }
      */
-
-    public JSObject getFunction() {
-        return constructor;
-    }
-
-    public void setFunction(JSObject aFunction) {
-        constructor = aFunction;
-    }
 
     public Set<String> getModuleAllowedRoles() {
         return moduleAllowedRoles;
@@ -136,42 +134,41 @@ public class ScriptDocument {
     /**
      * Reads script annotations. Annotations, accompanied with
      *
+     * @param aSource
      * @name annotation are the 'module annotations'. Annotations, followed by
      * any property assignment are the 'property annotations'. Property
      * annotations will be taken into account while accessing through modules.
      */
-    public void readScriptAnnotations() {
-        assert scriptSource != null : "JavaScript source can't be null";
-        if (ast == null) {
-            moduleAnnotations = new ArrayList<>();
-            propertyAllowedRoles.clear();
-            Source source = new Source("", scriptSource);
-            ast = ScriptUtils.parseJs(source);
-            ast.accept(new AnnotationsMiner(source) {
+    private void readScriptAnnotations(String aSource) {
+        assert aSource != null : "JavaScript source can't be null";
+        moduleAnnotations = new ArrayList<>();
+        propertyAllowedRoles.clear();
+        Source source = new Source("", aSource);
+        FunctionNode ast = ScriptUtils.parseJs(source);
+        ast.accept(new AnnotationsMiner(source) {
 
-                @Override
-                protected void commentedFunction(FunctionNode aFunction, String aComment) {
-                    if (scopeLevel == 2) {
-                        JsDoc jsDoc = new JsDoc(aComment);
-                        jsDoc.parseAnnotations();
-                        jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
-                            moduleAnnotations.add(tag);
-                            if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                                tag.getParams().stream().forEach((role) -> {
-                                    moduleAllowedRoles.add(role);
-                                });
-                            }
-                        });
-                    }
+            @Override
+            protected void commentedFunction(FunctionNode aFunction, String aComment) {
+                if (scopeLevel == 2) {
+                    JsDoc jsDoc = new JsDoc(aComment);
+                    jsDoc.parseAnnotations();
+                    jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
+                        moduleAnnotations.add(tag);
+                        if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                            tag.getParams().stream().forEach((role) -> {
+                                moduleAllowedRoles.add(role);
+                            });
+                        }
+                    });
                 }
+            }
 
-                @Override
-                protected void commentedProperty(IdentNode aProperty, String aComment) {
-                    readPropertyRoles(aProperty.getPropertyName(), aComment);
-                }
+            @Override
+            protected void commentedProperty(IdentNode aProperty, String aComment) {
+                readPropertyRoles(aProperty.getPropertyName(), aComment);
+            }
 
-            });
-        }
+        });
     }
 
     private void readPropertyRoles(String aPropertyName, String aJsDocBody) {
