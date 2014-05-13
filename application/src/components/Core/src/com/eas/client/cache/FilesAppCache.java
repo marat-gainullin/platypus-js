@@ -419,7 +419,7 @@ public class FilesAppCache extends AppElementsCache {
             String path = id2Paths.get(aName).iterator().next();
             return path + "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
         } else {
-            return calcSrcPath() + File.separator + aName;
+            return calcSrcPath() + File.separator + aName.replace('/', File.separatorChar);
         }
     }
 

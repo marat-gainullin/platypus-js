@@ -20,49 +20,32 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class XmlDom2String
-{
+public class XmlDom2String {
 
-    protected final static TransformerFactory tfactory = TransformerFactory.newInstance();
-    protected static Transformer transformer = null;
-    
+    protected static ThreadLocal<TransformerFactory> factories = new ThreadLocal<>();
 
-    static
-    {
-        // setup transformation framework
-        try
-        {
-            transformer = tfactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        }
-        catch (TransformerConfigurationException ex)
-        {
-            Logger.getLogger(XmlDom2String.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private XmlDom2String()
-    {
+    private XmlDom2String() {
         super();
     }
 
-    public static synchronized String transform(Document doc)
-    {
-        if (doc != null && transformer != null)
-        {
-            StringWriter sw = new StringWriter();
-            StreamResult res = new StreamResult(sw);
-            try
-            {
+    public static String transform(Document doc) {
+        try {
+            if (doc != null) {
+                TransformerFactory tfactory = factories.get();
+                if (tfactory == null) {
+                    tfactory = TransformerFactory.newInstance();
+                    factories.set(tfactory);
+                }
+                Transformer transformer = tfactory.newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                StringWriter sw = new StringWriter();
+                StreamResult res = new StreamResult(sw);
                 transformer.transform(new DOMSource(doc), res);
+                return sw.toString();
             }
-            catch (TransformerException ex)
-            {
-                Logger.getLogger(XmlDom2String.class.getName()).log(Level.SEVERE, null, ex);
-                return "";
-            }
-            return sw.toString();
+        } catch (IllegalArgumentException | TransformerException ex) {
+            Logger.getLogger(XmlDom2String.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "";
     }

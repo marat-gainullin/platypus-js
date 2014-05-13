@@ -7,7 +7,6 @@ package com.eas.client.cache;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import com.eas.xml.dom.Source2XmlDom;
@@ -17,6 +16,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -42,7 +43,7 @@ public class AppElementFiles {
     public final static String CREATE_FILE_EXCEPTION_MSG = "Error creating file: ";
     private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     private final String parentDirectoryAppElementId;
-    private final Set<File> files = new HashSet<>();
+    private final SortedSet<File> files = new TreeSet<>();
     private final Set<String> filesExtensions = new HashSet<>();
     protected StringBuilder accumulator;
 
@@ -71,8 +72,6 @@ public class AppElementFiles {
                     appElement.setParentId(parentDirectoryAppElementId);
                     appElement.setContent(getAppElementContent(appElementType));
                     String accumulatedText = accumulator.toString();
-                    accumulatedText = accumulatedText.replaceAll(ClientConstants.CRLF, "\n");// windows style
-                    accumulatedText = accumulatedText.replaceAll("\r", "\n");// mac style
                     // WARNING! The accumulatedText is changed every time the underliyng files change
                     // but it is not exact text representation of content DOM.
                     appElement.setTxtContentLength((long) accumulatedText.length());
@@ -141,7 +140,7 @@ public class AppElementFiles {
                         break;
                     case ClientConstants.ET_DB_SCHEME: {
                         String contentPart = FileUtils.readString(files.iterator().next(), PlatypusFiles.DEFAULT_ENCODING);
-                        accumulator.append(contentPart);
+                        accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                         return Source2XmlDom.transform(contentPart);
                     }
                 }
@@ -154,7 +153,7 @@ public class AppElementFiles {
                                 assert rootTag != null;
                                 Element jsSourceTag = appElementDom.createElement(ApplicationElement.SCRIPT_SOURCE_TAG_NAME);
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
-                                accumulator.append(contentPart);
+                                accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                                 jsSourceTag.setTextContent(contentPart);
                                 rootTag.appendChild(jsSourceTag);
                                 break;
@@ -162,7 +161,7 @@ public class AppElementFiles {
                             case PlatypusFiles.MODEL_EXTENSION: {
                                 assert rootTag != null;
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
-                                accumulator.append(contentPart);
+                                accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                                 Document modelDocument = Source2XmlDom.transform(contentPart);
                                 Element modelElement = (Element) appElementDom.importNode(modelDocument.getDocumentElement(), true);
                                 rootTag.appendChild(modelElement);
@@ -171,7 +170,7 @@ public class AppElementFiles {
                             case PlatypusFiles.FORM_EXTENSION: {
                                 assert rootTag != null;
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
-                                accumulator.append(contentPart);
+                                accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                                 Document layoutDocument = Source2XmlDom.transform(contentPart);
                                 Element layoutRootElement = (Element) appElementDom.importNode(layoutDocument.getDocumentElement(), true);
                                 rootTag.appendChild(layoutRootElement);
@@ -193,7 +192,7 @@ public class AppElementFiles {
                                 assert rootTag != null;
                                 Element sqlSourceTag = appElementDom.createElement(ApplicationElement.SQL_TAG_NAME);
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
-                                accumulator.append(contentPart);
+                                accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                                 sqlSourceTag.setTextContent(contentPart);
                                 rootTag.appendChild(sqlSourceTag);
                                 break;
@@ -202,7 +201,7 @@ public class AppElementFiles {
                                 assert rootTag != null;
                                 Element sqlDialectSourceTag = appElementDom.createElement(ApplicationElement.FULL_SQL_TAG_NAME);
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
-                                accumulator.append(contentPart);
+                                accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                                 sqlDialectSourceTag.setTextContent(contentPart);
                                 rootTag.appendChild(sqlDialectSourceTag);
                                 break;
@@ -210,7 +209,7 @@ public class AppElementFiles {
                             case PlatypusFiles.OUT_EXTENSION: {
                                 assert rootTag != null;
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
-                                accumulator.append(contentPart);
+                                accumulator.append(contentPart != null ? contentPart.replaceAll("[\r\n]", "") : null);
                                 if (contentPart != null && !contentPart.isEmpty()) {
                                     Document hintsDoc = Source2XmlDom.transform(contentPart);
                                     Element hintsElement = (Element) appElementDom.importNode(hintsDoc.getDocumentElement(), true);
@@ -221,7 +220,7 @@ public class AppElementFiles {
                         }
                     } else {
                         Logger.getLogger(AppElementFiles.class.getName()).log(Level.WARNING, "Wrong file: {0} for application element with type: {1}", // NOI18N
-                                new Object[]{file.getAbsolutePath(), Integer.valueOf(appElementType)});
+                                new Object[]{file.getAbsolutePath(), appElementType});
                     }
                 }
                 appElementDom.appendChild(rootTag);
@@ -448,7 +447,7 @@ public class AppElementFiles {
         NodeList contentNodes = node.getElementsByTagName(tagName);
         Node contentNode = contentNodes.item(0);
         if (contentNode != null) {
-            String aContent = checkAnnotation(contentNode.getTextContent(), aAppElement.getId());
+            String aContent = contentNode.getTextContent();
             saveFile(parentDirectory, aAppElement.getName(), ext, aContent);
         }
     }
@@ -460,15 +459,6 @@ public class AppElementFiles {
             FileUtils.writeString(file, aContent, PlatypusFiles.DEFAULT_ENCODING);
         } else {
             throw new AppElementFilesException(CREATE_FILE_EXCEPTION_MSG + file.getAbsolutePath());
-        }
-    }
-
-    private static String checkAnnotation(String aContent, String aAnnotationValue) {
-        String aName = PlatypusFilesSupport.getAnnotationValue(aContent, JsDoc.Tag.NAME_TAG);
-        if (aName != null && !aName.isEmpty()) {
-            return aContent;
-        } else {
-            return PlatypusFilesSupport.replaceAnnotationValue(aContent, JsDoc.Tag.NAME_TAG, aAnnotationValue);
         }
     }
 
