@@ -10,8 +10,6 @@
 package com.eas.client.scripts;
 
 import com.eas.client.login.PrincipalHost;
-import java.util.Map;
-import java.util.Set;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -22,18 +20,18 @@ public class SecuredJSFunction extends SecuredJSObjectFacade {
 
     protected String name;
 
-    public SecuredJSFunction(String aName, JSObject aDelegate, String aAppElementId, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
-        super(aDelegate, aAppElementId, aModuleAllowedRoles, aPropertiesAllowedRoles, aPrincipalHost);
+    public SecuredJSFunction(String aName, JSObject aDelegate, String aAppElementId, PrincipalHost aPrincipalHost, ScriptDocument aConfig) {
+        super(aDelegate, aAppElementId, aPrincipalHost, aConfig);
         name = aName;
     }
     @Override
-    public Object call(Object thiz, Object... args) {
+    public synchronized Object call(Object thiz, Object... args) {
         checkPropertyPermission(name, args);
         return super.call(thiz, args);
     }
 
     @Override
-    public Object newObject(Object... args) {
+    public synchronized Object newObject(Object... args) {
         checkPropertyPermission(name, args);
         return super.newObject(args);
     }

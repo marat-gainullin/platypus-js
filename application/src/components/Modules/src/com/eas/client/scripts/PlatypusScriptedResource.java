@@ -357,9 +357,9 @@ public class PlatypusScriptedResource {
                     SecuredJSConstructor securedContr;
                     if (aPrevConstrVersion != null) {
                         securedContr = aPrevConstrVersion;
-                        aPrevConstrVersion.replace(nativeConstr, appElement.getTxtContentLength(), appElement.getTxtCrc32(), doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles());
+                        aPrevConstrVersion.replace(nativeConstr, appElement.getTxtContentLength(), appElement.getTxtCrc32(), doc);
                     } else {
-                        securedContr = new SecuredJSConstructor(nativeConstr, appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), cache, doc.getModuleAllowedRoles(), doc.getPropertyAllowedRoles(), getPrincipalHost());
+                        securedContr = new SecuredJSConstructor(nativeConstr, appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), cache, getPrincipalHost(), doc);
                     }
                     ScriptUtils.putInGlobal(appElement.getId(), securedContr);
                 }

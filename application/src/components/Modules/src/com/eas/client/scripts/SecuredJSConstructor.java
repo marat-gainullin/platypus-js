@@ -11,6 +11,9 @@ package com.eas.client.scripts;
 
 import com.eas.client.AppCache;
 import com.eas.client.login.PrincipalHost;
+import com.eas.script.JsDoc;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -27,44 +30,55 @@ public class SecuredJSConstructor extends SecuredJSObjectFacade {
     protected long sourceLength;
     protected long sourceCRC32;
 
-    public SecuredJSConstructor(JSObject aDelegate, String aAppElementId, long aSourceLength, long aSourceCRC32, AppCache aCache, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
-        super(aDelegate, aAppElementId, aModuleAllowedRoles, aPropertiesAllowedRoles, aPrincipalHost);
+    public SecuredJSConstructor(JSObject aDelegate, String aAppElementId, long aSourceLength, long aSourceCRC32, AppCache aCache, PrincipalHost aPrincipalHost, ScriptDocument aConfig) {
+        super(aDelegate, aAppElementId, aPrincipalHost, aConfig);
         cache = aCache;
         sourceLength = aSourceLength;
         sourceCRC32 = aSourceCRC32;
     }
 
-    public void replace(JSObject aDelegate, long aSourceLength, long aSourceCRC32, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles) {
+    public void replace(JSObject aDelegate, long aSourceLength, long aSourceCRC32, ScriptDocument aConfig) {
         delegate = aDelegate;
-        moduleAllowedRoles = aModuleAllowedRoles;
-        propertiesAllowedRoles = aPropertiesAllowedRoles;
+        config = aConfig;
         sourceLength = aSourceLength;
         sourceCRC32 = aSourceCRC32;
     }
 
     public Set<String> getModuleAllowedRoles() {
-        return moduleAllowedRoles;
+        return config.getModuleAllowedRoles();
+    }
+    
+    public Map<String, Set<String>> getPropertyAllowedRoles() {
+        return config.getPropertyAllowedRoles();
+    }
+
+    public List<JsDoc.Tag> getModuleAnnotations() {
+        return config.getModuleAnnotations() != null ? Collections.unmodifiableList(config.getModuleAnnotations()) : null;
+    }
+    
+    public boolean hasModuleAnnotation(String anAnnotationName) {
+        return config.hasModuleAnnotation(anAnnotationName);
     }
 
     @Override
-    public Object call(Object thiz, Object... args) {
+    public synchronized Object call(Object thiz, Object... args) {
         checkAutoUpdate();
         checkModulePermissions();
         Object res = super.call(thiz, args);
         if (res instanceof JSObject) {
-            return new SecuredJSObject((JSObject) res, appElementId, moduleAllowedRoles, propertiesAllowedRoles, principalHost);
+            return new SecuredJSObject((JSObject) res, appElementId, principalHost, config);
         } else {
             return res;
         }
     }
 
     @Override
-    public Object newObject(Object... args) {
+    public synchronized Object newObject(Object... args) {
         checkAutoUpdate();
         checkModulePermissions();
         Object res = super.newObject(args);
         if (res instanceof JSObject) {
-            return new SecuredJSObject((JSObject) res, appElementId, moduleAllowedRoles, propertiesAllowedRoles, principalHost);
+            return new SecuredJSObject((JSObject) res, appElementId, principalHost, config);
         } else {
             return res;
         }

@@ -10,8 +10,6 @@
 package com.eas.client.scripts;
 
 import com.eas.client.login.PrincipalHost;
-import java.util.Map;
-import java.util.Set;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -20,15 +18,15 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class SecuredJSObject extends SecuredJSObjectFacade {
 
-    public SecuredJSObject(JSObject aDelegate, String aAppElementId, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
-        super(aDelegate, aAppElementId, aModuleAllowedRoles, aPropertiesAllowedRoles, aPrincipalHost);
+    public SecuredJSObject(JSObject aDelegate, String aAppElementId, PrincipalHost aPrincipalHost, ScriptDocument aConfig) {
+        super(aDelegate, aAppElementId, aPrincipalHost, aConfig);
     }
 
     @Override
-    public Object getMember(String name) {
+    public synchronized Object getMember(String name) {
         Object res = super.getMember(name);
         if (res instanceof JSObject && ((JSObject) res).isFunction()) {
-            return new SecuredJSFunction(name, (JSObject) res, appElementId, moduleAllowedRoles, propertiesAllowedRoles, principalHost);
+            return new SecuredJSFunction(name, (JSObject) res, appElementId, principalHost, config);
         } else {
             checkPropertyPermission(name);
             return res;
@@ -36,7 +34,7 @@ public class SecuredJSObject extends SecuredJSObjectFacade {
     }
 
     @Override
-    public void setMember(String name, Object value) {
+    public synchronized void setMember(String name, Object value) {
         if (value instanceof JSObject && ((JSObject) value).isFunction()) {
             super.setMember(name, value);
         } else {

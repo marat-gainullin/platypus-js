@@ -30,7 +30,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,21 +42,19 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SecuredJSObjectFacade extends JSObjectFacade {
 
     private final Pattern roleTemplate = Pattern.compile("(\\$\\d+)");// WARNING!!! Don't make this member static!
-    protected Map<String, Set<String>> propertiesAllowedRoles;
-    // configuration
     protected String appElementId;
-    protected Set<String> moduleAllowedRoles;
+    protected ScriptDocument config;
+    
     /**
      * Current principal provider
      */
     protected PrincipalHost principalHost;
 
-    public SecuredJSObjectFacade(JSObject aDelegate, String aAppElementId, Set<String> aModuleAllowedRoles, Map<String, Set<String>> aPropertiesAllowedRoles, PrincipalHost aPrincipalHost) {
+    public SecuredJSObjectFacade(JSObject aDelegate, String aAppElementId, PrincipalHost aPrincipalHost, ScriptDocument aConfig) {
         super(aDelegate);
         appElementId = aAppElementId;
-        moduleAllowedRoles = aModuleAllowedRoles;
-        propertiesAllowedRoles = aPropertiesAllowedRoles;
         principalHost = aPrincipalHost;
+        config = aConfig;
     }
 
     protected PlatypusPrincipal getPrincipal() {
@@ -67,15 +64,25 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
         return null;
     }
 
+    @Override
+    public synchronized Object getSlot(int index) {
+        return super.getSlot(index);
+    }
+
+    @Override
+    public synchronized void setSlot(int index, Object value) {
+        super.setSlot(index, value);
+    }
+
     /**
      * Checks module access roles.
      *
      */
     protected void checkModulePermissions() throws AccessControlException {
-        if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
+        if (config.getModuleAllowedRoles() != null && !config.getModuleAllowedRoles().isEmpty()) {
             try {
                 PlatypusPrincipal principal = getPrincipal();
-                if (principal == null || !principal.hasAnyRole(moduleAllowedRoles)) {
+                if (principal == null || !principal.hasAnyRole(config.getModuleAllowedRoles())) {
                     throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
                             appElementId,
                             principal != null ? principal.getName() : null));
@@ -138,8 +145,8 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
     protected void checkPropertyPermission(String aName, Object[] aArgs) throws AccessControlException {
         try {
             PlatypusPrincipal principal = getPrincipal();
-            if (propertiesAllowedRoles != null && propertiesAllowedRoles.get(aName) != null && !propertiesAllowedRoles.get(aName).isEmpty()) {
-                Set<String> declaredRoles = propertiesAllowedRoles.get(aName);
+            if (config.getPropertyAllowedRoles() != null && config.getPropertyAllowedRoles().get(aName) != null && !config.getPropertyAllowedRoles().get(aName).isEmpty()) {
+                Set<String> declaredRoles = config.getPropertyAllowedRoles().get(aName);
                 Set<String> filteredRoles;
                 if (aArgs == null) {
                     filteredRoles = declaredRoles;
