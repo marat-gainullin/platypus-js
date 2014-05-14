@@ -4,7 +4,7 @@
  * @module 
  */
 function ${appElementName}(){
-    var self = this, model = this.model;
+    var self = this, model = P.loadModel(this.constructor.name);
     
     this.schema = [
         // TODO : place schema definition here, such as:
@@ -38,7 +38,7 @@ function ${appElementName}(){
      * @param aLog Array of changes - log of changes made by clients or server side data driven code to be applied.
      */
     this.apply = function(aLog) {
-        Logger.info("${appElementName}. aLog.length: " + aLog.length + ";");
+        P.Logger.info("${appElementName}. aLog.length: " + aLog.length + ";");
         aLog.forEach(function(aChange) {
             aChange.consume();
         });

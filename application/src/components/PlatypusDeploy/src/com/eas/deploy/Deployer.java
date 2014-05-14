@@ -4,6 +4,7 @@
  */
 package com.eas.deploy;
 
+import com.eas.client.cache.AppElementFilesException;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
@@ -13,26 +14,17 @@ import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.cache.AppElementFiles;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
+import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import sun.misc.UUDecoder;
 import sun.misc.UUEncoder;
 
@@ -52,11 +44,6 @@ public class Deployer extends BaseDeployer {
             + ClientConstants.T_MTD_ENTITIES;
     protected static final String SELECT_ENTITIES_MD_SQL = SELECT_ENTITIES_SQL
             + " WHERE 0 = 1";
-    protected static final String CREATE_FILE_EXCEPTION_MSG = "Error creating file: ";
-    protected static final String CHECK_REQUIRED_TAG_EXCEPTION_MSG = "In Platypus documents should be exactly one tag: ";
-    protected static final String CHECK_OPTIONAL_TAG_EXCEPTION_MSG = "In Platypus documents should be one or zero tags: ";
-    protected static final String WRONG_ROOT_ELEMENT_EXCEPTION_MSG = "Wrong root element: %s for application element id: %s";
-    private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     private final File sourcesRoot;
     // used by deploy
     private Map<String, ApplicationElement> appElements;
@@ -75,7 +62,7 @@ public class Deployer extends BaseDeployer {
     void initUsersSpace() throws Exception {
         DatabasesClient.initUsersSpace(client.obtainDataSource(null));
     }
-    
+
     /**
      * Deploys Platypus application component to the database
      *
@@ -122,8 +109,8 @@ public class Deployer extends BaseDeployer {
                     txtContent = XmlDom2String.transform(appElement.getContent());
                 }
                 appElementRow.setColumnObject(ri.contentTxtColumnIndex, txtContent);
-                appElementRow.setColumnObject(ri.contentTxtSizeColumnIndex, txtContent.length());
-                appElementRow.setColumnObject(ri.contentTxtCrcColumnIndex, ApplicationElement.calcTxtCrc32(txtContent));
+                appElementRow.setColumnObject(ri.contentTxtSizeColumnIndex, appElement.getTxtContentLength());
+                appElementRow.setColumnObject(ri.contentTxtCrcColumnIndex, appElement.getTxtCrc32());
                 rs.insert(appElementRow, true);
                 i++;
             }
@@ -222,9 +209,10 @@ public class Deployer extends BaseDeployer {
                     UUDecoder decoder = new UUDecoder();
                     appElement.setBinaryContent(decoder.decodeBuffer(txtContent));
                 } else {
-                    appElement.setTxtContent(txtContent);
+                    appElement.setContent(Source2XmlDom.transform(txtContent));
+                    appElement.setTxtContentLength((row.getColumnObject(ri.contentTxtSizeColumnIndex) != null) ? ((Number) row.getColumnObject(ri.contentTxtSizeColumnIndex)).longValue() : 0l);
+                    appElement.setTxtCrc32((row.getColumnObject(ri.contentTxtCrcColumnIndex) != null) ? ((Number) row.getColumnObject(ri.contentTxtCrcColumnIndex)).longValue() : 0l);
                 }
-                appElement.setTxtCrc32((row.getColumnObject(ri.contentTxtCrcColumnIndex) != null) ? ((Number) row.getColumnObject(ri.contentTxtCrcColumnIndex)).longValue() : 0l);
                 Set<ApplicationElement> children = appElementsTree.get(parentId);
                 if (children == null) {
                     children = new HashSet<>();
@@ -270,7 +258,7 @@ public class Deployer extends BaseDeployer {
                         if (directory.mkdir()) {
                             traverseAppElements(directory, appElement.getId());
                         } else {
-                            throw new DeployException("Cant' create directory: " + appElement.getName() + " at path: " + parentDirectory.getAbsolutePath()); //NOI18N
+                            throw new AppElementFilesException("Cant' create directory: " + appElement.getName() + " at path: " + parentDirectory.getAbsolutePath()); //NOI18N
                         }
                     } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
                         String path = sourcesRoot.getPath() + File.separator + appElement.getId();
@@ -279,14 +267,14 @@ public class Deployer extends BaseDeployer {
                         if (file.createNewFile()) {
                             FileUtils.writeBytes(file, appElement.getBinaryContent());
                         } else {
-                            throw new DeployException(CREATE_FILE_EXCEPTION_MSG + file.getAbsolutePath());
+                            throw new AppElementFilesException(AppElementFiles.CREATE_FILE_EXCEPTION_MSG + file.getAbsolutePath());
                         }
                     } else {
-                        createAppElementFiles(parentDirectory, appElement);
+                        AppElementFiles.createAppElementFiles(parentDirectory, appElement);
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (DeployException ex) {
+                } catch (AppElementFilesException ex) {
                     Logger.getLogger(Deployer.class.getName()).log(Level.WARNING, getAppElementErrorMessage(appElement, ex.getMessage()), ex); // NOI18N
                     err.println(getAppElementErrorMessage(appElement, ex.getMessage())); // NOI18N
                 }
@@ -298,189 +286,10 @@ public class Deployer extends BaseDeployer {
         return String.format("File or directory can not be created: %s for application element id: %s name: %s", errorMsg, appElement.getId(), appElement.getName()); // NOI18N
     }
 
-    private void createAppElementFiles(File parentDirectory, ApplicationElement appElement) throws DeployException {
-        try {
-            assert appElement.getType() != ClientConstants.ET_FOLDER;
-            DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-            Document appElementDocument = appElement.getContent();
-            if (appElementDocument != null) {
-                Element rootElement = getRootElement(appElementDocument);
-                switch (appElement.getType()) {
-                    case ClientConstants.ET_COMPONENT:
-                        if (ApplicationElement.SCRIPT_ROOT_TAG_NAME.equals(rootElement.getNodeName())) {
-                            createModuleFiles(parentDirectory, appElement, rootElement, documentBuilder);
-                        } else {
-                            throw new DeployException(String.format(WRONG_ROOT_ELEMENT_EXCEPTION_MSG, rootElement.getNodeName(), appElement.getId()));
-                        }
-                        break;
-                    case ClientConstants.ET_FORM:
-                        if (ApplicationElement.FORM_ROOT_TAG_NAME.equals(rootElement.getNodeName())) {
-                            createFormFiles(parentDirectory, appElement, rootElement, documentBuilder);
-                        } else {
-                            throw new DeployException(String.format(WRONG_ROOT_ELEMENT_EXCEPTION_MSG, rootElement.getNodeName(), appElement.getId()));
-                        }
-                        break;
-                    case ClientConstants.ET_REPORT:
-                        if (ApplicationElement.SCRIPT_ROOT_TAG_NAME.equals(rootElement.getNodeName())) {
-                            createReportFiles(parentDirectory, appElement, rootElement, documentBuilder);
-                        } else {
-                            throw new DeployException(String.format(WRONG_ROOT_ELEMENT_EXCEPTION_MSG, rootElement.getNodeName(), appElement.getId()));
-                        }
-                        break;
-                    case ClientConstants.ET_QUERY:
-                        if (ApplicationElement.QUERY_ROOT_TAG_NAME.equals(rootElement.getNodeName())) {
-                            createQueryFiles(parentDirectory, appElement, rootElement, documentBuilder);
-                        } else {
-                            throw new DeployException("Wrong root element: " + rootElement.getNodeName() + " for application element id: " + appElement.getId()); // NOI18N  
-                        }
-                        break;
-                    case ClientConstants.ET_DB_SCHEME:
-                        saveXml2File(parentDirectory, appElement.getName(), PlatypusFiles.DB_SCHEME_EXTENSION, rootElement, documentBuilder);
-                        break;
-                    default:
-                        throw new DeployException("Unknown type: " + appElement.getType() + " for application element id: " + appElement.getId()); // NOI18N
-                }
-            } else {
-                throw new DeployException("Broken content for the application element id:" + appElement.getId()); // NOI18N
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, "Error creating files for application element", ex); // NOI18N
-        }
-    }
-
-    private static Element getRootElement(Document appElementDocument) throws DeployException {
-        NodeList roots = appElementDocument.getChildNodes();
-        if (roots.getLength() != 1) {
-            throw new DeployException("In Platypus documents should be exactly one root tag."); // NOI18N
-        }
-        return (Element) roots.item(0);
-    }
-
-    private static void createModuleFiles(File parentDirectory, ApplicationElement appElement, Element rootNode, DocumentBuilder documentBuilder) throws DeployException, IOException {
-        saveTextContentFile(parentDirectory, appElement, PlatypusFiles.JAVASCRIPT_EXTENSION, ApplicationElement.SCRIPT_SOURCE_TAG_NAME, rootNode);
-        saveExportedElementFile(parentDirectory, appElement.getName(), PlatypusFiles.MODEL_EXTENSION, Model2XmlDom.DATAMODEL_TAG_NAME, rootNode, documentBuilder);
-    }
-
-    private static void createFormFiles(File parentDirectory, ApplicationElement appElement, Element rootNode, DocumentBuilder documentBuilder) throws DeployException, IOException {
-        createModuleFiles(parentDirectory, appElement, rootNode, documentBuilder);
-        saveExportedElementFile(parentDirectory, appElement.getName(), PlatypusFiles.FORM_EXTENSION, ApplicationElement.LAYOUT_TAG_NAME, rootNode, documentBuilder);
-    }
-
-    private static void createReportFiles(File parentDirectory, ApplicationElement appElement, Element rootNode, DocumentBuilder documentBuilder) throws DeployException, IOException {
-        createModuleFiles(parentDirectory, appElement, rootNode, documentBuilder);
-        NodeList layoutNodes = rootNode.getElementsByTagName(ApplicationElement.XLS_LAYOUT_TAG_NAME);
-        if (layoutNodes.getLength() != 1) {
-            throw new DeployException(CHECK_REQUIRED_TAG_EXCEPTION_MSG + ApplicationElement.XLS_LAYOUT_TAG_NAME);
-        }
-        String ext = layoutNodes.item(0).getAttributes().getNamedItem(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME) != null ? layoutNodes.item(0).getAttributes().getNamedItem(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME).getNodeValue() : PlatypusFiles.REPORT_LAYOUT_EXTENSION;
-        String aName = checkFileName(appElement.getName());
-        File reportLayoutFile = new File(parentDirectory, addExtension(aName, ext));
-        if (reportLayoutFile.createNewFile()) {
-            UUDecoder decoder = new UUDecoder();
-            FileUtils.writeBytes(reportLayoutFile, decoder.decodeBuffer(layoutNodes.item(0).getTextContent()));
-        } else {
-            throw new DeployException(CREATE_FILE_EXCEPTION_MSG + reportLayoutFile.getAbsolutePath());
-        }
-    }
-
-    private static String checkFileName(String aFileName) {
-        String aName = StringUtils.replaceUnsupportedSymbolsinFileNames(aFileName);
-        if (aFileName.compareToIgnoreCase(aName) != 0) {
-            Logger.getLogger(Deployer.class.getName()).log(Level.INFO, "File name was changed from {0} to {1}",
-                    new Object[]{aFileName, aName});
-        }
-        return aName;
-    }
-
-    private static String checkAnnotation(String aContent, String aAnnotationValue) {
-        String aName = PlatypusFilesSupport.getAnnotationValue(aContent, JsDoc.Tag.NAME_TAG);
-        if (aName != null && !aName.isEmpty()) {
-            return aContent;
-        } else {
-            return PlatypusFilesSupport.replaceAnnotationValue(aContent, JsDoc.Tag.NAME_TAG, aAnnotationValue);
-        }
-    }
-
-    private static void createQueryFiles(File parentDirectory, ApplicationElement appElement, Element rootNode, DocumentBuilder documentBuilder) throws DeployException, IOException {
-        saveTextContentFile(parentDirectory, appElement, PlatypusFiles.SQL_EXTENSION, ApplicationElement.SQL_TAG_NAME, rootNode);
-        NodeList contentNodes = rootNode.getElementsByTagName(ApplicationElement.FULL_SQL_TAG_NAME);
-        Node contentNode = contentNodes.item(0);
-        if (contentNode != null && !contentNode.getTextContent().trim().equals("")) {
-            saveTextContentFile(parentDirectory, appElement, PlatypusFiles.DIALECT_EXTENSION, ApplicationElement.FULL_SQL_TAG_NAME, rootNode);
-        } else {
-            saveFile(parentDirectory, appElement.getName(), PlatypusFiles.DIALECT_EXTENSION, "");
-        }
-        //Remove Sql and Sql dialect nodes and export XML
-        NodeList sqlSourceNodes = rootNode.getElementsByTagName(ApplicationElement.SQL_TAG_NAME);
-        if (sqlSourceNodes.getLength() != 1) {
-            throw new DeployException(CHECK_REQUIRED_TAG_EXCEPTION_MSG + ApplicationElement.SQL_TAG_NAME);
-        }
-        rootNode.removeChild(sqlSourceNodes.item(0));
-        NodeList dialectSourceNodes = rootNode.getElementsByTagName(ApplicationElement.FULL_SQL_TAG_NAME);
-        if (sqlSourceNodes.getLength() > 1) {
-            throw new DeployException(CHECK_OPTIONAL_TAG_EXCEPTION_MSG + ApplicationElement.FULL_SQL_TAG_NAME);
-        }
-        Node dialectNode = dialectSourceNodes.item(0);
-        if (dialectNode != null) {
-            rootNode.removeChild(dialectSourceNodes.item(0));
-        }
-        contentNodes = rootNode.getElementsByTagName(ApplicationElement.OUTPUT_FIELDS_TAG_NAME);
-        contentNode = contentNodes.item(0);
-        if (contentNode != null) {
-            saveExportedElementFile(parentDirectory, appElement.getName(), PlatypusFiles.OUT_EXTENSION, ApplicationElement.OUTPUT_FIELDS_TAG_NAME, rootNode, documentBuilder);
-        } else {
-            saveFile(parentDirectory, appElement.getName(), PlatypusFiles.OUT_EXTENSION, PlatypusFiles.OUT_EMPTY_CONTENT);
-        }
-        saveExportedElementFile(parentDirectory, appElement.getName(), PlatypusFiles.MODEL_EXTENSION, Model2XmlDom.DATAMODEL_TAG_NAME, rootNode, documentBuilder);
-    }
-
-    private static void saveTextContentFile(File parentDirectory, ApplicationElement aAppElement, String ext, String tagName, Element node) throws DeployException, IOException {
-        NodeList contentNodes = node.getElementsByTagName(tagName);
-        Node contentNode = contentNodes.item(0);
-        if (contentNode != null) {
-            String aContent = checkAnnotation(contentNode.getTextContent(), aAppElement.getId());
-            saveFile(parentDirectory, aAppElement.getName(), ext, aContent);
-        }
-    }
-
-    private static void saveFile(File aParentDirectory, String aFileName, String aExt, String aContent) throws IOException, DeployException {
-        String aName = checkFileName(aFileName);
-        File file = new File(aParentDirectory, addExtension(aName, aExt));
-        if (file.createNewFile()) {
-            FileUtils.writeString(file, aContent, PlatypusFiles.DEFAULT_ENCODING);
-        } else {
-            throw new DeployException(CREATE_FILE_EXCEPTION_MSG + file.getAbsolutePath());
-        }
-    }
-
-    private static void saveExportedElementFile(File parentDirectory, String name, String ext, String tagName, Element node, DocumentBuilder documentBuilder) throws DeployException, IOException {
-        Document doc = documentBuilder.newDocument();
-        doc.setXmlStandalone(true);
-        NodeList importNodes = node.getElementsByTagName(tagName);
-        Node importNode = importNodes.item(0);
-        if (importNode != null) {
-            doc.adoptNode(importNode);
-            doc.appendChild(importNode);
-            saveFile(parentDirectory, name, ext, XmlDom2String.transform(doc));
-        }
-    }
-
-    private void saveXml2File(File parentDirectory, String fileName, String aExt, Element rootElement, DocumentBuilder documentBuilder) throws IOException, DeployException {
-        Document doc = documentBuilder.newDocument();
-        doc.setXmlStandalone(true);
-        doc.adoptNode(rootElement);
-        doc.appendChild(rootElement);
-        saveFile(parentDirectory, fileName, aExt, XmlDom2String.transform(doc));
-    }
-
-    private static String addExtension(String name, String ext) {
-        return name + FileUtils.EXTENSION_SEPARATOR + ext;
-    }
-
     private void traverseSources(File dir, String aParentDirectoryAppElementId) throws IOException {
-        assert dir.isDirectory();
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new FileNotFoundException(dir.getPath() + " - it must exist and it must be a directory.");
+        }
         Map<String, AppElementFiles> appElementsFileGroups = new HashMap<>();
         for (String filename : dir.list()) {
             File child = new File(dir, filename);

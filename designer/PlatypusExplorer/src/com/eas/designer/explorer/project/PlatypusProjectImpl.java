@@ -8,12 +8,9 @@ import com.eas.client.AppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.ScriptedDatabasesClient;
-import com.eas.client.application.ClientScriptDocuments;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.scripts.ScriptDocuments;
-import com.eas.client.scripts.ScriptDocumentsHost;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.Deployer;
 import com.eas.designer.application.PlatypusUtils;
@@ -82,7 +79,7 @@ import org.openide.windows.InputOutput;
  *
  * @author mg
  */
-public class PlatypusProjectImpl implements PlatypusProject, ScriptDocumentsHost {
+public class PlatypusProjectImpl implements PlatypusProject {
 
     public final RequestProcessor RP = new RequestProcessor(PlatypusProjectImpl.class);
 
@@ -105,7 +102,6 @@ public class PlatypusProjectImpl implements PlatypusProject, ScriptDocumentsHost
     private ClassPath sourceRoot;
     private final Set<PlatypusProject.ClientChangeListener> clientListeners = new HashSet<>();
     private final SearchFilter searchFilter;
-    private ScriptDocuments documents;
 
     public PlatypusProjectImpl(FileObject aProjectDir, ProjectState aState) throws Exception {
         super();
@@ -156,14 +152,8 @@ public class PlatypusProjectImpl implements PlatypusProject, ScriptDocumentsHost
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false, this);
-        documents = new ClientScriptDocuments(client);
+        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false);
         deployer = new Deployer(FileUtil.toFile(projectDir), client);
-    }
-
-    @Override
-    public ScriptDocuments getDocuments() {
-        return documents;
     }
 
     @Override

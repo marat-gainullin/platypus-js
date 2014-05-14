@@ -69,7 +69,7 @@ public class IntegrationTest extends GeoBaseTest {
     private static final String PROJECTION_HUMAN_NAME = "Stereographic North Pole";
     private static final String PROJECTION_QUALIFIED_NAME = "Stereographic_North_Pole";
     private static Map<String, RowsetFeatureDescriptor> map;
-    private static ApplicationDbModel datamodel;
+    private static ApplicationDbModel model;
     private static MathTransformFactory mtFactory;
     private static CRSFactory crsFactory;
     private Mockery context = new JUnit4Mockery();
@@ -85,15 +85,15 @@ public class IntegrationTest extends GeoBaseTest {
         mtFactory = ReferencingFactoryFinder.getMathTransformFactory(null);
         crsFactory = ReferencingFactoryFinder.getCRSFactory(null);
         // Populate datamodel.
-        datamodel = new ApplicationDbModel(dbClient);
-        datamodel.setRuntime(true);
+        model = new ApplicationDbModel(dbClient);
+        model.requery();
         map = new HashMap<>();
         for (String tableName : DELAWARE_MAP_TABLES) {
-            ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
+            ApplicationDbEntity e = new ApplicationDbEntity(model);
             e.regenerateId();
             e.setTableName(tableName);
             e.validateQuery();
-            datamodel.addEntity(e);
+            model.addEntity(e);
             final Rowset rowset = e.getRowset();
             assertNotNull(rowset);
             rowset.refresh();
@@ -259,6 +259,6 @@ public class IntegrationTest extends GeoBaseTest {
                 exactly(DELAWARE_MAP_TABLES.length).of(listener).layerChanged(with(any(MapLayerListEvent.class)));
             }
         });
-        datamodel.requery();
+        model.requery();
     }
 }

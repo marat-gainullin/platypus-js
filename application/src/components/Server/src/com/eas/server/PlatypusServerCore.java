@@ -11,11 +11,11 @@ import com.eas.client.cache.FilesAppCache;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
+import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptDocuments;
-import com.eas.client.scripts.ScriptDocumentsHost;
+import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.filter.AppElementsFilter;
@@ -37,7 +37,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDocumentsHost {
+public class PlatypusServerCore implements ContextHost, PrincipalHost {
 
     protected static PlatypusServerCore instance;
 
@@ -50,13 +50,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
             ScriptedDatabasesClient serverCoreDbClient;
             if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
                 if (aApplicationUrl.startsWith("jndi")) {
-                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true, null);
+                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true);
                 } else {// file://
                     File f = new File(new URI(aApplicationUrl));
                     if (f.exists() && f.isDirectory()) {
                         FilesAppCache filesAppCache = new FilesAppCache(f.getPath(), new ServerTasksScanner(tasks));
                         filesAppCache.watch();
-                        serverCoreDbClient = new ScriptedDatabasesClient(filesAppCache, aDefaultDatasourceName, true, null);
+                        serverCoreDbClient = new ScriptedDatabasesClient(filesAppCache, aDefaultDatasourceName, true);
                     } else {
                         throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
                     }
@@ -67,8 +67,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
             instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
             serverCoreDbClient.setContextHost(instance);
             serverCoreDbClient.setPrincipalHost(instance);
-            serverCoreDbClient.setDocumentsHost(instance);
-            PlatypusScriptedResource.init(serverCoreDbClient, instance, instance);
+            PlatypusScriptedResource.init(serverCoreDbClient, instance);
             instance.startServerTasks();
         }
         return instance;
@@ -95,7 +94,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient databasesClient;
-    protected ServerScriptDocuments scriptDocuments;
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
@@ -103,7 +101,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
     public PlatypusServerCore(ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
         sessionManager = new SessionManager(this);
-        scriptDocuments = new ServerScriptDocuments(databasesClient);
         browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
         tasks = aTasks;
@@ -158,9 +155,9 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
                 module = ScriptUtils.createModule(aModuleName);
             }
             Object oFunction = module.getMember(aMethodName);
-            if(oFunction instanceof JSObject && ((JSObject)oFunction).isFunction()){                
-                return ScriptUtils.toJava(((JSObject)oFunction).call(module, ScriptUtils.toJs(aArgs)));
-            }else{
+            if (oFunction instanceof JSObject && ((JSObject) oFunction).isFunction()) {
+                return ScriptUtils.toJava(((JSObject) oFunction).call(module, ScriptUtils.toJs(aArgs)));
+            } else {
                 throw new Exception(String.format("Module %s has no function %s", aModuleName, aMethodName));
             }
         } finally {
@@ -199,8 +196,9 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
      */
     public boolean startServerTask(String aModuleName) throws Exception {
         Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleName));
-        ScriptDocument sDoc = scriptDocuments.getScriptDocument(aModuleName);
-        if (sDoc != null) {
+        ApplicationElement appElement = getDatabasesClient().getAppCache().get(aModuleName);
+        if (appElement != null && appElement.isModule()) {
+            ScriptDocument sDoc = Dom2ScriptDocument.transform(appElement.getContent());
             boolean stateless = false;
             for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
                 switch (tag.getName()) {
@@ -272,56 +270,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, ScriptDoc
         }
     }
 
-    @Override
-    public ScriptDocuments getDocuments() {
-        return scriptDocuments;
-    }
-
-    /*
-    @Override
-    public void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
-        try {
-            ScriptDocument sDoc = scriptDocuments.compileScriptDocument(aClassName);
-            switch (aAppElement.getType()) {
-                case ClientConstants.ET_COMPONENT: {
-                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
-                        @Override
-                        protected Scriptable createObject(Context cx, Scriptable scope, Object[] args) {
-                            try {
-                                ServerScriptRunner runner = new ServerScriptRunner(PlatypusServerCore.this, PlatypusServerCore.this.getSessionManager().getCurrentSession(), aClassName, scope, PlatypusServerCore.this, PlatypusServerCore.this, args);
-                                runner.loadApplicationElement(aClassName, args);
-                                return runner;
-                            } catch (Exception ex) {
-                                throw new IllegalStateException(ex);
-                            }
-                        }
-                    };
-                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Module", ScriptUtils.getScope()));
-                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
-                }
-                break;
-                case ClientConstants.ET_REPORT:
-                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
-                        @Override
-                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
-                            try {
-                                ServerReportRunner runner = new ServerReportRunner(PlatypusServerCore.this, PlatypusServerCore.this.getSessionManager().getCurrentSession(), aClassName, scope, PlatypusServerCore.this, PlatypusServerCore.this, args);
-                                runner.loadApplicationElement(aClassName, args);
-                                return runner;
-                            } catch (Exception ex) {
-                                throw new IllegalStateException(ex);
-                            }
-                        }
-                    };
-                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Report", ScriptUtils.getScope()));
-                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
-                    break;
-            }
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
-*/
     public AppElementsFilter getBrowsersFilter() {
         return browsersFilter;
     }

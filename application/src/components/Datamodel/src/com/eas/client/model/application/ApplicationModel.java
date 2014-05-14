@@ -22,8 +22,6 @@ import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.util.ListenerRegistration;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -389,24 +387,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    @Override
-    public void setRuntime(boolean aValue) throws Exception {
-        if (runtime != aValue) {
-            boolean oldValue = runtime;
-            runtime = aValue;
-            if (!oldValue && runtime) {
-                executeRootEntities(true);
-            }
-            PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
-            for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {
-                try {
-                    l.propertyChange(evt);
-                } catch (Exception ex) {
-                    Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-    }
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
     public synchronized E createQuery(String aQueryId) throws Exception {

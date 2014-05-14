@@ -48,7 +48,7 @@ public class Object2Dom {
         try {
             builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
-	    doc.setXmlStandalone(true);
+            doc.setXmlStandalone(true);
             Element root = doc.createElement(rootTagName);
             doc.appendChild(root);
             generateFromGetters(doc, root, o, saveDefaultValues);
@@ -262,6 +262,10 @@ public class Object2Dom {
                 }
             }
         }
+    }
+
+    public static void transform(Object o, Element aTag) {
+        readBySetters(o, aTag);
     }
     protected static final Object NO_ATTRIBUTE_OR_TAG_MARKER = new Object();
     // we need to cache class setters information for performance

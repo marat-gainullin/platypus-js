@@ -4,6 +4,7 @@
  */
 package com.eas.client.geo;
 
+import com.eas.util.gis.GeometryUtils;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import org.junit.AfterClass;
@@ -33,12 +34,12 @@ public class GisUtilitiesTest {
      */
     @Test
     public void isPointIn() {
-        Point pB = GisUtilities.createPoint(10, 10);
-        Point pE = GisUtilities.createPoint(10, 20);
-        Polygon pl = GisUtilities.createPolygon(pB, pE);
-        pl = GisUtilities.addPoint2Polygon(pl, GisUtilities.createPoint(20, 20));
-        pl = GisUtilities.addPoint2Polygon(pl, GisUtilities.createPoint(20, 10));
-        Point p = GisUtilities.createPoint(15, 15);
+        Point pB = GeometryUtils.createPoint(10, 10);
+        Point pE = GeometryUtils.createPoint(10, 20);
+        Polygon pl = GeometryUtils.createPolygon(pB, pE);
+        pl = GeometryUtils.addPoint2Polygon(pl, GeometryUtils.createPoint(20, 20));
+        pl = GeometryUtils.addPoint2Polygon(pl, GeometryUtils.createPoint(20, 10));
+        Point p = GeometryUtils.createPoint(15, 15);
         assertTrue("Not contains", pl.contains(p));
     }
 }

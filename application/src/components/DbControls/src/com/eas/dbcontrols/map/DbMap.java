@@ -217,11 +217,6 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     @Override
-    public boolean isRuntime() {
-        return model != null && model.isRuntime();
-    }
-
-    @Override
     public void beginUpdate() {
     }
 
@@ -265,54 +260,52 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     public void configure() {
-        if (isRuntime()) {
-            cleanup();
-            bindRowsetFeatureDescriptors();
-            final Logger logger = Logger.getLogger(DbMap.class.getName());
-            try {
-                logger.fine("Configuring geo pane with feature layers."); //NOI18N
-                checkFeatureDescriptorsCrsWkt();
-                if (projectedCrs == null) {
-                    throw new NullPointerException("Projected CRS havn't been created.");
-                }
-                final MapContent mapContext = new MapContent(projectedCrs),
-                        activeMapContext = new MapContent(projectedCrs),
-                        screenMapContext = new MapContent(projectedCrs);
-                dataStore.setFeatureDescriptors(features);
-                if (mapTitle != null && !mapTitle.isEmpty()) {
-                    mapContext.setTitle(mapTitle);
-                }
-                for (RowsetFeatureDescriptor featureDescriptor : features) {
-                    logger.fine(String.format("Adding layer for feature %s", featureDescriptor.getTypeName())); //NOI18N
-                    final Style style = featureDescriptor.getStyle().isEmpty() ? null : featureDescriptor.getStyle().buildStyle(featureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
-                    if (featureDescriptor.isActive()) {
-                        activeMapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
-                    } else {
-                        mapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
-                    }
-                }
-
-                selectionStore = new SelectionDataStore(projectedCrs.getBaseCRS());
-                screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_PHANTOM_TYPE_NAME), GisUtilities.buildSelectionPhantomStyle()));
-                screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_TYPE_NAME), GisUtilities.buildSelectionStyle()));
-                screenMapContext.layers().get(screenMapContext.layers().size() - 1).setSelected(true);
-
-                logger.fine("Setting up the geo pane."); //NOI18N
-                if (backingUrl != null) {
-                    pane = new JGeoPane(mapContext, activeMapContext, screenMapContext, backingUrl);
-                } else {
-                    pane = new JGeoPane(mapContext, activeMapContext, screenMapContext, true);
-                }
-                pane.addGeoPaneViewpointListener(new ViewpointScriptInformer());
-                pane.addGeoPaneMouseListener(new MouseScriptInformer());
-                pane.setBackground(getBackground());
-                pane.scaleView(8e-4, 8e-4, false);
-                add(pane, BorderLayout.CENTER);
-                configureActions();
-                pane.addComponentListener(new PaneSizeReflector());
-            } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Creating a map context", ex); //NOI18N
+        cleanup();
+        bindRowsetFeatureDescriptors();
+        final Logger logger = Logger.getLogger(DbMap.class.getName());
+        try {
+            logger.fine("Configuring geo pane with feature layers."); //NOI18N
+            checkFeatureDescriptorsCrsWkt();
+            if (projectedCrs == null) {
+                throw new NullPointerException("Projected CRS havn't been created.");
             }
+            final MapContent mapContext = new MapContent(projectedCrs),
+                    activeMapContext = new MapContent(projectedCrs),
+                    screenMapContext = new MapContent(projectedCrs);
+            dataStore.setFeatureDescriptors(features);
+            if (mapTitle != null && !mapTitle.isEmpty()) {
+                mapContext.setTitle(mapTitle);
+            }
+            for (RowsetFeatureDescriptor featureDescriptor : features) {
+                logger.fine(String.format("Adding layer for feature %s", featureDescriptor.getTypeName())); //NOI18N
+                final Style style = featureDescriptor.getStyle().isEmpty() ? null : featureDescriptor.getStyle().buildStyle(featureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
+                if (featureDescriptor.isActive()) {
+                    activeMapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
+                } else {
+                    mapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
+                }
+            }
+
+            selectionStore = new SelectionDataStore(projectedCrs.getBaseCRS());
+            screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_PHANTOM_TYPE_NAME), GisUtilities.buildSelectionPhantomStyle()));
+            screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_TYPE_NAME), GisUtilities.buildSelectionStyle()));
+            screenMapContext.layers().get(screenMapContext.layers().size() - 1).setSelected(true);
+
+            logger.fine("Setting up the geo pane."); //NOI18N
+            if (backingUrl != null) {
+                pane = new JGeoPane(mapContext, activeMapContext, screenMapContext, backingUrl);
+            } else {
+                pane = new JGeoPane(mapContext, activeMapContext, screenMapContext, true);
+            }
+            pane.addGeoPaneViewpointListener(new ViewpointScriptInformer());
+            pane.addGeoPaneMouseListener(new MouseScriptInformer());
+            pane.setBackground(getBackground());
+            pane.scaleView(8e-4, 8e-4, false);
+            add(pane, BorderLayout.CENTER);
+            configureActions();
+            pane.addComponentListener(new PaneSizeReflector());
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Creating a map context", ex); //NOI18N
         }
     }
 

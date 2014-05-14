@@ -4,6 +4,7 @@
  */
 package com.eas.deploy;
 
+import com.eas.client.cache.AppElementFilesException;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
@@ -135,7 +136,7 @@ public class DbMigrator extends BaseDeployer {
                 err.format("Migration for next version %d already exists.\n", migrationNumber);
             }
             out.println();
-        } catch (DeployException ex) {
+        } catch (AppElementFilesException ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             synchronized (this) {
@@ -169,7 +170,7 @@ public class DbMigrator extends BaseDeployer {
             }
             out.println("Cleanup migrations directory complete."); // NOI18N
             out.println();
-        } catch (DeployException ex) {
+        } catch (AppElementFilesException ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             synchronized (this) {
@@ -184,7 +185,7 @@ public class DbMigrator extends BaseDeployer {
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
             Rowset rs = versionQuery.compile().executeQuery();
             if (rs.size() != 1) {
-                throw new DeployException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
+                throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
             }
             rs.first();
             return rs.getInt(rs.getFields().find(ClientConstants.F_VERSION_VALUE));
@@ -201,7 +202,7 @@ public class DbMigrator extends BaseDeployer {
             versionQuery.setEntityId(ClientConstants.T_MTD_VERSION);
             Rowset rs = versionQuery.compile().executeQuery();
             if (rs.size() != 1) {
-                throw new DeployException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
+                throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
             }
             rs.getFields().get(ClientConstants.F_VERSION_VALUE).setPk(true);
             Row r = rs.getRow(1);
@@ -215,7 +216,7 @@ public class DbMigrator extends BaseDeployer {
         }
     }
 
-    private void applyMigrationsImpl() throws DeployException, ParserConfigurationException, SAXException, IOException {
+    private void applyMigrationsImpl() throws AppElementFilesException, ParserConfigurationException, SAXException, IOException {
         String dumpDir = System.getProperty("netbeans.user") + "/var/log/"; //NOI18N
         File dumpDirFile = new File(dumpDir);
         if (!dumpDirFile.exists() || !dumpDirFile.isDirectory()) {
@@ -256,7 +257,7 @@ public class DbMigrator extends BaseDeployer {
     }
 
     // Ordering is important for method result
-    private List<File> listActualMigrations(Integer currentDbVersion) throws DeployException {
+    private List<File> listActualMigrations(Integer currentDbVersion) throws AppElementFilesException {
         TreeMap<Integer, File> migrations = new TreeMap<>();
         File[] migrationFiles = dir.listFiles(new MigrationsFilesFilter());
         for (File f : migrationFiles) {
@@ -266,7 +267,7 @@ public class DbMigrator extends BaseDeployer {
                 if (m == null) {
                     migrations.put(i, f);
                 } else {
-                    throw new DeployException("Ambigious migrations file:" + f.getAbsolutePath()); // NOI18N 
+                    throw new AppElementFilesException("Ambigious migrations file:" + f.getAbsolutePath()); // NOI18N 
                 }
             }
         }
@@ -294,11 +295,11 @@ public class DbMigrator extends BaseDeployer {
         }
     }
 
-    private String createSqlScriptFile(String path) throws DeployException {
+    private String createSqlScriptFile(String path) throws AppElementFilesException {
         File f = new File(path);
         try {
             if (!f.createNewFile()) {
-                throw new DeployException("Can't create new Sql batch file.");
+                throw new AppElementFilesException("Can't create new Sql batch file.");
             }
             return f.getAbsolutePath();
         } catch (IOException ex) {

@@ -332,7 +332,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     groups.put(tCol, group);
                     columnModel.addColumn(tCol);
                 } else {
-                    if (dCol.isPlain() || !isRuntime()) { // Plain
+                    if (dCol.isPlain()) { // Plain
                         Rowset rs = DbControlsUtils.resolveRowset(model, dCol.getDatamodelElement());
                         int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
                         if (fidx < 1) {
@@ -1183,7 +1183,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public void configure() throws Exception {
-        if (model != null && model.isRuntime()) {
+        if (model != null) {
             cleanup();
             if (rowsHeaderType != DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE) {
                 int fixedWidth = 18;
@@ -1449,124 +1449,122 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public void initializeDesign() {
-        if (!isRuntime()) {
-            removeAll();
-            setLayout(new BorderLayout());
-            JLabel label = new JLabel(this.getClass().getSimpleName().replace("Db", "Model"), IconCache.getIcon("16x16/grid.png"), SwingConstants.LEADING);
-            label.setOpaque(false);
-            add(label, BorderLayout.CENTER);
+        removeAll();
+        setLayout(new BorderLayout());
+        JLabel label = new JLabel(this.getClass().getSimpleName().replace("Db", "Model"), IconCache.getIcon("16x16/grid.png"), SwingConstants.LEADING);
+        label.setOpaque(false);
+        add(label, BorderLayout.CENTER);
 
-            MatteBorder innerBorder = new MatteBorder(1, 1, 0, 0, getBackground().brighter());
-            MatteBorder outerBorder = new MatteBorder(0, 0, 1, 1, getBackground().darker());
-            CompoundBorder border = new CompoundBorder(innerBorder, outerBorder);
-            setBorder(border);
+        MatteBorder innerBorder = new MatteBorder(1, 1, 0, 0, getBackground().brighter());
+        MatteBorder outerBorder = new MatteBorder(0, 0, 1, 1, getBackground().darker());
+        CompoundBorder border = new CompoundBorder(innerBorder, outerBorder);
+        setBorder(border);
 
-            if (header != null && !header.isEmpty()) {
-                try {
-                    // Columns configuration
-                    ListSelectionModel selectionModel = new DefaultListSelectionModel();
-                    columnModel = new DefaultTableColumnModel() {
-                        @Override
-                        public int getTotalColumnWidth() {
+        if (header != null && !header.isEmpty()) {
+            try {
+                // Columns configuration
+                ListSelectionModel selectionModel = new DefaultListSelectionModel();
+                columnModel = new DefaultTableColumnModel() {
+                    @Override
+                    public int getTotalColumnWidth() {
                             // super implementation caches the result and invalidates it
-                            // when width of any column is changed/
-                            // We need to set width silently, because of extra event
-                            // been fired by swing. We need to avoid it. 
-                            // We avoid it, but it leads to break of width cache invalidation.
-                            // So we need to calculate width unconditionally and allways.
-                            int width = 0;
-                            Enumeration<TableColumn> cols = getColumns();
-                            while (cols.hasMoreElements()) {
-                                width += cols.nextElement().getWidth();
-                            }
-                            return width;
+                        // when width of any column is changed/
+                        // We need to set width silently, because of extra event
+                        // been fired by swing. We need to avoid it. 
+                        // We avoid it, but it leads to break of width cache invalidation.
+                        // So we need to calculate width unconditionally and allways.
+                        int width = 0;
+                        Enumeration<TableColumn> cols = getColumns();
+                        while (cols.hasMoreElements()) {
+                            width += cols.nextElement().getWidth();
                         }
-                    };
-                    Rowset rowsRowset = new ParametersRowset(new com.bearsoft.rowset.metadata.Parameters());
-                    rowsModel = new RowsetsTableModel(null, rowsRowset, null) {
-                        @Override
-                        public int getRowCount() {
-                            return 10;
-                        }
-
-                        @Override
-                        public Object getValueAt(int rowIndex, int columnIndex) {
-                            return null;
-                        }
-
-                        @Override
-                        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-                        }
-                    };
-                    Map<TableColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header, true);
-                    for (int i = 0; i < columnModel.getColumnCount(); i++) {
-                        TableColumn tc = columnModel.getColumn(i);
-                        tc.setCellEditor(null);
-                        tc.setCellRenderer(new DefaultTableCellRenderer());
+                        return width;
                     }
-                    columnModel.setSelectionModel(selectionModel);
-                    columnModel.setColumnSelectionAllowed(true);
-
-                    trTable = new GridTable(null, rowsRowset, this) {
-                        @Override
-                        public TableCellRenderer getCellRenderer(int row, int column) {
-                            TableCellRenderer res = super.getCellRenderer(row, column);
-                            if (res instanceof Component) {
-                                ((Component) res).setBackground(DbGrid.this.getBackground());
-                            }
-                            return res;
-                        }
-                    };
-                    trTable.setModel((TableModel) rowsModel);
-                    trTable.setColumnModel(columnModel);
-                    trTable.setShowHorizontalLines(showHorizontalLines);
-                    trTable.setShowVerticalLines(showVerticalLines);
-                    trTable.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
-                    trTable.setOddRowsColor(oddRowsColor);
-                    trTable.setBackground(getBackground());
-                    trTable.setRowHeight(rowsHeight);
-
-                    trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                    trTable.setAutoCreateColumnsFromModel(false);
-
-                    rheader = new MultiLevelHeader();
-                    rheader.setTable(trTable);
-                    rheader.setColumnModel(columnModel);
-                    rheader.getColumnsParents().putAll(cols2groups);
-
-                    JPanel rPanel = new JPanel(new BorderLayout());
-                    rPanel.add(rheader, BorderLayout.NORTH);
-                    JPanel trPanel = new JPanel(new BorderLayout());
-                    trPanel.add(trTable, BorderLayout.CENTER);
-
-                    gridScroll = new JScrollPane();
-                    gridScroll.setColumnHeaderView(rPanel);
-                    gridScroll.setViewportView(trPanel);
-                    rheader.setRegenerateable(true);
-                    rheader.regenerate();
-                    for (int i = 0; i < rheader.getComponentCount(); i++) {
-                        if (rheader.getComponent(i) instanceof HeaderCell
-                                && ((HeaderCell) rheader.getComponent(i)).getColGroup() instanceof LinkedGridColumnsGroup) {
-                            final HeaderCell cell = (HeaderCell) rheader.getComponent(i);
-                            final LinkedGridColumnsGroup lg = (LinkedGridColumnsGroup) cell.getColGroup();
-                            lg.getGridColumn().addPropertyChangeListener(new PropertyChangeListener() {
-                                @Override
-                                public void propertyChange(PropertyChangeEvent evt) {
-                                    lg.setStyle(lg.getGridColumn().getHeaderStyle());
-                                    lg.setTitle(lg.getGridColumn().getTitle());
-                                    cell.applyStyle();
-                                    cell.repaint();
-                                }
-                            });
-                        }
+                };
+                Rowset rowsRowset = new ParametersRowset(new com.bearsoft.rowset.metadata.Parameters());
+                rowsModel = new RowsetsTableModel(null, rowsRowset, null) {
+                    @Override
+                    public int getRowCount() {
+                        return 10;
                     }
-                    add(gridScroll, BorderLayout.CENTER);
-                } catch (Exception ex) {
-                    Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
+
+                    @Override
+                    public Object getValueAt(int rowIndex, int columnIndex) {
+                        return null;
+                    }
+
+                    @Override
+                    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                    }
+                };
+                Map<TableColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header, true);
+                for (int i = 0; i < columnModel.getColumnCount(); i++) {
+                    TableColumn tc = columnModel.getColumn(i);
+                    tc.setCellEditor(null);
+                    tc.setCellRenderer(new DefaultTableCellRenderer());
                 }
-                revalidate();
-                repaint();
+                columnModel.setSelectionModel(selectionModel);
+                columnModel.setColumnSelectionAllowed(true);
+
+                trTable = new GridTable(null, rowsRowset, this) {
+                    @Override
+                    public TableCellRenderer getCellRenderer(int row, int column) {
+                        TableCellRenderer res = super.getCellRenderer(row, column);
+                        if (res instanceof Component) {
+                            ((Component) res).setBackground(DbGrid.this.getBackground());
+                        }
+                        return res;
+                    }
+                };
+                trTable.setModel((TableModel) rowsModel);
+                trTable.setColumnModel(columnModel);
+                trTable.setShowHorizontalLines(showHorizontalLines);
+                trTable.setShowVerticalLines(showVerticalLines);
+                trTable.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
+                trTable.setOddRowsColor(oddRowsColor);
+                trTable.setBackground(getBackground());
+                trTable.setRowHeight(rowsHeight);
+
+                trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                trTable.setAutoCreateColumnsFromModel(false);
+
+                rheader = new MultiLevelHeader();
+                rheader.setTable(trTable);
+                rheader.setColumnModel(columnModel);
+                rheader.getColumnsParents().putAll(cols2groups);
+
+                JPanel rPanel = new JPanel(new BorderLayout());
+                rPanel.add(rheader, BorderLayout.NORTH);
+                JPanel trPanel = new JPanel(new BorderLayout());
+                trPanel.add(trTable, BorderLayout.CENTER);
+
+                gridScroll = new JScrollPane();
+                gridScroll.setColumnHeaderView(rPanel);
+                gridScroll.setViewportView(trPanel);
+                rheader.setRegenerateable(true);
+                rheader.regenerate();
+                for (int i = 0; i < rheader.getComponentCount(); i++) {
+                    if (rheader.getComponent(i) instanceof HeaderCell
+                            && ((HeaderCell) rheader.getComponent(i)).getColGroup() instanceof LinkedGridColumnsGroup) {
+                        final HeaderCell cell = (HeaderCell) rheader.getComponent(i);
+                        final LinkedGridColumnsGroup lg = (LinkedGridColumnsGroup) cell.getColGroup();
+                        lg.getGridColumn().addPropertyChangeListener(new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(PropertyChangeEvent evt) {
+                                lg.setStyle(lg.getGridColumn().getHeaderStyle());
+                                lg.setTitle(lg.getGridColumn().getTitle());
+                                cell.applyStyle();
+                                cell.repaint();
+                            }
+                        });
+                    }
+                }
+                add(gridScroll, BorderLayout.CENTER);
+            } catch (Exception ex) {
+                Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
             }
+            revalidate();
+            repaint();
         }
     }
 
@@ -2559,11 +2557,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return style;
     }
 
-    @Override
-    public boolean isRuntime() {
-        return model != null && model.isRuntime();
-    }
-    protected ApplicationModel<?, ?, ?, ?> model = null;
+    protected ApplicationModel<?, ?, ?, ?> model;
 
     @Override
     public ApplicationModel<?, ?, ?, ?> getModel() {

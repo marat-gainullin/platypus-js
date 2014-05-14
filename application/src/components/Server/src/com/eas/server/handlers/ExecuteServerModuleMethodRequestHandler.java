@@ -4,7 +4,7 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.scripts.ScriptDocument;
+import com.eas.client.scripts.SecuredJSConstructor;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.script.JsDoc;
@@ -58,35 +58,35 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
         } else {
             moduleSession = getSession();
         }
-        ScriptDocument scriptDoc = getServerCore().getDocuments().getScriptDocument(moduleName);
         if (runner == null) {
-            runner = CreateServerModuleRequestHandler.runModule(scriptDoc, moduleName);
+            runner = CreateServerModuleRequestHandler.runModule(getServerCore().getDatabasesClient().getAppCache(), moduleName);
             moduleSession = getSession();
         }
         if (runner != null) {
             assert moduleSession != null;
-            synchronized (runner) {// Same synchronization object as in module method executing code
-                if (!scriptDoc.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
-                    throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
-                }
+            JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
+            assert jsConstr instanceof SecuredJSConstructor;
+            SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
+            if (!sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
+            }
+            if (executeCallback != null) {
+                executeCallback.beforeExecute(runner);
+            }
+            Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
+            Object oFun = runner.getMember(getRequest().getMethodName());
+            if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                Object result = ScriptUtils.toJava(((JSObject) oFun).call(runner, ScriptUtils.toJs(getRequest().getArguments())));
                 if (executeCallback != null) {
-                    executeCallback.beforeExecute(runner);
+                    executeCallback.afterExecute(runner);
                 }
-                Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
-                Object oFun = runner.getMember(getRequest().getMethodName());
-                if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                    Object result = ScriptUtils.toJava(((JSObject) oFun).call(runner, ScriptUtils.toJs(getRequest().getArguments())));
-                    if (executeCallback != null) {
-                        executeCallback.afterExecute(runner);
-                    }
-                    if (moduleSession != systemSession
-                            && scriptDoc.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                        moduleSession.unregisterModule(moduleName);
-                    }
-                    return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
-                } else {
-                    throw new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName()));
+                if (moduleSession != systemSession
+                        && sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
+                    moduleSession.unregisterModule(moduleName);
                 }
+                return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
+            } else {
+                throw new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName()));
             }
         } else {
             throw new Exception(String.format(MODULE_MISSING_MSG, getRequest().getModuleName()));

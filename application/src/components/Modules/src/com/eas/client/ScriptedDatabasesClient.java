@@ -11,13 +11,12 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.cache.FreqCache;
 import com.eas.client.exceptions.UnboundSqlParameterException;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.queries.PlatypusScriptedFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptDocumentsHost;
+import com.eas.client.scripts.store.Dom2ModelDocument;
 import com.eas.script.ScriptUtils;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -40,7 +39,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     protected static final String JAVASCRIPT_QUERY_CONTENTS = "javascript query";
     // key - validator name, value datasources list
     protected Map<String, Collection<String>> validators = new HashMap<>();
-    protected ScriptDocumentsHost documentsHost;
     //
     protected FreqCache<String, SqlQuery> scriptedQueries = new FreqCache<String, SqlQuery>() {
 
@@ -153,12 +151,13 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             params = new Parameters();
                             readScriptFields(aQueryId, (JSObject) oParams, params);
                         } else {
-                            ScriptDocument scriptDoc = documentsHost.getDocuments().getScriptDocument(aQueryId);
-                            params = scriptDoc != null ? scriptDoc.getModel().getParameters() : new Parameters();
+                            ApplicationElement moduleQuery = getAppCache().get(aQueryId);
+                            ApplicationModel<?,?, ?, ?> model = Dom2ModelDocument.transform(ScriptedDatabasesClient.this, moduleQuery.getContent());
+                            params = model != null ? model.getParameters() : new Parameters();
                         }
-                        for (Field p : params.toCollection()) {
+                        params.toCollection().stream().forEach((p) -> {
                             query.putParameter(p.getName(), p.getTypeInfo(), null);
-                        }
+                        });
                         return query;
                     } else {
                         throw new IllegalStateException(" datasource module: " + aQueryId + " doesn't contain schema");
@@ -175,17 +174,8 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, ScriptDocumentsHost aDocumentsHost) throws Exception {
+    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
         super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata);
-        documentsHost = aDocumentsHost;
-    }
-
-    public ScriptDocumentsHost getDocumentsHost() {
-        return documentsHost;
-    }
-
-    public void setDocumentsHost(ScriptDocumentsHost aValue) {
-        documentsHost = aValue;
     }
 
     /**

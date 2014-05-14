@@ -176,12 +176,12 @@ public class QueryResultsView extends javax.swing.JPanel {
         // enable dataworks
         if (queryEntity.getQuery().isCommand()) {
             queryEntity.getQuery().setManual(true);
-            model.setRuntime(true);
+            model.requery();
             int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
             return false;
         } else {
-            model.setRuntime(true);
+            model.requery();
             return true;
         }
     }

@@ -5,12 +5,14 @@ import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -29,6 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.URLReader;
 
 /**
  *
@@ -43,22 +47,19 @@ public class PlatypusScriptedResource {
     protected static Client client;
     protected static AppCache cache;
     protected static PrincipalHost principalHost;
-    protected static ScriptDocumentsHost scriptDocumentsHost;
 
     /**
      * Initializes a static fields.
      *
      * @param aClient Client instance
      * @param aPrincipalHost Login support
-     * @param aScriptDocumentsHost Scripts host
      * @throws Exception If something goes wrong
      */
-    public static void init(Client aClient, PrincipalHost aPrincipalHost, ScriptDocumentsHost aScriptDocumentsHost) throws Exception {
+    public static void init(Client aClient, PrincipalHost aPrincipalHost) throws Exception {
         assert cache == null : "Platypus application resources may be initialized only once.";
         client = aClient;
         cache = client.getAppCache();
         principalHost = aPrincipalHost;
-        scriptDocumentsHost = aScriptDocumentsHost;
     }
 
     /**
@@ -68,15 +69,6 @@ public class PlatypusScriptedResource {
      */
     public static PrincipalHost getPrincipalHost() {
         return principalHost;
-    }
-
-    /**
-     * Gets script documents host.
-     *
-     * @return Script documents host instance
-     */
-    public static ScriptDocumentsHost getScriptDocumentsHost() {
-        return scriptDocumentsHost;
     }
 
     /**
@@ -253,8 +245,8 @@ public class PlatypusScriptedResource {
             + "*/")
     public static String translateScriptPath(String aResourceId) throws Exception {
         if (aResourceId != null && !aResourceId.isEmpty()) {
-            Matcher htppMatcher = pattern.matcher(aResourceId);
-            if (htppMatcher.matches()) {
+            Matcher httpMatcher = pattern.matcher(aResourceId);
+            if (httpMatcher.matches()) {
                 return aResourceId;
             } else {
                 if (cache == null) {
@@ -273,7 +265,7 @@ public class PlatypusScriptedResource {
         }
     }
 
-    protected static Client getClient() {
+    public static Client getClient() {
         return client;
     }
 
@@ -291,7 +283,7 @@ public class PlatypusScriptedResource {
         url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
         return url;
     }
-    
+
     protected static class NotResourceException extends Exception {
 
         protected String resourceId;
@@ -309,7 +301,7 @@ public class PlatypusScriptedResource {
             return resourceId;
         }
     }
-    
+
     /**
      * Accounting of already executed scripts. Allows to avoid reexecution.
      */
@@ -322,30 +314,58 @@ public class PlatypusScriptedResource {
      * @throws Exception
      */
     public static void executeScriptResource(final String aResourceId) throws Exception {
+        executeScriptResource(aResourceId, null);
+    }
+
+    public static void executeScriptResource(final String aResourceId, SecuredJSConstructor aPrevConstrVersion) throws Exception {
         final String resourceId = PlatypusScriptedResource.normalizeResourcePath(aResourceId);
-        if (!executedScriptResources.contains(resourceId)) {
-            try {
-                String sourcePath = PlatypusScriptedResource.translateScriptPath(resourceId);
-                if (sourcePath != null) {
-                    URL sourceUrl;
-                    File test = new File(sourcePath);
-                    if (test.exists()) {
-                        sourceUrl = test.toURI().toURL();
-                    } else {
-                        sourceUrl = new URL(sourcePath);
-                    }
-                    ScriptUtils.exec(sourceUrl);
-                } else {
-                    throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
-                }
-            } catch (NotResourceException ex) {
-                // Silently return.
-                // There are cases, when require is called with regular platypus module id.
-                // In such case, we have to ignore require call in SE client, server and servlet (because of automatic dependecies resolution),
-                // and perform standard actions for html5 browser client.
-                return;
-            }
+        if (!executedScriptResources.contains(resourceId) || aPrevConstrVersion != null) {
             executedScriptResources.add(resourceId);
+            String sourcePath = PlatypusScriptedResource.translateScriptPath(resourceId);
+            if (sourcePath != null) {
+                URL sourceUrl;
+                File test = new File(sourcePath);
+                if (test.exists()) {
+                    sourceUrl = test.toURI().toURL();
+                } else {
+                    try {
+                        sourceUrl = new URL(sourcePath);
+                    } catch (MalformedURLException ex) {
+                        throw new FileNotFoundException(sourcePath);
+                    }
+                }
+                URLReader reader = new URLReader(sourceUrl, SettingsConstants.COMMON_ENCODING);
+                StringBuilder read = new StringBuilder();
+                char[] buffer = new char[1024 * 4];// 4kb
+                int readCount = 0;
+                while (readCount != -1) {
+                    readCount = reader.read(buffer);
+                    if (readCount != -1) {
+                        read.append(buffer, 0, readCount);
+                    }
+                }
+                DependenciesWalker walker = new DependenciesWalker(read.toString(), cache);
+                walker.walk();
+                for (String aDependence : walker.getDependencies()) {
+                    executeScriptResource(aDependence);
+                }
+                ScriptUtils.exec(sourceUrl);
+                ApplicationElement appElement = cache.get(resourceId);
+                if (appElement != null && appElement.isModule()) {
+                    ScriptDocument doc = Dom2ScriptDocument.transform(appElement.getContent());
+                    JSObject nativeConstr = ScriptUtils.lookupInGlobal(appElement.getId());
+                    SecuredJSConstructor securedContr;
+                    if (aPrevConstrVersion != null) {
+                        securedContr = aPrevConstrVersion;
+                        aPrevConstrVersion.replace(nativeConstr, appElement.getTxtContentLength(), appElement.getTxtCrc32(), doc);
+                    } else {
+                        securedContr = new SecuredJSConstructor(nativeConstr, appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), cache, getPrincipalHost(), doc);
+                    }
+                    ScriptUtils.putInGlobal(appElement.getId(), securedContr);
+                }
+            } else {
+                throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
+            }
         }
     }
 }

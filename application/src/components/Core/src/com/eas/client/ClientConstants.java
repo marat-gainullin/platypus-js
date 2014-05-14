@@ -99,7 +99,7 @@ public class ClientConstants {
     public static final String LINE_SEPARATOR_PROP_NAME = "line.separator";
     //public static final String TEMP_DIR_PROP_NAME = "java.io.tmpdir";
     public static final String USER_HOME_PLATYPUS_DIRECTORY_NAME = ".platypus";
-    public static final String ENTITIES_CACHE_DIRECTORY_NAME = "entitiesCache";
+    public static final String ENTITIES_CACHE_DIRECTORY_NAME = "appCache";
     public static final String CRLF = "\r\n";
     // Типы элементов приложения
     public static final int ET_COMPONENT = 20;

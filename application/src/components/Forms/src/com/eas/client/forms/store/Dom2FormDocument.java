@@ -1,20 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.forms.store;
 
 import com.eas.client.Client;
+import com.eas.client.ClientConstants;
 import com.eas.client.forms.DbFormDesignInfo;
-import com.eas.client.forms.FormDocument;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.store.Dom2ScriptDocument;
+import com.eas.client.settings.SettingsConstants;
+import com.eas.controls.FormDesignInfo;
 import com.eas.store.Object2Dom;
+import com.eas.xml.dom.Source2XmlDom;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -22,49 +20,37 @@ import org.w3c.dom.NodeList;
  *
  * @author mg
  */
-public class Dom2FormDocument extends Dom2ScriptDocument {
-
-    private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    private final DocumentBuilder documentBuilder;
+public class Dom2FormDocument {
 
     protected Dom2FormDocument() throws ParserConfigurationException {
         super();
-        documentBuilder = builderFactory.newDocumentBuilder();
     }
 
-    public static FormDocument dom2FormDocument(Client aClient, Document aDom) throws Exception {
-        Dom2FormDocument domReader = new Dom2FormDocument();
-        return domReader.parseDom(aClient, aDom);
+    public static FormDesignInfo load(Client aClient, String aAppElementName) throws Exception {
+        ApplicationElement appElement = aClient.getAppCache().get(aAppElementName);
+        if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+            Document doc = Source2XmlDom.transform(new String(appElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING));
+            return parseTag(doc.getDocumentElement());
+        } else {
+            return transform(appElement.getContent());
+        }
     }
 
-    @Override
-    protected String rootTagName() {
-        return ApplicationElement.FORM_ROOT_TAG_NAME;
-    }
-
-    @Override
-    public FormDocument parseDom(Client aClient, Document aDom) throws Exception {
-        ScriptDocument superDoc = super.parseDom(aClient, aDom);
-        DbFormDesignInfo formLayout = null;
-        NodeList roots = aDom.getChildNodes();
-        for (int i = 0; i < roots.getLength(); i++) {
-            Node root = roots.item(i);
-            if (ApplicationElement.FORM_ROOT_TAG_NAME.equals(root.getNodeName())) {
-                NodeList tags = root.getChildNodes();
-                for (int j = 0; j < tags.getLength(); j++) {
-                    Node tag = tags.item(j);
-                    switch (tag.getNodeName()) {
-                        case ApplicationElement.LAYOUT_TAG_NAME:
-                            Document layoutDom = documentBuilder.newDocument();
-			    layoutDom.setXmlStandalone(true);
-                            layoutDom.appendChild(layoutDom.importNode(tag, true));
-                            formLayout = new DbFormDesignInfo();
-                            Object2Dom.transform(formLayout, layoutDom);
-                            break;
-                    }
-                }
+    public static FormDesignInfo transform(Document aDocument) throws Exception {
+        Element root = aDocument.getDocumentElement();
+        NodeList tags = root.getChildNodes();
+        for (int j = 0; j < tags.getLength(); j++) {
+            Node node = tags.item(j);
+            if (node instanceof Element && ApplicationElement.LAYOUT_TAG_NAME.equals(((Element) node).getTagName())) {
+                return parseTag((Element) node);
             }
         }
-        return new FormDocument(superDoc.getModel(), superDoc.getScriptSource(), formLayout);
+        return null;
+    }
+
+    protected static FormDesignInfo parseTag(Element aTag) {
+        DbFormDesignInfo formLayout = new DbFormDesignInfo();
+        Object2Dom.transform(formLayout, aTag);
+        return formLayout;
     }
 }

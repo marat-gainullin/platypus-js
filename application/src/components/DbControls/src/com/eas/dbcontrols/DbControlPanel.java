@@ -813,7 +813,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public void setValue(Object aValue) throws Exception {
         if (standalone) {
             if (!setValue2Rowset(aValue)) {
-                    // if the value has been rejected by rowset we must
+                // if the value has been rejected by rowset we must
                 // reflect rowset's value in the control.
                 setEditingValue(getValueFromRowset());
             }
@@ -934,26 +934,24 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     @Override
     public void configure() throws Exception {
-        if (isRuntime()) {
-            cleanup();
-            if (standalone) {
-                if (model != null && datamodelElement != null) {
-                    kind = InitializingMethod.UNDEFINED;
-                    unbind();
-                    bind();
-                    createFieldExtraEditingControls();
-                    removeAll();
-                    initializeEditor();
-                    extraTools.setVisible(editable);
-                    initializeBorder();
-                    initializeFocusListener();
-                } else {
-                    initializeDesign();
-                }
+        cleanup();
+        if (standalone) {
+            if (model != null && datamodelElement != null) {
+                kind = InitializingMethod.UNDEFINED;
+                unbind();
+                bind();
+                createFieldExtraEditingControls();
+                removeAll();
+                initializeEditor();
+                extraTools.setVisible(editable);
+                initializeBorder();
+                initializeFocusListener();
             } else {
-                // addExtraControls(createCellExtraEditingControls());
-                // This work is moved to client code (grid or veer columns initializing)
+                initializeDesign();
             }
+        } else {
+                // addExtraControls(createCellExtraEditingControls());
+            // This work is moved to client code (grid or veer columns initializing)
         }
     }
 
@@ -1106,11 +1104,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         protected JSObject getSelectFunction() {
             return selectFunction;
         }
-    }
-
-    @Override
-    public boolean isRuntime() {
-        return model != null && model.isRuntime();
     }
 
     @Override
