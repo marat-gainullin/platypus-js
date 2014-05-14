@@ -88,12 +88,12 @@ public class ModuleCompletionContext extends CompletionContext {
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
-        if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
-            fillSystemConstructors(point, resultSet);
-        } else if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            fillSystemObjects(point, resultSet);
-        }
+//        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
+//        if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
+//            fillSystemConstructors(point, resultSet);
+//        } else if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
+//            fillSystemObjects(point, resultSet);
+//        }
     }
 
     protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
