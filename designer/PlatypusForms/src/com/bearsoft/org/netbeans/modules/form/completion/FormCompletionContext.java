@@ -11,11 +11,13 @@ import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import jdk.nashorn.internal.ir.VarNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
 
@@ -33,10 +35,17 @@ public class FormCompletionContext extends ModuleCompletionContext {
     }
 
     @Override
-    public ModuleThisCompletionContext createThisContext(boolean anEnableJsElementsCompletion) {
-        return new FormThisCompletionContext(this, anEnableJsElementsCompletion);
+    public CompletionContext getVarContext(VarNode varNode) {
+        CompletionContext cc = super.getVarContext(varNode);
+        if (cc != null) {
+            return cc;
+        }
+        if (isSystemObjectMethod(varNode.getAssignmentSource(), "loadForm")) {
+            cc = new FormThisCompletionContext(this);
+        } 
+        return cc;
     }
-
+    
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);

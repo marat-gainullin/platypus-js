@@ -178,29 +178,39 @@ public class ModuleCompletionContext extends CompletionContext {
             @Override
             public boolean enterVarNode(VarNode varNode) {
                 if (AstUtlities.isInNode(lc.getCurrentFunction(), offset)
-                        && varNode.getAssignmentDest().getName().equals(fieldName)) {      
-                    if (isLoadModelExpression(varNode.getAssignmentSource())) {
-                        lc.ctx = new ModelCompletionContext(parentModuleContext.getDataObject());
+                        && varNode.getAssignmentDest().getName().equals(fieldName)) {
+                    CompletionContext c = parentModuleContext.getVarContext(varNode);
+                    if (c != null) {
+                        lc.ctx = c;
                     }
                 }
                 return super.enterVarNode(varNode); //To change body of generated methods, choose Tools | Templates.
             }
 
-            private boolean isLoadModelExpression(Expression assignmentSource) {
-                if (assignmentSource instanceof CallNode) {
-                    CallNode cn = (CallNode) assignmentSource;
-                    System.out.println(cn.getFunction().toString());
-                    if (cn.getFunction() instanceof AccessNode) {
-                        AccessNode an = (AccessNode) cn.getFunction();
-                        return "loadModel".equals(an.getProperty().getName()) 
-                                && an.getBase() instanceof IdentNode 
-                                && "P".equals(((IdentNode)an.getBase()).getName());
-                    }
-                }
-                return false;
-            }
         });
         return lc.ctx;
+    }
+
+    public CompletionContext getVarContext(VarNode varNode) {
+        if (isSystemObjectMethod(varNode.getAssignmentSource(), "loadModel")) {
+            return new ModelCompletionContext(getDataObject());
+        } else {
+            return null;
+        }
+    }
+
+    protected static boolean isSystemObjectMethod(Expression assignmentSource, String methodName) {
+        if (assignmentSource instanceof CallNode) {
+            CallNode cn = (CallNode) assignmentSource;
+            System.out.println(cn.getFunction().toString());
+            if (cn.getFunction() instanceof AccessNode) {
+                AccessNode an = (AccessNode) cn.getFunction();
+                return methodName.equals(an.getProperty().getName())
+                        && an.getBase() instanceof IdentNode
+                        && "P".equals(((IdentNode) an.getBase()).getName());
+            }
+        }
+        return false;
     }
 
     public static boolean isModuleInitializerName(String name) {

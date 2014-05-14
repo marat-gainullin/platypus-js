@@ -6,9 +6,6 @@ package com.bearsoft.org.netbeans.modules.form.completion;
 
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
-import com.bearsoft.org.netbeans.modules.form.PersistenceException;
-import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
-import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.RADVisualFormContainer;
@@ -21,29 +18,27 @@ import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
-import java.awt.Container;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
  *
  * @author vv
  */
-public class FormThisCompletionContext extends ModuleThisCompletionContext {
+public class FormThisCompletionContext extends CompletionContext {
 
-    public FormThisCompletionContext(ModuleCompletionContext aParentContext, boolean anEnableJsElementsCompletion) {
-        super(aParentContext, anEnableJsElementsCompletion);
+    private final FormCompletionContext parentContext;
+
+    public FormThisCompletionContext(FormCompletionContext aParentContext) {
+        super(null);
+        parentContext = aParentContext;
     }
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-        ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(getParentContext().getDataObject(), offset, point.getFilter());
-        if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
-            fillComponents(point, resultSet);
-        }
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
+        fillComponents(point, resultSet);
+
     }
 
     @Override
@@ -94,20 +89,8 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         }
     }
 
-    
-    @Override
-    protected void fillSpecificObjects(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        //NO OP
-    }
-    
-    @Override
-    protected CompletionContext getSpecificContext(CompletionToken token) {
-        return null;
-    }
-    
     private FormModel getFormModel() {
-        assert getParentContext() instanceof FormCompletionContext;
-        return ((FormCompletionContext) getParentContext()).getFormModel();
+        return parentContext.getFormModel();
     }
 
     protected RADComponent<?> getComponentByName(String aName) {
