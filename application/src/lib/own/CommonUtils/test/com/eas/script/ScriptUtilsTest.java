@@ -42,6 +42,9 @@ public class ScriptUtilsTest {
         Object jsLiteralString = ScriptUtils.exec("('Sam' + 'p' + 'le');");
         Object javaUtilString = ScriptUtils.toJava(jsLiteralString);
         assertTrue(javaUtilString instanceof String);
+        String jsComments = "/* a */ function() { } //b";
+        String jsRemovedComments = ScriptUtils.removeComments(jsComments);
+        assertEquals(jsRemovedComments, "        function() { }    ");
    }
     
     @Test

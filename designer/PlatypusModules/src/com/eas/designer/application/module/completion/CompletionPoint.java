@@ -10,19 +10,15 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 import javax.swing.text.BadLocationException;
 import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.BlockLexicalContext;
-import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
-import jdk.nashorn.internal.ir.LiteralNode;
 import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.PropertyNode;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import jdk.nashorn.internal.parser.Token;
 import org.netbeans.modules.editor.NbEditorDocument;
 
 /**
@@ -67,8 +63,10 @@ public class CompletionPoint {
             if (Character.isJavaIdentifierPart(preCaretPositionChar) || preCaretPositionChar == DOT_CHARACTER) {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
-                String docStr = doc.getText(0, doc.getLength());
-                cp.astRoot = ScriptUtils.parseJs(afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr);
+                String docStr = removeComments(doc.getText(0, doc.getLength()));
+                cp.astRoot = ScriptUtils.parseJs(
+                        afterDotCaretPosintion
+                        ? sanitizeDot(docStr, caretOffset - 1) : docStr);
                 //Node offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
                 //final Node subRoot = getCompletionSubtree(cp.astRoot, caretOffset);
                 //if (subRoot != null) {
@@ -87,21 +85,14 @@ public class CompletionPoint {
         return cp;
     }
 
-    public static class AccessNodeLexicalContext extends LexicalContext {
-
-        private Deque<AccessNode> accessNodes = new ArrayDeque<>();
-
-    }
-
-    public static class ExpressionStatementContext extends LexicalContext {
-
-        private ExpressionStatement expressionStatement;
-
-    }
-
     public static List<CompletionToken> getContextTokens(final Node ast, final int offset) {
-        final List<CompletionToken> ctx = new ArrayList<>();
+        class AccessNodeLexicalContext extends LexicalContext {
+
+            final Deque<AccessNode> accessNodes = new ArrayDeque<>();
+
+        }
         final AccessNodeLexicalContext lc = new AccessNodeLexicalContext();
+        final List<CompletionToken> ctx = new ArrayList<>();
         ast.accept(new NodeVisitor<AccessNodeLexicalContext>(lc) {
 
             @Override
@@ -120,15 +111,13 @@ public class CompletionPoint {
                 lc.accessNodes.pop();
                 return super.leaveAccessNode(accessNode);
             }
-            
-            
 
             @Override
             public boolean enterIdentNode(IdentNode identNode) {
                 if (!lc.accessNodes.isEmpty()
                         && AstUtlities.isInNode(lc.accessNodes.peekLast(), identNode)
                         && AstUtlities.isInNode(lc.accessNodes.peekLast(), offset)
-                    || lc.accessNodes.isEmpty() 
+                        || lc.accessNodes.isEmpty()
                         && AstUtlities.isInNode(identNode, offset)) {
                     ctx.add(new CompletionToken(identNode.getName(), CompletionTokenType.IDENTIFIER, identNode));
                 }
@@ -175,6 +164,22 @@ public class CompletionPoint {
          });
          */
         return ctx;
+    }
+
+    private static String removeComments(String text) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for (Long t : ScriptUtils.getCommentsTokens(text)) {
+            int offset = Token.descPosition(t);
+            int lenght = Token.descLength(t);
+            sb.append(text.substring(i, offset));
+            for (int j = 0; j < lenght; j++) {
+                sb.append(" ");//NOI18N
+            }
+            i = offset + lenght;
+        }
+        sb.append(text.substring(i));
+        return sb.toString();
     }
 
     private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, int offset) {

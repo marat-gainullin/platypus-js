@@ -1,7 +1,9 @@
 package com.eas.script;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
@@ -10,7 +12,11 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
+import jdk.nashorn.internal.parser.Token;
+import jdk.nashorn.internal.parser.TokenStream;
+import jdk.nashorn.internal.parser.TokenType;
 import jdk.nashorn.internal.runtime.ErrorManager;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptEnvironment;
@@ -159,6 +165,56 @@ public class ScriptUtils {
         return publishedArgs;
     }
 
+    /**
+     * Extracts the comments tokens from a JavaScript source.
+     * @param aSource a source
+     * @return a list of comment tokens
+     */
+    public static List<Long> getCommentsTokens(String aSource) {
+        TokenStream tokens = new TokenStream();
+        Lexer lexer = new Lexer(new Source("", aSource), tokens);//NOI18N
+        long t;
+        TokenType tt = TokenType.EOL;
+        int i = 0;
+        List<Long> commentsTokens = new ArrayList<>();
+        while (tt != TokenType.EOF) {
+            // Get next token in nashorn's parser way
+            while (i > tokens.last()) {
+                if (tokens.isFull()) {
+                    tokens.grow();
+                }
+                lexer.lexify();
+            }
+            t = tokens.get(i++);
+            tt = Token.descType(t);
+            if (tt == TokenType.COMMENT) {
+                commentsTokens.add(t);
+            }
+        }
+        return commentsTokens;
+    }
+    
+    /**
+     * Removes all commentaries from some JavaScript code.
+     * @param text a source
+     * @return comments-free JavaScript code
+     */
+    public static String removeComments(String text) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for (Long t : getCommentsTokens(text)) {  
+            int offset = Token.descPosition(t);
+            int lenght = Token.descLength(t);
+            sb.append(text.substring(i, offset));
+            for (int j = 0; j < lenght; j++) {
+                sb.append(" ");//NOI18N
+            }
+            i = offset + lenght;
+        }
+        sb.append(text.substring(i));
+        return sb.toString();
+    }
+    
     public static Object parseJson(String json) {
         assert parseJsonFunc != null : SCRIPT_NOT_INITIALIZED;
         return parseJsonFunc.call(null, new Object[]{json});

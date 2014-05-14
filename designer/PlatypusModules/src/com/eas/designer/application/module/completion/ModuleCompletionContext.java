@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.LexicalContext;
+import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
@@ -159,7 +160,19 @@ public class ModuleCompletionContext extends CompletionContext {
         }
         FunctionNode astRoot = parentModuleContext.dataObject.getAstRoot();
         astRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
-        
+
+            @Override
+            protected boolean enterDefault(jdk.nashorn.internal.ir.Node node) {
+                return super.enterDefault(node); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public boolean enterVarNode(VarNode varNode) {
+                return super.enterVarNode(varNode); //To change body of generated methods, choose Tools | Templates.
+            }
+            
+            
+            
         });
         /*
        
