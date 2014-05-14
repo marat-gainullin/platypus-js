@@ -41,8 +41,7 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
     protected boolean canClose() {
         try {
             PlatypusReportDataObject reportObject = (PlatypusReportDataObject) dataObject;
-            reportObject.getLayoutData().getTemplate();
-            boolean res = reportObject.getLayoutData().isTemplateValid() && super.canClose();
+            boolean res = reportObject.isTemplateValid() && super.canClose();
             if (!res)// We can't close document while report layout been edited.
             {       // In this case we have to warn the user about this situation.
                 NotifyDescriptor message = new NotifyDescriptor.Message(NbBundle.getMessage(PlatypusReportSupport.class, "Can_tCloseWhileEditingReportLayout"), NotifyDescriptor.Message.INFORMATION_MESSAGE);
@@ -59,15 +58,9 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
     public void saveDocument() throws IOException {
         try {
             PlatypusReportDataObject reportObject = (PlatypusReportDataObject) dataObject;
-            reportObject.getLayoutData().getTemplate();
-            if (reportObject.getLayoutData().isTemplateValid()) {
+            if (reportObject.isTemplateValid()) {
                 // save js source and datamodel
                 super.saveDocument();
-                // save report layout
-                if (reportObject.getLayoutData().isTemplateModified()) {
-                    reportObject.saveLayout();
-                    reportObject.getLayoutData().setTemplateModified(false);
-                }
             } else // We can't save document while report layout been edited.
             {     // In this case we have to warn the user about this situation.
                 NotifyDescriptor message = new NotifyDescriptor.Message(NbBundle.getMessage(PlatypusReportSupport.class, "Can_tSaveWhileEditingReportLayout"), NotifyDescriptor.Message.INFORMATION_MESSAGE);

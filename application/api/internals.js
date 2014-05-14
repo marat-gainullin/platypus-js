@@ -25,7 +25,10 @@
             function(aPropertyName) {
                 return this[aPropertyName];
             });
-    ;
+    ScriptUtils.setPutInGlobalFunc(
+            function(aPropertyName, aValue) {
+                this[aPropertyName] = aValue;
+            });
     ScriptUtils.setToDateFunc(
             function(aJavaDate) {
                 return aJavaDate !== null ? new Date(aJavaDate.time) : null;

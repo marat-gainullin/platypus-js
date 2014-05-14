@@ -5,7 +5,9 @@
 package com.eas.server;
 
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.ScriptDocument;
+import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
 import com.eas.script.JsDoc;
@@ -117,8 +119,9 @@ public class PlatypusServer extends PlatypusServerCore {
     private String findAcceptorModule(String aProtocol) throws Exception {
         String lastAcceptor = null;
         for (String taskModuleId : tasks) {
-            ScriptDocument sDoc = scriptDocuments.getScriptDocument(taskModuleId);
-            if (sDoc != null) {
+            ApplicationElement appElement = getDatabasesClient().getAppCache().get(taskModuleId);
+            if (appElement != null && appElement.isModule()) {
+                ScriptDocument sDoc = Dom2ScriptDocument.transform(appElement.getContent());
                 boolean isAcceptor = false;
                 Set<String> protocols = new HashSet<>();
                 for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
@@ -190,12 +193,11 @@ public class PlatypusServer extends PlatypusServerCore {
 
     private void initializeAndBindPlatypusAcceptor(InetSocketAddress s) throws IOException, Exception {
         final SslFilter sslFilter = new SslFilter(sslContext);
-        
         Integer numWorkerThreads = portsNumWorkerThreads != null ? portsNumWorkerThreads.get(s.getPort()) : null;
         if (numWorkerThreads == null || numWorkerThreads == 0) {
             numWorkerThreads = DEFAULT_EXECUTOR_POOL_SIZE;
         }
-        
+
         final ExecutorService executor = new OrderedThreadPoolExecutor(numWorkerThreads);
 
         final IoAcceptor acceptor = new NioSocketAcceptor();

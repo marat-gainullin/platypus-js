@@ -5,6 +5,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.store.Model2XmlDom;
+import com.eas.client.scripts.DependenciesWalker;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.server.PlatypusServerCore;
@@ -90,13 +91,11 @@ public class AppElementsFilter {
      * @throws Exception
      */
     protected FilteredXml filter(ApplicationElement anAppElement) throws Exception {
-        if (anAppElement != null && (anAppElement.getType() == ClientConstants.ET_FORM || anAppElement.getType() == ClientConstants.ET_COMPONENT || anAppElement.getType() == ClientConstants.ET_REPORT)) {
+        if (anAppElement != null && anAppElement.isModule()) {
             anAppElement = anAppElement.copy();// Because of mutations of xml, made by this code.
             Document doc = anAppElement.getContent();
             if (doc != null) {
-                ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);
-                scriptDoc.readScriptAnnotations();
-                //String moduleId = aAppElement.getId();
+                ScriptDocument scriptDoc = Dom2ScriptDocument.transform(doc);
                 Set<String> dependencies = null;
                 Set<String> queryDependencies = null;
                 Set<String> serverDependencies = null;
@@ -178,11 +177,8 @@ public class AppElementsFilter {
     }
 
     protected Set<String> checkResourceKindAndRoles(ApplicationElement appElement, ScriptDocument scriptDoc) throws Exception {
-        if (ClientConstants.ET_COMPONENT == appElement.getType()
-                || ClientConstants.ET_REPORT == appElement.getType()
-                || ClientConstants.ET_FORM == appElement.getType()
-                || ClientConstants.ET_RESOURCE == appElement.getType()) {
-            return readResourceRoles(scriptDoc);
+        if (appElement.isModule()) {
+            return scriptDoc.getModuleAllowedRoles();
         } else {
             // We disallow access of any three-tier client to application
             // design data like folders, queries content or database diagrams.
@@ -194,10 +190,5 @@ public class AppElementsFilter {
             // || ClientConstants.ET_QUERY == appElement.getType()
         }
         return null;
-    }
-
-    private Set<String> readResourceRoles(ScriptDocument scriptDoc) {
-        scriptDoc.readScriptAnnotations();
-        return scriptDoc.getModuleAllowedRoles();
     }
 }

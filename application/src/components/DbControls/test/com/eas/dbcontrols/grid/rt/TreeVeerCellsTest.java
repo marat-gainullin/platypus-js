@@ -680,19 +680,19 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     Rowset cells2ValuesRowset = new Rowset(cells2Fields);
                     fillInRowset(cells2ValuesRowset, cells2TestData);
 
-                    ApplicationDbModel dm = new ApplicationDbModel(new DummyTestDbClient());
-                    assertNotNull(dm);
-                    dm.setRuntime(true);
-                    ApplicationDbEntity cells2Entity = dm.newGenericEntity();
-                    dm.addEntity(cells2Entity);
+                    ApplicationDbModel model = new ApplicationDbModel(new DummyTestDbClient());
+                    assertNotNull(model);
+                    model.requery();
+                    ApplicationDbEntity cells2Entity = model.newGenericEntity();
+                    model.addEntity(cells2Entity);
                     cells2Entity.setQuery(new DummyTestSqlQuery());
                     cells2Entity.setRowset(cells2Rowset);
-                    ApplicationDbEntity cells2ValuesEntity = dm.newGenericEntity();
-                    dm.addEntity(cells2ValuesEntity);
+                    ApplicationDbEntity cells2ValuesEntity = model.newGenericEntity();
+                    model.addEntity(cells2ValuesEntity);
                     cells2ValuesEntity.setQuery(new DummyTestSqlQuery());
                     cells2ValuesEntity.setRowset(cells2ValuesRowset);
                     Relation colRelation = new Relation(cells2Entity, cells2Rowset.getFields().get(1), cells2ValuesEntity, cells2ValuesRowset.getFields().get(1));
-                    dm.addRelation(colRelation);
+                    model.addRelation(colRelation);
 
                     int s1ToGlueToIndex = 1;
                     int s2ToGlueToIndex = 3;
@@ -722,17 +722,17 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     verifyColumns(columns, s2Rowset, s2ToGlueToIndex + s1Rowset.size() + 1, 2);
 
                     // TODO: make some nodes expanded
-                    TableModel model = tbl.getModel();
+                    TableModel rtModel = tbl.getModel();
                     //model to rowsets test section 1
                     for (int c = 9; c <= 15; c++) {
                         for (int r = 0; r <= 2; r++) {
-                            Object val = model.getValueAt(r, c);
+                            Object val = rtModel.getValueAt(r, c);
                             assertTrue(val instanceof CellData);
                             val = ((CellData) val).getData();
                             assertTrue(val instanceof String);
                             String sVal = (String) val;
                             assertFalse(sVal.endsWith("_"));
-                            model.setValueAt(sVal + "_", r, c);
+                            rtModel.setValueAt(sVal + "_", r, c);
                         }
                     }
                     // verify...1
@@ -778,7 +778,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
                     // verify...
                     for (int c = 9; c <= 15; c++) {
                         for (int r = 0; r <= 2; r++) {
-                            Object val = model.getValueAt(r, c);
+                            Object val = rtModel.getValueAt(r, c);
                             assertTrue(val instanceof CellData);
                             val = ((CellData) val).getData();
                             assertTrue(val instanceof String);

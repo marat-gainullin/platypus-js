@@ -4,12 +4,9 @@
  */
 package com.eas.designer.application.report;
 
-import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.reports.ExcelReport;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.File;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.MIMEResolver;
@@ -18,11 +15,10 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 
-@MIMEResolver.ExtensionRegistration(displayName="#LBL_PlatypusReport_layout_file", extension="xlsx", mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+@MIMEResolver.ExtensionRegistration(displayName = "#LBL_PlatypusReport_layout_file", extension = "xlsx", mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 public class PlatypusReportDataObject extends PlatypusModuleDataObject {
 
     protected Entry layoutEntry;
-    protected ExcelReport xlReport;
 
     public PlatypusReportDataObject(FileObject aJsFile, MultiFileLoader aLoader) throws Exception {
         super(aJsFile, aLoader);
@@ -31,26 +27,6 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
             aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION);
         }
         layoutEntry = registerEntry(aLayoutFile);
-    }
-
-    public ExcelReport getLayoutData() throws Exception {
-        checkLayoutData();
-        return xlReport;
-    }
-
-    public void checkLayoutData() throws IOException {
-        if (xlReport == null) {
-            xlReport = new ExcelReport(getLayoutFile().getExt());
-            xlReport.setTemplate(null);
-            xlReport.setTemplate(new CompactBlob(layoutEntry.getFile().asBytes()));
-            xlReport.setTemplateModified(false);
-        }
-    }
-
-    @Override
-    public void shrink() {
-        super.shrink();
-        xlReport = null;
     }
 
     @Override
@@ -71,12 +47,14 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
         return node;
     }
 
-    public void saveLayout() throws Exception {
-        if (xlReport != null) {
-            try (OutputStream out = layoutEntry.getFile().getOutputStream()) {
-                out.write(xlReport.getTemplate().getData());
-                out.flush();
-            }
-        }
+    public boolean isTemplateValid() {
+        File templateFile = FileUtil.toFile(getLayoutFile());
+        String path = templateFile.getPath();
+        String fileName = templateFile.getName();
+        path = path.substring(0, path.length() - fileName.length());
+        File fCandidate1 = new File(path + ".~lock." + fileName + "#");// open office
+        File fCandidate2 = new File(path + "~$" + fileName); // microsoft office
+        return !fCandidate1.exists() && !fCandidate2.exists();
     }
+
 }

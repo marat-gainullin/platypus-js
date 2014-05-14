@@ -203,13 +203,12 @@ public class ServerMain {
         }
         SSLContext ctx = createSSLContext();
         AppCache appCache = ClientFactory.obtainTwoTierAppCache(url, new ServerTasksScanner(tasks));
-        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true, null);
+        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true);
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
         server.setAnonymousEnabled(anonymousEnabled);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
-        appDbClient.setDocumentsHost(server);
-        PlatypusScriptedResource.init(appDbClient, server, server);
+        PlatypusScriptedResource.init(appDbClient, server);
         //
         server.start();
     }

@@ -375,7 +375,6 @@
 				<include name="lib/own/ScalablePane.jar"/>
 				
 				<include name="lib/thirdparty/JCalendar.jar"/>
-				<include name="lib/thirdparty/js.jar"/>
 				
 				<include name="lib/thirdparty/chart/*.jar"/>
 				

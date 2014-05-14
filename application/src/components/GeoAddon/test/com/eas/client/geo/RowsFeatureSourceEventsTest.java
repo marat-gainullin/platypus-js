@@ -15,6 +15,7 @@ import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.ModelEntityRef;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.util.gis.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class RowsFeatureSourceEventsTest extends GeoBaseTest {
             aRowset.insert(new Object[]{
                 1, aRowset.size(), // pk
                 2, aType, // type
-                3, GisUtilities.createPoint(45, 45), // geometry
+                3, GeometryUtils.createPoint(45, 45), // geometry
                 4, "label for geometrty binding tests № " + String.valueOf(i), // label field
                 5, "sample test row for geometrty binding tests № " + String.valueOf(i) // free field
             });
@@ -281,7 +282,7 @@ public class RowsFeatureSourceEventsTest extends GeoBaseTest {
         refreshListeners();
         testRowset.beforeFirst();
         while (testRowset.next()) {
-            testRowset.updateObject(3, GisUtilities.createPoint(58, 5));
+            testRowset.updateObject(3, GeometryUtils.createPoint(58, 5));
         }
         assertEquals(toInsert, listener1.eventsCount);
         assertEquals(toInsert, listener2.eventsCount);

@@ -8,8 +8,6 @@ import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.login.SystemPlatypusPrincipal;
-import com.eas.client.scripts.ScriptDocuments;
-import com.eas.client.scripts.ScriptDocumentsHost;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import org.junit.Test;
@@ -37,21 +35,6 @@ public class ApplicationScriptsTest {
             return new SystemPlatypusPrincipal();
         }
     }
-
-    protected static class TestScriptDocumentsHost implements ScriptDocumentsHost {
-
-        protected ScriptDocuments scriptDocuments;
-
-        public TestScriptDocumentsHost(ScriptDocuments aScriptDocuments) {
-            scriptDocuments = aScriptDocuments;
-        }
-
-        @Override
-        public ScriptDocuments getDocuments() {
-            return scriptDocuments;
-        }
-    }
-
     public static void scriptTest(String aModuleId) throws Exception {
         System.out.println("starting script test for the " + aModuleId + ". Expecting some exceptions while failure.");
         try (DatabasesClientWithResource resource = initDevelopTestClient()) {

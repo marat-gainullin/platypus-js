@@ -47,13 +47,20 @@ P.require = function(deps, aOnSuccess, aOnFailure) {
 (function() {
     var cached = {};
     var g = this;
-    var getModule = function(aName){
-        if(!cached[aName]){
+    var getModule = function(aName) {
+        if (!cached[aName]) {
             var c = g[aName];
-            if(c){
+            if (c) {
                 cached[aName] = new c();
-            }else{
-                throw 'No module constructor: '+aName+' found while Modules.get(...).';
+            } else {
+                var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
+                Executor.executeScriptResource(aName);
+                c = g[aName];
+                if (c) {
+                    cached[aName] = new c();
+                } else {
+                    throw 'No function: ' + aName + ' found while Modules.get(...).';
+                }
             }
         }
         return cached[aName];
@@ -78,44 +85,48 @@ P.require = function(deps, aOnSuccess, aOnFailure) {
 P.loadModel = function(aName, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-    var docsHost = Executor.getScriptDocumentsHost();
-    var docs = docsHost.getDocuments();
-    var doc = docs.getScriptDocument(aName);
-    var model = doc.getModel().copy();
+    var Loader = Java.type('com.eas.client.scripts.store.Dom2ModelDocument');
+    var model = Loader.load(Executor.getClient(), aName);
     // publish
-    publishTo.unwrap = function(){return model;};
-    publishTo.save = function(aCallback){model.save(aCallback);};
-    publishTo.revert = function(){model.revert();};
-    publishTo.requery = function(){model.requery();};
-    model.setPublished(publishTo);    
+    publishTo.unwrap = function() {
+        return model;
+    };
+    model.setPublished(publishTo);
     return publishTo;
 };
 
 P.loadForm = function(aName, aModel, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-    var docsHost = Executor.getScriptDocumentsHost();
-    var docs = docsHost.getDocuments();
-    var doc = docs.getScriptDocument(aName);
+    var Loader = Java.type('com.eas.client.forms.store.Dom2FormDocument');
     var Form = Java.type('com.eas.client.forms.Form');
-    var form = new Form(aName, doc, aModel.unwrap());
+    
+    var designInfo = Loader.load(Executor.getClient(), aName);
+    var form = new Form(aName, designInfo, aModel.unwrap());
     // publish
-    publishTo.show = function(){form.show();};
-    publishTo.close = function(aValue){form.close(aValue);};
+    publishTo.show = function() {
+        form.show();
+    };
+    publishTo.close = function(aValue) {
+        form.close(aValue);
+    };
     return publishTo;
 };
 
 P.loadReport = function(aName, aModel, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-    var docsHost = Executor.getScriptDocumentsHost();
-    var docs = docsHost.getDocuments();
-    var doc = docs.getScriptDocument(aName);
-    var Report = Java.type('com.eas.client.reports.Report');
-    var report = new Report(doc.getTemplate(), aModel.unwrap(), doc.getFormat());
+    var Loader = Java.type('com.eas.client.reports.store.Dom2ReportDocument');
+    var report = Loader.load(Executor.getClient(), aName, aModel.unwrap());
     // publish
-    publishTo.show = function(){report.show();};
-    publishTo.print = function(){report.print();};
-    publishTo.save = function(aPath){ return report.save(aPath);};
+    publishTo.show = function() {
+        report.show();
+    };
+    publishTo.print = function() {
+        report.print();
+    };
+    publishTo.save = function(aPath) {
+        return report.save(aPath);
+    };
     return publishTo;
 };

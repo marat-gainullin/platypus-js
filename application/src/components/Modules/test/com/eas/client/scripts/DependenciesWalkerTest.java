@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server.filter;
+package com.eas.client.scripts;
 
+import com.eas.client.scripts.DependenciesWalker;
 import java.util.Set;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -101,4 +102,5 @@ public class DependenciesWalkerTest {
         assertEquals(1, walker.getQueryDependencies().size());
         assertEquals("someQuery", walker.getQueryDependencies().iterator().next());
     }
+    
 }

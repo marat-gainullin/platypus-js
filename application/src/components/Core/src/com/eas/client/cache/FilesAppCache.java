@@ -164,13 +164,6 @@ public class FilesAppCache extends AppElementsCache {
     }
 
     @Override
-    protected void initializeFileCache(String aAppNameHash) throws Exception {
-        if (secondCacheEnabled) {
-            super.initializeFileCache(aAppNameHash);
-        }
-    }
-
-    @Override
     protected ApplicationElement getFromFileCache(String aId) throws Exception {
         if (secondCacheEnabled) {
             return super.getFromFileCache(aId);
@@ -421,12 +414,13 @@ public class FilesAppCache extends AppElementsCache {
 
     @Override
     public String translateScriptPath(String aName) throws Exception {
-        String res = calcSrcPath() + File.separator + aName;
         ApplicationElement appElement = get(aName);
-        if(appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE){
-            res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+        if (appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE) {
+            String path = id2Paths.get(aName).iterator().next();
+            return path + "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+        } else {
+            return calcSrcPath() + File.separator + aName.replace('/', File.separatorChar);
         }
-        return res;
     }
 
     protected synchronized void clearFamiliesByPathPrefix(String aPathPrefix) {

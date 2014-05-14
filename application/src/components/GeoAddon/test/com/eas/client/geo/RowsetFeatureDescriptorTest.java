@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
  */
 public class RowsetFeatureDescriptorTest extends GeoBaseTest {
 
-    private static ApplicationDbModel datamodel;
+    private static ApplicationDbModel model;
     private static ApplicationDbEntity colaMarkets;
 
     public RowsetFeatureDescriptorTest() {
@@ -25,13 +25,13 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         GeoBaseTest.setUpClass();
-        datamodel = new ApplicationDbModel(dbClient);
-        datamodel.setRuntime(true);
-        colaMarkets = new ApplicationDbEntity(datamodel);
+        model = new ApplicationDbModel(dbClient);
+        model.requery();
+        colaMarkets = new ApplicationDbEntity(model);
         colaMarkets.regenerateId();
         colaMarkets.setTableName("COLA_MARKETS");
         colaMarkets.validateQuery();
-        datamodel.addEntity(colaMarkets);
+        model.addEntity(colaMarkets);
         final Rowset rowset = colaMarkets.getRowset();
         assertNotNull(rowset);
         rowset.refresh();

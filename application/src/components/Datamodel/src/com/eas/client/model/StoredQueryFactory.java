@@ -161,7 +161,6 @@ public class StoredQueryFactory {
                 Document queryDom = appElement.getContent();
                 if (queryDom != null) {
                     QueryDocument queryDoc = XmlDom2QueryDocument.transform(client, aAppElementId, queryDom);
-
                     QueryModel model = queryDoc.getModel();
                     SqlQuery query = queryDoc.getQuery();
                     putRolesMutatables(query);

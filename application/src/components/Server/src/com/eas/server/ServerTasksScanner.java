@@ -25,6 +25,7 @@ public class ServerTasksScanner implements FilesAppCache.ScanCallback {
     private final Set<String> tasks;
 
     public ServerTasksScanner(Set<String> aTasks) {
+        super();
         tasks = aTasks;
     }
 
@@ -32,8 +33,7 @@ public class ServerTasksScanner implements FilesAppCache.ScanCallback {
     public void fileScanned(String aAppElementId, File file) {
         if ("js".equalsIgnoreCase(FileUtils.getFileExtension(file))) {
             try {
-                ScriptDocument doc = new ScriptDocument(null, FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING));
-                doc.readScriptAnnotations();
+                ScriptDocument doc = new ScriptDocument(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING));
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     for (JsDoc.Tag tag : annotations) {

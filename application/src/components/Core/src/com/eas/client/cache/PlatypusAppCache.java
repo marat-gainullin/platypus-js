@@ -35,16 +35,6 @@ public class PlatypusAppCache extends AppElementsCache{
     }
 
     @Override
-    public String translateScriptPath(String aName) throws Exception {
-        String res = generatePath(aName) + File.separator;
-        ApplicationElement appElement = get(aName);
-        if(appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE){
-            res += "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
-        }
-        return res;
-    }
-
-    @Override
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32) throws Exception {
         IsAppElementActualRequest rq = new IsAppElementActualRequest(IDGenerator.genID(), aId, aTxtContentLength, aTxtCrc32);
         client.executeRequest(rq);

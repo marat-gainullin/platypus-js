@@ -122,7 +122,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
                         sorter.setComparator(i - 1, new CellDataComparator());
                     }
 
-                    model.setRuntime(true);
+                    model.requery();
                     JTable tbl = new JTable(new CachingTableModel(tableViewModel), columnModel);
                     tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
                     tbl.setRowSorter(sorter);
@@ -200,7 +200,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
                         sorter.setComparator(i - 1, new CellDataComparator());
                     }
 
-                    model.setRuntime(true);
+                    model.requery();
                     JTable tbl = new JTable(new CachingTableModel(tableViewModel), columnModel);
                     tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
                     tbl.setRowSorter(sorter);
