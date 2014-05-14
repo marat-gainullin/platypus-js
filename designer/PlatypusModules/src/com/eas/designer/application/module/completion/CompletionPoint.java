@@ -12,7 +12,6 @@ import java.util.Deque;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;

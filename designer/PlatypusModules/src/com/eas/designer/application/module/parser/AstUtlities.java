@@ -17,7 +17,7 @@ public class AstUtlities {
 
     public static boolean isInNode(Node node, int offset) {
         return node.getStart() <= offset
-                && offset <= node.getFinish();
+                && offset <= node.getFinish() + 1;
     }
     
     public static boolean isInNode(Node outerNode, Node innerNode) {

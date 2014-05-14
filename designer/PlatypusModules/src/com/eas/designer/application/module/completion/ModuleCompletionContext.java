@@ -24,7 +24,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import jdk.nashorn.internal.ir.AccessNode;
+import jdk.nashorn.internal.ir.CallNode;
+import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
@@ -130,9 +134,9 @@ public class ModuleCompletionContext extends CompletionContext {
         assert false : "Refactoring is needed";
         return false;
         /*
-        return (aNode != null) && ((aNode instanceof NewExpression && (txt == null || txt.isEmpty()))
-                || (aNode instanceof Name && aNode.getParent() instanceof NewExpression));
-        */
+         return (aNode != null) && ((aNode instanceof NewExpression && (txt == null || txt.isEmpty()))
+         || (aNode instanceof Name && aNode.getParent() instanceof NewExpression));
+         */
     }
 
     public static ModuleCompletionContext getModuleCompletionContext(Project project, String appElementId) {
@@ -151,7 +155,7 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {        
+    public static CompletionContext findCompletionContext(final String fieldName, final int offset, final ModuleCompletionContext parentModuleContext) {
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Class clazz = scp.getClassByName(fieldName);
             if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
@@ -159,7 +163,12 @@ public class ModuleCompletionContext extends CompletionContext {
             }
         }
         FunctionNode astRoot = parentModuleContext.dataObject.getAstRoot();
-        astRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
+        class CompletionLexicalContext extends LexicalContext {
+
+            CompletionContext ctx;
+        }
+        CompletionLexicalContext lc = new CompletionLexicalContext();
+        astRoot.accept(new NodeVisitor<CompletionLexicalContext>(lc) {
 
             @Override
             protected boolean enterDefault(jdk.nashorn.internal.ir.Node node) {
@@ -168,42 +177,30 @@ public class ModuleCompletionContext extends CompletionContext {
 
             @Override
             public boolean enterVarNode(VarNode varNode) {
+                if (AstUtlities.isInNode(lc.getCurrentFunction(), offset)
+                        && varNode.getAssignmentDest().getName().equals(fieldName)) {      
+                    if (isLoadModelExpression(varNode.getAssignmentSource())) {
+                        lc.ctx = new ModelCompletionContext(parentModuleContext.getDataObject());
+                    }
+                }
                 return super.enterVarNode(varNode); //To change body of generated methods, choose Tools | Templates.
             }
-            
-            
-            
-        });
-        /*
-       
-        if (astRoot != null) {
-            jdk.nashorn.internal.ir.Node offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
-            jdk.nashorn.internal.ir.Node currentNode = offsetNode;
-            jdk.nashorn.internal.ir.Node parentScope = null;
-            for (;;) {//up to the root node  
-                if (currentNode instanceof ScriptNode) {
-                    if (parentScope == null) {
-                        parentScope = currentNode;
-                    }
-                    ModuleCompletionContext.FindModuleElementSupport visitor
-                            = new ModuleCompletionContext.FindModuleElementSupport(PlatypusFilesSupport.extractModuleConstructor(astRoot),
-                                    parentScope,
-                                    currentNode,
-                                    fieldName,
-                                    parentModuleContext);
-                    CompletionContext ctx = visitor.findContext();
-                    if (ctx != null) {
-                        return ctx;
+
+            private boolean isLoadModelExpression(Expression assignmentSource) {
+                if (assignmentSource instanceof CallNode) {
+                    CallNode cn = (CallNode) assignmentSource;
+                    System.out.println(cn.getFunction().toString());
+                    if (cn.getFunction() instanceof AccessNode) {
+                        AccessNode an = (AccessNode) cn.getFunction();
+                        return "loadModel".equals(an.getProperty().getName()) 
+                                && an.getBase() instanceof IdentNode 
+                                && "P".equals(((IdentNode)an.getBase()).getName());
                     }
                 }
-                currentNode = currentNode.getParent();
-                if (currentNode == null) {
-                    break;
-                }
+                return false;
             }
-        }
-            */
-        return null;
+        });
+        return lc.ctx;
     }
 
     public static boolean isModuleInitializerName(String name) {
@@ -216,15 +213,15 @@ public class ModuleCompletionContext extends CompletionContext {
 
     private static Class<?> getEventClass(Class<?> scriptClass, String name) {
         for (Method method : scriptClass.getMethods()) {
-            if (PropertiesUtils.isBeanPatternMethod(method) 
+            if (PropertiesUtils.isBeanPatternMethod(method)
                     && name.equals(PropertiesUtils.getPropertyName(method.getName()))
                     && method.isAnnotationPresent(EventMethod.class)) {
-                    return method.getAnnotation(EventMethod.class).eventClass();
+                return method.getAnnotation(EventMethod.class).eventClass();
             }
         }
         return null;
     }
-    
+
     public enum CompletionMode {
 
         VARIABLES_AND_FUNCTIONS, CONSTRUCTORS
@@ -262,152 +259,152 @@ public class ModuleCompletionContext extends CompletionContext {
         public CompletionContext findContext() {
             assert false : "Refactoring is needed";
             /*
-            lookupScope.visit(new NodeVisitor() {
-                @Override
-                public boolean visit(AstNode an) {
-                    if (an == lookupScope) {
-                        if (an instanceof FunctionNode) {
-                            FunctionNode fn = (FunctionNode) an;
-                            if (fn.getParams() != null && fn.getParams().size() > 0
-                                    && fieldName.equals(fn.getParams().get(0).toSource())) {// function parameter completion
-                                if (fn.getParent() instanceof FunctionCall) { // array iteration methods parameters on an entity with anonymous function an the fist parameter
-                                    FunctionCall fc = (FunctionCall) fn.getParent();
-                                    List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
-                                    if (tokens != null && tokens.size() > 1) {
-                                        CompletionToken funcitonCallToken = tokens.get(tokens.size() - 1);
-                                        if (fn == fc.getArguments().get(0) && ARRAY_ITERATION_FUNCTIONS_NAMES.contains(funcitonCallToken.name)) {
-                                            try {
-                                                CompletionContext c = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), fc.getAbsolutePosition());
-                                                if (c instanceof EntityCompletionContext) {
-                                                    ctx = ((EntityCompletionContext) c).getElementCompletionContext();
-                                                    return false;
-                                                }
-                                            } catch (Exception ex) {
-                                                ErrorManager.getDefault().notify(ex);
-                                            }
-                                        }
-                                    }
-                                } else if (fn.getParent() instanceof Assignment) { // event handler function pameter with event assignment
-                                    Assignment assignment = (Assignment) fn.getParent();
-                                    if (assignment.getLeft() instanceof PropertyGet) {
-                                        PropertyGet leftPg = (PropertyGet) assignment.getLeft();
-                                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(leftPg);
-                                        if (tokens != null && tokens.size() > 1) {
-                                            try {
-                                                CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), leftPg.getAbsolutePosition());
-                                                if (propsCtx != null && propsCtx.getScriptClass() != null) {
-                                                    Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
-                                                    if (eventClass != null) {
-                                                        ctx = new CompletionContext(eventClass);
-                                                        return false;
-                                                    }
-                                                }
-                                            } catch (Exception ex) {
-                                                ErrorManager.getDefault().notify(ex);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                    if (parentScope == moduleConstructorScope) {
-                        if (an instanceof PropertyGet) {
-                            PropertyGet pg = (PropertyGet) an;
-                            if (THIS_KEYWORD.equals(fieldName)
-                                    && pg.getTarget() instanceof KeywordLiteral
-                                    && Token.THIS == pg.getTarget().getType()) { // this.prop1
-                                ctx = parentContext.createThisContext(false);
-                                return false;
-                            }
-                        } else if (an instanceof ExpressionStatement) {
-                            ExpressionStatement es = (ExpressionStatement) an;
-                            if (THIS_KEYWORD.equals(fieldName)
-                                    && es.getExpression() instanceof KeywordLiteral
-                                    && Token.THIS == es.getExpression().getType()) { // this.
-                                ctx = parentContext.createThisContext(false);
-                                return false;
-                            }
-                        } else if (Token.THIS == an.getType() && THIS_KEYWORD.equals(fieldName)) {
-                            ctx = parentContext.createThisContext(false);
-                            return false;
-                        }
-                    }
-                    if (an instanceof VariableDeclaration) {
-                        VariableDeclaration variableDeclaration = (VariableDeclaration) an;
-                        if (variableDeclaration.getVariables() != null) {
-                            for (VariableInitializer variableInitializer : variableDeclaration.getVariables()) {
-                                if (variableInitializer.getTarget() != null
-                                        && variableInitializer.getTarget().getString().equals(fieldName)
-                                        && variableInitializer.getInitializer() != null) {
-                                    if (variableInitializer.getInitializer() instanceof NewExpression) {
-                                        NewExpression ne = (NewExpression) variableInitializer.getInitializer();
-                                        if (ne.getTarget() != null && ne.getTarget() instanceof Name) {
-                                            //checks for new Module(moduleName) like expression 
-                                            if (isModuleInitializerName(ne.getTarget().getString())
-                                                    && ne.getArguments() != null
-                                                    && ne.getArguments().size() > 0) {
-                                                ModuleCompletionContext mctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource()));
-                                                if (mctx != null) {
-                                                    ctx = mctx.createThisContext(true);
-                                                }
-                                                return false;
-                                            }
-                                            //checks for Platypus API classes
-                                            for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
-                                                Class clazz = scp.getClassByName(ne.getTarget().getString());
-                                                if (clazz != null) {
-                                                    ctx = new CompletionContext(clazz);
-                                                    return false;
-                                                }
-                                            }
-                                            //checks for new ModuleName() expression
-                                            ModuleCompletionContext mcc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString()));
-                                            if (mcc != null) {
-                                                CompletionContext cc = mcc.createThisContext(true);
-                                                if (cc != null) {
-                                                    ctx = cc;
-                                                    return false;
-                                                }
-                                            }
-                                        }
-                                        //checks for Modules.get(moduleName) expression
-                                    } else if (variableInitializer.getInitializer() instanceof FunctionCall) {
-                                        FunctionCall fc = (FunctionCall) variableInitializer.getInitializer();
-                                        if (fc.getTarget() instanceof PropertyGet) {
-                                            PropertyGet pg = (PropertyGet) fc.getTarget();
-                                            if (pg.getLeft().getString().equals(MODULES_OBJECT_NAME)
-                                                    && pg.getRight().getString().equals(GET_METHOD_NAME)) {
-                                                if (fc.getArguments() != null && fc.getArguments().size() > 0) {
-                                                    ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(fc.getArguments().get(0).toSource())).createThisContext(true);
-                                                    return false;
-                                                }
-                                            }
-                                        }
-                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral
-                                            && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
-                                        ctx = parentContext.createThisContext(false);
-                                        return false;
-                                    } else {
-                                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(variableInitializer);
-                                        if (tokens != null && tokens.size() > 1) {
-                                            try {
-                                                ctx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens, variableInitializer.getAbsolutePosition());
-                                                return false;
-                                            } catch (Exception ex) {
-                                                ErrorManager.getDefault().notify(ex);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return true;
-                }
-            });
-                    */
+             lookupScope.visit(new NodeVisitor() {
+             @Override
+             public boolean visit(AstNode an) {
+             if (an == lookupScope) {
+             if (an instanceof FunctionNode) {
+             FunctionNode fn = (FunctionNode) an;
+             if (fn.getParams() != null && fn.getParams().size() > 0
+             && fieldName.equals(fn.getParams().get(0).toSource())) {// function parameter completion
+             if (fn.getParent() instanceof FunctionCall) { // array iteration methods parameters on an entity with anonymous function an the fist parameter
+             FunctionCall fc = (FunctionCall) fn.getParent();
+             List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
+             if (tokens != null && tokens.size() > 1) {
+             CompletionToken funcitonCallToken = tokens.get(tokens.size() - 1);
+             if (fn == fc.getArguments().get(0) && ARRAY_ITERATION_FUNCTIONS_NAMES.contains(funcitonCallToken.name)) {
+             try {
+             CompletionContext c = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), fc.getAbsolutePosition());
+             if (c instanceof EntityCompletionContext) {
+             ctx = ((EntityCompletionContext) c).getElementCompletionContext();
+             return false;
+             }
+             } catch (Exception ex) {
+             ErrorManager.getDefault().notify(ex);
+             }
+             }
+             }
+             } else if (fn.getParent() instanceof Assignment) { // event handler function pameter with event assignment
+             Assignment assignment = (Assignment) fn.getParent();
+             if (assignment.getLeft() instanceof PropertyGet) {
+             PropertyGet leftPg = (PropertyGet) assignment.getLeft();
+             List<CompletionToken> tokens = CompletionPoint.getContextTokens(leftPg);
+             if (tokens != null && tokens.size() > 1) {
+             try {
+             CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), leftPg.getAbsolutePosition());
+             if (propsCtx != null && propsCtx.getScriptClass() != null) {
+             Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
+             if (eventClass != null) {
+             ctx = new CompletionContext(eventClass);
+             return false;
+             }
+             }
+             } catch (Exception ex) {
+             ErrorManager.getDefault().notify(ex);
+             }
+             }
+             }
+             }
+             }
+             }
+             return true;
+             }
+             if (parentScope == moduleConstructorScope) {
+             if (an instanceof PropertyGet) {
+             PropertyGet pg = (PropertyGet) an;
+             if (THIS_KEYWORD.equals(fieldName)
+             && pg.getTarget() instanceof KeywordLiteral
+             && Token.THIS == pg.getTarget().getType()) { // this.prop1
+             ctx = parentContext.createThisContext(false);
+             return false;
+             }
+             } else if (an instanceof ExpressionStatement) {
+             ExpressionStatement es = (ExpressionStatement) an;
+             if (THIS_KEYWORD.equals(fieldName)
+             && es.getExpression() instanceof KeywordLiteral
+             && Token.THIS == es.getExpression().getType()) { // this.
+             ctx = parentContext.createThisContext(false);
+             return false;
+             }
+             } else if (Token.THIS == an.getType() && THIS_KEYWORD.equals(fieldName)) {
+             ctx = parentContext.createThisContext(false);
+             return false;
+             }
+             }
+             if (an instanceof VariableDeclaration) {
+             VariableDeclaration variableDeclaration = (VariableDeclaration) an;
+             if (variableDeclaration.getVariables() != null) {
+             for (VariableInitializer variableInitializer : variableDeclaration.getVariables()) {
+             if (variableInitializer.getTarget() != null
+             && variableInitializer.getTarget().getString().equals(fieldName)
+             && variableInitializer.getInitializer() != null) {
+             if (variableInitializer.getInitializer() instanceof NewExpression) {
+             NewExpression ne = (NewExpression) variableInitializer.getInitializer();
+             if (ne.getTarget() != null && ne.getTarget() instanceof Name) {
+             //checks for new Module(moduleName) like expression 
+             if (isModuleInitializerName(ne.getTarget().getString())
+             && ne.getArguments() != null
+             && ne.getArguments().size() > 0) {
+             ModuleCompletionContext mctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource()));
+             if (mctx != null) {
+             ctx = mctx.createThisContext(true);
+             }
+             return false;
+             }
+             //checks for Platypus API classes
+             for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+             Class clazz = scp.getClassByName(ne.getTarget().getString());
+             if (clazz != null) {
+             ctx = new CompletionContext(clazz);
+             return false;
+             }
+             }
+             //checks for new ModuleName() expression
+             ModuleCompletionContext mcc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString()));
+             if (mcc != null) {
+             CompletionContext cc = mcc.createThisContext(true);
+             if (cc != null) {
+             ctx = cc;
+             return false;
+             }
+             }
+             }
+             //checks for Modules.get(moduleName) expression
+             } else if (variableInitializer.getInitializer() instanceof FunctionCall) {
+             FunctionCall fc = (FunctionCall) variableInitializer.getInitializer();
+             if (fc.getTarget() instanceof PropertyGet) {
+             PropertyGet pg = (PropertyGet) fc.getTarget();
+             if (pg.getLeft().getString().equals(MODULES_OBJECT_NAME)
+             && pg.getRight().getString().equals(GET_METHOD_NAME)) {
+             if (fc.getArguments() != null && fc.getArguments().size() > 0) {
+             ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(fc.getArguments().get(0).toSource())).createThisContext(true);
+             return false;
+             }
+             }
+             }
+             } else if (variableInitializer.getInitializer() instanceof KeywordLiteral
+             && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
+             ctx = parentContext.createThisContext(false);
+             return false;
+             } else {
+             List<CompletionToken> tokens = CompletionPoint.getContextTokens(variableInitializer);
+             if (tokens != null && tokens.size() > 1) {
+             try {
+             ctx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens, variableInitializer.getAbsolutePosition());
+             return false;
+             } catch (Exception ex) {
+             ErrorManager.getDefault().notify(ex);
+             }
+             }
+             }
+             }
+             }
+             }
+             }
+             return true;
+             }
+             });
+             */
             return ctx;
         }
 
