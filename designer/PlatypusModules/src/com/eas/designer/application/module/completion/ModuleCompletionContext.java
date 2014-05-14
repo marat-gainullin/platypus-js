@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.LexicalContext;
+import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
@@ -148,16 +150,19 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
-        assert false : "Refactoring is needed";
-        /*
+    public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {        
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Class clazz = scp.getClassByName(fieldName);
             if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
                 return new CompletionContext(clazz);
             }
         }
-        FunctionNode astRoot = parentModuleContext.dataObject.getAst();
+        FunctionNode astRoot = parentModuleContext.dataObject.getAstRoot();
+        astRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
+        
+        });
+        /*
+       
         if (astRoot != null) {
             jdk.nashorn.internal.ir.Node offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
             jdk.nashorn.internal.ir.Node currentNode = offsetNode;

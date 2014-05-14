@@ -4,7 +4,10 @@
  */
 package com.eas.designer.application.module.parser;
 
+import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
+import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
+import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  *
@@ -13,10 +16,13 @@ import jdk.nashorn.internal.ir.Node;
 public class AstUtlities {
 
     public static boolean isInNode(Node node, int offset) {
-        int startPosition = node.getStart();
-        int endPosition = node.getFinish();
-        return startPosition <= offset
-                && offset <= endPosition;
+        return node.getStart() <= offset
+                && offset <= node.getFinish();
+    }
+    
+    public static boolean isInNode(Node outerNode, Node innerNode) {
+        return outerNode.getStart() <= innerNode.getStart()
+                && innerNode.getFinish() <= outerNode.getFinish();
     }
 
     public static Node getOffsetNode(Node node, final int offset) {
@@ -26,9 +32,9 @@ public class AstUtlities {
     }
 
     private static class GetOffsetNodeVisitorSupport {
-        
-        private Node root;
-        private int offset;
+
+        private final Node root;
+        private final int offset;
         private Node offsetNode;
 
         public GetOffsetNodeVisitorSupport(Node root, int offset) {
@@ -37,22 +43,19 @@ public class AstUtlities {
         }
 
         public Node getOffsetNode() {
-            assert false : "Refactoring is needed";
-            return null;
-            /*
-            root.visit(new NodeVisitor() {
-                
+            final LexicalContext lc = new LexicalContext();
+            root.accept(new NodeVisitor<LexicalContext>(lc) {
+
                 @Override
-                public boolean visit(AstNode an) {
-                    if (isInNode(an, offset)) {
-                        offsetNode = an;
+                protected boolean enterDefault(Node node) {
+                    if (isInNode(node, offset)) {
+                        offsetNode = node;
                         return true;
                     }
                     return false;
                 }
             });
             return offsetNode;
-                    */
         }
     }
 }

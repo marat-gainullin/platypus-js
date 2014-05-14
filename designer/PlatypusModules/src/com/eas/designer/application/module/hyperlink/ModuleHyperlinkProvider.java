@@ -62,12 +62,12 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         if (tree == null) {
             return false;
         }
-        Node node = AstUtlities.getOffsetNode(tree, offset);
-        if (node == null || !(node instanceof IdentNode)) {
-            return false;
-        }
-        startOffset = node.getStart();
-        endOffset = node.getFinish();
+//        Node node = AstUtlities.getOffsetNode(tree, offset);
+//        if (node == null || !(node instanceof IdentNode)) {
+//            return false;
+//        }
+//        startOffset = node.getStart();
+//        endOffset = node.getFinish();
         return true;
     }
 
