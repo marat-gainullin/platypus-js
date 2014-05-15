@@ -199,7 +199,6 @@ public class ModuleCompletionContext extends CompletionContext {
                 if (AstUtlities.isInNode(binaryNode, offset)
                         && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
                     if (binaryNode.getAssignmentDest() instanceof AccessNode) {
-                        AccessNode an = (AccessNode) binaryNode.getAssignmentDest();
                         List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
                         if (tokens != null && tokens.size() > 1) {
                             try {
