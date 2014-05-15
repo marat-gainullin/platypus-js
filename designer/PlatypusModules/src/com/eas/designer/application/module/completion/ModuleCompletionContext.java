@@ -216,7 +216,6 @@ public class ModuleCompletionContext extends CompletionContext {
                             }
                         }
                     }
-                    System.out.println(binaryNode.toString());
                 }
                 return super.enterBinaryNode(binaryNode);
             }
