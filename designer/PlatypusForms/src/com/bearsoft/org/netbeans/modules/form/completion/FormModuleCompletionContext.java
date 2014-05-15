@@ -4,19 +4,14 @@
  */
 package com.bearsoft.org.netbeans.modules.form.completion;
 
-import com.bearsoft.org.netbeans.modules.form.Event;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.PersistenceException;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
-import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import jdk.nashorn.internal.ir.VarNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;

@@ -4,14 +4,9 @@
  */
 package com.eas.designer.application.module.hyperlink;
 
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.completion.CompletionContext;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import com.eas.designer.application.module.parser.AstUtlities;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;

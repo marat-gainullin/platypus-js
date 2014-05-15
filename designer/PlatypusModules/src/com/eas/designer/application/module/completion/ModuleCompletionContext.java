@@ -82,10 +82,6 @@ public class ModuleCompletionContext extends CompletionContext {
         return dataObject;
     }
 
-    public ModuleThisCompletionContext createThisContext(boolean enableJsElementsCompletion) {
-        return new ModuleThisCompletionContext(this, enableJsElementsCompletion);
-    }
-
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
 //        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
