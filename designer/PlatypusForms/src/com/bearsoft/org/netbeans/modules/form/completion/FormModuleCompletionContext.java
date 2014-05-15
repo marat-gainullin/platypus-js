@@ -22,11 +22,10 @@ import org.openide.ErrorManager;
  */
 public class FormModuleCompletionContext extends ModuleCompletionContext {
 
-    private static final Class EVENT_WRAPPER_CLASS = com.eas.client.forms.api.events.EventsWrapper.class;
-    private static final String EVENTS_WRAPPER_METHOD_NAME = "wrap";//NOI18N
-
+    public static final String LOAD_FORM_METHOD_NAME = "loadForm";//NOI18N
+    
     public FormModuleCompletionContext(PlatypusModuleDataObject dataObject, Class<? extends Object> aClass) {
-        super(dataObject, aClass);
+        super(dataObject);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class FormModuleCompletionContext extends ModuleCompletionContext {
         if (cc != null) {
             return cc;
         }
-        if (isSystemObjectMethod(varNode.getAssignmentSource(), "loadForm")) {
+        if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_FORM_METHOD_NAME)) {
             cc = new FormCompletionContext(this);
         } 
         return cc;

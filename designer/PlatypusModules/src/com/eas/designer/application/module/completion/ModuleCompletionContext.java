@@ -60,6 +60,7 @@ public class ModuleCompletionContext extends CompletionContext {
     protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
     protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
+    protected static final String LOAD_MODEL_METHOD_NAME = "loadModel";// NOI18N
     private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
         {
             add("forEach");//NOI18N
@@ -73,8 +74,8 @@ public class ModuleCompletionContext extends CompletionContext {
     };
     protected PlatypusModuleDataObject dataObject;
 
-    public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<?> aClass) {
-        super(aClass);
+    public ModuleCompletionContext(PlatypusModuleDataObject aDataObject) {
+        super(null);
         dataObject = aDataObject;
     }
 
@@ -188,7 +189,7 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public CompletionContext getVarContext(VarNode varNode) {
-        if (isSystemObjectMethod(varNode.getAssignmentSource(), "loadModel")) {
+        if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_MODEL_METHOD_NAME)) {
             return new ModelCompletionContext(getDataObject());
         } else {
             return null;

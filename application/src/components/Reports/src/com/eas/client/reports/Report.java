@@ -10,6 +10,7 @@ package com.eas.client.reports;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
@@ -59,6 +60,7 @@ public class Report implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_BEFORE_RENDER_JSDOC)
+    @EventMethod(eventClass = PublishedSourcedEvent.class)
     public JSObject getOnBeforeRender() {
         return onBeforeRender;
     }

@@ -126,7 +126,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     public ModuleCompletionContext getCompletionContext() {
-        return new ModuleCompletionContext(this, Object.class);
+        return new ModuleCompletionContext(this);
     }
 
     protected void validateAst() {
