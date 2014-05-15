@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.completion.FormCompletionContext;
+import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
 import com.bearsoft.org.netbeans.modules.form.node.FormEntityNode;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.forms.Form;
@@ -99,7 +99,7 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 
     @Override
     public ModuleCompletionContext getCompletionContext() {
-        return new FormCompletionContext(this, Form.class);
+        return new FormModuleCompletionContext(this, Form.class);
     }
 
     @Override
