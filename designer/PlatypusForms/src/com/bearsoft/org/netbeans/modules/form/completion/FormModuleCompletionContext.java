@@ -11,7 +11,9 @@ import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
+import com.eas.designer.application.module.completion.ModelCompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
+import java.util.Map;
 import jdk.nashorn.internal.ir.VarNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
@@ -29,15 +31,11 @@ public class FormModuleCompletionContext extends ModuleCompletionContext {
     }
 
     @Override
-    public CompletionContext getVarContext(VarNode varNode) {
-        CompletionContext cc = super.getVarContext(varNode);
-        if (cc != null) {
-            return cc;
-        }
+    public void injectVarContext(Map<String, CompletionContext> contexts, VarNode varNode) {
+        super.injectVarContext(contexts, varNode);
         if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_FORM_METHOD_NAME)) {
-            cc = new FormCompletionContext(this);
-        } 
-        return cc;
+            contexts.put(varNode.getName().getName(), new FormCompletionContext(this));
+        }
     }
     
     @Override

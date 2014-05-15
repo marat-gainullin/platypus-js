@@ -8,6 +8,7 @@ import com.eas.client.reports.Report;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
+import java.util.Map;
 import jdk.nashorn.internal.ir.VarNode;
 
 /**
@@ -16,21 +17,17 @@ import jdk.nashorn.internal.ir.VarNode;
  */
 public class ReportModuleCompletionContext extends ModuleCompletionContext {
 
-    public static final String LOAD_FORM_METHOD_NAME = "loadReport";//NOI18N
+    public static final String LOAD_REPORT_METHOD_NAME = "loadReport";//NOI18N
     
     public ReportModuleCompletionContext(PlatypusModuleDataObject dataObject) {
         super(dataObject);
     }
 
     @Override
-    public CompletionContext getVarContext(VarNode varNode) {
-        CompletionContext cc = super.getVarContext(varNode);
-        if (cc != null) {
-            return cc;
+    public void injectVarContext(Map<String, CompletionContext> contexts, VarNode varNode) {
+        super.injectVarContext(contexts, varNode);
+        if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_REPORT_METHOD_NAME)) {
+            contexts.put(varNode.getName().getName(), new CompletionContext(Report.class));
         }
-        if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_FORM_METHOD_NAME)) {
-            cc = new CompletionContext(Report.class);
-        } 
-        return cc;
     }
 }

@@ -4,27 +4,25 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.client.cache.PlatypusFilesSupport;
-import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.application.module.ModuleUtils;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.parser.AstUtlities;
-import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.utils.StringUtils;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptObj;
 import com.eas.util.PropertiesUtils;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import jdk.nashorn.internal.ir.AccessNode;
+import jdk.nashorn.internal.ir.BinaryNode;
 import jdk.nashorn.internal.ir.CallNode;
 import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -32,16 +30,13 @@ import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import jdk.nashorn.internal.parser.TokenType;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.nodes.Children;
-import org.openide.nodes.Node;
-import org.openide.nodes.Node.Property;
-import org.openide.nodes.Node.PropertySet;
 import org.openide.util.Lookup;
 
 /**
@@ -60,6 +55,7 @@ public class ModuleCompletionContext extends CompletionContext {
     protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
     protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
+    protected static final String SYSTEM_OBJECT_NAME = "P";//NOI18N
     protected static final String LOAD_MODEL_METHOD_NAME = "loadModel";// NOI18N
     private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
         {
@@ -153,58 +149,96 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static CompletionContext findCompletionContext(final String fieldName, final int offset, final ModuleCompletionContext parentModuleContext) {
+        /*
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Class clazz = scp.getClassByName(fieldName);
             if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
                 return new CompletionContext(clazz);
             }
         }
+        */
+        
+        //Collect a <code>CompletionContext</code> for all system objects like model and others.
         FunctionNode astRoot = parentModuleContext.dataObject.getAstRoot();
-        class CompletionLexicalContext extends LexicalContext {
+        class SystemLexicalContext extends LexicalContext {
 
-            CompletionContext ctx;
+            public Map<String, CompletionContext>  systemCompletionContexts = new HashMap<>();
+            
         }
-        CompletionLexicalContext lc = new CompletionLexicalContext();
-        astRoot.accept(new NodeVisitor<CompletionLexicalContext>(lc) {
+        final SystemLexicalContext slc = new SystemLexicalContext();
+        astRoot.accept(new NodeVisitor<SystemLexicalContext>(slc) {
 
             @Override
             protected boolean enterDefault(jdk.nashorn.internal.ir.Node node) {
-                return super.enterDefault(node); //To change body of generated methods, choose Tools | Templates.
+                return super.enterDefault(node);
             }
 
             @Override
             public boolean enterVarNode(VarNode varNode) {
-                if (AstUtlities.isInNode(lc.getCurrentFunction(), offset)
-                        && varNode.getAssignmentDest().getName().equals(fieldName)) {
-                    CompletionContext c = parentModuleContext.getVarContext(varNode);
-                    if (c != null) {
-                        lc.ctx = c;
-                    }
+                if (AstUtlities.isInNode(lc.getCurrentFunction(), offset)) {
+                    parentModuleContext.injectVarContext(lc.systemCompletionContexts, varNode);
                 }
-                return super.enterVarNode(varNode); //To change body of generated methods, choose Tools | Templates.
+                return super.enterVarNode(varNode);
             }
-
         });
-        return lc.ctx;
+        if (slc.systemCompletionContexts.get(fieldName) != null) {
+            return slc.systemCompletionContexts.get(fieldName);
+        }
+        
+        //Look for an event handler function parameter.
+        class CompletionLexicalContext extends LexicalContext {
+
+            public CompletionContext completionContext;
+            
+        }
+        final CompletionLexicalContext clc = new CompletionLexicalContext();
+        astRoot.accept(new NodeVisitor<CompletionLexicalContext>(clc) { 
+            
+            @Override
+            public boolean enterBinaryNode(BinaryNode binaryNode) {
+                if (AstUtlities.isInNode(binaryNode, offset)
+                        && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
+                    if (binaryNode.getAssignmentDest() instanceof AccessNode) {
+                        AccessNode an = (AccessNode) binaryNode.getAssignmentDest();
+                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
+                        if (tokens != null && tokens.size() > 1) {
+                            try {
+                                CompletionContext systemCompletionContext = slc.systemCompletionContexts.get(tokens.get(0).name);
+                                CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 1), 0);
+                                if (propsCtx != null && propsCtx.getScriptClass() != null) {
+                                    Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
+                                    if (eventClass != null) {
+                                        lc.completionContext = new CompletionContext(eventClass);
+                                        return false;
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                ErrorManager.getDefault().notify(ex);
+                            }
+                        }
+                    }
+                    System.out.println(binaryNode.toString());
+                }
+                return super.enterBinaryNode(binaryNode);
+            }
+        });
+        return clc.completionContext;
     }
 
-    public CompletionContext getVarContext(VarNode varNode) {
+    public void injectVarContext(Map<String, CompletionContext> contexts, VarNode varNode) {
         if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_MODEL_METHOD_NAME)) {
-            return new ModelCompletionContext(getDataObject());
-        } else {
-            return null;
+            contexts.put(varNode.getName().getName(), new ModelCompletionContext(getDataObject()));
         }
     }
 
     protected static boolean isSystemObjectMethod(Expression assignmentSource, String methodName) {
         if (assignmentSource instanceof CallNode) {
             CallNode cn = (CallNode) assignmentSource;
-            System.out.println(cn.getFunction().toString());
             if (cn.getFunction() instanceof AccessNode) {
                 AccessNode an = (AccessNode) cn.getFunction();
                 return methodName.equals(an.getProperty().getName())
                         && an.getBase() instanceof IdentNode
-                        && "P".equals(((IdentNode) an.getBase()).getName());
+                        && SYSTEM_OBJECT_NAME.equals(((IdentNode) an.getBase()).getName());
             }
         }
         return false;
