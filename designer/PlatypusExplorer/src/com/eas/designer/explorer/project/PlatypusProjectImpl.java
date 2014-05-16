@@ -15,6 +15,8 @@ import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.Deployer;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
+import com.eas.designer.application.platform.PlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectInformation;
 import com.eas.designer.application.utils.DatabaseConnections;
@@ -31,6 +33,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
@@ -62,6 +65,7 @@ import org.netbeans.spi.search.SearchFilterDefinition;
 import org.netbeans.spi.search.SearchInfoDefinition;
 import org.netbeans.spi.search.SearchInfoDefinitionFactory;
 import org.netbeans.spi.search.SubTreeSearchOptions;
+import org.openide.ErrorManager;
 import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -71,6 +75,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
+import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -543,6 +548,8 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private final class PlatypusClassPathProvider implements ClassPathProvider {
 
+        private ClassPath sourceClassPath;
+
         /**
          * Find some kind of a classpath for a given file or default classpath.
          *
@@ -554,10 +561,18 @@ public class PlatypusProjectImpl implements PlatypusProject {
         @Override
         public ClassPath findClassPath(FileObject file, String type) {
             if (PlatypusPathRecognizer.SOURCE_CP.equals(type)) {
-                return ClassPathFactory.createClassPath(new PlatypusClassPathImplementation());
+                return getSourceClassPath();
             }
             return null;
         }
+
+        public synchronized ClassPath getSourceClassPath() {
+            if (sourceClassPath == null) {
+                sourceClassPath = ClassPathFactory.createClassPath(new PlatypusClassPathImplementation());
+            }
+            return sourceClassPath;
+        }
+
     }
 
     private final class PlatypusClassPathImplementation implements ClassPathImplementation {
@@ -571,10 +586,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 if (resources != null) {
                     return resources;
                 }
-                final URL[] urls = {getSrcRoot().toURL()};
                 if (resources == null) {
-                    PathResourceImpl pri = new PathResourceImpl(urls);
-                    resources = Collections.<PathResourceImplementation>singletonList(pri);
+                    resources = new ArrayList<>();
+                    resources.add(new PathResourceImpl(new URL[] {getSrcRoot().toURL()}));
                 }
                 return resources;
             } catch (Exception ex) {
