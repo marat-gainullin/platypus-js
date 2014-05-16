@@ -33,7 +33,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
 /**
- *
+ * A class managing access to the platform's runtime installation.
  * @author vv
  */
 public class PlatypusPlatform {
@@ -43,13 +43,15 @@ public class PlatypusPlatform {
     public static final String PLATFORM_HOME_PATH_ATTR_NAME = "path"; //NOI18N
     public static final String BIN_DIRECTORY_NAME = "bin"; //NOI18N
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
+    public static final String JS_API_DIRECTORY_NAME = "api"; //NOI18N
     public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
     public static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
+    private static final String PLATFORM_ERROR_MSG = "Platform executables home does not exist or not a directory.";
 
     private static final Map<String, File> jarsCache = new HashMap<>();
 
     /**
-     * Gets Platypus platform home directory.
+     * Gets the platform home directory.
      *
      * @return home directory or null if this path isn't defined
      */
@@ -70,7 +72,7 @@ public class PlatypusPlatform {
     }
 
     /**
-     * Sets Platypus platform home directory.
+     * Sets the platform home directory.
      *
      * @param path home directory path
      * @return <code>true</code> if the value have stored successfully
@@ -98,73 +100,115 @@ public class PlatypusPlatform {
     }
 
     /**
-     * Platform's bin directory.
-     *
+     * The platform's main jars directory.
+     * 
      * @return bin directory path
-     * @throws PlatformHomePathException if platform isn't properly
-     * configured
+     * @throws PlatformHomePathException if the platform isn't properly configured
      */
     public static File getPlatformBinDirectory() throws PlatformHomePathException {
         File platformBinDir = new File(getPlatformHomeDir(), BIN_DIRECTORY_NAME);
         if (!platformBinDir.exists() || !platformBinDir.isDirectory()) {
-            throw new IllegalStateException("Platform executables home does not exist or not a directory.");
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
         }
         return platformBinDir;
     }
 
+    /**
+     * The platform's main jars directory.
+     * 
+     * @return bin directory path
+     * @throws PlatformHomePathException if the platform isn't properly configured
+     */
     public static File getPlatformLibDirectory() throws PlatformHomePathException {
         return getPlatformLibDirectory(getPlatformHomeDir());
     }
 
     /**
-     * Platform's bin directory.
-     *
+     * The platform's lib jars directory.
+     * 
      * @param platfromHomeDir
      * @return bin directory path
-     * @throws PlatformHomePathException if platform isn't properly
-     * configured
+     * @throws PlatformHomePathException if the platform isn't properly configured
      */
     public static File getPlatformLibDirectory(File platfromHomeDir) throws PlatformHomePathException {
         File platformLibDir = new File(platfromHomeDir, LIB_DIRECTORY_NAME);
         if (!platformLibDir.exists() || !platformLibDir.isDirectory()) {
-            throw new IllegalStateException("Platform executables home does not exist or not a directory.");
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
         }
         return platformLibDir;
     }
+    
+     /**
+     * Gets the platform's JavaScript API directory.
+     * 
+     * @return bin directory path
+     * @throws PlatformHomePathException if the platform isn't properly configured
+     */
+    public static File getPlatformApiDirectory() throws PlatformHomePathException {
+        return PlatypusPlatform.getPlatformApiDirectory(getPlatformHomeDir());
+    }
 
+    /**
+     * Gets the platform's JavaScript API directory.
+     * 
+     * @param platfromHomeDir
+     * @return bin directory path
+     * @throws PlatformHomePathException if the platform isn't properly configured
+     */
+    public static File getPlatformApiDirectory(File platfromHomeDir) throws PlatformHomePathException {
+        File platformApiDir = new File(platfromHomeDir, JS_API_DIRECTORY_NAME);
+        if (!platformApiDir.exists() || !platformApiDir.isDirectory()) {
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
+        }
+        return platformApiDir;
+    }
+    
+    
+    /**
+     * The platform's lib jars directory.
+     * 
+     * @return if the platform isn't properly configured
+     * @throws PlatformHomePathException if the platform isn't properly configured
+     */
     public static File getThirdpartyLibDirectory() throws PlatformHomePathException {
         return getThirdpartyLibDirectory(getPlatformLibDirectory());
     }
 
     /**
-     * Platform's third party subdirectory.
-     *
+     * Platform's third party jars subdirectory.
+     * 
      * @param platformLibDirectory
      * @return lib directory path
-     * @throws PlatformHomePathException if platform isn't properly
-     * configured
+     * @throws PlatformHomePathException if platform isn't properly configured
      */
     public static File getThirdpartyLibDirectory(File platformLibDirectory) throws PlatformHomePathException {
         File tpLibDir = new File(platformLibDirectory, THIRDPARTY_LIB_DIRECTORY_NAME);
         if (!tpLibDir.exists() || !tpLibDir.isDirectory()) {
-            throw new IllegalStateException("Platform's third party libs home not exists or not a directory.");
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
         }
         return tpLibDir;
     }
-
+   
+    /**
+     * Finds a jar file for some class.
+     * 
+     * @param className a class name to find
+     * @return a jar file
+     * @throws PlatformHomePathException when the platform is not found or not correct
+     * @throws IOException on some IO problems
+     */
     public synchronized static File findThirdpartyJar(String className) throws PlatformHomePathException, IOException {
         return findThirdpartyJar(getPlatformHomeDir(), className);
     }
 
     /**
      * Finds jar file in the platform's lib directory for provided class name.
-     *
+     * 
      * @param platfromHomeDir
      * @param className full class name to find in jars
      * @return jar file or null if jar is not found
-     * @throws
-     * com.eas.designer.application.platform.PlatformHomePathException
-     * @throws java.io.IOException
+     * @throws PlatformHomePathException when the platform is not found or not correct
+     * @throws java.io.IOException on some IO problems
      */
     public synchronized static File findThirdpartyJar(File platfromHomeDir, String className) throws PlatformHomePathException, IOException {
         File jarFile = jarsCache.get(className);
@@ -176,10 +220,26 @@ public class PlatypusPlatform {
         return jarFile;
     }
 
+    /**
+     * Registers the JDBC drivers provided with the platform in the IDE driver's manager.
+     * 
+     * @throws PlatformHomePathException when the platform is not found or not correct
+     * @throws IOException on some IO problems
+     * @throws DatabaseException  on some database problems
+     */
     public static void registerJdbcDrivers() throws PlatformHomePathException, IOException, DatabaseException {
         registerJdbcDrivers(getPlatformHomeDir());
     }
 
+    /**
+     * Registers the JDBC drivers provided with the platform in the IDE driver's manager.
+     * 
+     * @param platfromHomeDir a platform's installation directory
+     * @return a list JDBC of drivers
+     * @throws PlatformHomePathException when the platform is not found or not correct
+     * @throws IOException on some IO problems
+     * @throws DatabaseException on some database problems
+     */
     public static List<JDBCDriver> registerJdbcDrivers(File platfromHomeDir) throws PlatformHomePathException, IOException, DatabaseException {
         List<JDBCDriver> drivers = new ArrayList<>();
         for (DatabaseServerType databaseServer : DatabaseServerType.values()) {
@@ -247,7 +307,7 @@ public class PlatypusPlatform {
         }
         File platformHomeDir = new File(PlatypusPlatform.getPlatformHomePath());
         if (!platformHomeDir.exists() || !platformHomeDir.isDirectory()) {
-            throw new PlatformHomePathException("Platform home not exists or not a directory.");
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
         }
         return platformHomeDir;
     }
