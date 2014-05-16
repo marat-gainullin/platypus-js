@@ -6,6 +6,8 @@ package com.eas.designer.application.report;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import com.eas.designer.application.module.completion.ModuleCompletionContext;
+import com.eas.designer.application.report.completion.ReportModuleCompletionContext;
 import java.io.File;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -47,6 +49,11 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
         return node;
     }
 
+    @Override
+    public ModuleCompletionContext getCompletionContext() {
+        return new ReportModuleCompletionContext(this);
+    }
+    
     public boolean isTemplateValid() {
         File templateFile = FileUtil.toFile(getLayoutFile());
         String path = templateFile.getPath();

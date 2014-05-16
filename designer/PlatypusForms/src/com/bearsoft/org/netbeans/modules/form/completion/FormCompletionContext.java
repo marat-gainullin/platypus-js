@@ -4,54 +4,101 @@
  */
 package com.bearsoft.org.netbeans.modules.form.completion;
 
-import com.bearsoft.org.netbeans.modules.form.Event;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
-import com.bearsoft.org.netbeans.modules.form.PersistenceException;
-import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
-import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
+import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
-import com.eas.designer.application.module.PlatypusModuleDataObject;
+import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
+import com.bearsoft.org.netbeans.modules.form.RADVisualFormContainer;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
+import com.eas.client.forms.Form;
+import com.eas.client.forms.api.components.model.ModelGrid;
+import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.designer.application.module.completion.BeanCompletionItem;
+import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
-import org.openide.ErrorManager;
 
 /**
  *
  * @author vv
  */
-public class FormCompletionContext extends ModuleCompletionContext {
+public class FormCompletionContext extends CompletionContext {
 
-    private static final Class EVENT_WRAPPER_CLASS = com.eas.client.forms.api.events.EventsWrapper.class;
-    private static final String EVENTS_WRAPPER_METHOD_NAME = "wrap";//NOI18N
+    private final FormModuleCompletionContext parentContext;
 
-    public FormCompletionContext(PlatypusModuleDataObject dataObject, Class<? extends Object> aClass) {
-        super(dataObject, aClass);
-    }
-
-    @Override
-    public ModuleThisCompletionContext createThisContext(boolean anEnableJsElementsCompletion) {
-        return new FormThisCompletionContext(this, anEnableJsElementsCompletion);
+    public FormCompletionContext(FormModuleCompletionContext aParentContext) {
+        super(null);
+        parentContext = aParentContext;
     }
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
+        fillComponents(point, resultSet);
 
     }
 
-    protected FormModel getFormModel() {
-        PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) getDataObject();
-        PlatypusFormSupport support = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
-        try {
-            support.loadForm();
-        } catch (PersistenceException ex) {
-            ErrorManager.getDefault().notify(ex);
+    @Override
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
+        CompletionContext completionContext = super.getChildContext(token, offset);
+        if (completionContext != null) {
+            return completionContext;
         }
-        return support.getFormModel();
+        if (Form.VIEW_SCRIPT_NAME.equals(token.name)) {
+            Class<?> conainerClass = getPlaypusContainerClass();
+            if (conainerClass != null) {
+                return new CompletionContext(conainerClass);
+            } else {
+                return null;
+            }
+        }
+        RADComponent<?> comp = getComponentByName(token.name);
+        if (comp != null) {
+            Class<?> platypusControlClass = FormUtils.getPlatypusControlClass(comp.getBeanClass());
+            if (!ModelGrid.class.isAssignableFrom(platypusControlClass)) {
+                return new CompletionContext(platypusControlClass);
+            } else {
+                return new DbGridCompletionContext((DbGrid) comp.getBeanInstance());
 
+            }
+        }
+        return null;
+    }
+
+    protected Class<?> getPlaypusContainerClass() {
+        RADVisualContainer<?> container = getFormModel().getTopRADComponent();
+        return FormUtils.getPlatypusConainerClass(container.getLayoutSupport().getSupportedClass());
+    }
+
+    protected void fillComponents(CompletionPoint point, CompletionResultSet resultSet) {
+        FormModel fm = getFormModel();
+        for (RADComponent<?> comp : fm.getOrderedComponentList()) {
+            if (!(comp instanceof RADModelGridColumn) && !(comp instanceof RADModelMapLayer) && comp.getName() != null && !comp.getName().isEmpty()) {
+                // <comp>
+                if (point.getFilter() == null || point.getFilter().isEmpty() || comp.getName().toLowerCase().startsWith(point.getFilter().toLowerCase())) {
+                    String compName = comp.getName();
+                    if (RADVisualFormContainer.FORM_NAME.equals(compName)) {
+                        continue;
+                    }
+                    addItem(resultSet, point.getFilter(), new BeanCompletionItem(FormUtils.getPlatypusControlClass(comp.getBeanClass()), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+                }
+            }
+        }
+    }
+
+    private FormModel getFormModel() {
+        return parentContext.getFormModel();
+    }
+
+    protected RADComponent<?> getComponentByName(String aName) {
+        RADComponent<?> comp = getFormModel().getRADComponent(aName);
+        if (!(comp instanceof RADModelGridColumn) && !(comp instanceof RADModelMapLayer)) {
+            return comp;
+        } else {
+            return null;
+        }
     }
 }

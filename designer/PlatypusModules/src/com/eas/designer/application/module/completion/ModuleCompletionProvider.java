@@ -52,7 +52,7 @@ public class ModuleCompletionProvider implements CompletionProvider {
     }
 
     protected void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, int caretOffset) throws Exception {
-        dataObject.setAst(point.getAstRoot());
+        dataObject.setAstRoot(point.getAstRoot());
         CompletionContext initialCompltionContext = dataObject.getCompletionContext();
         CompletionContext completionContext = getCompletionContext(initialCompltionContext, point.getCompletionTokens(), caretOffset);
         if (completionContext != null) {

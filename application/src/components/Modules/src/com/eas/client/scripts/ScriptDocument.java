@@ -9,7 +9,6 @@ import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptUtils;
 import java.util.*;
-import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.runtime.Source;
@@ -79,7 +78,7 @@ public class ScriptDocument {
         moduleAnnotations = new ArrayList<>();
         propertyAllowedRoles.clear();
         Source source = new Source("", aSource);
-        FunctionNode ast = ScriptUtils.parseJs(source);
+        FunctionNode ast = ScriptUtils.parseJs(aSource);
         ast.accept(new AnnotationsMiner(source) {
 
             @Override

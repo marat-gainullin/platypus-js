@@ -26,9 +26,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.runtime.Source;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
@@ -93,7 +93,8 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
     private transient boolean astIsValid;
-    private transient FunctionNode ast;
+    private transient FunctionNode astRoot;
+    private transient FunctionNode constructor;
 
     public PlatypusModuleDataObject(FileObject aJsFile, MultiFileLoader loader) throws Exception {
         super(aJsFile, loader);
@@ -106,24 +107,26 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     @Override
-    public synchronized FunctionNode getAst() {
+    public synchronized FunctionNode getAstRoot() {
         validateAst();
-        return ast;
-    }
-    
-    @Override
-    public FunctionNode getConstructor() {
-        return null;
+        return astRoot;
     }
 
     @Override
-    public synchronized void setAst(FunctionNode anAstRoot) {
-        ast = anAstRoot;
-        astIsValid = (ast != null);
+    public synchronized void setAstRoot(FunctionNode anAstRoot) {
+        astRoot = anAstRoot;
+        constructor = astRoot != null ? PlatypusFilesSupport.extractModuleConstructor(astRoot) : null;
+        astIsValid = (astRoot != null);
+    }
+
+    @Override
+    public FunctionNode getConstructor() {
+        validateAst();
+        return constructor;
     }
 
     public ModuleCompletionContext getCompletionContext() {
-        return new ModuleCompletionContext(this, Object.class);
+        return new ModuleCompletionContext(this);
     }
 
     protected void validateAst() {
@@ -135,17 +138,20 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 Exceptions.printStackTrace(ex);
             }
             if (doc != null) {
+                FunctionNode parseResult = null;
                 try {
-                    FunctionNode parseResult = ScriptUtils.parseJs(new Source("", doc.getText(0, doc.getLength())));//NOI18N
-                    if (parseResult != null) {
-                        astIsValid = true;
-                        ast = parseResult;
-                    } else {
-                        astIsValid = false;
-                    }
-                } catch (Exception ex) {
-                    // no op
+                    parseResult = ScriptUtils.parseJs(doc.getText(0, doc.getLength()));
+                } catch (BadLocationException ex) {
+                    //no op
                 }
+                if (parseResult != null) {
+                    astIsValid = true;
+                    astRoot = parseResult;
+                    constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+                } else {
+                    astIsValid = false;
+                }
+
             }
         }
     }
@@ -171,7 +177,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         model = null;
         modelNode = null;
         astIsValid = false;
-        ast = null;
+        astRoot = null;
     }
 
     public FileObject getModelFile() {
