@@ -618,7 +618,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                             ScriptUtils.inContext(new ScriptAction() {
                                 @Override
                                 public Object run(Context cx) throws Exception {
-                                    onOkModalResult.call(cx, FormRunner.this, FormRunner.this, new Object[]{selected});
+                                    onOkModalResult.call(cx, onOkModalResult, FormRunner.this, new Object[]{selected});
                                     return null;
                                 }
                             });
@@ -1354,6 +1354,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         locationByPlatform = formDoc.getFormDesignInfo().isLocationByPlatform();
         designedViewSize = formDoc.getFormDesignInfo().getDesignedPreferredSize();
         windowHandler = new FormWindowEventsIProxy();
+        windowHandler.setEventThis(this);
         final DbSwingFactory factory = new FormFactory(this, model);
         final FormDesignInfo fdi = formDoc.getFormDesignInfo();//.copy();
         fdi.accept(factory);
