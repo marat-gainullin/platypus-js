@@ -13,7 +13,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.netbeans.api.*;
 import org.netbeans.api.java.classpath.ClassPath;
+import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.netbeans.spi.java.classpath.ClassPathImplementation;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
@@ -21,6 +23,7 @@ import org.netbeans.spi.java.classpath.support.PathResourceBase;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Utilities;
+import org.openide.util.io.OperationException;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -36,19 +39,25 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
     @Override
     public ClassPath findClassPath(FileObject file, String type) {
         if (type.equals(PlatypusPathRecognizer.BOOT_CP)) {
-            return getBootClassPath();
+                validateBootClassPath();
+            return bootClassPath;
         }
         return null;
     }
 
     public void registerJsClassPath() {
+        if (bootClassPath != null) {
+           GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
+        }
+        bootClassPath = null;
+        validateBootClassPath();
     }
 
-    public ClassPath getBootClassPath() {
+    public void validateBootClassPath() {
         if (bootClassPath == null) {
             bootClassPath = ClassPathSupport.createClassPath(Collections.singletonList(new BootResourceImpl()));
+            GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
         }
-        return bootClassPath;
     }
 
     private File getBootDirectory() {
