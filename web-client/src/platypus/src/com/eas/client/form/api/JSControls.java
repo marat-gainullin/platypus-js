@@ -1186,10 +1186,11 @@ public class JSControls {
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusScrollContainer::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	else if(aPublished.parent instanceof $wnd.FlowPane)
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusFlowLayoutContainer::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
-		    	else if(aPublished.parent instanceof $wnd.BoxPane)
-		    	{
+		    	else if(aPublished.parent instanceof $wnd.BoxPane){
 		    		if(aPublished.parent.orientation == $wnd.Orientation.HORIZONTAL)
 		    			aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusHBoxLayoutContainer::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    	}else if(aPublished.parent == null){
+		    		aPublished.unwrap().@com.sencha.gxt.widget.core.client.Component::setWidth(I)(aValue);
 		    	}
 		    }
  	    });
@@ -1204,10 +1205,11 @@ public class JSControls {
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusScrollContainer::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	else if(aPublished.parent instanceof $wnd.FlowPane)
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusFlowLayoutContainer::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
-		    	else if(aPublished.parent instanceof $wnd.BoxPane)
-		    	{
+		    	else if(aPublished.parent instanceof $wnd.BoxPane){
 		    		if(aPublished.parent.orientation == $wnd.Orientation.VERTICAL)
 		    			aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusVBoxLayoutContainer::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    	}else if(aPublished.parent == null){
+		    		aPublished.unwrap().@com.sencha.gxt.widget.core.client.Component::setHeight(I)(aValue);
 		    	}
 		    }
  	    });
@@ -1244,6 +1246,7 @@ public class JSControls {
         @com.eas.client.gxtcontrols.Publisher::publishExecutor(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
         comp.@com.sencha.gxt.widget.core.client.Component::setData(Ljava/lang/String;Ljava/lang/Object;)(@com.eas.client.form.Form::PUBLISHED_DATA_KEY, aPublished);
  	    // Native API
+ 	    
         Object.defineProperty(aPublished, "element", {
         	get : function() {
     			return comp.@com.sencha.gxt.widget.core.client.Component::getElement()();
