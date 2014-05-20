@@ -18,15 +18,18 @@ import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
+import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
  * Represents an instance of a Module, Form or Report.
+ *
  * @author vv
  */
 public class ModuleInstanceCompletionContext extends CompletionContext {
 
+    public static final String THIS_KEYWORD = "this";//NOI18N
     private final ModuleCompletionContext parentContext;
 
     public ModuleInstanceCompletionContext(ModuleCompletionContext aParentContext) {
@@ -54,22 +57,47 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
 
         public Collection<JsCompletionItem> getCompletionItems(CompletionPoint point) {
             functionsMap = new HashMap<>();
-            Set<String> thisAlises = new HashSet<>();
+            Set<String> thisAlises = getThisAliases(moduleConstructor);
             thisAlises.add("this");//TODO add othe this aliases
             scan(point, thisAlises);
             List<JsCompletionItem> items = new ArrayList<>(functionsMap.values());
             return items;
         }
 
+        public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
+            final Set<String> aliases = new HashSet<>();
+            if (moduleConstructor.getBody() != null) {
+                aliases.add(THIS_KEYWORD);
+                LexicalContext lc = new LexicalContext();
+                moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) { 
+
+                    @Override
+                    public boolean enterVarNode(VarNode varNode) {
+                        if (lc.getCurrentFunction() == moduleConstructor) {
+                            if (varNode.getAssignmentSource() instanceof IdentNode) {
+                                IdentNode in = (IdentNode) varNode.getAssignmentSource();
+                                if (THIS_KEYWORD.equals(in.getName())) {
+                                   aliases.add(varNode.getAssignmentDest().getName());
+                                }
+                            }
+                        }
+                        return super.enterVarNode(varNode);
+                    }
+                });
+            }
+
+            return aliases;
+        }
+
         private void scan(final CompletionPoint point, final Set<String> thisAliases) {
             if (moduleConstructor.getBody() != null) {
-                LexicalContext lc  = new LexicalContext();
+                LexicalContext lc = new LexicalContext();
                 moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) {
 
                     @Override
                     public boolean enterExpressionStatement(ExpressionStatement expressionStatement) {
-                        if (lc.getCurrentFunction() == moduleConstructor 
-                            && expressionStatement.getExpression() instanceof BinaryNode) {
+                        if (lc.getCurrentFunction() == moduleConstructor
+                                && expressionStatement.getExpression() instanceof BinaryNode) {
                             BinaryNode bn = (BinaryNode) expressionStatement.getExpression();
                             if (bn.getAssignmentSource() instanceof FunctionNode) {
                                 String propName;
@@ -82,9 +110,9 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
                                         List<String> params = new ArrayList<>();
                                         for (IdentNode paramNode : fn.getParameters()) {
                                             params.add(paramNode.getName());
-                                        } 
+                                        }
                                         functionsMap.put(propName,
-                                                new JsFunctionCompletionItem(propName, 
+                                                new JsFunctionCompletionItem(propName,
                                                         "",
                                                         params,
                                                         "jsDoc",//TODO

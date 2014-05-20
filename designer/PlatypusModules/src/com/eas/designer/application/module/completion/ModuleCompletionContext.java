@@ -47,9 +47,7 @@ import org.openide.util.Lookup;
  * @author vv
  */
 public class ModuleCompletionContext extends CompletionContext {
-
-    protected static final String GET_METHOD_NAME = "get";// NOI18N
-    public static final String THIS_KEYWORD = "this";//NOI18N
+    
     public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
     protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
     protected static final String MODULE_NAME = "Module";// NOI18N
