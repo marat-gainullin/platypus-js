@@ -100,41 +100,6 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
                     }
 
                 });
-
-//                moduleConstructor.getBody().visit(new NodeVisitor() {
-//                    @Override
-//                    public boolean visit(AstNode an) {
-//                        if (an.equals(moduleConstructor.getBody())) {
-//                            return true;
-//                        }
-//                        if (an instanceof ExpressionStatement) {
-//                            ExpressionStatement es = (ExpressionStatement) an;
-//                            if (es.getExpression() instanceof Assignment) {
-//                                Assignment a = (Assignment) es.getExpression();
-//                                if (a.getLeft() instanceof PropertyGet) {
-//                                    PropertyGet pg = (PropertyGet) a.getLeft();
-//                                    if (pg.getTarget().getType() == Token.THIS
-//                                            || (pg.getTarget() instanceof Name && thisAliases.contains(((Name)pg.getTarget()).getIdentifier()))) {
-//                                        if (a.getRight() instanceof FunctionNode) {
-//                                            FunctionNode fn = (FunctionNode) a.getRight();
-//                                            List<String> params = new ArrayList<>();
-//                                            if (fn.getSymbols() != null) {
-//                                                for (Symbol symbol : fn.getSymbols()) { // get function parameters
-//                                                    if (symbol.getDeclType() == Token.LP) {
-//                                                        params.add(symbol.getName());
-//                                                    }
-//                                                }
-//                                            }
-//                                            functionsMap.put(pg.getProperty().getIdentifier(),
-//                                                    new JsFunctionCompletionItem(pg.getProperty().getIdentifier(), "", params, a.getJsDoc(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                        return false;
-//                    }
-//                });
             }
         }
     }
