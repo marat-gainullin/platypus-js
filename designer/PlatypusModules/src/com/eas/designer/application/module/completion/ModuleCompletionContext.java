@@ -119,7 +119,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
     public static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
         FunctionNode tree = aDataObject.getAstRoot();
-        jdk.nashorn.internal.ir.Node offsetNode = AstUtlities.getOffsetNode(tree, offset);
+        Node offsetNode = AstUtlities.getOffsetNode(tree, offset);
         CompletionMode codeCompletionInfo = isInNewExpression(offsetNode, text) ? CompletionMode.CONSTRUCTORS : CompletionMode.VARIABLES_AND_FUNCTIONS;
         return new JsCodeCompletionScopeInfo(offsetNode, codeCompletionInfo);
     }
