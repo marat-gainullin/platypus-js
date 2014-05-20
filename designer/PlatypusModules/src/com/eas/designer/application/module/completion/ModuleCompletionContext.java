@@ -81,12 +81,6 @@ public class ModuleCompletionContext extends CompletionContext {
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-//        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
-//        if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
-//            fillSystemConstructors(point, resultSet);
-//        } else if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
-//            fillSystemObjects(point, resultSet);
-//        }
     }
 
     protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
@@ -149,15 +143,6 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static CompletionContext findCompletionContext(final String fieldName, final int offset, final ModuleCompletionContext parentModuleContext) {
-        /*
-         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
-         Class clazz = scp.getClassByName(fieldName);
-         if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
-         return new CompletionContext(clazz);
-         }
-         }
-         */
-
         //Collect a <code>CompletionContext</code> for all system objects like model and others.
         FunctionNode astRoot = parentModuleContext.dataObject.getAstRoot();
         class SystemLexicalContext extends LexicalContext {
