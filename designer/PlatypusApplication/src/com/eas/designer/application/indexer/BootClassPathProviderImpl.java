@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.netbeans.api.*;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.netbeans.spi.java.classpath.ClassPathImplementation;
@@ -23,7 +22,6 @@ import org.netbeans.spi.java.classpath.support.PathResourceBase;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Utilities;
-import org.openide.util.io.OperationException;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
