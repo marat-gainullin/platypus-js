@@ -27,9 +27,12 @@ import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
+import jdk.nashorn.internal.ir.LiteralNode;
 import jdk.nashorn.internal.ir.Node;
+import jdk.nashorn.internal.ir.UnaryNode;
 import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import jdk.nashorn.internal.parser.Token;
 import jdk.nashorn.internal.parser.TokenType;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
@@ -77,6 +80,10 @@ public class ModuleCompletionContext extends CompletionContext {
 
     public PlatypusModuleDataObject getDataObject() {
         return dataObject;
+    }
+
+    public CompletionContext getInstanceCompletionContext() {
+        return new ModuleInstanceCompletionContext(this);
     }
 
     @Override
@@ -142,95 +149,60 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    public static CompletionContext findCompletionContext(final String fieldName, final int offset, final ModuleCompletionContext parentModuleContext) {
-        //Collect a <code>CompletionContext</code> for all system objects like model and others.
+    protected static CompletionContext findCompletionContext(final String fieldName, final int offset, final ModuleCompletionContext parentModuleContext) {
         FunctionNode astRoot = parentModuleContext.dataObject.getAstRoot();
-        class SystemLexicalContext extends LexicalContext {
+        if (astRoot != null) {
+            //Collect a <code>CompletionContext</code> for all system objects like model and others.
+            class SystemLexicalContext extends LexicalContext {
 
-            public Map<String, CompletionContext> systemCompletionContexts = new HashMap<>();
+                public Map<String, CompletionContext> systemCompletionContexts = new HashMap<>();
 
-        }
-        final SystemLexicalContext slc = new SystemLexicalContext();
-        astRoot.accept(new NodeVisitor<SystemLexicalContext>(slc) {
-
-            @Override
-            protected boolean enterDefault(jdk.nashorn.internal.ir.Node node) {
-                return super.enterDefault(node);
             }
+            final SystemLexicalContext slc = new SystemLexicalContext();
+            astRoot.accept(new NodeVisitor<SystemLexicalContext>(slc) {
 
-            @Override
-            public boolean enterVarNode(VarNode varNode) {
-                if (ScriptUtils.isInNode(lc.getCurrentFunction(), offset)) {
-                    parentModuleContext.injectVarContext(lc.systemCompletionContexts, varNode);
+                @Override
+                protected boolean enterDefault(jdk.nashorn.internal.ir.Node node) {
+                    return super.enterDefault(node);
                 }
-                return super.enterVarNode(varNode);
-            }
-        });
-        if (slc.systemCompletionContexts.get(fieldName) != null) {
-            return slc.systemCompletionContexts.get(fieldName);
-        }
 
-        //Lookup for an event handler function parameter.
-        class CompletionLexicalContext extends LexicalContext {
-
-            public CompletionContext completionContext;
-
-        }
-        final CompletionLexicalContext clc = new CompletionLexicalContext();
-        astRoot.accept(new NodeVisitor<CompletionLexicalContext>(clc) {
-
-            @Override
-            public boolean enterBinaryNode(BinaryNode binaryNode) {
-                if (ScriptUtils.isInNode(binaryNode, offset)
-                        && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
-                    if (binaryNode.getAssignmentDest() instanceof AccessNode) {
-                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
-                        if (tokens != null && tokens.size() > 1) {
-                            try {
-                                CompletionContext systemCompletionContext = slc.systemCompletionContexts.get(tokens.get(0).name);
-                                CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 1), 0);
-                                if (propsCtx != null && propsCtx.getScriptClass() != null) {
-                                    Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
-                                    if (eventClass != null) {
-                                        lc.completionContext = new CompletionContext(eventClass);
-                                        return false;
-                                    }
-                                }
-                            } catch (Exception ex) {
-                                ErrorManager.getDefault().notify(ex);
-                            }
-                        }
+                @Override
+                public boolean enterVarNode(VarNode varNode) {
+                    if (ScriptUtils.isInNode(lc.getCurrentFunction(), offset)) {
+                        parentModuleContext.injectVarContext(lc.systemCompletionContexts, varNode);
                     }
+                    return super.enterVarNode(varNode);
                 }
-                return super.enterBinaryNode(binaryNode);
+            });
+            if (slc.systemCompletionContexts.get(fieldName) != null) {
+                return slc.systemCompletionContexts.get(fieldName);
             }
-        });
-        if (clc.completionContext != null) {
-            return clc.completionContext;
-        }
-        //Lookup for an entity's row iteration methods handler's parameter.
-        astRoot.accept(new NodeVisitor<CompletionLexicalContext>(clc) {
 
-            @Override
-            public boolean enterCallNode(CallNode callNode) {
-                if (ScriptUtils.isInNode(callNode, offset)
-                    && callNode.getArgs() != null
-                        && callNode.getArgs().size() > 0
-                        && callNode.getArgs().get(0) instanceof FunctionNode) {
-                        FunctionNode parameterFunction = (FunctionNode)callNode.getArgs().get(0);
-                        if (parameterFunction.getParameters() != null 
-                            && parameterFunction.getParameters().size() > 0
-                            && fieldName.equals(parameterFunction.getParameters().get(0).getName())) {                 
-                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), callNode.getFunction().getStart());
-                        if (tokens != null && tokens.size() > 1) {
-                            CompletionToken functionCallToken = tokens.get(tokens.size() - 1);
-                            if (ARRAY_ITERATION_FUNCTIONS_NAMES.contains(functionCallToken.name)) {
+            //Lookup for an event handler function parameter.
+            class CompletionLexicalContext extends LexicalContext {
+
+                public CompletionContext completionContext;
+
+            }
+            final CompletionLexicalContext clc = new CompletionLexicalContext();
+            astRoot.accept(new NodeVisitor<CompletionLexicalContext>(clc) {
+
+                @Override
+                public boolean enterBinaryNode(BinaryNode binaryNode) {
+                    if (ScriptUtils.isInNode(binaryNode, offset)
+                            && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
+                        if (binaryNode.getAssignmentDest() instanceof AccessNode) {
+                            List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
+                            if (tokens != null && tokens.size() > 1) {
                                 try {
                                     CompletionContext systemCompletionContext = slc.systemCompletionContexts.get(tokens.get(0).name);
-                                    CompletionContext c = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 1), 0);
-                                    if (c instanceof EntityCompletionContext) {
-                                        lc.completionContext = ((EntityCompletionContext) c).getElementCompletionContext();
-                                        return false;
+                                    CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 1), 0);
+                                    if (propsCtx != null && propsCtx.getScriptClass() != null) {
+                                        Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
+                                        if (eventClass != null) {
+                                            lc.completionContext = new CompletionContext(eventClass);
+                                            return false;
+                                        }
                                     }
                                 } catch (Exception ex) {
                                     ErrorManager.getDefault().notify(ex);
@@ -238,18 +210,86 @@ public class ModuleCompletionContext extends CompletionContext {
                             }
                         }
                     }
+                    return super.enterBinaryNode(binaryNode);
                 }
-                return super.enterCallNode(callNode);
+            });
+            if (clc.completionContext != null) {
+                return clc.completionContext;
             }
-        });
+            //Lookup for an entity's row iteration methods handler's parameter.
+            astRoot.accept(new NodeVisitor<CompletionLexicalContext>(clc) {
 
-        return clc.completionContext;
+                @Override
+                public boolean enterCallNode(CallNode callNode) {
+                    if (ScriptUtils.isInNode(callNode, offset)
+                            && callNode.getArgs() != null
+                            && callNode.getArgs().size() > 0
+                            && callNode.getArgs().get(0) instanceof FunctionNode) {
+                        FunctionNode parameterFunction = (FunctionNode) callNode.getArgs().get(0);
+                        if (parameterFunction.getParameters() != null
+                                && parameterFunction.getParameters().size() > 0
+                                && fieldName.equals(parameterFunction.getParameters().get(0).getName())) {
+                            List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), callNode.getFunction().getStart());
+                            if (tokens != null && tokens.size() > 1) {
+                                CompletionToken functionCallToken = tokens.get(tokens.size() - 1);
+                                if (ARRAY_ITERATION_FUNCTIONS_NAMES.contains(functionCallToken.name)) {
+                                    try {
+                                        CompletionContext systemCompletionContext = slc.systemCompletionContexts.get(tokens.get(0).name);
+                                        CompletionContext c = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 1), 0);
+                                        if (c instanceof EntityCompletionContext) {
+                                            lc.completionContext = ((EntityCompletionContext) c).getElementCompletionContext();
+                                            return false;
+                                        }
+                                    } catch (Exception ex) {
+                                        ErrorManager.getDefault().notify(ex);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return super.enterCallNode(callNode);
+                }
+            });
+            return clc.completionContext;
+        } else {
+            return null;
+        }
     }
 
     public void injectVarContext(Map<String, CompletionContext> contexts, VarNode varNode) {
         if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_MODEL_METHOD_NAME)) {
             contexts.put(varNode.getName().getName(), new ModelCompletionContext(getDataObject()));
+        } else {
+            String elementId = tryGetModuleElementId(varNode.getAssignmentSource());
+            if (elementId != null) {
+                ModuleCompletionContext mcc = getModuleCompletionContext(getDataObject().getProject(), elementId);
+                if (mcc != null) {
+                    contexts.put(varNode.getName().getName(), mcc.getInstanceCompletionContext());
+                }
+            }
+
         }
+    }
+
+    private String tryGetModuleElementId(Expression assignmentSource) {
+        if (assignmentSource instanceof UnaryNode) {
+            UnaryNode un = (UnaryNode) assignmentSource;
+            un.toString();
+            if (TokenType.NEW.equals(un.tokenType())) {
+                if (un.rhs() instanceof CallNode) {
+                    CallNode cn = (CallNode) un.rhs();
+                    if (cn.getFunction() instanceof IdentNode) {
+                        IdentNode in = (IdentNode) cn.getFunction();
+                        if (isModuleInitializerName(in.getName()) && cn.getArgs().size() > 0) {
+                            if (cn.getArgs().get(0) instanceof LiteralNode) {
+                                return ((LiteralNode) cn.getArgs().get(0)).getPropertyName();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     protected static boolean isSystemObjectMethod(Expression assignmentSource, String methodName) {
