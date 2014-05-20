@@ -7,6 +7,9 @@ package com.eas.designer.application.indexer;
 
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
+import com.eas.designer.application.utils.LifecycleSupport;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,7 +23,11 @@ import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.netbeans.spi.java.classpath.support.PathResourceBase;
 import org.openide.ErrorManager;
+import org.openide.LifecycleManager;
+import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
+import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -43,15 +50,16 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
         return null;
     }
 
-    public void registerJsClassPath() {
+    public synchronized void registerJsClassPath() {
         if (bootClassPath != null) {
            GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
         }
         bootClassPath = null;
         validateBootClassPath();
+        notifyRestartNeeded();
     }
 
-    public void validateBootClassPath() {
+    public synchronized void validateBootClassPath() {
         if (bootClassPath == null) {
             bootClassPath = ClassPathSupport.createClassPath(Collections.singletonList(new BootResourceImpl()));
             GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
@@ -66,6 +74,10 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
             //no-op
         }
         return dir;
+    }
+
+    private void notifyRestartNeeded() {
+        LifecycleSupport.getInstance().notifyRestartNeeded();
     }
 
     public class BootResourceImpl extends PathResourceBase {
