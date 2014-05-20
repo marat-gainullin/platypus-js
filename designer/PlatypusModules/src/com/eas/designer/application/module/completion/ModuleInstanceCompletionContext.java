@@ -95,8 +95,7 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
                             }
                             System.out.println(bn);
                         }
-
-                        return super.enterExpressionStatement(expressionStatement); //To change body of generated methods, choose Tools | Templates.
+                        return super.enterExpressionStatement(expressionStatement);
                     }
 
                 });
