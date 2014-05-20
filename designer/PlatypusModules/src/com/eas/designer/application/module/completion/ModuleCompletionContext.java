@@ -9,10 +9,9 @@ import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
 import com.eas.script.EventMethod;
-import com.eas.script.ScriptObj;
+import com.eas.script.ScriptUtils;
 import com.eas.util.PropertiesUtils;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -119,7 +118,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
     public static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
         FunctionNode tree = aDataObject.getAstRoot();
-        Node offsetNode = AstUtlities.getOffsetNode(tree, offset);
+        Node offsetNode = ScriptUtils.getOffsetNode(tree, offset);
         CompletionMode codeCompletionInfo = isInNewExpression(offsetNode, text) ? CompletionMode.CONSTRUCTORS : CompletionMode.VARIABLES_AND_FUNCTIONS;
         return new JsCodeCompletionScopeInfo(offsetNode, codeCompletionInfo);
     }
@@ -176,7 +175,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
             @Override
             public boolean enterVarNode(VarNode varNode) {
-                if (AstUtlities.isInNode(lc.getCurrentFunction(), offset)) {
+                if (ScriptUtils.isInNode(lc.getCurrentFunction(), offset)) {
                     parentModuleContext.injectVarContext(lc.systemCompletionContexts, varNode);
                 }
                 return super.enterVarNode(varNode);
@@ -197,7 +196,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
             @Override
             public boolean enterBinaryNode(BinaryNode binaryNode) {
-                if (AstUtlities.isInNode(binaryNode, offset)
+                if (ScriptUtils.isInNode(binaryNode, offset)
                         && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
                     if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                         List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
@@ -229,7 +228,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
             @Override
             public boolean enterCallNode(CallNode callNode) {
-                if (AstUtlities.isInNode(callNode, offset)
+                if (ScriptUtils.isInNode(callNode, offset)
                     && callNode.getArgs() != null
                         && callNode.getArgs().size() > 0
                         && callNode.getArgs().get(0) instanceof FunctionNode) {

@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.script.ScriptUtils;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -114,10 +113,10 @@ public class CompletionPoint {
             @Override
             public boolean enterIdentNode(IdentNode identNode) {
                 if (!lc.accessNodes.isEmpty()
-                        && AstUtlities.isInNode(lc.accessNodes.peekLast(), identNode)
-                        && AstUtlities.isInNode(lc.accessNodes.peekLast(), offset)
+                        && ScriptUtils.isInNode(lc.accessNodes.peekLast(), identNode)
+                        && ScriptUtils.isInNode(lc.accessNodes.peekLast(), offset)
                         || lc.accessNodes.isEmpty()
-                        && AstUtlities.isInNode(identNode, offset)) {
+                        && ScriptUtils.isInNode(identNode, offset)) {
                     ctx.add(new CompletionToken(identNode.getName(), CompletionTokenType.IDENTIFIER, identNode));
                 }
                 return true;
