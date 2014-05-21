@@ -61,7 +61,7 @@ public class CompletionPoint {
             if (Character.isJavaIdentifierPart(preCaretPositionChar) || preCaretPositionChar == DOT_CHARACTER) {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
-                String docStr = removeComments(doc.getText(0, doc.getLength()));
+                String docStr = doc.getText(0, doc.getLength());
                 cp.astRoot = ScriptUtils.parseJs(
                         afterDotCaretPosintion
                         ? sanitizeDot(docStr, caretOffset - 1) : docStr);
@@ -121,27 +121,12 @@ public class CompletionPoint {
         });
         return ctx;
     }
-
-    private static String removeComments(String text) {
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        for (Long t : ScriptUtils.getCommentsTokens(text)) {
-            int offset = Token.descPosition(t);
-            int lenght = Token.descLength(t);
-            sb.append(text.substring(i, offset));
-            for (int j = 0; j < lenght; j++) {
-                sb.append(" ");//NOI18N
-            }
-            i = offset + lenght;
-        }
-        sb.append(text.substring(i));
-        return sb.toString();
-    }
-
+    
     private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, int offset) {
         final List<CompletionToken> tokens = new ArrayList<>();
         for (CompletionToken token : contextTokens) {
-            if (token.node.getFinish() < offset) {
+            Long originalToken = token.node.getToken();
+            if (Token.descPosition(originalToken) + Token.descLength(originalToken) < offset) {
                 tokens.add(token);
             } else {
                 break;
