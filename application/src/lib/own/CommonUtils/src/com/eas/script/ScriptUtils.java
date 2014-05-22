@@ -3,7 +3,9 @@ package com.eas.script;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
@@ -12,8 +14,11 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
+import jdk.nashorn.internal.ir.VarNode;
+import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
@@ -32,6 +37,7 @@ import jdk.nashorn.internal.runtime.options.Options;
  */
 public class ScriptUtils {
 
+    public static final String THIS_KEYWORD = "this";//NOI18N
     protected static JSObject toPrimitiveFunc;
     protected static JSObject lookupInGlobalFunc;
     protected static JSObject putInGlobalFunc;
@@ -39,7 +45,6 @@ public class ScriptUtils {
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
     protected static JSObject writeJsonFunc;
-    //protected static JSObject toXMLStringFunc;
     protected static JSObject extendFunc;
     protected static JSObject scalarDefFunc;
     protected static JSObject collectionDefFunc;
@@ -76,7 +81,7 @@ public class ScriptUtils {
         Parser p = new Parser(env, source, errors);
         return p.parse();
     }
-    
+
     public static Object exec(URL aSource) throws ScriptException {
         return engine.eval(new URLReader(aSource), engine.getContext());
     }
@@ -95,11 +100,11 @@ public class ScriptUtils {
         lookupInGlobalFunc = aValue;
     }
 
-    public static void setPutInGlobalFunc(JSObject aValue){
+    public static void setPutInGlobalFunc(JSObject aValue) {
         assert putInGlobalFunc == null;
         putInGlobalFunc = aValue;
     }
-    
+
     public static void setGetModuleFunc(JSObject aValue) {
         assert getModuleFunc == null;
         getModuleFunc = aValue;
@@ -120,12 +125,6 @@ public class ScriptUtils {
         writeJsonFunc = aValue;
     }
 
-    /*
-     public static void setToXMLStringFunc(JSObject aValue) {
-     assert toXMLStringFunc == null;
-     toXMLStringFunc = aValue;
-     }
-     */
     public static void setExtendFunc(JSObject aValue) {
         assert extendFunc == null;
         extendFunc = aValue;
@@ -170,6 +169,7 @@ public class ScriptUtils {
 
     /**
      * Extracts the comments tokens from a JavaScript source.
+     *
      * @param aSource a source
      * @return a list of comment tokens
      */
@@ -196,16 +196,17 @@ public class ScriptUtils {
         }
         return commentsTokens;
     }
-    
+
     /**
      * Removes all commentaries from some JavaScript code.
+     *
      * @param text a source
      * @return comments-free JavaScript code
      */
     public static String removeComments(String text) {
         StringBuilder sb = new StringBuilder();
         int i = 0;
-        for (Long t : getCommentsTokens(text)) {  
+        for (Long t : getCommentsTokens(text)) {
             int offset = Token.descPosition(t);
             int lenght = Token.descLength(t);
             sb.append(text.substring(i, offset));
@@ -217,7 +218,36 @@ public class ScriptUtils {
         sb.append(text.substring(i));
         return sb.toString();
     }
-    
+
+    /**
+     * Searches for all <code>this</code> aliases in a constructor.
+     * @param moduleConstructor a constructor to search in
+     * @return a set of aliases including <code>this</code> itself
+     */
+    public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
+        final Set<String> aliases = new HashSet<>();
+        if (moduleConstructor.getBody() != null) {
+            aliases.add(THIS_KEYWORD);
+            LexicalContext lc = new LexicalContext();
+            moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) {
+
+                @Override
+                public boolean enterVarNode(VarNode varNode) {
+                    if (lc.getCurrentFunction() == moduleConstructor) {
+                        if (varNode.getAssignmentSource() instanceof IdentNode) {
+                            IdentNode in = (IdentNode) varNode.getAssignmentSource();
+                            if (THIS_KEYWORD.equals(in.getName())) {
+                                aliases.add(varNode.getAssignmentDest().getName());
+                            }
+                        }
+                    }
+                    return super.enterVarNode(varNode);
+                }
+            });
+        }
+        return aliases;
+    }
+
     public static Object parseJson(String json) {
         assert parseJsonFunc != null : SCRIPT_NOT_INITIALIZED;
         return parseJsonFunc.call(null, new Object[]{json});
@@ -228,12 +258,6 @@ public class ScriptUtils {
         return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
     }
 
-    /*
-     public static String toXMLString(XMLObject aObj) {
-     assert toXMLStringFunc != null : SCRIPT_NOT_INITIALIZED;
-     return JSType.toString(toXMLStringFunc.call(null, new Object[]{aObj}));
-     }
-     */
     public static void extend(JSObject aChild, JSObject aParent) {
         assert extendFunc != null : SCRIPT_NOT_INITIALIZED;
         extendFunc.call(null, new Object[]{aChild, aParent});
@@ -260,26 +284,26 @@ public class ScriptUtils {
         }
     }
 
-    public static JSObject lookupInGlobal(String aName){
+    public static JSObject lookupInGlobal(String aName) {
         assert lookupInGlobalFunc != null;
-        return (JSObject)lookupInGlobalFunc.call(null, new Object[]{aName});
+        return (JSObject) lookupInGlobalFunc.call(null, new Object[]{aName});
     }
-    
-    public static void putInGlobal(String aName, JSObject aValue){
+
+    public static void putInGlobal(String aName, JSObject aValue) {
         assert putInGlobalFunc != null;
         putInGlobalFunc.call(null, new Object[]{aName, aValue});
     }
-    
+
     public static JSObject getCachedModule(String aModuleName) {
         assert getModuleFunc != null;
         return (JSObject) getModuleFunc.call(null, new Object[]{aModuleName});
     }
-    
+
     public static boolean isInNode(Node node, int offset) {
         return node.getStart() <= offset
                 && offset <= node.getFinish() + 1;
     }
-    
+
     public static boolean isInNode(Node outerNode, Node innerNode) {
         return outerNode.getStart() <= innerNode.getStart()
                 && innerNode.getFinish() <= outerNode.getFinish();

@@ -2,10 +2,7 @@ package com.eas.script;
 
 import java.util.Map;
 import java.util.TreeMap;
-import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.BinaryNode;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
@@ -16,15 +13,18 @@ import jdk.nashorn.internal.parser.TokenType;
 import jdk.nashorn.internal.runtime.Source;
 
 /**
- *
+ * Base class for annotations mining.
+ * Important! The visitor's <code>accept</code> method must be invoked on an AST root.
  * @author mg
  */
-public abstract class AnnotationsMiner extends NodeVisitor<LexicalContext> {
+public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
 
+    protected final int TOP_SCOPE_LEVEL = 1;
+    protected final int TOP_CONSTRUCTORS_SCOPE_LEVEL = 2;
     protected Map<Long, Long> prevComments = new TreeMap<>();
     protected Source source;
 
-    public AnnotationsMiner(Source aSource) {
+    public BaseAnnotationsMiner(Source aSource) {
         super(new LexicalContext());
         source = aSource;
         mineComments();
@@ -79,24 +79,5 @@ public abstract class AnnotationsMiner extends NodeVisitor<LexicalContext> {
     }
 
     protected abstract void commentedFunction(FunctionNode aFunction, String aComment);
-
-    @Override
-    public boolean enterBinaryNode(BinaryNode binaryNode) {
-        if (scopeLevel == 2 && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
-            if (binaryNode.getAssignmentDest() instanceof AccessNode) {
-                AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
-                if (left.getBase() instanceof IdentNode && "this".equals(((IdentNode)left.getBase()).getName())) {
-                    long ft = left.getBase().getToken();
-                    if (prevComments.containsKey(ft)) {
-                        long prevComment = prevComments.get(ft);
-                        commentedProperty(left.getProperty(), source.getString(prevComment));
-                    }
-                }
-            }
-        }
-        return super.enterBinaryNode(binaryNode);
-    }
-
-    protected abstract void commentedProperty(IdentNode aProperty, String aComment);
 
 }
