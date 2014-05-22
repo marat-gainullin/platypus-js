@@ -5,7 +5,6 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
 import com.eas.script.ScriptFunction;
 import com.eas.util.PropertiesUtils;
 import com.eas.util.PropertiesUtils.PropBox;
@@ -15,6 +14,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.ir.IndexNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -99,13 +100,10 @@ public class CompletionContext {
     }
 
     protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
-        return (CompletionTokenType.PROPERTY_GET == token.type && propertyName.equals(token.name))
-                || (CompletionTokenType.ELEMENT_GET == token.type && isQuotedString(token.name) && propertyName.equals(removeQuotes(token.name)));
-    }
-
-    protected static boolean isQuotedString(String str) {
-        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH
-                && ((str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")));//NOI18N
+        return (token.node instanceof IdentNode && propertyName.equals(token.name))
+                || (token.node instanceof IndexNode 
+                && ((IndexNode)token.node).getIndex().getType().isString()
+                && propertyName.equals(removeQuotes(token.name)));
     }
 
     private static String removeQuotes(String str) {

@@ -7,13 +7,16 @@ package com.eas.designer.application.module.completion;
 import com.eas.script.ScriptUtils;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import javax.swing.text.BadLocationException;
-import jdk.nashorn.internal.ir.AccessNode;
+import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.ir.IndexNode;
 import jdk.nashorn.internal.ir.LexicalContext;
+import jdk.nashorn.internal.ir.LiteralNode;
 import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.parser.Token;
@@ -82,7 +85,7 @@ public class CompletionPoint {
     public static List<CompletionToken> getContextTokens(final Node ast, final int offset) {
         class AccessNodeLexicalContext extends LexicalContext {
 
-            final Deque<AccessNode> accessNodes = new ArrayDeque<>();
+            final Deque<ExpressionStatement> expressionsNodes = new ArrayDeque<>();
 
         }
         final AccessNodeLexicalContext lc = new AccessNodeLexicalContext();
@@ -95,30 +98,50 @@ public class CompletionPoint {
             }
 
             @Override
-            public boolean enterAccessNode(AccessNode accessNode) {
-                lc.accessNodes.push(accessNode);
-                return super.enterAccessNode(accessNode);
+            public boolean enterExpressionStatement(final ExpressionStatement expressionStatement) {
+                lc.expressionsNodes.push(expressionStatement);
+                return super.enterDefault(expressionStatement);
             }
 
             @Override
-            public Node leaveAccessNode(AccessNode accessNode) {
-                lc.accessNodes.pop();
-                return super.leaveAccessNode(accessNode);
+            public Node leaveExpressionStatement(ExpressionStatement expressionStatement) {
+                lc.expressionsNodes.pop();
+                return super.leaveExpressionStatement(expressionStatement);
             }
-
+            
             @Override
             public boolean enterIdentNode(IdentNode identNode) {
-                if (!lc.accessNodes.isEmpty()
-                        && ScriptUtils.isInNode(lc.accessNodes.peekLast(), identNode)
-                        && ScriptUtils.isInNode(lc.accessNodes.peekLast(), offset)
-                        || lc.accessNodes.isEmpty()
-                        && ScriptUtils.isInNode(identNode, offset)) {
-                    ctx.add(new CompletionToken(identNode.getName(), CompletionTokenType.PROPERTY_GET, identNode));
+                if (!lc.expressionsNodes.isEmpty()
+                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), identNode)
+                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
+                    ctx.add(new CompletionToken(identNode.getName(), identNode));
+                } else if (lc.expressionsNodes.isEmpty() && ScriptUtils.isInNode(identNode, offset)) {
+                    ctx.add(new CompletionToken(identNode.getName(), identNode));
                 }
-                return true;
+                return super.enterIdentNode(identNode);
             }
 
+            @Override
+            public boolean enterIndexNode(IndexNode indexNode) {
+                if (!lc.expressionsNodes.isEmpty()
+                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), indexNode)
+                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
+                    System.out.println(indexNode.getIndex());
+                    if (indexNode.getIndex() instanceof LiteralNode) {
+                        LiteralNode ln = (LiteralNode)indexNode.getIndex();
+                        ctx.add(new CompletionToken(ln.getString(), indexNode));
+                    } else if (indexNode.getIndex() instanceof IdentNode) {
+                        IdentNode in = (IdentNode) indexNode.getIndex();
+                        ctx.add(new CompletionToken(in.getName(), indexNode));
+                    }
+                }
+                return super.enterIndexNode(indexNode);
+            }
+            
+            
+
         });
+        Collections.sort(ctx);
         return ctx;
     }
     
@@ -158,22 +181,20 @@ public class CompletionPoint {
         return caretOffset;
     }
 
-    public enum CompletionTokenType {
-
-        PROPERTY_GET,
-        ELEMENT_GET
-    }
-
-    public static class CompletionToken {
+    public static class CompletionToken implements Comparable<CompletionToken> {
 
         public final String name;
-        public final CompletionTokenType type;
         public final Node node;
 
-        public CompletionToken(String aName, CompletionTokenType aType, Node aNode) {
+        public CompletionToken(String aName, Node aNode) {
             name = aName;
-            type = aType;
             node = aNode;
         }
+
+        @Override
+        public int compareTo(CompletionToken o) {
+            return node.position() - o.node.position();
+        }
+
     }
 }
