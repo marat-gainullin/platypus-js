@@ -23,6 +23,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -180,7 +181,7 @@ public class Form {
 	}
 
 	public JavaScriptObject submit(String aAction, final JavaScriptObject aDoneCallback) {
-		Map<String, String> fd = new HashMap<String, String>(); 
+		Map<String, String> fd = new HashMap<String, String>();
 		gatherForm(fd, view);
 		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, fd, aDoneCallback == null ? null : new Callback<XMLHttpRequest>() {
 			@Override
@@ -234,7 +235,7 @@ public class Form {
 			window.setMinimizable(minimizable);
 			window.setHeaderVisible(!undecorated);
 			window.setShadow(!undecorated);
-			window.setBorders(false);//(!undecorated);
+			window.setBorders(false);// (!undecorated);
 			window.setDraggable(true);
 			window.setResizable(resizable);
 			window.setOnEsc(aModal);
@@ -283,13 +284,15 @@ public class Form {
 	protected HandlerRegistration showedOnPanelHideReg = null;
 
 	public void showOnPanel(String aElementId) {
-		showOnPanel(RootPanel.get(aElementId));
+		Element el = Document.get().getElementById(aElementId).cast();
+		showOnPanel(el);
 	}
 
 	public void showOnPanel(Element aElement) {
-		showOnPanel(new WrapingPanel(aElement));
+		if (aElement != null)
+			showOnPanel(new WrapingPanel(aElement));
 	}
-	
+
 	public void showOnPanel(HasWidgets aPanel) {
 		close(null, null);
 		if (!isOpened()) {
@@ -355,13 +358,13 @@ public class Form {
 		} else if (aPanel instanceof RootPanel) {
 			aPanel.add(toAdd);
 			/*
-			toAdd.getElement().getStyle().clearLeft();
-			toAdd.getElement().getStyle().clearTop();
-			toAdd.getElement().getStyle().clearRight();
-			toAdd.getElement().getStyle().clearBottom();
-			toAdd.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-			toAdd.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-			*/
+			 * toAdd.getElement().getStyle().clearLeft();
+			 * toAdd.getElement().getStyle().clearTop();
+			 * toAdd.getElement().getStyle().clearRight();
+			 * toAdd.getElement().getStyle().clearBottom();
+			 * toAdd.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+			 * toAdd.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+			 */
 		} else {
 			aPanel.add(toAdd);
 		}
@@ -895,26 +898,26 @@ public class Form {
 		return window != null ? window.isCollapsed() : false;
 	}
 
-	public void minimize(){
-		if(window != null)
+	public void minimize() {
+		if (window != null)
 			window.minimize();
 	}
-	
-	public void maximize(){
-		if(window != null)
+
+	public void maximize() {
+		if (window != null)
 			window.maximize();
 	}
-	
-	public void toFront(){
-		if(window != null)
+
+	public void toFront() {
+		if (window != null)
 			window.toFront();
 	}
-	
-	public void restore(){
-		if(window != null)
+
+	public void restore() {
+		if (window != null)
 			window.restore();
 	}
-	
+
 	public boolean isMaximizable() {
 		return maximizable;
 	}
