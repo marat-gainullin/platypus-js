@@ -21,6 +21,7 @@ import jdk.nashorn.internal.runtime.ErrorManager;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptEnvironment;
 import jdk.nashorn.internal.runtime.Source;
+import jdk.nashorn.internal.runtime.Undefined;
 import jdk.nashorn.internal.runtime.options.Options;
 
 /**
@@ -35,6 +36,7 @@ public class ScriptUtils {
     protected static JSObject getModuleFunc;
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
+    protected static JSObject parseDatesFunc;
     protected static JSObject writeJsonFunc;
     //protected static JSObject toXMLStringFunc;
     protected static JSObject extendFunc;
@@ -73,7 +75,7 @@ public class ScriptUtils {
         Parser p = new Parser(env, source, errors);
         return p.parse();
     }
-    
+
     public static Object exec(URL aSource) throws ScriptException {
         return engine.eval(new URLReader(aSource), engine.getContext());
     }
@@ -92,11 +94,11 @@ public class ScriptUtils {
         lookupInGlobalFunc = aValue;
     }
 
-    public static void setPutInGlobalFunc(JSObject aValue){
+    public static void setPutInGlobalFunc(JSObject aValue) {
         assert putInGlobalFunc == null;
         putInGlobalFunc = aValue;
     }
-    
+
     public static void setGetModuleFunc(JSObject aValue) {
         assert getModuleFunc == null;
         getModuleFunc = aValue;
@@ -110,6 +112,11 @@ public class ScriptUtils {
     public static void setParseJsonFunc(JSObject aValue) {
         assert parseJsonFunc == null;
         parseJsonFunc = aValue;
+    }
+
+    public static void setParseDateFunc(JSObject aValue) {
+        assert parseDatesFunc == null;
+        parseDatesFunc = aValue;
     }
 
     public static void setWriteJsonFunc(JSObject aValue) {
@@ -167,6 +174,7 @@ public class ScriptUtils {
 
     /**
      * Extracts the comments tokens from a JavaScript source.
+     *
      * @param aSource a source
      * @return a list of comment tokens
      */
@@ -193,16 +201,17 @@ public class ScriptUtils {
         }
         return commentsTokens;
     }
-    
+
     /**
      * Removes all commentaries from some JavaScript code.
+     *
      * @param text a source
      * @return comments-free JavaScript code
      */
     public static String removeComments(String text) {
         StringBuilder sb = new StringBuilder();
         int i = 0;
-        for (Long t : getCommentsTokens(text)) {  
+        for (Long t : getCommentsTokens(text)) {
             int offset = Token.descPosition(t);
             int lenght = Token.descLength(t);
             sb.append(text.substring(i, offset));
@@ -214,24 +223,38 @@ public class ScriptUtils {
         sb.append(text.substring(i));
         return sb.toString();
     }
-    
+
     public static Object parseJson(String json) {
         assert parseJsonFunc != null : SCRIPT_NOT_INITIALIZED;
         return parseJsonFunc.call(null, new Object[]{json});
     }
+
+    public static Object parseDates(Object aObject) {
+        assert parseDatesFunc != null : SCRIPT_NOT_INITIALIZED;
+        return parseDatesFunc.call(null, new Object[]{aObject});
+    }
+
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script function are not initialized.";
 
     public static String toJson(Object aObj) {
-        return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
+        if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
+            aObj = null;
+        }
+        if (aObj instanceof JSObject || aObj instanceof String 
+                || aObj instanceof Number || aObj instanceof Boolean || aObj == null) {
+            return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
+        } else {
+            throw new IllegalArgumentException("Could not convert to JSON Java object!");
+        }    
     }
 
-    /*
-     public static String toXMLString(XMLObject aObj) {
-     assert toXMLStringFunc != null : SCRIPT_NOT_INITIALIZED;
-     return JSType.toString(toXMLStringFunc.call(null, new Object[]{aObj}));
-     }
-     */
-    public static void extend(JSObject aChild, JSObject aParent) {
+/*
+ public static String toXMLString(XMLObject aObj) {
+ assert toXMLStringFunc != null : SCRIPT_NOT_INITIALIZED;
+ return JSType.toString(toXMLStringFunc.call(null, new Object[]{aObj}));
+ }
+ */
+public static void extend(JSObject aChild, JSObject aParent) {
         assert extendFunc != null : SCRIPT_NOT_INITIALIZED;
         extendFunc.call(null, new Object[]{aChild, aParent});
     }
@@ -245,7 +268,7 @@ public class ScriptUtils {
         assert collectionDefFunc != null : SCRIPT_NOT_INITIALIZED;
         return (JSObject) collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName});
     }
-
+    
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});
@@ -257,16 +280,16 @@ public class ScriptUtils {
         }
     }
 
-    public static JSObject lookupInGlobal(String aName){
+    public static JSObject lookupInGlobal(String aName) {
         assert lookupInGlobalFunc != null;
-        return (JSObject)lookupInGlobalFunc.call(null, new Object[]{aName});
+        return (JSObject) lookupInGlobalFunc.call(null, new Object[]{aName});
     }
-    
-    public static void putInGlobal(String aName, JSObject aValue){
+
+    public static void putInGlobal(String aName, JSObject aValue) {
         assert putInGlobalFunc != null;
         putInGlobalFunc.call(null, new Object[]{aName, aValue});
     }
-    
+
     public static JSObject getCachedModule(String aModuleName) {
         assert getModuleFunc != null;
         return (JSObject) getModuleFunc.call(null, new Object[]{aModuleName});

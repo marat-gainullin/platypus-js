@@ -149,16 +149,21 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs) throws Exception {
         JSObject module = getSessionManager().getSystemSession().getModule(aModuleName);
         Session oldSession = getSessionManager().getCurrentSession();
+        getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
         try {
-            getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
             if (module == null) {
+                PlatypusScriptedResource.executeScriptResource(aModuleName);
                 module = ScriptUtils.createModule(aModuleName);
             }
-            Object oFunction = module.getMember(aMethodName);
-            if (oFunction instanceof JSObject && ((JSObject) oFunction).isFunction()) {
-                return ScriptUtils.toJava(((JSObject) oFunction).call(module, ScriptUtils.toJs(aArgs)));
+            if (module != null) {
+                Object oFunction = module.getMember(aMethodName);
+                if (oFunction instanceof JSObject && ((JSObject) oFunction).isFunction()) {
+                    return ScriptUtils.toJava(((JSObject) oFunction).call(module, ScriptUtils.toJs(aArgs)));
+                } else {
+                    throw new Exception(String.format("Module %s has no function %s", aModuleName, aMethodName));
+                }
             } else {
-                throw new Exception(String.format("Module %s has no function %s", aModuleName, aMethodName));
+                throw new Exception(String.format("Module %s is not found.", aModuleName));
             }
         } finally {
             getSessionManager().setCurrentSession(oldSession);

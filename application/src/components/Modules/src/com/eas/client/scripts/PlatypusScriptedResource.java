@@ -7,6 +7,7 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.client.threetier.PlatypusClient;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
@@ -267,6 +268,13 @@ public class PlatypusScriptedResource {
 
     public static Client getClient() {
         return client;
+    }
+
+    public static PlatypusClient getPlatypusClient() {
+        if (client instanceof PlatypusClient) {
+            return (PlatypusClient)client;
+        }
+        return null;
     }
 
     private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {

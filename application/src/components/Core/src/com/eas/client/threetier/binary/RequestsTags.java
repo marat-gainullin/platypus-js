@@ -101,20 +101,23 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_ACTUAL = 53;
     //CreateServerModuleResponse
     public static final int TAG_MODULE_ID = 55;
+    public static final int TAG_MODULE_PERMITTED = 56;
+    public static final int TAG_MODULE_FUNCTION_NAMES = 57;
+    public static final int TAG_MODULE_FUNCTION_NAME = 58;
     //CommitRequest.Response
-    public static final int UPDATED_TAG = 56;
+    public static final int UPDATED_TAG = 59;
     //AppQueryResponse
-    public static final int TAG_TITLE = 57;
-    public static final int TAG_DML = 58;
-    public static final int TAG_FIELDS = 59;
-    public static final int TAG_QUERY_SQL_PARAMETER = 60;
-    public static final int TAG_READ_ROLE = 61;
-    public static final int TAG_WRITE_ROLE = 62;
+    public static final int TAG_TITLE = 60;
+    public static final int TAG_DML = 61;
+    public static final int TAG_FIELDS = 62;
+    public static final int TAG_QUERY_SQL_PARAMETER = 63;
+    public static final int TAG_READ_ROLE = 64;
+    public static final int TAG_WRITE_ROLE = 65;
     //AppElementRequest.Response
-    public static final int TAG_NAME = 63;
-    public static final int TAG_TYPE = 64;
-    public static final int TAG_TEXT = 65;
-    public static final int TAG_TEXT_LENGTH = 66;
-    public static final int TAG_TEXT_CRC32 = 67;
-    public static final int TAG_RESOURCE = 68;
+    public static final int TAG_NAME = 66;
+    public static final int TAG_TYPE = 67;
+    public static final int TAG_TEXT = 68;
+    public static final int TAG_TEXT_LENGTH = 69;
+    public static final int TAG_TEXT_CRC32 = 70;
+    public static final int TAG_RESOURCE = 71;
 }

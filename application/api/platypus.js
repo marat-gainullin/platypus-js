@@ -100,7 +100,7 @@ P.loadForm = function(aName, aModel, aTarget) {
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
     var Loader = Java.type('com.eas.client.forms.store.Dom2FormDocument');
     var Form = Java.type('com.eas.client.forms.Form');
-    
+
     var designInfo = Loader.load(Executor.getClient(), aName);
     var form = new Form(aName, designInfo, aModel.unwrap());
     // publish
@@ -130,3 +130,58 @@ P.loadReport = function(aName, aModel, aTarget) {
     };
     return publishTo;
 };
+
+P.ServerModule = function(aModuleName) {
+    var clientHost = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
+    var client = clientHost.getPlatypusClient();
+    if (client) {
+        var CreateRequest = Java.type('com.eas.client.threetier.requests.CreateServerModuleRequest');
+        var Generator = Java.type('com.bearsoft.rowset.utils.IDGenerator');
+        var request = new CreateRequest(Generator.genID(), aModuleName);
+        client.executeRequest(request);
+        var responce = request.getResponse();
+        if (responce.isPermitted()) {
+            var functions = responce.getFunctionsNames();
+            var currentObject = this;
+            functions.forEach(function(aFunctionName) {
+                currentObject[aFunctionName] = function() {
+                    var onSuccess = null;
+                    var onFailure = null;
+                    var argsLength = arguments.length;
+                    if (arguments.length > 1 && typeof arguments[arguments.length - 1] == "function" && typeof arguments[arguments.length - 2] == "function") {
+                        onSuccess = arguments[arguments.length - 2];
+                        onFailure = arguments[arguments.length - 1];
+                        argsLength -= 2;
+                    } else if (arguments.length > 0 && typeof arguments[arguments.length - 1] == "function") {
+                        onSuccess = arguments[arguments.length - 1];
+                        argsLength -= 1;
+                    }
+                    try {
+                        var ObjectsArray = Java.type("java.lang.Object[]");
+                        var params = new ObjectsArray(argsLength);
+                        for (var j = 0; j < argsLength; j++) {
+                            params[j] = arguments[j];
+                        }
+                        var result = client.executeServerModuleMethod(aModuleName, aFunctionName, params);
+                        if (onSuccess) {
+                            onSuccess(result);
+                        } else {
+                            return result;
+                        }
+                    } catch (e) {
+                        if (onFailure) {
+                            onFailure(e);
+                        } else {
+                            throw e;
+                        }
+                    }
+                };
+            });
+        } else {
+            throw "Access denied for module" + aModuleName + ". May be denied public access."
+        }
+    } else {
+        throw "This architecture does not support server modules."
+    }
+};
+

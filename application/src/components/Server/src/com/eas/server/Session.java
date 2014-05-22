@@ -9,6 +9,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.threetier.Response;
+import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -157,58 +158,46 @@ public class Session implements PrincipalHost {
      * @param aName
      * @return
      */
-    public JSObject getModule(String aName) {
-        synchronized (modulesInstances) {
-            return modulesInstances.get(aName);
+    public synchronized JSObject getModule(String aName) {
+        return modulesInstances.get(aName);
+    }
+
+    public synchronized boolean containsModule(String aName) {
+        return modulesInstances.containsKey(aName);
+    }
+
+    public synchronized void registerModule(JSObject aModule) {
+        JSObject c = (JSObject)aModule.getMember("constructor");
+        String name = JSType.toString(c.getMember("name"));
+        modulesInstances.put(name, aModule);
+    }
+
+    public synchronized void unregisterModule(String aModuleName) {
+        modulesInstances.remove(aModuleName);
+    }
+
+    public synchronized void unregisterModules() {
+        modulesInstances.clear();
+    }
+
+    public synchronized void addPendingResponse(Response response) {
+        pendingResponses.put(response.getRequestID(), response);
+    }
+
+    public synchronized void removePendingResponse(Response response) {
+        final Response rsp = pendingResponses.get(response.getRequestID());
+        if (rsp == response) {
+            pendingResponses.remove(response.getRequestID());
         }
     }
 
-    public void registerModule(JSObject aModule) {
-        synchronized (modulesInstances) {
-            JSObject c = (JSObject) aModule.getMember("constructor");
-            String name = JSType.toString(c.getMember("name"));
-            modulesInstances.put(name, aModule);
-        }
+    public synchronized Response getPendingResponse(Long requestID) {
+        return pendingResponses.get(requestID);
     }
 
-    public void unregisterModule(String aModuleName) {
-        synchronized (modulesInstances) {
-            modulesInstances.remove(aModuleName);
-        }
-    }
-
-    public void unregisterModules() {
-        synchronized (modulesInstances) {
-            modulesInstances.clear();
-        }
-    }
-
-    public void addPendingResponse(Response response) {
-        synchronized (pendingResponses) {
-            pendingResponses.put(response.getRequestID(), response);
-        }
-    }
-
-    public void removePendingResponse(Response response) {
-        synchronized (pendingResponses) {
-            final Response rsp = pendingResponses.get(response.getRequestID());
-            if (rsp == response) {
-                pendingResponses.remove(response.getRequestID());
-            }
-        }
-    }
-
-    public Response getPendingResponse(Long requestID) {
-        synchronized (pendingResponses) {
-            return pendingResponses.get(requestID);
-        }
-    }
-
-    public void processPendingResponses(ResponseProcessor proc) throws Exception {
-        synchronized (pendingResponses) {
-            for (Entry<Long, Response> e : pendingResponses.entrySet()) {
-                proc.processResponse(e.getValue());
-            }
+    public synchronized void processPendingResponses(ResponseProcessor proc) throws Exception {
+        for (Entry<Long, Response> e : pendingResponses.entrySet()) {
+            proc.processResponse(e.getValue());
         }
     }
 
