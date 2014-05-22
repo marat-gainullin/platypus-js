@@ -5,7 +5,7 @@
 package com.eas.client.cache;
 
 import com.eas.client.ClientConstants;
-import com.eas.script.AnnotationsMiner;
+import com.eas.script.BaseAnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.util.FileUtils;
@@ -19,8 +19,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.runtime.Source;
 
 /**
  *
@@ -50,11 +48,11 @@ public class PlatypusFilesSupport {
     
     public static FunctionNode extractModuleConstructor(FunctionNode jsRoot) {
         final NodesContext cx = new NodesContext();
-        jsRoot.accept(new AnnotationsMiner(jsRoot.getSource()) {
+        jsRoot.accept(new BaseAnnotationsMiner(jsRoot.getSource()) {
 
             @Override
             public boolean enterFunctionNode(FunctionNode fn) {
-                if (scopeLevel == 1 && fn != jsRoot && !fn.isAnonymous()) {
+                if (scopeLevel == TOP_SCOPE_LEVEL && fn != jsRoot && !fn.isAnonymous()) {
                     if (cx.result == null) {
                         cx.result = fn;
                     }
@@ -65,7 +63,7 @@ public class PlatypusFilesSupport {
 
             @Override
             protected void commentedFunction(FunctionNode fn, String aComment) {
-                if (scopeLevel == 2) {
+                if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
                     JsDoc jsDoc = new JsDoc(aComment);
                     if (jsDoc.containsModuleAnnotation()) {
                         cx.result = fn;
@@ -73,12 +71,6 @@ public class PlatypusFilesSupport {
                     }
                 }
             }
-
-            @Override
-            protected void commentedProperty(IdentNode aProperty, String aComment) {
-                // no op here
-            }
-
         });
         if (cx.annotatedConstructors == 1) {
             return cx.result;

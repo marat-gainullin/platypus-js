@@ -17,6 +17,7 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service=PathRecognizer.class, position=100)
 public class PlatypusPathRecognizer extends PathRecognizer {
     
+    public static final String BOOT_CP = "platypus/classpath/boot"; // NOI18N
     public static final String SOURCE_CP = "platypus/classpath/source"; // NOI18N
     public static final String JAVASRIPT_MIME_TYPE = "text/javascript";  //NOI18N
     public static final String QUERY_MIME_TYPE = "text/x-platypus-sql";  //NOI18N
@@ -27,11 +28,13 @@ public class PlatypusPathRecognizer extends PathRecognizer {
         add(QUERY_MIME_TYPE);
         add(CONNECTION_MIME_TYPE);
     }};
-    private final Set<String> SOURCES = Collections.singleton(SOURCE_CP);
-
+    
+    private final Set<String> SOURCES_CP_IDS = Collections.singleton(SOURCE_CP);
+    private final Set<String> BOOT_CP_IDS = Collections.singleton(BOOT_CP);
+    
     @Override
     public Set<String> getSourcePathIds() {
-        return SOURCES;
+        return SOURCES_CP_IDS;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class PlatypusPathRecognizer extends PathRecognizer {
 
     @Override
     public Set<String> getLibraryPathIds() {
-        return null;
+        return BOOT_CP_IDS;
     }
 
     @Override

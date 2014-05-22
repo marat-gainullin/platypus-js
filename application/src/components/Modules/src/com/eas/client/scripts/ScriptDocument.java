@@ -4,9 +4,10 @@
  */
 package com.eas.client.scripts;
 
-import com.eas.script.AnnotationsMiner;
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
+import com.eas.script.PropertiesAnnotationsMiner;
 import com.eas.script.ScriptUtils;
 import java.util.*;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -67,11 +68,10 @@ public class ScriptDocument {
 
     /**
      * Reads script annotations. Annotations, accompanied with
-     *
-     * @param aSource
      * @name annotation are the 'module annotations'. Annotations, followed by
      * any property assignment are the 'property annotations'. Property
      * annotations will be taken into account while accessing through modules.
+     * @param aSource
      */
     private void readScriptAnnotations(String aSource) {
         assert aSource != null : "JavaScript source can't be null";
@@ -79,7 +79,8 @@ public class ScriptDocument {
         propertyAllowedRoles.clear();
         Source source = new Source("", aSource);
         FunctionNode ast = ScriptUtils.parseJs(aSource);
-        ast.accept(new AnnotationsMiner(source) {
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast);
+        ast.accept(new PropertiesAnnotationsMiner(source, ScriptUtils.getThisAliases(moduleConstructor)) {
 
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {

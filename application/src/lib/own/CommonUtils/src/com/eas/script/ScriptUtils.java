@@ -3,7 +3,9 @@ package com.eas.script;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
@@ -12,6 +14,12 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.ir.LexicalContext;
+import jdk.nashorn.internal.ir.Node;
+import jdk.nashorn.internal.ir.VarNode;
+import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
+import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
 import jdk.nashorn.internal.parser.Token;
@@ -30,6 +38,7 @@ import jdk.nashorn.internal.runtime.options.Options;
  */
 public class ScriptUtils {
 
+    public static final String THIS_KEYWORD = "this";//NOI18N
     protected static JSObject toPrimitiveFunc;
     protected static JSObject lookupInGlobalFunc;
     protected static JSObject putInGlobalFunc;
@@ -38,7 +47,6 @@ public class ScriptUtils {
     protected static JSObject parseJsonFunc;
     protected static JSObject parseDatesFunc;
     protected static JSObject writeJsonFunc;
-    //protected static JSObject toXMLStringFunc;
     protected static JSObject extendFunc;
     protected static JSObject scalarDefFunc;
     protected static JSObject collectionDefFunc;
@@ -124,12 +132,6 @@ public class ScriptUtils {
         writeJsonFunc = aValue;
     }
 
-    /*
-     public static void setToXMLStringFunc(JSObject aValue) {
-     assert toXMLStringFunc == null;
-     toXMLStringFunc = aValue;
-     }
-     */
     public static void setExtendFunc(JSObject aValue) {
         assert extendFunc == null;
         extendFunc = aValue;
@@ -224,6 +226,35 @@ public class ScriptUtils {
         return sb.toString();
     }
 
+    /**
+     * Searches for all <code>this</code> aliases in a constructor.
+     * @param moduleConstructor a constructor to search in
+     * @return a set of aliases including <code>this</code> itself
+     */
+    public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
+        final Set<String> aliases = new HashSet<>();
+        if (moduleConstructor.getBody() != null) {
+            aliases.add(THIS_KEYWORD);
+            LexicalContext lc = new LexicalContext();
+            moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) {
+
+                @Override
+                public boolean enterVarNode(VarNode varNode) {
+                    if (lc.getCurrentFunction() == moduleConstructor) {
+                        if (varNode.getAssignmentSource() instanceof IdentNode) {
+                            IdentNode in = (IdentNode) varNode.getAssignmentSource();
+                            if (THIS_KEYWORD.equals(in.getName())) {
+                                aliases.add(varNode.getAssignmentDest().getName());
+                            }
+                        }
+                    }
+                    return super.enterVarNode(varNode);
+                }
+            });
+        }
+        return aliases;
+    }
+
     public static Object parseJson(String json) {
         assert parseJsonFunc != null : SCRIPT_NOT_INITIALIZED;
         return parseJsonFunc.call(null, new Object[]{json});
@@ -247,14 +278,7 @@ public class ScriptUtils {
             throw new IllegalArgumentException("Could not convert to JSON Java object!");
         }    
     }
-
-/*
- public static String toXMLString(XMLObject aObj) {
- assert toXMLStringFunc != null : SCRIPT_NOT_INITIALIZED;
- return JSType.toString(toXMLStringFunc.call(null, new Object[]{aObj}));
- }
- */
-public static void extend(JSObject aChild, JSObject aParent) {
+    public static void extend(JSObject aChild, JSObject aParent) {
         assert extendFunc != null : SCRIPT_NOT_INITIALIZED;
         extendFunc.call(null, new Object[]{aChild, aParent});
     }
@@ -293,5 +317,49 @@ public static void extend(JSObject aChild, JSObject aParent) {
     public static JSObject getCachedModule(String aModuleName) {
         assert getModuleFunc != null;
         return (JSObject) getModuleFunc.call(null, new Object[]{aModuleName});
+    }
+
+    public static boolean isInNode(Node node, int offset) {
+        return node.getStart() <= offset
+                && offset <= node.getFinish() + 1;
+    }
+
+    public static boolean isInNode(Node outerNode, Node innerNode) {
+        return outerNode.getStart() <= innerNode.getStart()
+                && innerNode.getFinish() <= outerNode.getFinish();
+    }
+
+    public static Node getOffsetNode(Node node, final int offset) {
+        GetOffsetNodeVisitorSupport vs = new GetOffsetNodeVisitorSupport(node, offset);
+        Node offsetNode = vs.getOffsetNode();
+        return offsetNode != null ? offsetNode : node;
+    }
+
+    private static class GetOffsetNodeVisitorSupport {
+
+        private final Node root;
+        private final int offset;
+        private Node offsetNode;
+
+        public GetOffsetNodeVisitorSupport(Node root, int offset) {
+            this.root = root;
+            this.offset = offset;
+        }
+
+        public Node getOffsetNode() {
+            final LexicalContext lc = new LexicalContext();
+            root.accept(new NodeVisitor<LexicalContext>(lc) {
+
+                @Override
+                protected boolean enterDefault(Node node) {
+                    if (isInNode(node, offset)) {
+                        offsetNode = node;
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            return offsetNode;
+        }
     }
 }

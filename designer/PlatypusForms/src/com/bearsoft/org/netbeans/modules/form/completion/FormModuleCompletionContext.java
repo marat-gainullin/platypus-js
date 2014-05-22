@@ -11,7 +11,6 @@ import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
-import com.eas.designer.application.module.completion.ModelCompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import java.util.Map;
 import jdk.nashorn.internal.ir.VarNode;

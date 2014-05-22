@@ -62,7 +62,6 @@ public class FormCompletionContext extends CompletionContext {
                 return new CompletionContext(platypusControlClass);
             } else {
                 return new DbGridCompletionContext((DbGrid) comp.getBeanInstance());
-
             }
         }
         return null;
