@@ -113,7 +113,7 @@ public class CompletionPoint {
                         && ScriptUtils.isInNode(lc.accessNodes.peekLast(), offset)
                         || lc.accessNodes.isEmpty()
                         && ScriptUtils.isInNode(identNode, offset)) {
-                    ctx.add(new CompletionToken(identNode.getName(), CompletionTokenType.IDENTIFIER, identNode));
+                    ctx.add(new CompletionToken(identNode.getName(), CompletionTokenType.PROPERTY_GET, identNode));
                 }
                 return true;
             }
@@ -160,7 +160,6 @@ public class CompletionPoint {
 
     public enum CompletionTokenType {
 
-        IDENTIFIER,
         PROPERTY_GET,
         ELEMENT_GET
     }
