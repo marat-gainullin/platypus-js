@@ -45,6 +45,7 @@ import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -152,6 +153,10 @@ public class PlatypusWebModuleManager {
                     if (libsDir != null && libsDir.isFolder()) {
                         FileUtils.clearDirectory(FileUtil.toFile(libsDir));
                     }
+                    FileObject classesDir = webInfDir.getFileObject(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
+                    if (classesDir != null && classesDir.isFolder()) {
+                        FileUtils.clearDirectory(FileUtil.toFile(classesDir));
+                    }
                 }
             }
             FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
@@ -187,6 +192,13 @@ public class PlatypusWebModuleManager {
         if (libsDir.getChildren().length == 0) {
             copyBinJars(libsDir);
             copyLibJars(libsDir);
+        }
+        FileObject classesDir = webInfDir.getFileObject(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
+        if (classesDir == null) {
+            classesDir = webInfDir.createFolder(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
+        }
+        if (classesDir.getChildren().length == 0) {
+            copyApiJs(classesDir);
         }
     }
 
@@ -231,7 +243,7 @@ public class PlatypusWebModuleManager {
      * @param destination directory
      * @throws IOException if some I/O problem occurred.
      */
-    protected void copyContent(FileObject sourceDir, FileObject targetDir) throws IOException {
+    protected static void copyContent(FileObject sourceDir, FileObject targetDir) throws IOException {
         assert sourceDir.isFolder() && targetDir.isFolder();
         for (FileObject childFile : sourceDir.getChildren()) {
             if (childFile.isFolder()) {
@@ -383,6 +395,14 @@ public class PlatypusWebModuleManager {
             } else {
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Skipped while copying libs: {0}", fo.getPath());
             }
+        }
+    }
+    
+    private void copyApiJs(FileObject clasessDir) throws IOException {
+        try {
+            copyContent(FileUtil.toFileObject(PlatypusPlatform.getPlatformApiDirectory()), clasessDir);
+        } catch (PlatformHomePathException ex) {
+            ErrorManager.getDefault().notify(ex);//Should not happen
         }
     }
 }
