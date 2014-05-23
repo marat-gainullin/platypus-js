@@ -68,6 +68,7 @@ public class NetBeansRCPUtils {
      */
     public static File getApplicationUserDirFile(File appLocation) throws IOException {
         String dir = getApplicationUserDir(appLocation);
+	if (dir != null) {
         String userHome = System.getProperty("user.home");
         if(SystemUtils.isWindows()) {
             WindowsNativeUtils wnu = (WindowsNativeUtils) SystemUtils.getNativeUtils();
@@ -86,6 +87,9 @@ public class NetBeansRCPUtils {
         dir = dir.replace(USER_HOME_TOKEN, userHome);
         dir = dir.replace(APPNAME_TOKEN, getApplicationName(appLocation));
         return new File(dir);
+	} else {
+		return null;	
+	}	
     }
     
     /**
