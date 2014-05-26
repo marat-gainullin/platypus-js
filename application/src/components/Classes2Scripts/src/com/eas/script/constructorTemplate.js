@@ -1,7 +1,7 @@
-{$JsDoc}
-function {$Name}({$Params}) {
+${JsDoc}
+function ${Name}(${Params}) {
 
-{$Vars}
+${Vars}
     
-{$Methods}
+${Methods}
 }

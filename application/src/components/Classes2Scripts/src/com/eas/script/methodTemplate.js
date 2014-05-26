@@ -1,4 +1,4 @@
-{$JsDoc}
-this.{$Name} = function({$Params}) {
-{$Body}  
+${JsDoc}
+this.${Name} = function(${Params}) {
+${Body}  
 };

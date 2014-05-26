@@ -1,5 +1,5 @@
-{$JsDoc}
-Object.defineProperty(this, "{$Name}", { 
-{$Descriptor}
+${JsDoc}
+Object.defineProperty(this, "${Name}", { 
+${Descriptor}
 });
  

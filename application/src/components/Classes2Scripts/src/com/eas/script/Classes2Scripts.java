@@ -45,13 +45,13 @@ public class Classes2Scripts {
     private static final String PROPERTY_TEMPLATE = getStringResource("propertyTemplate.js");//NOI18N
     private static final String METHOD_TEMPLATE = getStringResource("methodTemplate.js");//NOI18N
 
-    private static final String NAME_TAG = "{$Name}";//NOI18N
-    private static final String PARAMS_TAG = "{$Params}";//NOI18N
-    private static final String VARS_TAG = "{$Vars}";//NOI18N
-    private static final String METHODS_TAG = "{$Methods}";//NOI18N
-    private static final String BODY_TAG = "{$Body}";//NOI18N
-    private static final String DESCRIPTOR_TAG = "{$Descriptor}";//NOI18N
-    private static final String JSDOC_TAG = "{$JsDoc}";//NOI18N
+    private static final String NAME_TAG = "${Name}";//NOI18N
+    private static final String PARAMS_TAG = "${Params}";//NOI18N
+    private static final String VARS_TAG = "${Vars}";//NOI18N
+    private static final String METHODS_TAG = "${Methods}";//NOI18N
+    private static final String BODY_TAG = "${Body}";//NOI18N
+    private static final String DESCRIPTOR_TAG = "${Descriptor}";//NOI18N
+    private static final String JSDOC_TAG = "${JsDoc}";//NOI18N
     private static final String DELELGATE_CLASS = "__JavaClass";//NOI18N
     private static final String DELELGATE_OBJECT = "__javaObj";//NOI18N
     private static final String DEFAULT_CONSTRUCTOR_JS_DOC = "/**\n"//NOI18N
