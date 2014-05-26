@@ -45,8 +45,12 @@ public class Classes2Scripts {
     private static final String PROPERTY_TEMPLATE = getStringResource("propertyTemplate.js");//NOI18N
     private static final String METHOD_TEMPLATE = getStringResource("methodTemplate.js");//NOI18N
 
+    private static final int IDENTATION = 4;
+
     private static final String NAME_TAG = "${Name}";//NOI18N
+    private static final String JAVA_TYPE_TAG = "${Type}";//NOI18N
     private static final String PARAMS_TAG = "${Params}";//NOI18N
+    private static final String UNWRAPPED_PARAMS_TAG = "${UnwrappedParams}";//NOI18N
     private static final String VARS_TAG = "${Vars}";//NOI18N
     private static final String METHODS_TAG = "${Methods}";//NOI18N
     private static final String BODY_TAG = "${Body}";//NOI18N
@@ -65,7 +69,7 @@ public class Classes2Scripts {
     private static final String JS_DOC_TEMPLATE = "/**\n"//NOI18N
             + "* %s\n"//NOI18N
             + "*/";//NOI18N
-    
+
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -170,13 +174,14 @@ public class Classes2Scripts {
             }
         }
     }
-  
+
     protected String getClassJs(Class clazz) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         String js = CONSTRUCTOR_TEMPLATE
+                .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, ci.name)
-                .replace(PARAMS_TAG, ci.params)
+                .replace(PARAMS_TAG, ci.getParamsStr())
                 .replace(VARS_TAG, getVarsPart(ci, clazz))
                 .replace(METHODS_TAG, getPropsAndMethodsPart(clazz));
         return js;
@@ -202,7 +207,7 @@ public class Classes2Scripts {
         try {
             for (Constructor constr : clazz.getConstructors()) {
                 if (constr.isAnnotationPresent(ScriptFunction.class)) {
-                    return getFunctionInfo(clazz.getSimpleName(), constr);
+                    return getConstructorInfo(clazz.getName(), clazz.getSimpleName(), constr);
                 }
             }
             for (Method method : clazz.getMethods()) {
@@ -222,20 +227,20 @@ public class Classes2Scripts {
         fi.jsDoc = DEFAULT_CONSTRUCTOR_JS_DOC;
         return fi;
     }
+
+    private FunctionInfo getConstructorInfo(String javaType, String defaultName, AnnotatedElement ae) {
+        FunctionInfo fi  = getFunctionInfo(defaultName, ae);
+        fi.javaClassName = javaType;
+        return fi;
+    } 
     
     private FunctionInfo getFunctionInfo(String defaultName, AnnotatedElement ae) {
         FunctionInfo ci = new FunctionInfo();
         ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
         ci.name = sf.name().isEmpty() ? defaultName : sf.name();
         ci.jsDoc = formJsDoc(sf.jsDoc());
-        StringBuilder paramsSb = new StringBuilder();
-        for (int i = 0; i < sf.params().length; i++) {
-            paramsSb.append(sf.params()[i]);
-            if (i < sf.params().length - 1) {
-                paramsSb.append(", ");//NOI18N
-            }
-        }
-        ci.params = paramsSb.toString();
+        ci.params = new String[sf.params().length];
+        System.arraycopy(sf.params(), 0, ci.params, 0, sf.params().length);
         return ci;
     }
 
@@ -261,15 +266,15 @@ public class Classes2Scripts {
 
     private static String formJsDoc(String jsDoc) {
         if (!jsDoc.trim().startsWith("/**")) {//NOI18N
-            return String.format(JS_DOC_TEMPLATE, jsDoc); 
+            return String.format(JS_DOC_TEMPLATE, jsDoc);
         } else {
             return jsDoc;
         }
-        
+
     }
-    
+
     private String appendLine2JsDoc(String jsDoc, String line) {
-        
+
         List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));//NOI18N
         jsDocLines.add(jsDocLines.size() - 1, "* " + line);//NOI18N
         StringBuilder sb = new StringBuilder();
@@ -308,8 +313,8 @@ public class Classes2Scripts {
         return METHOD_TEMPLATE
                 .replace(JSDOC_TAG, fi.jsDoc)
                 .replace(NAME_TAG, fi.name)
-                .replace(PARAMS_TAG, fi.params)
-                .replace(BODY_TAG, getMethodBody(method.getName(), fi.params, !Void.TYPE.equals(method.getReturnType())));
+                .replace(PARAMS_TAG, fi.getParamsStr())
+                .replace(BODY_TAG, getMethodBody(method.getName(), fi.getParamsStr(), !Void.TYPE.equals(method.getReturnType())));
     }
 
     private String getMethodBody(String methodName, String methodParams, boolean returnsValue) {
@@ -359,13 +364,23 @@ public class Classes2Scripts {
     protected static class FunctionInfo {
 
         public FunctionInfo() {
-            params = "";//NOI18N
             jsDoc = "";//NOI18N
         }
 
-        
         public String name;
-        public String params;
+        public String javaClassName;
+        public String[] params;
         public String jsDoc;
+
+        public String getParamsStr() {
+            StringBuilder paramsSb = new StringBuilder();
+            for (int i = 0; i < params.length; i++) {
+                paramsSb.append(params[i]);
+                if (i < params.length - 1) {
+                    paramsSb.append(", ");//NOI18N
+                }
+            }
+            return paramsSb.toString();
+        }
     }
 }
