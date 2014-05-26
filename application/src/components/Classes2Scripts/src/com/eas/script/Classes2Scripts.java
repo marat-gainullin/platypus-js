@@ -160,7 +160,7 @@ public class Classes2Scripts {
                         if (jsConstructor != null) {
                             Logger.getLogger(Classes2Scripts.class.getName())
                                     .log(Level.INFO, "Converting class name: {0}", className);
-                            File resultFile = new File(destDirectory, jsConstructor.name + ".js"); //NOI18N
+                            File resultFile = new File(destDirectory, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                             FileUtils.writeString(resultFile, getClassJs(clazz), SettingsConstants.COMMON_ENCODING);
                         }
                     }
@@ -170,7 +170,7 @@ public class Classes2Scripts {
             }
         }
     }
-
+  
     protected String getClassJs(Class clazz) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         String js = CONSTRUCTOR_TEMPLATE
