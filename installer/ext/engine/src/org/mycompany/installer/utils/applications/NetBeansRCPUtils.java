@@ -104,7 +104,10 @@ public class NetBeansRCPUtils {
                 return name.endsWith(".conf");
             }
         });
-        File conf = null;
+	if(confFiles == null) {
+            return null;
+        }
+	File conf = null;
         if(confFiles.length == 1) {
             conf = confFiles[0];
         } else {
