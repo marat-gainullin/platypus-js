@@ -69,27 +69,27 @@ public class NetBeansRCPUtils {
     public static File getApplicationUserDirFile(File appLocation) throws IOException {
         String dir = getApplicationUserDir(appLocation);
 	if (dir != null) {
-        String userHome = System.getProperty("user.home");
-        if(SystemUtils.isWindows()) {
-            WindowsNativeUtils wnu = (WindowsNativeUtils) SystemUtils.getNativeUtils();
-            WindowsRegistry reg = wnu.getWindowsRegistry();
-            String key = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
-            try {
-            if(reg.keyExists(reg.HKCU, key) &&
-                    reg.valueExists(reg.HKCU, key, "AppData")) {
-                userHome = reg.getStringValue(reg.HKCU, key, "AppData", false);
+		String userHome = System.getProperty("user.home");
+		if(SystemUtils.isWindows()) {
+		    WindowsNativeUtils wnu = (WindowsNativeUtils) SystemUtils.getNativeUtils();
+		    WindowsRegistry reg = wnu.getWindowsRegistry();
+		    String key = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
+		    try {
+		    if(reg.keyExists(reg.HKCU, key) &&
+		            reg.valueExists(reg.HKCU, key, "AppData")) {
+		        userHome = reg.getStringValue(reg.HKCU, key, "AppData", false);
 
-            }
-            } catch (NativeException e) {
-                LogManager.log(e);
-            }
-        }
-        dir = dir.replace(USER_HOME_TOKEN, userHome);
-        dir = dir.replace(APPNAME_TOKEN, getApplicationName(appLocation));
-        return new File(dir);
+		    }
+		    } catch (NativeException e) {
+		        LogManager.log(e);
+		    }
+		}
+		dir = dir.replace(USER_HOME_TOKEN, userHome);
+		dir = dir.replace(APPNAME_TOKEN, getApplicationName(appLocation));
+		return new File(dir);
 	} else {
 		return null;	
-	}	
+	}
     }
     
     /**
@@ -104,7 +104,10 @@ public class NetBeansRCPUtils {
                 return name.endsWith(".conf");
             }
         });
-        File conf = null;
+	if(confFiles == null) {
+            return null;
+        }
+	File conf = null;
         if(confFiles.length == 1) {
             conf = confFiles[0];
         } else {
