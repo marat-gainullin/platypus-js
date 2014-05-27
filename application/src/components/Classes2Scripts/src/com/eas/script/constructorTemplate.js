@@ -7,22 +7,18 @@ ${JsDoc}
     P.${Name} = function (${Params}) {
 
         var maxArgs = ${MaxArgs};
-        var delegate = arguments.length > maxArgs ?
+        var ${Delegate} = arguments.length > maxArgs ?
             arguments[maxArgs] : new javaClass(${UnwrappedParams});
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
                 return function() {
-                    return delegate;
+                    return ${Delegate};
                 };
             }
         });
-
-
-${Vars}
     
-${Methods}
-
+${Props}
         delegate.setPublished(this);
     };
 })();
