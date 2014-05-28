@@ -4,17 +4,24 @@
  */
 package com.eas.gui;
 
+import static com.eas.gui.Cursor.publisher;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class Font {
+public class Font implements HasPublished {
 
     protected String family;
     protected int style;
     protected int size;
+    protected static JSObject publisher;
+    protected Object published;
 
     @ScriptFunction(params = {"family", "style", "size"}, jsDoc = "/**\n"
             + "* Font object, which is used to render text in a visible way.\n"
@@ -76,6 +83,29 @@ public class Font {
     @Override
     public String toString() {
         return String.format("Font [family:%s, size:%d, style:%s]", family, size, fontStyleToString(style));
+    }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
     protected String fontStyleToString(int aStyle) {

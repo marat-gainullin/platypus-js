@@ -4,8 +4,13 @@
  */
 package com.eas.gui;
 
+import static com.eas.gui.CascadedStyle.publisher;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -14,7 +19,7 @@ import com.eas.script.ScriptObj;
 @ScriptObj(jsDoc = "/**\n"
         + "* Mouse cursor constansts.\n"
         + "*/")
-public class Cursor {
+public class Cursor implements HasPublished  {
     
     public static final Cursor CROSSHAIR = new Cursor(java.awt.Cursor.CROSSHAIR_CURSOR);
     public static final Cursor DEFAULT = new Cursor(java.awt.Cursor.DEFAULT_CURSOR);
@@ -33,6 +38,8 @@ public class Cursor {
     public static final Cursor W_RESIZE = new Cursor(java.awt.Cursor.W_RESIZE_CURSOR);
     
     protected java.awt.Cursor delegate;
+    protected static JSObject publisher;
+    protected Object published;
     
     protected Cursor(java.awt.Cursor aDelegate)
     {
@@ -127,5 +134,28 @@ public class Cursor {
     @ScriptFunction
     public Cursor getW_RESIZE() {
         return W_RESIZE;
+    }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }
