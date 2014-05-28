@@ -719,7 +719,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
+    @EventMethod(eventClass = EntityInstanceDelete.class)
     public JSObject getOnDeleted() {
         return getOnAfterDelete();
     }
@@ -734,7 +734,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
+    @EventMethod(eventClass = EntityInstanceInsert.class)
     public JSObject getOnInserted() {
         return getOnAfterInsert();
     }
@@ -779,7 +779,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
+    @EventMethod(eventClass = EntityInstanceDelete.class)
     public JSObject getWillDelete() {
         return getOnBeforeDelete();
     }
@@ -794,7 +794,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
+    @EventMethod(eventClass = EntityInstanceInsert.class)
     public JSObject getWillInsert() {
         return getOnBeforeInsert();
     }
@@ -1696,36 +1696,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public static class EntityInstanceInsert extends PublishedSourcedEvent {
-
-        protected Row inserted;
-
-        public EntityInstanceInsert(HasPublished source, Row inserted) {
-            super(source);
-            this.inserted = inserted;
-        }
-
-        private static final String INSERTED_JSDOC = ""
-                + "/**\n"
-                + "* The inserted element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = INSERTED_JSDOC)
-        public Row getInserted() {
-            return inserted;
-        }
-
-        private static final String OBJECT_JSDOC = ""
-                + "/**\n"
-                + "* The inserted element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OBJECT_JSDOC)
-        public Row getObject() {
-            return inserted;
-        }
-    }
-
     @Override
     public boolean willInsertRow(final RowsetInsertEvent event) {
         boolean res = true;
@@ -1742,26 +1712,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
         return res;
-    }
-
-    public static class EntityInstanceDelete extends PublishedSourcedEvent {
-
-        protected Row deleted;
-
-        public EntityInstanceDelete(HasPublished aSource, Row aDeleted) {
-            super(aSource);
-            deleted = aDeleted;
-        }
-
-        private static final String DELETED_JSDOC = ""
-                + "/**\n"
-                + "* The deleted element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = DELETED_JSDOC)
-        public Row getDeleted() {
-            return deleted;
-        }
     }
 
     @Override
