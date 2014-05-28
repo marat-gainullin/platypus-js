@@ -5,6 +5,7 @@
 package com.bearsoft.gui.grid.data;
 
 import com.eas.gui.CascadedStyle;
+import com.eas.script.ScriptFunction;
 
 
 /**
@@ -37,6 +38,10 @@ public class CellData implements Comparable<Object> {
      * @return CascadedStyle instance.
      * @see CascadedStyle
      */
+    @ScriptFunction(jsDoc = ""
+                + "/**\n"
+                + " * The cell's style.\n"
+                + " */")
     public CascadedStyle getStyle() {
         return style;
     }
@@ -45,6 +50,10 @@ public class CellData implements Comparable<Object> {
      * Returns real data from subject area.
      * @return Real data.
      */
+    @ScriptFunction(jsDoc = ""
+                + "/**\n"
+                + " * The cell's data.\n"
+                + " */")
     public Object getData() {
         return data;
     }
@@ -53,6 +62,10 @@ public class CellData implements Comparable<Object> {
      * Returns data, that should be displayed instead of rela data.
      * @return
      */
+    @ScriptFunction(jsDoc = ""
+                + "/**\n"
+                + " * The displayed text.\n"
+                + " */")
     public Object getDisplay() {
         return display;
     }

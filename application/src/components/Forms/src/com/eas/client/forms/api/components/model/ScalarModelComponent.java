@@ -6,9 +6,9 @@ package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.forms.api.Component;
-import com.eas.client.forms.api.events.RenderEvent;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.DbControlPanel;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
@@ -102,7 +102,7 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
             + "*/";
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
-    @EventMethod(eventClass = RenderEvent.class)
+    @EventMethod(eventClass = CellRenderEvent.class)
     public JSObject getOnRender() {
         return delegate.getOnRender();
     }

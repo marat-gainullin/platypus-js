@@ -6,7 +6,7 @@ package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.forms.api.Component;
-import com.eas.client.forms.api.events.RenderEvent;
+import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
@@ -126,7 +126,7 @@ public class ModelGrid extends Component<DbGrid> {
             + " */";
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
-    @EventMethod(eventClass = RenderEvent.class)
+    @EventMethod(eventClass = CellRenderEvent.class)
     public JSObject getOnRender() {
         return delegate.getGeneralOnRender();
     }
