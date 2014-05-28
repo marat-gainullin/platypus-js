@@ -22,7 +22,7 @@ public abstract class PlatypusPrincipal implements Principal {
     }
 
     private static final String NAME_JS_DOC = "/**\n"
-            + "* The username.\n"
+            + "* The username..\n"
             + "*/";
     
     @ScriptFunction(jsDoc = NAME_JS_DOC)

@@ -135,7 +135,11 @@ public class Classes2Scripts {
     private void run() {
         try {
             for (File classPath : classPaths) {
-                processDirectory(classPath);
+                if (classPath.isDirectory()) {
+                    processDirectory(classPath);
+                } else {
+                    processJar(classPath);
+                }
             }
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.SEVERE, "Conversion error.", ex);
@@ -167,7 +171,10 @@ public class Classes2Scripts {
                             Logger.getLogger(Classes2Scripts.class.getName())
                                     .log(Level.INFO, "Converting class name: {0}", className);
                             File resultFile = new File(destDirectory, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
-                            FileUtils.writeString(resultFile, getClassJs(clazz), SettingsConstants.COMMON_ENCODING);
+                            String js = getClassJs(clazz);
+                            if (js != null) {
+                                FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
+                            }
                         }
                     }
                 } catch (NoClassDefFoundError ex) {
@@ -181,6 +188,7 @@ public class Classes2Scripts {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         if (ci.javaClassName.contains("$")) {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Inner class: {0}", ci.javaClassName);
+            return null;
         }
         String js = CONSTRUCTOR_TEMPLATE
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
@@ -425,12 +433,12 @@ public class Classes2Scripts {
                 return "";//NOI18N
             }
             StringBuilder paramsSb = new StringBuilder();
-            for (int i = 0; i < params.length; i++) { 
+            for (int i = 0; i < params.length; i++) {
                 paramsSb.append("null, ");//NOI18N
             }
             return paramsSb.toString();
         }
-        
+
         public String getParamsStr() {
             StringBuilder paramsSb = new StringBuilder();
             for (int i = 0; i < params.length; i++) {
