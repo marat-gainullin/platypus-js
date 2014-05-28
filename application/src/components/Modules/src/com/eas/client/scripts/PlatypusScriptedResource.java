@@ -7,6 +7,9 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
@@ -41,12 +44,14 @@ import jdk.nashorn.api.scripting.URLReader;
 @ScriptObj(name = "Resource", jsDoc = "/**\n"
         + "* Support object for resources loading.\n"
         + "*/")
-public class PlatypusScriptedResource {
+public class PlatypusScriptedResource implements HasPublished {
 
     private static final Pattern pattern = Pattern.compile("https?://.*");
     protected static Client client;
     protected static AppCache cache;
     protected static PrincipalHost principalHost;
+    protected static JSObject publisher;
+    protected Object published;
 
     /**
      * Initializes a static fields.
@@ -221,6 +226,29 @@ public class PlatypusScriptedResource {
         return data != null ? new String(data, aEncodingName) : null;
     }
     public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to {0}";
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
 
     protected static String normalizeResourcePath(String aPath) throws Exception {
         if (aPath.startsWith("/")) {
