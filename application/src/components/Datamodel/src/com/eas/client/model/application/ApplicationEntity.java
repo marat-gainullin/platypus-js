@@ -809,7 +809,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.CursorPositionWillChangeEvent.class)
+    @EventMethod(eventClass = CursorPositionWillChangeEvent.class)
     public JSObject getWillScroll() {
         return getOnBeforeScroll();
     }
@@ -1611,39 +1611,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             }
         }
         return res;
-    }
-
-    public static class CursorPositionWillChangeEvent extends PublishedSourcedEvent {
-
-        protected int oldIndex;
-        protected int newIndex;
-
-        public CursorPositionWillChangeEvent(HasPublished aSource, int aOldIndex, int aNewIndex) {
-            super(aSource);
-            oldIndex = aOldIndex;
-            newIndex = aNewIndex;
-        }
-
-        private static final String OLD_INDEX_JSDOC = ""
-                + "/**\n"
-                + "* Cursor position the cursor is still on.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OLD_INDEX_JSDOC)
-        public int getOldIndex() {
-            return oldIndex;
-        }
-
-        private static final String NEW_INDEX_JSDOC = ""
-                + "/**\n"
-                + "* Cursor position the cursor will be set on.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
-        public int getNewIndex() {
-            return newIndex;
-        }
-
     }
 
     @Override
