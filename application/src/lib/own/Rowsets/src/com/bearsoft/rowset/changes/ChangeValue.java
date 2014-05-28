@@ -6,12 +6,15 @@
 package com.bearsoft.rowset.changes;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Holds a typed value for some change in a changes log. 
- * @author mg, vv refactoring
+ * @author mg, vv
  */
 public class ChangeValue implements HasPublished {
 
@@ -19,6 +22,7 @@ public class ChangeValue implements HasPublished {
     public Object value;
     public DataTypeInfo type;
 
+    protected static JSObject publisher;
     protected Object published;
 
     public ChangeValue(String aName, Object aValue, DataTypeInfo aType) {
@@ -39,11 +43,24 @@ public class ChangeValue implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }
