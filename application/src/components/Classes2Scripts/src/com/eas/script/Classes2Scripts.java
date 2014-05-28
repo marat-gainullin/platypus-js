@@ -349,7 +349,7 @@ public class Classes2Scripts {
         String[] lines = str.split("\n");//NOI18N
         for (int i = 0; i < lines.length; i++) {
             sb.append(getIdentStr(ident));
-            sb.append(lines[i]);
+            sb.append(lines[i].trim());
             if (i < lines.length - 1) {
                 sb.append("\n");
             }
