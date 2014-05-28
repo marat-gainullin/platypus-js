@@ -218,22 +218,18 @@ public class Classes2Scripts {
         try {
             for (Constructor constr : clazz.getConstructors()) {
                 if (constr.isAnnotationPresent(ScriptFunction.class)) {
-                    return getConstructorInfo(escapeInnerClass(clazz.getName()), clazz.getSimpleName(), constr);
+                    return getConstructorInfo(clazz.getName(), clazz.getSimpleName(), constr);
                 }
             }
             for (Method method : clazz.getMethods()) {
                 if (method.isAnnotationPresent(ScriptFunction.class)) {
-                    return getSimpleConstructorInfo(escapeInnerClass(clazz.getName()), clazz.getSimpleName());
+                    return getSimpleConstructorInfo(clazz.getName(), clazz.getSimpleName());
                 }
             }
         } catch (Exception ex) {
             //NO-OP
         }
         return null;
-    }
-
-    private String escapeInnerClass(String className) {
-        return className.replace("$", ".");//NOI18N
     }
 
     private FunctionInfo getSimpleConstructorInfo(String javaType, String name) {
