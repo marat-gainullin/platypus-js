@@ -10,8 +10,10 @@ package com.eas.client.reports;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -27,6 +29,7 @@ public class Report implements HasPublished {
     protected JSObject onBeforeRender;
     protected String format;
     //
+    protected static JSObject publisher;
     protected Object published;
 
     public Report(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat) {
@@ -38,13 +41,26 @@ public class Report implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
     }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
 
     public JSObject getScriptData() {
         return scriptData;
