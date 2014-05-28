@@ -4,18 +4,25 @@
  */
 package com.eas.client.login;
 
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.security.Principal;
 import java.util.Set;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author pk, mg, bl, vv
  */
-public abstract class PlatypusPrincipal implements Principal {
+public abstract class PlatypusPrincipal implements Principal, HasPublished {
 
+    protected static JSObject publisher;
+    protected Object published;
+    
     private final String name;
-
+    
     public PlatypusPrincipal(String aName) {
         super();
         name = aName;
@@ -82,4 +89,27 @@ public abstract class PlatypusPrincipal implements Principal {
     public int hashCode() {
         return name.hashCode();
     }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
 }
