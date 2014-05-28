@@ -31,6 +31,7 @@ import com.eas.util.ListenerRegistration;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.sql.Types;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,6 +72,27 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 transactionListeners.remove(aListener);
             }
         };
+    }
+
+    /**
+     * Method checks if the type is supported for datamodel's internal usage.
+     * The types are fields or parameters types. If the type is reported as
+     * unsupported by this method, it doesn't mean that the type is unsupported
+     * in our pltypus system at all. It means only that platypus application
+     * designer will not be able to add fields or parameters of such types.
+     *
+     * @param type - the type to check.
+     * @return true if the type is supported for datamodel's internal usage.
+     */
+    @Override
+    public boolean isTypeSupported(int type) {
+        return type == Types.NUMERIC
+                || type == Types.DECIMAL
+                || type == Types.VARCHAR
+                || type == Types.DATE
+                || type == Types.BOOLEAN
+                || type == Types.BLOB
+                || type == Types.CLOB;
     }
 
     @Override

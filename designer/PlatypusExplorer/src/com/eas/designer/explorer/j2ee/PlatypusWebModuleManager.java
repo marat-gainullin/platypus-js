@@ -275,7 +275,7 @@ public class PlatypusWebModuleManager {
         wa.addAppListener(new AppListener(PlatypusSessionsSynchronizer.class.getName()));
         configureServlet(wa);
         configureDatasources(wa);
-        if (project.getSettings().isWebSecurityEnabled()) {
+        if (project.getSettings().isSecurityRealmEnabled()) {
             configureSecurity(wa);
         }
         FileObject webXml = webInfDir.getFileObject(WEB_XML_FILE_NAME);

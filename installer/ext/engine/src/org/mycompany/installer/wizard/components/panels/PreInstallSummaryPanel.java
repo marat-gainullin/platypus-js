@@ -282,8 +282,8 @@ public class PreInstallSummaryPanel extends ErrorMessagePanel {
                     File installLocation = product.getInstallationLocation();
                     LogManager.log("... product installation directory: " + installLocation);
                     File userDir = NetBeansRCPUtils.getApplicationUserDirFile(installLocation);
-                    LogManager.log("... product userdir: " + userDir);
-                    if (FileUtils.exists(userDir) && FileUtils.canWrite(userDir)) {
+                    LogManager.log(userDir != null ? ("... product userdir: " + userDir) : "... product userdir is null");
+                    if (userDir != null && FileUtils.exists(userDir) && FileUtils.canWrite(userDir)) {
                         removeUserdirCheckbox.setText(
                                 StringUtils.format(
                                 panel.getProperty(REMOVE_APP_USERDIR_CHECKBOX_PROPERTY),
