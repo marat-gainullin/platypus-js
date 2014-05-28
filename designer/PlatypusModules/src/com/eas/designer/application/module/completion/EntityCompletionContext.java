@@ -11,9 +11,9 @@ import com.eas.client.model.application.ApplicationEntity;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import static com.eas.designer.application.module.completion.CompletionContext.isPropertyGet;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
 import static com.eas.designer.application.module.completion.ModuleCompletionContext.METADATA_SCRIPT_NAME;
 import static com.eas.designer.application.module.completion.ModuleCompletionContext.PARAMS_SCRIPT_NAME;
+import jdk.nashorn.internal.ir.IndexNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -45,7 +45,7 @@ public class EntityCompletionContext extends CompletionContext {
             return new MetadataCompletionContext(entity.getFields());
         } else if(isPropertyGet(token, CURSOR_ENTITY_PROPERTY_NAME)) {
             return getElementCompletionContext();
-        } else if (CompletionTokenType.ELEMENT_GET == token.type && !isQuotedString(token.name)) { 
+        } else if (token.node instanceof IndexNode && !((IndexNode)token.node).getIndex().getType().isString()) { 
             return new EntityElementCompletionContext(entity);
         }else if (isPropertyGet(token, PARAMS_SCRIPT_NAME)) {
             return new ParametersCompletionContext(entity.getQuery().getParameters());

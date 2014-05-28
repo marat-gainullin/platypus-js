@@ -37,6 +37,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     public static final String WEB_DIRECTORY = "web"; //NOI18N
     public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
+    public static final String CLASSES_DIRECTORY_NAME = "classes"; //NOI18N
     public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
     public static final String PUBLIC_DIRECTORY = "pub"; //NOI18N
     protected final PlatypusProjectImpl project;

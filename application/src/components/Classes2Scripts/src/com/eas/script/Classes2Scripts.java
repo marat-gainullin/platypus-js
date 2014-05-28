@@ -42,30 +42,36 @@ public class Classes2Scripts {
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
-    private static final String PROPERTY_TEMPLATE = getStringResource("propertyTemplate.js");//NOI18N
-    private static final String METHOD_TEMPLATE = getStringResource("methodTemplate.js");//NOI18N
 
-    private static final String NAME_TAG = "{$Name}";//NOI18N
-    private static final String PARAMS_TAG = "{$Params}";//NOI18N
-    private static final String VARS_TAG = "{$Vars}";//NOI18N
-    private static final String METHODS_TAG = "{$Methods}";//NOI18N
-    private static final String BODY_TAG = "{$Body}";//NOI18N
-    private static final String DESCRIPTOR_TAG = "{$Descriptor}";//NOI18N
-    private static final String JSDOC_TAG = "{$JsDoc}";//NOI18N
-    private static final String DELELGATE_CLASS = "__JavaClass";//NOI18N
-    private static final String DELELGATE_OBJECT = "__javaObj";//NOI18N
+    private static final int DEFAULT_IDENTATION_WIDTH = 4;
+    private static final int CONSTRUCTOR_IDENT_LEVEL = 1;
+
+    private static final String NAME_TAG = "${Name}";//NOI18N
+    private static final String JAVA_TYPE_TAG = "${Type}";//NOI18N
+    private static final String PARAMS_TAG = "${Params}";//NOI18N
+    private static final String NULL_PARAMS_TAG = "${NullParams}";//NOI18N
+    private static final String UNWRAPPED_PARAMS_TAG = "${UnwrappedParams}";//NOI18N
+    private static final String MAX_ARGS_TAG = "${MaxArgs}";//NOI18N
+    private static final String PROPERTIES_TAG = "${Props}";//NOI18N
+    private static final String JSDOC_TAG = "${JsDoc}";//NOI18N
+    private static final String DELEGATE_TAG = "${Delegate}";//NOI18N
+    private static final String DELEGATE_OBJECT = "delegate";//NOI18N
     private static final String DEFAULT_CONSTRUCTOR_JS_DOC = "/**\n"//NOI18N
             + "* Generated constructor.\n"//NOI18N
             + "*/";//NOI18N
 
     private static final String DEFAULT_PROPERTY_JS_DOC = "/**\n"//NOI18N
-            + "* Generated property.\n"//NOI18N
+            + "* Generated property jsDoc.\n"//NOI18N
+            + "*/";//NOI18N
+
+    private static final String DEFAULT_METHOD_JS_DOC = "/**\n"//NOI18N
+            + "* Generated method jsDoc.\n"//NOI18N
             + "*/";//NOI18N
 
     private static final String JS_DOC_TEMPLATE = "/**\n"//NOI18N
             + "* %s\n"//NOI18N
             + "*/";//NOI18N
-    
+
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -160,7 +166,7 @@ public class Classes2Scripts {
                         if (jsConstructor != null) {
                             Logger.getLogger(Classes2Scripts.class.getName())
                                     .log(Level.INFO, "Converting class name: {0}", className);
-                            File resultFile = new File(destDirectory, jsConstructor.name + ".js"); //NOI18N
+                            File resultFile = new File(destDirectory, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                             FileUtils.writeString(resultFile, getClassJs(clazz), SettingsConstants.COMMON_ENCODING);
                         }
                     }
@@ -173,17 +179,32 @@ public class Classes2Scripts {
 
     protected String getClassJs(Class clazz) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
+        if (ci.javaClassName.contains("$")) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Inner class: {0}", ci.javaClassName);
+        }
         String js = CONSTRUCTOR_TEMPLATE
+                .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, ci.name)
-                .replace(PARAMS_TAG, ci.params)
-                .replace(VARS_TAG, getVarsPart(ci, clazz))
-                .replace(METHODS_TAG, getPropsAndMethodsPart(clazz));
+                .replace(NULL_PARAMS_TAG, ci.getNullParamsStr())
+                .replace(PARAMS_TAG, ci.getParamsStr())
+                .replace(DELEGATE_TAG, DELEGATE_OBJECT)
+                .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr())
+                .replace(MAX_ARGS_TAG, Integer.toString(ci.params.length))
+                .replace(PROPERTIES_TAG, getPropsAndMethodsPart(clazz, CONSTRUCTOR_IDENT_LEVEL));
         return js;
     }
 
-    private String getConstructorJsDoc(FunctionInfo ci) {
-        return appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name);
+    private static String getConstructorJsDoc(FunctionInfo ci) {
+        return addIdent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
+    }
+
+    private static String getIdentStr(int ident) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < DEFAULT_IDENTATION_WIDTH * ident; i++) {
+            sb.append(" ");//NOI18N
+        }
+        return sb.toString();
     }
 
     private static String entryName2ClassName(String entryName) {
@@ -202,12 +223,12 @@ public class Classes2Scripts {
         try {
             for (Constructor constr : clazz.getConstructors()) {
                 if (constr.isAnnotationPresent(ScriptFunction.class)) {
-                    return getFunctionInfo(clazz.getSimpleName(), constr);
+                    return getConstructorInfo(clazz.getName(), clazz.getSimpleName(), constr);
                 }
             }
             for (Method method : clazz.getMethods()) {
                 if (method.isAnnotationPresent(ScriptFunction.class)) {
-                    return getSimpleConstructorInfo(clazz.getSimpleName());
+                    return getSimpleConstructorInfo(clazz.getName(), clazz.getSimpleName());
                 }
             }
         } catch (Exception ex) {
@@ -216,60 +237,129 @@ public class Classes2Scripts {
         return null;
     }
 
-    private FunctionInfo getSimpleConstructorInfo(String name) {
+    private FunctionInfo getSimpleConstructorInfo(String javaType, String name) {
         FunctionInfo fi = new FunctionInfo();
+        fi.javaClassName = javaType;
         fi.name = name;
         fi.jsDoc = DEFAULT_CONSTRUCTOR_JS_DOC;
         return fi;
     }
-    
+
+    private FunctionInfo getConstructorInfo(String javaType, String defaultName, AnnotatedElement ae) {
+        FunctionInfo fi = getFunctionInfo(defaultName, ae);
+        fi.javaClassName = javaType;
+        return fi;
+    }
+
     private FunctionInfo getFunctionInfo(String defaultName, AnnotatedElement ae) {
         FunctionInfo ci = new FunctionInfo();
         ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
         ci.name = sf.name().isEmpty() ? defaultName : sf.name();
         ci.jsDoc = formJsDoc(sf.jsDoc());
-        StringBuilder paramsSb = new StringBuilder();
-        for (int i = 0; i < sf.params().length; i++) {
-            paramsSb.append(sf.params()[i]);
-            if (i < sf.params().length - 1) {
-                paramsSb.append(", ");//NOI18N
-            }
-        }
-        ci.params = paramsSb.toString();
+        ci.params = new String[sf.params().length];
+        System.arraycopy(sf.params(), 0, ci.params, 0, sf.params().length);
         return ci;
     }
 
-    private String getVarsPart(FunctionInfo ci, Class clazz) {
-        return String.format("var %s = Java.type(\"%s\");\n", DELELGATE_CLASS, clazz.getName())//NOI18N
-                + String.format("var %s = new %s(%s);", DELELGATE_OBJECT, DELELGATE_CLASS, ci.params);//NOI18N
+    private String getPropertyPart(String namespace, PropBox property, int ident) {
+        StringBuilder sb = new StringBuilder();
+        int i = ident;
+        sb.append(getPropertyJsDoc(namespace, property, i));
+        sb.append("\n");
+        sb.append(getIdentStr(i));
+        sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", property.name));
+        sb.append(getIdentStr(++i));
+        sb.append("get: function() {\n");
+        sb.append(getIdentStr(++i));
+        sb.append(String.format("var value = %s.%s;\n", DELEGATE_OBJECT, property.name));
+        sb.append(getIdentStr(i));
+        sb.append("return value && value.getPublished ? value.getPublished() : null;\n");
+        sb.append(getIdentStr(--i));
+        sb.append("},\n");
+        sb.append(getIdentStr(i));
+        sb.append("set: function(aValue) {\n");
+        sb.append(getIdentStr(++i));
+        sb.append(String.format("delegate.%s = aValue && aValue.unwrap ? aValue.unwrap() : null;\n", property.name));
+        sb.append(getIdentStr(--i));
+        sb.append("}\n");
+        sb.append(getIdentStr(--i));
+        sb.append("});\n");
+        return sb.toString();
     }
 
-    private String getPropertyPart(String namespace, PropBox property) {
-        return PROPERTY_TEMPLATE
-                .replace(JSDOC_TAG, getPropertyJsDoc(namespace, property))
-                .replace(NAME_TAG, property.name)
-                .replace(DESCRIPTOR_TAG, getPropertyDescriptor(property));
+    private String getMethodPart(String namespace, Method method, int ident) {
+        FunctionInfo fi = getFunctionInfo(method.getName(), method);
+        StringBuilder sb = new StringBuilder();
+        int i = ident;
+        sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ident));
+        sb.append("\n");
+        sb.append(getIdentStr(i));
+        sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", method.getName()));
+        sb.append(getIdentStr(++i));
+        sb.append("get: function() {\n");
+        sb.append(getIdentStr(++i));
+        sb.append("return function() {\n");
+        sb.append(getIdentStr(++i));
+        sb.append("var args = [];\n");
+        sb.append(getIdentStr(i));
+        sb.append("for(var a = 0; a < arguments.length; a++){\n");
+        sb.append(getIdentStr(++i));
+        sb.append("args[a] = arguments[a] && arguments[a].unwrap ? arguments[a].unwrap() : null;\n");
+        sb.append(getIdentStr(--i));
+        sb.append("}\n");
+        sb.append(getIdentStr(i));
+        sb.append(String.format("var value = %s.%s.apply(%s, args);\n", DELEGATE_OBJECT, method.getName(), DELEGATE_OBJECT));
+        sb.append(getIdentStr(i));
+        sb.append("return value && value.getPublished ? value.getPublished() : null;\n");
+        sb.append(getIdentStr(--i));
+        sb.append("};\n");
+        sb.append(getIdentStr(--i));
+        sb.append("}\n");
+        sb.append(getIdentStr(--i));
+        sb.append("});\n");
+        return sb.toString();
     }
 
-    private String getPropertyJsDoc(String namespace, PropBox property) {
+    private String getPropertyJsDoc(String namespace, PropBox property, int ident) {
         String jsDoc = property.jsDoc == null || property.jsDoc.isEmpty() ? DEFAULT_PROPERTY_JS_DOC : property.jsDoc;
         jsDoc = formJsDoc(jsDoc);
         jsDoc = appendLine2JsDoc(jsDoc, "@property " + property.name);
         jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
-        return jsDoc;
+        return addIdent(jsDoc, ident);
+    }
+
+    private String getMethodJsDoc(String namespace, String methodName, String str, int ident) {
+        String jsDoc = str == null || str.isEmpty() ? DEFAULT_METHOD_JS_DOC : str;
+        jsDoc = formJsDoc(jsDoc);
+        jsDoc = appendLine2JsDoc(jsDoc, "@method " + methodName);
+        jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
+        return addIdent(jsDoc, ident);
     }
 
     private static String formJsDoc(String jsDoc) {
         if (!jsDoc.trim().startsWith("/**")) {//NOI18N
-            return String.format(JS_DOC_TEMPLATE, jsDoc); 
+            return String.format(JS_DOC_TEMPLATE, jsDoc);
         } else {
             return jsDoc;
         }
-        
+
     }
-    
-    private String appendLine2JsDoc(String jsDoc, String line) {
-        
+
+    private static String addIdent(String str, int ident) {
+        StringBuilder sb = new StringBuilder();
+        String[] lines = str.split("\n");//NOI18N
+        for (int i = 0; i < lines.length; i++) {
+            sb.append(getIdentStr(ident));
+            sb.append(lines[i].trim());
+            if (i < lines.length - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    private static String appendLine2JsDoc(String jsDoc, String line) {
+
         List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));//NOI18N
         jsDocLines.add(jsDocLines.size() - 1, "* " + line);//NOI18N
         StringBuilder sb = new StringBuilder();
@@ -282,45 +372,7 @@ public class Classes2Scripts {
         return sb.toString();
     }
 
-    private String getPropertyDescriptor(PropBox property) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\twritable: ").append(Boolean.toString(property.writeable)).append(",\n");//NOI18N
-
-        sb.append("\tget: ").append(getPropertyGetFunction(property));//NOI18N
-
-        if (property.writeable) {
-            sb.append(",\n");//NOI18N
-            sb.append("\tset: ").append(getPropertySetFunction(property));//NOI18N
-        }
-        return sb.toString();
-    }
-
-    private String getPropertyGetFunction(PropBox property) {
-        return String.format("function() { return %s.%s() }", DELELGATE_OBJECT, property.readMethodName); //NOI18N
-    }
-
-    private String getPropertySetFunction(PropBox property) {
-        return String.format("function(val) { %s.%s(val) }", DELELGATE_OBJECT, property.writeMethodName); //NOI18N
-    }
-
-    private String getMethodPart(Method method) {
-        FunctionInfo fi = getFunctionInfo(method.getName(), method);
-        return METHOD_TEMPLATE
-                .replace(JSDOC_TAG, fi.jsDoc)
-                .replace(NAME_TAG, fi.name)
-                .replace(PARAMS_TAG, fi.params)
-                .replace(BODY_TAG, getMethodBody(method.getName(), fi.params, !Void.TYPE.equals(method.getReturnType())));
-    }
-
-    private String getMethodBody(String methodName, String methodParams, boolean returnsValue) {
-        if (returnsValue) {
-            return String.format("\treturn %s.%s(%s);", DELELGATE_OBJECT, methodName, methodParams);//NOI18N
-        } else {
-            return String.format("\t%s.%s(%s);", DELELGATE_OBJECT, methodName, methodParams);//NOI18N
-        }
-    }
-
-    private String getPropsAndMethodsPart(Class clazz) {
+    private String getPropsAndMethodsPart(Class clazz, int ident) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         Map<String, PropertiesUtils.PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
@@ -346,11 +398,11 @@ public class Classes2Scripts {
             }
         }
         for (PropBox property : props.values()) {
-            sb.append(getPropertyPart(ci.name, property));
+            sb.append(getPropertyPart(ci.name, property, ident));
             sb.append("\n");//NOI18N
         }
         for (Method method : methods) {
-            sb.append(getMethodPart(method));
+            sb.append(getMethodPart(ci.name, method, ident));
             sb.append("\n");//NOI18N
         }
         return sb.toString();
@@ -359,13 +411,47 @@ public class Classes2Scripts {
     protected static class FunctionInfo {
 
         public FunctionInfo() {
-            params = "";//NOI18N
             jsDoc = "";//NOI18N
+            params = new String[0];
         }
 
-        
         public String name;
-        public String params;
+        public String javaClassName;
+        public String[] params;
         public String jsDoc;
+
+        public String getNullParamsStr() {
+            if (params.length == 0) {
+                return "";//NOI18N
+            }
+            StringBuilder paramsSb = new StringBuilder();
+            for (int i = 0; i < params.length; i++) { 
+                paramsSb.append("null, ");//NOI18N
+            }
+            return paramsSb.toString();
+        }
+        
+        public String getParamsStr() {
+            StringBuilder paramsSb = new StringBuilder();
+            for (int i = 0; i < params.length; i++) {
+                paramsSb.append(params[i]);
+                if (i < params.length - 1) {
+                    paramsSb.append(", ");//NOI18N
+                }
+            }
+            return paramsSb.toString();
+        }
+
+        public String getUnwrappedParamsStr() {
+            StringBuilder paramsSb = new StringBuilder();
+            String template = "%s && %s.unwrap ? %s.unwrap() : %s";//NOI18N
+            for (int i = 0; i < params.length; i++) {
+                paramsSb.append(String.format(template, params[i], params[i], params[i], params[i]));
+                if (i < params.length - 1) {
+                    paramsSb.append(", ");//NOI18N
+                }
+            }
+            return paramsSb.toString();
+        }
     }
 }

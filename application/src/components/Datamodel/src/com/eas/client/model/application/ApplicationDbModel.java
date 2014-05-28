@@ -56,50 +56,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         parametersEntity.setModel(this);
     }
 
-    /**
-     * Method checks if the type is supported for datamodel's internal usage.
-     * The types are fields or parameters types. If the type is reported as
-     * unsupported by this method, it doesn't mean that the type is unsupported
-     * in our pltypus system at all. It means only that platypus application
-     * designer will not be able to add fields or parameters of such types.
-     *
-     * @param type - the type to check.
-     * @return true if the type is supported for datamodel's internal usage.
-     */
-    @Override
-    public boolean isTypeSupported(int type) throws Exception {
-        SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
-        Set<Integer> supportedTypes = driver.getSupportedJdbcDataTypes();
-        if (SQLUtils.isTypeSupported(type)) {
-            if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.NUMBERS) // numbers
-            {
-                return (type == Types.NUMERIC && supportedTypes.contains(Types.NUMERIC))
-                        || (type == Types.DECIMAL && supportedTypes.contains(Types.DECIMAL));
-            } else if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.STRINGS) // strings
-            {
-                return type == Types.VARCHAR && supportedTypes.contains(Types.VARCHAR);
-            } else if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.DATES) // dates
-            {
-                return (type == Types.DATE && supportedTypes.contains(Types.DATE))
-                        || (type == Types.TIMESTAMP && supportedTypes.contains(Types.TIMESTAMP));
-            } else if (SQLUtils.isSimpleTypesCompatible(type, Types.BLOB)) // large objects
-            {
-                return (type == Types.BLOB && supportedTypes.contains(Types.BLOB))
-                        || (type == Types.CLOB && supportedTypes.contains(Types.CLOB));
-            } else if (SQLUtils.isSimpleTypesCompatible(type, Types.BIT)) // logical
-            {
-                return type == Types.BOOLEAN && supportedTypes.contains(Types.BOOLEAN);
-            } else if (SQLUtils.isSimpleTypesCompatible(type, Types.STRUCT)) // aggregating type
-            {
-                return type == Types.STRUCT && supportedTypes.contains(Types.STRUCT);
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
     private static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"

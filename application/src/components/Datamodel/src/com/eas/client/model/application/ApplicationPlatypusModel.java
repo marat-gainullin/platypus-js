@@ -47,11 +47,6 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         parametersEntity.setModel(this);
     }
 
-    @Override
-    public boolean isTypeSupported(int aType) throws Exception {
-        return true;
-    }
-
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Saves model data changes. Calls aCallback when done.\n"

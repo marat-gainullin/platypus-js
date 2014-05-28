@@ -58,10 +58,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         };
     }
 
-    public E[] entities(){
-        return (E[])entities.values().toArray();
+    public E[] entities() {
+        return (E[]) entities.values().toArray();
     }
-    
+
     @Override
     public void setPublished(Object aValue) {
         Object oldValue = published;
@@ -175,6 +175,27 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     @Override
     public Document toXML() {
         return ApplicationModel2XmlDom.transform(this);
+    }
+
+    /**
+     * Method checks if the type is supported for datamodel's internal usage.
+     * The types are fields or parameters types. If the type is reported as
+     * unsupported by this method, it doesn't mean that the type is unsupported
+     * in our pltypus system at all. It means only that platypus application
+     * designer will not be able to add fields or parameters of such types.
+     *
+     * @param type - the type to check.
+     * @return true if the type is supported for datamodel's internal usage.
+     */
+    @Override
+    public boolean isTypeSupported(int type) {
+        return type == Types.NUMERIC
+                || type == Types.DECIMAL
+                || type == Types.VARCHAR
+                || type == Types.DATE
+                || type == Types.BOOLEAN
+                || type == Types.BLOB
+                || type == Types.CLOB;
     }
 
     public void addScriptEventsListener(ModelScriptEventsListener l) {

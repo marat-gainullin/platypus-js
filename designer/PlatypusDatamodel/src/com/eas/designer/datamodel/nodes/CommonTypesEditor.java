@@ -22,25 +22,25 @@ public class CommonTypesEditor extends SelectIntEditor {
     }
 
     public static synchronized CommonTypesEditor getNewInstanceFor(Model model) {
-            List<Integer> typeIndexesList = new ArrayList<>();
-            for (Integer e : RowsetUtils.typesNames.keySet()) {
-                try {
-                    if (model.isTypeSupported(e)) {
-                        typeIndexesList.add(e);
-                    }
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
+        List<Integer> typeIndexesList = new ArrayList<>();
+        for (Integer e : RowsetUtils.typesNames.keySet()) {
+            try {
+                if (model.isTypeSupported(e)) {
+                    typeIndexesList.add(e);
                 }
+            } catch (Exception ex) {
+                ErrorManager.getDefault().notify(ex);
             }
-            int[] types = new int[typeIndexesList.size()];
-            int i = 0;
-            for (Integer e : typeIndexesList) {
-                types[i++] = e.intValue();
-            }
-            String[] typeNames = new String[types.length];
-            for (int j = 0; j < typeNames.length; j++) {
-                typeNames[j] = SQLUtils.getLocalizedTypeName(types[j]);
-            }
+        }
+        int[] types = new int[typeIndexesList.size()];
+        int i = 0;
+        for (Integer e : typeIndexesList) {
+            types[i++] = e.intValue();
+        }
+        String[] typeNames = new String[types.length];
+        for (int j = 0; j < typeNames.length; j++) {
+            typeNames[j] = SQLUtils.getLocalizedTypeName(types[j]);
+        }
         return new CommonTypesEditor(typeNames, types);
     }
 
