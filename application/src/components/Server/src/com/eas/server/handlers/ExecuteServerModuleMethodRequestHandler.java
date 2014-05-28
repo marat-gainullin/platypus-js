@@ -85,7 +85,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                         executeCallback.beforeExecute(moduleInstance);
                     }
                     Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
-                    Object oFun = moduleInstance.getMember(getRequest().getMethodName());
+                    Object oFun = moduleInstance.getMember(methodName);
                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                         Object result = ((JSObject) oFun).call(moduleInstance, getRequest().getArguments());
                         if (executeCallback != null) {

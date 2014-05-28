@@ -64,6 +64,18 @@ public class PlatypusScriptedResource {
     }
 
     /**
+     * Do not use. Only for tests.
+     * @param aClient
+     * @param aPrincipalHost
+     * @throws Exception 
+     */
+    public static void initForTests(Client aClient, PrincipalHost aPrincipalHost) throws Exception { 
+        client = aClient;
+        cache = client.getAppCache();
+        principalHost = aPrincipalHost;
+    }
+    
+    /**
      * Gets an principal provider.
      *
      * @return Principal host instance

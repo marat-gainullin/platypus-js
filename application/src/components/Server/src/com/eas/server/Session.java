@@ -145,7 +145,7 @@ public class Session implements PrincipalHost {
                     Map<String, String> userProps = DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), userName);
                     userContext = userProps.get(ClientConstants.F_USR_CONTEXT);
                 } catch (Exception ex) {
-                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user " + userName + " properties.", ex);
+                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user " + userName + " properties.");
                 }
             }
         }

@@ -6,7 +6,9 @@ package com.eas.script;
 
 import java.util.Date;
 import javax.script.ScriptException;
+import jdk.nashorn.internal.objects.NativeDate;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -14,10 +16,14 @@ import org.junit.Test;
  * @author mg
  */
 public class ScriptUtilsTest {
+    
+    @Before
+    public void startTests() {
+        ScriptUtils.init();
+    } 
 
     @Test
     public void toJavaTest() throws ScriptException{
-        ScriptUtils.init();
         Object jsDate = ScriptUtils.exec("new Date();");
         Object javaDate = ScriptUtils.toJava(jsDate);
         assertTrue(javaDate instanceof Date);
@@ -53,5 +59,13 @@ public class ScriptUtilsTest {
         assertFalse(ScriptUtils.isValidJsIdentifier(""));
         assertFalse(ScriptUtils.isValidJsIdentifier(null));
         assertFalse(ScriptUtils.isValidJsIdentifier("t-estFunc"));
+    }
+    
+    @Test
+    public void parseDatesTest() throws ScriptException {
+        Object date = ScriptUtils.exec("new Date()");
+        String jsonDate = ScriptUtils.toJson(date);
+        Object stringDate = ScriptUtils.parseJson(jsonDate);
+        Object endDate = ScriptUtils.parseDates(stringDate);
     }
 }

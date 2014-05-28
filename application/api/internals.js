@@ -37,34 +37,23 @@
             function(str) {
                 return JSON.parse(str);
             });
-    ScriptUtils.setParseDatesFunc(
-            function(aObject) {
-                function tryToDate(aValue) {
-                    try {
-                        var timestamp = Date.parse(aValue);
-                        if (!isNaN(timestamp)) {
-                            return new Date(timestamp);
-                        }
-                    } catch (e) {
-                    }
-                    return aValue;
-                }
-                if (aObject) {
-                    for (var prop in aObject) {
-                        var value = aObject[prop];
-                        if (typeof (value) == "object") {
-                            P.JSONToDate(value);
-                        } else if (value && value.constructor) {
-                            var cName = value.constructor.name;
-                            if (cName === 'String') {
-                                aObject[prop] = tryToDate(value + '');
-                            }
-                        } else if (typeof (value) == "string") {
-                            aObject[prop] = tryToDate(value);
-                        }
-                    }
-                }
-            });
+
+    var parseDates = function(aObject) {
+        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
+            var timestamp = Date.parse(aObject);
+            if (!isNaN(timestamp)) {
+                return new Date(timestamp);
+            }
+        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+            for (var prop in aObject) {
+                aObject[prop] = parseDates(aObject[prop]);
+            }
+        }
+        return aObject;
+    };
+
+    ScriptUtils.setParseDatesFunc(parseDates);
+    
     ScriptUtils.setWriteJsonFunc(
             function(aObj) {
                 return JSON.stringify(aObj);

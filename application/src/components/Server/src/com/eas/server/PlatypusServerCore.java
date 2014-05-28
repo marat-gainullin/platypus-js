@@ -42,6 +42,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
     protected static PlatypusServerCore instance;
 
     public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, Set<String> aTasks, String aStartAppElementId) throws Exception {
+        ScriptUtils.init();
         if (instance == null) {
             final Set<String> tasks = new HashSet<>();
             if (aTasks != null) {
