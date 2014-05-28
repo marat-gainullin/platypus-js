@@ -37,7 +37,7 @@ public class PositioningPacketRecieverTest {
     @Test
     public void testUrlParse() {
         System.out.println("urlParse");
-        String aUrl = "http://ya.ru:80 https://ab:ab@google.com:8080 ftp://mail.ru:23 tst://rambler.ru";
+        String aUrl = "http://ya.ru:80 https://ab:ab@google.com:8080 ftp://mail.ru:23 tst://rambler.ru push://localost:8080/api?__type=14";
         Matcher m = PositioningPacketReciever.URL_PATTERN.matcher(aUrl);
         StringBuilder result = new StringBuilder();
         String delimiter = "";
@@ -57,6 +57,12 @@ public class PositioningPacketRecieverTest {
             if (m.group("PORT") != null) {
                  result.append(":");
                 result.append(m.group("PORT"));
+            }
+            if (m.group("PATH") != null) {
+                result.append(m.group("PATH"));
+            }
+            if (m.group("QUERY") != null) {
+                result.append(m.group("QUERY"));
             }
             delimiter = " ";
         }
@@ -84,6 +90,7 @@ public class PositioningPacketRecieverTest {
     @Test
     public void testSendData() throws Exception {
         System.out.println("sendData");
+        PositioningPacketReciever reciever = new PositioningPacketReciever();
         PositioningPacket packet = new PositioningPacket();
         packet.setImei("111111111111111");
         packet.setTime(new Date());
@@ -91,7 +98,7 @@ public class PositioningPacketRecieverTest {
         packet.setSOS(false);
         packet.setLatitude(40.99f);
         packet.setLongtitude(57.01f);
-        Object session = PositioningPacketReciever.send(packet, "localhost", 8443, "https", "testuser1", "test", "/application/api","?__type=1");
+        Object session = reciever.send(packet, "localhost", 8443, "https", "testuser1", "test", "/application/api","?__type=1");
         assertNotNull(session);
         assertTrue(session instanceof IoSession);
         IoSession ioSession = (IoSession) session;
@@ -103,7 +110,7 @@ public class PositioningPacketRecieverTest {
         } else {
             fail("No data for read in session.");
         }
-        session = PositioningPacketReciever.send(packet, "localhost", 8080, "http", "testuser1", "test", "/application/api","?__type=1");
+        session = reciever.send(packet, "localhost", 8080, "http", "testuser1", "test", "/application/api","?__type=1");
         assertNotNull(session);
         assertTrue(session instanceof IoSession);
         ioSession = (IoSession) session;
@@ -115,7 +122,7 @@ public class PositioningPacketRecieverTest {
         } else {
             fail("No data for read in session.");
         }
-        session = PositioningPacketReciever.send("{test:\"test\"}", "localhost", 8080, "http", "testuser1", "test", "/application/api","?__type=1");
+        session = reciever.send("{test:\"test\"}", "localhost", 8080, "http", "testuser1", "test", "/application/api","?__type=1");
         assertNotNull(session);
         assertTrue(session instanceof IoSession);
         ioSession = (IoSession) session;

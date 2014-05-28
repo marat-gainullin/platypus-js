@@ -23,6 +23,7 @@ import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.util.ListenerRegistration;
 import java.io.*;
+import java.sql.Types;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -53,7 +53,7 @@ public class ParameterTest {
         instance.setMode(10);
         instance.setValue("jdfshksdhf");
         instance.setDefaultValue(null);
-        instance.setSelectionForm(487684L);
+        instance.setSelectionForm("487684");
         instance1 = new Parameter(instance);
         assertTrue(instance.isEqual(instance1));
     }
@@ -82,9 +82,9 @@ public class ParameterTest {
         assertTrue(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
-        instance.setSelectionForm(876876L);
+        instance.setSelectionForm("876876");
         instance1 = new Parameter("sampleParam");
-        instance1.setSelectionForm(876876L);
+        instance1.setSelectionForm("876876");
         assertTrue(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
@@ -108,9 +108,9 @@ public class ParameterTest {
         assertFalse(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
-        instance.setSelectionForm(876876L);
+        instance.setSelectionForm("876876");
         instance1 = new Parameter("sampleParam");
-        instance1.setSelectionForm(8776L);
+        instance1.setSelectionForm("8776");
         assertFalse(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");

@@ -320,7 +320,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
 
             if (aField instanceof Parameter) {
                 ((Parameter) aField).setMode(readIntegerAttribute(Model2XmlDom.MODE_ATTR_NAME, ParameterMetaData.parameterModeUnknown));
-                ((Parameter) aField).setSelectionForm(readLongAttribute(Model2XmlDom.SELECTION_FORM_TAG_NAME, null));
+                ((Parameter) aField).setSelectionForm(currentNode.getAttribute(Model2XmlDom.SELECTION_FORM_TAG_NAME));
 
                 List<Element> dvEls = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.DEFAULT_VALUE_TAG_NAME);
                 if (dvEls != null && dvEls.size() == 1) {

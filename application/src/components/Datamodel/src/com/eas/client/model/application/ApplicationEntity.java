@@ -1398,7 +1398,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     public boolean bindQueryParameters() throws Exception {
         Parameters selfParameters = getQuery().getParameters();
-        // Let's correct javascript evil!!!
+        // Let's correct Rhino evil!!!
         for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
             Parameter p = selfParameters.get(i);
             boolean oldModified = p.isModified();
@@ -1436,6 +1436,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                             Parameter leftParameter = relation.getLeftParameter();
                             if (leftParameter != null) {
                                 pValue = leftParameter.getValue();
+                                // Let's correct Rhino evil!!!
+                                pValue = ScriptUtils.toJava(pValue);
                                 if (pValue == null) {
                                     pValue = leftParameter.getDefaultValue();
                                 }

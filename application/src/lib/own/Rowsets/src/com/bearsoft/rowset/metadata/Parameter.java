@@ -28,11 +28,11 @@ import java.sql.ParameterMetaData;
  */
 public class Parameter extends Field {
 
-    protected int mode = ParameterMetaData.parameterModeIn;
-    protected Long selectionForm = null;
-    protected Object defaultValue = null;
-    protected Object value = null;
-    protected boolean modified = false;
+    private int mode = ParameterMetaData.parameterModeIn;
+    private String selectionForm;
+    private Object defaultValue;
+    private Object value;
+    private boolean modified;
 
     /**
      * The default constructor.
@@ -327,7 +327,7 @@ public class Parameter extends Field {
      *
      * @return Selection form of the parameter.
      */
-    public Long getSelectionForm() {
+    public String getSelectionForm() {
         return selectionForm;
     }
 
@@ -336,8 +336,8 @@ public class Parameter extends Field {
      *
      * @param selectionForm Selection form of the parameter.
      */
-    public void setSelectionForm(Long aValue) {
-        Long oldValue = selectionForm;
+    public void setSelectionForm(String aValue) {
+        String oldValue = selectionForm;
         selectionForm = aValue;
         changeSupport.firePropertyChange("selectionForm", oldValue, aValue);
     }

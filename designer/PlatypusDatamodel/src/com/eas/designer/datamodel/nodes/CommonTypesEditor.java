@@ -17,17 +17,11 @@ import org.openide.ErrorManager;
  */
 public class CommonTypesEditor extends SelectIntEditor {
 
-    private static String[] typeNames;
-    private static int[] types;
-    private static Model model;
-
     private CommonTypesEditor(String[] aKeys, int[] aValues) {
         super(aKeys, aValues);
     }
 
-    public static synchronized CommonTypesEditor getNewInstanceFor(Model aModel) {
-        if (model == null || model != aModel) {
-            model = aModel;
+    public static synchronized CommonTypesEditor getNewInstanceFor(Model model) {
             List<Integer> typeIndexesList = new ArrayList<>();
             for (Integer e : RowsetUtils.typesNames.keySet()) {
                 try {
@@ -38,16 +32,15 @@ public class CommonTypesEditor extends SelectIntEditor {
                     ErrorManager.getDefault().notify(ex);
                 }
             }
-            types = new int[typeIndexesList.size()];
+            int[] types = new int[typeIndexesList.size()];
             int i = 0;
             for (Integer e : typeIndexesList) {
                 types[i++] = e.intValue();
             }
-            typeNames = new String[types.length];
+            String[] typeNames = new String[types.length];
             for (int j = 0; j < typeNames.length; j++) {
                 typeNames[j] = SQLUtils.getLocalizedTypeName(types[j]);
             }
-        }
         return new CommonTypesEditor(typeNames, types);
     }
 

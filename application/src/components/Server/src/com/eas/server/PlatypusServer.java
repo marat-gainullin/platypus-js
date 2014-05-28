@@ -164,7 +164,7 @@ public class PlatypusServer extends PlatypusServerCore {
                     sessionIdleCheckInterval = 360;
                 }
 
-                IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId));
+                IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId, numWorkerThreads));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
                     logger.info(String.format("Listening on %s; protocol: %s", s.toString(), protocol));
