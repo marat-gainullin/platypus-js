@@ -138,7 +138,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
 
     /**
      * WARNING!!! This method executes a method with system permissions! You
-     * should think twice befoce calling it i your code.
+     * should think twice before calling it in your code.
      *
      * @param aModuleName
      * @param aMethodName
