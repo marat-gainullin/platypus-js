@@ -14,11 +14,11 @@ import com.eas.script.ScriptFunction;
  * An event for an entity's instance row delete.
  * @author vv
  */
-public class EntityInstanceDelete extends PublishedSourcedEvent {
+public class EntityInstanceDeleteEvent extends PublishedSourcedEvent {
 
     protected Row deleted;
 
-    public EntityInstanceDelete(HasPublished aSource, Row aDeleted) {
+    public EntityInstanceDeleteEvent(HasPublished aSource, Row aDeleted) {
         super(aSource);
         deleted = aDeleted;
     }

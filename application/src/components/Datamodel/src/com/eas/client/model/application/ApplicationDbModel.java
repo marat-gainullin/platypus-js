@@ -7,18 +7,14 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DbClient;
-import com.eas.client.SQLUtils;
 import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.ScriptFunction;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**

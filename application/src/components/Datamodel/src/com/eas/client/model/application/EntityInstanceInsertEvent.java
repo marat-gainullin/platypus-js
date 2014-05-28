@@ -14,11 +14,11 @@ import com.eas.script.ScriptFunction;
  * Represents an event of an entity's instance row insert.
  * @author vv
  */
-public class EntityInstanceInsert extends PublishedSourcedEvent {
+public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
 
     protected Row inserted;
 
-    public EntityInstanceInsert(HasPublished source, Row inserted) {
+    public EntityInstanceInsertEvent(HasPublished source, Row inserted) {
         super(source);
         this.inserted = inserted;
     }

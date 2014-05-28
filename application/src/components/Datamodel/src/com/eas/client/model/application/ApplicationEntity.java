@@ -34,8 +34,10 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
@@ -71,6 +73,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected JSObject onFiltered;
     //
     protected JSObject instanceConstructor;
+    protected static JSObject publisher;
     protected Object published;
     protected Map<String, Object> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
@@ -719,7 +722,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
-    @EventMethod(eventClass = EntityInstanceDelete.class)
+    @EventMethod(eventClass = EntityInstanceDeleteEvent.class)
     public JSObject getOnDeleted() {
         return getOnAfterDelete();
     }
@@ -734,7 +737,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
-    @EventMethod(eventClass = EntityInstanceInsert.class)
+    @EventMethod(eventClass = EntityInstanceInsertEvent.class)
     public JSObject getOnInserted() {
         return getOnAfterInsert();
     }
@@ -779,7 +782,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
-    @EventMethod(eventClass = EntityInstanceDelete.class)
+    @EventMethod(eventClass = EntityInstanceDeleteEvent.class)
     public JSObject getWillDelete() {
         return getOnBeforeDelete();
     }
@@ -794,7 +797,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
-    @EventMethod(eventClass = EntityInstanceInsert.class)
+    @EventMethod(eventClass = EntityInstanceInsertEvent.class)
     public JSObject getWillInsert() {
         return getOnBeforeInsert();
     }
@@ -848,15 +851,28 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    @Override
+       @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
     }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
 
     /**
      * Gets cursor substitute.
@@ -1702,7 +1718,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         // call script method
         assert !model.isAjusting();
         try {
-            Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(this, event.getRow()));
+            Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsertEvent(this, event.getRow()));
             if (sRes != null && sRes instanceof Boolean) {
                 return (Boolean) sRes;
             } else {
@@ -1720,7 +1736,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         // call script method
         assert !model.isAjusting();
         try {
-            Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(this, event.getRow()));
+            Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
             if (sRes != null && sRes instanceof Boolean) {
                 return (Boolean) sRes;
             } else {
@@ -1738,7 +1754,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            executeScriptEvent(onAfterInsert, new EntityInstanceInsert(this, event.getRow()));
+            executeScriptEvent(onAfterInsert, new EntityInstanceInsertEvent(this, event.getRow()));
             internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1751,7 +1767,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            executeScriptEvent(onAfterDelete, new EntityInstanceDelete(this, event.getRow()));
+            executeScriptEvent(onAfterDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
             internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
