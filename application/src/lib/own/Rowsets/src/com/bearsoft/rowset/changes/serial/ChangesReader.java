@@ -32,7 +32,7 @@ public class ChangesReader {
             serializer = aSerializer;
         }
 
-        protected Change.Value readValue(ProtoNode aNode) throws Exception {
+        protected ChangeValue readValue(ProtoNode aNode) throws Exception {
             String valueName = aNode.getChild(ChangesTags.VALUE_NAME_TAG).getString();
             int typeId = aNode.getChild(ChangesTags.TYPE_ID_TAG).getInt();
             String typeName = aNode.getChild(ChangesTags.TYPE_NAME_TAG).getString();
@@ -50,13 +50,13 @@ public class ChangesReader {
             } else {
                 value = aNode.getChild(ChangesTags.VALUE_TAG).getJDBCCompatible(typeId);
             }
-            return new Change.Value(valueName, value, typeInfo);
+            return new ChangeValue(valueName, value, typeInfo);
         }
 
         @Override
         public void visit(Insert aChange) throws Exception {
             List<ProtoNode> dataNodes = node.getChildren(ChangesTags.CHANGE_VALUE_TAG);
-            aChange.data = new Change.Value[dataNodes.size()];
+            aChange.data = new ChangeValue[dataNodes.size()];
             for (int i = 0; i < dataNodes.size(); i++) {
                 aChange.data[i] = readValue(dataNodes.get(i));
             }
@@ -65,12 +65,12 @@ public class ChangesReader {
         @Override
         public void visit(Update aChange) throws Exception {
             List<ProtoNode> dataNodes = node.getChildren(ChangesTags.CHANGE_VALUE_TAG);
-            aChange.data = new Change.Value[dataNodes.size()];
+            aChange.data = new ChangeValue[dataNodes.size()];
             for (int i = 0; i < dataNodes.size(); i++) {
                 aChange.data[i] = readValue(dataNodes.get(i));
             }
             List<ProtoNode> keysNodes = node.getChildren(ChangesTags.CHANGE_KEY_TAG);
-            aChange.keys = new Change.Value[keysNodes.size()];
+            aChange.keys = new ChangeValue[keysNodes.size()];
             for (int i = 0; i < keysNodes.size(); i++) {
                 aChange.keys[i] = readValue(keysNodes.get(i));
             }
@@ -79,7 +79,7 @@ public class ChangesReader {
         @Override
         public void visit(Delete aChange) throws Exception {
             List<ProtoNode> keysNodes = node.getChildren(ChangesTags.CHANGE_KEY_TAG);
-            aChange.keys = new Change.Value[keysNodes.size()];
+            aChange.keys = new ChangeValue[keysNodes.size()];
             for (int i = 0; i < keysNodes.size(); i++) {
                 aChange.keys[i] = readValue(keysNodes.get(i));
             }
@@ -88,7 +88,7 @@ public class ChangesReader {
         @Override
         public void visit(Command aChange) throws Exception {
             List<ProtoNode> keysNodes = node.getChildren(ChangesTags.CHANGE_PARAMETER_TAG);
-            aChange.parameters = new Change.Value[keysNodes.size()];
+            aChange.parameters = new ChangeValue[keysNodes.size()];
             for (int i = 0; i < keysNodes.size(); i++) {
                 aChange.parameters[i] = readValue(keysNodes.get(i));
             }

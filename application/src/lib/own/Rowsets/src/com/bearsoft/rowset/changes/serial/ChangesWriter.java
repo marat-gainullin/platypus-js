@@ -30,7 +30,7 @@ public class ChangesWriter {
             serializer = aSerializer;
         }
         
-        protected ByteArrayOutputStream writeValue(Change.Value aValue) throws Exception {
+        protected ByteArrayOutputStream writeValue(ChangeValue aValue) throws Exception {
             ByteArrayOutputStream valueOut = new ByteArrayOutputStream();
             ProtoWriter valueWriter = new ProtoWriter(valueOut);
             valueWriter.put(ChangesTags.VALUE_NAME_TAG, aValue.name);
@@ -52,7 +52,7 @@ public class ChangesWriter {
         public void visit(Insert aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_INSERT);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
-            for (Change.Value value : aChange.data) {
+            for (ChangeValue value : aChange.data) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
@@ -63,11 +63,11 @@ public class ChangesWriter {
         public void visit(Update aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_UPDATE);            
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
-            for (Change.Value value : aChange.data) {
+            for (ChangeValue value : aChange.data) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
-            for (Change.Value value : aChange.keys) {
+            for (ChangeValue value : aChange.keys) {
                 writer.put(ChangesTags.CHANGE_KEY_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
@@ -78,7 +78,7 @@ public class ChangesWriter {
         public void visit(Delete aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_DELETE);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
-            for (Change.Value value : aChange.keys) {
+            for (ChangeValue value : aChange.keys) {
                 writer.put(ChangesTags.CHANGE_KEY_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
@@ -89,7 +89,7 @@ public class ChangesWriter {
         public void visit(Command aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_COMMAND);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
-            for (Change.Value value : aChange.parameters) {
+            for (ChangeValue value : aChange.parameters) {
                 writer.put(ChangesTags.CHANGE_PARAMETER_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }

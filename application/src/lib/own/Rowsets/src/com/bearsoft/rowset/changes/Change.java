@@ -20,41 +20,6 @@ public abstract class Change implements HasPublished {
     //
     protected Object published;
 
-    public static class Value implements HasPublished {
-
-        public String name;
-        public Object value;
-        public DataTypeInfo type;
-        //
-        protected Object published;
-
-        public Value(String aName, Object aValue, DataTypeInfo aType) {
-            name = aName;
-            value = aValue;
-            type = aType;
-        }
-
-        @ScriptFunction(jsDoc = "Name of changed property.")
-        public String getName() {
-            return name;
-        }
-
-        @ScriptFunction(jsDoc = "New value.")
-        public Object getValue() {
-            return value;
-        }
-
-        @Override
-        public Object getPublished() {
-            return published;
-        }
-
-        @Override
-        public void setPublished(Object aValue) {
-            published = aValue;
-        }
-    }
-
     public Change(String aEntityId) {
         super();
         entityId = aEntityId;

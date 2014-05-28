@@ -5,8 +5,9 @@
 package com.bearsoft.rowset;
 
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.Insert; 
+import com.bearsoft.rowset.changes.ChangeValue;
+import com.bearsoft.rowset.changes.Delete; 
+import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.dataflow.DatabaseFlowProvider;
 import com.bearsoft.rowset.dataflow.FlowProvider;
@@ -1908,23 +1909,23 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             }
             List<Change> changesLog = flow.getChangeLog();
             Insert insert = new Insert(flow.getEntityId());
-            List<Change.Value> data = new ArrayList<>();
+            List<ChangeValue> data = new ArrayList<>();
             for (int i = 0; i < aRow.getCurrentValues().length; i++) {
                 Field field = aRow.getFields().get(i + 1);
                 Object value = aRow.getCurrentValues()[i];
                 if (value != null) {
-                    data.add(new Change.Value(field.getName(), value, field.getTypeInfo()));
+                    data.add(new ChangeValue(field.getName(), value, field.getTypeInfo()));
                 }
             }
-            insert.data = data.toArray(new Change.Value[]{});
+            insert.data = data.toArray(new ChangeValue[]{});
             changesLog.add(insert);
             aRow.setInserted(insert);
         }
     }
 
-    private Change.Value[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
+    private ChangeValue[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
         if (fields != null) {
-            List<Change.Value> keys = new ArrayList<>();
+            List<ChangeValue> keys = new ArrayList<>();
             for (int i = 1; i <= fields.getFieldsCount(); i++) {
                 Field field = fields.get(i);
                 // Some tricky processing of primary key modification case ...
@@ -1933,10 +1934,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
                     if (i == colIndex) {
                         value = oldValue;
                     }
-                    keys.add(new Change.Value(field.getName(), value, field.getTypeInfo()));
+                    keys.add(new ChangeValue(field.getName(), value, field.getTypeInfo()));
                 }
             }
-            return keys.toArray(new Change.Value[]{});
+            return keys.toArray(new ChangeValue[]{});
         } else {
             return null;
         }
@@ -1952,7 +1953,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             boolean insertComplemented = tryToComplementInsert(aRow, field, newValue);
             if (!insertComplemented) {
                 Update update = new Update(flow.getEntityId());
-                update.data = new Change.Value[]{new Change.Value(field.getName(), newValue, field.getTypeInfo())};
+                update.data = new ChangeValue[]{new ChangeValue(field.getName(), newValue, field.getTypeInfo())};
                 update.keys = generateChangeLogKeys(colIndex, aRow, oldValue);
                 changesLog.add(update);
             }
@@ -2119,15 +2120,15 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
         Insert insertChange = aRow.getInsertChange();
         if (insertChange != null && !insertChange.consumed && !field.isNullable()) {
             boolean met = false;
-            for (Change.Value value : insertChange.data) {
+            for (ChangeValue value : insertChange.data) {
                 if (value.name.equalsIgnoreCase(field.getName())) {
                     met = true;
                     break;
                 }
             }
             if (!met) {
-                Change.Value[] newdata = new Change.Value[insertChange.data.length+1];
-                newdata[newdata.length-1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
+                ChangeValue[] newdata = new ChangeValue[insertChange.data.length+1];
+                newdata[newdata.length-1] = new ChangeValue(field.getName(), newValue, field.getTypeInfo());
                 System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
                 insertChange.data = newdata;
                 insertComplemented = true;
