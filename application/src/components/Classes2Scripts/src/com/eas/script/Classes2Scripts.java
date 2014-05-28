@@ -179,6 +179,9 @@ public class Classes2Scripts {
 
     protected String getClassJs(Class clazz) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
+        if (ci.javaClassName.contains("$")) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Inner class: {0}", ci.javaClassName);
+        }
         String js = CONSTRUCTOR_TEMPLATE
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
