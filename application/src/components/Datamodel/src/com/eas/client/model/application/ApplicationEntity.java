@@ -704,7 +704,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
+    @EventMethod(eventClass = EntityInstanceChangeEvent.class)
     public JSObject getOnChanged() {
         return getOnAfterChange();
     }
@@ -764,7 +764,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
+    @EventMethod(eventClass = EntityInstanceChangeEvent.class)
     public JSObject getWillChange() {
         return getOnBeforeChange();
     }
@@ -1650,64 +1650,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             } catch (Exception ex) {
                 Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-    }
-
-    public static class EntityInstanceChangeEvent extends PublishedSourcedEvent {
-
-        protected Field field;
-        protected Object oldValue;
-        protected Object newValue;
-
-        public EntityInstanceChangeEvent(HasPublished aSource, Field aField, Object aOldValue, Object aNewValue) {
-            super(aSource);
-            field = aField;
-            oldValue = aOldValue;
-            newValue = aNewValue;
-        }
-
-        public Field getField() {
-            return field;
-        }
-
-        private static final String PROPERTY_NAME_JSDOC = ""
-                + "/**\n"
-                + "* The changed property name.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = PROPERTY_NAME_JSDOC)
-        public String getPropertyName() {
-            return field != null ? field.getName() : null;
-        }
-
-        private static final String OLD_VALUE_JSDOC = ""
-                + "/**\n"
-                + "* The old value.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OLD_VALUE_JSDOC)
-        public Object getOldValue() {
-            return oldValue;
-        }
-
-        private static final String NEW_VALUE_JSDOC = ""
-                + "/**\n"
-                + "* The new value.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = NEW_VALUE_JSDOC)
-        public Object getNewValue() {
-            return newValue;
-        }
-
-        private static final String OBJECT_JSDOC = ""
-                + "/**\n"
-                + "* The updated element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OBJECT_JSDOC)
-        public HasPublished getObject() {
-            return source;
         }
     }
 
