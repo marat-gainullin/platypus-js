@@ -749,7 +749,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.CursorPositionChangedEvent.class)
+    @EventMethod(eventClass = CursorPositionChangedEvent.class)
     public JSObject getOnScrolled() {
         return getOnAfterScroll();
     }
@@ -1637,37 +1637,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         private static final String NEW_INDEX_JSDOC = ""
                 + "/**\n"
                 + "* Cursor position the cursor will be set on.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
-        public int getNewIndex() {
-            return newIndex;
-        }
-
-    }
-
-    public static class CursorPositionChangedEvent extends PublishedSourcedEvent {
-
-        protected int oldIndex;
-        protected int newIndex;
-
-        public CursorPositionChangedEvent(HasPublished aSource, int aOldIndex, int aNewIndex) {
-            super(aSource);
-            oldIndex = aOldIndex;
-            newIndex = aNewIndex;
-        }
-
-        @ScriptFunction(jsDoc = ""
-                + "/**\n"
-                + " * Cursor position the cursor was on.\n"
-                + " */")
-        public int getOldIndex() {
-            return oldIndex;
-        }
-
-        private static final String NEW_INDEX_JSDOC = ""
-                + "/**\n"
-                + "* Cursor position the cursor has been set on.\n"
                 + "*/";
 
         @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
