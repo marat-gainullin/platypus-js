@@ -2,7 +2,7 @@
     
     var javaClass = Java.type("${Type}");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.${Name}(null, null, null, aDelegate);
+        return new P.${Name}(${NullParams}aDelegate);
     });
     
 ${JsDoc}

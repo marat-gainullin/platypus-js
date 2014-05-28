@@ -49,6 +49,7 @@ public class Classes2Scripts {
     private static final String NAME_TAG = "${Name}";//NOI18N
     private static final String JAVA_TYPE_TAG = "${Type}";//NOI18N
     private static final String PARAMS_TAG = "${Params}";//NOI18N
+    private static final String NULL_PARAMS_TAG = "${NullParams}";//NOI18N
     private static final String UNWRAPPED_PARAMS_TAG = "${UnwrappedParams}";//NOI18N
     private static final String MAX_ARGS_TAG = "${MaxArgs}";//NOI18N
     private static final String PROPERTIES_TAG = "${Props}";//NOI18N
@@ -182,6 +183,7 @@ public class Classes2Scripts {
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, ci.name)
+                .replace(NULL_PARAMS_TAG, ci.getNullParamsStr())
                 .replace(PARAMS_TAG, ci.getParamsStr())
                 .replace(DELEGATE_TAG, DELEGATE_OBJECT)
                 .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr())
@@ -415,6 +417,17 @@ public class Classes2Scripts {
         public String[] params;
         public String jsDoc;
 
+        public String getNullParamsStr() {
+            if (params.length == 0) {
+                return "";//NOI18N
+            }
+            StringBuilder paramsSb = new StringBuilder();
+            for (int i = 0; i < params.length; i++) { 
+                paramsSb.append("null, ");//NOI18N
+            }
+            return paramsSb.toString();
+        }
+        
         public String getParamsStr() {
             StringBuilder paramsSb = new StringBuilder();
             for (int i = 0; i < params.length; i++) {
