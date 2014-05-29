@@ -1,0 +1,517 @@
+package com.eas.client.form.js;
+
+import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
+import com.eas.client.form.events.AddEvent;
+import com.eas.client.form.events.HideEvent;
+import com.eas.client.form.events.RemoveEvent;
+import com.eas.client.form.events.ShowEvent;
+import com.eas.client.form.published.PublishedCell;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+
+public class JsEvents {
+
+	public native static JavaScriptObject getFormsClass()/*-{
+		return $wnd.Form;
+	}-*/;
+	
+	public native static JavaScriptObject publishScriptSourcedEvent(JavaScriptObject aSource)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		return published;
+	}-*/;	
+	
+	public native static JavaScriptObject publishCursorPositionWillChangeEvent(JavaScriptObject aSource, int aNewIndex)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "newIndex", {
+			get : function(){
+				return aNewIndex;
+			}
+		});
+		return published;
+	}-*/;	
+	
+	public native static JavaScriptObject publishCursorPositionChangedEvent(JavaScriptObject aSource, int aOldIndex, int aNewIndex)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "oldIndex", {
+			get : function(){
+				return aOldIndex;
+			}
+		});
+		Object.defineProperty(published, "newIndex", {
+			get : function(){
+				return aNewIndex;
+			}
+		});
+		return published;
+	}-*/;	
+	
+	
+	public native static JavaScriptObject publishEntityInstanceChangeEvent(JavaScriptObject aSource, JavaScriptObject aPublishedField, Object aOldValue, Object aNewValue)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "object", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "field", {
+			get : function(){
+				return aPublishedField;
+			}
+		});
+		Object.defineProperty(published, "oldValue", {
+			get : function(){
+				return $wnd.boxAsJs(aOldValue);
+			}
+		});
+		Object.defineProperty(published, "newValue", {
+			get : function(){
+				return $wnd.boxAsJs(aNewValue);
+			}
+		});
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publishEntityInstanceDeleteEvent(JavaScriptObject aSource, JavaScriptObject aPublishedRow)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "deleted", {
+			get : function(){
+				return aPublishedRow;
+			}
+		});
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publishEntityInstanceInsertEvent(JavaScriptObject aSource, JavaScriptObject aPublishedRow)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "inserted", {
+			get : function(){
+				return aPublishedRow;
+			}
+		});
+		Object.defineProperty(published, "object", {
+			get : function(){
+				return aPublishedRow;
+			}
+		});
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publishOnRenderEvent(JavaScriptObject aSource, Object aRowId, Object aColumnId, JavaScriptObject aPublishedRow, PublishedCell aCell)/*-{
+		var published = {};
+		Object.defineProperty(published, "source", {
+			get : function(){
+				return aSource;
+			}
+		});
+		Object.defineProperty(published, "id", {
+			get : function(){
+				return $wnd.boxAsJs(aRowId);
+			}
+		});
+		Object.defineProperty(published, "columnId", {
+			get : function(){
+				return $wnd.boxAsJs(aColumnId);
+			}
+		});
+		Object.defineProperty(published, "object", {
+			get : function(){
+				return aPublishedRow;
+			}
+		});
+		Object.defineProperty(published, "cell", {
+			get : function(){
+				return aCell;
+			}
+		});
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publishWindowEvent(Object aEvent, JavaScriptObject aPublishedForm)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		Object.defineProperty(published, "source", {
+			get : function() {
+				return aPublishedForm;
+			}
+		});
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MouseDownEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MouseUpEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MouseWheelEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MouseMoveEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(ClickEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		Object.defineProperty(published, "clickCount", {
+			get : function() {
+				return 1;
+			}
+		});
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(DoubleClickEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		Object.defineProperty(published, "clickCount", {
+			get : function() {
+				return 2;
+			}
+		});
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MouseOverEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+ 
+	public native static JavaScriptObject publish(MouseOutEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishMouseEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publish(KeyDownEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishKeyEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(KeyUpEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishKeyEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publish(KeyPressEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishKeyEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publish(FocusEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(BlurEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(ResizeEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(ShowEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(HideEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MoveEvent<Object> aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(AddEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		Object.defineProperty(published, "child", {
+			get : function()
+			{
+				var comp = aEvent.@com.eas.client.form.events.AddEvent::getWidget()();
+				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
+			}
+		});
+		return published; 
+	}-*/;
+
+	public native static JavaScriptObject publish(RemoveEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		Object.defineProperty(published, "child", {
+			get : function()
+			{
+				var comp = aEvent.@com.eas.client.form.events.RemoveEvent::getWidget()();
+				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
+			}
+		});
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(Object aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static void publishEvent(JavaScriptObject aPublishedEvent)/*-{
+		var aEvent = aPublishedEvent.unwrap();
+		Object.defineProperty(aPublishedEvent, "source", {
+			get : function() {
+				var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
+				var jsSource = @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+				return jsSource;
+			}
+		});
+	}-*/;
+	
+	public native static void publishMouseEvent(JavaScriptObject aPublishedEvent)/*-{
+		var aEvent = aPublishedEvent.unwrap();
+		Object.defineProperty(aPublishedEvent, "x", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.MouseEvent::getX()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "y", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.MouseEvent::getY()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "screenX", {
+			get : function() {
+				aEvent.@com.google.gwt.event.dom.client.MouseEvent::getScreenX()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "screenY", {
+			get : function() {
+				aEvent.@com.google.gwt.event.dom.client.MouseEvent::getScreenY()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "altDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.MouseEvent::isAltKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "controlDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.MouseEvent::isControlKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "shiftDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.MouseEvent::isShiftKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "metaDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.MouseEvent::isMetaKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "button", {
+			get : function() {
+				var button = aEvent.@com.google.gwt.event.dom.client.MouseEvent::getNativeButton()();
+//??????????????????????? ввести константу ??????
+				switch (button) {
+					case @com.google.gwt.dom.client.NativeEvent::BUTTON_LEFT : return 1; 
+					case @com.google.gwt.dom.client.NativeEvent::BUTTON_RIGHT : return 2; 
+					case @com.google.gwt.dom.client.NativeEvent::BUTTON_MIDDLE : return 3;
+					default : return 0;
+				} 
+			}
+		});
+	}-*/;
+	
+	public native static void publishKeyEvent(JavaScriptObject aPublishedEvent)/*-{
+		var aEvent = aPublishedEvent.unwrap();
+		Object.defineProperty(aPublishedEvent, "altDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.KeyEvent::isAltKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "controlDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.KeyEvent::isControlKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "shiftDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.KeyEvent::isShiftKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "metaDown", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.KeyEvent::isMetaKeyDown()();
+			}
+		});
+		Object.defineProperty(aPublishedEvent, "key", {
+			get : function() {
+				return aEvent.@com.google.gwt.event.dom.client.KeyCodeEvent::getNativeKeyCode()();
+			}
+		});
+	}-*/;
+	
+}

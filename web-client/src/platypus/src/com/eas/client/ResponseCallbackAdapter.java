@@ -4,6 +4,7 @@
  */
 package com.eas.client;
 
+import com.bearsoft.rowset.Callback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 
 /**

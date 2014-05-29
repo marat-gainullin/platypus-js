@@ -8,8 +8,8 @@ package com.bearsoft.rowset.metadata;
  * <code>Parameters</code> class is intended to hold and process information about parameters
  * of forms, queries, reports and datamodules.
  */
-public class Parameters extends Fields
-{
+public class Parameters extends Fields{
+	
     private static final String DEFAULT_PARAM_NAME_PREFIX = "Param";
 
     /**

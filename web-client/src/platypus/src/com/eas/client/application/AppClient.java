@@ -15,21 +15,20 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.Requests;
 import com.eas.client.ResponseCallbackAdapter;
-import com.eas.client.Utils;
 import com.eas.client.published.PublishedFile;
 import com.eas.client.queries.Query;
 import com.eas.client.serial.ChangesWriter;
@@ -62,7 +61,6 @@ import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
-import com.sencha.gxt.core.client.GXT;
 
 /**
  * 
@@ -571,10 +569,7 @@ public class AppClient {
 
 	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		if(GXT.isChrome())// remove if chrome bug 266971 is fixed
-		{
-			aUrl += "&"+param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId()));
-		}
+		aUrl = Loader.URL_PROCESSOR.process(aUrl);
 		req.open(aMethod.toString(), aUrl, false);
 		interceptRequest(req);
 		/* Since W3C standard about sync XmlHttpRequest and response type.
@@ -707,8 +702,7 @@ public class AppClient {
 			};
 		} else {
 			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)));
-			if(GXT.isChrome())// remove if chrome bug 266971 is fixed
-				query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId())));
+			query = Loader.URL_PROCESSOR.process(query);
 			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override

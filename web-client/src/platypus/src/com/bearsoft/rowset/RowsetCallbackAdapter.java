@@ -4,7 +4,6 @@
  */
 package com.bearsoft.rowset;
 
-import com.eas.client.Callback;
 
 /**
  * 
