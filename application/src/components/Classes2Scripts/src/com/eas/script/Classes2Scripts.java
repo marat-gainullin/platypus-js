@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -169,7 +170,7 @@ public class Classes2Scripts {
                         FunctionInfo jsConstructor = getJsConstructorInfo(clazz);
                         if (jsConstructor != null) {
                             Logger.getLogger(Classes2Scripts.class.getName())
-                                    .log(Level.INFO, "Converting class name: {0}", className);
+                                    .log(Level.INFO, "File: {0} Class name: {1}", new String[] {file.getName(), className});
                             File resultFile = new File(destDirectory, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                             String js = getClassJs(clazz);
                             if (js != null) {
@@ -190,6 +191,8 @@ public class Classes2Scripts {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Inner class: {0}", ci.javaClassName);
             return null;
         }
+        checkForHasPublised(clazz);
+        checkForSetPublisher(clazz);
         String js = CONSTRUCTOR_TEMPLATE
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
@@ -203,6 +206,21 @@ public class Classes2Scripts {
         return js;
     }
 
+    private static void checkForHasPublised(Class clazz) {
+        if (!HasPublished.class.isAssignableFrom(clazz)) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "=======================================  HasPublished iterface is not implemented: {0}", clazz.getName());
+        }
+    }
+    
+    private static void checkForSetPublisher(Class clazz) {
+        for (Method m : clazz.getMethods()) {
+            if (m.getName().equals("setPublisher") && Modifier.isStatic(m.getModifiers())) { 
+                return;
+            }
+        }
+        Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "=======================================  setPublisher static method is not implemented: {0}", clazz.getName());
+    }
+    
     private static String getConstructorJsDoc(FunctionInfo ci) {
         return addIdent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
     }
