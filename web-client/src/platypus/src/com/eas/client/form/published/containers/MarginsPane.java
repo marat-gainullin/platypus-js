@@ -141,6 +141,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 	}
 
 	public void add(Widget aChild, PublishedMarginConstraints aConstraints) {
+		super.add(aChild);
 		MarginConstraints anchors = new MarginConstraints();
 		int h = 0;
 		int v = 0;
@@ -179,6 +180,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 		if (v < 2)
 			throw new IllegalArgumentException("There are must be at least two vertical values in anchors.");
 		applyConstraints(aChild, anchors);
+		
 	}
 
 	public void add(Widget aChild, PublishedAbsoluteConstraints aConstraints) {

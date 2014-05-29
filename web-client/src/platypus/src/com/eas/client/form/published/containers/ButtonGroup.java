@@ -60,19 +60,19 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade {
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap) {
-				aComponent.@com.eas.client.form.published.containers.ButtonGroup::add(Lcom/eas/client/form/published/HasPublished;)(toAdd.unwrap());
+				aWidget.@com.eas.client.form.published.containers.ButtonGroup::add(Lcom/eas/client/form/published/HasPublished;)(toAdd.unwrap());
 			}
 		}
 		published.remove = function(toRemove) {
 			if(toRemove && toRemove.unwrap) {
-				aComponent.@com.eas.client.form.published.containers.ButtonGroup::remove(Lcom/eas/client/form/published/HasPublished;)(toRemove.unwrap());
+				aWidget.@com.eas.client.form.published.containers.ButtonGroup::remove(Lcom/eas/client/form/published/HasPublished;)(toRemove.unwrap());
 			}
 		}
 		published.clear = function() {
-			aComponent.@com.eas.client.form.published.containers.ButtonGroup::clear()();				
+			aWidget.@com.eas.client.form.published.containers.ButtonGroup::clear()();				
 		}
 		published.child = function(aIndex) {
-			var comp = aComponent.@com.eas.client.form.published.containers.ButtonGroup::getChild(I)(aIndex);
+			var comp = aWidget.@com.eas.client.form.published.containers.ButtonGroup::getChild(I)(aIndex);
 		    return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);					
 		};
 		Object.defineProperty(published, "children", {
@@ -85,7 +85,7 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade {
 		});
 		Object.defineProperty(published, "count", {
 			get : function() {
-				return aComponent.@com.eas.client.form.published.containers.ButtonGroup::size()();
+				return aWidget.@com.eas.client.form.published.containers.ButtonGroup::size()();
 			}
 		});
 	}-*/;

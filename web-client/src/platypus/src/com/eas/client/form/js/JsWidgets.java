@@ -40,7 +40,6 @@ public class JsWidgets {
 		
 		// **************************************************************************
 		$wnd.Button = function (aText, aIcon, aGapOrCallback, aCallback) {
-			
 			var aIconTextGap = 4;
 			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
 				aCallback = aGapOrCallback;

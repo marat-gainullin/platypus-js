@@ -6,7 +6,7 @@ import com.eas.client.xhr.UrlQueryProcessor;
 
 /**
  * Workaround chrome bug 266971.
- * When it will be fixed, this class should be elimiated
+ * When it will be fixed, this class should be eliminated
  * @author mg
  *
  */
