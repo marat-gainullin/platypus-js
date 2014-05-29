@@ -32,12 +32,10 @@ public class CursorPositionChangedEvent extends PublishedSourcedEvent {
         return oldIndex;
     }
 
-    private static final String NEW_INDEX_JSDOC = ""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + "* Cursor position the cursor has been set on.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
+            + "*/")
     public int getNewIndex() {
         return newIndex;
     }

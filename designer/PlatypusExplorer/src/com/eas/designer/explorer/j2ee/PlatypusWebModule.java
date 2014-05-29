@@ -145,7 +145,8 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
             } else {
                 return null;
             }
-            return FileUtil.toFile(dir.getFileObject(path));
+            FileObject fo = dir.getFileObject(path);
+            return fo != null ? FileUtil.toFile(fo) : null;
         } catch (IOException ex) {
             ErrorManager.getDefault().notify(ex);         
         }

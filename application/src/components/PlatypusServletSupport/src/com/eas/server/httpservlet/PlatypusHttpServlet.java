@@ -28,7 +28,9 @@ import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
 import com.eas.util.StringUtils;
 import java.io.*;
+import java.net.URI;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,7 +82,8 @@ public class PlatypusHttpServlet extends HttpServlet {
         try {
             super.init(config);
             ServerConfig scp = ServerConfig.parse(config);
-            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getTasks(), scp.getAppElementId());
+            String docsRoot = config.getServletContext().getRealPath("/");
+            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getTasks(), scp.getAppElementId(), docsRoot + File.separator + ClientConstants.ENTITIES_CACHE_DIRECTORY_NAME);
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
@@ -449,9 +452,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                     String docsRoot = aHttpRequest.getServletContext().getRealPath("/");
                     String scriptPath = resp.getScriptPath();
-                    if(scriptPath.startsWith(docsRoot)){
+                    if (scriptPath.startsWith(docsRoot)) {
                         String newScriptUri = scriptPath.substring(docsRoot.length());
-                        String redirectLocation = aHttpResponse.encodeRedirectURL(newScriptUri);
+                        String redirectLocation = aHttpResponse.encodeRedirectURL(newScriptUri.replace(File.separator, "/"));
+                        redirectLocation = new URI(null, null, redirectLocation, null).toASCIIString();
                         aHttpResponse.sendRedirect(redirectLocation);
                     }
                 } else {

@@ -24,22 +24,19 @@ public class CursorPositionWillChangeEvent extends PublishedSourcedEvent {
         newIndex = aNewIndex;
     }
 
-    private static final String OLD_INDEX_JSDOC = ""
+
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + "* Cursor position the cursor is still on.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = OLD_INDEX_JSDOC)
+            + "*/")
     public int getOldIndex() {
         return oldIndex;
     }
 
-    private static final String NEW_INDEX_JSDOC = ""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + "* Cursor position the cursor will be set on.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
+            + "*/")
     public int getNewIndex() {
         return newIndex;
     }

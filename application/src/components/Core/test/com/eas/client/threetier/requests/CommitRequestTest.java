@@ -5,6 +5,7 @@
 package com.eas.client.threetier.requests;
 
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
@@ -27,8 +28,8 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -43,24 +44,24 @@ public class CommitRequestTest {
         long rqId = 78347834L;
         String entityId = "testEntity";
         String command = "testCommand";
-        Change.Value key1 = new Change.Value("key1", 78.9f, DataTypeInfo.FLOAT);
-        Change.Value key2 = new Change.Value("key2", "key2Value", DataTypeInfo.CHAR);
-        Change.Value[] keys = new Change.Value[]{key1, key2};
+        ChangeValue key1 = new ChangeValue("key1", 78.9f, DataTypeInfo.FLOAT);
+        ChangeValue key2 = new ChangeValue("key2", "key2Value", DataTypeInfo.CHAR);
+        ChangeValue[] keys = new ChangeValue[]{key1, key2};
 
         Timestamp date = new Timestamp((new Date()).getTime());
         CompactClob clob = new CompactClob("data6Value");
         CompactBlob blob = new CompactBlob("data7Value".getBytes("utf-8"));
         Point point = gFactory.createPoint(new Coordinate(52, 27));
         DataTypeInfo geometryTypeInfo = DataTypeInfo.GEOMETRY.copy();
-        Change.Value data1 = new Change.Value("data1", 56, DataTypeInfo.INTEGER);
-        Change.Value data2 = new Change.Value("data2", "data2Value", DataTypeInfo.VARCHAR);
-        Change.Value data3 = new Change.Value("data3", true, DataTypeInfo.BOOLEAN);
-        Change.Value data4 = new Change.Value("data4", false, DataTypeInfo.BIT);
-        Change.Value data5 = new Change.Value("data5", date, DataTypeInfo.TIMESTAMP);
-        Change.Value data6 = new Change.Value("data6", clob, DataTypeInfo.CLOB);
-        Change.Value data7 = new Change.Value("data7", blob, DataTypeInfo.BLOB);
-        Change.Value data8 = new Change.Value("data8", point, geometryTypeInfo);
-        Change.Value[] data = new Change.Value[]{data1, data2, data3, data4, data5, data6, data7, data8};
+        ChangeValue data1 = new ChangeValue("data1", 56, DataTypeInfo.INTEGER);
+        ChangeValue data2 = new ChangeValue("data2", "data2Value", DataTypeInfo.VARCHAR);
+        ChangeValue data3 = new ChangeValue("data3", true, DataTypeInfo.BOOLEAN);
+        ChangeValue data4 = new ChangeValue("data4", false, DataTypeInfo.BIT);
+        ChangeValue data5 = new ChangeValue("data5", date, DataTypeInfo.TIMESTAMP);
+        ChangeValue data6 = new ChangeValue("data6", clob, DataTypeInfo.CLOB);
+        ChangeValue data7 = new ChangeValue("data7", blob, DataTypeInfo.BLOB);
+        ChangeValue data8 = new ChangeValue("data8", point, geometryTypeInfo);
+        ChangeValue[] data = new ChangeValue[]{data1, data2, data3, data4, data5, data6, data7, data8};
 
         List<Change> changes = new ArrayList<>();
         Insert i = new Insert(entityId);
@@ -131,7 +132,7 @@ public class CommitRequestTest {
         }
     }
 
-    protected static void compareValues(Change.Value v1, Change.Value v2) {
+    protected static void compareValues(ChangeValue v1, ChangeValue v2) {
         assertEquals(v1.name, v2.name);
         assertEquals(v1.type.getSqlType(), v2.type.getSqlType());
         assertEquals(v1.type.getSqlTypeName(), v2.type.getSqlTypeName());
