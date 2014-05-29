@@ -11,7 +11,7 @@ import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
- *
+ * The base event type.
  * @author vv
  */
 public class PublishedSourcedEvent implements HasPublished {

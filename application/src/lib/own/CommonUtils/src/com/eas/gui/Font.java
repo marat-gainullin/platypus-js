@@ -4,7 +4,6 @@
  */
 package com.eas.gui;
 
-import static com.eas.gui.Cursor.publisher;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
