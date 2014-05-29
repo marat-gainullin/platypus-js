@@ -74,6 +74,7 @@ public class ClientFactory {
     public static AppCache obtainTwoTierAppCache(String aApplicationUrl, FilesAppCache.ScanCallback aCallBack) throws Exception {
         AppCache appCache;
         if (aApplicationUrl.startsWith("jndi")) {
+            Logger.getLogger(ClientFactory.class.getName()).info("Resident modules are specified on the command line via parameter 'tasks'.");
             appCache = new DatabaseAppCache(aApplicationUrl);
         } else {// file://
             File f = new File(new URI(aApplicationUrl));

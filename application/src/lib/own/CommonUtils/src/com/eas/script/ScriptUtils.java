@@ -20,6 +20,7 @@ import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import jdk.nashorn.internal.objects.NativeDate;
 import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
 import jdk.nashorn.internal.parser.Token;
@@ -28,7 +29,9 @@ import jdk.nashorn.internal.parser.TokenType;
 import jdk.nashorn.internal.runtime.ErrorManager;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptEnvironment;
+import jdk.nashorn.internal.runtime.ScriptObject;
 import jdk.nashorn.internal.runtime.Source;
+import jdk.nashorn.internal.runtime.Undefined;
 import jdk.nashorn.internal.runtime.options.Options;
 
 /**
@@ -44,6 +47,7 @@ public class ScriptUtils {
     protected static JSObject getModuleFunc;
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
+    protected static JSObject parseDatesFunc;
     protected static JSObject writeJsonFunc;
     protected static JSObject extendFunc;
     protected static JSObject scalarDefFunc;
@@ -118,6 +122,11 @@ public class ScriptUtils {
     public static void setParseJsonFunc(JSObject aValue) {
         assert parseJsonFunc == null;
         parseJsonFunc = aValue;
+    }
+
+    public static void setParseDatesFunc(JSObject aValue) {
+        assert parseDatesFunc == null;
+        parseDatesFunc = aValue;
     }
 
     public static void setWriteJsonFunc(JSObject aValue) {
@@ -226,7 +235,7 @@ public class ScriptUtils {
      */
     public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
         final Set<String> aliases = new HashSet<>();
-        if (moduleConstructor.getBody() != null) {
+        if (moduleConstructor != null && moduleConstructor.getBody() != null) {
             aliases.add(THIS_KEYWORD);
             LexicalContext lc = new LexicalContext();
             moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) {
@@ -252,12 +261,25 @@ public class ScriptUtils {
         assert parseJsonFunc != null : SCRIPT_NOT_INITIALIZED;
         return parseJsonFunc.call(null, new Object[]{json});
     }
+
+    public static Object parseDates(Object aObject) {
+        assert parseDatesFunc != null : SCRIPT_NOT_INITIALIZED;
+        return parseDatesFunc.call(null, new Object[]{aObject});
+    }
+
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script function are not initialized.";
 
     public static String toJson(Object aObj) {
-        return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
+        if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
+            aObj = null;
+        }
+        if (aObj instanceof JSObject || aObj instanceof String 
+                || aObj instanceof Number || aObj instanceof Boolean || aObj instanceof ScriptObject || aObj == null) {
+            return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
+        } else {
+            throw new IllegalArgumentException("Could not convert to JSON Java object!");
+        }    
     }
-
     public static void extend(JSObject aChild, JSObject aParent) {
         assert extendFunc != null : SCRIPT_NOT_INITIALIZED;
         extendFunc.call(null, new Object[]{aChild, aParent});
@@ -272,7 +294,7 @@ public class ScriptUtils {
         assert collectionDefFunc != null : SCRIPT_NOT_INITIALIZED;
         return (JSObject) collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName});
     }
-
+    
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});

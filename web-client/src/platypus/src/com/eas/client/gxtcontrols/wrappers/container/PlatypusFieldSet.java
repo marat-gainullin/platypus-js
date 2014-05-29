@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.Style.Side;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
 import com.sencha.gxt.widget.core.client.Component;

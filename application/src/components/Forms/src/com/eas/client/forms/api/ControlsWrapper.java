@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.api;
 
+import static com.eas.client.forms.api.Component.checkEventsProxy;
 import com.eas.client.forms.api.components.ComponentWrapper;
 import com.eas.client.forms.api.components.model.ModelComponentWrapper;
 import com.eas.client.forms.api.containers.ContainerWrapper;
@@ -184,6 +185,7 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
     public void visit(TextPaneDesignInfo epdi) {
         result = ComponentWrapper.wrap((JTextPane) target);
     }
+
     @Override
     public void visit(EditorPaneDesignInfo epdi) {
         result = ComponentWrapper.wrap((JEditorPane) target);

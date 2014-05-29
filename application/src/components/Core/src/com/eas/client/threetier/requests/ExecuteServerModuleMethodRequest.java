@@ -35,9 +35,6 @@ public class ExecuteServerModuleMethodRequest extends Request {
             throw new NullPointerException("No arguments.");
         }
         arguments = aArguments;
-        for (int i = 0; i < arguments.length; i++) {
-            arguments[i] = ScriptUtils.toJava(arguments[i]);
-        }
     }
 
     public Object[] getArguments() {
@@ -122,7 +119,7 @@ public class ExecuteServerModuleMethodRequest extends Request {
 
         public Response(long requestID, Object aResult) {
             super(requestID);
-            result = ScriptUtils.toJava(aResult);
+            result = aResult;
         }
 
         public Object getResult() {

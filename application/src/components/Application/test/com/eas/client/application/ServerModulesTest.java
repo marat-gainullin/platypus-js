@@ -45,7 +45,12 @@ public class ServerModulesTest {
         statefullTaskModule(ScriptRunnerSecurityTest.httpClient, 0);
         statefullTaskModule(ScriptRunnerSecurityTest.httpClient, 20);
     }
-
+    
+    @Test
+    public void statefullServerModule() throws Exception {
+        ApplicationScriptsTest.serverScriptTest("ServerModuleTests");
+    }
+    
     protected void statelessSessionModule(AppClient aClient) throws Exception {
         aClient.login(ScriptRunnerSecurityTest.USER1_NAME, ScriptRunnerSecurityTest.USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
         try {

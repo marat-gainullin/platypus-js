@@ -993,7 +993,10 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public void setRowsHeaderType(int aValue) {
-        rowsHeaderType = aValue;
+        if (rowsHeaderType != aValue) {
+            rowsHeaderType = aValue;
+            initializeDesign();
+        }
     }
 
     @Undesignable
@@ -1195,7 +1198,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 if (header.isEmpty() || header.get(0) == null || !(header.get(0) instanceof FixedDbGridColumn)) {
                     header.add(0, new FixedDbGridColumn(fixedWidth, rowsHeaderType));// Space enough for two icons
                 }
-                fixedColumns++;
             }
             fixedColumns = convertFixedColumns2Leaves(header, fixedColumns);
 
@@ -1513,6 +1515,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         if (res instanceof Component) {
                             ((Component) res).setBackground(DbGrid.this.getBackground());
                         }
+
                         return res;
                     }
                 };

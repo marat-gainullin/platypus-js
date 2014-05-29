@@ -295,7 +295,7 @@ public interface PlatypusProjectSettings {
     void setRunUser(String aValue);
 
     /**
-     * Sets if security realm to be configured on J2EE server startup.
+     * Sets if security realm is enabled.
      *
      * @param aValue true to enable configure security realm
      */

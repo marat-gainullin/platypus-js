@@ -5,8 +5,10 @@
 package com.eas.client.threetier.binary;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetReader;
+import com.bearsoft.rowset.serial.BinaryTags;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.ErrorResponse;
@@ -33,11 +35,14 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
+import com.eas.script.ScriptUtils;
 import com.eas.xml.dom.Source2XmlDom;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.internal.runtime.Undefined;
@@ -132,26 +137,11 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        final Iterator<ProtoNode> it = input.iterator();
-        ExecuteServerModuleMethodRequest.ArgumentType at = null;
-        while (it.hasNext()) {
-            final ProtoNode node = it.next();
-            switch (node.getNodeTag()) {
-                case RequestsTags.TAG_RESULT_TYPE:
-                    at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(node.getInt());
-                    break;
-                case RequestsTags.TAG_NULL_RESULT:
-                    rsp.setResult(null);
-                    break;
-                case RequestsTags.TAG_UNDEFINED_RESULT:
-                    rsp.setResult(Undefined.getUndefined());
-                    break;
-                case RequestsTags.TAG_RESULT_VALUE:
-                    assert at != null;
-                    rsp.setResult(PlatypusRequestReader.getValue(node, at));
-                    break;
-            }
+        Object result = null;
+        if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
+            result = ScriptUtils.parseDates(ScriptUtils.parseJson(input.getChild(RequestsTags.TAG_RESULT_VALUE).getString()));
         }
+        rsp.setResult(result);
     }
 
     @Override
@@ -165,19 +155,24 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(CreateServerModuleResponse rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        final Logger logger = Logger.getLogger(CreateServerModuleResponse.class.getName());
-        logger.log(Level.FINEST, "Response length = {0}", bytes.length);
-        if (logger.isLoggable(Level.FINEST)) {
-            final Iterator<ProtoNode> it = input.iterator();
-            while (it.hasNext()) {
-                final ProtoNode next = it.next();
-                logger.log(Level.FINEST, "Response Tag {0}", next.getNodeTag());
-            }
-        }
+        boolean permitted = false;
         if (!input.containsChild(RequestsTags.TAG_MODULE_ID)) {
             throw new ProtoReaderException("No module ID specified!");
         }
         rsp.setModuleName(input.getChild(RequestsTags.TAG_MODULE_ID).getString());
+        if (input.containsChild(RequestsTags.TAG_MODULE_PERMITTED)) {
+            permitted = input.getChild(RequestsTags.TAG_MODULE_PERMITTED).getBoolean();
+        }
+        rsp.setPermitted(permitted);
+        if (input.containsChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES)) {
+            Set<String> functionNames = new HashSet<>();
+            List<ProtoNode> functionNodes = input.getChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES).getChildren(RequestsTags.TAG_MODULE_FUNCTION_NAME);
+            for (ProtoNode functionNode : functionNodes) {
+                assert functionNode != null;
+                functionNames.add(functionNode.getString());
+            }
+            rsp.setFunctionsNames(functionNames);
+        }
     }
 
     @Override

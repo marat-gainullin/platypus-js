@@ -131,73 +131,13 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         writer.flush();
     }
 
-    public static void putValue(ProtoWriter writer, Object arg) throws IOException, Exception {
-        if (arg == null) {
-            writer.put(RequestsTags.TAG_NULL_ARGUMENT);
-        } else if (arg instanceof Undefined) {
-            writer.put(RequestsTags.TAG_UNDEFINED_ARGUMENT);
-        } else {
-            ExecuteServerModuleMethodRequest.ArgumentType at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(arg);
-            if (at == null) {
-                throw new IllegalArgumentException(arg.toString());
-            }
-            writer.put(RequestsTags.TAG_ARGUMENT_TYPE, at.getTypeID());
-            switch (at) {
-                case BIG_DECIMAL:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (BigDecimal) arg);
-                    break;
-                case BIG_INTEGER:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, new BigDecimal((BigInteger) arg));
-                    break;
-                case BOOLEAN:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Boolean) arg ? 1 : 0);
-                    break;
-                case BYTE:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Byte) arg);
-                    break;
-                case CHARACTER:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ((Character) arg).toString());
-                    break;
-                case DATE:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Date) arg);
-                    break;
-                case DOUBLE:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Double) arg);
-                    break;
-                case FLOAT:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ((Float) arg).doubleValue());
-                    break;
-                case INTEGER:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Integer) arg);
-                    break;
-                case LONG:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (Long) arg);
-                    break;
-                case SHORT:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ((Short) arg).intValue());
-                    break;
-                case STRING:
-                    writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (String) arg);
-                    break;
-                case OBJECT:
-                    if (arg instanceof Rowset) {
-                        RowsetJsonWriter jsonWriter = new RowsetJsonWriter((Rowset) arg);
-                        writer.put(RequestsTags.TAG_ARGUMENT_VALUE, jsonWriter.write());
-                    } else {
-                        writer.put(RequestsTags.TAG_ARGUMENT_VALUE, (String) ScriptUtils.toJson(arg));
-                    }
-                    break;
-            }
-        }
-    }
-
     @Override
     public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.put(RequestsTags.TAG_METHOD_NAME, rq.getMethodName());
         for (Object arg : rq.getArguments()) {
-            putValue(writer, arg);
+            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ScriptUtils.toJson(arg));
         }
         writer.flush();
     }

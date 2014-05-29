@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.SecuredJSConstructor;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
@@ -16,6 +17,7 @@ import java.security.AccessControlException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
@@ -44,52 +46,63 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
 
     @Override
     public Response handle2() throws Exception {
-        Session systemSession = getServerCore().getSessionManager().getSystemSession();
-        Session moduleSession = null;
         String moduleName = getRequest().getModuleName();
-        JSObject runner = getSession().getModule(moduleName);
-        if (runner == null) {
-            // It's seems client wants a background module.
-            // Let's try to look up it in system session.
-            runner = systemSession.getModule(getRequest().getModuleName());
-            if (runner != null) {
-                moduleSession = systemSession;
-            }
-        } else {
-            moduleSession = getSession();
+        if (moduleName == null || moduleName.isEmpty()) {
+            throw new Exception("Module name is missing. Unnamed server modules are not allowed.");
         }
-        if (runner == null) {
-            runner = CreateServerModuleRequestHandler.runModule(getServerCore().getDatabasesClient().getAppCache(), moduleName);
-            moduleSession = getSession();
+        String methodName = getRequest().getMethodName();
+        if (methodName == null || methodName.isEmpty()) {
+            throw new Exception("Module's method name is missing.");
         }
-        if (runner != null) {
-            assert moduleSession != null;
-            JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
-            assert jsConstr instanceof SecuredJSConstructor;
-            SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
-            if (!sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
-                throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
-            }
-            if (executeCallback != null) {
-                executeCallback.beforeExecute(runner);
-            }
-            Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
-            Object oFun = runner.getMember(getRequest().getMethodName());
-            if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                Object result = ScriptUtils.toJava(((JSObject) oFun).call(runner, ScriptUtils.toJs(getRequest().getArguments())));
-                if (executeCallback != null) {
-                    executeCallback.afterExecute(runner);
+        PlatypusScriptedResource.executeScriptResource(moduleName);
+        JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
+        if (jsConstr != null) {
+            if (jsConstr instanceof SecuredJSConstructor) {
+                SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
+                // Let's check the if module is resident
+                JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
+                if (moduleInstance != null) {
+                    // Resident module roles need to be checked against a current user.
+                    CreateServerModuleRequestHandler.checkPrincipalPermission(getServerCore(), sjsConstr.getModuleAllowedRoles(), moduleName);
+                } else {
+                    if (getSession().containsModule(moduleName)) {
+                        moduleInstance = getSession().getModule(moduleName);
+                    } else {
+                        if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                            if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
+                                moduleInstance = (JSObject) sjsConstr.newObject(new Object[]{});
+                                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1} on request {2}", new Object[]{getRequest().getModuleName(), moduleName, getRequest().getID()});
+                            } else {
+                                throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", moduleName));
+                            }
+                        } else {
+                            throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
+                        }
+                    }
                 }
-                if (moduleSession != systemSession
-                        && sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                    moduleSession.unregisterModule(moduleName);
+                if (moduleInstance != null) {
+                    if (executeCallback != null) {
+                        executeCallback.beforeExecute(moduleInstance);
+                    }
+                    Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
+                    Object oFun = moduleInstance.getMember(methodName);
+                    if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                        Object result = ((JSObject) oFun).call(moduleInstance, getRequest().getArguments());
+                        if (executeCallback != null) {
+                            executeCallback.afterExecute(moduleInstance);
+                        }
+                        return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
+                    } else {
+                        throw new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName()));
+                    }
+                } else {
+                    throw new Exception(String.format(MODULE_MISSING_MSG, getRequest().getModuleName()));
                 }
-                return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
             } else {
-                throw new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName()));
+                throw new AccessControlException(String.format("Access to unsecured module %s is denied.", moduleName));//NOI18N
             }
         } else {
-            throw new Exception(String.format(MODULE_MISSING_MSG, getRequest().getModuleName()));
+            throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName));
         }
     }
 

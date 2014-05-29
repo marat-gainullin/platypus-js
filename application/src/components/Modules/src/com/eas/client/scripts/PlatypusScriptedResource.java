@@ -7,6 +7,7 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.client.threetier.PlatypusClient;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -67,6 +68,18 @@ public class PlatypusScriptedResource implements HasPublished {
         principalHost = aPrincipalHost;
     }
 
+    /**
+     * Do not use. Only for tests.
+     * @param aClient
+     * @param aPrincipalHost
+     * @throws Exception 
+     */
+    public static void initForTests(Client aClient, PrincipalHost aPrincipalHost) throws Exception { 
+        client = aClient;
+        cache = client.getAppCache();
+        principalHost = aPrincipalHost;
+    }
+    
     /**
      * Gets an principal provider.
      *
@@ -295,6 +308,13 @@ public class PlatypusScriptedResource implements HasPublished {
 
     public static Client getClient() {
         return client;
+    }
+
+    public static PlatypusClient getPlatypusClient() {
+        if (client instanceof PlatypusClient) {
+            return (PlatypusClient)client;
+        }
+        return null;
     }
 
     private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {

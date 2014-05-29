@@ -6,8 +6,8 @@ import java.util.Set;
 public class CreateServerModuleResponse extends Response {
 
     private String moduleName;
-    private final Set<String> functionsNames;
-    private final boolean permitted;
+    private Set<String> functionsNames;
+    private boolean permitted;
 
     public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean isPermitted) {
         super(aRequestId);
@@ -27,9 +27,17 @@ public class CreateServerModuleResponse extends Response {
     public Set<String> getFunctionsNames() {
         return functionsNames;
     }
+    
+    public void setFunctionsNames(Set<String> aFuntionNames) {
+        functionsNames = aFuntionNames;
+    }
 
     public boolean isPermitted() {
         return permitted;
+    }
+    
+    public void setPermitted(boolean aPermitted) {
+        permitted = aPermitted;
     }
 
     @Override

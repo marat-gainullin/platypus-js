@@ -343,7 +343,7 @@ public class DatabaseMdCache implements DbMetadataCache {
                     String fName = colsRs.getString(JDBCCOLS_COLUMN_INDEX);
                     //String fDescription = colsRs.getString(JDBCCOLS_REMARKS_INDEX);
                     //Field field = new Field(fName, fDescription);
-                    Field field = new Field(fName);
+                    Field field = new Field(fName.toLowerCase());
                     field.setOriginalName(fName);
                     String rdbmsTypeName = colsRs.getString(JDBCCOLS_TYPE_NAME_INDEX);
                     Integer correctType = sqlDriver.getJdbcTypeByRDBMSTypename(rdbmsTypeName);
@@ -483,15 +483,6 @@ public class DatabaseMdCache implements DbMetadataCache {
             return tabledComments;
         }
 
-        /*
-         @Override
-         protected Fields cloneEntry(Fields source) {
-         if (source != null) {
-         return source.copy();
-         }
-         return null;
-         }
-         */
     }
 
     @Override
@@ -558,15 +549,5 @@ public class DatabaseMdCache implements DbMetadataCache {
             }
             return null;
         }
-
-        /*
-         @Override
-         protected DbTableIndexes cloneEntry(DbTableIndexes source) {
-         if (source != null) {
-         return source.copy();
-         }
-         return null;
-         }
-         */
     }
 }

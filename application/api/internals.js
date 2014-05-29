@@ -5,7 +5,7 @@
 (function() {
     var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
     ScriptUtils.setToPrimitiveFunc(function(aValue) {
-        if (aValue !== null && aValue.constructor !== null) {
+        if (aValue && aValue.constructor) {
             var cName = aValue.constructor.name;
             if (cName === 'Date') {
                 var dateClass = Java.type('java.util.Date');
@@ -37,6 +37,23 @@
             function(str) {
                 return JSON.parse(str);
             });
+
+    var parseDates = function(aObject) {
+        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
+            var timestamp = Date.parse(aObject);
+            if (!isNaN(timestamp)) {
+                return new Date(timestamp);
+            }
+        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+            for (var prop in aObject) {
+                aObject[prop] = parseDates(aObject[prop]);
+            }
+        }
+        return aObject;
+    };
+
+    ScriptUtils.setParseDatesFunc(parseDates);
+    
     ScriptUtils.setWriteJsonFunc(
             function(aObj) {
                 return JSON.stringify(aObj);

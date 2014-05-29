@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
@@ -159,45 +158,11 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         rq.setModuleName(input.getChild(RequestsTags.TAG_MODULE_NAME).getString());
     }
 
-    public static Object getValue(ProtoNode node, ExecuteServerModuleMethodRequest.ArgumentType at) throws ProtoReaderException {
-        switch (at) {
-            case BIG_DECIMAL:
-                return (node.getBigDecimal());
-            case BIG_INTEGER:
-                return (node.getBigDecimal().toBigInteger());
-            case BOOLEAN:
-                return (node.getInt() != 0);
-            case BYTE:
-                return (node.getByte());
-            case CHARACTER:
-                return (node.getString().charAt(0));
-            case DATE:
-                return (node.getDate());
-            case DOUBLE:
-                return (node.getDouble());
-            case FLOAT:
-                return ((float) node.getDouble());
-            case INTEGER:
-                return (node.getInt());
-            case LONG:
-                return (node.getLong());
-            case SHORT:
-                return ((short) node.getInt());
-            case STRING:
-                return (node.getString());
-            case OBJECT:
-                return ScriptUtils.parseJson(node.getString());
-            default:
-                throw new IllegalArgumentException();
-        }
-    }
-
     @Override
     public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         final Iterator<ProtoNode> it = input.iterator();
         final List<Object> args = new ArrayList<>();
-        ExecuteServerModuleMethodRequest.ArgumentType at = null;
         while (it.hasNext()) {
             final ProtoNode node = it.next();
             switch (node.getNodeTag()) {
@@ -207,18 +172,8 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                 case RequestsTags.TAG_METHOD_NAME:
                     rq.setMethodName(node.getString());
                     break;
-                case RequestsTags.TAG_NULL_ARGUMENT:
-                    args.add(null);
-                    break;
-                case RequestsTags.TAG_UNDEFINED_ARGUMENT:
-                    args.add(Undefined.getUndefined());
-                    break;
-                case RequestsTags.TAG_ARGUMENT_TYPE:
-                    at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(node.getInt());
-                    break;
                 case RequestsTags.TAG_ARGUMENT_VALUE: {
-                    assert at != null : "Argument type is not known";
-                    args.add(getValue(node, at));
+                    args.add(ScriptUtils.parseDates(ScriptUtils.parseJson(node.getString())));
                     break;
                 }
             }

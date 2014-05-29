@@ -35,7 +35,7 @@ public class CommonTypesEditor extends SelectIntEditor {
         int[] types = new int[typeIndexesList.size()];
         int i = 0;
         for (Integer e : typeIndexesList) {
-            types[i++] = e;
+            types[i++] = e.intValue();
         }
         String[] typeNames = new String[types.length];
         for (int j = 0; j < typeNames.length; j++) {

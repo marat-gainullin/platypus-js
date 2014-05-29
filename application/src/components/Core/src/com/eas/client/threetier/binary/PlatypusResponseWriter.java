@@ -30,6 +30,7 @@ import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
+import com.eas.script.ScriptUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -172,7 +173,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        PlatypusRequestWriter.putValue(writer, rsp.getResult());
+        writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
         writer.flush();
     }
 
@@ -188,6 +189,17 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(CreateServerModuleResponse rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_MODULE_ID, rsp.getModuleName());
+        writer.put(RequestsTags.TAG_MODULE_PERMITTED, rsp.isPermitted());
+        if (!rsp.getFunctionsNames().isEmpty()) {
+            ByteArrayOutputStream functions = new ByteArrayOutputStream();
+            ProtoWriter functionsWriter = new ProtoWriter(functions);
+            for (String functionName : rsp.getFunctionsNames()) {
+                functionsWriter.put(RequestsTags.TAG_MODULE_FUNCTION_NAME, functionName);
+            }
+            functionsWriter.flush();
+            writer.put(RequestsTags.TAG_MODULE_FUNCTION_NAMES);
+            writer.put(CoreTags.TAG_STREAM, functions);
+        }
         writer.flush();
     }
 
