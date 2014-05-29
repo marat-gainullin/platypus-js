@@ -202,7 +202,7 @@ public class Classes2Scripts {
                 .replace(DELEGATE_TAG, DELEGATE_OBJECT)
                 .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr())
                 .replace(MAX_ARGS_TAG, Integer.toString(ci.params.length))
-                .replace(PROPERTIES_TAG, getPropsAndMethodsPart(clazz, CONSTRUCTOR_IDENT_LEVEL));
+                .replace(PROPERTIES_TAG, getPropsAndMethodsPart(clazz, CONSTRUCTOR_IDENT_LEVEL + 1));
         return js;
     }
 
