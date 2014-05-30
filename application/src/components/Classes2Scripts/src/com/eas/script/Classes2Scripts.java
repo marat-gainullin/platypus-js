@@ -33,7 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The utility to convert JavaScript API classes with @ScritpFunction annotation
+ * The utility application to convert JavaScript API classes with @ScritpFunction annotation
  * to pure JavaScript objects.
  *
  * @author vv
