@@ -37,7 +37,7 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 
 /**
- *
+ * This class represents a JavaScript module completion context.
  * @author vv
  */
 public class ModuleCompletionContext extends CompletionContext {

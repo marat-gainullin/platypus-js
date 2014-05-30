@@ -12,7 +12,7 @@ import static com.eas.designer.application.module.completion.CompletionContext.a
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
- *
+ * A completion context for an data model entity row.
  * @author vv
  */
 public class EntityElementCompletionContext extends CompletionContext {

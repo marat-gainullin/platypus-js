@@ -7,7 +7,9 @@ package com.eas.designer.application.module.completion;
 import javax.swing.ImageIcon;
 
 /**
- *
+ * The class represents a special kind of property item in a completion
+ * pop-up list.
+ * 
  * @author mg
  */
 public class BeanCompletionItem extends JsCompletionItem {

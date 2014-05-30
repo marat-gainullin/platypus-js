@@ -25,6 +25,8 @@ import org.openide.ErrorManager;
 import org.openide.util.NbBundle;
 
 /**
+ * The class represents a JavaScript language element item in a completion
+ * pop-up list.
  *
  * @author mg
  */

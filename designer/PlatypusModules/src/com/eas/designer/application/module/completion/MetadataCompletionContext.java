@@ -10,7 +10,7 @@ import com.eas.designer.application.module.completion.CompletionPoint.Completion
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
- *
+ * A data model field data schema completion context. 
  * @author vv
  */
 public class MetadataCompletionContext extends CompletionContext {
