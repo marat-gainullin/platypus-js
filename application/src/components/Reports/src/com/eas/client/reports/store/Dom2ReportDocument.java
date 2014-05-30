@@ -12,7 +12,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.reports.Report;
+import com.eas.client.reports.ReportTemplate;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,22 +30,22 @@ public class Dom2ReportDocument {
         super();
     }
 
-    public static Report load(Client aClient, String aAppElementName, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public static ReportTemplate load(Client aClient, String aAppElementName, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         ApplicationElement appElement = aClient.getAppCache().get(aAppElementName);
         if (appElement.getType() == ClientConstants.ET_RESOURCE) {
             String format = aAppElementName.substring(aAppElementName.lastIndexOf('.') + 1, aAppElementName.length());
-            return new Report(appElement.getBinaryContent(), aModel, format);
+            return new ReportTemplate(appElement.getBinaryContent(), aModel, format);
         } else {
             return transform(appElement.getContent(), aModel);
         }
     }
 
-    public static Report transform(Document aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public static ReportTemplate transform(Document aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         Dom2ReportDocument dom2doc = new Dom2ReportDocument();
         return dom2doc.parseDom(aDocument, aModel);
     }
 
-    protected Report parseDom(Document aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    protected ReportTemplate parseDom(Document aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         byte[] template = null;
         String format = null;
         Element root = aDocument.getDocumentElement();
@@ -61,6 +61,6 @@ public class Dom2ReportDocument {
                 }
             }
         }
-        return new Report(template, aModel, format);
+        return new ReportTemplate(template, aModel, format);
     }
 }

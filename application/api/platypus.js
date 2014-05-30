@@ -122,14 +122,8 @@ P.loadReport = function(aName, aModel, aTarget) {
     var Loader = Java.type('com.eas.client.reports.store.Dom2ReportDocument');
     var report = Loader.load(Executor.getClient(), aName, aModel.unwrap());
     // publish
-    publishTo.show = function() {
-        report.show();
-    };
-    publishTo.print = function() {
-        report.print();
-    };
-    publishTo.save = function(aPath) {
-        return report.save(aPath);
+    publishTo.generateReport = function() {
+        report.generateReport();
     };
     return publishTo;
 };
@@ -167,9 +161,9 @@ P.ServerModule = function(aModuleName) {
                         }
                         var result = client.executeServerModuleMethod(aModuleName, aFunctionName, params);
                         if (onSuccess) {
-                            onSuccess(result);
+                            onSuccess(result && result.getPublished ? result.getPublished() : result);
                         } else {
-                            return result;
+                            return result && result.getPublished ? result.getPublished() : result;
                         }
                     } catch (e) {
                         if (onFailure) {

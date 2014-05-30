@@ -12,15 +12,11 @@ import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.wrappers.jdbc.ResultSetImpl;
-import com.eas.client.ClientConstants;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
-import java.awt.Desktop;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import jdk.nashorn.api.scripting.JSObject;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.*;
@@ -40,7 +35,7 @@ import org.apache.poi.ss.usermodel.Workbook;
  *
  * @author mg
  */
-public class ExcelReport {
+public class ExelTemplate {
 
     public static final String FIXED_SIZE_COLLECTION_FLAG_NAME = "fixed";
     public static final String REPORT_DYNA_CLASS_PREFIX = "PlatypusReportClass_";
@@ -56,16 +51,16 @@ public class ExcelReport {
     /**
      * Constructor for such use case: create instacne to edit the template.
      */
-    public ExcelReport() {
+    public ExelTemplate() {
         super();
     }
 
-    public ExcelReport(String aFormat) {
+    public ExelTemplate(String aFormat) {
         super();
         format = aFormat;
     }
 
-    public ExcelReport(ApplicationModel<?, ?, ?, ?> aModel, JSObject aScriptData, String aFormat) {
+    public ExelTemplate(ApplicationModel<?, ?, ?, ?> aModel, JSObject aScriptData, String aFormat) {
         super();
         model = aModel;
         format = aFormat;
@@ -94,47 +89,11 @@ public class ExcelReport {
         }
     }
 
-    public void execute(String aPath2Save) throws Exception {
-        if (aPath2Save != null) {
-            Workbook workbook = executeReport();
-            saveReport(workbook, aPath2Save);
-        } else {
-            throw new Exception("Path is absent. Can't execute a report");
-        }
-    }
-
-    public void show() throws Exception {
-        Workbook workbook = executeReport();
-        String lPath2Save = generateReportPath(format);
-        saveReport(workbook, lPath2Save);
-        File f = new File(lPath2Save);
-        f.deleteOnExit();
-        shellShowReport(lPath2Save);
-    }
-
-    public void save(String aFileName) throws Exception {
-        if (aFileName != null && !aFileName.isEmpty()) {
-            Workbook workbook = executeReport();
-            saveReport(workbook, aFileName);
-        } else {
-            throw new Exception("Report filename could not be empty.");
-        }
-    }
-
-    public void print() throws Exception {
-        Workbook workbook = executeReport();
-        String lPath2Save = generateReportPath(format);
-        saveReport(workbook, lPath2Save);
-        File f = new File(lPath2Save);
-        f.deleteOnExit();
-        shellPrintReport(lPath2Save);
-    }
-
     public void edit() throws Exception {
         CompactBlob template2Edit = template;
         if (template2Edit != null) {
             if (templatePath == null) {
-                templatePath = generateReportPath(format);
+                templatePath = Report.generateReportPath(format);
             }
             if (templatePath != null && !templatePath.isEmpty()) {
                 try {
@@ -151,71 +110,13 @@ public class ExcelReport {
                                 out.flush();
                             }
                         }
-                        shellShowReport(templatePath);
+                        Report.shellShowReport(templatePath);
                     }
                 } catch (IOException ex) {
-                    Logger.getLogger(ExcelReport.class.getName()).log(Level.SEVERE, "It seems that file is already opened. May be editing?");
+                    Logger.getLogger(ExelTemplate.class.getName()).log(Level.SEVERE, "It seems that file is already opened. May be editing?", ex);
                 }
             }
             invalidateTemplate();
-        }
-    }
-
-    protected void shellShowReport(String savedPath) throws IOException {
-        File f = new File(savedPath);
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-            Desktop desk = Desktop.getDesktop();
-            f.deleteOnExit();
-            desk.open(f);
-        } else {
-            final String pathReport = Preferences.userRoot().node(SettingsConstants.CLIENT_SETTINGS_NODE).get(SettingsConstants.REPORT_RUN_COMMAND, "");
-            Runtime.getRuntime().exec(String.format(pathReport, savedPath));
-        }
-    }
-
-    protected void shellPrintReport(String savedPath) throws IOException {
-        File f = new File(savedPath);
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.PRINT)) {
-            Desktop desk = Desktop.getDesktop();
-            f.deleteOnExit();
-            desk.print(f);
-        } else {
-            final String pathReport = Preferences.userRoot().node(SettingsConstants.CLIENT_SETTINGS_NODE).get(SettingsConstants.REPORT_PRINT_COMMAND, "");
-            Runtime.getRuntime().exec(String.format(pathReport, savedPath));
-        }
-    }
-
-    protected void saveReport(Workbook workbook, String aPath2Save) throws IOException {
-        if (aPath2Save != null) {
-            if (workbook != null) {
-                File f = new File(aPath2Save);
-                if (!f.exists()) {
-                    f.createNewFile();
-                }
-                try (FileOutputStream osf = new FileOutputStream(f)) {
-                    workbook.write(osf);
-                    osf.flush();
-                }
-            }
-        } else {
-            throw new IOException("Path is absent.");
-        }
-    }
-
-    protected void saveReport(byte[] workbook, String aPath2Save) throws IOException {
-        if (aPath2Save != null) {
-            if (workbook != null) {
-                File f = new File(aPath2Save);
-                if (!f.exists()) {
-                    f.createNewFile();
-                }
-                try (FileOutputStream osf = new FileOutputStream(f)) {
-                    osf.write(workbook);
-                    osf.flush();
-                }
-            }
-        } else {
-            throw new IOException("Path is absent.");
         }
     }
 
@@ -255,15 +156,14 @@ public class ExcelReport {
                 return wrapScriptArray(jsSubject);
             } else {
                 List<DynaProperty> props = new ArrayList<>();
-                for (String subjectKey : jsSubject.keySet()) {
-                    DynaProperty dp = new DynaProperty(subjectKey);
+                jsSubject.keySet().stream().map((subjectKey) -> new DynaProperty(subjectKey)).forEach((dp) -> {
                     props.add(dp);
-                }
+                });
                 DynaClass subjectClass = new BasicDynaClass(REPORT_DYNA_CLASS_PREFIX + String.valueOf(IDGenerator.genID()), null, props.toArray(new DynaProperty[]{}));
                 BasicDynaBean bean = new BasicDynaBean(subjectClass);
-                for (DynaProperty prop : props) {
+                props.stream().forEach((prop) -> {
                     bean.set(prop.getName(), wrapScriptableObject(jsSubject.getMember(prop.getName())));
-                }
+                });
                 return bean;
             }
         } else {
@@ -284,7 +184,7 @@ public class ExcelReport {
     private void generateDataNamedMap(XLSTransformer aTransformer) throws Exception {
         generated = new HashMap<>();
         if (scriptData != null) {
-            for (String sid : scriptData.keySet()) {
+            scriptData.keySet().stream().forEach((sid) -> {
                 Object subject = scriptData.getMember(sid);
                 if (isPrimitive(subject)) {// Atomic values
                     generated.put(sid, ScriptUtils.toJava(subject));
@@ -302,7 +202,7 @@ public class ExcelReport {
                         generated.put((String) sid, wrapped);
                     }
                 }
-            }
+            });
         }
         if (model != null) {
             for (ApplicationEntity<?, ?, ?> entity : model.getAllEntities().values()) {
@@ -322,7 +222,7 @@ public class ExcelReport {
                                     rowset.first();
                                 }
                             } catch (InvalidCursorPositionException | SQLException ex) {
-                                Logger.getLogger(ExcelReport.class.getName()).severe(ex.getMessage());
+                                Logger.getLogger(ExelTemplate.class.getName()).severe(ex.getMessage());
                             }
                         }
                     }
@@ -331,24 +231,7 @@ public class ExcelReport {
         }
     }
 
-    public String generateReportPath(String aFormat) {
-        String reportPath = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
-        if (!reportPath.endsWith(File.separator)) {
-            reportPath += File.separator;
-        }
-        reportPath += ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME;
-        File newDir = new File(reportPath);
-        if (!newDir.exists()) {
-            newDir.mkdir();
-        }
-        reportPath += File.separator + "reports";
-        newDir = new File(reportPath);
-        if (!newDir.exists()) {
-            newDir.mkdir();
-        }
-        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + "." + (aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
-        return reportPath;
-    }
+    
 
     private boolean updateTemplateFromFile() throws Exception {
         if (templatePath != null && !templatePath.isEmpty()) {

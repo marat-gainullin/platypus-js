@@ -28,6 +28,7 @@ import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.client.threetier.requests.StartAppElementRequest;
+import com.eas.client.reports.Report;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
@@ -173,7 +174,11 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+        if (rsp.getResult() instanceof Report) {
+
+        } else {
+            writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+        }
         writer.flush();
     }
 

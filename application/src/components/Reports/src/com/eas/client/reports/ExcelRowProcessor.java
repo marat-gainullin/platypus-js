@@ -19,7 +19,7 @@ import org.apache.poi.ss.usermodel.Workbook;
  */
 public class ExcelRowProcessor implements RowProcessor {
 
-    private static String TEMPLATE_CELL = "cellTemplateLabel";
+    private static final String TEMPLATE_CELL = "cellTemplateLabel";
 
     @Override
     public void processRow(Row row, Map namedCells) {

@@ -5,10 +5,8 @@
 package com.eas.client.threetier.binary;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetReader;
-import com.bearsoft.rowset.serial.BinaryTags;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.ErrorResponse;
@@ -40,12 +38,8 @@ import com.eas.xml.dom.Source2XmlDom;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
