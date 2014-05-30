@@ -44,7 +44,7 @@ public class Locator extends HashOrderer {
 
 	/**
      * Returns <code>Row</code> object from rowset on witch this locator was created
-     * @param aIndex Index of row in the rows subset vector. Index is 0-based
+     * @param aIndex Index of row in the subset of found rows. Index is 0 - based.
      * @return A <code>Row</code> object.
      */
     public Row getRow(int aIndex) throws IllegalStateException {

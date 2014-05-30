@@ -9,14 +9,14 @@
  */
 package com.eas.client.queries;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetCallbackAdapter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
 
@@ -33,15 +33,15 @@ public class Query {
     protected FlowProvider flow;
     protected AppClient client;
     // parameters propagation. ParamName - DsName, ParamName
-    protected Map<String, Map<String, String>> parametersBinds = new HashMap();
+    protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected Fields fields = new Fields();
     protected Parameters params = new Parameters();
     protected String title = null;
     protected String appElementId;
     protected boolean procedure = false;
     protected boolean manual = false;
-    protected Set<String> readRoles = new HashSet();
-    protected Set<String> writeRoles = new HashSet();
+    protected Set<String> readRoles = new HashSet<>();
+    protected Set<String> writeRoles = new HashSet<>();
 
     /**
      * Creates an instance of Query with empty SQL query text and parameters.
@@ -99,7 +99,7 @@ public class Query {
                                         if (lpEntries != null) {
                                             Iterator<Entry<String, String>> lpEntIt = lpEntries.iterator();
                                             if (lpEntIt != null) {
-                                                Map<String, String> lparamBinds = new HashMap();
+                                                Map<String, String> lparamBinds = new HashMap<>();
                                                 parametersBinds.put(new String(parName.toCharArray()), lparamBinds);
                                                 while (lpEntIt.hasNext()) {
                                                     Entry<String, String> lpEnt = lpEntIt.next();

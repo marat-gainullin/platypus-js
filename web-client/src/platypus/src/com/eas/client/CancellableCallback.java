@@ -4,6 +4,8 @@
  */
 package com.eas.client;
 
+import com.bearsoft.rowset.Cancellable;
+
 /**
  *
  * @author mg

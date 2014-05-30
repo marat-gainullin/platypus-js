@@ -13,7 +13,6 @@ import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
-import com.eas.client.Utils;
 import com.google.gwt.core.client.JsDate;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;

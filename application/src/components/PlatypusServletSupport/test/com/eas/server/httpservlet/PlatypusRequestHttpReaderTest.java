@@ -5,6 +5,7 @@
 package com.eas.server.httpservlet;
 
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.EntitiesHost;
@@ -12,8 +13,8 @@ import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import com.eas.client.threetier.RowsetJsonConstants;
+import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -84,17 +85,17 @@ public class PlatypusRequestHttpReaderTest {
             }
         });
 
-        Change.Value key1 = new Change.Value("key1", 78.9f, DataTypeInfo.FLOAT);
-        Change.Value key2 = new Change.Value("key2", "key2Value", DataTypeInfo.CHAR);
-        Change.Value[] keys = new Change.Value[]{key1, key2};
+        ChangeValue key1 = new ChangeValue("key1", 78.9f, DataTypeInfo.FLOAT);
+        ChangeValue key2 = new ChangeValue("key2", "key2Value", DataTypeInfo.CHAR);
+        ChangeValue[] keys = new ChangeValue[]{key1, key2};
 
         Date date = new Date(1346067735514L);
-        Change.Value data1 = new Change.Value("data\"\"1", 56, DataTypeInfo.INTEGER);
-        Change.Value data2 = new Change.Value("data2", "data2Value", DataTypeInfo.VARCHAR);
-        Change.Value data3 = new Change.Value("da\"ta3", true, DataTypeInfo.BOOLEAN);
-        Change.Value data4 = new Change.Value("data4", false, DataTypeInfo.BIT);
-        Change.Value data5 = new Change.Value("data5", date, DataTypeInfo.TIMESTAMP);
-        Change.Value[] data = new Change.Value[]{data1, data2, data3, data4, data5};
+        ChangeValue data1 = new ChangeValue("data\"\"1", 56, DataTypeInfo.INTEGER);
+        ChangeValue data2 = new ChangeValue("data2", "data2Value", DataTypeInfo.VARCHAR);
+        ChangeValue data3 = new ChangeValue("da\"ta3", true, DataTypeInfo.BOOLEAN);
+        ChangeValue data4 = new ChangeValue("data4", false, DataTypeInfo.BIT);
+        ChangeValue data5 = new ChangeValue("data5", date, DataTypeInfo.TIMESTAMP);
+        ChangeValue[] data = new ChangeValue[]{data1, data2, data3, data4, data5};
 
 
         assertNotNull(changes);
@@ -136,7 +137,7 @@ public class PlatypusRequestHttpReaderTest {
         }
     }
 
-    protected static void compareValues(Change.Value v1, Change.Value v2) {
+    protected static void compareValues(ChangeValue v1, ChangeValue v2) {
         assertEquals(v1.name, v2.name);
         assertEquals(v1.type.getSqlType(), v2.type.getSqlType());
         assertEquals(v1.type.getSqlTypeName(), v2.type.getSqlTypeName());

@@ -1,7 +1,7 @@
 package com.eas.client.model.interacting.quering;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.Utils.JsObject;
+import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;

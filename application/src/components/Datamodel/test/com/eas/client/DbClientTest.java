@@ -72,82 +72,79 @@ public class DbClientTest {
             changeLogs.put(null, commonLog);
 
             final DbClient dbClient = resource.getClient();
-            Runnable clientRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        while (!Thread.interrupted()) {
-
-                            Random rnd = new Random();
-                            rnd.setSeed(System.currentTimeMillis());
-                            int due = rnd.nextInt(10);
-                            try {
-                                Thread.sleep(due);
-                            } catch (InterruptedException ex) {
-                                break;
-                            }
-                            SqlCompiledQuery query00 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F1");
-                            Rowset rowset00 = query00.executeQuery();
-                            rowset00.setFlowProvider(new DelegatingFlowProvider(rowset00.getFlowProvider()) {
-
-                                @Override
-                                public List<Change> getChangeLog() {
-                                    return commonLog;
-                                }
-
-                            });
-                            rowset00.refresh();
-                            SqlCompiledQuery query0 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F2");
-                            Rowset rowset0 = query0.executeQuery();
-                            rowset0.setFlowProvider(new DelegatingFlowProvider(rowset0.getFlowProvider()) {
-
-                                @Override
-                                public List<Change> getChangeLog() {
-                                    return commonLog;
-                                }
-
-                            });
-                            rowset0.refresh();
-                            SqlCompiledQuery query = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.ID");
-                            query.setEntityId("TABLE1");
-                            Rowset rowset = query.executeQuery();
-                            rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
-
-                                @Override
-                                public List<Change> getChangeLog() {
-                                    return commonLog;
-                                }
-
-                            });
-                            rowset.getFields().get("ID").setPk(true);
-                            assertNotNull(rowset.getFlowProvider());
-                            assertTrue(rowset.getFlowProvider() instanceof DatabaseFlowProvider);
-                            rowset.getFields().get(1).setPk(true);
-                            assertTrue(rowset.size() > 0);
-                            rowset.beforeFirst();
-                            boolean rowMet = false;
-                            int newValue = (new Random()).nextInt();
-                            while (rowset.next()) {
-                                Integer id = rowset.getInt(rowset.getFields().find("id"));
-                                assertNotNull(id);
-                                if (id == 2) {
-                                    rowMet = true;
-                                    rowset.updateObject(rowset.getFields().find("f3"), newValue);
-                                }
-                            }
-                            assertTrue(rowMet);
-                            dbClient.commit(changeLogs);
-                            assertTrue(commonLog.isEmpty());
-                            dbClient.dbTableChanged(null, "eAs", "test_fieldsAdding");
+            Runnable clientRunnable = () -> {
+                try {
+                    while (!Thread.interrupted()) {
+                        
+                        Random rnd = new Random();
+                        rnd.setSeed(System.currentTimeMillis());
+                        int due = rnd.nextInt(10);
+                        try {
+                            Thread.sleep(due);
+                        } catch (InterruptedException ex) {
+                            break;
                         }
-
-                    } catch (Exception ex) {
-                        boolean sleepIterrupted = (ex instanceof InterruptedException)
-                                || ((ex instanceof SQLException) && ((SQLException) ex).getCause() instanceof InterruptedException);
-                        if (!sleepIterrupted) {
-                            failedException = ex;
-                            Logger.getLogger(DbClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                        SqlCompiledQuery query00 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F1");
+                        Rowset rowset00 = query00.executeQuery();
+                        rowset00.setFlowProvider(new DelegatingFlowProvider(rowset00.getFlowProvider()) {
+                            
+                            @Override
+                            public List<Change> getChangeLog() {
+                                return commonLog;
+                            }
+                            
+                        });
+                        rowset00.refresh();
+                        SqlCompiledQuery query0 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F2");
+                        Rowset rowset0 = query0.executeQuery();
+                        rowset0.setFlowProvider(new DelegatingFlowProvider(rowset0.getFlowProvider()) {
+                            
+                            @Override
+                            public List<Change> getChangeLog() {
+                                return commonLog;
+                            }
+                            
+                        });
+                        rowset0.refresh();
+                        SqlCompiledQuery query = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.ID");
+                        query.setEntityId("TABLE1");
+                        Rowset rowset = query.executeQuery();
+                        rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
+                            
+                            @Override
+                            public List<Change> getChangeLog() {
+                                return commonLog;
+                            }
+                            
+                        });
+                        rowset.getFields().get("ID").setPk(true);
+                        assertNotNull(rowset.getFlowProvider());
+                        assertTrue(rowset.getFlowProvider() instanceof DatabaseFlowProvider);
+                        rowset.getFields().get(1).setPk(true);
+                        assertTrue(rowset.size() > 0);
+                        rowset.beforeFirst();
+                        boolean rowMet = false;
+                        int newValue = (new Random()).nextInt();
+                        while (rowset.next()) {
+                            Integer id = rowset.getInt(rowset.getFields().find("id"));
+                            assertNotNull(id);
+                            if (id == 2) {
+                                rowMet = true;
+                                rowset.updateObject(rowset.getFields().find("f3"), newValue);
+                            }
                         }
+                        assertTrue(rowMet);
+                        dbClient.commit(changeLogs);
+                        assertTrue(commonLog.isEmpty());
+                        dbClient.dbTableChanged(null, "eAs", "test_fieldsAdding");
+                    }
+                    
+                } catch (Exception ex) {
+                    boolean sleepIterrupted = (ex instanceof InterruptedException)
+                            || ((ex instanceof SQLException) && ((SQLException) ex).getCause() instanceof InterruptedException);
+                    if (!sleepIterrupted) {
+                        failedException = ex;
+                        Logger.getLogger(DbClientTest.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             };

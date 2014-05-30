@@ -6,12 +6,12 @@ package com.bearsoft.rowset.dataflow;
 
 import java.util.List;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 
 /**
  * This interface is intended to serve as base contract for data quering/reading/achieving and
