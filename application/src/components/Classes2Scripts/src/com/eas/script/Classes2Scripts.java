@@ -76,7 +76,10 @@ public class Classes2Scripts {
     private static final String JS_DOC_TEMPLATE = "/**\n"//NOI18N
             + "* %s\n"//NOI18N
             + "*/";//NOI18N
-
+    
+    private static final String DEPS_HEADER = "/**\n"//NOI18N
+            + "* Contains the basic dependencies loading.\n"//NOI18N
+            + "*/\n";//NOI18N
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -232,22 +235,39 @@ public class Classes2Scripts {
     }
 
     private String getDepsJsContent() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(DEPS_HEADER);
+        String dir = "";
         for (String path : depsPaths) {
+            String pathDir = pathRootDir(path);
+            if (dir != null && pathDir == null 
+                    || dir == null && pathDir != null
+                    || !dir.equals(pathDir)) {
+                sb.append("\n");
+            }
+            dir = pathDir;
             sb.append(String.format("load(%s);\n", path));
         }
         return sb.toString();
     }
 
+    private static String pathRootDir(String path) {
+        String[] pathElements = path.split("/");
+        if (pathElements.length > 0) {
+            return path.split("/")[0];
+        } else {
+            return null;
+        }
+    }
+
     private static String getRelativePath(File base, File file) {
         Path pathAbsolute = file.toPath();
         Path pathBase = base.toPath();
-        return pathBase.relativize(pathAbsolute).toString();
+        return pathBase.relativize(pathAbsolute).toString().replace("\\", "/");
     }
 
     private static void checkForHasPublised(Class clazz) {
         if (!HasPublished.class.isAssignableFrom(clazz)) {
-            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "=======================================  HasPublished iterface is not implemented: {0}", clazz.getName());
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "HasPublished iterface is not implemented: {0}", clazz.getName());
         }
     }
 
@@ -257,7 +277,7 @@ public class Classes2Scripts {
                 return;
             }
         }
-        Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "=======================================  setPublisher static method is not implemented: {0}", clazz.getName());
+        Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "setPublisher static method is not implemented: {0}", clazz.getName());
     }
 
     private static String getConstructorJsDoc(FunctionInfo ci) {
