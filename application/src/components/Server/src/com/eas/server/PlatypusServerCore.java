@@ -42,6 +42,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
     protected static PlatypusServerCore instance;
 
     public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, Set<String> aTasks, String aStartAppElementId) throws Exception {
+        return getInstance(aApplicationUrl, aDefaultDatasourceName, aTasks, aStartAppElementId, null);
+    }
+    
+    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, Set<String> aTasks, String aStartAppElementId, String aAppCacheBasePath) throws Exception {
         ScriptUtils.init();
         if (instance == null) {
             final Set<String> tasks = new HashSet<>();
@@ -51,7 +55,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
             ScriptedDatabasesClient serverCoreDbClient;
             if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
                 if (aApplicationUrl.startsWith("jndi")) {
-                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true);
+                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl, aAppCacheBasePath), aDefaultDatasourceName, true);
                 } else {// file://
                     File f = new File(new URI(aApplicationUrl));
                     if (f.exists() && f.isDirectory()) {
@@ -139,7 +143,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
 
     /**
      * WARNING!!! This method executes a method with system permissions! You
-     * should think twice befoce calling it i your code.
+     * should think twice before calling it in your code.
      *
      * @param aModuleName
      * @param aMethodName

@@ -4,8 +4,6 @@
  */
 package com.eas.client.login;
 
-import com.eas.client.login.PlatypusPrincipal;
-
 /**
  *
  * @author vv

@@ -7,6 +7,7 @@
  */
 package com.eas.client.reports;
 
+import com.eas.client.report.Report;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
@@ -42,8 +43,6 @@ public class ExelTemplate {
     protected ApplicationModel<?, ?, ?, ?> model;
     protected JSObject scriptData;
     protected CompactBlob template;
-    protected boolean validTemplate = true;
-    protected boolean templateModified;
     protected String templatePath;
     protected String format;
     protected Map<String, Object> generated;
@@ -76,50 +75,16 @@ public class ExelTemplate {
     }
 
     public CompactBlob getTemplate() throws Exception {
-        validateTemplate();
         return template;
     }
 
     public void setTemplate(CompactBlob aTemplate) {
         if (template != aTemplate) {
             template = aTemplate;
-            validTemplate = true;
             templatePath = null;
-            templateModified = true;
         }
     }
-
-    public void edit() throws Exception {
-        CompactBlob template2Edit = template;
-        if (template2Edit != null) {
-            if (templatePath == null) {
-                templatePath = Report.generateReportPath(format);
-            }
-            if (templatePath != null && !templatePath.isEmpty()) {
-                try {
-                    File f = new File(templatePath);
-                    if (canCreateTemplateFile()) {
-                        if (f.exists()) {
-                            f.delete();
-                        }
-                        f.createNewFile();
-                        f.deleteOnExit();
-                        if (template2Edit.length() > 0) {
-                            try (OutputStream out = new FileOutputStream(f)) {
-                                out.write(template2Edit.getBytes(1, (int) template2Edit.length()));
-                                out.flush();
-                            }
-                        }
-                        Report.shellShowReport(templatePath);
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(ExelTemplate.class.getName()).log(Level.SEVERE, "It seems that file is already opened. May be editing?", ex);
-                }
-            }
-            invalidateTemplate();
-        }
-    }
-
+    
     public byte[] create() throws Exception {
         Workbook workbook = executeReport();
         ByteArrayOutputStream st = new ByteArrayOutputStream();
@@ -229,70 +194,5 @@ public class ExelTemplate {
                 }
             }
         }
-    }
-
-    
-
-    private boolean updateTemplateFromFile() throws Exception {
-        if (templatePath != null && !templatePath.isEmpty()) {
-            File f = new File(templatePath);
-            if (f.exists() && canCreateTemplateFile()) {
-                try (InputStream is = new FileInputStream(f)) {
-                    byte[] bytes = BinaryUtils.readStream(is, -1);
-                    template = new CompactBlob(bytes);
-                    templateModified = true;
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void invalidateTemplate() {
-        validTemplate = false;
-    }
-
-    public void validateTemplate() throws Exception {
-        if (!validTemplate && updateTemplateFromFile()) {
-            validTemplate = true;
-            templatePath = null;
-        }
-    }
-
-    public boolean isTemplateValid() {
-        return validTemplate;
-    }
-
-    public boolean isTemplateModified() {
-        return templateModified;
-    }
-
-    public void setTemplateModified(boolean aValue) {
-        templateModified = aValue;
-    }
-
-    protected boolean canCreateTemplateFile() {
-        assert templatePath != null;
-        File file = new File(templatePath);
-        if (file.exists()) {
-            String path = file.getPath();
-            String fileName = file.getName();
-            path = path.substring(0, path.length() - fileName.length());
-            File fCandidate1 = new File(path + ".~lock." + fileName + "#");// open office
-            File fCandidate2 = new File(path + "~$" + fileName); // microsoft office
-            return !fCandidate1.exists() && !fCandidate2.exists() && checkWriteness(templatePath);
-        } else {
-            return true;
-        }
-    }
-
-    protected boolean checkWriteness(String aFileName) {
-        File file = new File(aFileName);
-        File file1 = new File(aFileName + "_test");
-        boolean renamed = file.renameTo(file1);
-        if (renamed) {
-            file1.renameTo(file);
-        }
-        return renamed;
     }
 }

@@ -7,6 +7,8 @@ package com.eas.client.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
@@ -14,8 +16,6 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 
 /**
  * 

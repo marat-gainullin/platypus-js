@@ -78,7 +78,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
             if (appElement.getType() == ClientConstants.ET_RESOURCE) {
                 return basePath + File.separator + aName.replace('/', File.separatorChar);
             } else if (appElement.isModule()) {
-                return generateAppElementPath(aName) + File.separator + aName + ".js";
+                return generateAppElementPath(aName) + File.separator + appElement.getName() + ".js";
             }
         }
         return "";

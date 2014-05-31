@@ -213,6 +213,7 @@
                 <package>com.eas.client.model.store</package>
                 <package>com.eas.client.model.visitors</package>
                 <package>com.eas.client.queries</package>
+                <package>com.eas.client.report</package>
                 <package>com.eas.client.reports</package>
                 <package>com.eas.client.resourcepool</package>
                 <package>com.eas.client.scripts</package>

@@ -7,7 +7,7 @@ package com.eas.util;
 import java.io.*;
 
 /**
- *
+ * Common operations with files.
  * @author vv
  */
 public class FileUtils {

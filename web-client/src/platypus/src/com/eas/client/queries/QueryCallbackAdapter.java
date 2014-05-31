@@ -1,6 +1,6 @@
 package com.eas.client.queries;
 
-import com.eas.client.Callback;
+import com.bearsoft.rowset.Callback;
 
 public abstract class QueryCallbackAdapter implements Callback<Query>{
 

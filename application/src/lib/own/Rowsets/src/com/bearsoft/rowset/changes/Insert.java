@@ -12,7 +12,7 @@ import com.eas.script.ScriptFunction;
  */
 public class Insert extends Change {
 
-    public Value[] data;
+    public ChangeValue[] data;
 
     public Insert(String aEntityId) {
         super(aEntityId);
@@ -24,7 +24,7 @@ public class Insert extends Change {
     }
 
     @ScriptFunction(jsDoc = "Data that will be inserted.")
-    public Value[] getData() {
+    public ChangeValue[] getData() {
         return data;
     }
 }

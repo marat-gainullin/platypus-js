@@ -12,8 +12,8 @@ import com.eas.script.ScriptFunction;
  */
 public class Update extends Change {
 
-    public Value[] keys;
-    public Value[] data;
+    public ChangeValue[] keys;
+    public ChangeValue[] data;
 
     public Update(String aEntityId) {
         super(aEntityId);
@@ -25,12 +25,12 @@ public class Update extends Change {
     }
 
     @ScriptFunction(jsDoc = "Keys used for indentifying data changes within a target datasource")
-    public Value[] getKeys() {
+    public ChangeValue[] getKeys() {
         return keys;
     }
 
     @ScriptFunction(jsDoc = "Data to be applied within a target datasource")
-    public Value[] getData() {
+    public ChangeValue[] getData() {
         return data;
     }
 }

@@ -6,6 +6,7 @@ package com.eas.client.queries;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.RowsetException;
@@ -193,10 +194,10 @@ public class SqlCompiledQuery {
     public void enqueueUpdate() throws Exception {
         Command command = new Command(entityId);
         command.command = sqlClause;
-        command.parameters = new Change.Value[parameters.getParametersCount()];
+        command.parameters = new ChangeValue[parameters.getParametersCount()];
         for (int i = 0; i < command.parameters.length; i++) {
             Parameter param = parameters.get(i + 1);
-            command.parameters[i] = new Change.Value(param.getName(), param.getValue(), param.getTypeInfo());
+            command.parameters[i] = new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo());
         }
         flow.getChangeLog().add(command);
     }

@@ -116,14 +116,14 @@ P.loadForm = function(aName, aModel, aTarget) {
     return publishTo;
 };
 
-P.loadReport = function(aName, aModel, aTarget) {
+P.loadTemplate = function(aName, aModel, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
     var Loader = Java.type('com.eas.client.reports.store.Dom2ReportDocument');
-    var report = Loader.load(Executor.getClient(), aName, aModel.unwrap());
+    var template = Loader.load(Executor.getClient(), aName, aModel.unwrap());
     // publish
     publishTo.generateReport = function() {
-        report.generateReport();
+        template.generateReport();
     };
     return publishTo;
 };

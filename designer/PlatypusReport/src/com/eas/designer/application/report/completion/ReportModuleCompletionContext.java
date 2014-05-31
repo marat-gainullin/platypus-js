@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.report.completion;
 
-import com.eas.client.reports.Report;
+import com.eas.client.report.Report;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;

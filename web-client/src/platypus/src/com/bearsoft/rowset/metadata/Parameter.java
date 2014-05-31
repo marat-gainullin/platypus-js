@@ -9,8 +9,7 @@
  */
 package com.bearsoft.rowset.metadata;
 
-import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.Utils;
+import com.bearsoft.rowset.Utils;
 
 import java.sql.ParameterMetaData;
 
@@ -179,7 +178,6 @@ public class Parameter extends Field {
      * @param aValue The mode.
      */
     public void setMode(int aValue) {
-        int oldValue = mode;
         mode = aValue;
     }
 

@@ -1,8 +1,8 @@
 package com.eas.client;
 
-import com.google.gwt.resources.client.ImageResource;
+import com.eas.client.application.PlatypusImageResource;
 
 public interface ImageResourceCallback {
 
-	public void run(ImageResource aResource);
+	public void run(PlatypusImageResource aResource);
 }

@@ -17,24 +17,24 @@ import java.util.logging.Logger;
 public class CollectionEditingSupport<C, V> {
 
     protected C collection;
-    protected Set<CollectionListener<C, V>> listeners = new HashSet();
+    protected Set<CollectionListener<C, V>> listeners = new HashSet<>();
 
     public CollectionEditingSupport(C aCollection) {
         super();
         collection = aCollection;
     }
 
-    public void addListener(CollectionListener aListener) {
+    public void addListener(CollectionListener<C, V> aListener) {
         listeners.add(aListener);
     }
 
-    public boolean removeListener(CollectionListener aListener) {
+    public boolean removeListener(CollectionListener<C, V> aListener) {
         return listeners.remove(aListener);
     }
 
     public void fireElementAdded(V element) {
         try {
-            for (CollectionListener l : listeners) {
+            for (CollectionListener<C, V> l : listeners) {
                 l.added(collection, element);
             }
         } catch (Exception ex) {
@@ -44,7 +44,7 @@ public class CollectionEditingSupport<C, V> {
 
     public void fireElementsAdded(Collection<V> elements) {
         try {
-            for (CollectionListener l : listeners) {
+            for (CollectionListener<C, V> l : listeners) {
                 l.added(collection, elements);
             }
         } catch (Exception ex) {
@@ -54,7 +54,7 @@ public class CollectionEditingSupport<C, V> {
 
     public void fireElementRemoved(V element) {
         try {
-            for (CollectionListener l : listeners) {
+            for (CollectionListener<C, V> l : listeners) {
                 l.removed(collection, element);
             }
         } catch (Exception ex) {
@@ -64,7 +64,7 @@ public class CollectionEditingSupport<C, V> {
 
     public void fireElementsRemoved(Collection<V> elements) {
         try {
-            for (CollectionListener l : listeners) {
+            for (CollectionListener<C, V> l : listeners) {
                 l.removed(collection, elements);
             }
         } catch (Exception ex) {
@@ -74,7 +74,7 @@ public class CollectionEditingSupport<C, V> {
 
     public void fireCleared() {
         try {
-            for (CollectionListener l : listeners) {
+            for (CollectionListener<C, V> l : listeners) {
                 l.cleared(collection);
             }
         } catch (Exception ex) {

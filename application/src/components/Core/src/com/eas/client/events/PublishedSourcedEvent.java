@@ -4,15 +4,19 @@
  */
 package com.eas.client.events;
 
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
- *
+ * The base event type.
  * @author vv
  */
-public class PublishedSourcedEvent implements HasPublished{
+public class PublishedSourcedEvent implements HasPublished {
 
+    protected static JSObject publisher;
     protected Object published;
     protected HasPublished source;
 
@@ -31,11 +35,24 @@ public class PublishedSourcedEvent implements HasPublished{
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
-        this.published = aValue;
-    }    
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }   
 }

@@ -4,22 +4,24 @@
  */
 package com.eas.client.forms.api.events;
 
+import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.Component;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.util.EventObject;
 import javax.swing.JComponent;
 
 /**
- *
+ * Base class for any GUI event.
  * @author mg
  * @param <E>
  */
-public abstract class Event<E extends EventObject> {
+public abstract class Event<E extends EventObject> extends PublishedSourcedEvent {
 
     protected E delegate;
 
     protected Event(E aDelegate) {
-        super();
+        super(null);
         delegate = aDelegate;
     }
 
@@ -29,7 +31,8 @@ public abstract class Event<E extends EventObject> {
             + "*/";
 
     @ScriptFunction(jsDoc = SOURCE_JS_DOC)
-    public Component<?> getSource() {
+    @Override
+    public HasPublished getSource() {
         Object oSource = delegate.getSource();
         if (oSource instanceof JComponent) {
             return lookupApiComponent((JComponent) oSource);

@@ -6,6 +6,8 @@ package com.eas.client.model;
 
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.application.ApplicationEntity;
+import com.eas.client.model.application.CursorPositionChangedEvent;
+import com.eas.client.model.application.CursorPositionWillChangeEvent;
 
 /**
  *
@@ -25,8 +27,8 @@ public class DataScriptEventsListener implements ModelScriptEventsListener {
     @Override
     public void eventExecuting(PublishedSourcedEvent anEvent) {
         if (anEvent.getSource() == entity.getPublished()) {
-            if (anEvent instanceof ApplicationEntity.CursorPositionChangedEvent
-                    || anEvent instanceof ApplicationEntity.CursorPositionWillChangeEvent) {
+            if (anEvent instanceof CursorPositionChangedEvent
+                    || anEvent instanceof CursorPositionWillChangeEvent) {
                 scrollEvents++;
             } else {
                 events++;

@@ -13,9 +13,9 @@ import com.eas.client.CancellableCallback;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
-import com.eas.client.form.api.JSContainers;
-import com.eas.client.form.api.JSControls;
-import com.eas.client.form.api.ModelJSControls;
+import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsModelWidgets;
+import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelBaseTest;
@@ -144,9 +144,9 @@ public abstract class MixedTest extends ModelBaseTest {
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
-		JSControls.initControls();
-		JSContainers.initContainers();
-		ModelJSControls.initModelControls();
+		JsWidgets.init();
+		JsContainers.init();
+		JsModelWidgets.init();
 		AppClient client = initDevelopTestClient();
 		Application.publish(client);
 		AppClient.publishApi(client);

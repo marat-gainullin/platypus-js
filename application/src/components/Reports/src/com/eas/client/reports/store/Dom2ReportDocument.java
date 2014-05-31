@@ -34,7 +34,7 @@ public class Dom2ReportDocument {
         ApplicationElement appElement = aClient.getAppCache().get(aAppElementName);
         if (appElement.getType() == ClientConstants.ET_RESOURCE) {
             String format = aAppElementName.substring(aAppElementName.lastIndexOf('.') + 1, aAppElementName.length());
-            return new ReportTemplate(appElement.getBinaryContent(), aModel, format);
+            return new ReportTemplate(appElement.getBinaryContent(), aModel, format, aAppElementName);
         } else {
             return transform(appElement.getContent(), aModel);
         }
@@ -61,6 +61,6 @@ public class Dom2ReportDocument {
                 }
             }
         }
-        return new ReportTemplate(template, aModel, format);
+        return new ReportTemplate(template, aModel, format, "");
     }
 }

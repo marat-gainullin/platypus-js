@@ -4,13 +4,17 @@
  */
 package com.eas.client.forms.api;
 
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class Anchors {
+public class Anchors implements HasPublished {
 
     @ScriptFunction(params = {"left", "width", "right", "top", "height", "bottom"}, jsDoc = "/**\n"
             + "* Component's binding anchors for anchors layout.\n"
@@ -38,4 +42,29 @@ public class Anchors {
     
     public Object left, width, right;
     public Object top, height, bottom;
+    protected static JSObject publisher;
+    protected Object published;
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
 }

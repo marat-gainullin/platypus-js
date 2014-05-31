@@ -11,7 +11,9 @@ import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
 import com.eas.gui.CascadedStyle;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ public class ScriptableColumn implements HasPublished {
     protected ModelColumn modelColumn;
     // view
     protected TableColumn viewColumn;
+    protected static JSObject publisher;
     protected Object published;
     protected int viewIndex = -1;
     protected boolean visible;
@@ -222,11 +225,20 @@ public class ScriptableColumn implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object jsColumn) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = jsColumn;
         if (viewColumn != null) {
             if (viewColumn.getCellEditor() instanceof ScalarDbControl) {
@@ -239,5 +251,9 @@ public class ScriptableColumn implements HasPublished {
         if (modelColumn != null) {
             modelColumn.setPublished(published);
         }
+    }
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

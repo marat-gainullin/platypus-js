@@ -27,7 +27,7 @@ public class RowsetReader extends JsonReader {
     	assert aExpectedFields != null;
         JSONArray da = aValue.isArray();
         Rowset rowset = new Rowset(aExpectedFields);
-        List<Row> rows = new ArrayList();
+        List<Row> rows = new ArrayList<>();
         for (int i = 0; i < da.size(); i++) {
             Row row = readRow(da.get(i), rowset.getFields());
             rows.add(row);

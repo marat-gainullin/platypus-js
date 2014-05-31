@@ -8,6 +8,7 @@ import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
+import com.eas.script.ScriptFunction;
 
 /**
  *
@@ -28,18 +29,34 @@ public class CellRenderEvent extends PublishedSourcedEvent {
         this.object = object;
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The primary key of the data object.\n"
+            + " */")
     public Object getId() {
         return id;
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The cell's column ID.\n"
+            + " */")
     public Object getColumnId() {
         return columnId;
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The \"abstract\" cell.\n"
+            + " */")
     public CellData getCell() {
         return cell;
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The cell's row object.\n"
+            + " */")
     public Row getObject() {
         return object;
     }

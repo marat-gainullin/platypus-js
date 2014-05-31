@@ -9,6 +9,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetReader;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.client.report.Report;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetReader;
@@ -132,7 +133,11 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         Object result = null;
-        if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
+        if (input.containsChild(RequestsTags.TAG_FORMAT) && input.containsChild(RequestsTags.TAG_FILE_NAME)) {
+            result = new Report(input.getChild(RequestsTags.TAG_RESULT_VALUE).getData(), 
+                    input.getChild(RequestsTags.TAG_FORMAT).getString(), 
+                    input.getChild(RequestsTags.TAG_FILE_NAME).getString());
+        } else if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
             result = ScriptUtils.parseDates(ScriptUtils.parseJson(input.getChild(RequestsTags.TAG_RESULT_VALUE).getString()));
         }
         rsp.setResult(result);

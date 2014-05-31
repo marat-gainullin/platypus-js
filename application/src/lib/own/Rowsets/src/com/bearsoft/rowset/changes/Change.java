@@ -4,9 +4,11 @@
  */
 package com.bearsoft.rowset.changes;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -18,42 +20,8 @@ public abstract class Change implements HasPublished {
     public boolean trusted;
     public boolean consumed;
     //
+    protected static JSObject publisher;
     protected Object published;
-
-    public static class Value implements HasPublished {
-
-        public String name;
-        public Object value;
-        public DataTypeInfo type;
-        //
-        protected Object published;
-
-        public Value(String aName, Object aValue, DataTypeInfo aType) {
-            name = aName;
-            value = aValue;
-            type = aType;
-        }
-
-        @ScriptFunction(jsDoc = "Name of changed property.")
-        public String getName() {
-            return name;
-        }
-
-        @ScriptFunction(jsDoc = "New value.")
-        public Object getValue() {
-            return value;
-        }
-
-        @Override
-        public Object getPublished() {
-            return published;
-        }
-
-        @Override
-        public void setPublished(Object aValue) {
-            published = aValue;
-        }
-    }
 
     public Change(String aEntityId) {
         super();
@@ -79,14 +47,27 @@ public abstract class Change implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
     }
 
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+    
     @Override
     public String toString() {
         return getType();

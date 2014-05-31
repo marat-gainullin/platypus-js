@@ -12,7 +12,7 @@ import com.eas.script.ScriptFunction;
  */
 public class Delete extends Change {
 
-    public Value[] keys;
+    public ChangeValue[] keys;
 
     public Delete(String aEntityId) {
         super(aEntityId);
@@ -24,7 +24,7 @@ public class Delete extends Change {
     }
 
     @ScriptFunction(jsDoc = "Keys values used for identification of deleted data.")
-    public Value[] getKeys() {
+    public ChangeValue[] getKeys() {
         return keys;
     }
 }

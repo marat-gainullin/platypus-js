@@ -24,8 +24,10 @@ import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.events.WindowEventsIProxy;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.resources.images.IconCache;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import com.eas.util.exceptions.ClosedManageException;
@@ -191,6 +193,7 @@ public class Form implements HasPublished {
     protected JPanel view;
     protected Map<String, JComponent> components;
     protected String formKey;
+    protected static JSObject publisher;
     protected Object published;
     // frequent runtime
     protected Container surface;
@@ -207,17 +210,30 @@ public class Form implements HasPublished {
         return model;
     }
 
-    // Script interface
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
     }
 
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
+    
+    // Script interface
     private static final String SHOW_JSDOC = ""
             + "/**\n"
             + " * Shows the form as an ordinary window.\n"

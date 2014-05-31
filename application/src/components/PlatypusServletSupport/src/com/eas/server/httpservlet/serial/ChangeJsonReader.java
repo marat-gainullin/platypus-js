@@ -7,6 +7,7 @@ package com.eas.server.httpservlet.serial;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.RowsetConverter;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.ChangeVisitor;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.Delete;
@@ -46,8 +47,8 @@ public class ChangeJsonReader implements ChangeVisitor {
         fieldsResolver = aFieldsResolver;
     }
 
-    protected Change.Value[] parseObjectProperties(Object oData) throws Exception {
-        List<Change.Value> data = new ArrayList<>();
+    protected ChangeValue[] parseObjectProperties(Object oData) throws Exception {
+        List<ChangeValue> data = new ArrayList<>();
         if (oData instanceof JSObject) {
             JSObject sValue = (JSObject) oData;
             for (String sValueName : sValue.keySet()) {
@@ -66,13 +67,13 @@ public class ChangeJsonReader implements ChangeVisitor {
                         }
                     }
                     Object convertedValueValue = converter.convert2RowsetCompatible(oValueValue, field.getTypeInfo());
-                    data.add(new Change.Value(sValueName, convertedValueValue, field.getTypeInfo()));
+                    data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
                 } else {
                     Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityId, sValueName));
                 }
             }
         }
-        return data.toArray(new Change.Value[]{});
+        return data.toArray(new ChangeValue[]{});
     }
 
     @Override

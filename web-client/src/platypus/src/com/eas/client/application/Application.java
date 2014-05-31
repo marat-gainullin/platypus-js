@@ -16,53 +16,32 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.Cancellable;
+import com.bearsoft.gwt.ui.XElement;
+import com.bearsoft.rowset.Cancellable;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.CancellableCallbackAdapter;
+import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
 import com.eas.client.StringCallbackAdapter;
-import com.eas.client.Utils;
-import com.eas.client.form.Form;
-import com.eas.client.form.api.JSContainers;
-import com.eas.client.form.api.JSControls;
-import com.eas.client.form.api.ModelJSControls;
+import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.PlatypusWindow;
+import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsMenus;
+import com.eas.client.form.js.JsModelWidgets;
+import com.eas.client.form.js.JsWidgets;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sencha.gxt.core.client.dom.XElement;
-import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
 
 /**
  * 
  * @author mg
  */
 public class Application {
-
-	protected static class ElementMaskLoadHandler implements Loader.LoadHandler {
-		protected XElement xDiv;
-
-		public ElementMaskLoadHandler(XElement aXDiv) {
-			xDiv = aXDiv;
-		}
-
-		@Override
-		public void started(String anItemName) {
-			final String message = "Loading... " + anItemName;
-			xDiv.unmask();
-			xDiv.mask(message);
-		}
-
-		@Override
-		public void loaded(String anItemName) {
-			final String message = "Loaded " + anItemName;
-			xDiv.unmask();
-			xDiv.mask(message);
-		}
-	}
 
 	protected static class LoggingLoadHandler implements Loader.LoadHandler {
 
@@ -82,7 +61,7 @@ public class Application {
 			platypusApplicationLogger.log(Level.INFO, message);
 		}
 	}
-	
+
 	public static Logger platypusApplicationLogger;
 	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
@@ -105,22 +84,26 @@ public class Application {
 	protected static class ExecuteApplicationCallback extends CancellableCallbackAdapter {
 
 		protected Collection<String> executedAppElements;
+		protected Set<Element> indicators; 
 
-		public ExecuteApplicationCallback(Collection<String> appElementsToExecute) {
+		public ExecuteApplicationCallback(Collection<String> appElementsToExecute, Set<Element> aIndicators) {
 			super();
 			executedAppElements = appElementsToExecute;
+			indicators = aIndicators;
 		}
 
 		@Override
 		protected void doWork() throws Exception {
+			for(Element el : indicators){
+				el.<XElement>cast().unmask();
+			}
 			loaderHandlerRegistration.removeHandler();
 			for (String appElementName : executedAppElements) {
-				Form f = getStartForm(appElementName);
+				PlatypusWindow f = getStartForm(appElementName);
 				RootPanel target = RootPanel.get(appElementName);
 				if (target != null) {
-					target.getElement().<XElement> cast().unmask();
 					if (f != null) {
-						f.showOnPanel(target);
+						ControlsUtils.addWidgetTo(f.getView(), target);
 					} else {
 						target.getElement().setInnerHTML(loader.getAppElementError(appElementName));
 					}
@@ -140,7 +123,7 @@ public class Application {
 		return $wnd.Modules.get(appElement);
 	}-*/;
 
-	public native static Form getStartForm(String appElement)/*-{
+	public native static PlatypusWindow getStartForm(String appElement)/*-{
 		var existingModule = $wnd.Modules.get(appElement);
 		return existingModule["x-Form"];
 	}-*/;
@@ -156,7 +139,7 @@ public class Application {
 		$wnd.Function.prototype.invokeLater = function() {
 			var _func = this;
 			var _arguments = arguments;
-			@com.eas.client.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
+			@com.bearsoft.rowset.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
 				_func.apply(_func, _arguments);
 			});
 		}
@@ -170,7 +153,7 @@ public class Application {
 		    for (var i = 1; i < _arguments.length; i++) {
 		        userArgs.push(_arguments[i]);
 		    }
-			@com.eas.client.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(_arguments[0], function(){
+			@com.bearsoft.rowset.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(_arguments[0], function(){
 				try{
 					_func.apply(_func, userArgs);
 				}catch(e){
@@ -180,7 +163,7 @@ public class Application {
 		}
 		
 		$wnd.selectFile = function(aCallback) {
-			@com.eas.client.gxtcontrols.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
 		$wnd.Resource = {};
@@ -223,9 +206,9 @@ public class Application {
 		$wnd.boxAsJs = function(aValue) {
 			if(aValue == null)
 				return null;
-			else if(@com.eas.client.Utils::isNumber(Ljava/lang/Object;)(aValue))
+			else if(@com.bearsoft.rowset.Utils::isNumber(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Number::doubleValue()();
-			else if(@com.eas.client.Utils::isBoolean(Ljava/lang/Object;)(aValue))
+			else if(@com.bearsoft.rowset.Utils::isBoolean(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Boolean::booleanValue()();
 			else // dates, strings, complex java objects handled in Utils.toJs()
 				return aValue;
@@ -583,7 +566,7 @@ public class Application {
 		$wnd.platypus.readForm = function(appElementDoc, aModule) {
 			var nativeModel = aModule.model.unwrap();
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementDoc, nativeModel);
-			nativeForm.@com.eas.client.form.Form::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
+			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
 		};
 		$wnd.platypus.HTML5 = "Html5 client";
@@ -618,7 +601,7 @@ public class Application {
 		};
 		$wnd.Form = $wnd.Module;
 		$wnd.Form.getShownForm = function(aFormKey){
-			return @com.eas.client.form.Form::getShownForm(Ljava/lang/String;)(aFormKey);
+			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		}
 		$wnd.ServerModule = function(aModuleId){
 			$wnd.platypus.defineServerModule(aModuleId, this);
@@ -630,15 +613,15 @@ public class Application {
 		
 		Object.defineProperty($wnd.Form, "shown", {
 			get : function() {
-				return @com.eas.client.form.Form::getShownForms()();
+				return @com.eas.client.form.PlatypusWindow::getShownForms()();
 			}
 		});
 		Object.defineProperty($wnd.Form, "onChange", {
 			get : function() {
-				return @com.eas.client.form.Form::getOnChange()();
+				return @com.eas.client.form.PlatypusWindow::getOnChange()();
 			},
 			set : function(aValue) {
-				@com.eas.client.form.Form::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				@com.eas.client.form.PlatypusWindow::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
@@ -656,7 +639,7 @@ public class Application {
 		function _Color(aRed, aGreen, aBlue, aAlpha){
 			var _red = 0, _green = 0, _blue = 0, _alpha = 0xff;
 			if(arguments.length == 1){
-				var _color = @com.eas.client.gxtcontrols.ControlsUtils::parseColor(Ljava/lang/String;)(aRed + '');
+				var _color = @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(aRed + '');
 				if(_color){
 					_red = _color.red;
 					_green = _color.green;
@@ -888,97 +871,6 @@ public class Application {
 		    });
 		}
 		$wnd.Style = _Style;
-		function _LineChart(chartTitle, xTitle, yTitle, pDs){
-			var _dataSource = pDs;
-        	var nativeChart = @com.eas.client.chart.LineChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(chartTitle, xTitle, yTitle, pDs.unwrap ? pDs.unwrap() : pDs);
-			this.addSeries = function(pXAxisField, pYAxisField, pTitle){
-				nativeChart.@com.eas.client.chart.LineChart::addSeries(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(pXAxisField, pYAxisField, pTitle);
-			}
-			this.unwrap = function(){
-				return nativeChart; 
-			}
-			this.dataWillChange = function(){
-				nativeChart.@com.eas.client.chart.LineChart::dataWillChange()();
-			}
-			this.dataChanged = function(){
-				nativeChart.@com.eas.client.chart.LineChart::dataChanged()();
-			}
-			Object.defineProperty(this, "data", {
-				get: function(){
-					return _dataSource;
-				},
-				set: function(aValue){
-					if(_dataSource != aValue){
-					    nativeChart.@com.eas.client.chart.LineChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-				        _dataSource = aValue;
-					}
-				}
-			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
-			return this; 
-		};
-		$wnd.LineChart = _LineChart;
-		function _TimeSeriesChart(chartTitle, xTitle, yTitle, pDs){
-			var _dataSource = pDs;
-        	var nativeChart = @com.eas.client.chart.TimeSeriesChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(chartTitle, xTitle, yTitle, pDs.unwrap ? pDs.unwrap() : pDs);
-			this.addSeries = function(pXAxisField, pYAxisField, pTitle){
-				nativeChart.@com.eas.client.chart.TimeSeriesChart::addSeries(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(pXAxisField, pYAxisField, pTitle);
-			}
-			this.unwrap = function(){
-				return nativeChart; 
-			}
-			this.dataWillChange = function(){
-				nativeChart.@com.eas.client.chart.TimeSeriesChart::dataWillChange()();
-			}
-			this.dataChanged = function(){
-				nativeChart.@com.eas.client.chart.TimeSeriesChart::dataChanged()();
-			}
-			Object.defineProperty(this, "data", {
-				get: function(){
-					return _dataSource;
-				},
-				set: function(aValue){
-					nativeChart.@com.eas.client.chart.TimeSeriesChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-					_dataSource = aValue;
-				}
-			});
-			Object.defineProperty(this, "XLabelsFormat", {
-				get: function(){
-					return nativeChart.@com.eas.client.chart.TimeSeriesChart::getXLabelsFormat();
-				},
-				set: function(aValue){
-					nativeChart.@com.eas.client.chart.TimeSeriesChart::setXLabelsFormat(Ljava/lang/String;)(aValue);
-				}
-			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
-			return this; 
-		};
-		$wnd.TimeSeriesChart = _TimeSeriesChart;
-		function _PieChart(pTitle, pXAxisField, pYAxisField, pDs){
-			var _dataSource = pDs;
-        	var nativeChart = @com.eas.client.chart.PieChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(pTitle, pXAxisField, pYAxisField, pDs.unwrap ? pDs.unwrap() : pDs);
-			this.unwrap = function(){
-				return nativeChart; 
-			}
-			this.dataWillChange = function(){
-				nativeChart.@com.eas.client.chart.PieChart::dataWillChange()();
-			}
-			this.dataChanged = function(){
-				nativeChart.@com.eas.client.chart.PieChart::dataChanged()();
-			}
-			Object.defineProperty(this, "data", {
-				get: function(){
-					return _dataSource;
-				},
-				set: function(aValue){
-					nativeChart.@com.eas.client.chart.PieChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-					_dataSource = aValue;
-				}
-			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
-			return this; 
-		};
-		$wnd.PieChart = _PieChart;
 		
 	    $wnd.VK_ALT = @com.google.gwt.event.dom.client.KeyCodes::KEY_ALT;
 	    $wnd.VK_BACKSPACE = @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE;
@@ -1006,7 +898,7 @@ public class Application {
 		return run(client, extractPlatypusModules());
 	}
 
-	public static Cancellable run(AppClient client, Map<String, Element> start) throws Exception {
+	public static Cancellable run(AppClient client, Map<String, Element> aMarkupStart) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
 			platypusApplicationLogger = Logger.getLogger("platypusApplication");
 			Formatter f = new PlatypusLogFormatter(true);
@@ -1015,43 +907,33 @@ public class Application {
 				h.setFormatter(f);
 			}
 		}
-		JSControls.initControls();
-		JSContainers.initContainers();
-		ModelJSControls.initModelControls();
+		JsWidgets.init();
+		JsMenus.init();
+		JsContainers.init();
+		JsModelWidgets.init();
 		publish(client);
 		AppClient.publishApi(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for (Element el : indicators){
-			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()) {
-				public void loaded(String anItemName) {
-					xDiv.unmask();
-				};
-			}));
+		for (Element el : indicators) {
+			el.<XElement> cast().loadMask();
 		}
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
-		return startAppElements(client, start);
+		return startAppElements(client, aMarkupStart, indicators);
 	}
 
 	private static Set<Element> extractPlatypusProgressIndicators() {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass1 = "platypusIndicator";
-		String platypusModuleClass2 = "platypus-indicator";
-		if (platypusModuleClass1.equals(xBody.getClassName()) || platypusModuleClass2.equals(xBody.getClassName()))
+		String platypusIndicatorClass = "platypus-indicator";
+		if (xBody.getClassName() != null && xBody.hasClassName(platypusIndicatorClass)){
 			platypusIndicators.add(xBody);
-
-		NodeList<Element> divs1 = xBody.select("." + platypusModuleClass1);
-		if (divs1 != null) {
-			for (int i = 0; i < divs1.getLength(); i++) {
-				Element div = divs1.getItem(i);
-				platypusIndicators.add(div);
-			}
 		}
-		NodeList<Element> divs2 = xBody.select("." + platypusModuleClass2);
+
+		List<Element> divs2 = xBody.select(platypusIndicatorClass);
 		if (divs2 != null) {
-			for (int i = 0; i < divs2.getLength(); i++) {
-				Element div = divs2.getItem(i);
+			for (int i = 0; i < divs2.size(); i++) {
+				Element div = divs2.get(i);
 				platypusIndicators.add(div);
 			}
 		}
@@ -1061,21 +943,11 @@ public class Application {
 	private static Map<String, Element> extractPlatypusModules() {
 		Map<String, Element> platypusModules = new HashMap<String, Element>();
 		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass1 = "platypusModule";
-		NodeList<Element> divs1 = xBody.select("." + platypusModuleClass1);
-		if (divs1 != null) {
-			for (int i = 0; i < divs1.getLength(); i++) {
-				Element div = divs1.getItem(i);
-				if (div.getId() != null && !div.getId().isEmpty()) {
-					platypusModules.put(div.getId(), div);
-				}
-			}
-		}
-		String platypusModuleClass2 = "platypus-module";
-		NodeList<Element> divs2 = xBody.select("." + platypusModuleClass2);
-		if (divs2 != null) {
-			for (int i = 0; i < divs2.getLength(); i++) {
-				Element div = divs2.getItem(i);
+		String platypusModuleClass = "platypus-module";
+		List<Element> divs = xBody.select(platypusModuleClass);
+		if (divs != null) {
+			for (int i = 0; i < divs.size(); i++) {
+				Element div = divs.get(i);
 				if (div.getId() != null && !div.getId().isEmpty()) {
 					platypusModules.put(div.getId(), div);
 				}
@@ -1095,7 +967,7 @@ public class Application {
 			$wnd.platypus.ready();
 	}-*/;
 
-	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart) throws Exception {
+	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators) throws Exception {
 		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
 			return client.getStartElement(new StringCallbackAdapter() {
 
@@ -1106,8 +978,11 @@ public class Application {
 					if (aResult != null && !aResult.isEmpty()) {
 						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
-						loadings = loader.load(results, new ExecuteApplicationCallback(results));
+						loadings = loader.load(results, new ExecuteApplicationCallback(results, aIndicators));
 					} else {
+						for (Element el : aIndicators) {
+							el.<XElement> cast().unmask();
+						}
 						onReady();
 					}
 				}
@@ -1122,21 +997,15 @@ public class Application {
 			});
 		} else {
 			Set<String> modulesIds = aMarkupStart.keySet();
-			for (final String elId : modulesIds) {
-				Element el = aMarkupStart.get(elId);
-				if (el != null) {
-					loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast())));
-				}
-			}
-			return loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds));
+			return loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds, aIndicators));
 		}
 	}
 
 	/**
-	 * Avoiding parallel Loader.load() calls like this:
-	 * require(["Module1", "Module2", "Module3", "Module4"], function(){});
-	 * require(["Module0", "Module2", "Module5", "Module7"], function(){});
-	 * Here, loader will be called twice form "Module2" in parallel.
+	 * Avoiding parallel Loader.load() calls like this: require(["Module1",
+	 * "Module2", "Module3", "Module4"], function(){}); require(["Module0",
+	 * "Module2", "Module5", "Module7"], function(){}); Here, loader will be
+	 * called twice form "Module2" in parallel.
 	 */
 	protected static boolean requiring;
 
@@ -1173,15 +1042,15 @@ public class Application {
 						requiring = false;
 						try {
 							if (deps.isEmpty() || loader.isLoaded(deps)) {
-								if(aOnSuccess != null)
+								if (aOnSuccess != null)
 									Utils.invokeJsFunction(aOnSuccess);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: "+aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
 							} else {
-								if(aOnFailure != null)
+								if (aOnFailure != null)
 									Utils.invokeJsFunction(aOnFailure);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: "+aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 							}
 						} finally {
 							if (!requireProcesses.isEmpty()) {

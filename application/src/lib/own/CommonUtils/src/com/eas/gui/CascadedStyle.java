@@ -5,6 +5,9 @@
 package com.eas.gui;
 
 import com.eas.resources.images.IconCache;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.store.Serial;
 import com.eas.store.SerialColor;
@@ -14,12 +17,13 @@ import java.beans.PropertyChangeSupport;
 import javax.swing.Icon;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class CascadedStyle {
+public class CascadedStyle implements HasPublished {
 
     protected static JTextField testText = new JTextField();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -36,6 +40,8 @@ public class CascadedStyle {
     protected String openFolderIconName = null;
     protected String leafIconName = null;
     protected CascadedStyle parent = null;
+    protected static JSObject publisher;
+    protected Object published;
 
     public CascadedStyle() {
         super();
@@ -504,4 +510,28 @@ public class CascadedStyle {
         }
         return style;
     }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+    
 }

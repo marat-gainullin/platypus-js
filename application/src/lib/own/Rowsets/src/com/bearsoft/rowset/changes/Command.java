@@ -13,7 +13,7 @@ import com.eas.script.ScriptFunction;
 public class Command extends Change {
 
     public String command;// transient property
-    public Value[] parameters;
+    public ChangeValue[] parameters;
 
     public Command(String aEntityId) {
         super(aEntityId);
@@ -30,7 +30,7 @@ public class Command extends Change {
     }
 
     @ScriptFunction(jsDoc = "Parameters of command.")
-    public Value[] getParameters() {
+    public ChangeValue[] getParameters() {
         return parameters;
     }
     

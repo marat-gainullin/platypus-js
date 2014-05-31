@@ -8,7 +8,6 @@ import com.eas.client.serial.JsonReader;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.Query;
-import com.google.gwt.dev.json.JsonBoolean;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;

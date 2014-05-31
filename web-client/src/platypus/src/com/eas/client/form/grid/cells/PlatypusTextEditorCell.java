@@ -1,0 +1,23 @@
+package com.eas.client.form.grid.cells;
+
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+
+public class PlatypusTextEditorCell extends RenderedPopupEditorCell<String> {
+
+	public PlatypusTextEditorCell() {
+		super(new TextBox());
+	}
+	
+	public PlatypusTextEditorCell(Widget aEditor) {
+		super(aEditor);
+	}
+
+	@Override
+	protected void renderCell(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
+		sb.appendEscaped(value);
+	}
+
+}

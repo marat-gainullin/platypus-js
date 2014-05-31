@@ -21,19 +21,19 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
+import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
-import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
-import com.eas.client.beans.PropertyChangeSupport;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
@@ -72,7 +72,6 @@ public class Model {
 	protected NetworkProcess process;
 	protected int ajustingCounter = 0;
 	protected JavaScriptObject module;
-	protected Runnable handlersResolver;
 
 	public static class NetworkProcess {
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
@@ -254,12 +253,6 @@ public class Model {
 		this();
 		client = aClient;
 	}
-
-	public Model(AppClient aClient, Runnable aHandlersResolver) {
-		this(aClient);
-		handlersResolver = aHandlersResolver;
-	}
-
 	public PropertyChangeSupport getChangeSupport() {
 		return changeSupport;
 	}
@@ -861,16 +854,8 @@ public class Model {
 		boolean oldValue = runtime;
 		runtime = aValue;
 		if (!oldValue && runtime) {
-			resolveHandlers();
 			validateQueries();
 			executeRootEntities(true, null, null);
-		}
-	}
-
-	protected void resolveHandlers() {
-		if (handlersResolver != null) {
-			handlersResolver.run();
-			handlersResolver = null;
 		}
 	}
 

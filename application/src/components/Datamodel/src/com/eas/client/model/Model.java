@@ -16,9 +16,12 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
+import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
 
 /**
@@ -41,6 +44,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
+    protected static JSObject publisher;
     protected Object published;
     protected int ajustingCounter;
     protected Runnable resolver;
@@ -324,13 +328,26 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
     }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
 
     public int getAjustingCounter() {
         return ajustingCounter;

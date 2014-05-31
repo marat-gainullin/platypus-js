@@ -5,6 +5,7 @@
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
@@ -362,10 +363,10 @@ public abstract class PlatypusClient implements AppClient {
     @Override
     public void enqueueUpdate(String aQueryId, Parameters aParams) throws Exception {
         Command command = new Command(aQueryId);
-        command.parameters = new Change.Value[aParams.getParametersCount()];
+        command.parameters = new ChangeValue[aParams.getParametersCount()];
         for (int i = 0; i < command.parameters.length; i++) {
             Parameter p = aParams.get(i + 1);
-            command.parameters[i] = new Change.Value(p.getName(), p.getValue(), p.getTypeInfo());
+            command.parameters[i] = new ChangeValue(p.getName(), p.getValue(), p.getTypeInfo());
         }
         changeLog.add(command);
     }

@@ -34,8 +34,10 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
@@ -71,6 +73,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected JSObject onFiltered;
     //
     protected JSObject instanceConstructor;
+    protected static JSObject publisher;
     protected Object published;
     protected Map<String, Object> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
@@ -704,7 +707,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
+    @EventMethod(eventClass = EntityInstanceChangeEvent.class)
     public JSObject getOnChanged() {
         return getOnAfterChange();
     }
@@ -719,7 +722,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
+    @EventMethod(eventClass = EntityInstanceDeleteEvent.class)
     public JSObject getOnDeleted() {
         return getOnAfterDelete();
     }
@@ -734,7 +737,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
+    @EventMethod(eventClass = EntityInstanceInsertEvent.class)
     public JSObject getOnInserted() {
         return getOnAfterInsert();
     }
@@ -749,7 +752,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.CursorPositionChangedEvent.class)
+    @EventMethod(eventClass = CursorPositionChangedEvent.class)
     public JSObject getOnScrolled() {
         return getOnAfterScroll();
     }
@@ -764,7 +767,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
+    @EventMethod(eventClass = EntityInstanceChangeEvent.class)
     public JSObject getWillChange() {
         return getOnBeforeChange();
     }
@@ -779,7 +782,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
+    @EventMethod(eventClass = EntityInstanceDeleteEvent.class)
     public JSObject getWillDelete() {
         return getOnBeforeDelete();
     }
@@ -794,7 +797,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
+    @EventMethod(eventClass = EntityInstanceInsertEvent.class)
     public JSObject getWillInsert() {
         return getOnBeforeInsert();
     }
@@ -809,7 +812,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
-    @EventMethod(eventClass = ApplicationEntity.CursorPositionWillChangeEvent.class)
+    @EventMethod(eventClass = CursorPositionWillChangeEvent.class)
     public JSObject getWillScroll() {
         return getOnBeforeScroll();
     }
@@ -848,15 +851,28 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    @Override
+       @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
     }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
 
     /**
      * Gets cursor substitute.
@@ -1615,70 +1631,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         return res;
     }
 
-    public static class CursorPositionWillChangeEvent extends PublishedSourcedEvent {
-
-        protected int oldIndex;
-        protected int newIndex;
-
-        public CursorPositionWillChangeEvent(HasPublished aSource, int aOldIndex, int aNewIndex) {
-            super(aSource);
-            oldIndex = aOldIndex;
-            newIndex = aNewIndex;
-        }
-
-        private static final String OLD_INDEX_JSDOC = ""
-                + "/**\n"
-                + "* Cursor position the cursor is still on.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OLD_INDEX_JSDOC)
-        public int getOldIndex() {
-            return oldIndex;
-        }
-
-        private static final String NEW_INDEX_JSDOC = ""
-                + "/**\n"
-                + "* Cursor position the cursor will be set on.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
-        public int getNewIndex() {
-            return newIndex;
-        }
-
-    }
-
-    public static class CursorPositionChangedEvent extends PublishedSourcedEvent {
-
-        protected int oldIndex;
-        protected int newIndex;
-
-        public CursorPositionChangedEvent(HasPublished aSource, int aOldIndex, int aNewIndex) {
-            super(aSource);
-            oldIndex = aOldIndex;
-            newIndex = aNewIndex;
-        }
-
-        @ScriptFunction(jsDoc = ""
-                + "/**\n"
-                + " * Cursor position the cursor was on.\n"
-                + " */")
-        public int getOldIndex() {
-            return oldIndex;
-        }
-
-        private static final String NEW_INDEX_JSDOC = ""
-                + "/**\n"
-                + "* Cursor position the cursor has been set on.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
-        public int getNewIndex() {
-            return newIndex;
-        }
-
-    }
-
     @Override
     public boolean willScroll(final RowsetScrollEvent aEvent) {
         boolean res = true;
@@ -1716,64 +1668,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             } catch (Exception ex) {
                 Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-    }
-
-    public static class EntityInstanceChangeEvent extends PublishedSourcedEvent {
-
-        protected Field field;
-        protected Object oldValue;
-        protected Object newValue;
-
-        public EntityInstanceChangeEvent(HasPublished aSource, Field aField, Object aOldValue, Object aNewValue) {
-            super(aSource);
-            field = aField;
-            oldValue = aOldValue;
-            newValue = aNewValue;
-        }
-
-        public Field getField() {
-            return field;
-        }
-
-        private static final String PROPERTY_NAME_JSDOC = ""
-                + "/**\n"
-                + "* The changed property name.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = PROPERTY_NAME_JSDOC)
-        public String getPropertyName() {
-            return field != null ? field.getName() : null;
-        }
-
-        private static final String OLD_VALUE_JSDOC = ""
-                + "/**\n"
-                + "* The old value.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OLD_VALUE_JSDOC)
-        public Object getOldValue() {
-            return oldValue;
-        }
-
-        private static final String NEW_VALUE_JSDOC = ""
-                + "/**\n"
-                + "* The new value.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = NEW_VALUE_JSDOC)
-        public Object getNewValue() {
-            return newValue;
-        }
-
-        private static final String OBJECT_JSDOC = ""
-                + "/**\n"
-                + "* The updated element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OBJECT_JSDOC)
-        public HasPublished getObject() {
-            return source;
         }
     }
 
@@ -1820,43 +1714,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public static class EntityInstanceInsert extends PublishedSourcedEvent {
-
-        protected Row inserted;
-
-        public EntityInstanceInsert(HasPublished source, Row inserted) {
-            super(source);
-            this.inserted = inserted;
-        }
-
-        private static final String INSERTED_JSDOC = ""
-                + "/**\n"
-                + "* The inserted element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = INSERTED_JSDOC)
-        public Row getInserted() {
-            return inserted;
-        }
-
-        private static final String OBJECT_JSDOC = ""
-                + "/**\n"
-                + "* The inserted element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = OBJECT_JSDOC)
-        public Row getObject() {
-            return inserted;
-        }
-    }
-
     @Override
     public boolean willInsertRow(final RowsetInsertEvent event) {
         boolean res = true;
         // call script method
         assert !model.isAjusting();
         try {
-            Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(this, event.getRow()));
+            Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsertEvent(this, event.getRow()));
             if (sRes != null && sRes instanceof Boolean) {
                 return (Boolean) sRes;
             } else {
@@ -1868,33 +1732,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         return res;
     }
 
-    public static class EntityInstanceDelete extends PublishedSourcedEvent {
-
-        protected Row deleted;
-
-        public EntityInstanceDelete(HasPublished aSource, Row aDeleted) {
-            super(aSource);
-            deleted = aDeleted;
-        }
-
-        private static final String DELETED_JSDOC = ""
-                + "/**\n"
-                + "* The deleted element.\n"
-                + "*/";
-
-        @ScriptFunction(jsDoc = DELETED_JSDOC)
-        public Row getDeleted() {
-            return deleted;
-        }
-    }
-
     @Override
     public boolean willDeleteRow(final RowsetDeleteEvent event) {
         boolean res = true;
         // call script method
         assert !model.isAjusting();
         try {
-            Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(this, event.getRow()));
+            Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
             if (sRes != null && sRes instanceof Boolean) {
                 return (Boolean) sRes;
             } else {
@@ -1912,7 +1756,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            executeScriptEvent(onAfterInsert, new EntityInstanceInsert(this, event.getRow()));
+            executeScriptEvent(onAfterInsert, new EntityInstanceInsertEvent(this, event.getRow()));
             internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1925,7 +1769,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            executeScriptEvent(onAfterDelete, new EntityInstanceDelete(this, event.getRow()));
+            executeScriptEvent(onAfterDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
             internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);

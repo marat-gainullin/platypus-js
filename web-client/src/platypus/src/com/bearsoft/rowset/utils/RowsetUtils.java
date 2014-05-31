@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
 
@@ -76,7 +76,7 @@ public class RowsetUtils {
 
 	public static final int INOPERABLE_TYPE_MARKER = 0;
 	public static final Object UNDEFINED_SQL_VALUE = new Object();
-	public static final Map<Integer, String> typesNames = new HashMap();
+	public static final Map<Integer, String> typesNames = new HashMap<>();
 
 	static {
 		typesNames.put(java.sql.Types.ARRAY, "ARRAY");

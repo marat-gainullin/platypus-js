@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.report;
 
-import com.eas.client.reports.ExcelReport;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.util.BinaryUtils;
@@ -21,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 
@@ -63,7 +61,7 @@ public class ReportDesignerPanel extends JPanel {
                     try {
                         editReportTemplate();
                         modifiedRunnable.run();
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
                         Logger.getLogger(ReportDesignerPanel.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }

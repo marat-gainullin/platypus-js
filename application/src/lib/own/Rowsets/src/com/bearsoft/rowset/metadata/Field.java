@@ -9,20 +9,20 @@
  */
 package com.bearsoft.rowset.metadata;
 
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeSupport;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This class is table field representation. It holds information about field
  * name, description, typeInfo, size and information about primary and foreign
- * keys. If
- * <code>isPk()</code> returns true, than this field is the primary key in
- * corresponding table. If
- * <code>getFk()</code> returns reference to a
+ * keys. If <code>isPk()</code> returns true, than this field is the primary key
+ * in corresponding table. If <code>getFk()</code> returns reference to a
  * <code>PrimaryKeySpec</code>, than it is a foreign key in corresponding table,
- * and it references to returning
- * <code>PrimaryKeySpec</code>.
+ * and it references to returning <code>PrimaryKeySpec</code>.
  *
  * @author mg
  */
@@ -47,7 +47,9 @@ public class Field implements HasPublished {
     protected String tableName;
     protected String schemaName;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+    protected static JSObject publisher;
     protected Object published;
+
     public static final String PK_PROPERTY = "pk";
     public static final String STRONG4INSERT_PROPERTY = "strong4Insert";
     public static final String FK_PROPERTY = "fk";
@@ -106,8 +108,7 @@ public class Field implements HasPublished {
     }
 
     /**
-     * Copy constructor of
-     * <code>Field</code> class.
+     * Copy constructor of <code>Field</code> class.
      *
      * @param aSourceField Source of created field.
      */
@@ -123,10 +124,10 @@ public class Field implements HasPublished {
     private static final String FK_JS_DOC = "/**\n"
             + "* Indicates that this field is a foreign key to another table or it is a self-reference key.\n"
             + "*/";
-    
+
     /**
-     * Returns if this field is foreign key to another table or it is
-     * a self-reference key.
+     * Returns if this field is foreign key to another table or it is a
+     * self-reference key.
      *
      * @return If this field is foreign key to another table or it is
      * self-reference key.
@@ -139,7 +140,7 @@ public class Field implements HasPublished {
     private static final String PK_JS_DOC = "/**\n"
             + "* Determines that this field is a primary key.\n"
             + "*/";
-    
+
     /**
      * Returns if this field is primary key.
      *
@@ -188,7 +189,7 @@ public class Field implements HasPublished {
     private static final String READOLNY_JS_DOC = "/**\n"
             + "* Determines if this field is readonly.\n"
             + "*/";
-    
+
     /**
      * Returns if this field is readonly.
      *
@@ -266,10 +267,10 @@ public class Field implements HasPublished {
      }
      */
 
-    
     private static final String NAME_JS_DOC = "/**\n"
             + "* The name of the field.\n"
             + "*/";
+
     /**
      * Returns the name of the field.
      *
@@ -297,7 +298,7 @@ public class Field implements HasPublished {
             + "* In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,\n"
             + "* but be able to generate right update sql clauses for multiple tables.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ORIGINAL_NAME_JS_DOC)
     public String getOriginalName() {
         return originalName;
@@ -313,7 +314,7 @@ public class Field implements HasPublished {
     private static final String DESCRIPTION_JS_DOC = "/**\n"
             + "* The description of the field.\n"
             + "*/";
-    
+
     /**
      * Returns description of the field.
      *
@@ -339,7 +340,7 @@ public class Field implements HasPublished {
     private static final String TYPE_INFO_JS_DOC = "/**\n"
             + "* The field's type information.\n"
             + "*/";
-    
+
     /**
      * Returns the field's type information
      *
@@ -366,7 +367,7 @@ public class Field implements HasPublished {
     private static final String SCHEMA_NAME_JS_DOC = "/**\n"
             + "* This field schema name.\n"
             + "*/";
-    
+
     /**
      * Returns the field's schema name.
      *
@@ -392,7 +393,7 @@ public class Field implements HasPublished {
     private static final String TABLE_NAME_JS_DOC = "/**\n"
             + "* This field table's name.\n"
             + "*/";
-    
+
     /**
      * Returns the field's table name.
      *
@@ -418,7 +419,7 @@ public class Field implements HasPublished {
     private static final String SIZE_JS_DOC = "/**\n"
             + "* The size of the field.\n"
             + "*/";
-    
+
     /**
      * Returns the field size.
      *
@@ -444,7 +445,7 @@ public class Field implements HasPublished {
     private static final String SCALE_JS_DOC = "/**\n"
             + "* The scale of the field.\n"
             + "*/";
-    
+
     /**
      * Returns the field's scale.
      *
@@ -470,7 +471,7 @@ public class Field implements HasPublished {
     private static final String PRECISION_JS_DOC = "/**\n"
             + "* The precision of the field.\n"
             + "*/";
-    
+
     /**
      * Returns the field's precision.
      *
@@ -496,7 +497,7 @@ public class Field implements HasPublished {
     private static final String SIGNED_JS_DOC = "/**\n"
             + "* Determines if the field is signed.\n"
             + "*/";
-    
+
     /**
      * Returns whether this field is signed.
      *
@@ -522,7 +523,7 @@ public class Field implements HasPublished {
     private static final String NULLABLE_JS_DOC = "/**\n"
             + "* Determines if field is nullable.\n"
             + "*/";
-    
+
     /**
      * Returns whether this field is nullable.
      *
@@ -556,9 +557,8 @@ public class Field implements HasPublished {
     }
 
     /**
-     * Assignes
-     * <code>aSourceField</code> information to this
-     * <code>Field</code> instance.
+     * Assignes <code>aSourceField</code> information to this <code>Field</code>
+     * instance.
      *
      * @param aSourceField <code>Field</code> instance used as a source for
      * assigning.
@@ -662,11 +662,24 @@ public class Field implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

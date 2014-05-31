@@ -36,7 +36,7 @@ public class StatementsGenerator implements ChangeVisitor {
         protected static final Logger queriesLogger = Logger.getLogger(StatementsLogEntry.class.getName());
         protected Converter converter;
         public String clause;
-        public List<Change.Value> parameters = new ArrayList<>();
+        public List<ChangeValue> parameters = new ArrayList<>();
         public boolean valid = true;
 
         public StatementsLogEntry(Converter aConverter) {
@@ -48,7 +48,7 @@ public class StatementsGenerator implements ChangeVisitor {
             if (valid) {
                 try (PreparedStatement stmt = aConnection.prepareStatement(clause)) {
                     for (int i = 1; i <= parameters.size(); i++) {
-                        Change.Value v = parameters.get(i - 1);
+                        ChangeValue v = parameters.get(i - 1);
                         converter.convert2JdbcAndAssign(v.value, v.type, aConnection, i, stmt);
                     }
                     if (queriesLogger.isLoggable(Level.FINE)) {
@@ -101,7 +101,7 @@ public class StatementsGenerator implements ChangeVisitor {
      *
      * @param aKeys Keys array to deal with.
      */
-    protected String generateWhereClause(List<Change.Value> aKeys) {
+    protected String generateWhereClause(List<ChangeValue> aKeys) {
         StringBuilder whereClause = new StringBuilder();
         for (int i = 0; i < aKeys.size(); i++) {
             if (i > 0) {
@@ -151,7 +151,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
                     chunk.contexted = true;
                     if (aChange.data[i] == null) {
-                        chunk.insert.parameters.add(new Change.Value(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                        chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
                     } else {
                         chunk.insert.parameters.add(aChange.data[i]);
                     }
@@ -176,7 +176,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         chunk.dataColumnsNames.append(", ");
                     }
                     chunk.dataColumnsNames.append(schemaContextFieldName);
-                    chunk.insert.parameters.add(new Change.Value(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                    chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
                 }
             }
             //
@@ -196,8 +196,8 @@ public class StatementsGenerator implements ChangeVisitor {
 
         public StatementsLogEntry update;
         public StringBuilder columnsClause;
-        public List<Change.Value> keys;
-        public List<Change.Value> data;
+        public List<ChangeValue> keys;
+        public List<ChangeValue> data;
     }
 
     @Override
@@ -238,7 +238,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         if (chunk.keys == null) {
                             chunk.keys = new ArrayList<>();
                         }
-                        chunk.keys.add(new Change.Value(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
+                        chunk.keys.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
                     }
                 }
             }
@@ -274,7 +274,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(delete);
                     }
-                    delete.parameters.add(new Change.Value(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
+                    delete.parameters.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
                 }
             }
             for (String tableName : deletes.keySet()) {

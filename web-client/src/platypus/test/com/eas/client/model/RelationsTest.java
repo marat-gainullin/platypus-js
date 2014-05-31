@@ -9,17 +9,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
-import com.eas.client.form.api.JSContainers;
-import com.eas.client.form.api.JSControls;
-import com.eas.client.form.api.ModelJSControls;
+import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsModelWidgets;
+import com.eas.client.form.js.JsWidgets;
 import com.eas.client.CancellableCallback;
-import com.eas.client.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
@@ -110,9 +110,9 @@ public class RelationsTest extends ModelBaseTest {
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
-		JSControls.initControls();
-		JSContainers.initContainers();
-		ModelJSControls.initModelControls();
+		JsWidgets.init();
+		JsContainers.init();
+		JsModelWidgets.init();
 		AppClient client = initDevelopTestClient();
 		Application.publish(client);
 		AppClient.publishApi(client);

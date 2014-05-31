@@ -9,6 +9,7 @@ import java.util.logging.LogRecord;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.logging.client.TextLogFormatter;
+import com.google.gwt.logging.impl.StackTracePrintStream;
 
 /**
  * 
@@ -16,8 +17,8 @@ import com.google.gwt.logging.client.TextLogFormatter;
  */
 public class PlatypusLogFormatter extends TextLogFormatter {
 
-    private boolean showStackTraces;
-    
+	private boolean showStackTraces;
+
 	public PlatypusLogFormatter(boolean showStackTraces) {
 		super(showStackTraces);
 		this.showStackTraces = showStackTraces;
@@ -32,10 +33,12 @@ public class PlatypusLogFormatter extends TextLogFormatter {
 		Date date = new Date(event.getMillis());
 		message.append(dateFormat.format(date)).append("\t");
 		message.append(event.getLevel().getName()).append("\t");
-		if(event.getMessage() != null)
+		if (event.getMessage() != null)
 			message.append(event.getMessage()).append("\t").append("\n");
 		if (event.getThrown() != null && showStackTraces) {
-			message.append(getStackTraceAsString(event.getThrown(), "\n", "\t"));
+			StringBuilder traceSOut = new StringBuilder();
+			event.getThrown().printStackTrace(new StackTracePrintStream(traceSOut));
+			message.append(traceSOut);
 		}
 		return message.toString();
 	}

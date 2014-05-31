@@ -6,9 +6,13 @@ package com.eas.client.forms;
 
 import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.resources.images.IconCache;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import javax.swing.ImageIcon;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -17,8 +21,11 @@ import javax.swing.ImageIcon;
 @ScriptObj(name = "Icon", jsDoc = "/**\n"
         + "* Image icon.\n"
         + "*/")
-public class IconResources {
+public class IconResources implements HasPublished {
 
+    protected static JSObject publisher;
+    protected Object published;
+    
     @ScriptFunction(params = {"path"}, jsDoc = "/**\n"
             + "* Loads an image resource.\n"
             + "* @param path a path or an URL to the icon resource\n"
@@ -36,4 +43,28 @@ public class IconResources {
             }
         }
     }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
+    
 }
