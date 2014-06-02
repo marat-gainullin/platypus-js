@@ -17,7 +17,7 @@ import jdk.nashorn.internal.ir.IndexNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
- *
+ * A completion context for a data model entity.
  * @author vv
  */
 public class EntityCompletionContext extends CompletionContext {

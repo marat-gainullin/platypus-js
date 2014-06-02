@@ -13,7 +13,9 @@ import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;
 
 /**
- *
+ * The class represents a data model field item in a completion
+ * pop-up list.
+ * 
  * @author mg
  */
 public class FieldCompletionItem extends JsCompletionItem {

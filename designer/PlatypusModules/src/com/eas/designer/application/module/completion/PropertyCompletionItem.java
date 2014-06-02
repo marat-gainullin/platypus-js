@@ -12,10 +12,11 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.editor.completion.Completion;
 import org.openide.ErrorManager;
-import org.openide.util.NbBundle;
 
 /**
- *
+ * The class represents a JavaScript property item in 
+ * a completion pop-up list.
+ * 
  * @author mg
  */
 public class PropertyCompletionItem extends JsCompletionItem {

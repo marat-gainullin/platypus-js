@@ -18,7 +18,8 @@ import org.netbeans.spi.editor.completion.support.CompletionUtilities;
 import org.openide.ErrorManager;
 
 /**
- *
+ * The class represents a JavaScript function item in a completion
+ * pop-up list.
  * @author vv
  */
 public class JsFunctionCompletionItem extends JsCompletionItem {

@@ -51,7 +51,7 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * This class helps to format the JsDoc comments.
  * @author Martin Adamek
  */
 public class JsCommentFormatter {

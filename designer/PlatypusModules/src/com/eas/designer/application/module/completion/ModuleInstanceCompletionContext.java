@@ -23,8 +23,8 @@ import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
- * Represents an instance of a Module, Form or Report.
- *
+ * A completion context for an instance of a module.
+ * 
  * @author vv
  */
 public class ModuleInstanceCompletionContext extends CompletionContext {

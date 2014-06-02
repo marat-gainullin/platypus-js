@@ -18,7 +18,7 @@ import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 
 /**
- *
+ * Provides specific completion for the JavaScript documents.
  * @author vv
  */
 public class ModuleCompletionProvider implements CompletionProvider {

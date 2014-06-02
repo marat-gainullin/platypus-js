@@ -19,26 +19,50 @@ import jdk.nashorn.internal.ir.IndexNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
+ * The base class for a completion context. A completion context for some file
+ * of object knows how to fill the completion items and how get a descendant
+ * completion context.
  *
  * @author vv
  */
 public class CompletionContext {
 
-    private static final int QUOTED_STRING_MIN_LENGTH = 2;
     private final Class<?> scriptClass;
 
+    /**
+     * The class constructor.
+     * @param aScriptClass a class to provide the completion items using reflection
+     */
     public CompletionContext(Class<?> aScriptClass) {
         scriptClass = aScriptClass;
     }
 
+    /**
+     * Get a script class.
+     * @return a class to provide the completion items using reflection
+     */
     public Class<?> getScriptClass() {
         return scriptClass;
     }
-
+    
+    /**
+     * Applies completion items to be shown in a pop-up list.
+     * @param point a document's cursor position environment 
+     * @param offset a cursor position
+     * @param resultSet a container to add completion items
+     * @throws Exception if something goes wrong
+     */
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillJavaCompletionItems(point, resultSet);
     }
 
+    /**
+     * Gets a child completion context.
+     * @param token an element of interest
+     * @param offset a cursor position
+     * @return an instance of completion context
+     * @throws Exception if something goes wrong
+     */
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         return null;
     }
@@ -101,8 +125,8 @@ public class CompletionContext {
 
     protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
         return (token.node instanceof IdentNode && propertyName.equals(token.name))
-                || (token.node instanceof IndexNode 
-                && ((IndexNode)token.node).getIndex().getType().isString()
+                || (token.node instanceof IndexNode
+                && ((IndexNode) token.node).getIndex().getType().isString()
                 && propertyName.equals(removeQuotes(token.name)));
     }
 
