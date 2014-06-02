@@ -423,7 +423,7 @@ public class Model implements HasPublished{
 		Object.defineProperty(publishedModel, "createQuery", { 
 			get : function(){
 				return function(aQueryId) {
-					$wnd.Logger.warning("createQuery deprecated call detected. Use loadEntity() instead.");
+					$wnd.P.Logger.warning("createQuery deprecated call detected. Use loadEntity() instead.");
 					return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
 				}
 			}

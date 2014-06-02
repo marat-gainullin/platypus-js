@@ -119,11 +119,11 @@ public class Application {
 	}
 
 	protected native static JavaScriptObject getModule(String appElement)/*-{
-		return $wnd.Modules.get(appElement);
+		return $wnd.P.Modules.get(appElement);
 	}-*/;
 
 	public native static PlatypusWindow getStartForm(String appElement)/*-{
-		var existingModule = $wnd.Modules.get(appElement);
+		var existingModule = $wnd.P.Modules.get(appElement);
 		return existingModule["x-Form"];
 	}-*/;
 
@@ -156,28 +156,44 @@ public class Application {
 				try{
 					_func.apply(_func, userArgs);
 				}catch(e){
-					$wnd.Logger.severe(e);
+					$wnd.P.Logger.severe(e);
 				}
 			});
 		}
 		
-		$wnd.selectFile = function(aCallback) {
+		(function() {
+		    // this === global;
+		    var global = $wnd;
+		    var oldP = global.P;
+		    global.P = {};
+		    global.P.restore = function() {
+		        var ns = global.P;
+		        global.P = oldP;
+		        return ns;
+		    };
+		     //global.P = this; // global scope of api - for legacy applications
+		     //global.P.restore = function() {
+		     //throw "Legacy api can't restore the global namespace.";
+		     //};
+		})();
+		
+		$wnd.P.selectFile = function(aCallback) {
 			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
-		$wnd.Resource = {};
-		Object.defineProperty($wnd.Resource, "upload", {get : function(){
+		$wnd.P.Resource = {};
+		Object.defineProperty($wnd.P.Resource, "upload", {get : function(){
 				return function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
 					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aCompleteCallback, aProgressCallback, aAbortCallback);
 				}
 		}});
-		Object.defineProperty($wnd.Resource, "load", {get : function(){
+		Object.defineProperty($wnd.P.Resource, "load", {get : function(){
 		        return function(aResName, onSuccess, onFailure){
-	            	return $wnd.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, false));
+	            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, false));
 		        };
 		}});
 		
-		Object.defineProperty($wnd.Resource, "loadText", {get : function(){
+		Object.defineProperty($wnd.P.Resource, "loadText", {get : function(){
 		        return function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aOnFailure){
 		        	var onSuccess = aOnSuccessOrEncoding;
 		        	var onFailure = aOnSuccessOrOnFailure;
@@ -185,24 +201,23 @@ public class Application {
 		        		onSuccess = aOnSuccessOrOnFailure;
 		        		onFailure = aOnFailure;
 		        	}
-		        	return $wnd.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, true));
+		        	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, true));
 		        };
 		}});
 		
-		$wnd.logout = function(onSuccess, onFailure) {
+		$wnd.P.logout = function(onSuccess, onFailure) {
 			return @com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 		}
 		
-		$wnd.getElementComputedStyle = function(_elem) {
-			if (typeof _elem.currentStyle != 'undefined')
-			{
+		$wnd.P.getElementComputedStyle = function(_elem) {
+			if (typeof _elem.currentStyle != 'undefined'){
 				return _elem.currentStyle; 
 		    } else {
 		    	return document.defaultView.getComputedStyle(_elem, null); 
 		    }			
 		}
 	
-		$wnd.boxAsJs = function(aValue) {
+		$wnd.P.boxAsJs = function(aValue) {
 			if(aValue == null)
 				return null;
 			else if(@com.bearsoft.rowset.Utils::isNumber(Ljava/lang/Object;)(aValue))
@@ -213,7 +228,7 @@ public class Application {
 				return aValue;
 		}
 		
-		$wnd.boxAsJava = function (aValue) {
+		$wnd.P.boxAsJava = function (aValue) {
 			var valueType = typeof(aValue);
 			if(valueType == "string")
 				return aValue;
@@ -552,19 +567,17 @@ public class Application {
             return (num << cnt) | (num >>> (32 - cnt));
         }
 
-		if(!$wnd.platypus)
-			$wnd.platypus = {};
-		$wnd.platypus.getCached = function(appElementId) {
+		$wnd.P.getCached = function(appElementId) {
 			return aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementId);
 		};
-		$wnd.platypus.readModel = function(appElementDoc, aModule, aTarget) {
+		$wnd.P.readModel = function(appElementDoc, aModule, aTarget) {
 			if(!aTarget)
 				aTarget = {};
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModule);
 			nativeModel.@com.eas.client.model.Model::publishTopLevelFacade(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/model/Model;)(aModule);
 			return nativeModel;
 		};
-		$wnd.platypus.readForm = function(appElementDoc, aModule, aTarget) {
+		$wnd.P.readForm = function(appElementDoc, aModule, aTarget) {
 			if(!aTarget)
 				aTarget = {};
 			var nativeModel = aModule.model.unwrap();
@@ -572,18 +585,18 @@ public class Application {
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
 		};
-		$wnd.platypus.HTML5 = "Html5 client";
-		$wnd.platypus.J2SE = "Java SE client";
-		$wnd.platypus.agent = $wnd.platypus.HTML5; 
+		$wnd.P.HTML5 = "Html5 client";
+		$wnd.P.J2SE = "Java SE client";
+		$wnd.P.agent = $wnd.P.platypus.HTML5; 
 		function _Modules() {
 			var platypusModules = {};
 			this.get = function(aModuleId) {
 				var pModule = platypusModules[aModuleId];
 				if (pModule == null || pModule == undefined) {
-					if(!$wnd.platypusModulesConstructors) {
-						throw 'No $wnd.platypusModulesConstructors';
+					if(!$wnd.P.platypusModulesConstructors) {
+						throw 'No $wnd.P.platypusModulesConstructors';
 					}
-					var mc = $wnd.platypusModulesConstructors[aModuleId];
+					var mc = $wnd.P.platypusModulesConstructors[aModuleId];
 					if (mc != null && mc != undefined) {
 						pModule = new mc();
 						platypusModules[aModuleId] = pModule;
@@ -593,33 +606,33 @@ public class Application {
 				return pModule;
 			}
 		}
-		$wnd.Modules = new _Modules();
-		$wnd.Module = function(aModuleId)
+		$wnd.P.Modules = new _Modules();
+		$wnd.P.Module = function(aModuleId)
 		{
-			var mc = $wnd.platypusModulesConstructors[aModuleId];
+			var mc = $wnd.P.platypusModulesConstructors[aModuleId];
 			if (mc){
 				mc.call(this);
 			} else
 				throw 'No module constructor to module: ' + aModuleId;
 		};
-		$wnd.Form = $wnd.Module;
-		$wnd.Form.getShownForm = function(aFormKey){
+		$wnd.P.Form = $wnd.P.Module;
+		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		}
-		$wnd.ServerModule = function(aModuleId){
-			$wnd.platypus.defineServerModule(aModuleId, this);
+		$wnd.P.ServerModule = function(aModuleId){
+			$wnd.P.defineServerModule(aModuleId, this);
 		};
-		$wnd.ServerReport = function(aModuleId){
-			$wnd.platypus.defineServerModule(aModuleId, this);
+		$wnd.P.ServerReport = function(aModuleId){
+			$wnd.P.defineServerModule(aModuleId, this);
 		};
-		$wnd.Report = $wnd.ServerReport;
+		$wnd.P.Report = $wnd.P.ServerReport;
 		
-		Object.defineProperty($wnd.Form, "shown", {
+		Object.defineProperty($wnd.P.Form, "shown", {
 			get : function() {
 				return @com.eas.client.form.PlatypusWindow::getShownForms()();
 			}
 		});
-		Object.defineProperty($wnd.Form, "onChange", {
+		Object.defineProperty($wnd.P.Form, "onChange", {
 			get : function() {
 				return @com.eas.client.form.PlatypusWindow::getOnChange()();
 			},
@@ -627,7 +640,7 @@ public class Application {
 				@com.eas.client.form.PlatypusWindow::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
-		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
+		$wnd.P.require = function (aDeps, aOnSuccess, aOnFailure) {
 			var deps = Array.isArray(aDeps) ? aDeps : [aDeps];
 			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aOnSuccess, aOnFailure);
 		} 
@@ -637,8 +650,8 @@ public class Application {
 				return appClient.@com.eas.client.application.AppClient::getImageResource(Ljava/lang/String;)(aIconName != null ? '' + aIconName : null);
 			}
 		}
-		$wnd.Icon = new _Icons();
-		$wnd.Icons = $wnd.Icon;
+		$wnd.P.Icon = new _Icons();
+		$wnd.P.Icons = $wnd.P.Icon;
 		function _Color(aRed, aGreen, aBlue, aAlpha){
 			var _red = 0, _green = 0, _blue = 0, _alpha = 0xff;
 			if(arguments.length == 1){
@@ -682,34 +695,34 @@ public class Application {
 				return "#"+sred+sgreen+sblue;
 			}
 		}; 
-		$wnd.Color = _Color;
-		$wnd.Color.black = new $wnd.Color(0,0,0);
-		$wnd.Color.BLACK = new $wnd.Color(0,0,0);
-		$wnd.Color.blue = new $wnd.Color(0,0,0xff);
-		$wnd.Color.BLUE = new $wnd.Color(0,0,0xff);
-		$wnd.Color.cyan = new $wnd.Color(0,0xff,0xff);
-		$wnd.Color.CYAN = new $wnd.Color(0,0xff,0xff);
-		$wnd.Color.DARK_GRAY = new $wnd.Color(0x40, 0x40, 0x40);
-		$wnd.Color.darkGray = new $wnd.Color(0x40, 0x40, 0x40);
-		$wnd.Color.gray = new $wnd.Color(0x80, 0x80, 0x80);
-		$wnd.Color.GRAY = new $wnd.Color(0x80, 0x80, 0x80);
-		$wnd.Color.green = new $wnd.Color(0, 0xff, 0);
-		$wnd.Color.GREEN = new $wnd.Color(0, 0xff, 0);
-		$wnd.Color.LIGHT_GRAY = new $wnd.Color(0xC0, 0xC0, 0xC0);
-		$wnd.Color.lightGray = new $wnd.Color(0xC0, 0xC0, 0xC0);
-		$wnd.Color.magenta = new $wnd.Color(0xff, 0, 0xff);
-		$wnd.Color.MAGENTA = new $wnd.Color(0xff, 0, 0xff);
-		$wnd.Color.orange = new $wnd.Color(0xff, 0xC8, 0);
-		$wnd.Color.ORANGE = new $wnd.Color(0xff, 0xC8, 0);
-		$wnd.Color.pink = new $wnd.Color(0xFF, 0xAF, 0xAF);
-		$wnd.Color.PINK = new $wnd.Color(0xFF, 0xAF, 0xAF);
-		$wnd.Color.red = new $wnd.Color(0xFF, 0, 0);
-		$wnd.Color.RED = new $wnd.Color(0xFF, 0, 0);
-		$wnd.Color.white = new $wnd.Color(0xFF, 0xff, 0xff);
-		$wnd.Color.WHITE = new $wnd.Color(0xFF, 0xff, 0xff);
-		$wnd.Color.yellow = new $wnd.Color(0xFF, 0xff, 0);
-		$wnd.Color.YELLOW = new $wnd.Color(0xFF, 0xff, 0);
-		$wnd.Colors = $wnd.Color;
+		$wnd.P.Color = _Color;
+		$wnd.P.Color.black = new $wnd.P.Color(0,0,0);
+		$wnd.P.Color.BLACK = new $wnd.P.Color(0,0,0);
+		$wnd.P.Color.blue = new $wnd.P.Color(0,0,0xff);
+		$wnd.P.Color.BLUE = new $wnd.P.Color(0,0,0xff);
+		$wnd.P.Color.cyan = new $wnd.P.Color(0,0xff,0xff);
+		$wnd.P.Color.CYAN = new $wnd.P.Color(0,0xff,0xff);
+		$wnd.P.Color.DARK_GRAY = new $wnd.P.Color(0x40, 0x40, 0x40);
+		$wnd.P.Color.darkGray = new $wnd.P.Color(0x40, 0x40, 0x40);
+		$wnd.P.Color.gray = new $wnd.P.Color(0x80, 0x80, 0x80);
+		$wnd.P.Color.GRAY = new $wnd.P.Color(0x80, 0x80, 0x80);
+		$wnd.P.Color.green = new $wnd.P.Color(0, 0xff, 0);
+		$wnd.P.Color.GREEN = new $wnd.P.Color(0, 0xff, 0);
+		$wnd.P.Color.LIGHT_GRAY = new $wnd.P.Color(0xC0, 0xC0, 0xC0);
+		$wnd.P.Color.lightGray = new $wnd.P.Color(0xC0, 0xC0, 0xC0);
+		$wnd.P.Color.magenta = new $wnd.P.Color(0xff, 0, 0xff);
+		$wnd.P.Color.MAGENTA = new $wnd.P.Color(0xff, 0, 0xff);
+		$wnd.P.Color.orange = new $wnd.P.Color(0xff, 0xC8, 0);
+		$wnd.P.Color.ORANGE = new $wnd.P.Color(0xff, 0xC8, 0);
+		$wnd.P.Color.pink = new $wnd.P.Color(0xFF, 0xAF, 0xAF);
+		$wnd.P.Color.PINK = new $wnd.P.Color(0xFF, 0xAF, 0xAF);
+		$wnd.P.Color.red = new $wnd.P.Color(0xFF, 0, 0);
+		$wnd.P.Color.RED = new $wnd.P.Color(0xFF, 0, 0);
+		$wnd.P.Color.white = new $wnd.P.Color(0xFF, 0xff, 0xff);
+		$wnd.P.Color.WHITE = new $wnd.P.Color(0xFF, 0xff, 0xff);
+		$wnd.P.Color.yellow = new $wnd.P.Color(0xFF, 0xff, 0);
+		$wnd.P.Color.YELLOW = new $wnd.P.Color(0xFF, 0xff, 0);
+		$wnd.P.Colors = $wnd.P.Color;
 		
 		function _Font(aFamily, aStyle, aSize){
 			var _self = this;
@@ -717,8 +730,8 @@ public class Application {
 			Object.defineProperty(_self, "style", { get:function(){ return aStyle;} });
 			Object.defineProperty(_self, "size", { get:function(){ return aSize;} });			
 		}; 
-		$wnd.Font = _Font;
-		$wnd.Cursor = {
+		$wnd.P.Font = _Font;
+		$wnd.P.Cursor = {
 		    CROSSHAIR : "crosshair",
 		    DEFAULT : "default",
 		    AUTO : "auto",
@@ -737,19 +750,17 @@ public class Application {
 		    WAIT : "wait",
 		    W_RESIZE : "w-resize"
 		};
-		$wnd.IDGenerator = {
-			genID : function()
-			{
+		$wnd.P.IDGenerator = {
+			genID : function(){
 				return @com.bearsoft.rowset.utils.IDGenerator::genId()();
 			}
 		};
-		$wnd.MD5Generator = {
-			generate : function(aSource)
-			{
+		$wnd.P.MD5Generator = {
+			generate : function(aSource){
 				return hex_md5(aSource).toLowerCase();
 			}
 		};
-		$wnd.Logger = new (function(){
+		$wnd.P.Logger = new (function(){
 			var nativeLogger = @com.eas.client.application.Application::platypusApplicationLogger;
 			this.severe = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::severe(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
@@ -873,24 +884,24 @@ public class Application {
 		    	}
 		    });
 		}
-		$wnd.Style = _Style;
+		$wnd.P.Style = _Style;
 		
-	    $wnd.VK_ALT = @com.google.gwt.event.dom.client.KeyCodes::KEY_ALT;
-	    $wnd.VK_BACKSPACE = @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE;
-	    $wnd.VK_BACKSPACE = @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE;
-	    $wnd.VK_DELETE = @com.google.gwt.event.dom.client.KeyCodes::KEY_DELETE;
-	    $wnd.VK_DOWN = @com.google.gwt.event.dom.client.KeyCodes::KEY_DOWN;
-	    $wnd.VK_END = @com.google.gwt.event.dom.client.KeyCodes::KEY_END;
-	    $wnd.VK_ENTER = @com.google.gwt.event.dom.client.KeyCodes::KEY_ENTER;
-	    $wnd.VK_ESCAPE = @com.google.gwt.event.dom.client.KeyCodes::KEY_ESCAPE;
-	    $wnd.VK_HOME = @com.google.gwt.event.dom.client.KeyCodes::KEY_HOME;
-	    $wnd.VK_LEFT = @com.google.gwt.event.dom.client.KeyCodes::KEY_LEFT;
-	    $wnd.VK_PAGEDOWN = @com.google.gwt.event.dom.client.KeyCodes::KEY_PAGEDOWN;
-	    $wnd.VK_PAGEUP = @com.google.gwt.event.dom.client.KeyCodes::KEY_PAGEUP;
-	    $wnd.VK_RIGHT = @com.google.gwt.event.dom.client.KeyCodes::KEY_RIGHT;
-	    $wnd.VK_SHIFT = @com.google.gwt.event.dom.client.KeyCodes::KEY_SHIFT;
-	    $wnd.VK_TAB = @com.google.gwt.event.dom.client.KeyCodes::KEY_TAB;
-        $wnd.VK_UP = @com.google.gwt.event.dom.client.KeyCodes::KEY_UP;
+	    $wnd.P.VK_ALT = @com.google.gwt.event.dom.client.KeyCodes::KEY_ALT;
+	    $wnd.P.VK_BACKSPACE = @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE;
+	    $wnd.P.VK_BACKSPACE = @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE;
+	    $wnd.P.VK_DELETE = @com.google.gwt.event.dom.client.KeyCodes::KEY_DELETE;
+	    $wnd.P.VK_DOWN = @com.google.gwt.event.dom.client.KeyCodes::KEY_DOWN;
+	    $wnd.P.VK_END = @com.google.gwt.event.dom.client.KeyCodes::KEY_END;
+	    $wnd.P.VK_ENTER = @com.google.gwt.event.dom.client.KeyCodes::KEY_ENTER;
+	    $wnd.P.VK_ESCAPE = @com.google.gwt.event.dom.client.KeyCodes::KEY_ESCAPE;
+	    $wnd.P.VK_HOME = @com.google.gwt.event.dom.client.KeyCodes::KEY_HOME;
+	    $wnd.P.VK_LEFT = @com.google.gwt.event.dom.client.KeyCodes::KEY_LEFT;
+	    $wnd.P.VK_PAGEDOWN = @com.google.gwt.event.dom.client.KeyCodes::KEY_PAGEDOWN;
+	    $wnd.P.VK_PAGEUP = @com.google.gwt.event.dom.client.KeyCodes::KEY_PAGEUP;
+	    $wnd.P.VK_RIGHT = @com.google.gwt.event.dom.client.KeyCodes::KEY_RIGHT;
+	    $wnd.P.VK_SHIFT = @com.google.gwt.event.dom.client.KeyCodes::KEY_SHIFT;
+	    $wnd.P.VK_TAB = @com.google.gwt.event.dom.client.KeyCodes::KEY_TAB;
+        $wnd.P.VK_UP = @com.google.gwt.event.dom.client.KeyCodes::KEY_UP;
 	}-*/;
 
 	public static void run() throws Exception {
@@ -966,8 +977,8 @@ public class Application {
 	}
 
 	protected static native void onReady()/*-{
-		if ($wnd.platypus.ready)
-			$wnd.platypus.ready();
+		if ($wnd.P.ready)
+			$wnd.P.ready();
 	}-*/;
 
 	protected static void startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators) throws Exception {

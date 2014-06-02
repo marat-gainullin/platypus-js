@@ -7,7 +7,7 @@ public class JsModel {
 
 	public native static void init()/*-{
 		
-		$wnd.Entity = function(aModel){
+		$wnd.P.Entity = function(aModel){
 			var delegate = arguments.length > 1 ? arguments[1] : @com.eas.client.model.Entity::new(Lcom/eas/client/model/Model;)(aModel.unwrap());
 			delegate.@com.eas.client.model.Entity::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(this);
 		};
@@ -15,6 +15,6 @@ public class JsModel {
 	}-*/;
 	
 	public native static JavaScriptObject publish(Entity toBePublished)/*-{
-		return new $wnd.Entity(null, toBePublished);
+		return new $wnd.P.Entity(null, toBePublished);
 	}-*/;
 }

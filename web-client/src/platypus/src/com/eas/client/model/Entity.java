@@ -663,7 +663,7 @@ public class Entity implements RowsetListener, HasPublished{
 						return aEntity.@com.eas.client.model.Entity::find(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
 					},
 					findById : function(aValue) {
-						return aEntity.@com.eas.client.model.Entity::findById(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+						return aEntity.@com.eas.client.model.Entity::findById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 					},
 					// relations interface
 					beginUpdate : function() {
@@ -720,13 +720,13 @@ public class Entity implements RowsetListener, HasPublished{
 						if(rValue == null){
 							rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
 						}
-						return $wnd.boxAsJs(rValue);
+						return $wnd.P.boxAsJs(rValue);
 					},
 					// modify interface
 					updateObject : function(aColIndex, aValue) {
 						var rowset = getRowset();
 						if(rowset != null)
-							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.boxAsJava(aValue));
+							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.P.boxAsJava(aValue));
 					},
 					insert : function() {
 						aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
@@ -935,12 +935,12 @@ public class Entity implements RowsetListener, HasPublished{
 					published = {}; 
 				Object.defineProperty(published, "getColumnObject", { get : function(){
 					return function(aFieldName) {
-						return $wnd.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(aFieldName));
+						return $wnd.P.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(aFieldName));
 					}
 				}});
 				Object.defineProperty(published, "setColumnObject", { get : function(){
 					return function(aFieldName, aValue) {
-						aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(aFieldName, $wnd.boxAsJava(aValue));
+						aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(aFieldName, $wnd.P.boxAsJava(aValue));
 					}
 				}});
 				Object.defineProperty(published, "unwrap", { get : function(){
@@ -1107,10 +1107,10 @@ public class Entity implements RowsetListener, HasPublished{
 					});
 					Object.defineProperty(published, "value", {
 						get : function() {
-							return $wnd.boxAsJs(aField.@com.bearsoft.rowset.metadata.Parameter::getJsValue()());
+							return $wnd.P.boxAsJs(aField.@com.bearsoft.rowset.metadata.Parameter::getJsValue()());
 						},
 						set : function(aValue) {
-							aField.@com.bearsoft.rowset.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+							aField.@com.bearsoft.rowset.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 						}
 					});
 				}

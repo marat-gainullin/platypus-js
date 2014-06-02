@@ -12,11 +12,11 @@ public class JsModelWidgets {
 		}
 		
 		// **************************************************************************
-		$wnd.ModelGrid = function () {
+		$wnd.P.ModelGrid = function () {
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
-			if (!(this instanceof $wnd.ModelGrid)) {
-				throw  ' use  "new ModelGrid()" !';
+			if (!(this instanceof $wnd.P.ModelGrid)) {
+				throw  ' use  "new P.ModelGrid()" !';
 			}
 
 			var published = this;
@@ -34,11 +34,11 @@ public class JsModelWidgets {
 		};	
 		
 		// **************************************************************************
-		$wnd.ModelCheckBox = function (aText) {
+		$wnd.P.ModelCheckBox = function (aText) {
 			var aComponent = arguments.length>1?arguments[1]:null;
 			
-			if (!(this instanceof $wnd.ModelCheckBox)) {
-				throw  ' use  "new ModelCheckBox()" !';
+			if (!(this instanceof $wnd.P.ModelCheckBox)) {
+				throw  ' use  "new P.ModelCheckBox()" !';
 			}
 
 			var published = this;
@@ -57,11 +57,11 @@ public class JsModelWidgets {
 		};	
 
 		// **************************************************************************
-		$wnd.ModelFormattedField = function () {
+		$wnd.P.ModelFormattedField = function () {
 			var aComponent = arguments.length>0?arguments[0]:null;
 			
-			if (!(this instanceof $wnd.ModelFormattedField)) {
-				throw  ' use  "new ModelFormattedField()" !';
+			if (!(this instanceof $wnd.P.ModelFormattedField)) {
+				throw  ' use  "new P.ModelFormattedField()" !';
 			}
 
 			var published = this;
@@ -80,11 +80,11 @@ public class JsModelWidgets {
 		};	
 
 		// **************************************************************************
-		$wnd.ModelTextArea = function () {
+		$wnd.P.ModelTextArea = function () {
 			var aComponent = arguments.length>0?arguments[0]:null;
 			
-			if (!(this instanceof $wnd.ModelTextArea)) {
-				throw  ' use  "new ModelTextArea()" !';
+			if (!(this instanceof $wnd.P.ModelTextArea)) {
+				throw  ' use  "new P.ModelTextArea()" !';
 			}
 
 			var published = this;
@@ -103,11 +103,11 @@ public class JsModelWidgets {
 		};	
 
 		// **************************************************************************
-		$wnd.ModelDate = function () {
+		$wnd.P.ModelDate = function () {
 			var aComponent = arguments.length>0?arguments[0]:null;
 			
-			if (!(this instanceof $wnd.ModelDate)) {
-				throw  ' use  "new ModelDate()" !';
+			if (!(this instanceof $wnd.P.ModelDate)) {
+				throw  ' use  "new P.ModelDate()" !';
 			}
 
 			var published = this;
@@ -125,11 +125,11 @@ public class JsModelWidgets {
 		};	
 
 		// **************************************************************************
-		$wnd.ModelSpin = function () {
+		$wnd.P.ModelSpin = function () {
 			var aComponent = arguments.length>0?arguments[0]:null;
 			
-			if (!(this instanceof $wnd.ModelSpin)) {
-				throw  ' use  "new ModelSpin()" !';
+			if (!(this instanceof $wnd.P.ModelSpin)) {
+				throw  ' use  "new P.ModelSpin()" !';
 			}
 
 			var published = this;
@@ -148,11 +148,11 @@ public class JsModelWidgets {
 		};	
 
 		// **************************************************************************
-		$wnd.ModelCombo = function () {
+		$wnd.P.ModelCombo = function () {
 			var aComponent = arguments.length>0?arguments[0]:null;
 			
-			if (!(this instanceof $wnd.ModelCombo)) {
-				throw  ' use  "new ModelCombo()" !';
+			if (!(this instanceof $wnd.P.ModelCombo)) {
+				throw  ' use  "new P.ModelCombo()" !';
 			}
 
 			var published = this;

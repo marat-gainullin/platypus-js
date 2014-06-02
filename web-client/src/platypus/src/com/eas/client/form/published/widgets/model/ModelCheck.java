@@ -41,7 +41,7 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> {
 			},
 			set : function(aValue) {
 				if (aValue != null) {
-					var javaValue = $wnd.boxAsJava((false != aValue));
+					var javaValue = $wnd.P.boxAsJava((false != aValue));
 					aField.@com.eas.client.form.published.widgets.model.ModelCheck::setValue(Ljava/lang/Boolean;Z)(javaValue, true);
 				} else {
 					aField.@com.eas.client.form.published.widgets.model.ModelCheck::setValue(Ljava/lang/Boolean;Z)(null, true);

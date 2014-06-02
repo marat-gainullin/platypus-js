@@ -8,11 +8,11 @@ public class PublishedFont extends JavaScriptObject {
 	}
 
 	public final native boolean isBold()/*-{
-		return this.style == $wnd.FontStyle.BOLD || this.style == $wnd.FontStyle.BOLD_ITALIC;
+		return this.style == $wnd.P.FontStyle.BOLD || this.style == $wnd.P.FontStyle.BOLD_ITALIC;
 	}-*/;
 
 	public final native boolean isItalic()/*-{
-		return this.style == $wnd.FontStyle.ITALIC || this.style == $wnd.FontStyle.BOLD_ITALIC;
+		return this.style == $wnd.P.FontStyle.ITALIC || this.style == $wnd.P.FontStyle.BOLD_ITALIC;
 	}-*/;
 
 	public final native String getFamily()/*-{
@@ -28,7 +28,7 @@ public class PublishedFont extends JavaScriptObject {
 	}-*/;
 
 	public static native PublishedFont create(String aFamily, int aStyle, int aSize)/*-{
-		return new $wnd.Font(aFamily, aStyle, aSize);
+		return new $wnd.P.Font(aFamily, aStyle, aSize);
 	}-*/;
 
 	public final String toStyled() {

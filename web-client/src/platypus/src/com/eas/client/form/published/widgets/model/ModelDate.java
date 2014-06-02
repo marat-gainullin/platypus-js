@@ -65,10 +65,10 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
-				return $wnd.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelDate::getJsValue()());
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelDate::getJsValue()());
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
 	}-*/;

@@ -48,92 +48,92 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class Publisher {
 
 	public native static PublishedComponent publish(PlatypusRadioButton aComponent)/*-{
-		return new $wnd.RadioButton(null, null, null, aComponent);
+		return new $wnd.P.RadioButton(null, null, null, aComponent);
 	}-*/;
 	
 	public native static PublishedComponent publish(PlatypusCheckBox aComponent)/*-{
-		return new $wnd.CheckBox(null, null, null, aComponent);
+		return new $wnd.P.CheckBox(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusSlider aComponent)/*-{
-		return new $wnd.Slider(null, null, null, null, aComponent);
+		return new $wnd.P.Slider(null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusToggleButton aComponent)/*-{
-		return new $wnd.ToggleButton(null, null, null, null, null, aComponent);
+		return new $wnd.P.ToggleButton(null, null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusTextField aComponent)/*-{
-		return new $wnd.TextField(null, aComponent);
+		return new $wnd.P.TextField(null, aComponent);
 	}-*/;
 	
 	public native static PublishedComponent publish(PlatypusFormattedTextField aComponent)/*-{
-		return new $wnd.FormattedField(null, aComponent);
+		return new $wnd.P.FormattedField(null, aComponent);
 	}-*/;	
 
 	public native static PublishedComponent publish(PlatypusTextArea aComponent)/*-{
-		return new $wnd.TextArea(null, aComponent);
+		return new $wnd.P.TextArea(null, aComponent);
 	}-*/;
 	
 	public native static PublishedComponent publish(PlatypusHtmlEditor aComponent)/*-{
-		return new $wnd.HtmlArea(null, aComponent);
+		return new $wnd.P.HtmlArea(null, aComponent);
 	}-*/;	
 
 	public native static PublishedComponent publish(PlatypusProgressBar aComponent)/*-{
-		return new $wnd.ProgressBar(null, null, aComponent);
+		return new $wnd.P.ProgressBar(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusPasswordField aComponent)/*-{
-		return new $wnd.PasswordField(null, aComponent);
+		return new $wnd.P.PasswordField(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusButton aComponent)/*-{
-		return new $wnd.Button(null, null, null, null, aComponent);
+		return new $wnd.P.Button(null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusSplitButton aComponent)/*-{
-		return new $wnd.DropDownButton(null, null, null, null, aComponent);
+		return new $wnd.P.DropDownButton(null, null, null, null, aComponent);
 	}-*/;
 	
 	public native static PublishedComponent publish(PlatypusLabel aComponent)/*-{
-		return new $wnd.Label(null, null, null, aComponent);
+		return new $wnd.P.Label(null, null, null, aComponent);
 
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuItemSeparator aComponent)/*-{
-		return new $wnd.MenuSeparator(aComponent);
+		return new $wnd.P.MenuSeparator(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuBar aComponent)/*-{
-		return new $wnd.MenuBar(aComponent);
+		return new $wnd.P.MenuBar(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenu aComponent)/*-{
-		return new $wnd.Menu(null, aComponent);
+		return new $wnd.P.Menu(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publishPopup(PlatypusMenu aComponent)/*-{
-		return new $wnd.PopupMenu(aComponent);
+		return new $wnd.P.PopupMenu(aComponent);
 	}-*/;
 	
 	public native static PublishedComponent publish(PlatypusMenuItemImageText aComponent)/*-{
-		return new $wnd.MenuItem(null, null, null, aComponent);
+		return new $wnd.P.MenuItem(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuItemCheckBox aComponent)/*-{
-		return new $wnd.CheckMenuItem(null, null, null, aComponent);
+		return new $wnd.P.CheckMenuItem(null, null, null, aComponent);
 	}-*/;
 
 	public native static JavaScriptObject publish(PlatypusMenuItemRadioButton aComponent)/*-{
-		return new $wnd.RadioMenuItem(null, null, null, aComponent);
+		return new $wnd.P.RadioMenuItem(null, null, null, aComponent);
 	}-*/;
 	
 	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
 		var published = {
-					data : $wnd.boxAsJs(aData)
+					data : $wnd.P.boxAsJs(aData)
 		};
 		var _display = aDisplay;
-		var _style = new $wnd.Style();
+		var _style = new $wnd.P.Style();
 		Object.defineProperty(published, "display", {
 			get: function(){
 				return _display;
@@ -158,83 +158,83 @@ public class Publisher {
 	}-*/;
 	
 	public native static PublishedComponent publish(ModelGrid aComponent)/*-{
-		return new $wnd.ModelGrid(aComponent);
+		return new $wnd.P.ModelGrid(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelCheck aComponent)/*-{
-		return new $wnd.ModelCheckBox(null, aComponent);
+		return new $wnd.P.ModelCheckBox(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelFormattedField aComponent)/*-{
-		return new $wnd.ModelFormattedField(aComponent);
+		return new $wnd.P.ModelFormattedField(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelTextArea aComponent)/*-{
-		return new $wnd.ModelTextArea(aComponent);
+		return new $wnd.P.ModelTextArea(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelDate aComponent)/*-{
-		return new $wnd.ModelDate(aComponent);
+		return new $wnd.P.ModelDate(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelSpin aComponent)/*-{
-		return new $wnd.ModelSpin(aComponent);
+		return new $wnd.P.ModelSpin(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelCombo aComponent)/*-{
-		return new $wnd.ModelCombo(aComponent);
+		return new $wnd.P.ModelCombo(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(BorderPane aComponent)/*-{
-		return new $wnd.BorderPane(null, null, aComponent);
+		return new $wnd.P.BorderPane(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ScrollPane aComponent)/*-{
-		return new $wnd.ScrollPane(null, aComponent);
+		return new $wnd.P.ScrollPane(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(SplitPane aComponent)/*-{
-		return new $wnd.SplitPane(null, aComponent);
+		return new $wnd.P.SplitPane(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(VBoxPane aComponent)/*-{
-		return new $wnd.BoxPane($wnd.Orientation.VERTICAL, aComponent);
+		return new $wnd.P.BoxPane($wnd.P.Orientation.VERTICAL, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(HBoxPane aComponent)/*-{
-		return new $wnd.BoxPane($wnd.Orientation.HORIZONTAL, aComponent);
+		return new $wnd.P.BoxPane($wnd.P.Orientation.HORIZONTAL, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(CardPane aComponent)/*-{
-		return new $wnd.CardPane(null, null, aComponent);
+		return new $wnd.P.CardPane(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(AbsolutePane aComponent)/*-{
-		return new $wnd.AbsolutePane(aComponent);
+		return new $wnd.P.AbsolutePane(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(AnchorsPane aComponent)/*-{
-		return new $wnd.AnchorsPane(aComponent);
+		return new $wnd.P.AnchorsPane(aComponent);
 	}-*/;
 	
 	public native static PublishedComponent publish(DesktopPane aComponent)/*-{
-		return new $wnd.DesktopPane(aComponent);
+		return new $wnd.P.DesktopPane(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(TabbedPane aComponent)/*-{
-		return new $wnd.TabbedPane(aComponent);
+		return new $wnd.P.TabbedPane(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ToolBar aComponent)/*-{
-		return new $wnd.ToolBar(null, aComponent);
+		return new $wnd.P.ToolBar(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(FlowPane aComponent)/*-{
-		return new $wnd.FlowPane(null, null, aComponent);
+		return new $wnd.P.FlowPane(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(GridPane aComponent)/*-{
-		return new $wnd.GridPane(null, null, null, null, aComponent);
+		return new $wnd.P.GridPane(null, null, null, null, aComponent);
 	}-*/;
 
 	protected static JavaScriptObject checkPublishedComponent(Object aCandidate) {
@@ -245,7 +245,7 @@ public class Publisher {
 	}
 
 	public native static JavaScriptObject publish(ButtonGroup aButtonGroup)/*-{
-		return new $wnd.ButtonGroup(aButtonGroup);
+		return new $wnd.P.ButtonGroup(aButtonGroup);
 	}-*/;
 
 }

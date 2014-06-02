@@ -581,7 +581,7 @@ public class AppClient {
 	}
 
 	public static native void defineServerModule(String aModuleName, JavaScriptObject aModule)/*-{
-		var moduleData = $wnd.serverModules[aModuleName];
+		var moduleData = $wnd.P.serverModules[aModuleName];
 		for ( var i = 0; i < moduleData.functions.length; i++) {
 			aModule[moduleData.functions[i]] = function(functionName) {
 				return function() {
@@ -600,14 +600,14 @@ public class AppClient {
 					for ( var j = 0; j < argsLength; j++) {
 						params[j] = JSON.stringify(arguments[j]);
 					}
-					return $wnd.platypus.executeServerModuleMethod(aModuleName, functionName, params, onSuccess, onFailure);
+					return $wnd.P.executeServerModuleMethod(aModuleName, functionName, params, onSuccess, onFailure);
 				}
 			}(moduleData.functions[i]);
 		}
 		if (moduleData.isReport) {
 			aModule.show = function() {
 				if (moduleData.isPermitted) {
-					$wnd.platypus.executeServerReport(aModuleName, aModule);
+					$wnd.P.executeServerReport(aModuleName, aModule);
 				} else {
 					throw "AccessControlException";
 				}	
@@ -770,31 +770,31 @@ public class AppClient {
 	}
 
 	public static native void addServerModule(String aModuleName, String aStructure) throws Exception /*-{
-		if (!$wnd.serverModules) {
-			$wnd.serverModules = {};
+		if (!$wnd.P.serverModules) {
+			$wnd.P.serverModules = {};
 		}
-		$wnd.serverModules[aModuleName] = JSON.parse(aStructure);
+		$wnd.P.serverModules[aModuleName] = JSON.parse(aStructure);
 	}-*/;
 
 	public static native boolean isReport(String aModuleName) throws Exception /*-{
-		if ($wnd.serverModules && $wnd.serverModules[aModuleName]) {
-			return $wnd.serverModules[aModuleName].isReport;
+		if ($wnd.P.serverModules && $wnd.P.serverModules[aModuleName]) {
+			return $wnd.P.serverModules[aModuleName].isReport;
 		} else
 			return false;
 	}-*/;
 
 	public static native boolean isServerModule(String aModuleName) throws Exception /*-{
-		return ($wnd.serverModules && $wnd.serverModules[aModuleName]) ? true : false;
+		return ($wnd.P.serverModules && $wnd.P.serverModules[aModuleName]) ? true : false;
 	}-*/;
 	
 	public static native void publishApi(AppClient aClient) throws Exception /*-{
-		$wnd.platypus.defineServerModule = function(aModuleName, aModule) {
+		$wnd.P.defineServerModule = function(aModuleName, aModule) {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
-		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
-			return $wnd.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
+		$wnd.P.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
+			return $wnd.P.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
 		}
-		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
+		$wnd.P.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 	}-*/;

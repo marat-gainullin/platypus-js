@@ -39,7 +39,7 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 			protected native JavaScriptObject bind(PlatypusModulesTest aRunner, String aModuleName)/*-{
 				window.Logger = {info:function(aMessage){}, severe : function(aMessage){}, warning : function(aMessage){},
 				fine:function(aMessage){}, finer : function(aMessage){}, finest : function(aMessage){}};
-				$wnd.Logger = window.Logger;
+				$wnd.P.Logger = window.Logger;
 				var constr = $wnd[aModuleName];
 				var instance = new constr();
 				instance.onSuccess = function(aValue) {

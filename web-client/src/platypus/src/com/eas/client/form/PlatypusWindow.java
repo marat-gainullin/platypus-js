@@ -422,7 +422,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	}
 
 	protected native static void invokeDialogCallback(JavaScriptObject aCallback, Object aSelectedValue)/*-{
-		aCallback($wnd.boxAsJs(aSelectedValue));
+		aCallback($wnd.P.boxAsJs(aSelectedValue));
 	}-*/;
 
 	private void publishComponentsFacades(JavaScriptObject aTarget, HasWidgets aView) {
@@ -669,7 +669,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(true, aCallback, null);
 	        };
 	        aPublished.showOnPanel = function(aPanel) {
-	        	$wnd.Logger.info("showOnPanel is unsupported. Use widget.addTo(...) method instead.");
+	        	$wnd.P.Logger.info("showOnPanel is unsupported. Use widget.addTo(...) method instead.");
 	        };
 	        aPublished.showInternalFrame = function(aPanel) {
 	        	showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, aPanel != null ? aPanel.unwrap() : null);
@@ -688,7 +688,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        };
 	        aPublished.close = function() {
 		        if (arguments.length > 0)
-		        	aForm.@com.eas.client.form.PlatypusWindow::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(arguments[0] == null ? null : $wnd.boxAsJava(arguments[0]), closeCallback);
+		        	aForm.@com.eas.client.form.PlatypusWindow::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(arguments[0] == null ? null : $wnd.P.boxAsJava(arguments[0]), closeCallback);
 		        else
 		        	aForm.@com.eas.client.form.PlatypusWindow::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(null, null);
 	        };

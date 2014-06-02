@@ -9,7 +9,7 @@ public final class PublishedStyle extends JavaScriptObject {
 	}
 
 	public static native PublishedStyle create() /*-{
-		return new $wnd.Style();
+		return new $wnd.P.Style();
 	}-*/;
 
 	public final native PublishedColor getBackground()/*-{
@@ -37,7 +37,7 @@ public final class PublishedStyle extends JavaScriptObject {
 	}-*/;
 
 	public final native int getAlign()/*-{
-		return this.align ? this.align : $wnd.HorizontalPosition.LEFT;
+		return this.align ? this.align : $wnd.P.HorizontalPosition.LEFT;
 	}-*/;
 
 	public final native void setAlign(int aValue)/*-{
@@ -45,9 +45,9 @@ public final class PublishedStyle extends JavaScriptObject {
 	}-*/;
 
 	public final native String getStyledAlign()/*-{
-		if (this.align == $wnd.HorizontalPosition.CENTER)
+		if (this.align == $wnd.P.HorizontalPosition.CENTER)
 			return "center";
-		else if (this.align == $wnd.HorizontalPosition.RIGHT)
+		else if (this.align == $wnd.P.HorizontalPosition.RIGHT)
 			return "right";
 		else
 			return "left";

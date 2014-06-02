@@ -25,7 +25,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 public class JsEvents {
 
 	public native static JavaScriptObject getFormsClass()/*-{
-		return $wnd.Form;
+		return $wnd.$wnd.P.Form;
 	}-*/;
 	
 	public native static JavaScriptObject publishScriptSourcedEvent(JavaScriptObject aSource)/*-{
@@ -93,12 +93,12 @@ public class JsEvents {
 		});
 		Object.defineProperty(published, "oldValue", {
 			get : function(){
-				return $wnd.boxAsJs(aOldValue);
+				return $wnd.P.boxAsJs(aOldValue);
 			}
 		});
 		Object.defineProperty(published, "newValue", {
 			get : function(){
-				return $wnd.boxAsJs(aNewValue);
+				return $wnd.P.boxAsJs(aNewValue);
 			}
 		});
 		return published;
@@ -148,12 +148,12 @@ public class JsEvents {
 		});
 		Object.defineProperty(published, "id", {
 			get : function(){
-				return $wnd.boxAsJs(aRowId);
+				return $wnd.P.boxAsJs(aRowId);
 			}
 		});
 		Object.defineProperty(published, "columnId", {
 			get : function(){
-				return $wnd.boxAsJs(aColumnId);
+				return $wnd.P.boxAsJs(aColumnId);
 			}
 		});
 		Object.defineProperty(published, "object", {

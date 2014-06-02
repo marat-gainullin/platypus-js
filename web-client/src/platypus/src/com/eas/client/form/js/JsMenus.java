@@ -9,9 +9,9 @@ public class JsMenus {
 		}
 				
 		// ***************************************************
-		$wnd.MenuBar = function() {
-			if (!(this instanceof $wnd.MenuBar)) {
-				throw  ' use  "new MenuBar()" !';
+		$wnd.P.MenuBar = function() {
+			if (!(this instanceof $wnd.P.MenuBar)) {
+				throw  ' use  "new P.MenuBar()" !';
 			}
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
 
@@ -24,9 +24,9 @@ public class JsMenus {
 		};
 
 		// ***************************************************
-		$wnd.Menu = function(aText) {
-			if (!(this instanceof $wnd.Menu)) {
-				throw  ' use  "new Menu()" !';
+		$wnd.P.Menu = function(aText) {
+			if (!(this instanceof $wnd.P.Menu)) {
+				throw  ' use  "new P.Menu()" !';
 			}
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
 
@@ -43,9 +43,9 @@ public class JsMenus {
 		};
 
 		// ***************************************************
-		$wnd.PopupMenu = function() {
-			if (!(this instanceof $wnd.PopupMenu)) {
-				throw  ' use  "new PopupMenu()" !';
+		$wnd.P.PopupMenu = function() {
+			if (!(this instanceof $wnd.P.PopupMenu)) {
+				throw  ' use  "new P.PopupMenu()" !';
 			}
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
 
@@ -58,11 +58,11 @@ public class JsMenus {
 		};
 		
 		// **************************************************************************
-		$wnd.MenuItem = function (aText, aIcon, aCallback) {
+		$wnd.P.MenuItem = function (aText, aIcon, aCallback) {
 			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
-			if (!(this instanceof $wnd.MenuItem)) {
-				throw  ' use  "new MenuItem()" !';
+			if (!(this instanceof $wnd.P.MenuItem)) {
+				throw  ' use  "new P.MenuItem()" !';
 			}
 
 			var published = this;
@@ -86,11 +86,11 @@ public class JsMenus {
 		};	
 		
 		// **************************************************************************
-		$wnd.CheckMenuItem = function (aText, aSelected, aCallback) {
+		$wnd.P.CheckMenuItem = function (aText, aSelected, aCallback) {
 			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
-			if (!(this instanceof $wnd.CheckMenuItem)) {
-				throw  ' use  "new CheckMenuItem()" !';
+			if (!(this instanceof $wnd.P.CheckMenuItem)) {
+				throw  ' use  "new P.CheckMenuItem()" !';
 			}
 
 			var published = this;
@@ -113,11 +113,11 @@ public class JsMenus {
 		}
 
 		// **************************************************************************
-		$wnd.RadioMenuItem = function (aText, aSelected, aCallback) {
+		$wnd.P.RadioMenuItem = function (aText, aSelected, aCallback) {
 			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
-			if (!(this instanceof $wnd.RadioMenuItem)) {
-				throw  ' use  "new RadioMenuItem()" !';
+			if (!(this instanceof $wnd.P.RadioMenuItem)) {
+				throw  ' use  "new P.RadioMenuItem()" !';
 			}
 
 			var published = this;
@@ -140,11 +140,11 @@ public class JsMenus {
 		}
 		
 		// **************************************************************************
-		$wnd.MenuSeparator = function () {
+		$wnd.P.MenuSeparator = function () {
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
-			if (!(this instanceof $wnd.MenuSeparator)) {
-				throw  ' use  "new MenuSeparator()" !';
+			if (!(this instanceof $wnd.P.MenuSeparator)) {
+				throw  ' use  "new P.MenuSeparator()" !';
 			}
 
 			var published = this;
