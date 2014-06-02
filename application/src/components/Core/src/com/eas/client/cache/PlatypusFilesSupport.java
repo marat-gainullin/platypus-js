@@ -45,44 +45,46 @@ public class PlatypusFilesSupport {
     public static FunctionNode extractModuleConstructor(String aJsContent) {
         return extractModuleConstructor(ScriptUtils.parseJs(aJsContent));
     }
-    
+
     public static FunctionNode extractModuleConstructor(FunctionNode jsRoot) {
-        final NodesContext cx = new NodesContext();
-        jsRoot.accept(new BaseAnnotationsMiner(jsRoot.getSource()) {
+        if (jsRoot != null) {
+            final NodesContext cx = new NodesContext();
+            jsRoot.accept(new BaseAnnotationsMiner(jsRoot.getSource()) {
 
-            @Override
-            public boolean enterFunctionNode(FunctionNode fn) {
-                if (scopeLevel == TOP_SCOPE_LEVEL && fn != jsRoot && !fn.isAnonymous()) {
-                    if (cx.result == null) {
-                        cx.result = fn;
+                @Override
+                public boolean enterFunctionNode(FunctionNode fn) {
+                    if (scopeLevel == TOP_SCOPE_LEVEL && fn != jsRoot && !fn.isAnonymous()) {
+                        if (cx.result == null) {
+                            cx.result = fn;
+                        }
+                        cx.functions++;
                     }
-                    cx.functions++;
+                    return super.enterFunctionNode(fn);
                 }
-                return super.enterFunctionNode(fn);
-            }
 
-            @Override
-            protected void commentedFunction(FunctionNode fn, String aComment) {
-                if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
-                    JsDoc jsDoc = new JsDoc(aComment);
-                    if (jsDoc.containsModuleAnnotation()) {
-                        cx.result = fn;
-                        cx.annotatedConstructors++;
+                @Override
+                protected void commentedFunction(FunctionNode fn, String aComment) {
+                    if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
+                        JsDoc jsDoc = new JsDoc(aComment);
+                        if (jsDoc.containsModuleAnnotation()) {
+                            cx.result = fn;
+                            cx.annotatedConstructors++;
+                        }
                     }
                 }
+            });
+            if (cx.annotatedConstructors == 1) {
+                return cx.result;
+            } else if (cx.functions == 1) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).finer("Single function is found in the module - considered as a module's constructor.");
+                return cx.result;
+            } else if (cx.functions == 0) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");
+            } else if (cx.annotatedConstructors > 1) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("More than one annotated constructor found.");
+            } else if (cx.annotatedConstructors == 0 && cx.functions > 1) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No annotated constructors and more than one plain function found.");
             }
-        });
-        if (cx.annotatedConstructors == 1) {
-            return cx.result;
-        } else if (cx.functions == 1) {
-            Logger.getLogger(PlatypusFilesSupport.class.getName()).finer("Single function is found in the module - considered as a module's constructor.");
-            return cx.result;
-        } else if (cx.functions == 0) {
-            Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");
-        } else if (cx.annotatedConstructors > 1) {
-            Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("More than one annotated constructor found.");
-        } else if (cx.annotatedConstructors == 0 && cx.functions > 1) {
-            Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No annotated constructors and more than one plain function found.");
         }
         return null;
     }
