@@ -10,8 +10,6 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.form.published.widgets.model.ModelCombo;
-import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 

@@ -6,12 +6,12 @@ package com.bearsoft.rowset.dataflow;
 
 import java.util.List;
 
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.google.gwt.core.client.Callback;
 
 /**
  * This interface is intended to serve as base contract for data quering/reading/achieving and
@@ -40,7 +40,7 @@ public interface FlowProvider {
      * @return Rowset instance, containing data, retrieved from the source.
      * @see Parameters
      */
-    public Cancellable refresh(Parameters aParams, Callback<Rowset> onSuccess, Callback<String> onFailure) throws Exception;
+    public Cancellable refresh(Parameters aParams, Callback<Rowset, String> aCallback) throws Exception;
 
     /**
      * Retruns a change log, fronted with this flow provider.

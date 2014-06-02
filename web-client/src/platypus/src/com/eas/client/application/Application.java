@@ -17,12 +17,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Cancellable;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
-import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
-import com.eas.client.StringCallbackAdapter;
+import com.eas.client.RunnableAdapter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.js.JsContainers;
@@ -81,7 +80,7 @@ public class Application {
 		return appQueries.put(aQuery.getEntityId(), aQuery);
 	}
 
-	protected static class ExecuteApplicationCallback extends CancellableCallbackAdapter {
+	protected static class ExecuteApplicationCallback extends RunnableAdapter {
 
 		protected Collection<String> executedAppElements;
 		protected Set<Element> indicators; 
@@ -558,14 +557,18 @@ public class Application {
 		$wnd.platypus.getCached = function(appElementId) {
 			return aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementId);
 		};
-		$wnd.platypus.readModel = function(appElementDoc, aModule) {
+		$wnd.platypus.readModel = function(appElementDoc, aModule, aTarget) {
+			if(!aTarget)
+				aTarget = {};
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModule);
-			nativeModel.@com.eas.client.model.Model::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
+			nativeModel.@com.eas.client.model.Model::publishTopLevelFacade(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/model/Model;)(aModule);
 			return nativeModel;
 		};
-		$wnd.platypus.readForm = function(appElementDoc, aModule) {
+		$wnd.platypus.readForm = function(appElementDoc, aModule, aTarget) {
+			if(!aTarget)
+				aTarget = {};
 			var nativeModel = aModule.model.unwrap();
-			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementDoc, nativeModel);
+			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
 		};
@@ -890,15 +893,15 @@ public class Application {
         $wnd.VK_UP = @com.google.gwt.event.dom.client.KeyCodes::KEY_UP;
 	}-*/;
 
-	public static Cancellable run() throws Exception {
-		return run(AppClient.getInstance());
+	public static void run() throws Exception {
+		run(AppClient.getInstance());
 	}
 
-	public static Cancellable run(AppClient client) throws Exception {
-		return run(client, extractPlatypusModules());
+	public static void run(AppClient client) throws Exception {
+		run(client, extractPlatypusModules());
 	}
 
-	public static Cancellable run(AppClient client, Map<String, Element> aMarkupStart) throws Exception {
+	public static void run(AppClient client, Map<String, Element> aMarkupStart) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
 			platypusApplicationLogger = Logger.getLogger("platypusApplication");
 			Formatter f = new PlatypusLogFormatter(true);
@@ -919,7 +922,7 @@ public class Application {
 			el.<XElement> cast().loadMask();
 		}
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
-		return startAppElements(client, aMarkupStart, indicators);
+		startAppElements(client, aMarkupStart, indicators);
 	}
 
 	private static Set<Element> extractPlatypusProgressIndicators() {
@@ -967,18 +970,16 @@ public class Application {
 			$wnd.platypus.ready();
 	}-*/;
 
-	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators) throws Exception {
+	protected static void startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators) throws Exception {
 		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
-			return client.getStartElement(new StringCallbackAdapter() {
-
-				protected Cancellable loadings;
+			client.getStartElement(new CallbackAdapter<String, Void>() {
 
 				@Override
 				protected void doWork(String aResult) throws Exception {
 					if (aResult != null && !aResult.isEmpty()) {
 						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
-						loadings = loader.load(results, new ExecuteApplicationCallback(results, aIndicators));
+						loader.load(results, new ExecuteApplicationCallback(results, aIndicators));
 					} else {
 						for (Element el : aIndicators) {
 							el.<XElement> cast().unmask();
@@ -986,18 +987,14 @@ public class Application {
 						onReady();
 					}
 				}
-
+				
 				@Override
-				public void cancel() {
-					super.cancel();
-					if (loadings != null) {
-						loadings.cancel();
-					}
+				public void onFailure(Void reason) {
 				}
 			});
 		} else {
 			Set<String> modulesIds = aMarkupStart.keySet();
-			return loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds, aIndicators));
+			loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds, aIndicators));
 		}
 	}
 
@@ -1035,7 +1032,7 @@ public class Application {
 			requiring = true;
 			try {
 				loader.prepareOptimistic();
-				loader.load(deps, new CancellableCallbackAdapter() {
+				loader.load(deps, new RunnableAdapter() {
 
 					@Override
 					protected void doWork() throws Exception {

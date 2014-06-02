@@ -37,7 +37,7 @@ public class ChangesWriterTest extends GWTTestCase {
 		Change.Value data5 = new Change.Value("data5", date, DataTypeInfo.TIMESTAMP);
 		Change.Value[] data = new Change.Value[] { data1, data2, data3, data4, data5 };
 
-		List<Change> changes = new ArrayList();
+		List<Change> changes = new ArrayList<>();
 		Insert i = new Insert(entityId);
 		i.data = data;
 		Update u = new Update(entityId);

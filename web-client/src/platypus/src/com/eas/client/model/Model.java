@@ -1,4 +1,4 @@
-/* Datamodel license.
+/* Data model license.
  * Exclusive rights on this code in any form
  * are belong to it's author. This code was
  * developed for commercial purposes only. 
@@ -21,8 +21,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Cancellable;
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
@@ -31,56 +32,46 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.CancellableCallback;
-import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.application.AppClient;
+import com.eas.client.form.published.HasPublished;
+import com.eas.client.model.js.JsModel;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * @author mg
  */
-public class Model {
+public class Model implements HasPublished{
 
 	public static final String SCRIPT_MODEL_NAME = "model";
 	public static final String PARAMETERS_SCRIPT_NAME = "params";
 	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
 	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
 	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-	public static final String DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME = "onBeforeChange";
-	public static final String DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME = "onAfterChange";
-	public static final String DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME = "onBeforeScroll";
-	public static final String DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME = "onAfterScroll";
-	public static final String DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME = "onBeforeInsert";
-	public static final String DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME = "onAfterInsert";
-	public static final String DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME = "onBeforeDelete";
-	public static final String DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME = "onAfterDelete";
-	public static final String DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME = "onRequeried";
-	public static final String DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME = "onFiltered";
+	
 	protected Set<String> savedRowIndexEntities = new HashSet<String>();
 	protected List<Entry<Entity, Integer>> savedEntitiesRowIndexes = new ArrayList<Entry<Entity, Integer>>();
-	protected AppClient client = null;
+	protected AppClient client;
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
 	protected Map<String, Entity> entities = new HashMap<String, Entity>();
 	protected ParametersEntity parametersEntity;
 	protected Parameters parameters = new Parameters();
 	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-	protected boolean runtime = false;
 	protected List<Change> changeLog = new ArrayList<Change>();
 	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
 	//
 	protected NetworkProcess process;
-	protected int ajustingCounter = 0;
-	protected JavaScriptObject module;
+	protected int ajustingCounter;
+	protected JavaScriptObject jsPublished;
 
 	public static class NetworkProcess {
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
-		public CancellableCallback onSuccess;
-		public Callback<String> onFailure;
+		public Callback<Rowset, String> callback;
 
-		public NetworkProcess(CancellableCallback aOnSuccess, Callback<String> aOnFailure) {
-			onSuccess = aOnSuccess;
-			onFailure = aOnFailure;
+		public NetworkProcess(Callback<Rowset, String> aCallback) {
+			super();
+			callback = aCallback;
 		}
 
 		protected String assembleErrors() {
@@ -97,18 +88,18 @@ public class Model {
 		}
 
 		public void cancel() throws Exception {
-			if (onFailure != null)
-				onFailure.run("Canceled");
+			if (callback != null)
+				callback.onFailure("Canceled");
 		}
 
 		public void success() throws Exception {
-			if (onSuccess != null)
-				onSuccess.run();
+			if (callback != null)
+				callback.onSuccess(null);
 		}
 
 		public void failure() throws Exception {
-			if (onFailure != null)
-				onFailure.run(assembleErrors());
+			if (callback != null)
+				callback.onFailure(assembleErrors());
 		}
 
 		public void end() throws Exception {
@@ -235,7 +226,7 @@ public class Model {
 	/**
 	 * Base model constructor.
 	 */
-	public Model() {
+	protected Model() {
 		super();
 		parametersEntity = new ParametersEntity();
 		parametersEntity.setModel(this);
@@ -303,37 +294,30 @@ public class Model {
 		return aEntity.getInOutRelations();
 	}
 
-	public JavaScriptObject getModule() {
-		return module;
+	@Override
+	public JavaScriptObject getPublished() {
+		return jsPublished;
+	}
+	
+	@Override
+	public void setPublished(JavaScriptObject aValue) {
+		if (jsPublished != aValue) {
+			jsPublished = aValue;
+			publish();
+		}
 	}
 
-	public void publish(JavaScriptObject aModule) throws Exception {
+	private void publish(){
 		try {
-			module = aModule;
-			// deprecated
-			ParametersEntity parametersEntity = getParametersEntity();
-			Entity.publish(module, parametersEntity);
-			if (!"params".equals(parametersEntity.getName())) {
-				String oldName = parametersEntity.getName();
-				try {
-					parametersEntity.setName("params");
-					Entity.publish(module, parametersEntity);
-				} finally {
-					parametersEntity.setName(oldName);
-				}
-			}
-			Entity.publishRows(parametersEntity.getPublished());
-			//
-			publishTopLevelFacade(aModule, this);
+			publishTopLevelFacade(jsPublished, this);
 			publishRowsets();
 		} catch (Exception ex) {
 			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-			throw ex;
 		}
 	}
  
-	public void publishRowsets() throws Exception {
-		assert module != null : "Module has to be already installed while publishing rowsets facades.";
+	private void publishRowsets() throws Exception {
+		assert jsPublished != null : "JavaScript facade object has to be already installed while publishing rowsets facades.";
 		validateQueries();
 		for (Entity entity : entities.values()) {
 			if (entity instanceof ParametersEntity) {
@@ -341,15 +325,21 @@ public class Model {
 				try {
 					if (!"params".equals(oldName)) {
 						entity.setName("params");
-						Entity.publish(module.<JsObject> cast().getJs("model"), entity);
-						Entity.publishRows(entity.getPublished());
+						JavaScriptObject publishedEntity = JsModel.publish(entity);
+						Entity.publishRows(publishedEntity);
+						if(entity.getName() != null && !entity.getName().isEmpty()){
+							jsPublished.<JsObject>cast().inject(entity.getName(), publishedEntity);
+						}
 					}
 				} finally {
 					entity.setName(oldName);
 				}
 			} else {
-				Entity.publish(module, entity);/* deprecated */
-				Entity.publish(module.<JsObject> cast().getJs("model"), entity);
+				JavaScriptObject publishedEntity = JsModel.publish(entity);
+				Entity.publishRows(publishedEntity);
+				if(entity.getName() != null && !entity.getName().isEmpty()){
+					jsPublished.<JsObject>cast().inject(entity.getName(), publishedEntity);
+				}
 			}
 		}
 		//
@@ -428,38 +418,54 @@ public class Model {
 		}-*/;
 	}
 
-	public native static void publishTopLevelFacade(JavaScriptObject aModule, Model aModel) throws Exception/*-{
-		var publishedModel = {
-			createQuery : function(aQueryId) {
-				$wnd.Logger.warning("createQuery deprecated call detected. Use loadEntity() instead.");
-				return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
-			},
-			loadEntity : function(aQueryId) {
-				return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
-			},
-			save : function(onScuccess, onFailure) {
-				aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onScuccess, onFailure);
-			},
-			revert : function() {
-				aModel.@com.eas.client.model.Model::revert()();
-			},
-			requery : function(onSuccess, onFailure) {
-				aModel.@com.eas.client.model.Model::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-			},
-			unwrap : function() {
-				return aModel;
+	public native static void publishTopLevelFacade(JavaScriptObject aTarget, Model aModel) throws Exception/*-{
+		var publishedModel = aTarget;
+		Object.defineProperty(publishedModel, "createQuery", { 
+			get : function(){
+				return function(aQueryId) {
+					$wnd.Logger.warning("createQuery deprecated call detected. Use loadEntity() instead.");
+					return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
+				}
 			}
-		};
+		});
+		Object.defineProperty(publishedModel, "loadEntity", { 
+			get : function(){
+				return function(aQueryId) {
+					return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
+				}
+			}
+		});
+		Object.defineProperty(publishedModel, "save", { 
+			get : function(){
+				return function(onScuccess, onFailure) {
+					aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onScuccess, onFailure);
+				}
+			}
+		});
+		Object.defineProperty(publishedModel, "revert", { 
+			get : function(){
+				return function() {
+					aModel.@com.eas.client.model.Model::revert()();
+				}
+			}
+		});
+		Object.defineProperty(publishedModel, "requery", { 
+			get : function(){
+				return  function(onSuccess, onFailure) {
+					aModel.@com.eas.client.model.Model::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+				}
+			}
+		});
+		Object.defineProperty(publishedModel, "unwrap", { 
+			get : function(){
+				return function() {
+					return aModel;
+				}
+			}
+		});
 		Object.defineProperty(publishedModel, "modified", {
 			get : function() {
 				return aModel.@com.eas.client.model.Model::isModified()();
-			}
-		});
-		Object.defineProperty(publishedModel, "runtime", {
-			configurable : true,
-			set : function(aValue) {
-				aModel.@com.eas.client.model.Model::setRuntime(Z)(aValue);
-				delete publishedModel.runtime;
 			}
 		});
 		Object.defineProperty(publishedModel, "pending", {
@@ -472,26 +478,6 @@ public class Model {
 				return publishedModel;
 			}
 		});
-		// deprecated
-		Object.defineProperty(aModule, "schema", {
-			get : function() {
-				return aModule.params.schema;
-			}
-		});
-		for ( var i = 0; i < aModule.schema.length; i++) {
-			(function() {
-				var param = aModule.schema[i];
-				Object.defineProperty(aModule, param.name, {
-					get : function() {
-						return aModule.params[param.name];
-					},
-					set : function(aValue) {
-						aModule.params[param.name] = aValue;
-					}
-				});
-			})();
-		}
-		//
 	}-*/;
 
 	public int getAjustingCounter() {
@@ -569,10 +555,6 @@ public class Model {
 
 	public void setRelations(Set<Relation> aRelations) {
 		relations = aRelations;
-	}
-
-	public boolean isRuntime() {
-		return runtime;
 	}
 
 	public NetworkProcess getProcess() {
@@ -661,26 +643,26 @@ public class Model {
 	}
 
 	public Cancellable save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		return client.commit(changeLog, new CancellableCallbackAdapter() {
+		return client.commit(changeLog, new CallbackAdapter<Void, String>() {
 
 			@Override
-			protected void doWork() throws Exception {
+			protected void doWork(Void aVoid) throws Exception {
 				saved();
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>() {
-
+			
 			@Override
-			public void run(String aResult) throws Exception {
-				rolledback();
-				if (onFailure != null)
-					Utils.executeScriptEventVoid(module, onFailure, aResult);
+			public void onFailure(String aReason) {
+				try {
+	                rolledback();
+	                if (onFailure != null)
+	                	Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+                } catch (Exception ex) {
+                	Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+                }
 			}
-
-			@Override
-			public void cancel() {
-			}
+			
 		});
 	}
 
@@ -710,52 +692,55 @@ public class Model {
 	}
 
 	public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		requery(new CancellableCallbackAdapter() {
+		requery(new CallbackAdapter<Rowset, String>() {
 			@Override
-			protected void doWork() throws Exception {
+			protected void doWork(Rowset aRowset) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>() {
+			
 			@Override
-			public void run(String aResult) throws Exception {
-				if (onFailure != null)
-					Utils.executeScriptEventVoid(module, onFailure, aResult);
-			}
-
-			@Override
-			public void cancel() {
+			public void onFailure(String reason) {
+				if (onFailure != null){
+					try{
+						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
+					}catch(Exception ex){
+						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
 			}
 		});
 	}
 
-	public void requery(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	public void requery(Callback<Rowset, String> aCallback) throws Exception {
+		validateQueries();
 		revert();
-		executeRootEntities(true, onSuccess, onFailure);
+		executeRootEntities(true, aCallback);
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		execute(new CancellableCallbackAdapter() {
+		execute(new CallbackAdapter<Rowset, String>() {
 			@Override
-			protected void doWork() throws Exception {
+			protected void doWork(Rowset aRowset) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>() {
+			
 			@Override
-			public void run(String aResult) throws Exception {
-				if (onFailure != null)
-					Utils.executeScriptEventVoid(module, onFailure, aResult);
-			}
-
-			@Override
-			public void cancel() {
+			public void onFailure(String reason) {
+				if (onFailure != null){
+					try{
+						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
+					}catch(Exception ex){
+						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
 			}
 		});
 	}
 
-	public void execute(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
-		executeRootEntities(false, onSuccess, onFailure);
+	public void execute(Callback<Rowset, String> aCallback) throws Exception {
+		executeRootEntities(false, aCallback);
 	}
 
 	public static Set<Entity> gatherNextLayer(Collection<Entity> aLayer) throws Exception {
@@ -776,13 +761,13 @@ public class Model {
 		return nextLayer;
 	}
 
-	public void executeEntities(Set<Entity> toExecute, CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	public void executeEntities(Set<Entity> toExecute) throws Exception {
 		for (Entity entity : toExecute) {
-			entity.internalExecute(null, null);
+			entity.internalExecute(null);
 		}
 	}
 
-	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	private void executeRootEntities(boolean refresh, Callback<Rowset, String> aCallback) throws Exception {
 		final Set<Entity> toExecute = new HashSet<Entity>();
 		for (Entity entity : entities.values()) {
 			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is
@@ -804,8 +789,8 @@ public class Model {
 		}
 		if (process != null)
 			process.cancel();
-		process = new NetworkProcess(onSuccess, onFailure);
-		executeEntities(toExecute, onSuccess, onFailure);
+		process = new NetworkProcess(aCallback);
+		executeEntities(toExecute);
 	}
 
 	public void validateQueries() throws Exception {
@@ -850,15 +835,6 @@ public class Model {
 		}
 	}
 
-	public void setRuntime(boolean aValue) throws Exception {
-		boolean oldValue = runtime;
-		runtime = aValue;
-		if (!oldValue && runtime) {
-			validateQueries();
-			executeRootEntities(true, null, null);
-		}
-	}
-
 	protected static final String USER_DATASOURCE_NAME = "userEntity";
 
 	public synchronized Object jsLoadEntity(String aQueryId) throws Exception {
@@ -870,7 +846,7 @@ public class Model {
 		entity.setQueryId(aQueryId);
 		entity.validateQuery();
 		// addEntity(entity); To avoid memory leaks you should not add the
-		// entity in the model!
-		return Entity.publishEntityFacade(entity);
+		// entity to the model!
+		return JsModel.publish(entity);
 	}
 }

@@ -2,7 +2,7 @@ package com.eas.client.script;
 
 import java.util.Collections;
 
-import com.eas.client.CancellableCallbackAdapter;
+import com.eas.client.RunnableAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
@@ -34,7 +34,7 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 		final AppClient client = ModelBaseTest.initDevelopTestClient(getModuleName());
 		Application.publish(client);
 		Loader loader = new Loader(client);
-		loader.load(Collections.singleton(testsModuleName()), new CancellableCallbackAdapter() {
+		loader.load(Collections.singleton(testsModuleName()), new RunnableAdapter() {
 
 			protected native JavaScriptObject bind(PlatypusModulesTest aRunner, String aModuleName)/*-{
 				window.Logger = {info:function(aMessage){}, severe : function(aMessage){}, warning : function(aMessage){},
@@ -51,6 +51,7 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 			@Override
 			protected void doWork() throws Exception {
 				JavaScriptObject instance = bind(PlatypusModulesTest.this, testsModuleName());
+				instance = null;
 			}
 
 		});

@@ -6,18 +6,16 @@
 package com.eas.client.model;
 
 /**
- *
+ * 
  * @author mg
  */
-public class RowsetMissingException extends Exception{
+public class RowsetMissingException extends Exception {
 
-    public RowsetMissingException()
-    {
-        super();
-    }
+	public RowsetMissingException() {
+		super();
+	}
 
-    public RowsetMissingException(String aMessage)
-    {
-        super(aMessage);
-    }
+	public RowsetMissingException(String aMessage) {
+		super(aMessage);
+	}
 }

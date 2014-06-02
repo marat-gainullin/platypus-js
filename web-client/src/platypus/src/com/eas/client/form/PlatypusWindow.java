@@ -26,7 +26,6 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.AppClient;
@@ -35,6 +34,7 @@ import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.widgets.DesktopPane;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Document;
@@ -212,14 +212,17 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public JavaScriptObject submit(String aAction, final JavaScriptObject aDoneCallback) {
 		Map<String, String> fd = new HashMap<String, String>();
 		gatherForm(fd, (HasWidgets) getWidget());
-		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, fd, aDoneCallback == null ? null : new Callback<XMLHttpRequest>() {
+		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, fd, aDoneCallback == null ? null : new Callback<XMLHttpRequest, XMLHttpRequest>() {
 			@Override
-			public void run(XMLHttpRequest aRequest) throws Exception {
-				Utils.executeScriptEventVoid(aDoneCallback, aDoneCallback, aRequest);
+			public void onSuccess(XMLHttpRequest aRequest) {
+				try{
+					Utils.executeScriptEventVoid(aDoneCallback, aDoneCallback, aRequest);
+				}catch(Exception ex){
+					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
+				}
 			}
-
 			@Override
-			public void cancel() {
+			public void onFailure(XMLHttpRequest aRequest) {
 			}
 		}));
 	}

@@ -9,16 +9,16 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.RowsetCallbackAdapter;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.*;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
+import com.google.gwt.core.client.Callback;
 
 import java.util.Map.Entry;
 import java.util.*;
@@ -128,16 +128,23 @@ public class Query {
         createFlow();
     }
 
-    public Cancellable execute(final Callback<Rowset> onSuccess, Callback<String> onFailure) throws Exception {
-        return flow.refresh(params, new RowsetCallbackAdapter() {
+    public Cancellable execute(final Callback<Rowset, String> aCallback) throws Exception {
+        return flow.refresh(params, new CallbackAdapter<Rowset, String>() {
 
             @Override
             public void doWork(Rowset aRowset) throws Exception {
                 aRowset.setTransacted(true);
                 aRowset.setFlowProvider(flow);
-                onSuccess.run(aRowset);
+                if(aCallback != null)
+                	aCallback.onSuccess(aRowset);
             }
-        }, onFailure);
+            
+            @Override
+            public void onFailure(String reason) {
+                if(aCallback != null)
+                	aCallback.onFailure(reason);
+            }
+        });
     }
 
     public Rowset prepareRowset(){

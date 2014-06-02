@@ -2,6 +2,7 @@ package com.eas.client.model.interacting.mixed;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.model.Model;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -66,8 +67,8 @@ public class MixedCrudTest extends MixedTest {
 				.setOnRequeried(module.<JsObject>cast().getJs("edIzmRequeried"));
 		model.getEntityById(ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_1_ID)
 				.setOnRequeried(module.<JsObject>cast().getJs("naimSiPoVel1Requeried"));
-		model.publish(module);
-		model.setRuntime(true);
+		Model.publishTopLevelFacade(module, model);
+		model.requery(null);
 		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
 
 			@Override

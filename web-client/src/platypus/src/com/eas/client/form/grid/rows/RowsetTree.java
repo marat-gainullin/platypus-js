@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeAdapter;
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -25,6 +24,7 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
+import com.google.gwt.core.client.Callback;
 
 public class RowsetTree extends TreeAdapter<Row> {
 
@@ -37,13 +37,13 @@ public class RowsetTree extends TreeAdapter<Row> {
 	protected boolean lazy;
 	protected RowsetReflector rowsetReflector = new RowsetReflector();
 	protected Runnable onLoadStart;
-	protected Callback<String> onError;
+	protected Callback<Void, String> onError;
 
-	public RowsetTree(Rowset aRowset, Field aParentField, Runnable aOnLoadStart, Callback<String> aOnError) {
+	public RowsetTree(Rowset aRowset, Field aParentField, Runnable aOnLoadStart, Callback<Void, String> aOnError) {
 		this(aRowset, aParentField, false, aOnLoadStart, aOnError);
 	}
 
-	public RowsetTree(Rowset aRowset, Field aParentField, boolean aLazy, Runnable aOnLoadStart, Callback<String> aOnError) {
+	public RowsetTree(Rowset aRowset, Field aParentField, boolean aLazy, Runnable aOnLoadStart, Callback<Void, String> aOnError) {
 		super();
 		parentField = aParentField;
 		lazy = aLazy;
@@ -247,7 +247,7 @@ public class RowsetTree extends TreeAdapter<Row> {
 		public void rowsetNetError(RowsetNetErrorEvent event) {
 			if (onError != null) {
 				try {
-					onError.run(event.getMessage());
+					onError.onFailure(event.getMessage());
 				} catch (Exception e) {
 					Logger.getLogger(RowsetTree.class.getName()).log(Level.SEVERE, null, e);
 				}

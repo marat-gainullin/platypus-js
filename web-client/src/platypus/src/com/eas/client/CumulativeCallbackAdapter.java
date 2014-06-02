@@ -4,23 +4,25 @@
  */
 package com.eas.client;
 
+import com.bearsoft.rowset.CallbackAdapter;
+
 /**
- *
+ * 
  * @author mg
  */
-public abstract class CumulativeCallbackAdapter extends CancellableCallbackAdapter {
+public abstract class CumulativeCallbackAdapter<T, F> extends CallbackAdapter<T, F> {
 
-    protected int exepectedExecutesCount;
-    protected int executed;
+	protected int exepectedExecutesCount;
+	protected int executed;
 
-    public CumulativeCallbackAdapter(int aExecutesCount) {
-        exepectedExecutesCount = aExecutesCount;
-    }
+	public CumulativeCallbackAdapter(int aExecutesCount) {
+		super();
+		exepectedExecutesCount = aExecutesCount;
+	}
 
-    @Override
-    public void run() throws Exception {
-        if (!cancelled && ++executed == exepectedExecutesCount) {
-            doWork();
-        }
-    }
+	public void onSuccess(T result) {
+		if (++executed == exepectedExecutesCount) {
+			super.onSuccess(result);
+		}
+	}
 }

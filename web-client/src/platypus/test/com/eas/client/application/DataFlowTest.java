@@ -5,18 +5,15 @@ import java.util.List;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.RowsetCallbackAdapter;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.CancellableCallback;
-import com.eas.client.StringCallbackAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.model.ModelBaseTest;
 import com.eas.client.queries.Query;
-import com.eas.client.queries.QueryCallbackAdapter;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
 
@@ -52,19 +49,19 @@ public class DataFlowTest extends GWTTestCase {
 	public void testThreeTablesTest() throws Exception {
 		final List<Change> commonLog = new ArrayList<Change>();
 		final AppClient client = ModelBaseTest.initDevelopTestClient(getModuleName());
-		client.getAppQuery(AMBIGUOUS_QUERY_ID, new QueryCallbackAdapter() {
+		client.getAppQuery(AMBIGUOUS_QUERY_ID, new CallbackAdapter<Query, String>() {
 			@Override
-			public void run(Query aQuery) throws Exception {
+			public void doWork(Query aQuery) throws Exception {
 				Query query = aQuery;
-				query.execute(new RowsetCallbackAdapter() {
+				query.execute(new CallbackAdapter<Rowset, String>() {
 
 					@Override
 					public void doWork(Rowset aRowset) throws Exception {
 						final Rowset rowset = aRowset;
-						rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()){
+						rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
 							@Override
 							public List<Change> getChangeLog() {
-							    return commonLog;
+								return commonLog;
 							}
 						});
 						final int oldRowsetSize = rowset.size();
@@ -97,9 +94,9 @@ public class DataFlowTest extends GWTTestCase {
 						assertEquals(row.getColumnObject(fields.find("tid")), NEW_RECORD_ID);
 						assertEquals(row.getColumnObject(fields.find("kid")), NEW_RECORD_ID);
 						//
-						client.getAppQuery(COMMAND_QUERY_ID, new QueryCallbackAdapter() {
+						client.getAppQuery(COMMAND_QUERY_ID, new CallbackAdapter<Query, String>() {
 							@Override
-							public void run(Query aQuery) throws Exception {
+							public void doWork(Query aQuery) throws Exception {
 								Query command = aQuery;
 								command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
 								command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
@@ -109,22 +106,15 @@ public class DataFlowTest extends GWTTestCase {
 								// NEW_RECORD_NAME_G);
 								rowset.updateObject(fields.find("tname"), NEW_RECORD_NAME_T);
 								rowset.updateObject(fields.find("kname"), NEW_RECORD_NAME_K);
-								client.commit(commonLog, new CancellableCallback() {
+								client.commit(commonLog, new CallbackAdapter<Void, String>() {
 
 									@Override
-									public void cancel() {
-									}
-
-									@Override
-									public void run() throws Exception {
+									public void doWork(Void aVoid) throws Exception {
 										assertTrue(commonLog.isEmpty());
-										rowset.refresh(new CancellableCallback() {
-											@Override
-											public void cancel() {
-											}
+										rowset.refresh(new CallbackAdapter<Rowset, String>() {
 
 											@Override
-											public void run() throws Exception {
+											public void doWork(Rowset aRowset) throws Exception {
 												final Fields fields = rowset.getFields();
 												assertEquals(oldRowsetSize + 1, rowset.size());
 
@@ -145,21 +135,14 @@ public class DataFlowTest extends GWTTestCase {
 												assertEquals(newRow.getColumnObject(fields.find("kname")), NEW_RECORD_NAME_K);
 												// Delete operation
 												rowset.delete();
-												client.commit(commonLog, new CancellableCallback() {
-													@Override
-													public void cancel() {
-													}
+												client.commit(commonLog, new CallbackAdapter<Void, String>() {
 
 													@Override
-													public void run() throws Exception {
-														rowset.refresh(new CancellableCallback() {
+													public void doWork(Void aVoid) throws Exception {
+														rowset.refresh(new CallbackAdapter<Rowset, String>() {
 
 															@Override
-															public void cancel() {
-															}
-
-															@Override
-															public void run() throws Exception {
+															public void doWork(Rowset aRowset) throws Exception {
 																Fields fields = rowset.getFields();
 																assertEquals(oldRowsetSize, rowset.size());
 
@@ -179,39 +162,45 @@ public class DataFlowTest extends GWTTestCase {
 																finishTest();
 															}
 
-														}, new StringCallbackAdapter() {
 															@Override
-															protected void doWork(String aResult) throws Exception {
+															public void onFailure(String reason) {
 															}
 														});
 													}
-												}, null);
+
+													@Override
+													public void onFailure(String reason) {
+													}
+												});
 											}
-										}, new StringCallbackAdapter() {
+
 											@Override
-											protected void doWork(String aResult) throws Exception {
+											public void onFailure(String reason) {
 											}
 										});
 									}
 
-								}, null);
+									@Override
+									public void onFailure(String reason) {
+									}
+
+								});
 							}
-						}, new StringCallbackAdapter() {
+
 							@Override
-							protected void doWork(String aResult) throws Exception {
+							public void onFailure(String reason) {
 							}
 						});
 					}
 
-				}, new StringCallbackAdapter() {
 					@Override
-					protected void doWork(String aResult) throws Exception {
+					public void onFailure(String reason) {
 					}
 				});
 			}
-		}, new StringCallbackAdapter() {
+
 			@Override
-			protected void doWork(String aResult) throws Exception {
+			public void onFailure(String reason) {
 			}
 		});
 	}

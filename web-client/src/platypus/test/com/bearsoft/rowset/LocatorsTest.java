@@ -11,7 +11,6 @@ import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.KeySet;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,13 +60,13 @@ public class LocatorsTest extends DataRowsetBaseTest {
             checkAllLocatorsAreValid(rowset);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);
 
             sc1 = new SortingCriterion(1, true);
-            criteria = new ArrayList();
+            criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);
@@ -114,13 +113,13 @@ public class LocatorsTest extends DataRowsetBaseTest {
             checkAllLocatorsAreValid(rowset);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);
 
             sc1 = new SortingCriterion(1, true);
-            criteria = new ArrayList();
+            criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);

@@ -4,8 +4,6 @@
  */
 package com.bearsoft.rowset.events;
 
-import java.math.BigDecimal;
-
 import com.bearsoft.rowset.DataRowsetBaseTest;
 import com.bearsoft.rowset.Rowset;
 

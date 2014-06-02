@@ -168,9 +168,8 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 	public void setValue(T value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 		try {
-			JavaScriptObject eventThis = modelElement != null && modelElement.entity != null && modelElement.entity.getModel() != null ? modelElement.entity.getModel().getModule() : null;
 			if (onRender != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null) {
-				cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, onRender, modelElement.entity.getRowset().getCurrentRow(), null, modelElement, cellToRender);
+				cellToRender = ControlsUtils.calcStandalonePublishedCell(published, onRender, modelElement.entity.getRowset().getCurrentRow(), null, modelElement, cellToRender);
 			}
 			if (cellToRender != null) {
 				if (cellToRender.getDisplayCallback() == null) {

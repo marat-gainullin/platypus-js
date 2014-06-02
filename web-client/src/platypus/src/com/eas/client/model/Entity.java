@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Row;
@@ -57,11 +57,11 @@ import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.CancellableCallback;
-import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.application.Application;
 import com.eas.client.form.js.JsEvents;
+import com.eas.client.form.published.HasPublished;
 import com.eas.client.queries.Query;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -70,7 +70,7 @@ import com.google.gwt.core.client.JsArrayMixed;
  * 
  * @author mg
  */
-public class Entity implements RowsetListener {
+public class Entity implements RowsetListener, HasPublished{
 
 	public static final String QUERY_REQUIRED = "All model entities must have a query";
 	protected JavaScriptObject onBeforeChange;
@@ -85,7 +85,7 @@ public class Entity implements RowsetListener {
 	protected JavaScriptObject onFiltered;
 	protected JavaScriptObject jsPublished;
 	protected JavaScriptObject jsElementClass;
-	// for runtime
+	// runtime
 	protected List<Integer> filterConstraints = new ArrayList<Integer>();
 	protected Cancellable pending;
 	protected boolean valid;
@@ -137,7 +137,8 @@ public class Entity implements RowsetListener {
         return Collections.unmodifiableMap(ormDefinitions);
     }
 
-	public static native void publish(JavaScriptObject aTarget, Entity aEntity) throws Exception/*-{
+    /*
+	private static native void publish(JavaScriptObject aTarget, Entity aEntity) throws Exception/*-{
 		var dsName = aEntity.@com.eas.client.model.Entity::getName()();
 		if (dsName) {
 			var publishedRowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
@@ -149,30 +150,25 @@ public class Entity implements RowsetListener {
 		}
 	}-*/;
 
-	public static native JavaScriptObject publishEntityFacade(Entity aEntity) throws Exception/*-{
+	private static native JavaScriptObject publishEntityFacade(Entity aEntity)/*-{
 
 		function getRowset() {
 			return aEntity.@com.eas.client.model.Entity::getRowset()();
 		}
 		
-		function propsToArray(aObj)
-		{
+		function propsToArray(aObj){
 			var linearProps = [];
-			for(var pName in aObj)
-			{
-				if(isNaN(pName) && pName != 'length')
-				{
+			for(var pName in aObj){
+				if(isNaN(pName) && pName != 'length'){
 					linearProps.push(pName);
 					linearProps.push(aObj[pName]);
 				}
 			}
 			return linearProps;
 		}
-		if(aEntity != null)
-		{
+		if(aEntity != null){
 			var published = aEntity.@com.eas.client.model.Entity::getPublished()();
-			if(published == null)
-			{
+			if(published == null){
 				published = {
 					// array mutator methods
 					pop : function()
@@ -1344,9 +1340,9 @@ public class Entity implements RowsetListener {
 		return true;
 	}
 
-	protected Cancellable refreshRowset(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	protected Cancellable refreshRowset(Callback<Rowset, String> aCallback) throws Exception {
 		if (query != null && rowset != null) {
-			return rowset.refresh(query.getParameters(), onSuccess, onFailure);
+			return rowset.refresh(query.getParameters(), aCallback);
 		}else
 			return null;
 	}
@@ -1506,30 +1502,31 @@ public class Entity implements RowsetListener {
 	}
 
 	public void refresh(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		refresh(new CancellableCallbackAdapter() {
+		refresh(new CallbackAdapter<Rowset, String>() {
 			@Override
-			protected void doWork() throws Exception {
+			protected void doWork(Rowset result) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>(){
-
-			@Override
-            public void run(String aResult) throws Exception {
-				if(onFailure != null)
-					Utils.executeScriptEventVoid(jsPublished, onFailure, aResult);
-            }
 			
 			@Override
-            public void cancel() {
-            }
+			public void onFailure(String reason) {
+				if(onFailure != null){
+					try{
+						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
+					}catch(Exception ex){
+						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+			}
+			
 		});
 	}
 
-	public void refresh(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	public void refresh(final Callback<Rowset, String> aCallback) throws Exception {
 		if (model != null/* && model.isRuntime()*/) {
 			invalidate();
-			internalExecute(onSuccess, onFailure);
+			internalExecute(aCallback);
 			/*
 			 * internalExecute(new CancellableCallbackAdapter() {
 			 * 
@@ -1544,29 +1541,31 @@ public class Entity implements RowsetListener {
 	}
 	
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		execute(new CancellableCallbackAdapter() {
+		execute(new CallbackAdapter<Rowset, String>() {
+			
 			@Override
-			protected void doWork() throws Exception {
+			protected void doWork(Rowset aResult) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>(){
-
-			@Override
-            public void run(String aResult) throws Exception {
-				if(onFailure != null)
-					Utils.executeScriptEventVoid(jsPublished, onFailure, aResult);
-            }
 			
 			@Override
-            public void cancel() {
-            }
+			public void onFailure(String reason) {
+				if(onFailure != null){
+					try{
+						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
+					}catch(Exception ex){
+						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+			}			
+			
 		});
 	}
 
-	public void execute(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	public void execute(Callback<Rowset, String> aCallback) throws Exception {
 		if (model != null/* && model.isRuntime()*/) {
-			internalExecute(onSuccess, onFailure);
+			internalExecute(aCallback);
 			/*
 			 * internalExecute(new CancellableCallbackAdapter() {
 			 * 
@@ -1576,7 +1575,7 @@ public class Entity implements RowsetListener {
 		}
 	}
 
-	protected void internalExecute(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
+	protected void internalExecute(final Callback<Rowset, String> aCallback) throws Exception {
 		if (model != null/* && model.isRuntime()*/) {
 			assert query != null : QUERY_REQUIRED;
 			// try to select any data only within non-manual queries
@@ -1608,28 +1607,29 @@ public class Entity implements RowsetListener {
 							model.setProcess(lprocess);
 						}
 					}
-					pending = refreshRowset(new CancellableCallbackAdapter() {
+					pending = refreshRowset(new CallbackAdapter<Rowset, String>() {
 
 						@Override
-						public void doWork() throws Exception {
+						public void doWork(Rowset aResult) throws Exception {
 							assert rowset != null;// pending nulling is done in onRequeried event handler
-							if (onSuccess != null)
-								onSuccess.run();
+							if (aCallback != null)
+								aCallback.onSuccess(aResult);
 						}
-					}, new Callback<String>(){
+						
 						@Override
-						public void run(String aMessage) throws Exception {
-							assert pending != null;
-							pending = null;
-							valid = true;
-							model.terminateProcess(Entity.this, aMessage);
-							if(onFailure != null)
-								onFailure.run(aMessage);
+						public void onFailure(String aMessage) {
+							try{
+								assert pending != null;
+								pending = null;
+								valid = true;
+								model.terminateProcess(Entity.this, aMessage);
+								if(aCallback != null)
+									aCallback.onFailure(aMessage);
+							}catch(Exception ex){
+								Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+							}
 						}
-
-						@Override
-                        public void cancel() {
-                        }
+						
 					});
 				} else {
 					// There might be a case of only rowset filtering
@@ -1673,7 +1673,7 @@ public class Entity implements RowsetListener {
 						}
 					}
 				}
-				model.executeEntities(toExecute, null, null);
+				model.executeEntities(toExecute);
 			}
 		}
 	}
@@ -1692,7 +1692,7 @@ public class Entity implements RowsetListener {
 						}
 					}
 				}
-				model.executeEntities(toExecute, null, null);
+				model.executeEntities(toExecute);
 			}
 		}
 	}
@@ -1712,13 +1712,7 @@ public class Entity implements RowsetListener {
 			if (rowset.getActiveFilter() != null) {
 				rowset.getActiveFilter().cancelFilter();
 			}
-			execute(new CancellableCallbackAdapter() {
-
-				@Override
-				public void doWork() throws Exception {
-					// no op
-				}
-			}, null);
+			execute(null);
 		}
 	}
 
@@ -2568,9 +2562,13 @@ public class Entity implements RowsetListener {
 	}
 
 	public void setPublished(JavaScriptObject aPublished) {
-		jsPublished = aPublished;
+		if(jsPublished != aPublished){
+			jsPublished = aPublished;
+			publishEntityFacade(this);
+		}
 	}
 
+	@Override
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}

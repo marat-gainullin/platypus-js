@@ -3,12 +3,10 @@ package com.eas.client.form.grid.columns;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowRowValueConverter;
 import com.eas.client.form.ControlsUtils;

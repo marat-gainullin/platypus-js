@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.model.Model;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -67,8 +68,8 @@ public class MixedScrollTest extends MixedTest {
 		model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmRequeried"));
 		model.getEntityById(ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("naimSiPoVel1Requeried"));
 		model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_ID).setOnRequeried(module.<JsObject>cast().getJs("edOborRequeried"));
-		model.publish(module);
-		model.setRuntime(true);
+		Model.publishTopLevelFacade(module, model);
+		model.requery(null);
 		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
 
 			@Override

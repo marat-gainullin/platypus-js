@@ -1,8 +1,8 @@
 package com.eas.client.model.interacting.quering;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.model.Model;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -63,8 +63,8 @@ public class QueringCRUDTest extends QueringTest {
 			model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_QUERING_RELATIONS), module);
 			model.getEntityById(ENTITY_IZMERJAEMIE_VELICHINI_ID).setOnRequeried(module.<JsObject>cast().getJs("izmVelRequeried"));
 			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmPoVelRequeried"));
-			model.publish(module);
-			model.setRuntime(true);
+			Model.publishTopLevelFacade(module, model);
+			model.requery(null);
 			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
 
 				@Override
