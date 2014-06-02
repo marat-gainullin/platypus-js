@@ -13,7 +13,7 @@ import static com.eas.designer.application.module.completion.ModuleCompletionCon
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
- *
+ * This class represents a data model or entity parameters completion context.
  * @author vv
  */
 public class ParametersCompletionContext extends CompletionContext {

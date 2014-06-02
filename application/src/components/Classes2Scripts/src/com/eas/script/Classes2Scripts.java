@@ -18,19 +18,22 @@ import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The utility to convert JavaScript API classes with @ScritpFunction annotation
+ * The utility application to convert JavaScript API classes with @ScritpFunction annotation
  * to pure JavaScript objects.
  *
  * @author vv
@@ -43,6 +46,7 @@ public class Classes2Scripts {
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
+    private static final String DEPS_FILE_NAME = "deps.js";//NOI18N
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
     private static final int CONSTRUCTOR_IDENT_LEVEL = 1;
@@ -72,16 +76,21 @@ public class Classes2Scripts {
     private static final String JS_DOC_TEMPLATE = "/**\n"//NOI18N
             + "* %s\n"//NOI18N
             + "*/";//NOI18N
-
+    
+    private static final String DEPS_HEADER = "/**\n"//NOI18N
+            + "* Contains the basic dependencies loading.\n"//NOI18N
+            + "*/\n";//NOI18N
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
+    private final Set<String> depsPaths = new TreeSet<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         convertor = new Classes2Scripts();
         try {
             convertor.parseArguments(args);
             convertor.validate();
+            convertor.clean();
             convertor.run();
             System.out.println("Conversion completed.");
         } catch (Exception ex) {
@@ -118,8 +127,12 @@ public class Classes2Scripts {
     }
 
     private void validate() {
+        if (!destDirectory.exists()) {
+            throw new IllegalArgumentException("Destination directory does not exists: " + destDirectory);
+        }
+
         if (!destDirectory.isDirectory()) {
-            throw new IllegalArgumentException("Destination path is not a directory: " + destDirectory);
+            throw new IllegalArgumentException("Destination is not a directory: " + destDirectory);
         }
 
         for (File classPath : classPaths) {
@@ -133,15 +146,20 @@ public class Classes2Scripts {
         return f.isFile() && f.getName().endsWith("jar");//NOI18N
     }
 
+    private void clean() throws IOException {
+        FileUtils.clearDirectory(destDirectory);
+    }
+
     private void run() {
         try {
             for (File classPath : classPaths) {
                 if (classPath.isDirectory()) {
                     processDirectory(classPath);
-                } else {
+                } else if (isJar(classPath)) {
                     processJar(classPath);
                 }
             }
+            createDepsFile();
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.SEVERE, "Conversion error.", ex);
         }
@@ -157,9 +175,9 @@ public class Classes2Scripts {
         }
     }
 
-    private void processJar(File file) throws IOException, ClassNotFoundException {
-        try (JarFile jar = new JarFile(file)) {
-            URLClassLoader cl = new URLClassLoader(new URL[]{file.toURI().toURL()}, this.getClass().getClassLoader());
+    private void processJar(File jarFile) throws IOException, ClassNotFoundException {
+        try (JarFile jar = new JarFile(jarFile)) {
+            URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
                 try {
@@ -169,12 +187,17 @@ public class Classes2Scripts {
                         Class clazz = Class.forName(className, false, cl);
                         FunctionInfo jsConstructor = getJsConstructorInfo(clazz);
                         if (jsConstructor != null) {
-                            Logger.getLogger(Classes2Scripts.class.getName())
-                                    .log(Level.INFO, "File: {0} Class name: {1}", new String[] {file.getName(), className});
-                            File resultFile = new File(destDirectory, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                             String js = getClassJs(clazz);
                             if (js != null) {
+                                File subDir = new File(destDirectory, FileUtils.removeExtension(jarFile.getName()));
+                                if (!subDir.exists()) {
+                                    subDir.mkdir();
+                                }
+                                Logger.getLogger(Classes2Scripts.class.getName())
+                                        .log(Level.INFO, "File: {0} Class name: {1}", new String[]{jarFile.getAbsolutePath(), className});
+                                File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
+                                depsPaths.add(getRelativePath(destDirectory, resultFile));
                             }
                         }
                     }
@@ -206,21 +229,57 @@ public class Classes2Scripts {
         return js;
     }
 
-    private static void checkForHasPublised(Class clazz) {
-        if (!HasPublished.class.isAssignableFrom(clazz)) {
-            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "=======================================  HasPublished iterface is not implemented: {0}", clazz.getName());
+    private void createDepsFile() throws IOException {
+        File deps = new File(destDirectory, DEPS_FILE_NAME);
+        FileUtils.writeString(deps, getDepsJsContent(), SettingsConstants.COMMON_ENCODING);
+    }
+
+    private String getDepsJsContent() {
+        StringBuilder sb = new StringBuilder(DEPS_HEADER);
+        String dir = "";
+        for (String path : depsPaths) {
+            String pathDir = pathRootDir(path);
+            if (dir != null && pathDir == null 
+                    || dir == null && pathDir != null
+                    || !dir.equals(pathDir)) {
+                sb.append("\n");
+            }
+            dir = pathDir;
+            sb.append(String.format("load(%s);\n", path));
+        }
+        return sb.toString();
+    }
+
+    private static String pathRootDir(String path) {
+        String[] pathElements = path.split("/");
+        if (pathElements.length > 0) {
+            return path.split("/")[0];
+        } else {
+            return null;
         }
     }
-    
+
+    private static String getRelativePath(File base, File file) {
+        Path pathAbsolute = file.toPath();
+        Path pathBase = base.toPath();
+        return pathBase.relativize(pathAbsolute).toString().replace("\\", "/");
+    }
+
+    private static void checkForHasPublised(Class clazz) {
+        if (!HasPublished.class.isAssignableFrom(clazz)) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "HasPublished iterface is not implemented: {0}", clazz.getName());
+        }
+    }
+
     private static void checkForSetPublisher(Class clazz) {
         for (Method m : clazz.getMethods()) {
-            if (m.getName().equals("setPublisher") && Modifier.isStatic(m.getModifiers())) { 
+            if (m.getName().equals("setPublisher") && Modifier.isStatic(m.getModifiers())) {
                 return;
             }
         }
-        Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "=======================================  setPublisher static method is not implemented: {0}", clazz.getName());
+        Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "setPublisher static method is not implemented: {0}", clazz.getName());
     }
-    
+
     private static String getConstructorJsDoc(FunctionInfo ci) {
         return addIdent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
     }
@@ -295,19 +354,25 @@ public class Classes2Scripts {
         sb.append(getIdentStr(i));
         sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", property.name));
         sb.append(getIdentStr(++i));
+        assert property.readable;
         sb.append("get: function() {\n");
         sb.append(getIdentStr(++i));
         sb.append(String.format("var value = %s.%s;\n", DELEGATE_OBJECT, property.name));
         sb.append(getIdentStr(i));
         sb.append("return value && value.getPublished ? value.getPublished() : null;\n");
         sb.append(getIdentStr(--i));
-        sb.append("},\n");
-        sb.append(getIdentStr(i));
-        sb.append("set: function(aValue) {\n");
-        sb.append(getIdentStr(++i));
-        sb.append(String.format("delegate.%s = aValue && aValue.unwrap ? aValue.unwrap() : null;\n", property.name));
-        sb.append(getIdentStr(--i));
-        sb.append("}\n");
+        sb.append("}");
+        if (property.writeable) {
+            sb.append(",\n");
+            sb.append(getIdentStr(i));
+            sb.append("set: function(aValue) {\n");
+            sb.append(getIdentStr(++i));
+            sb.append(String.format("delegate.%s = aValue && aValue.unwrap ? aValue.unwrap() : null;\n", property.name));
+            sb.append(getIdentStr(--i));
+            sb.append("}\n");
+        } else {
+            sb.append("\n");
+        }
         sb.append(getIdentStr(--i));
         sb.append("});\n");
         return sb.toString();

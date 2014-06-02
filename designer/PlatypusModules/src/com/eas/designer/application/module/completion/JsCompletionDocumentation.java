@@ -9,7 +9,7 @@ import javax.swing.Action;
 import org.netbeans.spi.editor.completion.CompletionDocumentation;
 
 /**
- *
+ * JavaScript documentation in a completion pop-up.
  * @author mg
  */
 public class JsCompletionDocumentation implements CompletionDocumentation {

@@ -23,6 +23,8 @@ import jdk.nashorn.internal.parser.Token;
 import org.netbeans.modules.editor.NbEditorDocument;
 
 /**
+ * The class hold information about a completion environment near the cursor
+ * position in a document.
  *
  * @author vv
  */
@@ -108,7 +110,7 @@ public class CompletionPoint {
                 lc.expressionsNodes.pop();
                 return super.leaveExpressionStatement(expressionStatement);
             }
-            
+
             @Override
             public boolean enterIdentNode(IdentNode identNode) {
                 if (!lc.expressionsNodes.isEmpty()
@@ -128,7 +130,7 @@ public class CompletionPoint {
                         && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
                     System.out.println(indexNode.getIndex());
                     if (indexNode.getIndex() instanceof LiteralNode) {
-                        LiteralNode ln = (LiteralNode)indexNode.getIndex();
+                        LiteralNode ln = (LiteralNode) indexNode.getIndex();
                         ctx.add(new CompletionToken(ln.getString(), indexNode));
                     } else if (indexNode.getIndex() instanceof IdentNode) {
                         IdentNode in = (IdentNode) indexNode.getIndex();
@@ -137,14 +139,12 @@ public class CompletionPoint {
                 }
                 return super.enterIndexNode(indexNode);
             }
-            
-            
 
         });
         Collections.sort(ctx);
         return ctx;
     }
-    
+
     private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, int offset) {
         final List<CompletionToken> tokens = new ArrayList<>();
         for (CompletionToken token : contextTokens) {
@@ -181,6 +181,10 @@ public class CompletionPoint {
         return caretOffset;
     }
 
+    /**
+     * Represents an element in a completion chain.
+     * TODO Should be removed?
+     */
     public static class CompletionToken implements Comparable<CompletionToken> {
 
         public final String name;

@@ -15,7 +15,7 @@ import java.util.Collection;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
- *
+ * This class represents a data model completion context.
  * @author vv
  */
 public class ModelCompletionContext extends CompletionContext {
