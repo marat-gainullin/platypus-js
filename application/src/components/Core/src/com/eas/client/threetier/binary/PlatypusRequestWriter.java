@@ -4,7 +4,6 @@
  */
 package com.eas.client.threetier.binary;
 
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.serial.ChangesWriter;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -13,7 +12,6 @@ import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Request;
-import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -36,12 +34,8 @@ import com.eas.script.ScriptUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *

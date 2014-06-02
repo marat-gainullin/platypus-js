@@ -20,7 +20,6 @@ import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.ir.VarNode;
 import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.objects.NativeDate;
 import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
 import jdk.nashorn.internal.parser.Token;

@@ -5,6 +5,6 @@
 function ${appElementName}(){
     var self = this
     , model = P.loadModel(this.constructor.name)
-    , report = P.loadReport(this.constructor.name, model);
+    , template = P.loadTemplate(this.constructor.name, model);
     
 }
