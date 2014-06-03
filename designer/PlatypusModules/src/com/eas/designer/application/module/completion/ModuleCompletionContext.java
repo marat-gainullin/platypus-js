@@ -246,7 +246,7 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    protected static boolean isSystemObjectMethod(Expression assignmentSource, String methodName) {
+    public static boolean isSystemObjectMethod(Expression assignmentSource, String methodName) {
         if (assignmentSource instanceof CallNode) {
             CallNode cn = (CallNode) assignmentSource;
             if (cn.getFunction() instanceof AccessNode) {

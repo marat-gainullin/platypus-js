@@ -567,20 +567,19 @@ public class Application {
             return (num << cnt) | (num >>> (32 - cnt));
         }
 
-		$wnd.P.getCached = function(appElementId) {
-			return aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementId);
-		};
-		$wnd.P.readModel = function(appElementDoc, aModule, aTarget) {
+		$wnd.P.loadModel = function(appElementName, aTarget) {
 			if(!aTarget)
 				aTarget = {};
-			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModule);
-			nativeModel.@com.eas.client.model.Model::publishTopLevelFacade(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/model/Model;)(aModule);
-			return nativeModel;
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
+			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
+			@com.eas.client.model.Model::publishTopLevelFacade(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/model/Model;)(aTarget, nativeModel);
+			return aTarget;
 		};
-		$wnd.P.readForm = function(appElementDoc, aModule, aTarget) {
+		$wnd.P.readForm = function(appElementName, aModel, aTarget) {
 			if(!aTarget)
 				aTarget = {};
-			var nativeModel = aModule.model.unwrap();
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
+			var nativeModel = aModel.unwrap();
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
