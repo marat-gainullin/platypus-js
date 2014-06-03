@@ -7,8 +7,10 @@ package com.eas.client.forms.api.containers;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.Orientation;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JSplitPane;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -16,13 +18,14 @@ import javax.swing.JSplitPane;
  */
 public class SplitPane extends Container<JSplitPane> {
 
+    private static JSObject publisher;
     public SplitPane() {
         this(Orientation.HORIZONTAL);
     }
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.\n" 
+            + "* <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.\n"
             + "* @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).\n"
             + "*/";
 
@@ -42,12 +45,12 @@ public class SplitPane extends Container<JSplitPane> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String ORIENTATION_JSDOC = ""
             + "/**\n"
             + "* The orientation of the container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ORIENTATION_JSDOC)
     public int getOrientation() {
         if (delegate.getOrientation() == JSplitPane.HORIZONTAL_SPLIT) {
@@ -72,7 +75,7 @@ public class SplitPane extends Container<JSplitPane> {
             + "/**\n"
             + "* The split pane divider's location in pixels.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = DIVIDER_LOCATION_JSDOC)
     public int getDividerLocation() {
         return delegate.getDividerLocation();
@@ -87,7 +90,7 @@ public class SplitPane extends Container<JSplitPane> {
             + "/**\n"
             + "* <code>true</code> if the pane is one touch expandable.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ONE_TOUCH_EXPANDABLE_JSDOC)
     public boolean getOneTouchExpandable() {
         return delegate.isOneTouchExpandable();
@@ -102,7 +105,7 @@ public class SplitPane extends Container<JSplitPane> {
             + "/**\n"
             + "* The first component of the container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = FIRST_COMPONENT_JSDOC)
     public Component<?> getFirstComponent() {
         return getComponentWrapper(delegate.getLeftComponent());
@@ -119,7 +122,7 @@ public class SplitPane extends Container<JSplitPane> {
             + "/**\n"
             + "* The second component of the container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SECOND_COMPONENT_JSDOC)
     public Component<?> getSecondComponent() {
         return getComponentWrapper(delegate.getRightComponent());
@@ -137,7 +140,7 @@ public class SplitPane extends Container<JSplitPane> {
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComponent) {
         if (getFirstComponent() == null) {
@@ -145,5 +148,20 @@ public class SplitPane extends Container<JSplitPane> {
         } else {
             setSecondComponent(aComponent);
         }
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

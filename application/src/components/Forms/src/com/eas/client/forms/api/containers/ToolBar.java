@@ -6,8 +6,10 @@ package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JToolBar;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -15,6 +17,7 @@ import javax.swing.JToolBar;
  */
 public class ToolBar extends Container<JToolBar> {
 
+    private static JSObject publisher;
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.\n"
@@ -50,5 +53,20 @@ public class ToolBar extends Container<JToolBar> {
             delegate.revalidate();
             delegate.repaint();
         }
+    }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

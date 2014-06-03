@@ -9,6 +9,7 @@ import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.HorizontalPosition;
 import com.eas.client.forms.api.VerticalPosition;
 import com.eas.client.forms.api.containers.ButtonGroup;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -19,9 +20,10 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ToggleButton extends Component<JToggleButton> implements HasGroup{
+public class ToggleButton extends Component<JToggleButton> implements HasGroup {
 
     protected ButtonGroup group;
+    private static JSObject publisher;
 
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap) {
         this(aText, aIcon, aSelected, aIconTextGap, null);
@@ -69,8 +71,8 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
         super();
         setDelegate(aDelegate);
     }
-    
-    @ScriptFunction(jsDoc=""
+
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Text on the button.\n"
             + " */")
@@ -83,7 +85,7 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Image picture for the button.\n"
             + " */")
@@ -96,7 +98,7 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The amount of space between the text and the icon displayed in this button.\n"
             + " */")
@@ -109,7 +111,7 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
         delegate.setIconTextGap(aValue);
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Horizontal position of the text relative to the icon.\n"
             + " */")
@@ -143,8 +145,8 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
                 break;
         }
     }
-    
-    @ScriptFunction(jsDoc=""
+
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Vertical position of the text relative to the icon.\n"
             + " */")
@@ -160,7 +162,7 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
                 return VerticalPosition.CENTER;
         }
     }
-    
+
     @ScriptFunction
     public void setVerticalTextPosition(int aValue) {
         switch (aValue) {
@@ -179,7 +181,7 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
         }
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The state of the button.\n"
             + " */")
@@ -192,7 +194,7 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
         delegate.setSelected(aValue);
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The ButtonGroup this component belongs to.\n"
             + " */")
@@ -213,5 +215,20 @@ public class ToggleButton extends Component<JToggleButton> implements HasGroup{
                 group.add(this);
             }
         }
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

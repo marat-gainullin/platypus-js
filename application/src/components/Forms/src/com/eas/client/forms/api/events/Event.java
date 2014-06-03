@@ -6,6 +6,7 @@ package com.eas.client.forms.api.events;
 
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.Component;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.util.EventObject;
@@ -19,7 +20,7 @@ import javax.swing.JComponent;
 public abstract class Event<E extends EventObject> extends PublishedSourcedEvent {
 
     protected E delegate;
-
+        
     protected Event(E aDelegate) {
         super(null);
         delegate = aDelegate;

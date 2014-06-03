@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.api;
 
-import static com.eas.client.forms.api.HorizontalPosition.publisher;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -25,7 +24,7 @@ public class VerticalPosition implements HasPublished {
     public static final int CENTER = 0;
     public static final int BOTTOM = 3;
     
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     
     @ScriptFunction()

@@ -5,6 +5,7 @@
 package com.eas.client.chart;
 
 import com.eas.client.scripts.ScriptColor;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptUtils;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -30,7 +31,8 @@ public class TimeSeriesChart extends AbstractLineChart {
     private final String title;
     private final String xLabel;
     private final String yLabel;
-
+    private static JSObject publisher;
+    
     public TimeSeriesChart(String pTitle, String pXAxisLabel, String pYAxisLabel) {
         super();
         title = pTitle;
@@ -161,5 +163,20 @@ public class TimeSeriesChart extends AbstractLineChart {
         createChart();
         chart.fireChartChanged();
         super.fireDataChanged();
+    }
+    
+        @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

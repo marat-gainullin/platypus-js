@@ -5,15 +5,18 @@
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JTextPane;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
 public class TextArea extends Component<JTextPane> {
-
+    
+    private static JSObject publisher;
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Text area component. \n"
@@ -54,7 +57,7 @@ public class TextArea extends Component<JTextPane> {
             + "/**\n"
             + "* The text to be shown when component's value is absent.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EMPTY_TEXT_JSDOC)
     public String getEmptyText() {
         return (String) delegate.getClientProperty(Component.EMPTY_TEXT_PROP_NAME);
@@ -63,5 +66,20 @@ public class TextArea extends Component<JTextPane> {
     @ScriptFunction
     public void setEmptyText(String aValue) {
         delegate.putClientProperty(Component.EMPTY_TEXT_PROP_NAME, aValue);
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }
