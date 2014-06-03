@@ -30,12 +30,8 @@
          * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().
         Object.defineProperty(this, "save", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.save.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.save(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -48,12 +44,8 @@
          */
         Object.defineProperty(this, "requery", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.requery.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.requery(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -66,12 +58,8 @@
          */
         Object.defineProperty(this, "requery", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.requery.apply(delegate, args);
+                return function(arg0arg1) {
+                    var value = delegate.requery(P.boxAsJava(arg0)P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }
@@ -86,12 +74,8 @@
         */
         Object.defineProperty(this, "execute", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.execute.apply(delegate, args);
+                return function(arg0arg1) {
+                    var value = delegate.execute(P.boxAsJava(arg0)P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }
@@ -106,12 +90,8 @@
         */
         Object.defineProperty(this, "loadEntity", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.loadEntity.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.loadEntity(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }

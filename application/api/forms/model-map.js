@@ -652,12 +652,8 @@
         */
         Object.defineProperty(this, "hit", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.hit.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.hit(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -671,12 +667,8 @@
         */
         Object.defineProperty(this, "select", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.select.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.select(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -691,31 +683,8 @@
         */
         Object.defineProperty(this, "getLayer", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.getLayer.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
-        * @param area the <code>Geometry</code> of the specified area (optional) 
-         * @method fit
-         * @memberOf ModelMap
-        */
-        Object.defineProperty(this, "fit", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.fit.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.getLayer(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -730,12 +699,8 @@
         */
         Object.defineProperty(this, "removeLayer", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.removeLayer.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.removeLayer(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -750,11 +715,7 @@
         Object.defineProperty(this, "removeAllLayers", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.removeAllLayers.apply(delegate, args);
+                    var value = delegate.removeAllLayers();
                     return P.boxAsJs(value);
                 };
             }
@@ -769,12 +730,8 @@
         */
         Object.defineProperty(this, "cartesian2Geo", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.cartesian2Geo.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.cartesian2Geo(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -789,12 +746,8 @@
         */
         Object.defineProperty(this, "geo2Cartesian", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.geo2Cartesian.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.geo2Cartesian(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -809,12 +762,8 @@
         */
         Object.defineProperty(this, "cartesian2Screen", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.cartesian2Screen.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.cartesian2Screen(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -829,12 +778,8 @@
         */
         Object.defineProperty(this, "screen2Cartesian", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.screen2Cartesian.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.screen2Cartesian(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -848,12 +793,8 @@
         */
         Object.defineProperty(this, "goToGeoPosition", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.goToGeoPosition.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.goToGeoPosition(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -868,12 +809,23 @@
         */
         Object.defineProperty(this, "hitSelection", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.hitSelection.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.hitSelection(P.boxAsJava(arg0));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
+        * @param area the <code>Geometry</code> of the specified area (optional) 
+         * @method fit
+         * @memberOf ModelMap
+        */
+        Object.defineProperty(this, "fit", {
+            get: function() {
+                return function(arg0) {
+                    var value = delegate.fit(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -891,12 +843,8 @@
         */
         Object.defineProperty(this, "addLayer", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.addLayer.apply(delegate, args);
+                return function(arg0arg1arg2arg3) {
+                    var value = delegate.addLayer(P.boxAsJava(arg0)P.boxAsJava(arg1)P.boxAsJava(arg2)P.boxAsJava(arg3));
                     return P.boxAsJs(value);
                 };
             }
@@ -910,11 +858,7 @@
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.focus.apply(delegate, args);
+                    var value = delegate.focus();
                     return P.boxAsJs(value);
                 };
             }

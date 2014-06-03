@@ -786,11 +786,7 @@
         Object.defineProperty(this, "find", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.find.apply(delegate, args);
+                    var value = delegate.find();
                     return P.boxAsJs(value);
                 };
             }
@@ -803,12 +799,8 @@
         */
         Object.defineProperty(this, "select", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.select.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.select(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -822,11 +814,7 @@
         Object.defineProperty(this, "clearSelection", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.clearSelection.apply(delegate, args);
+                    var value = delegate.clearSelection();
                     return P.boxAsJs(value);
                 };
             }
@@ -841,12 +829,8 @@
         */
         Object.defineProperty(this, "makeVisible", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.makeVisible.apply(delegate, args);
+                return function(arg0arg1) {
+                    var value = delegate.makeVisible(P.boxAsJava(arg0)P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }
@@ -861,12 +845,8 @@
         */
         Object.defineProperty(this, "makeVisible", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.makeVisible.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.makeVisible(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -880,12 +860,8 @@
         */
         Object.defineProperty(this, "unselect", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.unselect.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.unselect(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -900,11 +876,7 @@
         Object.defineProperty(this, "findSomething", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.findSomething.apply(delegate, args);
+                    var value = delegate.findSomething();
                     return P.boxAsJs(value);
                 };
             }
@@ -918,11 +890,7 @@
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.focus.apply(delegate, args);
+                    var value = delegate.focus();
                     return P.boxAsJs(value);
                 };
             }

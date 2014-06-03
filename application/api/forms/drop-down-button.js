@@ -679,11 +679,7 @@
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.focus.apply(delegate, args);
+                    var value = delegate.focus();
                     return P.boxAsJs(value);
                 };
             }

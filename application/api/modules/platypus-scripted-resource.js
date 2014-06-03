@@ -30,12 +30,8 @@
         */
         Object.defineProperty(this, "load", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.load.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.load(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -50,12 +46,8 @@
         */
         Object.defineProperty(this, "translateScriptPath", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.translateScriptPath.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.translateScriptPath(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -71,12 +63,8 @@
         */
         Object.defineProperty(this, "loadText", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.loadText.apply(delegate, args);
+                return function(arg0arg1) {
+                    var value = delegate.loadText(P.boxAsJava(arg0)P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }

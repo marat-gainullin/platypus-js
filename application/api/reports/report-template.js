@@ -29,11 +29,7 @@
         Object.defineProperty(this, "generateReport", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.generateReport.apply(delegate, args);
+                    var value = delegate.generateReport();
                     return P.boxAsJs(value);
                 };
             }

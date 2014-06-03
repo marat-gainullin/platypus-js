@@ -15,6 +15,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -417,17 +418,22 @@ public class Classes2Scripts {
         sb.append(getIndentStr(++i));
         sb.append("get: function() {\n");
         sb.append(getIndentStr(++i));
-        sb.append("return function() {\n");
+        sb.append("return function(");
+        StringBuilder params = new StringBuilder();
+        String delimiter = "";
+        for (Parameter param : method.getParameters()) {
+            sb.append(delimiter).append(param.getName());
+            params.append(delimiter).append("P.boxAsJava(").append(param.getName()).append(")");
+        }
+        sb.append(") {\n");
         sb.append(getIndentStr(++i));
-        sb.append("var args = [];\n");
-        sb.append(getIndentStr(i));
-        sb.append("for(var a = 0; a < arguments.length; a++){\n");
-        sb.append(getIndentStr(++i));
-        sb.append("args[a] = P.boxAsJava(arguments[a]);\n");
-        sb.append(getIndentStr(--i));
-        sb.append("}\n");
-        sb.append(getIndentStr(i));
-        sb.append(String.format("var value = %s.%s.apply(%s, args);\n", DELEGATE_OBJECT, method.getName(), DELEGATE_OBJECT));
+        sb.append("var value = ")
+                .append(DELEGATE_OBJECT)
+                .append(".")
+                .append(method.getName())
+                .append("(")
+                .append(params)
+                .append(");\n");
         sb.append(getIndentStr(i));
         sb.append("return P.boxAsJs(value);\n");
         sb.append(getIndentStr(--i));

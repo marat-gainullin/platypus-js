@@ -598,11 +598,7 @@
         Object.defineProperty(this, "closeAll", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.closeAll.apply(delegate, args);
+                    var value = delegate.closeAll();
                     return P.boxAsJs(value);
                 };
             }
@@ -616,11 +612,7 @@
         Object.defineProperty(this, "minimizeAll", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.minimizeAll.apply(delegate, args);
+                    var value = delegate.minimizeAll();
                     return P.boxAsJs(value);
                 };
             }
@@ -634,11 +626,7 @@
         Object.defineProperty(this, "restoreAll", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.restoreAll.apply(delegate, args);
+                    var value = delegate.restoreAll();
                     return P.boxAsJs(value);
                 };
             }
@@ -652,11 +640,7 @@
         Object.defineProperty(this, "maximizeAll", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.maximizeAll.apply(delegate, args);
+                    var value = delegate.maximizeAll();
                     return P.boxAsJs(value);
                 };
             }
@@ -670,11 +654,7 @@
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.focus.apply(delegate, args);
+                    var value = delegate.focus();
                     return P.boxAsJs(value);
                 };
             }

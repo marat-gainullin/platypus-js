@@ -253,11 +253,7 @@
         Object.defineProperty(this, "next", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.next.apply(delegate, args);
+                    var value = delegate.next();
                     return P.boxAsJs(value);
                 };
             }
@@ -272,12 +268,8 @@
         */
         Object.defineProperty(this, "find", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.find.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.find(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -292,12 +284,8 @@
         */
         Object.defineProperty(this, "execute", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.execute.apply(delegate, args);
+                return function(arg0arg1) {
+                    var value = delegate.execute(P.boxAsJava(arg0)P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }
@@ -312,11 +300,7 @@
         Object.defineProperty(this, "prev", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.prev.apply(delegate, args);
+                    var value = delegate.prev();
                     return P.boxAsJs(value);
                 };
             }
@@ -330,12 +314,8 @@
         */
         Object.defineProperty(this, "insert", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.insert.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.insert(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -350,11 +330,7 @@
         Object.defineProperty(this, "eof", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.eof.apply(delegate, args);
+                    var value = delegate.eof();
                     return P.boxAsJs(value);
                 };
             }
@@ -369,11 +345,7 @@
         Object.defineProperty(this, "first", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.first.apply(delegate, args);
+                    var value = delegate.first();
                     return P.boxAsJs(value);
                 };
             }
@@ -388,11 +360,7 @@
         Object.defineProperty(this, "last", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.last.apply(delegate, args);
+                    var value = delegate.last();
                     return P.boxAsJs(value);
                 };
             }
@@ -407,12 +375,8 @@
         */
         Object.defineProperty(this, "pos", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.pos.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.pos(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -427,31 +391,8 @@
         */
         Object.defineProperty(this, "getRow", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.getRow.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Deletes the row by cursor position.
-         * @param aCusorPos row position in terms of cursor API. 1-based.
-         * @method deleteRow
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        Object.defineProperty(this, "deleteRow", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.deleteRow.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.getRow(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -465,11 +406,22 @@
         Object.defineProperty(this, "deleteRow", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.deleteRow.apply(delegate, args);
+                    var value = delegate.deleteRow();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Deletes the row by cursor position.
+         * @param aCusorPos row position in terms of cursor API. 1-based.
+         * @method deleteRow
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        Object.defineProperty(this, "deleteRow", {
+            get: function() {
+                return function(arg0) {
+                    var value = delegate.deleteRow(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -483,12 +435,8 @@
          */
         Object.defineProperty(this, "deleteRow", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.deleteRow.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.deleteRow(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -502,11 +450,7 @@
         Object.defineProperty(this, "beforeFirst", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.beforeFirst.apply(delegate, args);
+                    var value = delegate.beforeFirst();
                     return P.boxAsJs(value);
                 };
             }
@@ -520,11 +464,7 @@
         Object.defineProperty(this, "afterLast", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.afterLast.apply(delegate, args);
+                    var value = delegate.afterLast();
                     return P.boxAsJs(value);
                 };
             }
@@ -538,11 +478,7 @@
         Object.defineProperty(this, "deleteAll", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.deleteAll.apply(delegate, args);
+                    var value = delegate.deleteAll();
                     return P.boxAsJs(value);
                 };
             }
@@ -557,91 +493,8 @@
         */
         Object.defineProperty(this, "createFilter", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.createFilter.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Finds row by its key. Key must a single property.
-        * @param key the unique identifier of the row.
-        * @return a row object or <code>null</code> if nothing is found.
-         * @method findById
-         * @memberOf ApplicationPlatypusParametersEntity
-        */
-        Object.defineProperty(this, "findById", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.findById.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Sets the rowset cursor to the specified row.
-        * @param row the row to position the entity cursor.
-        * @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.
-         * @method scrollTo
-         * @memberOf ApplicationPlatypusParametersEntity
-        */
-        Object.defineProperty(this, "scrollTo", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.scrollTo.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Checks if cursor in the position before the first row.
-        * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
-         * @method bof
-         * @memberOf ApplicationPlatypusParametersEntity
-        */
-        Object.defineProperty(this, "bof", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.bof.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
-        * @param onSuccessCallback the handler function for refresh data on success event (optional).
-        * @param onFailureCallback the handler function for refresh data on failure event (optional).
-         * @method requery
-         * @memberOf ApplicationPlatypusParametersEntity
-        */
-        Object.defineProperty(this, "requery", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.requery.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.createFilter(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -656,12 +509,71 @@
         */
         Object.defineProperty(this, "createSorting", {
             get: function() {
+                return function(arg0) {
+                    var value = delegate.createSorting(P.boxAsJava(arg0));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Finds row by its key. Key must a single property.
+        * @param key the unique identifier of the row.
+        * @return a row object or <code>null</code> if nothing is found.
+         * @method findById
+         * @memberOf ApplicationPlatypusParametersEntity
+        */
+        Object.defineProperty(this, "findById", {
+            get: function() {
+                return function(arg0) {
+                    var value = delegate.findById(P.boxAsJava(arg0));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Sets the rowset cursor to the specified row.
+        * @param row the row to position the entity cursor.
+        * @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.
+         * @method scrollTo
+         * @memberOf ApplicationPlatypusParametersEntity
+        */
+        Object.defineProperty(this, "scrollTo", {
+            get: function() {
+                return function(arg0) {
+                    var value = delegate.scrollTo(P.boxAsJava(arg0));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Checks if cursor in the position before the first row.
+        * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
+         * @method bof
+         * @memberOf ApplicationPlatypusParametersEntity
+        */
+        Object.defineProperty(this, "bof", {
+            get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.createSorting.apply(delegate, args);
+                    var value = delegate.bof();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
+        * @param onSuccessCallback the handler function for refresh data on success event (optional).
+        * @param onFailureCallback the handler function for refresh data on failure event (optional).
+         * @method requery
+         * @memberOf ApplicationPlatypusParametersEntity
+        */
+        Object.defineProperty(this, "requery", {
+            get: function() {
+                return function(arg0arg1) {
+                    var value = delegate.requery(P.boxAsJava(arg0)P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }
@@ -675,11 +587,7 @@
         Object.defineProperty(this, "beginUpdate", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.beginUpdate.apply(delegate, args);
+                    var value = delegate.beginUpdate();
                     return P.boxAsJs(value);
                 };
             }
@@ -693,11 +601,7 @@
         Object.defineProperty(this, "endUpdate", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.endUpdate.apply(delegate, args);
+                    var value = delegate.endUpdate();
                     return P.boxAsJs(value);
                 };
             }

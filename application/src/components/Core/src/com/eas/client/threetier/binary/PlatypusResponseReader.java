@@ -134,7 +134,10 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         Object result = null;
         if (input.containsChild(RequestsTags.TAG_FORMAT) && input.containsChild(RequestsTags.TAG_FILE_NAME)) {
-            result = new Report(input.getChild(RequestsTags.TAG_RESULT_VALUE).getData(), 
+            ProtoNode dataNode = input.getChild(RequestsTags.TAG_RESULT_VALUE);
+            ByteArrayOutputStream st = new ByteArrayOutputStream();
+            st.write(dataNode.getData(), dataNode.getOffset(), dataNode.getSize());
+            result = new Report(st.toByteArray(), 
                     input.getChild(RequestsTags.TAG_FORMAT).getString(), 
                     input.getChild(RequestsTags.TAG_FILE_NAME).getString());
         } else if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {

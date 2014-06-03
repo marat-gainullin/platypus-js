@@ -29,11 +29,7 @@
         Object.defineProperty(this, "print", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.print.apply(delegate, args);
+                    var value = delegate.print();
                     return P.boxAsJs(value);
                 };
             }
@@ -46,12 +42,8 @@
          * @param aFileName Name of a file, the generated report should be save in. */
         Object.defineProperty(this, "save", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.save.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.save(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -65,11 +57,7 @@
         Object.defineProperty(this, "show", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.show.apply(delegate, args);
+                    var value = delegate.show();
                     return P.boxAsJs(value);
                 };
             }
