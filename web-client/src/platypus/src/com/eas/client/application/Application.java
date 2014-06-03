@@ -614,39 +614,55 @@ public class Application {
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		}
-		$wnd.P.ServerModule = function(aModuleId){
-			if(!(this instanceof $wnd.P.ServerModule)){
-				throw 'use P.ServerModule(...) please.';
-			}
-			var moduleData = $wnd.P.serverModules[aModuleName];
-			if(!moduleData.isPermitted)
-				throw 'AccessControlException';
-			aModule = this;
-			for ( var i = 0; i < moduleData.functions.length; i++) {
-				aModule[moduleData.functions[i]] = function(functionName) {
-					return function() {
-						var onSuccess = null;
-						var onFailure = null;
-						var argsLength = arguments.length;
-						if(arguments.length > 1 && typeof arguments[arguments.length-1] == "function" && typeof arguments[arguments.length-2] == "function"){
-							onSuccess = arguments[arguments.length-2];
-							onFailure = arguments[arguments.length-1];
-							argsLength -= 2;
-						}else if(arguments.length > 0 && typeof arguments[arguments.length-1] == "function"){
-							onSuccess = arguments[arguments.length-1];
-							argsLength -= 1;
+
+		(function(){
+		    function parseDates(aObject) {
+		        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
+		            var timestamp = Date.parse(aObject);
+		            if (!isNaN(timestamp)) {
+		                return new Date(timestamp);
+		            }
+		        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+		            for (var prop in aObject) {
+		                aObject[prop] = parseDates(aObject[prop]);
+		            }
+		        }
+		        return aObject;
+		    };
+			
+			$wnd.P.ServerModule = function(aModuleId){
+				if(!(this instanceof $wnd.P.ServerModule)){
+					throw 'use P.ServerModule(...) please.';
+				}
+				var moduleData = $wnd.P.serverModules[aModuleName];
+				if(!moduleData.isPermitted)
+					throw 'AccessControlException';
+				aModule = this;
+				for ( var i = 0; i < moduleData.functions.length; i++) {
+					aModule[moduleData.functions[i]] = function(functionName) {
+						return function() {
+							var onSuccess = null;
+							var onFailure = null;
+							var argsLength = arguments.length;
+							if(arguments.length > 1 && typeof arguments[arguments.length-1] == "function" && typeof arguments[arguments.length-2] == "function"){
+								onSuccess = arguments[arguments.length-2];
+								onFailure = arguments[arguments.length-1];
+								argsLength -= 2;
+							}else if(arguments.length > 0 && typeof arguments[arguments.length-1] == "function"){
+								onSuccess = arguments[arguments.length-1];
+								argsLength -= 1;
+							}
+							var params = [];
+							for (var j = 0; j < argsLength; j++) {
+								params[j] = JSON.stringify(arguments[j]);
+							}
+							var nativeClient = @com.eas.client.application.AppClient::getInstance()();
+							return parseDates(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, functionName, params, onSuccess, onFailure));
 						}
-						var params = [];
-						for ( var j = 0; j < argsLength; j++) {
-							params[j] = JSON.stringify(arguments[j]);
-						}
-						var nativeClient = @com.eas.client.application.AppClient::getInstance()();
-						return $wnd.P.boxAsJs(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, functionName, params, onSuccess, onFailure));
-					}
-				}(moduleData.functions[i]);
-			}
-		};
-		
+					}(moduleData.functions[i]);
+				}
+			};
+		})();
 		Object.defineProperty($wnd.P.Form, "shown", {
 			get : function() {
 				return @com.eas.client.form.PlatypusWindow::getShownForms()();
