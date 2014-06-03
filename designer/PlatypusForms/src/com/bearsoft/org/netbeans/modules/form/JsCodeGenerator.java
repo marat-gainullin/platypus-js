@@ -5,13 +5,19 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.eas.client.cache.PlatypusFilesSupport;
+import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
 import com.eas.designer.application.module.ModuleUtils;
 import java.io.IOException;
-import java.util.Iterator;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import jdk.nashorn.internal.ir.AccessNode;
+import jdk.nashorn.internal.ir.BinaryNode;
+import jdk.nashorn.internal.ir.CallNode;
+import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.ir.IdentNode;
+import jdk.nashorn.internal.ir.Statement;
+import jdk.nashorn.internal.ir.VarNode;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 
@@ -23,7 +29,7 @@ import org.openide.cookies.EditorCookie;
 public class JsCodeGenerator {
 
     public static final String FORM_OBJECT_NAME = "form";//NOI18N
-    public static final String THIS_OBJECT_NAME = "this";//NOI18N
+    //public static final String THIS_OBJECT_NAME = "this";//NOI18N
     private static final int NOT_FOUND = -1;
     private static final JsCodeGenerator INSTANCE = new JsCodeGenerator();
 
@@ -31,39 +37,34 @@ public class JsCodeGenerator {
         return INSTANCE;
     }
 
-    public void generateEventHandler(String componentName, Class<?> scriptClass, PlatypusFormDataObject dataObject) {
-        assert false: "Refactoring is needed.";
-        /*
-        if (isFormObjectExistsInJs(dataObject.getAst())) {
+    public void generateEventHandler(String componentName, Class<?> scriptClass, PlatypusFormDataObject aDataObject) {
+        if (isFormObjectExistsInJs(aDataObject.getConstructor())) {
             String handlerName = getDefaultEventPropertyName(scriptClass);
             int handlerPosition;
             if (handlerName != null) {
-                handlerPosition = findHandlerPosition(componentName, handlerName, dataObject);
+                handlerPosition = findHandlerPosition(componentName, handlerName, aDataObject);
                 try {
                     if (handlerPosition == NOT_FOUND) {
-                        FunctionNode ctor = PlatypusFilesSupport.extractModuleConstructor(dataObject.getAst());
+                        FunctionNode ctor = aDataObject.getConstructor();
                         int insertPosition = ctor.getFinish() - 1;
                         String objAndProp = getObjectAndProp(FORM_OBJECT_NAME, componentName);
-                        insertEventHandler(objAndProp, handlerName, insertPosition, dataObject);
+                        insertEventHandler(objAndProp, handlerName, insertPosition, aDataObject);
                         goToEventHandler(insertPosition
                                 + ModuleUtils.getNumberOfSpacesPerIndent()
                                 + objAndProp.length()
                                 + handlerName.length()
                                 + ModuleUtils.FUNCTION_HEADER.length()
-                                + ModuleUtils.getNumberOfSpacesPerIndent()*2
-                                , dataObject);
+                                + ModuleUtils.getNumberOfSpacesPerIndent() * 2, aDataObject);
                     } else {
                         goToEventHandler(handlerPosition
                                 + ModuleUtils.FUNCTION_HEADER.length()
-                                + ModuleUtils.getNumberOfSpacesPerIndent()*2
-                                , dataObject);
-                    }  
-                } catch (IOException | BadLocationException ex) {
+                                + ModuleUtils.getNumberOfSpacesPerIndent() * 2, aDataObject);
+                    }
+                } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
             }
         }
-        */
     }
 
     public boolean hasDefaultEventHandler(Class<?> scriptClass) {
@@ -73,56 +74,41 @@ public class JsCodeGenerator {
     private String getDefaultEventPropertyName(Class<?> scriptClass) {
         return FormUtils.getDefaultEventPropertyName(scriptClass);
     }
-    
-    private boolean isFormObjectExistsInJs(FunctionNode astRoot) {
-        assert false: "Refactoring is needed.";
-        /*
-        FunctionNode constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+
+    private boolean isFormObjectExistsInJs(FunctionNode constructor) {
         if (constructor != null && constructor.getBody() != null) {
-            Iterator<Node> constructorTopLevelNodes = constructor.getBody().iterator();
-            while (constructorTopLevelNodes.hasNext()) {
-                Node n = constructorTopLevelNodes.next();
-                if (n instanceof VariableDeclaration) {
-                    VariableDeclaration vd = (VariableDeclaration) n;
-                    for (VariableInitializer vi : vd.getVariables()) {
-                        if (getFormObjectName().equals(vi.getTarget().toSource()) && THIS_OBJECT_NAME.equals(vi.getInitializer().toSource())) {
-                            return true;
+            for (Statement st : constructor.getBody().getStatements()) {
+                if (st instanceof VarNode) {
+                    VarNode vn = (VarNode) st;
+                    if (FORM_OBJECT_NAME.equals(vn.getName().getName())) {
+                        if (vn.getInit() instanceof CallNode) {
+                            CallNode cn = (CallNode) vn.getInit();
+                            return FormModuleCompletionContext.isSystemObjectMethod(cn, FormModuleCompletionContext.LOAD_FORM_METHOD_NAME);
                         }
                     }
-
                 }
             }
         }
-        */
         return false;
     }
 
-    private String getFormObjectName() {
-        return FORM_OBJECT_NAME;
-    }
-
-    /*
     private int findHandlerPosition(String componentName, String handlerName, PlatypusFormDataObject dataObject) {
-        AstRoot astRoot = dataObject.getAst();
-        FunctionNode constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+        FunctionNode constructor = dataObject.getConstructor();
         if (constructor != null && constructor.getBody() != null) {
-            Iterator<Node> constructorTopLevelNodes = PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody().iterator();
-            while (constructorTopLevelNodes.hasNext()) {
-                Node n = constructorTopLevelNodes.next();
-                if (n instanceof ExpressionStatement) {
-                    ExpressionStatement es = (ExpressionStatement) n;
-                    if (es.getExpression() instanceof Assignment) {
-                        Assignment a = (Assignment) es.getExpression();
-                        if (a.getLeft() instanceof PropertyGet) {
-                            PropertyGet pg = (PropertyGet) a.getLeft();
-                            if (handlerName.equals(pg.getProperty().toSource())) {
-                                if (pg.getTarget() instanceof PropertyGet) {
-                                    PropertyGet componentPg = (PropertyGet) pg.getTarget();
-                                    if (componentName.equals(componentPg.getProperty().toSource())
-                                            && getFormObjectName().equals(componentPg.getTarget().toSource())) {
-                                        if (a.getRight() instanceof FunctionNode) {
-                                            return a.getLeft().getAbsolutePosition() + a.getLeft().getLength();
-                                        }
+            for (Statement st : constructor.getBody().getStatements()) {
+                if (st instanceof ExpressionStatement && ((ExpressionStatement) st).getExpression() instanceof BinaryNode) {
+                    BinaryNode a = (BinaryNode) ((ExpressionStatement) st).getExpression();
+                    if (a.isAssignment() && a.getAssignmentDest() instanceof AccessNode) {
+                        AccessNode pg = (AccessNode) a.getAssignmentDest();
+                        if (handlerName.equals(pg.getProperty().getName())) {
+                            if (pg.getBase() instanceof AccessNode) {
+                                AccessNode componentPg = (AccessNode) pg.getBase();
+                                if (componentName.equals(componentPg.getProperty().getName())
+                                        && componentPg.getBase() instanceof IdentNode
+                                        && FORM_OBJECT_NAME.equals(((IdentNode) componentPg.getBase()).getName())) {
+                                    if (a.getAssignmentSource() instanceof FunctionNode) {
+                                        FunctionNode handlerFn = (FunctionNode) a.getAssignmentSource();
+                                        return handlerFn.getStart();
                                     }
                                 }
                             }
@@ -133,7 +119,7 @@ public class JsCodeGenerator {
         }
         return NOT_FOUND;
     }
-*/
+
     private void goToEventHandler(int handlerPosition, PlatypusFormDataObject dataObject) throws IOException, BadLocationException {
         getFormSupport(dataObject).openAt(getDocument(dataObject).createPosition(handlerPosition));
     }

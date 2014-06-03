@@ -47,6 +47,7 @@ import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
@@ -578,15 +579,15 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 						ModelGrid.this.getElement().<XElement> cast().loadMask();
 					}
 				};
-				com.bearsoft.rowset.Callback<String> onError = new com.bearsoft.rowset.Callback<String>() {
+				Callback<Void, String> onError = new Callback<Void, String>() {
 					@Override
-					public void run(String aResult) throws Exception {
-						ModelGrid.this.getElement().<XElement> cast().unmask();
-						ModelGrid.this.getElement().<XElement> cast().errorMask(aResult);
+					public void onSuccess(Void result) {
 					}
-
+					
 					@Override
-					public void cancel() {
+					public void onFailure(String reason) {
+						ModelGrid.this.getElement().<XElement> cast().unmask();
+						ModelGrid.this.getElement().<XElement> cast().errorMask(reason);
 					}
 				};
 				if (isTreeConfigured()) {

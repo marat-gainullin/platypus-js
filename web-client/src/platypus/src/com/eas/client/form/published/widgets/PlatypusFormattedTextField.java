@@ -130,10 +130,10 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 		// In other cases only model-controls have value property
 		Object.defineProperty(published, "value", {
 			get : function() {
-				return $wnd.boxAsJs(aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getJsValue()());
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getJsValue()());
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
 		Object.defineProperty(published, "format", {

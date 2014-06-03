@@ -14,7 +14,6 @@ import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.KeySet;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,13 +93,13 @@ public class FilteringTest extends DataRowsetBaseTest {
             checkRowsetPks(rowset, rowsetPks[i - 2]);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);
 
             sc1 = new SortingCriterion(1, true);
-            criteria = new ArrayList();
+            criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);
@@ -330,7 +329,7 @@ public class FilteringTest extends DataRowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        List<Filter> lfilters = new ArrayList();
+        List<Filter> lfilters = new ArrayList<>();
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
             Filter hf = rowset.createFilter();
             hf.beginConstrainting();
@@ -366,13 +365,13 @@ public class FilteringTest extends DataRowsetBaseTest {
             checkRowsetPks(rowset, rowsetPks[i]);
 
             SortingCriterion sc1 = new SortingCriterion(i + 2, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);
 
             sc1 = new SortingCriterion(1, true);
-            criteria = new ArrayList();
+            criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             checkAllLocatorsAreInvalid(rowset);

@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import jdk.nashorn.internal.ir.FunctionNode;
+import jdk.nashorn.internal.parser.Token;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
@@ -297,9 +298,10 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         if (constructorFunc != null) {
             String oldName = constructorFunc.getName();
             String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(project, oldName);
-            StringBuilder sb = new StringBuilder(aJsContent.substring(0, constructorFunc.getStart()));
+            int start = Token.descPosition(constructorFunc.getIdent().getToken());
+            StringBuilder sb = new StringBuilder(aJsContent.substring(0, start));
             sb.append(newName);
-            sb.append(aJsContent.substring(constructorFunc.getStart() + oldName.length()));
+            sb.append(aJsContent.substring(start + oldName.length()));
             return sb.toString();
         } else {
             return aJsContent;

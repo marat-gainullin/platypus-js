@@ -1,12 +1,6 @@
 package com.eas.client.application;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.eas.client.model.ModelBaseTest;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.user.client.Timer;
 
 public class ApplicationTest extends GWTTestCase {
 

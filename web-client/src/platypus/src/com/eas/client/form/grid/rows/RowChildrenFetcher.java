@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.ChildrenFetcher;
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
@@ -17,6 +16,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.queries.Query;
+import com.google.gwt.core.client.Callback;
 
 public class RowChildrenFetcher implements ChildrenFetcher<Row> {
 
@@ -41,51 +41,44 @@ public class RowChildrenFetcher implements ChildrenFetcher<Row> {
 			query.setClient(targetEntity.getQuery().getClient());
 			Parameter param2Init = query.getParameters().get(param2GetChildren.getName());
 			param2Init.setValue(aParent.getColumnObject(rowset.getFields().find(paramSource.getName())));
-			query.execute(new Callback<Rowset>() {
+			query.execute(new Callback<Rowset, String>() {
 
 				@Override
-				public void cancel() {
-					// callback.onFailure(new
-					// RowsetException("Rowset request has been cancelled"));
-				}
-
-				@Override
-				public void run(Rowset aRowset) throws Exception {
-					List<Row> fetched = aRowset.getCurrent();
-					if (!fetched.isEmpty()) {
-						Set<RowsetListener> listeners = rowset.getRowsetChangeSupport().getRowsetListeners();
-						rowset.getRowsetChangeSupport().setRowsetListeners(null);
-						FlowProvider rowsetFlow = rowset.getFlowProvider();
-						rowset.setFlowProvider(null);
-						try {
-							int preservedCursorPos = rowset.getCursorPos();
-							boolean oldModified = rowset.isModified();
+				public void onSuccess(Rowset aRowset) {
+					try {
+						List<Row> fetched = aRowset.getCurrent();
+						if (!fetched.isEmpty()) {
+							Set<RowsetListener> listeners = rowset.getRowsetChangeSupport().getRowsetListeners();
+							rowset.getRowsetChangeSupport().setRowsetListeners(null);
+							FlowProvider rowsetFlow = rowset.getFlowProvider();
+							rowset.setFlowProvider(null);
 							try {
-								for (Row row : fetched) {
-									rowset.insert(row, true);
-									row.clearInserted();
+								int preservedCursorPos = rowset.getCursorPos();
+								boolean oldModified = rowset.isModified();
+								try {
+									for (Row row : fetched) {
+										rowset.insert(row, true);
+										row.clearInserted();
+									}
+								} finally {
+									rowset.setModified(oldModified);
 								}
+								aRowset.setCurrent(new ArrayList<Row>());
+								aRowset.currentToOriginal();
+								rowset.absolute(preservedCursorPos);
 							} finally {
-								rowset.setModified(oldModified);
+								rowset.setFlowProvider(rowsetFlow);
+								rowset.getRowsetChangeSupport().setRowsetListeners(listeners);
 							}
-							aRowset.setCurrent(new ArrayList<Row>());
-							aRowset.currentToOriginal();
-							rowset.absolute(preservedCursorPos);
-						} finally {
-							rowset.setFlowProvider(rowsetFlow);
-							rowset.getRowsetChangeSupport().setRowsetListeners(listeners);
 						}
+						aFetchCompleter.run();
+					} catch (Exception ex) {
+						Logger.getLogger(RowChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);
 					}
-					aFetchCompleter.run();
-				}
-
-			}, new Callback<String>() {
-				@Override
-				public void run(String aResult) throws Exception {
 				}
 
 				@Override
-				public void cancel() {
+				public void onFailure(String reason) {
 				}
 			});
 		} catch (Exception e) {

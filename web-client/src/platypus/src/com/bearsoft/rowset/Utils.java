@@ -19,7 +19,7 @@ public class Utils {
 		}
 
 		public final native Object getJava(String aName)/*-{
-			return $wnd.boxAsJava(this[aName]);
+			return $wnd.P.boxAsJava(this[aName]);
 		}-*/;
 
 		public final native JavaScriptObject getJs(String aName)/*-{
@@ -106,7 +106,7 @@ public class Utils {
 
 	public native static Boolean executeScriptEventBoolean(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = aHandler.call(aEventThis, $wnd.boxAsJs(aArg));
+			var res = aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return @java.lang.Boolean::new(Z)((false != res));
 			else
@@ -117,7 +117,7 @@ public class Utils {
 
 	public native static Double executeScriptEventDouble(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = aHandler.call(aEventThis, $wnd.boxAsJs(aArg));
+			var res = aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return @java.lang.Double::new(D)(res * 1);
 			else
@@ -128,7 +128,7 @@ public class Utils {
 
 	public native static String executeScriptEventString(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = aHandler.call(aEventThis, $wnd.boxAsJs(aArg));
+			var res = aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return (res + '');
 			else
@@ -139,7 +139,7 @@ public class Utils {
 
 	public native static Date executeScriptEventDate(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = new Date(aHandler.call(aEventThis, $wnd.boxAsJs(aArg)));
+			var res = new Date(aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg)));
 			if (res != undefined && res != null)
 				return @com.bearsoft.rowset.Utils::double2Date(D)(res.getTime());
 			else
@@ -150,12 +150,12 @@ public class Utils {
 
 	public native static void executeScriptEventVoid(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			aHandler.call(aEventThis, $wnd.boxAsJs(aArg));
+			aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
 		}
 	}-*/;
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
-		return $wnd.boxAsJava(JSON.parse(aData));
+		return $wnd.P.boxAsJava(JSON.parse(aData));
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
@@ -304,7 +304,7 @@ public class Utils {
 		var res = [];
 		var inLength = @com.bearsoft.rowset.Utils::javaArrayLength([Ljava/lang/Object;)(aValue);
 		for ( var i = 0; i < inLength; i++)
-			res[res.length] = $wnd.boxAsJs(@com.bearsoft.rowset.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i))
+			res[res.length] = $wnd.P.boxAsJs(@com.bearsoft.rowset.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i))
 		return res;
 	}-*/;
 

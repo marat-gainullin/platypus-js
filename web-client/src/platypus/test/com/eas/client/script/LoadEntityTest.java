@@ -1,6 +1,6 @@
 package com.eas.client.script;
 
-public class PlatypusLoadEntityTest extends PlatypusModulesTest{
+public class LoadEntityTest extends PlatypusModulesTest{
 
 	@Override
 	protected String testsModuleName(){

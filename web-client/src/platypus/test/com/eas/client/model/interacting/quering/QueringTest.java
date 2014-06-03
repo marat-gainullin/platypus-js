@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.eas.client.CancellableCallback;
+import com.eas.client.RunnableAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
@@ -32,17 +32,26 @@ public abstract class QueringTest extends ModelBaseTest {
 	        + "<datamodel>"
 	        + "    <parameters>"
 	        + "        <parameter description=\"Родитель\" name=\"P_ID\" nullable=\"true\" precision=\"10\" scale=\"0\" selectionForm=\"null\" signed=\"true\" size=\"22\" type=\"3\" typeName=\"NUMBER\">"
-	        + "            <primaryKey field=\"ID\" name=\"PK_ASSET_GROUPS\" schema=\"EAS\" table=\"ASSET_GROUPS\"/>" + "        </parameter>" + "    </parameters>"
-	        + "    <parametersEntity Title=\"Параметры\">" + "    </parametersEntity>"
-	        + "    <entity Name=\"dsMarki\" Title=\"Марки объектов ремонта\" entityId=\"128049574970367\" queryId=\"128049551290614\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">" + "    </entity>"
-	        + "    <entity Name=\"dsEdOborPoMarke\" Title=\"Единицы оборудования по марке\" entityId=\"128049775173425\" queryId=\"128049731084369\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">" + "    </entity>"
-	        + "    <entity Name=\"dsEdIzmPoVel\" Title=\"Единицы измерения  по величине\" entityId=\"128049746332840\" queryId=\"128049734162523\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">" + "    </entity>"
-	        + "    <entity Name=\"dsSrIzmPoVel\" Title=\"Наименования СИ по величине\" entityId=\"128049750556261\" queryId=\"128049732520388\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">" + "    </entity>"
-	        + "    <entity Name=\"dsIzmVel\" Title=\"Измеряемые величины\" entityId=\"128049576695369\" queryId=\"128049562734356\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">" + "    </entity>"
+	        + "            <primaryKey field=\"ID\" name=\"PK_ASSET_GROUPS\" schema=\"EAS\" table=\"ASSET_GROUPS\"/>"
+	        + "        </parameter>"
+	        + "    </parameters>"
+	        + "    <parametersEntity Title=\"Параметры\">"
+	        + "    </parametersEntity>"
+	        + "    <entity Name=\"dsMarki\" Title=\"Марки объектов ремонта\" entityId=\"128049574970367\" queryId=\"128049551290614\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsEdOborPoMarke\" Title=\"Единицы оборудования по марке\" entityId=\"128049775173425\" queryId=\"128049731084369\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsEdIzmPoVel\" Title=\"Единицы измерения  по величине\" entityId=\"128049746332840\" queryId=\"128049734162523\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsSrIzmPoVel\" Title=\"Наименования СИ по величине\" entityId=\"128049750556261\" queryId=\"128049732520388\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsIzmVel\" Title=\"Измеряемые величины\" entityId=\"128049576695369\" queryId=\"128049562734356\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
 	        + "    <entity Name=\"dsEdIzm1\" Title=\"Единицы измерения  по величине 1\" entityId=\"128073170857902\" queryId=\"128049734162523\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
 	        + "    </entity>"
 	        + "    <entity Name=\"dsGroup\" Title=\"Группа объекта ремонта по родителю\" entityId=\"128049787114001\" queryId=\"128049779804659\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsVidObj\" Title=\"Вид объекта ремонта\" entityId=\"128049576096827\" queryId=\"128049558485943\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsVidObj\" Title=\"Вид объекта ремонта\" entityId=\"128049576096827\" queryId=\"128049558485943\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
 	        + "    </entity>" + "    <relation leftEntityFieldName=\"P_ID\" leftEntityId=\"-1\" rightEntityId=\"128049787114001\" rightEntityParameterName=\"P_ID\"/>"
 	        + "    <relation leftEntityFieldName=\"MEASURAND\" leftEntityId=\"128049746332840\" rightEntityId=\"128073170857902\" rightEntityParameterName=\"VALUE\"/>"
 	        + "    <relation leftEntityFieldName=\"ID\" leftEntityId=\"128049576695369\" rightEntityId=\"128049750556261\" rightEntityParameterName=\"VALUE\"/>"
@@ -99,7 +108,7 @@ public abstract class QueringTest extends ModelBaseTest {
 		}
 
 		public Map<String, Integer> gatherRowCounts() throws Exception {
-			Map<String, Integer> counts = new HashMap();
+			Map<String, Integer> counts = new HashMap<>();
 			for (Entity entity : model.getEntities().values()) {
 				counts.put(entity.getEntityId(), entity.getRowset().size());
 			}
@@ -130,14 +139,10 @@ public abstract class QueringTest extends ModelBaseTest {
 		Application.publish(client);
 		AppClient.publishApi(client);
 		Loader l = new Loader(client);
-		l.loadQueries(queries(), new CancellableCallback() {
+		l.loadQueries(queries(), new RunnableAdapter() {
 
 			@Override
-			public void cancel() {
-			}
-
-			@Override
-			public void run() throws Exception {
+			protected void doWork() throws Exception {
 				setupModel();
 			}
 

@@ -60,10 +60,10 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
-				return $wnd.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getJsValue()());
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getJsValue()());
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
 	}-*/;

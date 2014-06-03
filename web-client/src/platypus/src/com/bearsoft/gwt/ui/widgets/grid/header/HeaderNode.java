@@ -2,9 +2,6 @@ package com.bearsoft.gwt.ui.widgets.grid.header;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.eas.client.form.published.PublishedColor;
-import com.eas.client.form.published.PublishedFont;
 import com.eas.client.form.published.PublishedStyle;
 import com.google.gwt.user.cellview.client.Header;
 

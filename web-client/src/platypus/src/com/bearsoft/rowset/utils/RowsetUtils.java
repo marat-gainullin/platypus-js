@@ -146,7 +146,7 @@ public class RowsetUtils {
 	}-*/;
 
 	protected static native Object boxArrayElementAsJava(JavaScriptObject aArray, int aIndex) throws Exception/*-{
-		return $wnd.boxAsJava(aArray[aIndex]);
+		return $wnd.P.boxAsJava(aArray[aIndex]);
 	}-*/;
 	
 	public static Object extractValueFromJsArray(JsArrayMixed aArray, int aIndex) throws Exception {

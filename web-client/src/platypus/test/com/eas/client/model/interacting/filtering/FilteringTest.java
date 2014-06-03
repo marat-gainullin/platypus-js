@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.eas.client.CancellableCallback;
+import com.eas.client.RunnableAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Loader;
 import com.eas.client.model.Entity;
@@ -27,14 +27,22 @@ import com.google.gwt.xml.client.XMLParser;
 public abstract class FilteringTest extends ModelBaseTest {
 
 	public static final String DATAMODEL_FILTERING_RELATIONS = "" + "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "<datamodel>" + "    <parametersEntity Title=\"Параметры\">"
-	        + "    </parametersEntity>" + "    <entity Name=\"dsEdIzm\" Title=\"Единицы измерения\" entityId=\"128049575554676\" queryId=\"128049555364003\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsSrIzmNames\" Title=\"Наименования СИ\" entityId=\"128049577162567\" queryId=\"128049565893763\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsMarki\" Title=\"Марки объектов ремонта\" entityId=\"128049574970367\" queryId=\"128049551290614\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsGroup\" Title=\"Группа объекта ремонта\" entityId=\"128049573928131\" queryId=\"128049508301511\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsIzmVel\" Title=\"Измеряемые величины\" entityId=\"128049576695369\" queryId=\"128049562734356\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsEdObor\" Title=\"Единицы оборудования\" entityId=\"128049574495320\" queryId=\"128049547464084\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsRemVid\" Title=\"Вид объекта ремонта\" entityId=\"128049576096827\" queryId=\"128049558485943\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
-	        + "    </entity>" + "    <entity Name=\"dsEdIzm1\" Title=\"Единицы измерения 1\" entityId=\"128072901201589\" queryId=\"128049555364003\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </parametersEntity>"
+	        + "    <entity Name=\"dsEdIzm\" Title=\"Единицы измерения\" entityId=\"128049575554676\" queryId=\"128049555364003\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsSrIzmNames\" Title=\"Наименования СИ\" entityId=\"128049577162567\" queryId=\"128049565893763\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsMarki\" Title=\"Марки объектов ремонта\" entityId=\"128049574970367\" queryId=\"128049551290614\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsGroup\" Title=\"Группа объекта ремонта\" entityId=\"128049573928131\" queryId=\"128049508301511\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsIzmVel\" Title=\"Измеряемые величины\" entityId=\"128049576695369\" queryId=\"128049562734356\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsEdObor\" Title=\"Единицы оборудования\" entityId=\"128049574495320\" queryId=\"128049547464084\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsRemVid\" Title=\"Вид объекта ремонта\" entityId=\"128049576096827\" queryId=\"128049558485943\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
+	        + "    </entity>"
+	        + "    <entity Name=\"dsEdIzm1\" Title=\"Единицы измерения 1\" entityId=\"128072901201589\" queryId=\"128049555364003\" tableDbId=\"null\" tableName=\"\" tableSchemaName=\"\">"
 	        + "    </entity>" + "    <relation leftEntityFieldName=\"ID\" leftEntityId=\"128049575554676\" rightEntityFieldName=\"ID\" rightEntityId=\"128072901201589\"/>"
 	        + "    <relation leftEntityFieldName=\"ID\" leftEntityId=\"128049576695369\" rightEntityFieldName=\"VALUE\" rightEntityId=\"128049577162567\"/>"
 	        + "    <relation leftEntityFieldName=\"ID\" leftEntityId=\"128049574970367\" rightEntityFieldName=\"MARK\" rightEntityId=\"128049574495320\"/>"
@@ -89,7 +97,7 @@ public abstract class FilteringTest extends ModelBaseTest {
 		}
 
 		public Map<String, Integer> gatherRowCounts() throws Exception {
-			Map<String, Integer> counts = new HashMap();
+			Map<String, Integer> counts = new HashMap<>();
 			for (Entity entity : model.getEntities().values()) {
 				counts.put(entity.getEntityId(), entity.getRowset().size());
 			}
@@ -121,18 +129,14 @@ public abstract class FilteringTest extends ModelBaseTest {
 		delayTestFinish(60 * 60 * 1000);
 		AppClient client = initDevelopTestClient();
 		Loader l = new Loader(client);
-		l.loadQueries(queries(), new CancellableCallback() {
+		l.loadQueries(queries(), new RunnableAdapter() {
 
 			@Override
-			public void cancel() {
-			}
-
-			@Override
-			public void run() throws Exception {
+			protected void doWork() throws Exception {
 				JavaScriptObject module = publish(FilteringTest.this);
 				model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_FILTERING_RELATIONS), module);
-				model.publish(module); 
-				model.setRuntime(true);
+				Model.publishTopLevelFacade(module, model);
+				model.requery(null);
 			}
 
 		});
@@ -140,10 +144,10 @@ public abstract class FilteringTest extends ModelBaseTest {
 			public void run() {
 				// check test's internal counters
 				try {
-	                validate();
-                } catch (Exception ex) {
-	                ex.printStackTrace();
-                }
+					validate();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 				// tell the test system the test is now done
 				finishTest();
 			}

@@ -55,13 +55,13 @@ public class SortingTest extends DataRowsetBaseTest {
         for (int i = 1; i <= fields.getFieldsCount(); i++) {
             // to avoid sorting stability problems...
             SortingCriterion sc0 = new SortingCriterion(1, true);
-            List<SortingCriterion> criteria0 = new ArrayList();
+            List<SortingCriterion> criteria0 = new ArrayList<>();
             criteria0.add(sc0);
             rowset.sort(new RowsComparator(criteria0));
             checkPkSequence(pkSequencesAsc[0], rowset);
 
             SortingCriterion sc1 = new SortingCriterion(i, true);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             assertEquals(lreciver.willSort, i * 2);
@@ -75,7 +75,7 @@ public class SortingTest extends DataRowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        List<SortingCriterion> criteria = new ArrayList();
+        List<SortingCriterion> criteria = new ArrayList<>();
         SortingCriterion sc1 = new SortingCriterion(3, true);
         criteria.add(sc1);
         SortingCriterion sc2 = new SortingCriterion(5, true);
@@ -104,13 +104,13 @@ public class SortingTest extends DataRowsetBaseTest {
         for (int i = 1; i <= fields.getFieldsCount(); i++) {
             // to avoid sorting stability problems...
             SortingCriterion sc0 = new SortingCriterion(1, true);
-            List<SortingCriterion> criteria0 = new ArrayList();
+            List<SortingCriterion> criteria0 = new ArrayList<>();
             criteria0.add(sc0);
             rowset.sort(new RowsComparator(criteria0));
             checkPkSequence(pkSequencesAsc[0], rowset);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             assertEquals(lreciver.willSort, i * 2);
@@ -128,13 +128,13 @@ public class SortingTest extends DataRowsetBaseTest {
         for (int i = 1; i <= fields.getFieldsCount(); i++) {
             // to avoid sorting stability problems...
             SortingCriterion sc0 = new SortingCriterion(1, true);
-            List<SortingCriterion> criteria0 = new ArrayList();
+            List<SortingCriterion> criteria0 = new ArrayList<>();
             criteria0.add(sc0);
             rowset.sort(new RowsComparator(criteria0));
             checkPkSequence(pkSequencesAsc[0], rowset);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             assertEquals(lreciver.willSort, i * 2);
@@ -145,13 +145,13 @@ public class SortingTest extends DataRowsetBaseTest {
         for (int i = 1; i <= fields.getFieldsCount(); i++) {
             // to avoid sorting stability problems...
             SortingCriterion sc0 = new SortingCriterion(1, true);
-            List<SortingCriterion> criteria0 = new ArrayList();
+            List<SortingCriterion> criteria0 = new ArrayList<>();
             criteria0.add(sc0);
             rowset.sort(new RowsComparator(criteria0));
             checkPkSequence(pkSequencesAsc[0], rowset);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
-            List<SortingCriterion> criteria = new ArrayList();
+            List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
             assertEquals(lreciver.willSort, i * 2 + fields.getFieldsCount() * 2);
@@ -165,7 +165,7 @@ public class SortingTest extends DataRowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        List<SortingCriterion> criteria = new ArrayList();
+        List<SortingCriterion> criteria = new ArrayList<>();
         SortingCriterion sc1 = new SortingCriterion(3, true);
         criteria.add(sc1);
         SortingCriterion sc2 = new SortingCriterion(5, true);

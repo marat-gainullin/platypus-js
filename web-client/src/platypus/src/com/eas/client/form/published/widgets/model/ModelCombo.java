@@ -198,11 +198,11 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	                                                                                   });
 	                                                                                   Object.defineProperty(aPublished, "value", {
 	                                                                                   get : function() {
-	                                                                                   return $wnd.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());
+	                                                                                   return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());
 	                                                                                   },
 	                                                                                   set : function(aValue) {
 	                                                                                   if (aValue != null) {
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 	                                                                                   } else {
 	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)(null);
 	                                                                                   }

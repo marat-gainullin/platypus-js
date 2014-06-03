@@ -7,13 +7,12 @@ package com.eas.client.model;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.CancellableCallback;
 import com.eas.client.queries.Query;
+import com.google.gwt.core.client.Callback;
 
 /**
  * 
@@ -74,7 +73,7 @@ public class ParametersEntity extends Entity {
 	}
 
 	@Override
-	public void execute(CancellableCallback onSuccess, Callback<String> onFailure) {
+	public void execute(Callback<Rowset, String> aCallback) {
 		if (rowset == null) {
 			rowset = new ParametersRowset((Parameters) model.getParameters());
 			rowset.addRowsetListener(this);
@@ -83,15 +82,15 @@ public class ParametersEntity extends Entity {
 
 	@Override
 	public Rowset getRowset() {
-		execute((CancellableCallback)null, null);
+		execute((Callback<Rowset, String>)null);
 		return super.getRowset();
 	}
 
 	@Override
-	protected void internalExecute(CancellableCallback onSuccess, Callback<String> onFailure) {
-		if (onSuccess != null) {
+	protected void internalExecute(Callback<Rowset, String> aCallback) {
+		if (aCallback != null) {
 			try {
-				onSuccess.run();
+				aCallback.onSuccess(null);
 			} catch (Exception e) {
 				Logger.getLogger(ParametersEntity.class.getName()).log(Level.SEVERE, null, e);
 			}
@@ -99,7 +98,7 @@ public class ParametersEntity extends Entity {
 	}
 
 	@Override
-	protected Cancellable refreshRowset(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	protected Cancellable refreshRowset(Callback<Rowset, String> onFailure) throws Exception {
 		return null;
 	}
 

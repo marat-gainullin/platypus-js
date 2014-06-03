@@ -7,17 +7,17 @@ public class JsWidgets {
 
 	public native static void init()/*-{
 		
-		$wnd.Orientation = {HORIZONTAL: 0, VERTICAL: 1};
-		$wnd.VerticalPosition = {CENTER: 0, TOP: 1, BOTTOM: 3};
-		$wnd.HorizontalPosition = {CENTER: 0, LEFT: 2, RIGHT: 4};
-		$wnd.FontStyle = {NORMAL: 0, BOLD: 1, ITALIC: 2, BOLD_ITALIC: 3};
+		$wnd.P.Orientation = {HORIZONTAL: 0, VERTICAL: 1};
+		$wnd.P.VerticalPosition = {CENTER: 0, TOP: 1, BOTTOM: 3};
+		$wnd.P.HorizontalPosition = {CENTER: 0, LEFT: 2, RIGHT: 4};
+		$wnd.P.FontStyle = {NORMAL: 0, BOLD: 1, ITALIC: 2, BOLD_ITALIC: 3};
 		
 		// ***************************************************
-		$wnd.Label = function(aText, aIcon, aIconTextGap) {			
+		$wnd.P.Label = function(aText, aIcon, aIconTextGap) {			
 			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
-			if (!(this instanceof $wnd.Label)) {
-				throw  ' use  "new Label()" !';
+			if (!(this instanceof $wnd.P.Label)) {
+				throw  ' use  "new P.Label()" !';
 			}
 
 			var published = this;
@@ -39,15 +39,15 @@ public class JsWidgets {
 		};		
 		
 		// **************************************************************************
-		$wnd.Button = function (aText, aIcon, aGapOrCallback, aCallback) {
+		$wnd.P.Button = function (aText, aIcon, aGapOrCallback, aCallback) {
 			var aIconTextGap = 4;
 			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
 				aCallback = aGapOrCallback;
 			
 			var aComponent = arguments.length > 4 ? arguments[4] : null;
 			
-			if (!(this instanceof $wnd.Button)) {
-				throw  ' use  "new Button()" !';
+			if (!(this instanceof $wnd.P.Button)) {
+				throw  ' use  "new P.Button()" !';
 			}
 
 			var published = this;
@@ -69,9 +69,9 @@ public class JsWidgets {
 		};	
 		
 		// **************************************************************************
-		$wnd.DropDownButton = function (aText, aIcon, aGapOrCallback, aCallback) {			
-			if (!(this instanceof $wnd.DropDownButton)) {
-				throw  ' use  "new DropDownButton()" !';
+		$wnd.P.DropDownButton = function (aText, aIcon, aGapOrCallback, aCallback) {			
+			if (!(this instanceof $wnd.P.DropDownButton)) {
+				throw  ' use  "new P.DropDownButton()" !';
 			}
 			var aIconTextGap = 4;
 			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
@@ -97,7 +97,7 @@ public class JsWidgets {
 		};	
 		
 		// **************************************************************************
-		$wnd.ToggleButton = function (aText, aIcon, aSelected, aGapOrCallback, aCallback) {
+		$wnd.P.ToggleButton = function (aText, aIcon, aSelected, aGapOrCallback, aCallback) {
 			
 			var aIconTextGap = 4;
 			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
@@ -105,8 +105,8 @@ public class JsWidgets {
 
 			var aComponent = arguments.length > 5 ? arguments[5] : null;
 			
-			if (!(this instanceof $wnd.ToggleButton)) {
-				throw  ' use  "new ToggleButton()" !';
+			if (!(this instanceof $wnd.P.ToggleButton)) {
+				throw  ' use  "new P.ToggleButton()" !';
 			}
 
 			var published = this;
@@ -131,11 +131,11 @@ public class JsWidgets {
 		};	
 		
 		// **************************************************************************
-		$wnd.RadioButton = function (aText, aSelected, aCallback) {
+		$wnd.P.RadioButton = function (aText, aSelected, aCallback) {
 			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
-			if (!(this instanceof $wnd.RadioButton)) {
-				throw  ' use  "new RadioButton()" !';
+			if (!(this instanceof $wnd.P.RadioButton)) {
+				throw  ' use  "new P.RadioButton()" !';
 			}
 
 			var published = this;
@@ -157,11 +157,11 @@ public class JsWidgets {
 		};	
 		
 		// **************************************************************************
-		$wnd.CheckBox = function (aText, aSelected, aCallback) {
+		$wnd.P.CheckBox = function (aText, aSelected, aCallback) {
 			var aComponent = arguments.length>3?arguments[3]:null;
 			
-			if (!(this instanceof $wnd.CheckBox)) {
-				throw  ' use  "new CheckBox()" !';
+			if (!(this instanceof $wnd.P.CheckBox)) {
+				throw  ' use  "new P.CheckBox()" !';
 			}
 
 			var published = this;
@@ -183,10 +183,10 @@ public class JsWidgets {
 		};			
 		
 		// **************************************************************************
-		$wnd.PasswordField = function (aText) {
+		$wnd.P.PasswordField = function (aText) {
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.PasswordField)) {
-				throw  ' use  "new PasswordField()" !';
+			if (!(this instanceof $wnd.P.PasswordField)) {
+				throw  ' use  "new P.PasswordField()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusPasswordField::new()();
@@ -200,10 +200,10 @@ public class JsWidgets {
 		};	
 		
 		// **************************************************************************
-		$wnd.TextField = function (aText) {
+		$wnd.P.TextField = function (aText) {
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.TextField)) {
-				throw  ' use  "new TextField()" !';
+			if (!(this instanceof $wnd.P.TextField)) {
+				throw  ' use  "new P.TextField()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusTextField::new()();
@@ -217,10 +217,10 @@ public class JsWidgets {
 		};	
 
 		// **************************************************************************
-		$wnd.FormattedField = function (aValue) {
+		$wnd.P.FormattedField = function (aValue) {
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.FormattedField)) {
-				throw  ' use  "new FormattedField()" !';
+			if (!(this instanceof $wnd.P.FormattedField)) {
+				throw  ' use  "new P.FormattedField()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusFormattedTextField::new()();
@@ -234,10 +234,10 @@ public class JsWidgets {
 		};			
 		
 		// **************************************************************************
-		$wnd.TextArea = function (aText) {
+		$wnd.P.TextArea = function (aText) {
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.TextArea)) {
-				throw  ' use  "new TextArea()" !';
+			if (!(this instanceof $wnd.P.TextArea)) {
+				throw  ' use  "new P.TextArea()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusTextArea::new()();
@@ -251,10 +251,10 @@ public class JsWidgets {
 		}
 		
 		// **************************************************************************
-		$wnd.HtmlArea = function (aText) {
+		$wnd.P.HtmlArea = function (aText) {
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.HtmlArea)) {
-				throw  ' use  "new HtmlArea()" !';
+			if (!(this instanceof $wnd.P.HtmlArea)) {
+				throw  ' use  "new P.HtmlArea()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusHtmlEditor::new()();
@@ -268,8 +268,8 @@ public class JsWidgets {
 		}
 		
 		// **************************************************************************
-		$wnd.Slider = function () {
-			var aOrientation = arguments.length == 1 || arguments.length == 4 ? arguments[0] : $wnd.Orientation.HORIZONTAL;
+		$wnd.P.Slider = function () {
+			var aOrientation = arguments.length == 1 || arguments.length == 4 ? arguments[0] : $wnd.P.Orientation.HORIZONTAL;
 			var aMinimum = null;
 			if(arguments.length == 3)
 				aMinimum = arguments[0];
@@ -286,8 +286,8 @@ public class JsWidgets {
 			else if(arguments.length == 4)
 				aValue = arguments[3];
 			var aComponent = arguments.length > 4 ? arguments[4] : null;
-			if (!(this instanceof $wnd.Slider)) {
-				throw  ' use  "new Slider()" !';
+			if (!(this instanceof $wnd.P.Slider)) {
+				throw  ' use  "new P.Slider()" !';
 			}
 			if (!aMinimum) {
 				aMinimum = 0;
@@ -318,10 +318,10 @@ public class JsWidgets {
 		}
 		
 		// **************************************************************************
-		$wnd.ProgressBar = function (aMinimum, aMaximum) {
+		$wnd.P.ProgressBar = function (aMinimum, aMaximum) {
 			var aComponent = arguments.length > 2 ? arguments[2] : null;			
-			if (!(this instanceof $wnd.ProgressBar)) {
-				throw  ' use  "new ProgressBar()" !';
+			if (!(this instanceof $wnd.P.ProgressBar)) {
+				throw  ' use  "new P.ProgressBar()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusProgressBar::new()();
@@ -339,10 +339,10 @@ public class JsWidgets {
 		}
 
 		// ***************************************************
-		$wnd.DesktopPane = function() {
+		$wnd.P.DesktopPane = function() {
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
-			if (!(this instanceof $wnd.DesktopPane)) {
-				throw  ' use  "new DesktopPane()" !';
+			if (!(this instanceof $wnd.P.DesktopPane)) {
+				throw  ' use  "new P.DesktopPane()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.widgets.DesktopPane::new()();
@@ -393,7 +393,7 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "background", {
 		    get : function() {
 		    	//if(_background == null) {
-		    	//	var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
+		    	//	var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
 		    	//	return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.backgroundColor);
 		    	//}
 		    	return _background;
@@ -408,7 +408,7 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "foreground", {
 		    get : function() {
 		    	// if(_foreground == null){
-		    	//	var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
+		    	//	var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
 		    	//	return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.color);
 		    	//}
 		    	return _foreground;
@@ -434,19 +434,19 @@ public class JsWidgets {
 		    get : function() {
 		    	if(_font == null)
 		    	{
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
+		    		var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
 		    		var isItalic = style.fontStyle == "italic";
 		    		var isBold = style.fontWeight == "bold" || style.fontWeight == "bolder"; 
-		    		var platypusFontStyle = $wnd.FontStyle.NORMAL;
+		    		var platypusFontStyle = $wnd.P.FontStyle.NORMAL;
 		    		if(isItalic)
 		    		{
 		    			if(isBold)
-		    				platypusFontStyle = $wnd.FontStyle.BOLD_ITALIC;
+		    				platypusFontStyle = $wnd.P.FontStyle.BOLD_ITALIC;
 		    			else
-		    				platypusFontStyle = $wnd.FontStyle.ITALIC;
+		    				platypusFontStyle = $wnd.P.FontStyle.ITALIC;
 		    		}else if(isBold)
-		    			platypusFontStyle = $wnd.FontStyle.BOLD;
-		    		return new $wnd.Font(style.fontFamily, platypusFontStyle, parseInt(""+style.fontSize));
+		    			platypusFontStyle = $wnd.P.FontStyle.BOLD;
+		    		return new $wnd.P.Font(style.fontFamily, platypusFontStyle, parseInt(""+style.fontSize));
 		    	}
 		    	return _font;
 		    },
@@ -461,7 +461,7 @@ public class JsWidgets {
  	    	get : function(){
  	    		if(_cursor == null)
  	    		{
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
+		    		var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
 		    		return style.cursor;
  	    		}
  	    		return _cursor;
@@ -480,7 +480,7 @@ public class JsWidgets {
     			return aPublished.element.offsetLeft;
 		    },
 		    set : function(aValue) {
-		    	if(aPublished.parent instanceof $wnd.AbsolutePane || aPublished.parent instanceof $wnd.AnchorsPane)
+		    	if(aPublished.parent instanceof $wnd.P.AbsolutePane || aPublished.parent instanceof $wnd.P.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustLeft(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
  	    });
@@ -489,7 +489,7 @@ public class JsWidgets {
     			return aPublished.element.offsetTop;
 		    },
 		    set : function(aValue) {
-		    	if(aPublished.parent instanceof $wnd.AbsolutePane || aPublished.parent instanceof $wnd.AnchorsPane)
+		    	if(aPublished.parent instanceof $wnd.P.AbsolutePane || aPublished.parent instanceof $wnd.P.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustTop(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
  	    });
@@ -502,13 +502,13 @@ public class JsWidgets {
 		    },
 		    set : function(aValue) {
 		    	_width = aValue;
-		    	if(aPublished.parent instanceof $wnd.AbsolutePane || aPublished.parent instanceof $wnd.AnchorsPane)
+		    	if(aPublished.parent instanceof $wnd.P.AbsolutePane || aPublished.parent instanceof $wnd.P.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-		    	else if(aPublished.parent instanceof $wnd.ScrollPane)
+		    	else if(aPublished.parent instanceof $wnd.P.ScrollPane)
 		    		@com.eas.client.form.published.containers.ScrollPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-		    	else if(aPublished.parent instanceof $wnd.FlowPane)
+		    	else if(aPublished.parent instanceof $wnd.P.FlowPane)
 		    		@com.eas.client.form.published.containers.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-		    	else if(aPublished.parent instanceof $wnd.BoxPane && aPublished.parent.orientation == $wnd.Orientation.HORIZONTAL){
+		    	else if(aPublished.parent instanceof $wnd.P.BoxPane && aPublished.parent.orientation == $wnd.P.Orientation.HORIZONTAL){
 	    			aPublished.parent.unwrap().@com.eas.client.form.published.containers.HBoxPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}
 		    }
@@ -522,13 +522,13 @@ public class JsWidgets {
 		    },
 		    set : function(aValue) {
 		    	_height = aValue;
-		    	if(aPublished.parent instanceof $wnd.AbsolutePane || aPublished.parent instanceof $wnd.AnchorsPane)
+		    	if(aPublished.parent instanceof $wnd.P.AbsolutePane || aPublished.parent instanceof $wnd.P.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-		    	else if(aPublished.parent instanceof $wnd.ScrollPane)
+		    	else if(aPublished.parent instanceof $wnd.P.ScrollPane)
 		    		@com.eas.client.form.published.containers.ScrollPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-		    	else if(aPublished.parent instanceof $wnd.FlowPane)
+		    	else if(aPublished.parent instanceof $wnd.P.FlowPane)
 		    		@com.eas.client.form.published.containers.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-		    	else if(aPublished.parent instanceof $wnd.BoxPane && aPublished.parent.orientation == $wnd.Orientation.VERTICAL){
+		    	else if(aPublished.parent instanceof $wnd.P.BoxPane && aPublished.parent.orientation == $wnd.P.Orientation.VERTICAL){
 	    			aPublished.parent.unwrap().@com.eas.client.form.published.containers.VBoxPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	}
 		    }

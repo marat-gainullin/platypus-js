@@ -11,7 +11,6 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -167,21 +166,21 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalTextPosition()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
-					case $wnd.HorizontalPosition.LEFT:
+					case $wnd.P.HorizontalPosition.LEFT:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
-					case $wnd.HorizontalPosition.RIGHT:
+					case $wnd.P.HorizontalPosition.RIGHT:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
-					case $wnd.HorizontalPosition.CENTER:
+					case $wnd.P.HorizontalPosition.CENTER:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
@@ -191,21 +190,21 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getVerticalTextPosition()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
-					case $wnd.VerticalPosition.TOP:
+					case $wnd.P.VerticalPosition.TOP:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
-					case $wnd.VerticalPosition.BOTTOM:
+					case $wnd.P.VerticalPosition.BOTTOM:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
-					case $wnd.VerticalPosition.CENTER:
+					case $wnd.P.VerticalPosition.CENTER:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
@@ -216,21 +215,21 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalAlignment()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
-					case $wnd.HorizontalPosition.LEFT:
+					case $wnd.P.HorizontalPosition.LEFT:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
-					case $wnd.HorizontalPosition.RIGHT:
+					case $wnd.P.HorizontalPosition.RIGHT:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
-					case $wnd.HorizontalPosition.CENTER:
+					case $wnd.P.HorizontalPosition.CENTER:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
@@ -240,21 +239,21 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getVerticalAlignment()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
-					case $wnd.VerticalPosition.TOP:
+					case $wnd.P.VerticalPosition.TOP:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
-					case $wnd.VerticalPosition.BOTTOM:
+					case $wnd.P.VerticalPosition.BOTTOM:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
-					case $wnd.VerticalPosition.CENTER:
+					case $wnd.P.VerticalPosition.CENTER:
 						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}

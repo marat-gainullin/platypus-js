@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.MarginConstraints.Margin;
@@ -22,6 +21,7 @@ import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.model.Entity;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
@@ -99,32 +99,40 @@ public class ControlsUtils {
 
 	public static void jsSelectFile(final JavaScriptObject aCallback) {
 		if (aCallback != null) {
-			selectFile(new Callback<JavaScriptObject>() {
-				@Override
-				public void run(JavaScriptObject aResult) throws Exception {
-					Utils.executeScriptEventVoid(aCallback, aCallback, aResult);
-				}
+			selectFile(new Callback<JavaScriptObject, String>() {
 
 				@Override
-				public void cancel() {
+				public void onSuccess(JavaScriptObject result) {
+					try {
+						Utils.executeScriptEventVoid(aCallback, aCallback, result);
+					} catch (Exception ex) {
+						Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
+				
+				@Override
+				public void onFailure(String reason) {
+				}
+
 			});
 		}
 	}
 
-	public static void selectFile(final Callback<JavaScriptObject> aCallback) {
+	public static void selectFile(final Callback<JavaScriptObject, String> aCallback) {
 		final XFileUploadField fu = new XFileUploadField();
 		fu.getElement().getStyle().setDisplay(Style.Display.NONE);
 		RootPanel.get().add(fu);
 		fu.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				if (fu.getFiles() != null) {
-					for (int i = 0; i < fu.getFiles().length(); i++) {
-						try {
-							aCallback.run(fu.getFiles().get(i));
-						} catch (Exception ex) {
-							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+				if (aCallback != null) {
+					if (fu.getFiles() != null) {
+						for (int i = 0; i < fu.getFiles().length(); i++) {
+							try {
+								aCallback.onSuccess(fu.getFiles().get(i));
+							} catch (Exception ex) {
+								Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+							}
 						}
 					}
 				}
@@ -182,7 +190,7 @@ public class ControlsUtils {
 	public static String renderDecorated(SafeHtmlBuilder rendered, PublishedStyle aStyle, SafeHtmlBuilder sb) {
 		if (aStyle != null) {
 			return StyleIconDecorator.decorate(rendered.toSafeHtml(), aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
-		} else{
+		} else {
 			sb.append(rendered.toSafeHtml());
 			return "";
 		}
@@ -202,7 +210,7 @@ public class ControlsUtils {
 	}
 
 	/**
-	 * Calculates a published cell for standalone model-aware controls against
+	 * Calculates a published cell for stand-alone model-aware controls against
 	 * row aRow.
 	 * 
 	 * @param aEventThis
@@ -339,7 +347,7 @@ public class ControlsUtils {
 			} else {
 				parent = null;
 			}
-		} while (parent != null && (!(parent instanceof HasPublished) || ( ((HasPublished) parent).getPublished() == null ) ));
+		} while (parent != null && (!(parent instanceof HasPublished) || (((HasPublished) parent).getPublished() == null)));
 		return parent != null ? ((HasPublished) parent).getPublished() : null;
 	}
 

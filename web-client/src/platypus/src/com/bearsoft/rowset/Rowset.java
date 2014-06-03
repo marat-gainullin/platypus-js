@@ -44,7 +44,7 @@ import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.ordering.OrderersFactory;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.CancellableCallback;
+import com.google.gwt.core.client.Callback;
 
 /**
  * Rowset serves as original and updated rows vectors holder. There are three
@@ -373,8 +373,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 		}
 	}
 
-	public Cancellable refresh(CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
-		return refresh(new Parameters(), onSuccess, onFailure);
+	public Cancellable refresh(final Callback<Rowset, String> aCallback) throws Exception {
+		return refresh(new Parameters(), aCallback);
 	}
 
 	/**
@@ -388,11 +388,11 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	 *            Parameters values, ordered with some unknown criteria.
 	 * @see Parameters
 	 */
-	public Cancellable refresh(Parameters aParams, final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
+	public Cancellable refresh(Parameters aParams, final Callback<Rowset, String> aCallback) throws Exception {
 		if (flow != null) {
 			if (rowsetChangeSupport.fireWillRequeryEvent()) {
 				pending = true;
-				return flow.refresh(aParams, new RowsetCallbackAdapter() {
+				return flow.refresh(aParams, new CallbackAdapter<Rowset, String>() {
 
 					@Override
 					protected void doWork(Rowset aRowset) throws Exception {
@@ -414,24 +414,23 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 							silentFirst();
 							pending = false;
 							rowsetChangeSupport.fireRequeriedEvent();
-							onSuccess.run();
+							if(aCallback != null)
+								aCallback.onSuccess(aRowset);
 						} else {
 							throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
 						}
 					}
-
-				}, new Callback<String>() {
-					public void run(String aResult) throws Exception {
+					
+					@Override
+					public void onFailure(String reason) {
 						pending = false;
-						if (aResult == null)
-							aResult = "Unknown network error. May be cancelled.";
-						rowsetChangeSupport.fireNetErrorEvent(aResult);
-						if (onFailure != null)
-							onFailure.run(aResult);
+						if (reason == null)
+							reason = "Unknown network error. May be cancelled.";
+						rowsetChangeSupport.fireNetErrorEvent(reason);
+						if (aCallback != null)
+							aCallback.onFailure(reason);
 					}
 
-					public void cancel() {
-					}
 				});
 			}
 			return null;

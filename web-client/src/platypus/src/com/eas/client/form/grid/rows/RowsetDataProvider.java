@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
-import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -21,6 +20,7 @@ import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.view.client.ListDataProvider;
 
 public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOfProvider<Row> {
@@ -30,9 +30,9 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 	protected RowsetReflector rowsetReflector = new RowsetReflector();
 	protected Runnable onResize;
 	protected Runnable onLoadStart;
-	protected Callback<String> onError;
+	protected Callback<Void, String> onError;
 
-	public RowsetDataProvider(Rowset aRowset, Runnable aOnResize, Runnable aOnLoadStart, Callback<String> aOnError) {
+	public RowsetDataProvider(Rowset aRowset, Runnable aOnResize, Runnable aOnLoadStart, Callback<Void, String> aOnError) {
 		super();
 		setRowset(aRowset);
 		onResize = aOnResize;
@@ -258,7 +258,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 		public void rowsetNetError(RowsetNetErrorEvent event) {
 			if(onError != null){
 	            try {
-	                onError.run(event.getMessage());
+	                onError.onFailure(event.getMessage());
                 } catch (Exception e) {
                 	Logger.getLogger(RowsetDataProvider.class.getName()).log(Level.SEVERE, null, e);
                 }

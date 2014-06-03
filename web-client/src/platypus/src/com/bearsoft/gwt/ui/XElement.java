@@ -31,15 +31,15 @@ public class XElement extends Element {
 	}
 
 	public final native double getSubPixelComputedWidth() /*-{
-		if ($wnd.getComputedStyle)
-			return parseFloat($wnd.getComputedStyle(this).width);
+		if ($wnd.P.getComputedStyle)
+			return parseFloat($wnd.P.getComputedStyle(this).width);
 		else
 			return -1;
 	}-*/;
 
 	public final native double getSubPixelComputedHeight() /*-{
-		if ($wnd.getComputedStyle)
-			return parseFloat($wnd.getComputedStyle(this).height);
+		if ($wnd.P.getComputedStyle)
+			return parseFloat($wnd.P.getComputedStyle(this).height);
 		else
 			return -1;
 	}-*/;

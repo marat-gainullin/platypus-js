@@ -19,7 +19,7 @@ import com.bearsoft.rowset.metadata.Parameter;
  */
 public class Relation {
 
-	// runtime properties
+	// runtime
 	protected Entity leftEntity;
 	protected Field leftField;
 	protected Entity rightEntity;

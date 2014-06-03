@@ -22,4 +22,8 @@ public class ProgressEvent extends JavaScriptObject {
 		return this.total;
 	}-*/;
 
+	public native final boolean isComplete()/*-{
+		return this.lengthComputable && this.total == this.loaded;
+	}-*/;
+
 }

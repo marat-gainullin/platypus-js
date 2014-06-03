@@ -9,7 +9,7 @@ public class JsContainers {
 		}
 				
 		// ***************************************************
-		$wnd.BorderPane = function(aVGap, aHGap) {
+		$wnd.P.BorderPane = function(aVGap, aHGap) {
 			var aComponent = arguments.length > 2 ? arguments[2] : null;
 			if(!aComponent)
 			{
@@ -18,8 +18,8 @@ public class JsContainers {
 				if(!aHGap)
 					aHGap = 0;
 			}
-			if (!(this instanceof $wnd.BorderPane)) {
-				throw  ' use  "new BorderPane()" !';
+			if (!(this instanceof $wnd.P.BorderPane)) {
+				throw  ' use  "new P.BorderPane()" !';
 			}
 
 			var published = this; 
@@ -32,7 +32,7 @@ public class JsContainers {
 		};		
 
 		// ***************************************************
-		$wnd.FlowPane = function(aVGap, aHGap) {
+		$wnd.P.FlowPane = function(aVGap, aHGap) {
 			var aComponent = arguments.length > 2 ? arguments[2] : null;
 			if(!aComponent)
 			{
@@ -41,8 +41,8 @@ public class JsContainers {
 				if(!aHGap)
 					aHGap = 0;
 			}
-			if (!(this instanceof $wnd.FlowPane)) {
-				throw  ' use  "new FlowPane()" !';
+			if (!(this instanceof $wnd.P.FlowPane)) {
+				throw  ' use  "new P.FlowPane()" !';
 			}
 
 			var published = this; 
@@ -55,10 +55,10 @@ public class JsContainers {
 		};
 		
 		// ***************************************************
-		$wnd.GridPane = function(aRows, aCols, aVGap, aHGap) {
+		$wnd.P.GridPane = function(aRows, aCols, aVGap, aHGap) {
 			var aComponent = arguments.length > 4 ? arguments[4] : null;
-			if (!(this instanceof $wnd.GridPane)) {
-				throw  ' use  "new GridPane()" !';
+			if (!(this instanceof $wnd.P.GridPane)) {
+				throw  ' use  "new P.GridPane()" !';
 			}
 
 			var published = this; 
@@ -87,16 +87,16 @@ public class JsContainers {
 		};
 		
 		// ***************************************************
-		$wnd.BoxPane = function(aOrientation) {
-			if (!(this instanceof $wnd.BoxPane)) {
-				throw  ' use  "new BoxPane()" !';
+		$wnd.P.BoxPane = function(aOrientation) {
+			if (!(this instanceof $wnd.P.BoxPane)) {
+				throw  ' use  "new P.BoxPane()" !';
 			}
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
 			if(!aComponent)
 			{
 				if(!aOrientation)
-					aOrientation = $wnd.Orientation.HORIZONTAL;
-				aComponent = aOrientation == $wnd.Orientation.VERTICAL ? @com.eas.client.form.published.containers.VBoxPane::new()() : @com.eas.client.form.published.containers.HBoxPane::new()();
+					aOrientation = $wnd.P.Orientation.HORIZONTAL;
+				aComponent = aOrientation == $wnd.P.Orientation.VERTICAL ? @com.eas.client.form.published.containers.VBoxPane::new()() : @com.eas.client.form.published.containers.HBoxPane::new()();
 			}
 
 			var published = this;
@@ -108,7 +108,7 @@ public class JsContainers {
 			
 			published.add = function(toAdd){
 				if(toAdd && toAdd.unwrap){
-					if (aOrientation == $wnd.Orientation.VERTICAL) {
+					if (aOrientation == $wnd.P.Orientation.VERTICAL) {
 						aComponent.@com.eas.client.form.published.containers.VBoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 					} else { 
 						aComponent.@com.eas.client.form.published.containers.HBoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
@@ -127,9 +127,9 @@ public class JsContainers {
 		};		
 
 		// ***************************************************
-		$wnd.CardPane = function(aVGap, aHGap) {
-			if (!(this instanceof $wnd.CardPane)) {
-				throw  ' use  "new CardPane()" !';
+		$wnd.P.CardPane = function(aVGap, aHGap) {
+			if (!(this instanceof $wnd.P.CardPane)) {
+				throw  ' use  "new P.CardPane()" !';
 			}
 			var aComponent = arguments.length>2?arguments[2]:null;
 			if(!aComponent)
@@ -150,10 +150,10 @@ public class JsContainers {
 		};		
 
 		// ***************************************************
-		$wnd.TabbedPane = function() {
+		$wnd.P.TabbedPane = function() {
 			var aComponent = arguments.length>0?arguments[0]:null;
-			if (!(this instanceof $wnd.TabbedPane)) {
-				throw  ' use  "new TabbedPane()" !';
+			if (!(this instanceof $wnd.P.TabbedPane)) {
+				throw  ' use  "new P.TabbedPane()" !';
 			}
 
 			var published = this; 
@@ -167,10 +167,10 @@ public class JsContainers {
 		};
 
 		// ***************************************************
-		$wnd.ScrollPane = function(aChild) {
+		$wnd.P.ScrollPane = function(aChild) {
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.ScrollPane)) {
-				throw  ' use  "new ScrollPane()" !';
+			if (!(this instanceof $wnd.P.ScrollPane)) {
+				throw  ' use  "new P.ScrollPane()" !';
 			}
 
 			var published = this; 
@@ -186,17 +186,17 @@ public class JsContainers {
 		};		
 		
 		// ***************************************************
-		$wnd.SplitPane = function(aOrientation) {
-			if (!(this instanceof $wnd.SplitPane)) {
-				throw  ' use  "new SplitPane()" !';
+		$wnd.P.SplitPane = function(aOrientation) {
+			if (!(this instanceof $wnd.P.SplitPane)) {
+				throw  ' use  "new P.SplitPane()" !';
 			}
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
 			if(!aComponent)
 			{
 				if(!aOrientation)
-					aOrientation = $wnd.Orientation.HORIZONTAL;
+					aOrientation = $wnd.P.Orientation.HORIZONTAL;
 				aComponent = @com.eas.client.form.published.containers.SplitPane::new()();
-				var orientation = (aOrientation === $wnd.Orientation.VERTICAL ? @com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT : @com.eas.client.form.published.containers.SplitPane::HORIZONTAL_SPLIT); 
+				var orientation = (aOrientation === $wnd.P.Orientation.VERTICAL ? @com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT : @com.eas.client.form.published.containers.SplitPane::HORIZONTAL_SPLIT); 
 				aComponent.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(orientation);
 			}
 
@@ -210,9 +210,9 @@ public class JsContainers {
 		};		
 		
 		// ***************************************************
-		$wnd.ToolBar = function(floatable) {
-			if (!(this instanceof $wnd.ToolBar)) {
-				throw  ' use  "new ToolBar()" !';
+		$wnd.P.ToolBar = function(floatable) {
+			if (!(this instanceof $wnd.P.ToolBar)) {
+				throw  ' use  "new P.ToolBar()" !';
 			}
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
 			if(!aComponent)
@@ -232,10 +232,10 @@ public class JsContainers {
 		};
 		
 		// ***************************************************
-		$wnd.AnchorsPane = function() {
+		$wnd.P.AnchorsPane = function() {
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
-			if (!(this instanceof $wnd.AnchorsPane)) {
-				throw  ' use  "new AnchorsPane()" !';
+			if (!(this instanceof $wnd.P.AnchorsPane)) {
+				throw  ' use  "new P.AnchorsPane()" !';
 			}
 
 			var published = this; 
@@ -249,10 +249,10 @@ public class JsContainers {
 		}
 
 		// ***************************************************
-		$wnd.AbsolutePane = function() {
+		$wnd.P.AbsolutePane = function() {
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
-			if (!(this instanceof $wnd.AbsolutePane)) {
-				throw  ' use  "new AbsolutePane()" !';
+			if (!(this instanceof $wnd.P.AbsolutePane)) {
+				throw  ' use  "new P.AbsolutePane()" !';
 			}
 			var published = this; 
 			aComponent = aComponent || @com.eas.client.form.published.containers.AbsolutePane::new()();
@@ -265,11 +265,11 @@ public class JsContainers {
 		}
 		
 		// **************************************************************************
-		$wnd.ButtonGroup = function () {
+		$wnd.P.ButtonGroup = function () {
 			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
-			if (!(this instanceof $wnd.ButtonGroup)) {
-				throw  ' use  "new ButtonGroup()" !';
+			if (!(this instanceof $wnd.P.ButtonGroup)) {
+				throw  ' use  "new P.ButtonGroup()" !';
 			}
 			var published = this;
 			aComponent = aComponent || @com.eas.client.form.published.containers.ButtonGroup::new()();
@@ -280,7 +280,7 @@ public class JsContainers {
 		}
 
 		// ***************************************************
-		$wnd.Anchors = function(aLeft, aWidth, aRight, aTop, aHeight, aBottom) {
+		$wnd.P.Anchors = function(aLeft, aWidth, aRight, aTop, aHeight, aBottom) {
 			function marginToString (aMargin) {
 				if (aMargin != undefined && aMargin != null) {
 					var unit = aMargin.@com.eas.client.form.MarginConstraints.Margin::unit;
@@ -289,8 +289,8 @@ public class JsContainers {
 				return null;
 			}
 			
-			if (!(this instanceof $wnd.Anchors)) {
-				throw  ' use  "new Anchors(...)" !';
+			if (!(this instanceof $wnd.P.Anchors)) {
+				throw  ' use  "new P.Anchors(...)" !';
 			}
 			var aConstraints = arguments.length>6?arguments[6]:null;
 			if(!aConstraints)

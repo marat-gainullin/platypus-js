@@ -209,13 +209,13 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 			get : function() {
 				var orientation = aComponent.@com.eas.client.form.published.containers.SplitPane::getOrientation()();
 				if (orientation == @com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT) {
-					return $wnd.Orientation.VERTICAL;
+					return $wnd.P.Orientation.VERTICAL;
 				} else {
-					return $wnd.Orientation.HORIZONTAL;
+					return $wnd.P.Orientation.HORIZONTAL;
 				}
 			},
 			set : function(aOrientation) {
-				if (aOrientation == $wnd.Orientation.VERTICAL) {
+				if (aOrientation == $wnd.P.Orientation.VERTICAL) {
 					aComponent.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(@com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT);
 				} else {
 					aComponent.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(@com.eas.client.form.published.containers.SplitPane::HORIZONTAL_SPLIT);

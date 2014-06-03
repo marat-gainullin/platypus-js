@@ -28,6 +28,6 @@ public class PublishedColor extends JavaScriptObject {
 	}-*/;
 	
 	public static native PublishedColor create(int aR, int aG, int aB, int aA)/*-{
-		return new $wnd.Color(aR, aG, aB, aA);
+		return new $wnd.P.Color(aR, aG, aB, aA);
 	}-*/;
 }

@@ -279,21 +279,21 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 					aSize = 32;
 				}
 				if(!region)
-					region = $wnd.VerticalPosition.CENTER;
+					region = $wnd.P.VerticalPosition.CENTER;
 				switch (region) {
-					case $wnd.VerticalPosition.CENTER:
+					case $wnd.P.VerticalPosition.CENTER:
 						aComponent.@com.eas.client.form.published.containers.BorderPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 						break;  
-					case $wnd.VerticalPosition.TOP: 
+					case $wnd.P.VerticalPosition.TOP: 
 						aComponent.@com.eas.client.form.published.containers.BorderPane::addNorth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
-					case $wnd.VerticalPosition.BOTTOM: 
+					case $wnd.P.VerticalPosition.BOTTOM: 
 						aComponent.@com.eas.client.form.published.containers.BorderPane::addSouth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
-					case $wnd.HorizontalPosition.LEFT: 
+					case $wnd.P.HorizontalPosition.LEFT: 
 						aComponent.@com.eas.client.form.published.containers.BorderPane::addWest(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
-					case $wnd.HorizontalPosition.RIGHT: 
+					case $wnd.P.HorizontalPosition.RIGHT: 
 						aComponent.@com.eas.client.form.published.containers.BorderPane::addEast(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 				}

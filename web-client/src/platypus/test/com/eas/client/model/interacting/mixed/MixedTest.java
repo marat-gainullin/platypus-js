@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.eas.client.CancellableCallback;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
@@ -117,7 +116,7 @@ public abstract class MixedTest extends ModelBaseTest {
 		}
 
 		public Map<String, Integer> gatherRowCounts() throws Exception {
-			Map<String, Integer> counts = new HashMap();
+			Map<String, Integer> counts = new HashMap<>();
 			for (Entity entity : model.getEntities().values()) {
 				counts.put(entity.getEntityId(), entity.getRowset().size());
 			}
@@ -151,14 +150,10 @@ public abstract class MixedTest extends ModelBaseTest {
 		Application.publish(client);
 		AppClient.publishApi(client);
 		Loader l = new Loader(client);
-		l.loadQueries(queries(), new CancellableCallback() {
-
+		l.loadQueries(queries(), new Runnable() {
+			
 			@Override
-			public void cancel() {
-			}
-
-			@Override
-			public void run() throws Exception {
+			public void run() {
 				try {
 					setupModel();
 				} catch (Exception ex) {

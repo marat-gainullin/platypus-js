@@ -1,9 +1,5 @@
 load("classpath:internals.js");
 
-function testXXX() {
-}
-
-
 (function() {
     // this === global;
     var global = this;

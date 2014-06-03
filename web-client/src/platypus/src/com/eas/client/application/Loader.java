@@ -14,14 +14,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Cancellable;
-import com.eas.client.CancellableCallback;
-import com.eas.client.CumulativeCallbackAdapter;
-import com.eas.client.DocumentCallbackAdapter;
-import com.eas.client.ResponseCallbackAdapter;
-import com.eas.client.StringCallbackAdapter;
+import com.eas.client.CumulativeRunnableAdapter;
 import com.eas.client.queries.Query;
-import com.eas.client.queries.QueryCallbackAdapter;
 import com.eas.client.xhr.UrlQueryProcessor;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -98,7 +94,7 @@ public class Loader {
 		};
 	}
 
-	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
+	public void load(final Collection<String> aAppElementNames, final Runnable onEnd) throws Exception {
 		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
 		List<String> appElementNames = new ArrayList<String>();
 		// Recursion handling
@@ -107,37 +103,28 @@ public class Loader {
 				appElementNames.add(appElementName);
 			}
 		}
-		final CancellableCallback loaded = new CumulativeCallbackAdapter(appElementNames.size() * 2) {
+		final Runnable onEndCaller = new CumulativeRunnableAdapter(appElementNames.size() * 2) {
 
 			@Override
-			protected void doWork() throws Exception {
-				onEnd.run();
-			}
-
-			@Override
-			public void cancel() {
-				for (Cancellable toCancel : loadingsStarted)
-					toCancel.cancel();
+			protected void doWork(){
+				if(onEnd != null){
+					onEnd.run();
+				}
 			}
 		};
 		if (!appElementNames.isEmpty()) {
 			for (final String appElementName : appElementNames) {
 
-				final CancellableCallback fireLoaded = new CumulativeCallbackAdapter(2) {
+				final Runnable fireLoadedCaller = new CumulativeRunnableAdapter(2) {
 
 					@Override
-					protected void doWork() throws Exception {
+					protected void doWork(){
 						fireLoaded(appElementName);
 					}
-
-					@Override
-					public void cancel() {
-					}
+					
 				};
 
-				loadingsStarted.add(client.getAppElementXml(appElementName, new DocumentCallbackAdapter() {
-
-					Set<Cancellable> loadings = new HashSet<Cancellable>();
+				loadingsStarted.add(client.getAppElementXml(appElementName, new CallbackAdapter<Document, XMLHttpRequest>() {
 
 					@Override
 					protected void doWork(Document aDoc) throws Exception {
@@ -184,7 +171,7 @@ public class Loader {
 								}
 							}
 						}					
-						fireLoaded.run();
+						fireLoadedCaller.run();
 						if (!dependencies.isEmpty() || !serverModuleDependencies.isEmpty() || !queryDependencies.isEmpty()) {
 							int accumulate = 0;
 							if (!dependencies.isEmpty())
@@ -193,39 +180,29 @@ public class Loader {
 								++accumulate;
 							if (!serverModuleDependencies.isEmpty())
 								++accumulate;
-							CancellableCallback onDependenciesLoaded = new CumulativeCallbackAdapter(accumulate) {
+							Runnable onDependenciesLoaded = new CumulativeRunnableAdapter(accumulate) {
 
 								@Override
-								protected void doWork() throws Exception {
-									loaded.run();
+								protected void doWork() {
+									onEndCaller.run();
 								}
 							};
 							if (!dependencies.isEmpty()) {
-								loadings.add(load(dependencies, onDependenciesLoaded));
+								load(dependencies, onDependenciesLoaded);
 							}
 							if (!queryDependencies.isEmpty()) {
-								loadings.add(loadQueries(queryDependencies, onDependenciesLoaded));
+								loadQueries(queryDependencies, onDependenciesLoaded);
 							}
 							if (!serverModuleDependencies.isEmpty()) {
-								loadings.add(loadServerModules(serverModuleDependencies, onDependenciesLoaded));
+								loadServerModules(serverModuleDependencies, onDependenciesLoaded);
 							}
 						} else {
-							loaded.run();
+							onEndCaller.run();
 						}
 					}
-
+					
 					@Override
-					public void cancel() {
-						super.cancel();
-						for (Cancellable loading : loadings) {
-							loading.cancel();
-						}
-						loadings.clear();
-					}
-				}, new ResponseCallbackAdapter() {
-
-					@Override
-					protected void doWork(XMLHttpRequest aResponse) throws Exception {
+					public void onFailure(XMLHttpRequest aResponse) {
 						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, appElementName + " loading response is: " + aResponse.getStatus() + " (" + aResponse.getStatusText() + ")");
 						assert !loadedAppElements.contains(appElementName);
 						// Erroneous dependencies and other erroneous
@@ -234,9 +211,8 @@ public class Loader {
 						// error.
 						if (!appElementsErrors.containsKey(appElementName))
 							appElementsErrors.put(appElementName, aResponse.getStatusText());
-						loaded.run();
+						onEndCaller.run();
 					}
-
 				}));
 				//
 				String jsURL = client.resourceUrl(appElementName);
@@ -246,8 +222,8 @@ public class Loader {
 					@Override
 					public void onSuccess(Void result) {
 						try {
-							fireLoaded.run();
-							loaded.run();
+							fireLoadedCaller.run();
+							onEndCaller.run();
 						} catch (Exception ex) {
 							Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -264,7 +240,7 @@ public class Loader {
 							// the
 							// error.
 							appElementsErrors.put(appElementName, reason.getMessage());
-							loaded.run();
+							onEndCaller.run();
 						} catch (Exception ex) {
 							Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -284,37 +260,31 @@ public class Loader {
 				        .inject();
 				fireStarted(appElementName);
 			}
-		} else
+		} else{
 			onEnd.run();
-		return loaded;
+		}
 	}
 
-	private Cancellable loadServerModules(Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
+	private void loadServerModules(Collection<String> aAppElementNames, final Runnable onEnd) throws Exception {
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
 			if (!isTouched(SERVER_MODULE_TOUCHED_NAME + appElementName))
 				appElementNames.add(appElementName);
 		}
 		final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
-		final CancellableCallback loaded = new CumulativeCallbackAdapter(appElementNames.size()) {
+		final Runnable onEndCaller = new CumulativeRunnableAdapter(appElementNames.size()) {
 
 			@Override
-			protected void doWork() throws Exception {
+			protected void doWork(){
 				onEnd.run();
-			}
-
-			@Override
-			public void cancel() {
-				for (Cancellable toCancel : startLoadings)
-					toCancel.cancel();
 			}
 		};
 		if (!appElementNames.isEmpty()) {
 			for (final String appElementName : appElementNames) {
-				startLoadings.add(client.createServerModule(appElementName, new com.bearsoft.rowset.Callback<Void>() {
+				startLoadings.add(client.createServerModule(appElementName, new CallbackAdapter<Void, String>() {
 
 					@Override
-					public void run(Void aDoc) throws Exception {
+					public void doWork(Void aDoc) throws Exception {
 						/*
 						String source = null;
 						Element rootNode = aDoc.getDocumentElement();
@@ -337,27 +307,22 @@ public class Loader {
 						}
 						*/
 						fireLoaded(SERVER_MODULE_TOUCHED_NAME + appElementName);
-						loaded.run();
+						onEndCaller.run();
 					}
 
 					@Override
-                    public void cancel() {
-					}
-
-				}, new StringCallbackAdapter() {
-					@Override
-					protected void doWork(String aResult) throws Exception {
+					public void onFailure(String reason) {
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason);
 						assert !loadedAppElements.contains(SERVER_MODULE_TOUCHED_NAME + appElementName);
-						appElementsErrors.put(SERVER_MODULE_TOUCHED_NAME + appElementName, aResult);
-						loaded.run();
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResult);
+						appElementsErrors.put(SERVER_MODULE_TOUCHED_NAME + appElementName, reason);
+						onEndCaller.run();
 					}
 				}));
 				fireStarted(SERVER_MODULE_TOUCHED_NAME + appElementName);
 			}
-		} else
+		} else{
 			onEnd.run();
-		return loaded;
+		}
 	}
 
 	/**
@@ -368,50 +333,46 @@ public class Loader {
 	 * @return
 	 * @throws Exception
 	 */
-	public Cancellable loadQueries(Collection<String> aAppElementNames, final CancellableCallback onSuccess) throws Exception {
+	public void loadQueries(Collection<String> aAppElementNames, final Runnable onEnd) throws Exception {
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
 			if (!isTouched(appElementName))
 				appElementNames.add(appElementName);
 		}
 		final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
-		final CancellableCallback loaded = new CumulativeCallbackAdapter(appElementNames.size()) {
+		final Runnable onEndInvoker = new CumulativeRunnableAdapter(appElementNames.size()) {
 
 			@Override
-			protected void doWork() throws Exception {
-				onSuccess.run();
-			}
-
-			@Override
-			public void cancel() {
-				for (Cancellable toCancel : startLoadings)
-					toCancel.cancel();
+			protected void doWork() {
+				if(onEnd != null){
+					onEnd.run();
+				}
 			}
 		};
 		if (!appElementNames.isEmpty()) {
 			for (final String appElementName : appElementNames) {
-				startLoadings.add(client.getAppQuery(appElementName, new QueryCallbackAdapter() {
+				startLoadings.add(client.getAppQuery(appElementName, new CallbackAdapter<Query, String>() {
 
 					@Override
-					public void run(Query aQuery) throws Exception {
+					public void doWork(Query aQuery) throws Exception {
 						Application.putAppQuery(aQuery);
 						fireLoaded(appElementName);
-						loaded.run();
+						onEndInvoker.run();
 					}
-
-				}, new StringCallbackAdapter() {
+					
 					@Override
-					protected void doWork(String aResult) throws Exception {
+					public void onFailure(String reason) {
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason);
 						assert !loadedAppElements.contains(appElementName);
-						appElementsErrors.put(appElementName, aResult);
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResult);
+						appElementsErrors.put(appElementName, reason);
+						onEndInvoker.run();
 					}
 				}));
 				fireStarted(appElementName);
 			}
-		} else
-			onSuccess.run();
-		return loaded;
+		} else {
+			onEnd.run();
+		}
 	}
 
 	public boolean isTouched(String aAppElementId) {
