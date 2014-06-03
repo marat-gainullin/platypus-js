@@ -15,7 +15,7 @@ import org.jfree.data.xy.XYDataset;
 public abstract class AbstractLineChart extends AbstractChart {
 
     protected XYDataset xyDataset;
-    private List<SeriesProperties> series = new ArrayList<>();
+    private final List<SeriesProperties> series = new ArrayList<>();
 
     public AbstractLineChart() {
         super();

@@ -8,7 +8,9 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.script.NoPublisherException;
 import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -77,4 +79,22 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

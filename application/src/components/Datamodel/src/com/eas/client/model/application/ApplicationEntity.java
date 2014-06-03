@@ -37,7 +37,6 @@ import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
@@ -73,7 +72,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected JSObject onFiltered;
     //
     protected JSObject instanceConstructor;
-    protected static JSObject publisher;
     protected Object published;
     protected Map<String, Object> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
@@ -851,17 +849,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-       @Override
-    public Object getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = publisher.call(null, new Object[]{});
-        }
-        return published;
-    }
-
     @Override
     public void setPublished(Object aValue) {
         if (published != null) {
@@ -869,10 +856,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
         published = aValue;
     }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    } 
 
     /**
      * Gets cursor substitute.

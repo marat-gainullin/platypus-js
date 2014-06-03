@@ -4,8 +4,10 @@
  */
 package com.eas.client.login;
 
+import com.eas.script.NoPublisherException;
 import java.util.Collections;
 import java.util.Set;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -51,5 +53,22 @@ public class DbPlatypusPrincipal extends PlatypusPrincipal {
 
     public String getStartAppElement() {
         return startAppElement;
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

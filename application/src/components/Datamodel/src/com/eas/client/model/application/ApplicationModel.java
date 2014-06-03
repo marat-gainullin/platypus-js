@@ -20,6 +20,8 @@ import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.util.ListenerRegistration;
 import java.io.*;
@@ -43,8 +45,9 @@ import org.w3c.dom.Document;
  * @param <C>
  * @param <Q>
  */
-public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> {
+public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> implements HasPublished {
 
+    protected Object published;
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
@@ -65,7 +68,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     @Override
     public void setPublished(Object aValue) {
         Object oldValue = published;
-        super.setPublished(aValue);
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
         /*
          if (published != null && published instanceof ScriptableObject) {
          for (ReferenceRelation<E> aRelation : referenceRelations) {

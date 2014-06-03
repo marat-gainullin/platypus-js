@@ -7,10 +7,13 @@ package com.eas.client.model.application;
 
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * An event of an entity cursor positioning.
+ *
  * @author mg, vv refactoring
  */
 public class CursorPositionChangedEvent extends PublishedSourcedEvent {
@@ -39,4 +42,22 @@ public class CursorPositionChangedEvent extends PublishedSourcedEvent {
     public int getNewIndex() {
         return newIndex;
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

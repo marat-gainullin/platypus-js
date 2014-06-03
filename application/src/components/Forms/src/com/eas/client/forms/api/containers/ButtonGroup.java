@@ -8,7 +8,9 @@ import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.HasGroup;
 import com.eas.controls.wrappers.ButtonGroupWrapper;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -84,6 +86,23 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
                 }
             }
         }
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
 }

@@ -12,8 +12,10 @@ import com.eas.client.model.ParametersRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.SqlQuery;
+import com.eas.script.NoPublisherException;
 import java.util.ArrayList;
 import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -128,4 +130,22 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     protected void refreshRowset() throws Exception {
         // no op
     }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
+
 }

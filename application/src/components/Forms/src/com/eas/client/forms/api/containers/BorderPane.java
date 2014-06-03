@@ -8,9 +8,11 @@ import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.HorizontalPosition;
 import com.eas.client.forms.api.VerticalPosition;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -73,7 +75,7 @@ public class BorderPane extends Container<JPanel> {
             delegate.repaint();
         }
     }
-    
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to this container on the specified placement.\n"
@@ -96,7 +98,7 @@ public class BorderPane extends Container<JPanel> {
             + "* The component added using HorizontalPosition.LEFT constraint.\n"
             + "* If no component at this constraint then set to <code>null</code>.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = LEFT_COMPONENT_JSDOC)
     public Component<?> getLeftComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
@@ -127,7 +129,7 @@ public class BorderPane extends Container<JPanel> {
             + "* The component added using HorizontalPosition.TOP constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TOP_COMPONENT_JSDOC)
     public Component<?> getTopComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
@@ -157,6 +159,7 @@ public class BorderPane extends Container<JPanel> {
             + "* The component added using HorizontalPosition.RIGHT constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = RIGHT_COMPONENT_JSDOC)
     public Component<?> getRightComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
@@ -187,7 +190,7 @@ public class BorderPane extends Container<JPanel> {
             + "* The component added using HorizontalPosition.BOTTOM constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = BOTTOM_COMPONENT_JSDOC)
     public Component<?> getBottomComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
@@ -212,13 +215,13 @@ public class BorderPane extends Container<JPanel> {
         }
         add(aComp, VerticalPosition.BOTTOM);
     }
-    
+
     private static final String CENTER_COMPONENT_JSDOC = ""
             + "/**\n"
             + "* The component added using HorizontalPosition.CENTER constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CENTER_COMPONENT_JSDOC)
     public Component<?> getCenterComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
@@ -236,4 +239,22 @@ public class BorderPane extends Container<JPanel> {
         }
         add(aComp, VerticalPosition.CENTER);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

@@ -15,8 +15,10 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
+import com.eas.script.NoPublisherException;
 import java.sql.ParameterMetaData;
 import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -116,4 +118,22 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

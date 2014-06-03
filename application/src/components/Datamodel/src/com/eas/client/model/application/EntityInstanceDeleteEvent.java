@@ -8,10 +8,13 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * An event for an entity's instance row delete.
+ *
  * @author vv
  */
 public class EntityInstanceDeleteEvent extends PublishedSourcedEvent {
@@ -32,4 +35,22 @@ public class EntityInstanceDeleteEvent extends PublishedSourcedEvent {
     public Row getDeleted() {
         return deleted;
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

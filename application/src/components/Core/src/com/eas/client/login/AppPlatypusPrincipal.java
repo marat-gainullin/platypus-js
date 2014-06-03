@@ -7,8 +7,10 @@ package com.eas.client.login;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
+import com.eas.script.NoPublisherException;
 import java.util.HashSet;
 import java.util.Set;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -37,5 +39,22 @@ public class AppPlatypusPrincipal extends PlatypusPrincipal {
             }
             return res;
         }
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

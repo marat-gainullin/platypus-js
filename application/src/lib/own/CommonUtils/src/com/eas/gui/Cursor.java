@@ -4,7 +4,6 @@
  */
 package com.eas.gui;
 
-import static com.eas.gui.CascadedStyle.publisher;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -19,8 +18,8 @@ import jdk.nashorn.api.scripting.JSObject;
 @ScriptObj(jsDoc = "/**\n"
         + "* Mouse cursor constansts.\n"
         + "*/")
-public class Cursor implements HasPublished  {
-    
+public class Cursor implements HasPublished {
+
     public static final Cursor CROSSHAIR = new Cursor(java.awt.Cursor.CROSSHAIR_CURSOR);
     public static final Cursor DEFAULT = new Cursor(java.awt.Cursor.DEFAULT_CURSOR);
     public static final Cursor AUTO = DEFAULT;
@@ -36,23 +35,20 @@ public class Cursor implements HasPublished  {
     public static final Cursor TEXT = new Cursor(java.awt.Cursor.TEXT_CURSOR);
     public static final Cursor WAIT = new Cursor(java.awt.Cursor.WAIT_CURSOR);
     public static final Cursor W_RESIZE = new Cursor(java.awt.Cursor.W_RESIZE_CURSOR);
-    
+
+    private static JSObject publisher;
     protected java.awt.Cursor delegate;
-    protected static JSObject publisher;
     protected Object published;
-    
-    protected Cursor(java.awt.Cursor aDelegate)
-    {
+
+    protected Cursor(java.awt.Cursor aDelegate) {
         delegate = aDelegate;
     }
-    
-    protected Cursor(int aCursorType)
-    {
+
+    protected Cursor(int aCursorType) {
         delegate = new java.awt.Cursor(aCursorType);
     }
-    
-    public java.awt.Cursor unwrap()
-    {
+
+    public java.awt.Cursor unwrap() {
         return delegate;
     }
 
@@ -60,82 +56,82 @@ public class Cursor implements HasPublished  {
     public String toString() {
         return delegate.getName();
     }
-    
+
     @ScriptFunction
     public Cursor getCROSSHAIR() {
         return CROSSHAIR;
     }
-    
+
     @ScriptFunction
     public Cursor getDEFAULT() {
         return DEFAULT;
     }
-    
+
     @ScriptFunction
     public Cursor getAUTO() {
         return AUTO;
     }
-    
+
     @ScriptFunction
     public Cursor getE_RESIZE() {
         return E_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getHAND() {
         return HAND;
     }
-    
+
     @ScriptFunction
     public Cursor getMOVE() {
         return MOVE;
     }
-    
+
     @ScriptFunction
     public Cursor getNE_RESIZE() {
         return NE_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getNW_RESIZE() {
         return NW_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getN_RESIZE() {
         return N_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getSE_RESIZE() {
         return SE_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getSW_RESIZE() {
         return SW_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getS_RESIZE() {
         return S_RESIZE;
     }
-    
+
     @ScriptFunction
     public Cursor getTEXT() {
         return TEXT;
     }
-    
+
     @ScriptFunction
     public Cursor getWAIT() {
         return WAIT;
     }
-    
+
     @ScriptFunction
     public Cursor getW_RESIZE() {
         return W_RESIZE;
     }
-    
+
     @Override
     public Object getPublished() {
         if (published == null) {

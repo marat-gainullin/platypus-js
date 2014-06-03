@@ -29,8 +29,7 @@ public class Anchors implements HasPublished {
             + "* @param bottom a bottom anchor\n"
             + "*/")
     public Anchors(Object aLeft, Object aWidth, Object aRight,
-            Object aTop, Object aHeight, Object aBottom)
-    {
+            Object aTop, Object aHeight, Object aBottom) {
         super();
         left = aLeft;
         width = aWidth;
@@ -39,12 +38,13 @@ public class Anchors implements HasPublished {
         height = aHeight;
         bottom = aBottom;
     }
-    
+
+    private static JSObject publisher;
+    //
     public Object left, width, right;
     public Object top, height, bottom;
-    protected static JSObject publisher;
     protected Object published;
-    
+
     @Override
     public Object getPublished() {
         if (published == null) {

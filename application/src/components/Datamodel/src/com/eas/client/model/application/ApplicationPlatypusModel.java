@@ -7,6 +7,7 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.changes.Change;
 import com.eas.client.AppClient;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,4 +102,22 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     public List<Change> getChangeLog() {
         return changeLog;
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }
