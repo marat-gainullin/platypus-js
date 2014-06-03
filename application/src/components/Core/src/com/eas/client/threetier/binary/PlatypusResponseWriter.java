@@ -178,8 +178,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
             Report report = (Report)rsp.getResult();
             writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
             writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
-            writer.put(RequestsTags.TAG_RESULT_VALUE);
-            writer.put(CoreTags.TAG_COMPRESSED_STREAM, report.getReport());
+            writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
         } else {
             writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
         }

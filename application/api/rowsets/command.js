@@ -77,11 +77,7 @@
         Object.defineProperty(this, "consume", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.consume.apply(delegate, args);
+                    var value = delegate.consume();
                     return P.boxAsJs(value);
                 };
             }

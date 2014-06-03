@@ -298,11 +298,7 @@
         Object.defineProperty(this, "copy", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.copy.apply(delegate, args);
+                    var value = delegate.copy();
                     return P.boxAsJs(value);
                 };
             }
@@ -316,11 +312,7 @@
         Object.defineProperty(this, "copy", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.copy.apply(delegate, args);
+                    var value = delegate.copy();
                     return P.boxAsJs(value);
                 };
             }
@@ -333,12 +325,8 @@
          */
         Object.defineProperty(this, "assignFrom", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.assignFrom.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.assignFrom(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }

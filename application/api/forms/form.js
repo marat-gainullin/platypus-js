@@ -417,12 +417,8 @@
          */
         Object.defineProperty(this, "close", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.close.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.close(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -436,11 +432,7 @@
         Object.defineProperty(this, "show", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.show.apply(delegate, args);
+                    var value = delegate.show();
                     return P.boxAsJs(value);
                 };
             }
@@ -454,11 +446,7 @@
         Object.defineProperty(this, "toFront", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.toFront.apply(delegate, args);
+                    var value = delegate.toFront();
                     return P.boxAsJs(value);
                 };
             }
@@ -472,12 +460,8 @@
          */
         Object.defineProperty(this, "showModal", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.showModal.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.showModal(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -491,11 +475,7 @@
         Object.defineProperty(this, "maximize", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.maximize.apply(delegate, args);
+                    var value = delegate.maximize();
                     return P.boxAsJs(value);
                 };
             }
@@ -509,11 +489,7 @@
         Object.defineProperty(this, "minimize", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.minimize.apply(delegate, args);
+                    var value = delegate.minimize();
                     return P.boxAsJs(value);
                 };
             }
@@ -527,11 +503,7 @@
         Object.defineProperty(this, "restore", {
             get: function() {
                 return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.restore.apply(delegate, args);
+                    var value = delegate.restore();
                     return P.boxAsJs(value);
                 };
             }
@@ -545,12 +517,8 @@
          */
         Object.defineProperty(this, "showInternalFrame", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.showInternalFrame.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.showInternalFrame(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -565,12 +533,8 @@
          */
         Object.defineProperty(this, "getShownForm", {
             get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.getShownForm.apply(delegate, args);
+                return function(arg0) {
+                    var value = delegate.getShownForm(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }

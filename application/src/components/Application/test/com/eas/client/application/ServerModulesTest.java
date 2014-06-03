@@ -46,7 +46,7 @@ public class ServerModulesTest {
         statefullTaskModule(ScriptRunnerSecurityTest.httpClient, 20);
     }
     
-    @Test
+    //@Test
     public void statefullServerModule() throws Exception {
         ApplicationScriptsTest.serverScriptTest("ServerModuleTests");
     }
