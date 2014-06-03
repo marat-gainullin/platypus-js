@@ -8,6 +8,7 @@ import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.Orientation;
 import com.eas.controls.visitors.SwingFactory;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
@@ -21,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -78,7 +80,7 @@ public class BoxPane extends Container<JPanel> {
             + "/**\n"
             + "* Box orientation of this container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ORIENTATION_JSDOC)
     public int getOrientation() {
         int axis = ((BoxLayout) delegate.getLayout()).getAxis();
@@ -114,7 +116,7 @@ public class BoxPane extends Container<JPanel> {
             + "/**\n"
             + "* Removes all the components from this container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CLEAR_JSDOC)
     @Override
     public void clear() {
@@ -131,7 +133,7 @@ public class BoxPane extends Container<JPanel> {
             + "* Removes the specified component from this container.\n"
             + "* @param component the component to remove\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {
@@ -216,4 +218,22 @@ public class BoxPane extends Container<JPanel> {
             }
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

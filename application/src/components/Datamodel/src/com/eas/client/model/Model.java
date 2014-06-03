@@ -18,10 +18,8 @@ import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
-import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
 
 /**
@@ -31,7 +29,7 @@ import org.w3c.dom.Document;
  * @param <Q> Query generic type.
  * @author mg
  */
-public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> implements HasPublished {
+public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> {
 
     public static final long PARAMETERS_ENTITY_ID = -1L;
     public static final String PARAMETERS_SCRIPT_NAME = "params";
@@ -44,8 +42,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
-    protected static JSObject publisher;
-    protected Object published;
     protected int ajustingCounter;
     protected Runnable resolver;
     protected GuiCallback guiCallback;
@@ -326,29 +322,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         return aEntity.getInOutRelations();
     }
 
-    @Override
-    public Object getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = publisher.call(null, new Object[]{});
-        }
-        return published;
-    }
-
-    @Override
-    public void setPublished(Object aValue) {
-        if (published != null) {
-            throw new AlreadyPublishedException();
-        }
-        published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    } 
-
     public int getAjustingCounter() {
         return ajustingCounter;
     }
@@ -556,8 +529,8 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
                 toDel.add(rel);
             }
         }
-        for (Relation<E> rel : toDel) {
+        toDel.stream().forEach((rel) -> {
             removeRelation(rel);
-        }
+        });
     }
 }

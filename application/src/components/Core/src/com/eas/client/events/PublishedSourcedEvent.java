@@ -16,7 +16,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class PublishedSourcedEvent implements HasPublished {
 
-    protected static JSObject publisher;
+    private static JSObject publisher;
+    //
     protected Object published;
     protected HasPublished source;
 

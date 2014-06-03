@@ -25,6 +25,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class CascadedStyle implements HasPublished {
 
+    private static JSObject publisher;
+    //
     protected static JTextField testText = new JTextField();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected Color background = defaultBackground();
@@ -40,7 +42,6 @@ public class CascadedStyle implements HasPublished {
     protected String openFolderIconName = null;
     protected String leafIconName = null;
     protected CascadedStyle parent = null;
-    protected static JSObject publisher;
     protected Object published;
 
     public CascadedStyle() {

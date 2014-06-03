@@ -46,7 +46,6 @@ public abstract class Component<D extends JComponent> implements HasPublished {
     protected Cursor cursor;
     protected String errorMessage;
     protected D delegate;
-    protected static JSObject publisher;
     protected Object published;
 
     @ScriptFunction(jsDoc = ""
@@ -732,27 +731,12 @@ public abstract class Component<D extends JComponent> implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = publisher.call(null, new Object[]{});
-        }
-        return published;
-    }
-
-    @Override
     public void setPublished(Object aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }
         published = aValue;
     }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    } 
 
     // Native API
     private static final String NATIVE_COMPONENT_JSDOC = ""

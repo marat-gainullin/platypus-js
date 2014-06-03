@@ -8,7 +8,9 @@ import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -60,4 +62,22 @@ public class CellRenderEvent extends PublishedSourcedEvent {
     public Row getObject() {
         return object;
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

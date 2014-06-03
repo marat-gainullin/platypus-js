@@ -10,6 +10,7 @@ import com.eas.client.DbClient;
 import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -178,4 +179,22 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         SqlCompiledQuery compiled = new SqlCompiledQuery(client, aDatasourceName, aSqlClause);
         client.executeUpdate(compiled);
     }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    } 
+
 }

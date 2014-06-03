@@ -20,7 +20,7 @@ import jdk.nashorn.api.scripting.JSObject;
         + "*/")
 public class FontStyle implements HasPublished {
 
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     
     @ScriptFunction

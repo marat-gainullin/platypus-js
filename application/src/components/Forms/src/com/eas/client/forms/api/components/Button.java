@@ -7,6 +7,7 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.HorizontalPosition;
 import com.eas.client.forms.api.VerticalPosition;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -31,7 +32,7 @@ public class Button extends Component<JButton> {
     public Button(String aText, Icon aIcon) {
         this(aText, aIcon, 4);
     }
-    
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Simple button component.\n"
@@ -60,12 +61,12 @@ public class Button extends Component<JButton> {
     public Button() {
         this(null, null, 4);
     }
-    
+
     private static final String TEXT_JSDOC = ""
             + "/**\n"
             + "* Text on the button.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
@@ -80,6 +81,7 @@ public class Button extends Component<JButton> {
             + "/**\n"
             + "* Image picture for the button.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ICON_JSDOC)
     public Icon getIcon() {
         return delegate.getIcon();
@@ -94,6 +96,7 @@ public class Button extends Component<JButton> {
             + "/**\n"
             + "* The amount of space between the text and the icon displayed in this button.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ICON_TEXT_GAP_JSDOC)
     public int getIconTextGap() {
         return delegate.getIconTextGap();
@@ -108,7 +111,7 @@ public class Button extends Component<JButton> {
             + "/**\n"
             + "* Horizontal position of the text relative to the icon.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = HORIZONTAL_TEXT_POSITION_JSDOC)
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
@@ -145,6 +148,7 @@ public class Button extends Component<JButton> {
             + "/**\n"
             + "* Vertical position of the text relative to the icon.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = VERTICAL_TEXT_POSITION_JSDOC)
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
@@ -176,4 +180,22 @@ public class Button extends Component<JButton> {
                 break;
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

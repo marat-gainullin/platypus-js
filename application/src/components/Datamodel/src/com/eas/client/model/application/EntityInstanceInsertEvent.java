@@ -8,10 +8,13 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Represents an event of an entity's instance row insert.
+ *
  * @author vv
  */
 public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
@@ -42,4 +45,22 @@ public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
     public Row getObject() {
         return inserted;
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

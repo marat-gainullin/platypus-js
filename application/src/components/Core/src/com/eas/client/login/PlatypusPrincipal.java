@@ -10,7 +10,6 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.security.Principal;
 import java.util.Set;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -18,7 +17,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public abstract class PlatypusPrincipal implements Principal, HasPublished {
 
-    protected static JSObject publisher;
     protected Object published;
     
     private final String name;
@@ -91,17 +89,6 @@ public abstract class PlatypusPrincipal implements Principal, HasPublished {
     }
     
     @Override
-    public Object getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = publisher.call(null, new Object[]{});
-        }
-        return published;
-    }
-
-    @Override
     public void setPublished(Object aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
@@ -109,7 +96,4 @@ public abstract class PlatypusPrincipal implements Principal, HasPublished {
         published = aValue;
     }
 
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    } 
 }

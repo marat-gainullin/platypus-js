@@ -28,6 +28,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ScriptableColumn implements HasPublished {
 
+    private static JSObject publisher;
+    //
     protected MultiLevelHeader header;
     protected GridColumnsGroup group;
     protected TableColumnModel viewModel;
@@ -38,7 +40,6 @@ public class ScriptableColumn implements HasPublished {
     protected ModelColumn modelColumn;
     // view
     protected TableColumn viewColumn;
-    protected static JSObject publisher;
     protected Object published;
     protected int viewIndex = -1;
     protected boolean visible;

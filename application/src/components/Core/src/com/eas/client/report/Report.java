@@ -27,11 +27,12 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Report implements HasPublished {
 
+    private static JSObject publisher;
+    //
     private final byte[] report;
     protected JSObject scriptData;
     private final String format;
     private final String name;
-    protected static JSObject publisher;
     protected Object published;
 
     @ScriptFunction(params = {"aReport", "aFormat", "aName"})

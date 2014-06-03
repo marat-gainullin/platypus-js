@@ -16,10 +16,11 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Font implements HasPublished {
 
+    private static JSObject publisher;
+    
     protected String family;
     protected int style;
     protected int size;
-    protected static JSObject publisher;
     protected Object published;
 
     @ScriptFunction(params = {"family", "style", "size"}, jsDoc = "/**\n"
