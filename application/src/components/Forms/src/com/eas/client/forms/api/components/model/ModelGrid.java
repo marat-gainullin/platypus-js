@@ -9,6 +9,7 @@ import com.eas.client.forms.api.Component;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.script.EventMethod;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.util.List;
@@ -278,4 +279,22 @@ public class ModelGrid extends Component<DbGrid> {
     public List<Object> getColumns() throws Exception {
         return delegate.getColumns();
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

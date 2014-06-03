@@ -5,7 +5,9 @@
 package com.eas.client.forms.api.components.model;
 
 import com.eas.dbcontrols.check.DbCheck;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -34,17 +36,17 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String TEXT_JSDOC = ""
             + "/**\n"
             + "* Text on the check box."
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
@@ -54,7 +56,7 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
             + "/**\n"
             + "* Determines if component is editable."
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {
         return delegate.isEditable();
@@ -64,4 +66,22 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
     public void setEditable(boolean aValue) {
         delegate.setEditable(aValue);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

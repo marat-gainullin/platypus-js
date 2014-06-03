@@ -7,6 +7,7 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.containers.ButtonGroup;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JRadioButton;
@@ -16,10 +17,10 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class RadioButton extends Component<JRadioButton> implements HasGroup{
+public class RadioButton extends Component<JRadioButton> implements HasGroup {
 
     protected ButtonGroup group;
-    
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Radio button component.\n"
@@ -38,7 +39,7 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
     public RadioButton(String aText, boolean aSelected) {
         this(aText, aSelected, null);
     }
-    
+
     public RadioButton(String aText) {
         this(aText, false);
     }
@@ -46,13 +47,13 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
     public RadioButton() {
         this(null, false);
     }
-    
+
     protected RadioButton(JRadioButton aDelegate) {
         super();
         setDelegate(aDelegate);
     }
-    
-    @ScriptFunction(jsDoc=""
+
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The button's text.\n"
             + " */")
@@ -65,7 +66,7 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The default icon.\n"
             + " */")
@@ -78,7 +79,7 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The state of the button.\n"
             + " */")
@@ -90,8 +91,8 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
     }
-    
-    @ScriptFunction(jsDoc=""
+
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The ButtonGroup this component belongs to.\n"
             + " */")
@@ -113,4 +114,22 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup{
             }
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

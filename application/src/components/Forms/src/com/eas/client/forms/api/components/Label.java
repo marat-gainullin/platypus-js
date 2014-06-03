@@ -7,9 +7,11 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.HorizontalPosition;
 import com.eas.client.forms.api.VerticalPosition;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -226,4 +228,22 @@ public class Label extends Component<JLabel> {
                 break;
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

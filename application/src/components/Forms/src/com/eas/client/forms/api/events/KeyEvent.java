@@ -4,7 +4,9 @@
  */
 package com.eas.client.forms.api.events;
 
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -20,17 +22,17 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
             + "/**\n"
             + "* Key code associated with this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = KEY_JS_DOC)
     public int getKey() {
         return delegate.getKeyCode();
     }
 
-     private static final String ALT_DOWN_JS_DOC = ""
-             + "/**\n"
+    private static final String ALT_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Alt key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ALT_DOWN_JS_DOC)
     public boolean isAltDown() {
         return delegate.isAltDown() || delegate.isAltGraphDown();
@@ -40,7 +42,7 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
             + "/**\n"
             + "* Ctrl key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CONTROL_DOWN_JS_DOC)
     public boolean isControlDown() {
         return delegate.isControlDown();
@@ -50,7 +52,7 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
             + "/**\n"
             + "* Shift key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SHIFT_DOWN_JS_DOC)
     public boolean isShiftDown() {
         return delegate.isShiftDown();
@@ -60,9 +62,27 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
             + "/**\n"
             + "* Meta key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = META_DOWN_JS_DOC)
     public boolean isMetaDown() {
         return delegate.isMetaDown();
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

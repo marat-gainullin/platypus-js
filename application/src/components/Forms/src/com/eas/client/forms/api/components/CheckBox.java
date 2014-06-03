@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JCheckBox;
 import jdk.nashorn.api.scripting.JSObject;
@@ -32,7 +33,7 @@ public class CheckBox extends Component<JCheckBox> {
             + "* @param actionPerformed the function for the action performed (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected",  "actionPerformed"})
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super();
         setDelegate(new JCheckBox(aText, aSelected));
@@ -76,4 +77,22 @@ public class CheckBox extends Component<JCheckBox> {
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

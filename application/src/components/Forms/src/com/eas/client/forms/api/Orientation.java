@@ -23,7 +23,7 @@ public class Orientation implements HasPublished {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
     
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     
     @ScriptFunction

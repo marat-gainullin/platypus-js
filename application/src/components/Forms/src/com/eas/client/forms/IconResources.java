@@ -23,7 +23,7 @@ import jdk.nashorn.api.scripting.JSObject;
         + "*/")
 public class IconResources implements HasPublished {
 
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     
     @ScriptFunction(params = {"path"}, jsDoc = "/**\n"

@@ -8,6 +8,7 @@ import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.containers.ButtonGroup;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -18,10 +19,10 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements HasGroup{
+public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements HasGroup {
 
     protected ButtonGroup group;
-    
+
     protected RadioMenuItem(JRadioButtonMenuItem aDelegate) {
         super();
         setDelegate(aDelegate);
@@ -58,7 +59,7 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
             + "/**\n"
             + "* The parent container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
@@ -73,7 +74,7 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
             + "/**\n"
             + "* The menu item text.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
@@ -87,7 +88,7 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
             + "/**\n"
             + "* <code>true</code> if the menu item is selected.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SELECTED_JSDOC)
     public boolean getSelected() {
         return delegate.isSelected();
@@ -96,8 +97,8 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
     }
-    
-    @ScriptFunction(jsDoc=""
+
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The ButtonGroup this component belongs to.\n"
             + " */")
@@ -119,4 +120,22 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
             }
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

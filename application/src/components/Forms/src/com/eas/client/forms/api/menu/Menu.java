@@ -6,9 +6,11 @@ package com.eas.client.forms.api.menu;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -20,7 +22,7 @@ public class Menu extends Container<JMenu> {
         super();
         setDelegate(new JMenu());
     }
-        
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* An implementation of a menu -- a popup window containing MenuItems\n"
@@ -39,12 +41,12 @@ public class Menu extends Container<JMenu> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String PARENT_JSDOC = ""
             + "/**\n"
             + "* The parent container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
@@ -55,14 +57,13 @@ public class Menu extends Container<JMenu> {
         return parent;
     }
 
-    
     private static final String CHILD_JSDOC = ""
             + "/**\n"
             + "* Gets the child item component whith specified index.\n"
             + "* @param index the component's index in the container.\n"
             + "* @return the child component\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
     @Override
     public Component<?> child(int aIndex) {
@@ -73,12 +74,12 @@ public class Menu extends Container<JMenu> {
             + "/**\n"
             + "* The text of the menu.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
@@ -89,22 +90,38 @@ public class Menu extends Container<JMenu> {
             + "* Adds an item to the menu.\n"
             + "* @param component the component to add\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         delegate.add(unwrap(aComp));
     }
 
-    
     private static final String COUNT_JSDOC = ""
             + "/**\n"
             + "* The count of the menu items.\n"
             + "*/";
+
     @Override
-    @ScriptFunction(jsDoc=COUNT_JSDOC)
+    @ScriptFunction(jsDoc = COUNT_JSDOC)
     public int getCount() {
         return delegate.getMenuComponentCount();
     }
-    
-    
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

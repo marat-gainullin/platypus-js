@@ -7,7 +7,9 @@ package com.eas.client.forms.api.components.model;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.ModelElementRef;
 import com.eas.dbcontrols.combo.DbCombo;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -108,6 +110,23 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
     @ScriptFunction
     public void setEmptyText(String aValue) {
         delegate.setEmptyText(aValue);
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
 }

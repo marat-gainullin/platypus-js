@@ -10,6 +10,7 @@ import com.eas.client.forms.api.HorizontalPosition;
 import com.eas.client.forms.api.VerticalPosition;
 import com.eas.client.forms.api.menu.PopupMenu;
 import com.eas.gui.JDropDownButton;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -23,12 +24,11 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class DropDownButton extends Component<JDropDownButton> {
 
-    protected DropDownButton(JDropDownButton aDelegate)
-    {
+    protected DropDownButton(JDropDownButton aDelegate) {
         super();
         setDelegate(aDelegate);
     }
-    
+
     public DropDownButton(String aText, Icon aIcon, int aIconTextGap) {
         this(aText, aIcon, aIconTextGap, null);
     }
@@ -36,7 +36,7 @@ public class DropDownButton extends Component<JDropDownButton> {
     public DropDownButton(String aText, Icon aIcon) {
         this(aText, aIcon, 4);
     }
-    
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Drop-down button component.\n"
@@ -57,7 +57,7 @@ public class DropDownButton extends Component<JDropDownButton> {
     public DropDownButton(String aText, Icon aIcon, JSObject aActionPerformedHandler) {
         this(aText, aIcon, 4, aActionPerformedHandler);
     }
-    
+
     public DropDownButton(String aText) {
         this(aText, null, 4);
     }
@@ -65,17 +65,18 @@ public class DropDownButton extends Component<JDropDownButton> {
     public DropDownButton() {
         this(null, null, 4);
     }
-    
+
     private static final String DROP_DOWN_MENU_JSDOC = ""
             + "/**\n"
             + "* <code>PopupMenu</code> for the component.\n"
             + "*/";
-    @ScriptFunction(jsDoc=DROP_DOWN_MENU_JSDOC)
+
+    @ScriptFunction(jsDoc = DROP_DOWN_MENU_JSDOC)
     public PopupMenu getDropDownMenu() {
         Container<?> cMenu = getContainerWrapper(delegate.getDropDownMenu());
         return cMenu instanceof PopupMenu ? (PopupMenu) cMenu : null;
     }
-    
+
     @ScriptFunction
     public void setDropDownMenu(PopupMenu aMenu) {
         JComponent jPopupMenu = unwrap(aMenu);
@@ -86,11 +87,12 @@ public class DropDownButton extends Component<JDropDownButton> {
             + "/**\n"
             + "* Text on the button.\n"
             + "*/";
-    @ScriptFunction(jsDoc=TEXT_JSDOC)
+
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
@@ -100,7 +102,8 @@ public class DropDownButton extends Component<JDropDownButton> {
             + "/**\n"
             + "* Image picture for the button.\n"
             + "*/";
-    @ScriptFunction(jsDoc=ICON_JSDOC)
+
+    @ScriptFunction(jsDoc = ICON_JSDOC)
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -114,11 +117,12 @@ public class DropDownButton extends Component<JDropDownButton> {
             + "/**\n"
             + "* The amount of space between the text and the icon displayed in this button.\n"
             + "*/";
-    @ScriptFunction(jsDoc=ICON_TEXT_GAP_JSDOC)
+
+    @ScriptFunction(jsDoc = ICON_TEXT_GAP_JSDOC)
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
-    
+
     @ScriptFunction
     public void setIconTextGap(int aValue) {
         delegate.setIconTextGap(aValue);
@@ -128,7 +132,8 @@ public class DropDownButton extends Component<JDropDownButton> {
             + "/**\n"
             + "* Horizontal position of the text relative to the icon.\n"
             + "*/";
-    @ScriptFunction(jsDoc=HORIZONTAL_TEXT_POSITION_JSDOC)
+
+    @ScriptFunction(jsDoc = HORIZONTAL_TEXT_POSITION_JSDOC)
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -159,12 +164,13 @@ public class DropDownButton extends Component<JDropDownButton> {
                 break;
         }
     }
-    
+
     private static final String VERTICAL_TEXT_POSITION_JSDOC = ""
             + "/**\n"
             + "* Vertical position of the text relative to the icon.\n"
             + "*/";
-    @ScriptFunction(jsDoc=VERTICAL_TEXT_POSITION_JSDOC)
+
+    @ScriptFunction(jsDoc = VERTICAL_TEXT_POSITION_JSDOC)
     public int getVerticalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.TOP:
@@ -177,7 +183,7 @@ public class DropDownButton extends Component<JDropDownButton> {
                 return VerticalPosition.CENTER;
         }
     }
-    
+
     @ScriptFunction
     public void setVerticalTextPosition(int aValue) {
         switch (aValue) {
@@ -195,4 +201,22 @@ public class DropDownButton extends Component<JDropDownButton> {
                 break;
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

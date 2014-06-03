@@ -6,8 +6,10 @@ package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Orientation;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JSlider;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -23,7 +25,7 @@ public class Slider extends Component<JSlider> {
             + "* @param value the initial value (optional)\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"}) 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
     public Slider(int aOrientation, int min, int max, int value) {
         super();
         int orientation = JSlider.HORIZONTAL;
@@ -47,7 +49,7 @@ public class Slider extends Component<JSlider> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL\n"
@@ -98,7 +100,7 @@ public class Slider extends Component<JSlider> {
     public void setMaximum(int aValue) {
         delegate.setMaximum(aValue);
     }
-    
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The slider's current value.\n"
@@ -106,9 +108,27 @@ public class Slider extends Component<JSlider> {
     public int getValue() {
         return delegate.getValue();
     }
-    
+
     @ScriptFunction
     public void setValue(int aValue) {
         delegate.setValue(aValue);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }
