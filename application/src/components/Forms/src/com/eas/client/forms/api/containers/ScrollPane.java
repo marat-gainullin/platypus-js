@@ -7,8 +7,10 @@ package com.eas.client.forms.api.containers;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.ControlsWrapper;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JScrollPane;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -16,8 +18,8 @@ import javax.swing.JScrollPane;
  */
 public class ScrollPane extends Container<JScrollPane> {
 
-     private static final String CONSTRUCTOR_JSDOC = ""
-             + "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Provides a scrollable view of a lightweight component.\n"
             + "* @param view the component to display in the scrollpane's viewport (optional)\n"
             + "*/";
@@ -36,13 +38,13 @@ public class ScrollPane extends Container<JScrollPane> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
@@ -56,7 +58,7 @@ public class ScrollPane extends Container<JScrollPane> {
             + "/**\n"
             + "* The specified component as the scroll pane view.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = VIEW_JSDOC)
     public Component<?> getView() {
         return getComponentWrapper(delegate.getViewport().getView());
@@ -76,7 +78,7 @@ public class ScrollPane extends Container<JScrollPane> {
             + "* Removes the specified component from this container.\n"
             + "* @param component the component to remove\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {
@@ -89,7 +91,7 @@ public class ScrollPane extends Container<JScrollPane> {
             + "/**\n"
             + "* Gets the number of components in this panel.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = COUNT_JSDOC)
     @Override
     public int getCount() {
@@ -101,10 +103,28 @@ public class ScrollPane extends Container<JScrollPane> {
             + "* Gets the container's child component.\n"
             + "* @return the child component\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CHILD_JSDOC)
     @Override
     public Component<?> child(int aIndex) {
         return getView();// to avoid swing's viewports to be included in results
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

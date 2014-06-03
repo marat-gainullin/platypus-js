@@ -5,7 +5,9 @@
 package com.eas.client.forms.api.components.model;
 
 import com.eas.dbcontrols.spin.DbSpin;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -84,7 +86,7 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
     public void setStep(double aValue) throws Exception {
         delegate.setStep(aValue);
     }
-    
+
     @ScriptFunction
     public String getEmptyText() {
         return delegate.getEmptyText();
@@ -93,6 +95,23 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
     @ScriptFunction
     public void setEmptyText(String aValue) {
         delegate.setEmptyText(aValue);
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
 }

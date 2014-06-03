@@ -6,6 +6,7 @@ package com.eas.client.forms.api.menu;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -21,7 +22,7 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
     public CheckMenuItem(String aText, boolean aSelected) {
         this(aText, aSelected, null);
     }
-    
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* A menu item that can be selected or deselected.\n"
@@ -49,12 +50,12 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String PARENT_JSDOC = ""
             + "/**\n"
             + "* The parent container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
@@ -69,7 +70,7 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
             + "/**\n"
             + "* The menu item text.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
@@ -78,12 +79,12 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
     public void setText(String aValue) {
         delegate.setText(aValue);
     }
-    
+
     private static final String SELECTED_JSDOC = ""
             + "/**\n"
             + "* <code>true</code> if the menu item is selected.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SELECTED_JSDOC)
     public boolean getSelected() {
         return delegate.isSelected();
@@ -92,4 +93,22 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

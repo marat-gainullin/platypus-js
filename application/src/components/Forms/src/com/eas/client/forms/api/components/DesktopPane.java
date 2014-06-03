@@ -10,11 +10,13 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.PlatypusInternalFrame;
 import com.eas.client.forms.api.Component;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -105,4 +107,22 @@ public class DesktopPane extends Component<JDesktopPane> {
         }
         return forms.toArray(new Form[]{});
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

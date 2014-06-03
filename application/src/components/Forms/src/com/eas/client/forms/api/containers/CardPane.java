@@ -7,9 +7,11 @@ package com.eas.client.forms.api.containers;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.controls.wrappers.PlatypusCardLayout;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.CardLayout;
 import javax.swing.JPanel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -44,14 +46,14 @@ public class CardPane extends Container<JPanel> {
         assert aDelegate.getLayout() instanceof CardLayout;
         setDelegate(aDelegate);
     }
-    
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the component to this container with the specified name.\n"
             + "* @param component the component to add.\n"
             + "* @param cardName the name of the card.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_JSDOC)
     public void add(Component<?> aComp, String aCardName) {
         if (aComp != null) {
@@ -66,7 +68,7 @@ public class CardPane extends Container<JPanel> {
             + "* Gets the component with the specified name from the container.\n"
             + "* @param cardName the card name\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"name"})
     public Component<?> child(String aCardName) {
         PlatypusCardLayout layout = (PlatypusCardLayout) delegate.getLayout();
@@ -78,10 +80,28 @@ public class CardPane extends Container<JPanel> {
             + "* Flips to the component that was added to this layout with the specified name.\n"
             + "* @param name the card name\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SHOW_JSDOC, params = {"name"})
     public void show(String aCardName) {
         PlatypusCardLayout layout = (PlatypusCardLayout) delegate.getLayout();
         layout.show(delegate, aCardName);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

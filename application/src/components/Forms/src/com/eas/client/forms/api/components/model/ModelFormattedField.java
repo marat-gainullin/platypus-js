@@ -6,9 +6,11 @@ package com.eas.client.forms.api.components.model;
 
 import com.eas.controls.ControlsUtils;
 import com.eas.dbcontrols.label.DbLabel;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.text.ParseException;
 import javax.swing.JFormattedTextField;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -31,11 +33,12 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String EDITABLE_JSDOC = ""
             + "/**\n"
             + "* Determines if component is editable.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {
         return delegate.isEditable();
@@ -50,6 +53,7 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
             + "/**\n"
             + "* The format string of the component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = FORMAT_JSDOC)
     public String getFormat() {
         if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
@@ -78,7 +82,7 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
             }
         }
     }
-    
+
     @ScriptFunction
     public String getEmptyText() {
         return delegate.getEmptyText();
@@ -87,6 +91,23 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
     @ScriptFunction
     public void setEmptyText(String aValue) {
         delegate.setEmptyText(aValue);
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
 }

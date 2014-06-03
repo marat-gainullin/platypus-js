@@ -24,7 +24,7 @@ public class HorizontalPosition implements HasPublished {
     public static final int CENTER = 0;
     public static final int RIGHT = 4;
     
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     
     @ScriptFunction

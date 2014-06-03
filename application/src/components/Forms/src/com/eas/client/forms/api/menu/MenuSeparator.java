@@ -6,10 +6,12 @@ package com.eas.client.forms.api.menu;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -33,13 +35,12 @@ public class MenuSeparator extends Component<JSeparator> {
         super();
         setDelegate(aDelegate);
     }
-    
-    
+
     private static final String PARENT_JSDOC = ""
             + "/**\n"
             + "* The parent container.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
@@ -49,4 +50,22 @@ public class MenuSeparator extends Component<JSeparator> {
         }
         return parent;
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

@@ -5,8 +5,10 @@
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JPasswordField;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -52,7 +54,7 @@ public class PasswordField extends Component<JPasswordField> {
             + "/**\n"
             + "* The text to be shown when component's value is absent.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EMPTY_TEXT_JSDOC)
     public String getEmptyText() {
         return (String) delegate.getClientProperty(Component.EMPTY_TEXT_PROP_NAME);
@@ -62,4 +64,22 @@ public class PasswordField extends Component<JPasswordField> {
     public void setEmptyText(String aValue) {
         delegate.putClientProperty(Component.EMPTY_TEXT_PROP_NAME, aValue);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

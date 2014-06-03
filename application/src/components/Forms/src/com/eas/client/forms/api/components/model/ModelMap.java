@@ -10,6 +10,7 @@ import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.map.DbMap;
 import com.eas.dbcontrols.map.mousetools.MouseTools;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -29,7 +30,7 @@ public class ModelMap extends Component<DbMap> {
             + "/**\n"
             + " * A model component that shows a map.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelMap() {
         super();
@@ -40,12 +41,12 @@ public class ModelMap extends Component<DbMap> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     private static final String BACKING_URL_JSDOC = ""
             + "/**\n"
             + "* The map tiles service URL.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = BACKING_URL_JSDOC)
     public String getBackingUrl() {
         return delegate.getBackingUrl();
@@ -61,7 +62,7 @@ public class ModelMap extends Component<DbMap> {
             + "* Makes map move to the specified geo position.\n"
             + "* @param position the position on the map.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = GO_TO_GEO_POSITION_JSDOC, params = {"position"})
     public void goToGeoPosition(Point aPosition) throws Exception {
         delegate.goToGeoPosition(aPosition);
@@ -71,23 +72,22 @@ public class ModelMap extends Component<DbMap> {
             + "/**\n"
             + "* The current geo position on the map.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = GEO_POSITION_JSDOC)
     public Point getGeoPosition() throws Exception {
         return delegate.getGeoPosition();
     }
 
-    
     public void fit() throws Exception {
         delegate.fit();
     }
-    
+
     private static final String FIT_JSDOC = ""
             + "/**\n"
             + "* Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. \n"
             + "* @param area the <code>Geometry</code> of the specified area (optional) \n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = FIT_JSDOC, params = {"area"})
     public void fit(Geometry aArea) throws Exception {
         delegate.fit(aArea);
@@ -99,8 +99,8 @@ public class ModelMap extends Component<DbMap> {
             + "* @param hitObject the object to hit, can be either a Point or a Polygon instance.\n"
             + "* @return an array of <code>SelectionEntry</code> elements\n"
             + "*/";
-    
-    @ScriptFunction(jsDoc = HIT_JSDOC,  params = {"hitObject"})
+
+    @ScriptFunction(jsDoc = HIT_JSDOC, params = {"hitObject"})
     public List<SelectionEntry> hit(Point aHitPoint) throws Exception {
         return delegate.hit(aHitPoint);
     }
@@ -114,7 +114,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @param hitPoint the Point to hit.\n"
             + "* @return an array of <code>SelectionEntry</code> elements.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = HIT_SELECTION_JSDOC, params = {"hitPoint"})
     public List<SelectionEntry> hitSelection(Point aHitPoint) throws Exception {
         return delegate.hitSelection(aHitPoint);
@@ -125,7 +125,7 @@ public class ModelMap extends Component<DbMap> {
             + "* Selects specified entries.\n"
             + "* @param selectionEntries the array of <code>SelectionEntry</code> elements to select.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SELECT_JSDOC, params = {"selectionEntries"})
     public void select(List<SelectionEntry> aSelectionEntries) {
         delegate.select(aSelectionEntries);
@@ -135,7 +135,7 @@ public class ModelMap extends Component<DbMap> {
             + "/**\n"
             + "* The map's geo pane (read only).\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = PANE_JSDOC)
     public JGeoPane getPane() {
         return delegate.getPane();
@@ -145,7 +145,7 @@ public class ModelMap extends Component<DbMap> {
             + "/**\n"
             + "* The map's mouse tools.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = TOOLS_JSDOC)
     public MouseTools getTools() {
         return delegate.getTools();
@@ -155,7 +155,7 @@ public class ModelMap extends Component<DbMap> {
             + "/**\n"
             + "* The map's event handler function.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_EVENT_JSDOC)
     public JSObject getOnEvent() {
         return delegate.getOnEvent();
@@ -175,7 +175,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @param styleAttributes the layer's style attributes.\n"
             + "* @return <code>MapLayer</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_LAYER_JSDOC, params = {"layerTitle", "rowset", "geometryClass", "styleAttributes"})
     public Layer addLayer(String aLayerTitle, ApplicationEntity<?, ?, ?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
         return delegate.addLayer(aLayerTitle, aRowset, aGeometryClass, aStyleAttributes);
@@ -187,12 +187,12 @@ public class ModelMap extends Component<DbMap> {
             + "* @param layerTitle the layer's title.\n"
             + "* @return <code>MapLayer</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REMOVE_LAYER_JSDOC)
     public Layer removeLayer(String aLayerTitle) throws Exception {
         return delegate.removeLayer(aLayerTitle);
     }
-    
+
     private static final String REMOVE_ALL_LAYER_JSDOC = ""
             + "/**\n"
             + "* Removes all layers of the map.\n"
@@ -210,7 +210,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @param layerTitle the layer's title.\n"
             + "* @return an <code>MapLayer</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = LAYER_JSDOC, params = {"layerTitle"})
     public Layer getLayer(String aLayerTitle) {
         return delegate.getLayer(aLayerTitle);
@@ -222,7 +222,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @param point the <code>Point</code> to transform.\n"
             + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CARTESIAN2GEO_JSDOC, params = {"point"})
     public Point cartesian2Geo(Point aPt) throws Exception {
         return delegate.cartesian2Geo(aPt);
@@ -234,7 +234,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @param point the <code>Point</code> to transform.\n"
             + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = GEO2CARTESIAN_JSDOC, params = {"point"})
     public Point geo2Cartesian(Point aPt) throws Exception {
         return delegate.geo2Cartesian(aPt);
@@ -246,7 +246,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @param point the <code>Point</code> to transform.\n"
             + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CARTESIAN2SCREEN_JSDOC, params = {"point"})
     public Point cartesian2Screen(Point aPt) throws Exception {
         return delegate.cartesian2Screen(aPt);
@@ -258,9 +258,27 @@ public class ModelMap extends Component<DbMap> {
             + "* @param point the <code>Point</code> to transform.\n"
             + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SCREEN2CARTESIAN_JSDOC, params = {"point"})
     public Point screen2Cartesian(Point aPt) throws Exception {
         return delegate.screen2Cartesian(aPt);
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

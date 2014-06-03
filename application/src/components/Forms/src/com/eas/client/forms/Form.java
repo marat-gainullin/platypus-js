@@ -1,16 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.forms;
 
 import com.eas.client.events.PublishedSourcedEvent;
@@ -193,7 +180,7 @@ public class Form implements HasPublished {
     protected JPanel view;
     protected Map<String, JComponent> components;
     protected String formKey;
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     // frequent runtime
     protected Container surface;

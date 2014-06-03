@@ -6,9 +6,11 @@ package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.GridLayout;
 import javax.swing.JPanel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -25,7 +27,7 @@ public class GridPane extends Container<JPanel> {
     public GridPane(int rows, int cols, int hgap) {
         this(rows, cols, hgap, 0);
     }
-    
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* A container with Grid Layout.\n"
@@ -49,13 +51,13 @@ public class GridPane extends Container<JPanel> {
         setDelegate(aDelegate);
         layout = (GridLayout) aDelegate.getLayout();
     }
-    
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
@@ -71,7 +73,7 @@ public class GridPane extends Container<JPanel> {
             + "* @param row the row of the component\n"
             + "* @param column the column of the component\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"row", "column"})
     public Component<?> child(int aRow, int aCol) {
         int index = aRow * layout.getColumns() + aCol;
@@ -81,4 +83,22 @@ public class GridPane extends Container<JPanel> {
             return null;
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

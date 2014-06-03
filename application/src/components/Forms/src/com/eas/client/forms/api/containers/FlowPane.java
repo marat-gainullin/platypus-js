@@ -6,9 +6,11 @@ package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -43,13 +45,13 @@ public class FlowPane extends Container<JPanel> {
         assert aDelegate.getLayout() instanceof FlowLayout;
         setDelegate(aDelegate);
     }
-    
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
@@ -58,4 +60,22 @@ public class FlowPane extends Container<JPanel> {
             delegate.repaint();
         }
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

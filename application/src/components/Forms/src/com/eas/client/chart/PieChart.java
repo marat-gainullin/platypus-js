@@ -4,6 +4,7 @@
  */
 package com.eas.client.chart;
 
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptUtils;
 import java.awt.Font;
 import java.awt.Paint;
@@ -98,4 +99,22 @@ public class PieChart extends AbstractChart {
         chart.fireChartChanged();
         super.fireDataChanged();
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }

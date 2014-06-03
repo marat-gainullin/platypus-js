@@ -4,7 +4,9 @@
  */
 package com.eas.client.forms.api.events;
 
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -20,7 +22,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* X cursor coordinate in component's space.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = X_JS_DOC)
     public int getX() {
         return delegate.getX();
@@ -30,7 +32,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* Y cursor coordinate in component's space.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = Y_JS_DOC)
     public int getY() {
         return delegate.getY();
@@ -41,7 +43,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "* Which, if any, of the mouse buttons has changed state.\n"
             + "* Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = BUTTON_JS_DOC)
     public int getButton() {
         return delegate.getButton();
@@ -51,7 +53,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* The number of mouse clicks associated with this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CLICK_COUNT_JS_DOC)
     public int getClickCount() {
         return delegate.getClickCount();
@@ -61,7 +63,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* Alt key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ALT_DOWN_JS_DOC)
     public boolean isAltDown() {
         return delegate.isAltDown() || delegate.isAltGraphDown();
@@ -71,7 +73,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* Ctrl key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CONTROL_DOWN_JS_DOC)
     public boolean isControlDown() {
         return delegate.isControlDown();
@@ -81,7 +83,7 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* Shift key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SHIFT_DOWN_JS_DOC)
     public boolean isShiftDown() {
         return delegate.isShiftDown();
@@ -91,9 +93,27 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
             + "/**\n"
             + "* Meta key is down on this event.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = META_DOWN_JS_DOC)
     public boolean isMetaDown() {
         return delegate.isMetaDown();
     }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
 }
