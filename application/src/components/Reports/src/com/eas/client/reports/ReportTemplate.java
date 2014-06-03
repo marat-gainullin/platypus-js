@@ -10,6 +10,9 @@ package com.eas.client.reports;
 import com.eas.client.report.Report;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -17,14 +20,16 @@ import jdk.nashorn.api.scripting.JSObject;
  * TODO Create factory for ReportTemplate descendants as new formats will be added.  
  * @author mg
  */
-public class ReportTemplate {
+public class ReportTemplate implements HasPublished{
 
     protected byte[] template;
     protected ApplicationModel<?, ?, ?, ?> model;
     protected JSObject scriptData;
     protected String format;
     protected String name;
-
+    private static JSObject publisher;
+    protected Object published;
+    
     public ReportTemplate(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat, String aName) {
         super();
         template = aTemplate;
@@ -55,6 +60,29 @@ public class ReportTemplate {
             return new Report(data, format, name);
         }
         return null;
+    }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
     
 }

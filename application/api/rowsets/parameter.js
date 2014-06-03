@@ -94,21 +94,6 @@
         });
 
         /**
-        * Determines if the field is signed.
-         * @property signed
-         * @memberOf Parameter
-        */
-        Object.defineProperty(this, "signed", {
-            get: function() {
-                var value = delegate.signed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.signed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
         * The description of the field.
          * @property description
          * @memberOf Parameter
@@ -120,6 +105,21 @@
             },
             set: function(aValue) {
                 delegate.description = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Determines if the field is signed.
+         * @property signed
+         * @memberOf Parameter
+        */
+        Object.defineProperty(this, "signed", {
+            get: function() {
+                var value = delegate.signed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.signed = P.boxAsJava(aValue);
             }
         });
 

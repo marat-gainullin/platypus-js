@@ -703,6 +703,25 @@
         });
 
         /**
+        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
+        * @param area the <code>Geometry</code> of the specified area (optional) 
+         * @method fit
+         * @memberOf ModelMap
+        */
+        Object.defineProperty(this, "fit", {
+            get: function() {
+                return function() {
+                    var args = [];
+                    for(var a = 0; a < arguments.length; a++){
+                        args[a] = P.boxAsJava(arguments[a]);
+                    }
+                    var value = delegate.fit.apply(delegate, args);
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
         * Removes layer by the specified title.
         * @param layerTitle the layer's title.
         * @return <code>MapLayer</code> instance.
@@ -855,25 +874,6 @@
                         args[a] = P.boxAsJava(arguments[a]);
                     }
                     var value = delegate.hitSelection.apply(delegate, args);
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
-        * @param area the <code>Geometry</code> of the specified area (optional) 
-         * @method fit
-         * @memberOf ModelMap
-        */
-        Object.defineProperty(this, "fit", {
-            get: function() {
-                return function() {
-                    var args = [];
-                    for(var a = 0; a < arguments.length; a++){
-                        args[a] = P.boxAsJava(arguments[a]);
-                    }
-                    var value = delegate.fit.apply(delegate, args);
                     return P.boxAsJs(value);
                 };
             }

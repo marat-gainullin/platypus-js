@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 /**
  * The utility application to convert JavaScript API classes with
+ *
  * @ScritpFunction annotation to pure JavaScript objects.
  *
  * @author vv
@@ -252,14 +253,27 @@ public class Classes2Scripts {
 
     private String getDepsJsContent() {
         StringBuilder sb = new StringBuilder(DEPS_HEADER);
-        String dir = "";
-        for (String path : depsPaths) {
-            String pathDir = pathRootDir(path);
-            if (dir == null ? pathDir != null : !dir.equals(pathDir)) {
-                sb.append("\n");
+        if (!depsPaths.isEmpty()) {
+            String dir = "";
+            String indent = getIndentStr(1);
+            sb.append("try {\n");
+            for (String path : depsPaths) {
+                String pathDir = pathRootDir(path);
+                if (!dir.equals(pathDir) && !dir.isEmpty()) {
+                    sb.append(indent).append("printf('").append(dir).append(" API loaded.');\n");
+                    sb.append("} catch (e) {\n");
+                    sb.append(indent).append("printf('").append(dir).append(" API skipped.');\n");
+                    sb.append("}\n");
+                    sb.append("\n");
+                    sb.append("try {\n");
+                }
+                dir = pathDir;
+                sb.append(indent).append(String.format("load('classpath:%s');\n", FileNameSupport.getFileName(path)));
             }
-            dir = pathDir;
-            sb.append(String.format("load('classpath:%s');\n", FileNameSupport.getFileName(path)));
+            sb.append(indent).append("printf('").append(dir).append(" API loaded.');\n");
+            sb.append("} catch (e) {\n");
+            sb.append(indent).append("printf('").append(dir).append(" API skipped.');\n");
+            sb.append("}\n");
         }
         return sb.toString();
     }

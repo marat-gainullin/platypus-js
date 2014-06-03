@@ -84,13 +84,10 @@
         });
 
         /**
-        * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
-        * @param sqlText SQL text for the new entity.
-        * @param dbId the concrete database ID (optional).
-        * @return an entity instance.
+         * Executed sql query. This method works only in two tier components of a system.
          * @method executeSql
          * @memberOf ApplicationDbModel
-        */
+         */
         Object.defineProperty(this, "executeSql", {
             get: function() {
                 return function() {
@@ -105,10 +102,13 @@
         });
 
         /**
-         * Executed sql query. This method works only in two tier components of a system.
+        * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
+        * @param sqlText SQL text for the new entity.
+        * @param dbId the concrete database ID (optional).
+        * @return an entity instance.
          * @method executeSql
          * @memberOf ApplicationDbModel
-         */
+        */
         Object.defineProperty(this, "executeSql", {
             get: function() {
                 return function() {

@@ -439,7 +439,8 @@
         });
 
         /**
-         * Deletes the row at the cursor position.
+         * Deletes the row by cursor position.
+         * @param aCusorPos row position in terms of cursor API. 1-based.
          * @method deleteRow
          * @memberOf ApplicationDbEntity
          */
@@ -457,8 +458,7 @@
         });
 
         /**
-         * Deletes the row by cursor position.
-         * @param aCusorPos row position in terms of cursor API. 1-based.
+         * Deletes the row at the cursor position.
          * @method deleteRow
          * @memberOf ApplicationDbEntity
          */
