@@ -22,6 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class TabbedPane extends Container<JTabbedPane> {
 
     private static JSObject publisher;
+    
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + " * A component that lets the user switch between a group of components by\n"

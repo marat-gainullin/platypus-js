@@ -19,6 +19,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SplitPane extends Container<JSplitPane> {
 
     private static JSObject publisher;
+
     public SplitPane() {
         this(Orientation.HORIZONTAL);
     }

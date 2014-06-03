@@ -8,6 +8,7 @@ import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
@@ -271,12 +272,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
             return sessionManager.getCurrentSession().getPrincipal();
         } else {
             // Construct a dummy Principal for a debugger can discover inner Principal's structure
-            return new PlatypusPrincipal("No current session found") {
-                @Override
-                public boolean hasRole(String string) throws Exception {
-                    return false;
-                }
-            };
+            return new AnonymousPlatypusPrincipal("No current session found");
         }
     }
 

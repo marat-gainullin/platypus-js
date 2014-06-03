@@ -5,7 +5,9 @@
 package com.eas.server.httpservlet;
 
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.script.NoPublisherException;
 import javax.servlet.http.HttpServletRequest;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -25,5 +27,22 @@ public class WebPlatypusPrincipal extends PlatypusPrincipal {
         HttpServletRequest currentRequest = servlet.getCurrentRequest();
         assert currentRequest != null : "Current request is null"; //NOI18N
         return currentRequest.isUserInRole(aRole) || servlet.getServerCore().isUserInApplicationRole(getName(), aRole);
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }
