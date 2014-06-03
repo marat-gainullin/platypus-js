@@ -93,6 +93,10 @@ public class ScriptUtils {
         return engine.eval(aSource, engine.getContext());
     }
 
+    public static JSObject getToPrimitiveFunc() {
+        assert toPrimitiveFunc != null;
+        return toPrimitiveFunc;
+    }
     public static void setToPrimitiveFunc(JSObject aValue) {
         assert toPrimitiveFunc == null;
         toPrimitiveFunc = aValue;
@@ -113,6 +117,10 @@ public class ScriptUtils {
         getModuleFunc = aValue;
     }
 
+    public static JSObject getToDateFunc() {
+        assert toDateFunc != null;
+        return toDateFunc;
+    }
     public static void setToDateFunc(JSObject aValue) {
         assert toDateFunc == null;
         toDateFunc = aValue;

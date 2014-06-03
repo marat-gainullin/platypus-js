@@ -34,6 +34,7 @@ public class Report implements HasPublished {
     protected static JSObject publisher;
     protected Object published;
 
+    @ScriptFunction(params = {"aReport", "aFormat", "aName"})
     public Report(byte[] aReport, String aFormat, String aName) {
         super();
         report = aReport;

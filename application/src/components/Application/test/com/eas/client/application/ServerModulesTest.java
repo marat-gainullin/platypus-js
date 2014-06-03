@@ -51,6 +51,11 @@ public class ServerModulesTest {
         ApplicationScriptsTest.serverScriptTest("ServerModuleTests");
     }
     
+    @Test
+    public void serverReportTest() throws Exception {
+        ApplicationScriptsTest.serverScriptTest("ServerReportTests");
+    }
+    
     protected void statelessSessionModule(AppClient aClient) throws Exception {
         aClient.login(ScriptRunnerSecurityTest.USER1_NAME, ScriptRunnerSecurityTest.USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
         try {

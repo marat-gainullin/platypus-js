@@ -61,25 +61,30 @@ public class Classes2Scripts {
     private static final String JSDOC_TAG = "${JsDoc}";//NOI18N
     private static final String DELEGATE_TAG = "${Delegate}";//NOI18N
     private static final String DELEGATE_OBJECT = "delegate";//NOI18N
-    private static final String DEFAULT_CONSTRUCTOR_JS_DOC = "/**\n"//NOI18N
-            + "* Generated constructor.\n"//NOI18N
-            + "*/";//NOI18N
+    private static final String DEFAULT_CONSTRUCTOR_JS_DOC = ""
+            + "/**\n"//NOI18N
+            + " * Generated constructor.\n"//NOI18N
+            + " */";//NOI18N
 
-    private static final String DEFAULT_PROPERTY_JS_DOC = "/**\n"//NOI18N
-            + "* Generated property jsDoc.\n"//NOI18N
-            + "*/";//NOI18N
+    private static final String DEFAULT_PROPERTY_JS_DOC = ""
+            + "/**\n"//NOI18N
+            + " * Generated property jsDoc.\n"//NOI18N
+            + " */";//NOI18N
 
-    private static final String DEFAULT_METHOD_JS_DOC = "/**\n"//NOI18N
-            + "* Generated method jsDoc.\n"//NOI18N
-            + "*/";//NOI18N
+    private static final String DEFAULT_METHOD_JS_DOC = ""
+            + "/**\n"//NOI18N
+            + " * Generated method jsDoc.\n"//NOI18N
+            + " */";//NOI18N
 
-    private static final String JS_DOC_TEMPLATE = "/**\n"//NOI18N
-            + "* %s\n"//NOI18N
-            + "*/";//NOI18N
+    private static final String JS_DOC_TEMPLATE = ""
+            + "/**\n"//NOI18N
+            + " * %s\n"//NOI18N
+            + " */";//NOI18N
     
-    private static final String DEPS_HEADER = "/**\n"//NOI18N
-            + "* Contains the basic dependencies loading.\n"//NOI18N
-            + "*/\n";//NOI18N
+    private static final String DEPS_HEADER = ""
+            + "/**\n"//NOI18N
+            + " * Contains the basic dependencies loading.\n"//NOI18N
+            + " */\n";//NOI18N
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -147,7 +152,13 @@ public class Classes2Scripts {
     }
 
     private void clean() throws IOException {
-        FileUtils.clearDirectory(destDirectory);
+        if (!destDirectory.isDirectory()) {
+            throw new IllegalArgumentException("Only directory can be used as dest."); // NOI18N
+        }
+        for (File c : destDirectory.listFiles()) {
+            if(!"platypus.js".equals(c.getName()) && !"internals.js".equals(c.getName()))
+                FileUtils.delete(c);
+        }
     }
 
     private void run() {
@@ -189,7 +200,7 @@ public class Classes2Scripts {
                         if (jsConstructor != null) {
                             String js = getClassJs(clazz);
                             if (js != null) {
-                                File subDir = new File(destDirectory, FileUtils.removeExtension(jarFile.getName()));
+                                File subDir = new File(destDirectory, FileNameSupport.getFileName(FileUtils.removeExtension(jarFile.getName())));
                                 if (!subDir.exists()) {
                                     subDir.mkdir();
                                 }
@@ -239,13 +250,11 @@ public class Classes2Scripts {
         String dir = "";
         for (String path : depsPaths) {
             String pathDir = pathRootDir(path);
-            if (dir != null && pathDir == null 
-                    || dir == null && pathDir != null
-                    || !dir.equals(pathDir)) {
+            if (dir == null ? pathDir != null : !dir.equals(pathDir)) {
                 sb.append("\n");
             }
             dir = pathDir;
-            sb.append(String.format("load(%s);\n", path));
+            sb.append(String.format("load('classpath:%s');\n", FileNameSupport.getFileName(path)));
         }
         return sb.toString();
     }
@@ -253,7 +262,7 @@ public class Classes2Scripts {
     private static String pathRootDir(String path) {
         String[] pathElements = path.split("/");
         if (pathElements.length > 0) {
-            return path.split("/")[0];
+            return pathElements[0];
         } else {
             return null;
         }
@@ -281,10 +290,10 @@ public class Classes2Scripts {
     }
 
     private static String getConstructorJsDoc(FunctionInfo ci) {
-        return addIdent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
+        return addIndent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
     }
 
-    private static String getIdentStr(int ident) {
+    private static String getIndentStr(int ident) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < DEFAULT_IDENTATION_WIDTH * ident; i++) {
             sb.append(" ");//NOI18N
@@ -351,29 +360,29 @@ public class Classes2Scripts {
         int i = ident;
         sb.append(getPropertyJsDoc(namespace, property, i));
         sb.append("\n");
-        sb.append(getIdentStr(i));
+        sb.append(getIndentStr(i));
         sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", property.name));
-        sb.append(getIdentStr(++i));
+        sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
-        sb.append(getIdentStr(++i));
+        sb.append(getIndentStr(++i));
         sb.append(String.format("var value = %s.%s;\n", DELEGATE_OBJECT, property.name));
-        sb.append(getIdentStr(i));
-        sb.append("return value && value.getPublished ? value.getPublished() : null;\n");
-        sb.append(getIdentStr(--i));
+        sb.append(getIndentStr(i));
+        sb.append("return P.boxAsJs(value);\n");
+        sb.append(getIndentStr(--i));
         sb.append("}");
         if (property.writeable) {
             sb.append(",\n");
-            sb.append(getIdentStr(i));
+            sb.append(getIndentStr(i));
             sb.append("set: function(aValue) {\n");
-            sb.append(getIdentStr(++i));
-            sb.append(String.format("delegate.%s = aValue && aValue.unwrap ? aValue.unwrap() : null;\n", property.name));
-            sb.append(getIdentStr(--i));
+            sb.append(getIndentStr(++i));
+            sb.append(String.format("delegate.%s = P.boxAsJava(aValue);\n", property.name));
+            sb.append(getIndentStr(--i));
             sb.append("}\n");
         } else {
             sb.append("\n");
         }
-        sb.append(getIdentStr(--i));
+        sb.append(getIndentStr(--i));
         sb.append("});\n");
         return sb.toString();
     }
@@ -384,39 +393,39 @@ public class Classes2Scripts {
         int i = ident;
         sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ident));
         sb.append("\n");
-        sb.append(getIdentStr(i));
+        sb.append(getIndentStr(i));
         sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", method.getName()));
-        sb.append(getIdentStr(++i));
+        sb.append(getIndentStr(++i));
         sb.append("get: function() {\n");
-        sb.append(getIdentStr(++i));
+        sb.append(getIndentStr(++i));
         sb.append("return function() {\n");
-        sb.append(getIdentStr(++i));
+        sb.append(getIndentStr(++i));
         sb.append("var args = [];\n");
-        sb.append(getIdentStr(i));
+        sb.append(getIndentStr(i));
         sb.append("for(var a = 0; a < arguments.length; a++){\n");
-        sb.append(getIdentStr(++i));
-        sb.append("args[a] = arguments[a] && arguments[a].unwrap ? arguments[a].unwrap() : null;\n");
-        sb.append(getIdentStr(--i));
+        sb.append(getIndentStr(++i));
+        sb.append("args[a] = P.boxAsJava(arguments[a]);\n");
+        sb.append(getIndentStr(--i));
         sb.append("}\n");
-        sb.append(getIdentStr(i));
+        sb.append(getIndentStr(i));
         sb.append(String.format("var value = %s.%s.apply(%s, args);\n", DELEGATE_OBJECT, method.getName(), DELEGATE_OBJECT));
-        sb.append(getIdentStr(i));
-        sb.append("return value && value.getPublished ? value.getPublished() : null;\n");
-        sb.append(getIdentStr(--i));
+        sb.append(getIndentStr(i));
+        sb.append("return P.boxAsJs(value);\n");
+        sb.append(getIndentStr(--i));
         sb.append("};\n");
-        sb.append(getIdentStr(--i));
+        sb.append(getIndentStr(--i));
         sb.append("}\n");
-        sb.append(getIdentStr(--i));
+        sb.append(getIndentStr(--i));
         sb.append("});\n");
         return sb.toString();
     }
 
-    private String getPropertyJsDoc(String namespace, PropBox property, int ident) {
+    private String getPropertyJsDoc(String namespace, PropBox property, int indent) {
         String jsDoc = property.jsDoc == null || property.jsDoc.isEmpty() ? DEFAULT_PROPERTY_JS_DOC : property.jsDoc;
         jsDoc = formJsDoc(jsDoc);
         jsDoc = appendLine2JsDoc(jsDoc, "@property " + property.name);
         jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
-        return addIdent(jsDoc, ident);
+        return addIndent(jsDoc, indent);
     }
 
     private String getMethodJsDoc(String namespace, String methodName, String str, int ident) {
@@ -424,7 +433,7 @@ public class Classes2Scripts {
         jsDoc = formJsDoc(jsDoc);
         jsDoc = appendLine2JsDoc(jsDoc, "@method " + methodName);
         jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
-        return addIdent(jsDoc, ident);
+        return addIndent(jsDoc, ident);
     }
 
     private static String formJsDoc(String jsDoc) {
@@ -436,12 +445,12 @@ public class Classes2Scripts {
 
     }
 
-    private static String addIdent(String str, int ident) {
+    private static String addIndent(String str, int indent) {
         StringBuilder sb = new StringBuilder();
         String[] lines = str.split("\n");//NOI18N
         for (int i = 0; i < lines.length; i++) {
-            sb.append(getIdentStr(ident));
-            sb.append(lines[i].trim());
+            sb.append(getIndentStr(indent));
+            sb.append(lines[i]);
             if (i < lines.length - 1) {
                 sb.append("\n");
             }
@@ -450,9 +459,8 @@ public class Classes2Scripts {
     }
 
     private static String appendLine2JsDoc(String jsDoc, String line) {
-
         List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));//NOI18N
-        jsDocLines.add(jsDocLines.size() - 1, "* " + line);//NOI18N
+        jsDocLines.add(jsDocLines.size() - 1, " * " + line);//NOI18N
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < jsDocLines.size(); i++) {
             sb.append(jsDocLines.get(i));
@@ -535,9 +543,9 @@ public class Classes2Scripts {
 
         public String getUnwrappedParamsStr() {
             StringBuilder paramsSb = new StringBuilder();
-            String template = "%s && %s.unwrap ? %s.unwrap() : %s";//NOI18N
+            String template = "P.boxAsJava(%s)";//NOI18N
             for (int i = 0; i < params.length; i++) {
-                paramsSb.append(String.format(template, params[i], params[i], params[i], params[i]));
+                paramsSb.append(String.format(template, params[i]));
                 if (i < params.length - 1) {
                     paramsSb.append(", ");//NOI18N
                 }

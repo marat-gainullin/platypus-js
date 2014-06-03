@@ -1,5 +1,4 @@
 (function() {
-    
     var javaClass = Java.type("${Type}");
     javaClass.setPublisher(function(aDelegate) {
         return new P.${Name}(${NullParams}aDelegate);
@@ -19,7 +18,6 @@ ${JsDoc}
                 };
             }
         });
-    
 ${Props}
         delegate.setPublished(this);
     };

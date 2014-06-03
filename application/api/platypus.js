@@ -1,6 +1,7 @@
 load("classpath:internals.js");
 
-function testXXX() {}
+function testXXX() {
+}
 
 
 (function() {
@@ -21,8 +22,7 @@ function testXXX() {}
      */
 })();
 
-load("classpath:forms/BorderPane.js");
-//...
+load("classpath:deps.js");
 
 P.require = function(deps, aOnSuccess, aOnFailure) {
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
@@ -123,7 +123,7 @@ P.loadTemplate = function(aName, aModel, aTarget) {
     var template = Loader.load(Executor.getClient(), aName, aModel.unwrap());
     // publish
     publishTo.generateReport = function() {
-        template.generateReport();
+        return template.generateReport();
     };
     return publishTo;
 };
@@ -181,3 +181,32 @@ P.ServerModule = function(aModuleName) {
         throw "This architecture does not support server modules."
     }
 };
+
+
+(function() {
+    var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
+    var JavaDate = Java.type("java.util.Date");
+    var toPrimitive = ScriptUtils.getToPrimitiveFunc();
+
+    P.boxAsJava = function(aValue) {
+        if (aValue) {
+            if (aValue.unwrap) {
+                aValue = aValue.unwrap();
+            } else {
+                aValue = toPrimitive(aValue);
+            }
+        }
+        return aValue;
+    };
+
+    P.boxAsJs = function(aValue) {
+        if (aValue) {
+            if (aValue.getPublished) {
+                aValue = aValue.getPublished();
+            } else if (aValue instanceof JavaDate) {
+                aValue = new Date(aValue.time);
+            }
+        }
+        return aValue;
+    };
+})();
