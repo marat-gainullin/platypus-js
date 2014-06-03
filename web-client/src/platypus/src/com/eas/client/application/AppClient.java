@@ -742,7 +742,7 @@ public class AppClient {
 					if (responseType != null) {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(Utils.jsonParse(aResponse.getResponseText())));
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.parseDates(Utils.jsonParse(aResponse.getResponseText())));
 						} else {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						}

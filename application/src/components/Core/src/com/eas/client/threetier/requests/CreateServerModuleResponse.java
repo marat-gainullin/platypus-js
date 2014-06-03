@@ -9,11 +9,11 @@ public class CreateServerModuleResponse extends Response {
     private Set<String> functionsNames;
     private boolean permitted;
 
-    public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean isPermitted) {
+    public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean aPermitted) {
         super(aRequestId);
         moduleName = aModuleName;
         functionsNames = aFunctionsNames;
-        permitted = isPermitted;
+        permitted = aPermitted;
     }
 
     public String getModuleName() {

@@ -158,6 +158,20 @@ public class Utils {
 		return $wnd.P.boxAsJava(JSON.parse(aData));
 	}-*/;
 
+	public native static Object parseDates(Object aObject) throws Exception /*-{
+        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
+            var timestamp = Date.parse(aObject);
+            if (!isNaN(timestamp)) {
+                return new Date(timestamp);
+            }
+        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+            for (var prop in aObject) {
+                aObject[prop] = @com.bearsoft.rowset.Utils::parseDates(Ljava/lang/Object;)(aObject[prop]);
+            }
+        }
+        return aObject;
+	}-*/;
+	
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
 		if (aHandler) {
 			aHandler();

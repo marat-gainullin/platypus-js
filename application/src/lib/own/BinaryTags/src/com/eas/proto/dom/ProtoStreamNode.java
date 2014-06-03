@@ -24,6 +24,9 @@ import java.util.zip.ZipInputStream;
  */
 class ProtoStreamNode implements ProtoNode {
 
+    private static final String UNEXPECTED_EOF_MSG = "Unexpected EOF";
+    private static final String BUFFER_OVERFLOW_MSG = "Buffer overflow";
+    
     private Map<Integer, ProtoNode> childrenHash = new HashMap<>();
     private List<ProtoNode> childrenVector = new ArrayList<>();
     private byte[] data;
@@ -42,12 +45,12 @@ class ProtoStreamNode implements ProtoNode {
             this.dataSize = dataSize;
             this.startOffset = startOffset;
             if (startOffset + dataSize > data.length) {
-                throw new IllegalArgumentException("Buffer overflow");
+                throw new IllegalArgumentException(BUFFER_OVERFLOW_MSG);
             }
             int i = startOffset;
             while (i < startOffset + dataSize) {
                 if (dataSize - 5 < 0) {
-                    throw new ProtoReaderException("Unexpected EOF");
+                    throw new ProtoReaderException(UNEXPECTED_EOF_MSG);
                 }
                 ProtoNode child;
                 int tag = data[i++] & 0xff;
@@ -55,12 +58,12 @@ class ProtoStreamNode implements ProtoNode {
                 i += 4;
                 int dataOffset = i;
                 if (dataOffset + size > startOffset + dataSize) {
-                    throw new ProtoReaderException("Unexpected EOF");
+                    throw new ProtoReaderException(UNEXPECTED_EOF_MSG);
                 }
                 if (isSubStreamAt(dataOffset + size)) {
                     i = dataOffset + size;
                     if (startOffset + dataSize - i < 5) {
-                        throw new ProtoReaderException("Unexpected EOF");
+                        throw new ProtoReaderException(UNEXPECTED_EOF_MSG);
                     }
                     int nextTag = data[i] & 0xff;
                     assert nextTag == CoreTags.TAG_STREAM || nextTag == CoreTags.TAG_COMPRESSED_STREAM;

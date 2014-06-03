@@ -2092,6 +2092,8 @@ public class Entity implements RowsetListener, HasPublished{
 	@Override
 	public void rowsetSorted(RowsetSortEvent event) {
 		try {
+			if (jsPublished != null)
+				publishRows(jsPublished);
 			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
