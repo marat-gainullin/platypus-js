@@ -33,8 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The utility application to convert JavaScript API classes with @ScritpFunction annotation
- * to pure JavaScript objects.
+ * The utility application to convert JavaScript API classes with
+ * @ScritpFunction annotation to pure JavaScript objects.
  *
  * @author vv
  */
@@ -80,7 +80,7 @@ public class Classes2Scripts {
             + "/**\n"//NOI18N
             + " * %s\n"//NOI18N
             + " */";//NOI18N
-    
+
     private static final String DEPS_HEADER = ""
             + "/**\n"//NOI18N
             + " * Contains the basic dependencies loading.\n"//NOI18N
@@ -156,8 +156,9 @@ public class Classes2Scripts {
             throw new IllegalArgumentException("Only directory can be used as dest."); // NOI18N
         }
         for (File c : destDirectory.listFiles()) {
-            if(!"platypus.js".equals(c.getName()) && !"internals.js".equals(c.getName()))
+            if (!"platypus.js".equals(c.getName()) && !"internals.js".equals(c.getName())) {
                 FileUtils.delete(c);
+            }
         }
     }
 
@@ -223,6 +224,10 @@ public class Classes2Scripts {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         if (ci.javaClassName.contains("$")) {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Inner class: {0}", ci.javaClassName);
+            return null;
+        }
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Abstract class: {0}", ci.javaClassName);
             return null;
         }
         checkForHasPublised(clazz);

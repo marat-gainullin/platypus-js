@@ -682,6 +682,12 @@ public class FormUtils {
     private static final Map<Class<?>, String> componentClasses2DefaultEventHandlers = new HashMap<>();
     
     private static class Panel extends com.eas.client.forms.api.Container<JPanel> {
+
+        @Override
+        public Object getPublished() {
+            throw new UnsupportedOperationException("Dummt implementation for reflection only!");
+        }
+        
     }
 
     static {
