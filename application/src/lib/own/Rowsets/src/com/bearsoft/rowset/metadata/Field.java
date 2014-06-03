@@ -47,7 +47,7 @@ public class Field implements HasPublished {
     protected String tableName;
     protected String schemaName;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
 
     public static final String PK_PROPERTY = "pk";

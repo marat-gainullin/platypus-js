@@ -4,6 +4,9 @@
  */
 package com.eas.server.httpservlet;
 
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
@@ -14,30 +17,33 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author vv
  */
-public class HttpScriptContext {
+public class HttpScriptContext implements HasPublished {
 
     public final static String REQUEST_PROP_NAME = "request";//NOI18N
     public final static String RESPONSE_PROP_NAME = "response";//NOI18N
     private final static String HTTP_JS_CLASS_NAME = "Http";//NOI18N
     private Request request;
     private Response response;
-
+    private static JSObject publisher;
+    protected Object published;
+    
     /*
-    public static HttpScriptContext getInstance(Scriptable scope, HttpServletRequest aHttpRequest, HttpServletResponse aHttpResponse) {
-        HttpScriptContext sc = new HttpScriptContext();
-        ScriptRuntime.setBuiltinProtoAndParent(sc, scope, TopLevel.Builtins.Object);
-        sc.request = Request.getInstance(sc, aHttpRequest);
-        sc.response = Response.getInstance(sc, aHttpResponse);
-        sc.defineProperty(REQUEST_PROP_NAME, HttpScriptContext.class, READONLY);
-        sc.defineProperty(RESPONSE_PROP_NAME, HttpScriptContext.class, READONLY);
-        return sc;
-    }
-*/
+     public static HttpScriptContext getInstance(Scriptable scope, HttpServletRequest aHttpRequest, HttpServletResponse aHttpResponse) {
+     HttpScriptContext sc = new HttpScriptContext();
+     ScriptRuntime.setBuiltinProtoAndParent(sc, scope, TopLevel.Builtins.Object);
+     sc.request = Request.getInstance(sc, aHttpRequest);
+     sc.response = Response.getInstance(sc, aHttpResponse);
+     sc.defineProperty(REQUEST_PROP_NAME, HttpScriptContext.class, READONLY);
+     sc.defineProperty(RESPONSE_PROP_NAME, HttpScriptContext.class, READONLY);
+     return sc;
+     }
+     */
     private static final String REQUEST_JS_DOC = "/**\n"
             + "* HTTP request, when invoked by HTTP protocol.\n"
             + "*/";
@@ -56,6 +62,28 @@ public class HttpScriptContext {
         return response;
     }
 
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+    
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
 
     public static class Request {
 
@@ -91,48 +119,48 @@ public class HttpScriptContext {
         private Cookies cookies;
         private RequestHeaders headers;
         private Params params;
-/*
-        public static Request getInstance(Scriptable scope, HttpServletRequest aHttpRequest) {
-            Request r = new Request();
-            r.httpRequest = aHttpRequest;
-            r.defineProperty(AUTH_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(CHARACTER_ENCODING_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(CONTENT_LENGTH_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(CONTEXT_PATH_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+        /*
+         public static Request getInstance(Scriptable scope, HttpServletRequest aHttpRequest) {
+         Request r = new Request();
+         r.httpRequest = aHttpRequest;
+         r.defineProperty(AUTH_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(CHARACTER_ENCODING_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(CONTENT_LENGTH_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(CONTEXT_PATH_PROP_NAME, HttpScriptContext.Request.class, READONLY);
 
-            r.cookies = Cookies.getInstance(scope, r.httpRequest);
-            r.defineProperty(COOKIES_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.cookies = Cookies.getInstance(scope, r.httpRequest);
+         r.defineProperty(COOKIES_PROP_NAME, HttpScriptContext.Request.class, READONLY);
 
-            r.headers = RequestHeaders.getInstance(scope, aHttpRequest);
-            r.defineProperty(HEADERS_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.headers = RequestHeaders.getInstance(scope, aHttpRequest);
+         r.defineProperty(HEADERS_PROP_NAME, HttpScriptContext.Request.class, READONLY);
 
-            r.defineProperty(LOCAL_ADDR_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(LOCAL_NAME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(LOCAL_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(METHOD_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(LOCAL_ADDR_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(LOCAL_NAME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(LOCAL_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(METHOD_PROP_NAME, HttpScriptContext.Request.class, READONLY);
 
-            r.params = Params.getInstance(scope, r.httpRequest);
-            r.defineProperty(PARAMS_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.params = Params.getInstance(scope, r.httpRequest);
+         r.defineProperty(PARAMS_PROP_NAME, HttpScriptContext.Request.class, READONLY);
 
-            r.defineProperty(PATH_INFO_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(PATH_TRANSLATED_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(PROTOCOL_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(QUERY_STRING_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(REMOTE_ADDR_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(REMOTE_HOST_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(REMOTE_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(REQUEST_URI_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(REQUEST_URL_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(SCHEME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(SERVER_NAME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(SERVER_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(SECURE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            return r;
-        }
-*/
+         r.defineProperty(PATH_INFO_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(PATH_TRANSLATED_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(PROTOCOL_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(QUERY_STRING_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(REMOTE_ADDR_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(REMOTE_HOST_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(REMOTE_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(REQUEST_URI_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(REQUEST_URL_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(SCHEME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(SERVER_NAME_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(SERVER_PORT_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         r.defineProperty(SECURE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+         return r;
+         }
+         */
         private static final String AUTH_TYPE_JS_DOC = "/**\n"
                 + "* The name of the protection authentication scheme.\n"
                 + "*/";
@@ -413,27 +441,27 @@ public class HttpScriptContext {
         private final static String RESPONSE_JS_CLASS_NAME = "Response";//NOI18N
         private HttpServletResponse httpResponse;
         private ResponseHeaders headers;
-/*
-        public static Response getInstance(Scriptable scope, HttpServletResponse aHttpResponse) {
-            Response r = new Response();
-            r.httpResponse = aHttpResponse;
+        /*
+         public static Response getInstance(Scriptable scope, HttpServletResponse aHttpResponse) {
+         Response r = new Response();
+         r.httpResponse = aHttpResponse;
 
-            r.headers = ResponseHeaders.getInstance(scope, aHttpResponse);
-            r.defineProperty(HEADERS_PROP_NAME, HttpScriptContext.Response.class, READONLY);
+         r.headers = ResponseHeaders.getInstance(scope, aHttpResponse);
+         r.defineProperty(HEADERS_PROP_NAME, HttpScriptContext.Response.class, READONLY);
 
-            r.defineProperty(STATUS_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
-            r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
-            r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Response.class, READONLY);
-            r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Response.class, READONLY);
-            r.defineFunctionProperties(new String[]{
-                RESET_METHOD_NAME,
-                ADD_HEADER_METHOD_NAME,
-                SET_HEADER_METHOD_NAME,
-                ADD_COOKIE_METHOD_NAME}, Response.class, EMPTY);
-            ScriptRuntime.setBuiltinProtoAndParent(r, scope, TopLevel.Builtins.Object);
-            return r;
-        }
-*/
+         r.defineProperty(STATUS_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
+         r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
+         r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Response.class, READONLY);
+         r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Response.class, READONLY);
+         r.defineFunctionProperties(new String[]{
+         RESET_METHOD_NAME,
+         ADD_HEADER_METHOD_NAME,
+         SET_HEADER_METHOD_NAME,
+         ADD_COOKIE_METHOD_NAME}, Response.class, EMPTY);
+         ScriptRuntime.setBuiltinProtoAndParent(r, scope, TopLevel.Builtins.Object);
+         return r;
+         }
+         */
         private static final String STATUS_JS_DOC = "/**\n"
                 + "* The current status code of this response.\n"
                 + "*/";
@@ -560,47 +588,47 @@ public class HttpScriptContext {
         @ScriptFunction(jsDoc = ADD_COOKIE_JS_DOC, params = {"cookie"})
         public void addCookie(Object obj) {
             /*
-            if (obj instanceof Scriptable) {
-                Scriptable cookieObj = (Scriptable) obj;
-                Object name = cookieObj.get(Cookie.NAME_PROP_NAME, cookieObj);
-                Object value = cookieObj.get(Cookie.VALUE_PROP_NAME, cookieObj);
-                if (name != null && !UniqueTag.NOT_FOUND.equals(name) && value != null && !UniqueTag.NOT_FOUND.equals(value)) {
-                    javax.servlet.http.Cookie httpCookie = new javax.servlet.http.Cookie(name.toString(), value.toString());
-                    Object comment = cookieObj.get(Cookie.COMMENT_PROP_NAME, cookieObj);
-                    if (comment != null && !UniqueTag.NOT_FOUND.equals(comment)) {
-                        httpCookie.setComment(comment.toString());
-                    }
-                    Object domain = cookieObj.get(Cookie.DOMAIN_PROP_NAME, cookieObj);
-                    if (domain != null && !UniqueTag.NOT_FOUND.equals(domain)) {
-                        httpCookie.setComment(domain.toString());
-                    }
-                    Object maxAge = cookieObj.get(Cookie.MAX_AGE_PROP_NAME, cookieObj);
-                    if (maxAge != null && !UniqueTag.NOT_FOUND.equals(maxAge)) {
-                        Integer maxAgeInt = parseInt(maxAge.toString());
-                        if (maxAgeInt != null) {
-                            httpCookie.setMaxAge(maxAgeInt);
-                        }
-                    }
-                    Object path = cookieObj.get(Cookie.PATH_PROP_NAME, cookieObj);
-                    if (path != null && !UniqueTag.NOT_FOUND.equals(path)) {
-                        httpCookie.setPath(path.toString());
-                    }
-                    Object secure = cookieObj.get(Cookie.SECURE_PROP_NAME, cookieObj);
-                    if (secure != null && !UniqueTag.NOT_FOUND.equals(secure)) {
-                        httpCookie.setSecure(Boolean.valueOf(secure.toString()));
-                    }
-                    Object version = cookieObj.get(Cookie.VERSION_PROP_NAME, cookieObj);
-                    if (version != null && !UniqueTag.NOT_FOUND.equals(version)) {
-                        Integer versionInt = parseInt(version.toString());
-                        if (versionInt != null) {
-                            httpCookie.setVersion(versionInt);
-                        }
-                    }
-                    httpResponse.addCookie(httpCookie);
-                }
+             if (obj instanceof Scriptable) {
+             Scriptable cookieObj = (Scriptable) obj;
+             Object name = cookieObj.get(Cookie.NAME_PROP_NAME, cookieObj);
+             Object value = cookieObj.get(Cookie.VALUE_PROP_NAME, cookieObj);
+             if (name != null && !UniqueTag.NOT_FOUND.equals(name) && value != null && !UniqueTag.NOT_FOUND.equals(value)) {
+             javax.servlet.http.Cookie httpCookie = new javax.servlet.http.Cookie(name.toString(), value.toString());
+             Object comment = cookieObj.get(Cookie.COMMENT_PROP_NAME, cookieObj);
+             if (comment != null && !UniqueTag.NOT_FOUND.equals(comment)) {
+             httpCookie.setComment(comment.toString());
+             }
+             Object domain = cookieObj.get(Cookie.DOMAIN_PROP_NAME, cookieObj);
+             if (domain != null && !UniqueTag.NOT_FOUND.equals(domain)) {
+             httpCookie.setComment(domain.toString());
+             }
+             Object maxAge = cookieObj.get(Cookie.MAX_AGE_PROP_NAME, cookieObj);
+             if (maxAge != null && !UniqueTag.NOT_FOUND.equals(maxAge)) {
+             Integer maxAgeInt = parseInt(maxAge.toString());
+             if (maxAgeInt != null) {
+             httpCookie.setMaxAge(maxAgeInt);
+             }
+             }
+             Object path = cookieObj.get(Cookie.PATH_PROP_NAME, cookieObj);
+             if (path != null && !UniqueTag.NOT_FOUND.equals(path)) {
+             httpCookie.setPath(path.toString());
+             }
+             Object secure = cookieObj.get(Cookie.SECURE_PROP_NAME, cookieObj);
+             if (secure != null && !UniqueTag.NOT_FOUND.equals(secure)) {
+             httpCookie.setSecure(Boolean.valueOf(secure.toString()));
+             }
+             Object version = cookieObj.get(Cookie.VERSION_PROP_NAME, cookieObj);
+             if (version != null && !UniqueTag.NOT_FOUND.equals(version)) {
+             Integer versionInt = parseInt(version.toString());
+             if (versionInt != null) {
+             httpCookie.setVersion(versionInt);
+             }
+             }
+             httpResponse.addCookie(httpCookie);
+             }
 
-            }
-            */
+             }
+             */
         }
 
     }
@@ -617,39 +645,39 @@ public class HttpScriptContext {
 
         private final static String COOKIES_JS_CLASS_NAME = "Cookies";//NOI18N
 /*
-        public static Cookies getInstance(Scriptable scope, HttpServletRequest httpRequest) {
-            Cookies cookies = new Cookies();
-            javax.servlet.http.Cookie[] httpCookies = httpRequest.getCookies();
-            if (httpCookies != null) {
-                for (int i = 0; i < httpCookies.length; i++) {
-                    Cookie cookie = new Cookie(httpCookies[i]);
-                    ScriptRuntime.setBuiltinProtoAndParent(cookie, scope, TopLevel.Builtins.Object);
-                    cookies.defineProperty(httpCookies[i].getName(), cookie, READONLY);
+         public static Cookies getInstance(Scriptable scope, HttpServletRequest httpRequest) {
+         Cookies cookies = new Cookies();
+         javax.servlet.http.Cookie[] httpCookies = httpRequest.getCookies();
+         if (httpCookies != null) {
+         for (int i = 0; i < httpCookies.length; i++) {
+         Cookie cookie = new Cookie(httpCookies[i]);
+         ScriptRuntime.setBuiltinProtoAndParent(cookie, scope, TopLevel.Builtins.Object);
+         cookies.defineProperty(httpCookies[i].getName(), cookie, READONLY);
 
-                }
-            }
-            ScriptRuntime.setBuiltinProtoAndParent(cookies, scope, TopLevel.Builtins.Object);
-            return cookies;
-        }
-*/
+         }
+         }
+         ScriptRuntime.setBuiltinProtoAndParent(cookies, scope, TopLevel.Builtins.Object);
+         return cookies;
+         }
+         */
     }
 
     public static class RequestHeaders {
 
         private final static String REQUEST_HEADERS_JS_CLASS_NAME = "RequestHeaders";//NOI18N
 /*
-        public static RequestHeaders getInstance(Scriptable scope, HttpServletRequest httpRequest) {
-            RequestHeaders headers = new RequestHeaders();
-            Enumeration<String> headerNames = httpRequest.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                headers.defineProperty(headerName, httpRequest.getHeader(headerName), READONLY);
+         public static RequestHeaders getInstance(Scriptable scope, HttpServletRequest httpRequest) {
+         RequestHeaders headers = new RequestHeaders();
+         Enumeration<String> headerNames = httpRequest.getHeaderNames();
+         while (headerNames.hasMoreElements()) {
+         String headerName = headerNames.nextElement();
+         headers.defineProperty(headerName, httpRequest.getHeader(headerName), READONLY);
 
-            }
-            ScriptRuntime.setBuiltinProtoAndParent(headers, scope, TopLevel.Builtins.Object);
-            return headers;
-        }
-*/
+         }
+         ScriptRuntime.setBuiltinProtoAndParent(headers, scope, TopLevel.Builtins.Object);
+         return headers;
+         }
+         */
     }
 
     public static class ResponseHeaders {
@@ -657,51 +685,51 @@ public class HttpScriptContext {
         private final static String RESPONSE_HEADERS_JS_CLASS_NAME = "ResponseHeaders";//NOI18N
         private HttpServletResponse httpResponse;
         private boolean externalUpdateEnabled;
-/*
-        public static ResponseHeaders getInstance(Scriptable aScope, HttpServletResponse aHttpResponse) {
-            ResponseHeaders headers = new ResponseHeaders();
-            headers.httpResponse = aHttpResponse;
-            Collection<String> headerNames = headers.httpResponse.getHeaderNames();
-            for (String headerName : headerNames) {
-                headers.defineProperty(headerName, headers.httpResponse.getHeader(headerName), READONLY);
-            }
-            ScriptRuntime.setBuiltinProtoAndParent(headers, aScope, TopLevel.Builtins.Object);
-            headers.externalUpdateEnabled = true;
-            return headers;
-        }
+        /*
+         public static ResponseHeaders getInstance(Scriptable aScope, HttpServletResponse aHttpResponse) {
+         ResponseHeaders headers = new ResponseHeaders();
+         headers.httpResponse = aHttpResponse;
+         Collection<String> headerNames = headers.httpResponse.getHeaderNames();
+         for (String headerName : headerNames) {
+         headers.defineProperty(headerName, headers.httpResponse.getHeader(headerName), READONLY);
+         }
+         ScriptRuntime.setBuiltinProtoAndParent(headers, aScope, TopLevel.Builtins.Object);
+         headers.externalUpdateEnabled = true;
+         return headers;
+         }
 
-        @Override
-        public void put(String name, Scriptable start, Object value) {
-            super.put(name, start, value);
-            if (externalUpdateEnabled) {
-                if (httpResponse.getHeader(name) != null) {
-                    httpResponse.setHeader(name, value.toString());
-                } else {
-                    httpResponse.addHeader(name, value.toString());
-                }
-            }
-        }
-*/
+         @Override
+         public void put(String name, Scriptable start, Object value) {
+         super.put(name, start, value);
+         if (externalUpdateEnabled) {
+         if (httpResponse.getHeader(name) != null) {
+         httpResponse.setHeader(name, value.toString());
+         } else {
+         httpResponse.addHeader(name, value.toString());
+         }
+         }
+         }
+         */
     }
 
     public static class Params {
 
         private final static String PARAMS_JS_CLASS_NAME = "Params";//NOI18N
 /*
-        private static Params getInstance(Scriptable scope, HttpServletRequest httpRequest) {
-            Params params = new Params();
-            for (String paramName : httpRequest.getParameterMap().keySet()) {
-                String[] paramValues = httpRequest.getParameterValues(paramName);
-                if (paramValues.length == 1) {
-                    params.defineProperty(paramName, httpRequest.getParameter(paramName), READONLY);
-                } else {
-                    params.defineProperty(paramName, ScriptUtils.toJs(paramValues, scope), READONLY);
-                }
-            }
-            ScriptRuntime.setBuiltinProtoAndParent(params, scope, TopLevel.Builtins.Object);
-            return params;
-        }
-*/
+         private static Params getInstance(Scriptable scope, HttpServletRequest httpRequest) {
+         Params params = new Params();
+         for (String paramName : httpRequest.getParameterMap().keySet()) {
+         String[] paramValues = httpRequest.getParameterValues(paramName);
+         if (paramValues.length == 1) {
+         params.defineProperty(paramName, httpRequest.getParameter(paramName), READONLY);
+         } else {
+         params.defineProperty(paramName, ScriptUtils.toJs(paramValues, scope), READONLY);
+         }
+         }
+         ScriptRuntime.setBuiltinProtoAndParent(params, scope, TopLevel.Builtins.Object);
+         return params;
+         }
+         */
     }
 
     public static class Cookie {
@@ -716,19 +744,19 @@ public class HttpScriptContext {
         private final static String VERSION_PROP_NAME = "version";//NOI18N
         private final static String COOKIE_JS_CLASS_NAME = "Cookie";//NOI18N
         private javax.servlet.http.Cookie cookie;
-/*
-        public Cookie(javax.servlet.http.Cookie aCookie) {
-            cookie = aCookie;
-            defineProperty(COMMENT_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-            defineProperty(DOMAIN_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-            defineProperty(MAX_AGE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-            defineProperty(NAME_PROP_NAME, HttpScriptContext.Cookie.class, READONLY);
-            defineProperty(PATH_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-            defineProperty(SECURE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-            defineProperty(VALUE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-            defineProperty(VERSION_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
-        }
-*/
+        /*
+         public Cookie(javax.servlet.http.Cookie aCookie) {
+         cookie = aCookie;
+         defineProperty(COMMENT_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         defineProperty(DOMAIN_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         defineProperty(MAX_AGE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         defineProperty(NAME_PROP_NAME, HttpScriptContext.Cookie.class, READONLY);
+         defineProperty(PATH_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         defineProperty(SECURE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         defineProperty(VALUE_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         defineProperty(VERSION_PROP_NAME, HttpScriptContext.Cookie.class, EMPTY);
+         }
+         */
 
         private static final String COMMENT_JS_DOC = "/**\n"
                 + "* The comment describing the purpose of this cookie, or <code>null</code> if the cookie has no comment.\n"

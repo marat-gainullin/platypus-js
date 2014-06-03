@@ -22,7 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
         + "*/")
 public class ScriptColor extends java.awt.Color implements HasPublished {
 
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     
     @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"

@@ -6,9 +6,7 @@ package com.bearsoft.rowset.changes;
 
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -20,7 +18,7 @@ public abstract class Change implements HasPublished {
     public boolean trusted;
     public boolean consumed;
     //
-    protected static JSObject publisher;
+    
     protected Object published;
 
     public Change(String aEntityId) {
@@ -46,17 +44,6 @@ public abstract class Change implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = publisher.call(null, new Object[]{});
-        }
-        return published;
-    }
-
-    @Override
     public void setPublished(Object aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
@@ -64,10 +51,6 @@ public abstract class Change implements HasPublished {
         published = aValue;
     }
 
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
-    
     @Override
     public String toString() {
         return getType();

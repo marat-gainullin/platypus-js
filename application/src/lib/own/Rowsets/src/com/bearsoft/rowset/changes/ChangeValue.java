@@ -22,8 +22,8 @@ public class ChangeValue implements HasPublished {
     public Object value;
     public DataTypeInfo type;
 
-    protected static JSObject publisher;
-    protected Object published;
+    private static JSObject publisher;
+    private Object published;
 
     public ChangeValue(String aName, Object aValue, DataTypeInfo aType) {
         name = aName;

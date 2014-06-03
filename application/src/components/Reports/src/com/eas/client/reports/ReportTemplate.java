@@ -10,7 +10,6 @@ package com.eas.client.reports;
 import com.eas.client.report.Report;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -18,14 +17,13 @@ import jdk.nashorn.api.scripting.JSObject;
  * TODO Create factory for ReportTemplate descendants as new formats will be added.  
  * @author mg
  */
-public class ReportTemplate implements HasPublished {
+public class ReportTemplate {
 
     protected byte[] template;
     protected ApplicationModel<?, ?, ?, ?> model;
     protected JSObject scriptData;
     protected String format;
     protected String name;
-    protected Object published;
 
     public ReportTemplate(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat, String aName) {
         super();
@@ -33,16 +31,6 @@ public class ReportTemplate implements HasPublished {
         model = aModel;
         format = aFormat;
         name = aName;
-    }
-
-    @Override
-    public Object getPublished() {
-        return published;
-    }
-
-    @Override
-    public void setPublished(Object aValue) {
-        published = aValue;
     }
 
     public JSObject getScriptData() {

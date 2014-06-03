@@ -51,7 +51,7 @@ public class PlatypusScriptedResource implements HasPublished {
     protected static Client client;
     protected static AppCache cache;
     protected static PrincipalHost principalHost;
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
 
     /**

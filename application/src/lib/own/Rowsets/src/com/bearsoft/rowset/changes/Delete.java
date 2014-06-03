@@ -4,14 +4,17 @@
  */
 package com.bearsoft.rowset.changes;
 
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
 public class Delete extends Change {
-
+    
+    private static JSObject publisher;
     public ChangeValue[] keys;
 
     public Delete(String aEntityId) {
@@ -26,5 +29,20 @@ public class Delete extends Change {
     @ScriptFunction(jsDoc = "Keys values used for identification of deleted data.")
     public ChangeValue[] getKeys() {
         return keys;
+    }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

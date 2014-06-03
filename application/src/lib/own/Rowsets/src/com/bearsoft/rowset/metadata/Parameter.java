@@ -10,9 +10,11 @@
 package com.bearsoft.rowset.metadata;
 
 import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.math.BigDecimal;
 import java.sql.ParameterMetaData;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This class is a parameter specification for queries, forms, reports and
@@ -33,7 +35,8 @@ public class Parameter extends Field {
     private Object defaultValue;
     private Object value;
     private boolean modified;
-
+    private static JSObject publisher;
+    
     /**
      * The default constructor.
      */
@@ -363,5 +366,20 @@ public class Parameter extends Field {
     @ScriptFunction(jsDoc = "Copies the parameter information to another instance.")
     public Parameter copy() {
         return new Parameter(this);
+    }
+    
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{});
+        }
+        return published;
+    }
+    
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

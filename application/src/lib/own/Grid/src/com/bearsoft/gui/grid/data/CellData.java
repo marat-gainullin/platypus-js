@@ -23,7 +23,7 @@ public class CellData implements Comparable<Object>, HasPublished  {
     public Object data = null;
     public Object display = null;
 
-    protected static JSObject publisher;
+    private static JSObject publisher;
     protected Object published;
     /**
      * Simple constructor for controls models data.
