@@ -106,7 +106,7 @@ public class LineChart extends AbstractLineChart {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

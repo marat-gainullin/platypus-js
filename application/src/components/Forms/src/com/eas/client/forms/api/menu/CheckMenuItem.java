@@ -100,7 +100,7 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

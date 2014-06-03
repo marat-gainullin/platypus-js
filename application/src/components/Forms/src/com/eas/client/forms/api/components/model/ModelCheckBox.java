@@ -73,7 +73,7 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

@@ -35,7 +35,7 @@ public class FocusEvent extends Event<java.awt.event.FocusEvent> {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

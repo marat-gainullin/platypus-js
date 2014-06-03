@@ -586,29 +586,25 @@ public class Application {
 		};
 		$wnd.P.HTML5 = "Html5 client";
 		$wnd.P.J2SE = "Java SE client";
-		$wnd.P.agent = $wnd.P.platypus.HTML5; 
+		$wnd.P.agent = $wnd.P.HTML5; 
 		function _Modules() {
 			var platypusModules = {};
 			this.get = function(aModuleId) {
 				var pModule = platypusModules[aModuleId];
-				if (pModule == null || pModule == undefined) {
-					if(!$wnd.P.platypusModulesConstructors) {
-						throw 'No $wnd.P.platypusModulesConstructors';
-					}
-					var mc = $wnd.P.platypusModulesConstructors[aModuleId];
-					if (mc != null && mc != undefined) {
+				if (!pModule) {
+					var mc = $wnd[aModuleId];
+					if (mc) {
 						pModule = new mc();
 						platypusModules[aModuleId] = pModule;
 					} else
-						throw 'No module constructor to module: ' + aModuleId;
+						throw 'No module constructor for module: ' + aModuleId;
 				}
 				return pModule;
 			}
 		}
 		$wnd.P.Modules = new _Modules();
-		$wnd.P.Module = function(aModuleId)
-		{
-			var mc = $wnd.P.platypusModulesConstructors[aModuleId];
+		$wnd.P.Module = function(aModuleId){
+			var mc = $wnd[aModuleId];
 			if (mc){
 				mc.call(this);
 			} else
@@ -619,12 +615,37 @@ public class Application {
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		}
 		$wnd.P.ServerModule = function(aModuleId){
-			$wnd.P.defineServerModule(aModuleId, this);
+			if(!(this instanceof $wnd.P.ServerModule)){
+				throw 'use P.ServerModule(...) please.';
+			}
+			var moduleData = $wnd.P.serverModules[aModuleName];
+			if(!moduleData.isPermitted)
+				throw 'AccessControlException';
+			aModule = this;
+			for ( var i = 0; i < moduleData.functions.length; i++) {
+				aModule[moduleData.functions[i]] = function(functionName) {
+					return function() {
+						var onSuccess = null;
+						var onFailure = null;
+						var argsLength = arguments.length;
+						if(arguments.length > 1 && typeof arguments[arguments.length-1] == "function" && typeof arguments[arguments.length-2] == "function"){
+							onSuccess = arguments[arguments.length-2];
+							onFailure = arguments[arguments.length-1];
+							argsLength -= 2;
+						}else if(arguments.length > 0 && typeof arguments[arguments.length-1] == "function"){
+							onSuccess = arguments[arguments.length-1];
+							argsLength -= 1;
+						}
+						var params = [];
+						for ( var j = 0; j < argsLength; j++) {
+							params[j] = JSON.stringify(arguments[j]);
+						}
+						var nativeClient = @com.eas.client.application.AppClient::getInstance()();
+						return $wnd.P.boxAsJs(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, functionName, params, onSuccess, onFailure));
+					}
+				}(moduleData.functions[i]);
+			}
 		};
-		$wnd.P.ServerReport = function(aModuleId){
-			$wnd.P.defineServerModule(aModuleId, this);
-		};
-		$wnd.P.Report = $wnd.P.ServerReport;
 		
 		Object.defineProperty($wnd.P.Form, "shown", {
 			get : function() {
@@ -925,7 +946,6 @@ public class Application {
 		JsContainers.init();
 		JsModelWidgets.init();
 		publish(client);
-		AppClient.publishApi(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
 		for (Element el : indicators) {
@@ -969,8 +989,12 @@ public class Application {
 		String url = Document.get().getURL();
 		if (url != null) {
 			int pos = url.indexOf('#');
-			if (pos > -1)
-				platypusModules.put(url.substring(pos + 1), null);
+			if (pos > -1){
+				String moduleName = url.substring(pos + 1);
+				if(!moduleName.isEmpty()){
+					platypusModules.put(moduleName, null);
+				}
+			}
 		}
 		return platypusModules;
 	}

@@ -109,7 +109,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

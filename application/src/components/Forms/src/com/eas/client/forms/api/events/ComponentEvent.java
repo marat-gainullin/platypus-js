@@ -23,7 +23,7 @@ public class ComponentEvent extends Event<java.awt.event.ComponentEvent> {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

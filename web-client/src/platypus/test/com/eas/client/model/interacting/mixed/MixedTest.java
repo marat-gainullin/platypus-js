@@ -148,7 +148,6 @@ public abstract class MixedTest extends ModelBaseTest {
 		JsModelWidgets.init();
 		AppClient client = initDevelopTestClient();
 		Application.publish(client);
-		AppClient.publishApi(client);
 		Loader l = new Loader(client);
 		l.loadQueries(queries(), new Runnable() {
 			

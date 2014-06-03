@@ -23,7 +23,7 @@ public class ChangeEvent extends Event<javax.swing.event.ChangeEvent> {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{});
+            published = publisher.call(null, new Object[]{this});
         }
         return published;
     }

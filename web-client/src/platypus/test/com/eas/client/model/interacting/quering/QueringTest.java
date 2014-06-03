@@ -137,7 +137,6 @@ public abstract class QueringTest extends ModelBaseTest {
 		JsModelWidgets.init();
 		AppClient client = initDevelopTestClient();
 		Application.publish(client);
-		AppClient.publishApi(client);
 		Loader l = new Loader(client);
 		l.loadQueries(queries(), new RunnableAdapter() {
 

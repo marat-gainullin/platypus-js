@@ -72,13 +72,7 @@ public class AppClient {
 	public static final String APPLICATION_URI = "/application";
 	public static final String RESOURCES_URI = "/resources";
 	public static final String API_URI = "/api";
-	public static final String SELF_NAME = "_platypusModuleSelf";
-
-	/*
-	public static final String SERVER_MODULE_BODY = "function %s () {\n" + "    window.platypus.defineServerModule(\"%s\", this);\n" + "}";
-	public static final String SERVER_MODULE_FUNCTION_NAME = "ServerModule";
-	public static final String SERVER_REPORT_FUNCTION_NAME = "ServerReport";
-	*/
+	
 	protected static Set<String> attachedCss = new HashSet<String>();
 	//
 	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
@@ -580,42 +574,6 @@ public class AppClient {
 			throw new Exception(req.getStatus() + " " + req.getStatusText());
 	}
 
-	public static native void defineServerModule(String aModuleName, JavaScriptObject aModule)/*-{
-		var moduleData = $wnd.P.serverModules[aModuleName];
-		for ( var i = 0; i < moduleData.functions.length; i++) {
-			aModule[moduleData.functions[i]] = function(functionName) {
-				return function() {
-					var onSuccess = null;
-					var onFailure = null;
-					var argsLength = arguments.length;
-					if(arguments.length > 1 && typeof arguments[arguments.length-1] == "function" && typeof arguments[arguments.length-2] == "function"){
-						onSuccess = arguments[arguments.length-2];
-						onFailure = arguments[arguments.length-1];
-						argsLength -= 2;
-					}else if(arguments.length > 0 && typeof arguments[arguments.length-1] == "function"){
-						onSuccess = arguments[arguments.length-1];
-						argsLength -= 1;
-					}
-					var params = [];
-					for ( var j = 0; j < argsLength; j++) {
-						params[j] = JSON.stringify(arguments[j]);
-					}
-					return $wnd.P.executeServerModuleMethod(aModuleName, functionName, params, onSuccess, onFailure);
-				}
-			}(moduleData.functions[i]);
-		}
-		if (moduleData.isReport) {
-			aModule.show = function() {
-				if (moduleData.isPermitted) {
-					$wnd.P.executeServerReport(aModuleName, aModule);
-				} else {
-					throw "AccessControlException";
-				}	
-			}
-			aModule.print = aModule.show;
-		}
-	}-*/;
-
 	protected void interceptRequest(XMLHttpRequest req) {
 		// No-op here. Some implementation is in the tests.
 	}
@@ -744,17 +702,6 @@ public class AppClient {
 					// Some post processing
 					String appElementName = aModuleName;
 					addServerModule(appElementName, aResponse.getResponseText());
-					/*
-					Document doc = XMLParser.createDocument();
-					Node nd = doc.createElement("script");
-					doc.appendChild(nd);
-					Node ndc = doc.createElement(Loader.SCRIPT_SOURCE_TAG_NAME);
-					String src = Utils.format(SERVER_MODULE_BODY, AppClient.isReport(appElementName) ? SERVER_REPORT_FUNCTION_NAME + appElementName : SERVER_MODULE_FUNCTION_NAME + appElementName,
-					        appElementName);
-					ndc.appendChild(doc.createTextNode(src));
-					nd.appendChild(ndc);
-					serverElements.put(appElementName, doc);
-					*/
 					if(aCallback != null)
 						aCallback.onSuccess(null);
 				}
@@ -776,29 +723,10 @@ public class AppClient {
 		$wnd.P.serverModules[aModuleName] = JSON.parse(aStructure);
 	}-*/;
 
-	public static native boolean isReport(String aModuleName) throws Exception /*-{
-		if ($wnd.P.serverModules && $wnd.P.serverModules[aModuleName]) {
-			return $wnd.P.serverModules[aModuleName].isReport;
-		} else
-			return false;
-	}-*/;
-
 	public static native boolean isServerModule(String aModuleName) throws Exception /*-{
-		return ($wnd.P.serverModules && $wnd.P.serverModules[aModuleName]) ? true : false;
+		return $wnd.P.serverModules && $wnd.P.serverModules[aModuleName];
 	}-*/;
 	
-	public static native void publishApi(AppClient aClient) throws Exception /*-{
-		$wnd.P.defineServerModule = function(aModuleName, aModule) {
-			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
-		}
-		$wnd.P.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
-			return $wnd.P.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
-		}
-		$wnd.P.executeServerReport = function(aModuleName, aModule) {
-			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
-		}
-	}-*/;
-
 	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
@@ -857,13 +785,6 @@ public class AppClient {
 				return null;
 			}
 		}
-	}
-
-	public void executeServerReport(final String appElementName, JavaScriptObject aParams) throws Exception {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put(PlatypusHttpRequestParams.MODULE_NAME, appElementName);
-		params.putAll(Utils.extractSimpleProperties(aParams));
-		startDownloadRequest(API_URI, Requests.rqExecuteReport, params, RequestBuilder.GET);
 	}
 
 	public Cancellable getAppQuery(String queryId, final Callback<Query, String> aCallback) throws Exception {
