@@ -93,8 +93,9 @@ public class DependenciesWalker {
                     boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
                     boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
                     Expression fe = lastCall.getFunction();
-                    if (fe instanceof IdentNode) {
-                        String funcName = ((IdentNode) fe).getName();
+                    if (fe instanceof AccessNode && ((AccessNode) fe).getProperty() instanceof IdentNode) {
+                        AccessNode lastAccess = (AccessNode) fe;
+                        String funcName = ((IdentNode) lastAccess.getProperty()).getName();
                         if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
                             if (arrayAtFirstArg) {
                                 LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
@@ -116,23 +117,21 @@ public class DependenciesWalker {
                                 case SERVER_MODULE:
                                     putServerDependence(value);
                                     break;
-                            }
-                        }
-                    } else if (fe instanceof AccessNode) {
-                        AccessNode lastAccess = (AccessNode) fe;
-                        if (lastAccess.getBase() instanceof IdentNode && lastAccess.getProperty() instanceof IdentNode) {
-                            String baseName = ((IdentNode) lastAccess.getBase()).getName();
-                            String funcName = ((IdentNode) lastAccess.getProperty()).getName();
-                            if ((GET.equals(funcName) || LOAD_ENTITY.equals(funcName))
-                                    && atFirstArg) {
-                                switch (baseName) {
-                                    case MODULES:
-                                        putDependence(value);
-                                        break;
-                                    case MODEL:
+                                case GET:
+                                    AccessNode baseAccess = (AccessNode) lastAccess.getBase();
+                                    if (baseAccess.getProperty() instanceof IdentNode) {
+                                        String baseName = ((IdentNode) baseAccess.getProperty()).getName();
+                                        if (MODULES.equals(baseName) && GET.equals(funcName)) {
+                                            putDependence(value);
+                                        }
+                                    }
+                                    break;
+                                case LOAD_ENTITY:
+                                    String baseName = ((IdentNode) lastAccess.getBase()).getName();
+                                    if (MODEL.equals(baseName) && LOAD_ENTITY.equals(funcName)) {
                                         putQueryDependence(value);
-                                        break;
-                                }
+                                    }
+                                    break;
                             }
                         }
                     }

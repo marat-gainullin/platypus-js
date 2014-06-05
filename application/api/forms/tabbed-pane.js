@@ -687,8 +687,8 @@
          */
         Object.defineProperty(this, "add", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.add(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(component, text) {
+                    var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text));
                     return P.boxAsJs(value);
                 };
             }
@@ -702,8 +702,8 @@
         */
         Object.defineProperty(this, "remove", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.remove(P.boxAsJava(arg0));
+                return function(component) {
+                    var value = delegate.remove(P.boxAsJava(component));
                     return P.boxAsJs(value);
                 };
             }
@@ -732,8 +732,8 @@
         */
         Object.defineProperty(this, "child", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.child(P.boxAsJava(arg0));
+                return function(index) {
+                    var value = delegate.child(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }

@@ -126,7 +126,7 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap){
-				aComponent.@com.eas.client.form.published.containers.FlowPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+				aWidget.@com.eas.client.form.published.containers.FlowPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 			}
 		}
 	}-*/;

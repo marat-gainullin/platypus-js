@@ -652,8 +652,8 @@
         */
         Object.defineProperty(this, "hit", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.hit(P.boxAsJava(arg0));
+                return function(hitObject) {
+                    var value = delegate.hit(P.boxAsJava(hitObject));
                     return P.boxAsJs(value);
                 };
             }
@@ -667,8 +667,8 @@
         */
         Object.defineProperty(this, "select", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.select(P.boxAsJava(arg0));
+                return function(selectionEntries) {
+                    var value = delegate.select(P.boxAsJava(selectionEntries));
                     return P.boxAsJs(value);
                 };
             }
@@ -683,8 +683,42 @@
         */
         Object.defineProperty(this, "getLayer", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.getLayer(P.boxAsJava(arg0));
+                return function(layerTitle) {
+                    var value = delegate.getLayer(P.boxAsJava(layerTitle));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
+        * @param area the <code>Geometry</code> of the specified area (optional) 
+         * @method fit
+         * @memberOf ModelMap
+        */
+        Object.defineProperty(this, "fit", {
+            get: function() {
+                return function(area) {
+                    var value = delegate.fit(P.boxAsJava(area));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Adds new layer to the map.
+        * @param layerTitle the layer's title.
+        * @param rowset the layer's data.
+        * @param geometryClass the geometry class.
+        * @param styleAttributes the layer's style attributes.
+        * @return <code>MapLayer</code> instance.
+         * @method addLayer
+         * @memberOf ModelMap
+        */
+        Object.defineProperty(this, "addLayer", {
+            get: function() {
+                return function(layerTitle, rowset, geometryClass, styleAttributes) {
+                    var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
                     return P.boxAsJs(value);
                 };
             }
@@ -730,8 +764,8 @@
         */
         Object.defineProperty(this, "cartesian2Geo", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.cartesian2Geo(P.boxAsJava(arg0));
+                return function(point) {
+                    var value = delegate.cartesian2Geo(P.boxAsJava(point));
                     return P.boxAsJs(value);
                 };
             }
@@ -746,8 +780,8 @@
         */
         Object.defineProperty(this, "geo2Cartesian", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.geo2Cartesian(P.boxAsJava(arg0));
+                return function(point) {
+                    var value = delegate.geo2Cartesian(P.boxAsJava(point));
                     return P.boxAsJs(value);
                 };
             }
@@ -762,8 +796,8 @@
         */
         Object.defineProperty(this, "cartesian2Screen", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.cartesian2Screen(P.boxAsJava(arg0));
+                return function(point) {
+                    var value = delegate.cartesian2Screen(P.boxAsJava(point));
                     return P.boxAsJs(value);
                 };
             }
@@ -778,8 +812,8 @@
         */
         Object.defineProperty(this, "screen2Cartesian", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.screen2Cartesian(P.boxAsJava(arg0));
+                return function(point) {
+                    var value = delegate.screen2Cartesian(P.boxAsJava(point));
                     return P.boxAsJs(value);
                 };
             }
@@ -793,8 +827,8 @@
         */
         Object.defineProperty(this, "goToGeoPosition", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.goToGeoPosition(P.boxAsJava(arg0));
+                return function(position) {
+                    var value = delegate.goToGeoPosition(P.boxAsJava(position));
                     return P.boxAsJs(value);
                 };
             }
@@ -809,42 +843,8 @@
         */
         Object.defineProperty(this, "hitSelection", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.hitSelection(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
-        * @param area the <code>Geometry</code> of the specified area (optional) 
-         * @method fit
-         * @memberOf ModelMap
-        */
-        Object.defineProperty(this, "fit", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.fit(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Adds new layer to the map.
-        * @param layerTitle the layer's title.
-        * @param rowset the layer's data.
-        * @param geometryClass the geometry class.
-        * @param styleAttributes the layer's style attributes.
-        * @return <code>MapLayer</code> instance.
-         * @method addLayer
-         * @memberOf ModelMap
-        */
-        Object.defineProperty(this, "addLayer", {
-            get: function() {
-                return function(arg0arg1arg2arg3) {
-                    var value = delegate.addLayer(P.boxAsJava(arg0)P.boxAsJava(arg1)P.boxAsJava(arg2)P.boxAsJava(arg3));
+                return function(hitPoint) {
+                    var value = delegate.hitSelection(P.boxAsJava(hitPoint));
                     return P.boxAsJs(value);
                 };
             }

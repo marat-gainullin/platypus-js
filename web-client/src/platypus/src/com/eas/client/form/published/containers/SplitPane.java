@@ -207,7 +207,7 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "orientation", {
 			get : function() {
-				var orientation = aComponent.@com.eas.client.form.published.containers.SplitPane::getOrientation()();
+				var orientation = aWidget.@com.eas.client.form.published.containers.SplitPane::getOrientation()();
 				if (orientation == @com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT) {
 					return $wnd.P.Orientation.VERTICAL;
 				} else {
@@ -216,43 +216,43 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 			},
 			set : function(aOrientation) {
 				if (aOrientation == $wnd.P.Orientation.VERTICAL) {
-					aComponent.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(@com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT);
+					aWidget.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(@com.eas.client.form.published.containers.SplitPane::VERTICAL_SPLIT);
 				} else {
-					aComponent.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(@com.eas.client.form.published.containers.SplitPane::HORIZONTAL_SPLIT);
+					aWidget.@com.eas.client.form.published.containers.SplitPane::setOrientation(I)(@com.eas.client.form.published.containers.SplitPane::HORIZONTAL_SPLIT);
 				}
 			}
 		});
 		Object.defineProperty(published, "firstComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.SplitPane::getFirstWidget()();
+				var comp = aWidget.@com.eas.client.form.published.containers.SplitPane::getFirstWidget()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				var child = (aChild == null ? null: aChild.unwrap());
-				aComponent.@com.eas.client.form.published.containers.SplitPane::setFirstWidget(Lcom/google/gwt/user/client/ui/Widget;)(child);
+				aWidget.@com.eas.client.form.published.containers.SplitPane::setFirstWidget(Lcom/google/gwt/user/client/ui/Widget;)(child);
 			}
 		});
 		Object.defineProperty(published, "secondComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.SplitPane::getSecondWidget()();
+				var comp = aWidget.@com.eas.client.form.published.containers.SplitPane::getSecondWidget()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				var child = (aChild == null ? null: aChild.unwrap());
-				aComponent.@com.eas.client.form.published.containers.SplitPane::setSecondWidget(Lcom/google/gwt/user/client/ui/Widget;)(child);
+				aWidget.@com.eas.client.form.published.containers.SplitPane::setSecondWidget(Lcom/google/gwt/user/client/ui/Widget;)(child);
 			}
 		});
 		Object.defineProperty(published, "dividerLocation", {
 			get : function() {
-				return aComponent.@com.eas.client.form.published.containers.SplitPane::getDividerLocation()();
+				return aWidget.@com.eas.client.form.published.containers.SplitPane::getDividerLocation()();
 			},
 			set : function(aValue) {
-				aComponent.@com.eas.client.form.published.containers.SplitPane::setDividerLocation(I)(aValue);
+				aWidget.@com.eas.client.form.published.containers.SplitPane::setDividerLocation(I)(aValue);
 			}
 		});
 		Object.defineProperty(published, "oneTouchExpandable", {
 			get : function() {
-				return aComponent.@com.eas.client.form.published.containers.SplitPane::isOneTouchExpandable()();
+				return aWidget.@com.eas.client.form.published.containers.SplitPane::isOneTouchExpandable()();
 			},
 			set : function(aValue) {
 				aComponent.@com.eas.client.form.published.containers.SplitPane::setOneTouchExpandable(Z)(false != aValue);
@@ -269,11 +269,11 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 		}
 		published.remove = function(aChild) {
 			if (aChild != undefined && aChild != null && aChild.unwrap != undefined) {
-				aComponent.@com.eas.client.form.published.containers.SplitPane::remove(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());				
+				aWidget.@com.eas.client.form.published.containers.SplitPane::remove(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());				
 			}
 		};
 		published.child = function(aIndex) {
-			var widget = aComponent.@com.eas.client.form.published.containers.SplitPane::getWidget(I)(aIndex);
+			var widget = aWidget.@com.eas.client.form.published.containers.SplitPane::getWidget(I)(aIndex);
 			return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 		};
 	}-*/;

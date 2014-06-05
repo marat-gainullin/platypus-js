@@ -268,8 +268,8 @@
         */
         Object.defineProperty(this, "find", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.find(P.boxAsJava(arg0));
+                return function(pairs) {
+                    var value = delegate.find(P.boxAsJava(pairs));
                     return P.boxAsJs(value);
                 };
             }
@@ -284,8 +284,8 @@
         */
         Object.defineProperty(this, "execute", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.execute(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(onSuccessCallback, onFailureCallback) {
+                    var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
                     return P.boxAsJs(value);
                 };
             }
@@ -375,8 +375,8 @@
         */
         Object.defineProperty(this, "pos", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.pos(P.boxAsJava(arg0));
+                return function(index) {
+                    var value = delegate.pos(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }
@@ -391,8 +391,8 @@
         */
         Object.defineProperty(this, "getRow", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.getRow(P.boxAsJava(arg0));
+                return function(index) {
+                    var value = delegate.getRow(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }
@@ -420,8 +420,8 @@
          */
         Object.defineProperty(this, "deleteRow", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.deleteRow(P.boxAsJava(arg0));
+                return function(aCusorPos) {
+                    var value = delegate.deleteRow(P.boxAsJava(aCusorPos));
                     return P.boxAsJs(value);
                 };
             }
@@ -435,8 +435,38 @@
          */
         Object.defineProperty(this, "deleteRow", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.deleteRow(P.boxAsJava(arg0));
+                return function(aRow) {
+                    var value = delegate.deleteRow(P.boxAsJava(aRow));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Deletes all rows in the rowset.
+         * @method deleteAll
+         * @memberOf ApplicationPlatypusEntity
+        */
+        Object.defineProperty(this, "deleteAll", {
+            get: function() {
+                return function() {
+                    var value = delegate.deleteAll();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+        * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+        * @return a comparator object.
+         * @method createFilter
+         * @memberOf ApplicationPlatypusEntity
+        */
+        Object.defineProperty(this, "createFilter", {
+            get: function() {
+                return function(pairs) {
+                    var value = delegate.createFilter(P.boxAsJava(pairs));
                     return P.boxAsJs(value);
                 };
             }
@@ -471,52 +501,6 @@
         });
 
         /**
-        * Deletes all rows in the rowset.
-         * @method deleteAll
-         * @memberOf ApplicationPlatypusEntity
-        */
-        Object.defineProperty(this, "deleteAll", {
-            get: function() {
-                return function() {
-                    var value = delegate.deleteAll();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-        * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-        * @return a comparator object.
-         * @method createFilter
-         * @memberOf ApplicationPlatypusEntity
-        */
-        Object.defineProperty(this, "createFilter", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.createFilter(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Creates an instance of comparator object using specified constraints objects.
-        * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-        * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationPlatypusEntity
-        */
-        Object.defineProperty(this, "createSorting", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.createSorting(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
         * Finds row by its key. Key must a single property.
         * @param key the unique identifier of the row.
         * @return a row object or <code>null</code> if nothing is found.
@@ -525,8 +509,8 @@
         */
         Object.defineProperty(this, "findById", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.findById(P.boxAsJava(arg0));
+                return function(key) {
+                    var value = delegate.findById(P.boxAsJava(key));
                     return P.boxAsJs(value);
                 };
             }
@@ -541,8 +525,8 @@
         */
         Object.defineProperty(this, "scrollTo", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.scrollTo(P.boxAsJava(arg0));
+                return function(row) {
+                    var value = delegate.scrollTo(P.boxAsJava(row));
                     return P.boxAsJs(value);
                 };
             }
@@ -572,8 +556,24 @@
         */
         Object.defineProperty(this, "requery", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.requery(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(onSuccessCallback, onFailureCallback) {
+                    var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+        * Creates an instance of comparator object using specified constraints objects.
+        * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+        * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
+         * @memberOf ApplicationPlatypusEntity
+        */
+        Object.defineProperty(this, "createSorting", {
+            get: function() {
+                return function(arg0) {
+                    var value = delegate.createSorting(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }

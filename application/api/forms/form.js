@@ -417,8 +417,8 @@
          */
         Object.defineProperty(this, "close", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.close(P.boxAsJava(arg0));
+                return function(obj) {
+                    var value = delegate.close(P.boxAsJava(obj));
                     return P.boxAsJs(value);
                 };
             }
@@ -460,8 +460,8 @@
          */
         Object.defineProperty(this, "showModal", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.showModal(P.boxAsJava(arg0));
+                return function(callback) {
+                    var value = delegate.showModal(P.boxAsJava(callback));
                     return P.boxAsJs(value);
                 };
             }
@@ -517,8 +517,8 @@
          */
         Object.defineProperty(this, "showInternalFrame", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.showInternalFrame(P.boxAsJava(arg0));
+                return function(desktop) {
+                    var value = delegate.showInternalFrame(P.boxAsJava(desktop));
                     return P.boxAsJs(value);
                 };
             }
@@ -533,8 +533,8 @@
          */
         Object.defineProperty(this, "getShownForm", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.getShownForm(P.boxAsJava(arg0));
+                return function(key) {
+                    var value = delegate.getShownForm(P.boxAsJava(key));
                     return P.boxAsJs(value);
                 };
             }

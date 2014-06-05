@@ -683,8 +683,8 @@
         */
         Object.defineProperty(this, "child", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.child(P.boxAsJava(arg0));
+                return function(index) {
+                    var value = delegate.child(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }

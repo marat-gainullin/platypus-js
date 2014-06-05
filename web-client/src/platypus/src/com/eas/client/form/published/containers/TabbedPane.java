@@ -156,20 +156,20 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "selectedIndex", {
 			get : function() {
-				return aComponent.@com.eas.client.form.published.containers.TabbedPane::getSelectedIndex()();
+				return aWidget.@com.eas.client.form.published.containers.TabbedPane::getSelectedIndex()();
 			},
 			set : function(aValue) {
-				aComponent.@com.eas.client.form.published.containers.TabbedPane::setSelectedIndex(I)(aValue);
+				aWidget.@com.eas.client.form.published.containers.TabbedPane::setSelectedIndex(I)(aValue);
 			}
 		});
 		Object.defineProperty(published, "selectedComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.TabbedPane::getSelected()();
+				var comp = aWidget.@com.eas.client.form.published.containers.TabbedPane::getSelected()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aValue) {
 				if(aValue != null)
-					aComponent.@com.eas.client.form.published.containers.TabbedPane::setSelected(Lcom/google/gwt/user/client/ui/Widget;)(aValue.unwrap());
+					aWidget.@com.eas.client.form.published.containers.TabbedPane::setSelected(Lcom/google/gwt/user/client/ui/Widget;)(aValue.unwrap());
 			}
 		});
 		published.add = function(toAdd, aTabTitle, aTabIcon){
@@ -179,9 +179,9 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 				if(!aTabIcon)
 					aTabIcon = null;
 				if(aTabTitle.indexOf("<html>") == 0)
-					aComponent.@com.eas.client.form.published.containers.TabbedPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;ZLcom/google/gwt/resources/client/ImageResource;)(toAdd.unwrap(), aTabTitle.substring(6), true, aTabIcon);
+					aWidget.@com.eas.client.form.published.containers.TabbedPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;ZLcom/google/gwt/resources/client/ImageResource;)(toAdd.unwrap(), aTabTitle.substring(6), true, aTabIcon);
 				else
-					aComponent.@com.eas.client.form.published.containers.TabbedPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;ZLcom/google/gwt/resources/client/ImageResource;)(toAdd.unwrap(), aTabTitle, false, aTabIcon);
+					aWidget.@com.eas.client.form.published.containers.TabbedPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;ZLcom/google/gwt/resources/client/ImageResource;)(toAdd.unwrap(), aTabTitle, false, aTabIcon);
 			}
 		};
 	}-*/;

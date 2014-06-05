@@ -6,6 +6,7 @@ import com.eas.client.RunnableAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
+import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.ModelBaseTest;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -32,14 +33,20 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
 		final AppClient client = ModelBaseTest.initDevelopTestClient(getModuleName());
+		JsWidgets.init();
 		Application.publish(client);
 		Loader loader = new Loader(client);
 		loader.load(Collections.singleton(testsModuleName()), new RunnableAdapter() {
 
 			protected native JavaScriptObject bind(PlatypusModulesTest aRunner, String aModuleName)/*-{
-				window.Logger = {info:function(aMessage){}, severe : function(aMessage){}, warning : function(aMessage){},
-				fine:function(aMessage){}, finer : function(aMessage){}, finest : function(aMessage){}};
-				$wnd.P.Logger = window.Logger;
+				$wnd.P.Logger = {
+					info:function(aMessage){},
+					severe : function(aMessage){},
+					warning : function(aMessage){},
+					fine:function(aMessage){},
+					finer : function(aMessage){},
+					finest : function(aMessage){}
+				};
 				var constr = $wnd[aModuleName];
 				var instance = new constr();
 				instance.onSuccess = function(aValue) {

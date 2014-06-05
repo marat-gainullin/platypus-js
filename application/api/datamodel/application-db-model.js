@@ -31,8 +31,8 @@
         */
         Object.defineProperty(this, "save", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.save(P.boxAsJava(arg0));
+                return function(callback) {
+                    var value = delegate.save(P.boxAsJava(callback));
                     return P.boxAsJs(value);
                 };
             }
@@ -47,8 +47,8 @@
         */
         Object.defineProperty(this, "requery", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.requery(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(onSuccessCallback, onFailureCallback) {
+                    var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
                     return P.boxAsJs(value);
                 };
             }
@@ -64,8 +64,8 @@
         */
         Object.defineProperty(this, "createEntity", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.createEntity(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(sqlText, datasourceName) {
+                    var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
                     return P.boxAsJs(value);
                 };
             }
@@ -81,8 +81,8 @@
         */
         Object.defineProperty(this, "executeSql", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.executeSql(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(sqlText, datasourceName) {
+                    var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
                     return P.boxAsJs(value);
                 };
             }
@@ -111,8 +111,8 @@
         */
         Object.defineProperty(this, "execute", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.execute(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(onSuccessCallback, onFailureCallback) {
+                    var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
                     return P.boxAsJs(value);
                 };
             }
@@ -127,8 +127,8 @@
         */
         Object.defineProperty(this, "loadEntity", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.loadEntity(P.boxAsJava(arg0));
+                return function(queryId) {
+                    var value = delegate.loadEntity(P.boxAsJava(queryId));
                     return P.boxAsJs(value);
                 };
             }

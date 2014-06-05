@@ -161,22 +161,6 @@ public class Application {
 			});
 		}
 		
-		(function() {
-		    // this === global;
-		    var global = $wnd;
-		    var oldP = global.P;
-		    global.P = {};
-		    global.P.restore = function() {
-		        var ns = global.P;
-		        global.P = oldP;
-		        return ns;
-		    };
-		     //global.P = this; // global scope of api - for legacy applications
-		     //global.P.restore = function() {
-		     //throw "Legacy api can't restore the global namespace.";
-		     //};
-		})();
-		
 		$wnd.P.selectFile = function(aCallback) {
 			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
@@ -575,14 +559,14 @@ public class Application {
 			@com.eas.client.model.Model::publishTopLevelFacade(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/model/Model;)(aTarget, nativeModel);
 			return aTarget;
 		};
-		$wnd.P.readForm = function(appElementName, aModel, aTarget) {
+		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
 			if(!aTarget)
 				aTarget = {};
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
 			var nativeModel = aModel.unwrap();
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
-			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
-			return nativeForm;
+			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+			return aTarget;
 		};
 		$wnd.P.HTML5 = "Html5 client";
 		$wnd.P.J2SE = "Java SE client";
@@ -613,8 +597,7 @@ public class Application {
 		$wnd.P.Form = $wnd.P.Module;
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
-		}
-
+		};
 		(function(){
 			function generateFunction(moduleName, functionName) {
 				return function() {
@@ -635,7 +618,7 @@ public class Application {
 					}
 					var nativeClient = @com.eas.client.application.AppClient::getInstance()();
 					return @com.bearsoft.rowset.Utils::parseDates(Ljava/lang/Object;)(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(moduleName, functionName, params, onSuccess, onFailure));
-				}
+				};
 			}
 					
 			$wnd.P.ServerModule = function(aModuleName){

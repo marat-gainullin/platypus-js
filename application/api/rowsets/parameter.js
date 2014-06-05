@@ -94,6 +94,21 @@
         });
 
         /**
+        * The scale of the field.
+         * @property scale
+         * @memberOf Parameter
+        */
+        Object.defineProperty(this, "scale", {
+            get: function() {
+                var value = delegate.scale;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.scale = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
         * The description of the field.
          * @property description
          * @memberOf Parameter
@@ -120,21 +135,6 @@
             },
             set: function(aValue) {
                 delegate.signed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-        * The scale of the field.
-         * @property scale
-         * @memberOf Parameter
-        */
-        Object.defineProperty(this, "scale", {
-            get: function() {
-                var value = delegate.scale;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.scale = P.boxAsJava(aValue);
             }
         });
 

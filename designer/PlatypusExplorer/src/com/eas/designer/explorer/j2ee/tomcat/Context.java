@@ -26,12 +26,11 @@ public class Context {
     public static final String ROOT_TAG_NAME = "Context";//NOI18N
     public static final String DOC_BASE_ATTR_NAME = "docBase";//NOI18N
     public static final String PATH_ATTR_NAME = "path";//NOI18N
-    public static final String URI_ENCODING_ATTR_NAME = "URIEncoding";//NOI18N
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     protected DocumentBuilder builder;
-    private List<Parameter> params = new ArrayList<>();
+    private final List<Parameter> params = new ArrayList<>();
     private Realm realm;
-    private List<Resource> resources = new ArrayList<>();
+    private final List<Resource> resources = new ArrayList<>();
     private String docBase;
     private String path;
 
@@ -49,7 +48,6 @@ public class Context {
         if (path != null) {
             contextTag.setAttribute(PATH_ATTR_NAME, path);
         }
-        contextTag.setAttribute(URI_ENCODING_ATTR_NAME, SettingsConstants.COMMON_ENCODING);
         for (Parameter param : params) {
             contextTag.appendChild(param.getElement(doc));
         }

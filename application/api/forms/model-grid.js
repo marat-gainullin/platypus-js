@@ -829,8 +829,8 @@
         */
         Object.defineProperty(this, "makeVisible", {
             get: function() {
-                return function(arg0arg1) {
-                    var value = delegate.makeVisible(P.boxAsJava(arg0)P.boxAsJava(arg1));
+                return function(arg0) {
+                    var value = delegate.makeVisible(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -845,8 +845,8 @@
         */
         Object.defineProperty(this, "makeVisible", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.makeVisible(P.boxAsJava(arg0));
+                return function(arg0, arg1) {
+                    var value = delegate.makeVisible(P.boxAsJava(arg0), P.boxAsJava(arg1));
                     return P.boxAsJs(value);
                 };
             }
@@ -860,8 +860,8 @@
         */
         Object.defineProperty(this, "unselect", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.unselect(P.boxAsJava(arg0));
+                return function(row) {
+                    var value = delegate.unselect(P.boxAsJava(row));
                     return P.boxAsJs(value);
                 };
             }

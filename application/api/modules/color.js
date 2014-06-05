@@ -26,24 +26,24 @@
         });
         /**
          * Generated property jsDoc.
-         * @property WHITE
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "WHITE", {
-            get: function() {
-                var value = delegate.WHITE;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property GRAY
          * @memberOf Color
          */
         Object.defineProperty(this, "GRAY", {
             get: function() {
                 var value = delegate.GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property WHITE
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "WHITE", {
+            get: function() {
+                var value = delegate.WHITE;
                 return P.boxAsJs(value);
             }
         });
@@ -110,24 +110,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property MAGENTA
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "MAGENTA", {
-            get: function() {
-                var value = delegate.MAGENTA;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property BLACK
          * @memberOf Color
          */
         Object.defineProperty(this, "BLACK", {
             get: function() {
                 var value = delegate.BLACK;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property MAGENTA
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "MAGENTA", {
+            get: function() {
+                var value = delegate.MAGENTA;
                 return P.boxAsJs(value);
             }
         });

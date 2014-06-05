@@ -29,8 +29,8 @@
         */
         Object.defineProperty(this, "load", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.load(P.boxAsJava(arg0));
+                return function(path) {
+                    var value = delegate.load(P.boxAsJava(path));
                     return P.boxAsJs(value);
                 };
             }

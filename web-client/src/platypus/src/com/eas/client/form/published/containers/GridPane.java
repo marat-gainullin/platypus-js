@@ -119,18 +119,18 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aRow, aCol){
 			if(toAdd && toAdd.unwrap && aRow && aCol){
-				aComponent.@com.eas.client.form.published.containers.GridPane::setWidget(IILcom/google/gwt/user/client/ui/Widget;)(aRow, aCol, toAdd.unwrap());
+				aWidget.@com.eas.client.form.published.containers.GridPane::setWidget(IILcom/google/gwt/user/client/ui/Widget;)(aRow, aCol, toAdd.unwrap());
 			}
 		}
 		published.remove = function(aChild) {
 			if (aChild != undefined && aChild != null && aChild.unwrap != undefined) {
-				aComponent.@com.eas.client.form.published.containers.GridPane::remove(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());				
+				aWidget.@com.eas.client.form.published.containers.GridPane::remove(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());				
 			}
 		};
 		published.cell = function(aRow, aCol) {
 			var widget;
 			if (aCol != undefined && aCol != null) {
-				widget = aComponent.@com.eas.client.form.published.containers.GridPane::getWidget(II)(aRow, aCol);
+				widget = aWidget.@com.eas.client.form.published.containers.GridPane::getWidget(II)(aRow, aCol);
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			}else
 				return null;

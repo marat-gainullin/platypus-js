@@ -202,13 +202,13 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap){
-				aComponent.@com.eas.client.form.published.containers.ScrollPane::setWidget(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+				aWidget.@com.eas.client.form.published.containers.ScrollPane::setWidget(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 			}
 		}
 		Object.defineProperty(published, "view", {
 			get : function()
 			{
-				var widget = aComponent.@com.eas.client.form.published.containers.ScrollPane::getWidget()();
+				var widget = aWidget.@com.eas.client.form.published.containers.ScrollPane::getWidget()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			},
 			set : function(aValue)

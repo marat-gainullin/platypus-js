@@ -98,10 +98,10 @@ public class XmlDom2Model implements ModelVisitor {
 	protected Model model;
 	protected Collection<Runnable> relationsResolvers = new ArrayList<Runnable>();
 
-	public static Model transform(Document doc, JavaScriptObject aModule) throws Exception {
+	public static Model transform(Document doc, JavaScriptObject aTarget) throws Exception {
 		try {
 			Model model = new Model(AppClient.getInstance());
-			XmlDom2Model transformer = new XmlDom2Model(doc, aModule);
+			XmlDom2Model transformer = new XmlDom2Model(doc, aTarget);
 			model.accept(transformer);
 			return model;
 		} catch (Exception ex) {
@@ -110,10 +110,10 @@ public class XmlDom2Model implements ModelVisitor {
 		}
 	}
 
-	protected XmlDom2Model(Document aDoc, JavaScriptObject aModule) {
+	protected XmlDom2Model(Document aDoc, JavaScriptObject aTarget) {
 		super();
 		doc = aDoc;
-		module = aModule;
+		module = aTarget;
 	}
 
 	protected void readModel(Model aModel) throws Exception {

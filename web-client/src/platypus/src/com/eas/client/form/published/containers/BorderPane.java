@@ -215,60 +215,60 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "leftComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.BorderPane::getLeftComponent()();
+				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getLeftComponent()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aComponent.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
 				}else
 					published.remove(published.leftComponent);
 			}
 		});
 		Object.defineProperty(published, "topComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.BorderPane::getTopComponent()();
+				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getTopComponent()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aComponent.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
 				}else
 					published.remove(published.topComponent);
 			}
 		});
 		Object.defineProperty(published, "rightComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.BorderPane::getRightComponent()();
+				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getRightComponent()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aComponent.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
 				}else
 					published.remove(published.rightComponent);
 			}
 		});
 		Object.defineProperty(published, "bottomComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.BorderPane::getBottomComponent()();
+				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getBottomComponent()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aComponent.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
 				}else
 					published.remove(published.bottomComponent);
 			}
 		});
 		Object.defineProperty(published, "centerComponent", {
 			get : function() {
-				var comp = aComponent.@com.eas.client.form.published.containers.BorderPane::getCenterComponent()();
+				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getCenterComponent()();
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aComponent.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap(), 32);
 				}else
 					published.remove(published.centerComponent);
 			}
@@ -282,19 +282,19 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 					region = $wnd.P.VerticalPosition.CENTER;
 				switch (region) {
 					case $wnd.P.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.containers.BorderPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+						aWidget.@com.eas.client.form.published.containers.BorderPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 						break;  
 					case $wnd.P.VerticalPosition.TOP: 
-						aComponent.@com.eas.client.form.published.containers.BorderPane::addNorth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::addNorth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.VerticalPosition.BOTTOM: 
-						aComponent.@com.eas.client.form.published.containers.BorderPane::addSouth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::addSouth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.HorizontalPosition.LEFT: 
-						aComponent.@com.eas.client.form.published.containers.BorderPane::addWest(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::addWest(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.HorizontalPosition.RIGHT: 
-						aComponent.@com.eas.client.form.published.containers.BorderPane::addEast(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::addEast(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 				}
 			}

@@ -191,6 +191,8 @@ public class Classes2Scripts {
 
     private void processJar(File jarFile) throws IOException, ClassNotFoundException {
         try (JarFile jar = new JarFile(jarFile)) {
+            Logger.getLogger(Classes2Scripts.class.getName())
+                    .log(Level.INFO, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
             URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
@@ -208,7 +210,7 @@ public class Classes2Scripts {
                                     subDir.mkdir();
                                 }
                                 Logger.getLogger(Classes2Scripts.class.getName())
-                                        .log(Level.INFO, "File: {0} Class name: {1}", new String[]{jarFile.getAbsolutePath(), className});
+                                        .log(Level.INFO, "\tClass name: {0}", new String[]{className});
                                 File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
                                 depsPaths.add(getRelativePath(destDirectory, resultFile));
@@ -421,9 +423,19 @@ public class Classes2Scripts {
         sb.append("return function(");
         StringBuilder params = new StringBuilder();
         String delimiter = "";
-        for (Parameter param : method.getParameters()) {
-            sb.append(delimiter).append(param.getName());
-            params.append(delimiter).append("P.boxAsJava(").append(param.getName()).append(")");
+        ScriptFunction methodAnnotation = method.getAnnotation(ScriptFunction.class);
+        Parameter[] methodParams = method.getParameters();
+        for (int p = 0; p < methodParams.length; p++) {
+            Parameter param = methodParams[p];
+            String pName = param.getName();
+            if(methodAnnotation != null && p < methodAnnotation.params().length){
+                pName = methodAnnotation.params()[p];
+            }
+            sb.append(delimiter).append(pName);
+            params.append(delimiter).append("P.boxAsJava(").append(pName).append(")");
+            if (delimiter.isEmpty()) {
+                delimiter = ", ";
+            }
         }
         sb.append(") {\n");
         sb.append(getIndentStr(++i));

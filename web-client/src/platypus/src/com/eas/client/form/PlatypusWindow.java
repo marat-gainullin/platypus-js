@@ -695,6 +695,9 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        aPublished.submit = function(aAction, aCallback) {
 	        	aForm.@com.eas.client.form.PlatypusWindow::submit(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aAction, aCallback);
 	        }
+	        aPublished.unwrap = function(){
+	        	return aForm;
+	        };
         })();
     }-*/;
 

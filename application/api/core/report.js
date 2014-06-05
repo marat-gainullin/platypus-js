@@ -42,8 +42,8 @@
          * @param aFileName Name of a file, the generated report should be save in. */
         Object.defineProperty(this, "save", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.save(P.boxAsJava(arg0));
+                return function(aFileName) {
+                    var value = delegate.save(P.boxAsJava(aFileName));
                     return P.boxAsJs(value);
                 };
             }

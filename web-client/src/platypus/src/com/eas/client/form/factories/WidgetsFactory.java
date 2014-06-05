@@ -110,10 +110,10 @@ public class WidgetsFactory {
 	protected List<Runnable> postponedTasks = new ArrayList<>();
 	protected List<Runnable> postponedTasks1 = new ArrayList<>();
 
-	public WidgetsFactory(Element aFormElement, JavaScriptObject aModule) {
+	public WidgetsFactory(Element aFormElement, JavaScriptObject aTarget) {
 		super();
 		tag = aFormElement;
-		target = aModule;
+		target = aTarget;
 	}
 
 	/**

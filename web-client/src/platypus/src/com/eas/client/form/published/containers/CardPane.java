@@ -152,21 +152,21 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aCardName){
 			if(toAdd && toAdd.unwrap){
-				aComponent.@com.eas.client.form.published.containers.CardPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;)(toAdd.unwrap(), aCardName);
+				aWidget.@com.eas.client.form.published.containers.CardPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;)(toAdd.unwrap(), aCardName);
 			}
 		};
 		published.child = function(aIndex_or_aCardName) {
 			var widget;
 			if (isNaN(aIndex_or_aCardName)) {
-				widget = aComponent.@com.eas.client.form.published.containers.CardPane::getWidget(Ljava/lang/String;)(aIndex_or_aCardName);
+				widget = aWidget.@com.eas.client.form.published.containers.CardPane::getWidget(Ljava/lang/String;)(aIndex_or_aCardName);
 			}else {
 				var index = parseInt(aIndex_or_aCardName, 10);
-				widget = aComponent.@com.eas.client.form.published.containers.CardPane::getWidget(I)(index);
+				widget = aWidget.@com.eas.client.form.published.containers.CardPane::getWidget(I)(index);
 			}
 			return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 		};
 		published.show = function(aCardName) {
-			aComponent.@com.eas.client.form.published.containers.CardPane::show(Ljava/lang/String;)(aCardName);
+			aWidget.@com.eas.client.form.published.containers.CardPane::show(Ljava/lang/String;)(aCardName);
 		};			
 	}-*/;
 }

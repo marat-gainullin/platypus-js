@@ -59,10 +59,10 @@ public class PlatypusMenu extends PlatypusMenuBar {
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "text", {
 			get : function() {
-				return aComponent.@com.eas.client.form.published.menu.PlatypusMenu::getText()();
+				return aWidget.@com.eas.client.form.published.menu.PlatypusMenu::getText()();
 			},
 			set : function(aValue) {
-				aComponent.@com.eas.client.form.published.menu.PlatypusMenu::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.menu.PlatypusMenu::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 			}
 		});
 	}-*/;

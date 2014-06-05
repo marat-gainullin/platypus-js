@@ -164,7 +164,7 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 		});
 		Object.defineProperty(published, "horizontalTextPosition", {
 			get : function() {
-				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalTextPosition()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalTextPosition()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 

@@ -473,11 +473,6 @@ public class Model implements HasPublished{
 				return aModel.@com.eas.client.model.Model::isPending()();
 			}
 		});
-		Object.defineProperty(aModule, "model", {
-			get : function() {
-				return publishedModel;
-			}
-		});
 	}-*/;
 
 	public int getAjustingCounter() {

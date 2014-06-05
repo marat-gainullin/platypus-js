@@ -25,6 +25,10 @@
         <servlet-name>proxy</servlet-name> 
         <url-pattern>/application/*</url-pattern> 
     </servlet-mapping>
+    <servlet-mapping> 
+        <servlet-name>proxy</servlet-name> 
+        <url-pattern>/appCache/*</url-pattern> 
+    </servlet-mapping>
 	<servlet-mapping> 
         <servlet-name>proxy</servlet-name> 
         <url-pattern>/js/*</url-pattern> 

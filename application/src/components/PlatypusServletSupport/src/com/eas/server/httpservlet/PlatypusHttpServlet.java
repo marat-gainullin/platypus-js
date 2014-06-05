@@ -30,7 +30,6 @@ import com.eas.util.StringUtils;
 import java.io.*;
 import java.net.URI;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
