@@ -2,6 +2,7 @@ package com.eas.client.script;
 
 import java.util.Collections;
 
+import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.RunnableAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
@@ -58,6 +59,7 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 			@Override
 			protected void doWork() throws Exception {
 				JavaScriptObject instance = bind(PlatypusModulesTest.this, testsModuleName());
+				JavaScriptObject callback = instance.<JsObject>cast().getJs("onSuccess");
 				instance = null;
 			}
 

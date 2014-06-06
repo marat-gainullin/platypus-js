@@ -25,6 +25,10 @@
                 };
             }
         });
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor
@@ -222,8 +226,11 @@
         */
         Object.defineProperty(this, "children", {
             get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
+                if (!invalidatable) {
+                    var value = delegate.children;
+                    invalidatable = P.boxAsJs(value);
+                }
+                return invalidatable;
             }
         });
 
@@ -273,6 +280,18 @@
         });
 
         /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf GridPane
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
         * Height of the component.
          * @property height
          * @memberOf GridPane
@@ -284,18 +303,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf GridPane
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
@@ -402,21 +409,6 @@
         });
 
         /**
-        * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf GridPane
-        */
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf GridPane
@@ -428,6 +420,21 @@
             },
             set: function(aValue) {
                 delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Key released event handler function.
+         * @property onKeyReleased
+         * @memberOf GridPane
+        */
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
 
@@ -690,22 +697,6 @@
             get: function() {
                 return function() {
                     var value = delegate.clear();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Gets the container's nth component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf GridPane
-        */
-        Object.defineProperty(this, "child", {
-            get: function() {
-                return function(index) {
-                    var value = delegate.child(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }

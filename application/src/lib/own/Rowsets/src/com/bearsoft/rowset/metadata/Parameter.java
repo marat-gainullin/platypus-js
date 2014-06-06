@@ -363,7 +363,6 @@ public class Parameter extends Field {
      * @return Copied parameter.
      */
     @Override
-    @ScriptFunction(jsDoc = "Copies the parameter information to another instance.")
     public Parameter copy() {
         return new Parameter(this);
     }

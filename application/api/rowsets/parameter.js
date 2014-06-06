@@ -291,34 +291,6 @@
         });
 
         /**
-         * Copies the parameter information to another instance.
-         * @method copy
-         * @memberOf Parameter
-         */
-        Object.defineProperty(this, "copy", {
-            get: function() {
-                return function() {
-                    var value = delegate.copy();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Copies the parameter information to another instance.
-         * @method copy
-         * @memberOf Parameter
-         */
-        Object.defineProperty(this, "copy", {
-            get: function() {
-                return function() {
-                    var value = delegate.copy();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
          * Assigning method of field/parameter information using specified source.
          * @method assignFrom
          * @memberOf Parameter

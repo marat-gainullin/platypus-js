@@ -54,6 +54,12 @@ public class ToolBar extends Container<JToolBar> {
             delegate.repaint();
         }
     }
+
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
+    @Override
+    public Component<?> child(int aIndex) {
+        return super.child(aIndex);
+    }
     
     @Override
     public Object getPublished() {

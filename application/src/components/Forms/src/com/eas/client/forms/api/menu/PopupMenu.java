@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.api.menu;
 
+import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -42,6 +43,12 @@ public class PopupMenu extends Container<JPopupMenu> {
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"menu"})
     public void add(Menu aMenu) {
         delegate.add((JMenu) unwrap(aMenu));
+    }
+
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
+    @Override
+    public Component<?> child(int aIndex) {
+        return super.child(aIndex);
     }
 
     @Override

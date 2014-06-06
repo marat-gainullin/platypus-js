@@ -56,7 +56,7 @@ public class Application {
 
 		@Override
 		public void loaded(String anItemName) {
-			final String message = "Loaded " + anItemName;
+			final String message = anItemName + " - Loaded";
 			platypusApplicationLogger.log(Level.INFO, message);
 		}
 	}
@@ -599,7 +599,21 @@ public class Application {
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		};
 		(function(){
-			function generateFunction(moduleName, functionName) {
+			
+			function parseDates(aObject) {
+		        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
+		            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(aObject)){
+		                return new Date(aObject);
+		            }
+		        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+		            for (var prop in aObject) {
+		                aObject[prop] = parseDates(aObject[prop]);
+		            }
+		        }
+		        return aObject;
+		    }
+			
+			function generateFunction(aModuleName, aFunctionName) {
 				return function() {
 					var onSuccess = null;
 					var onFailure = null;
@@ -617,7 +631,13 @@ public class Application {
 						params[j] = JSON.stringify(arguments[j]);
 					}
 					var nativeClient = @com.eas.client.application.AppClient::getInstance()();
-					return @com.bearsoft.rowset.Utils::parseDates(Ljava/lang/Object;)(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(moduleName, functionName, params, onSuccess, onFailure));
+					return parseDates(JSON.parse(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
+						(!!onSuccess) ?
+						function(aResult){
+							if(onSuccess){
+								onSuccess(parseDates(JSON.parse(aResult)));
+							}
+						} : null, onFailure)));
 				};
 			}
 					

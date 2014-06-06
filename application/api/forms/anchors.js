@@ -5,9 +5,8 @@
     });
     
     /**
-    * Component's binding anchors for anchors layout.
-    * Two anchor binding of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>.* Parameters values can be provided in pixels, for this set values as a <code>Number</code> or <code>string</code> with 'px' suffix, e.g. '30px'.
-    * Also they can be provided in procents with usage of '%' suffixes, e.g. '10%'.
+    * Component's layout anchors for AnchorsPane.
+    * Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>.* Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.
     * @param left a left anchor
     * @param width a width value
     * @param right a right anchor

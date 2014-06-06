@@ -724,7 +724,7 @@ public class AppClient {
 	}-*/;
 
 	public static native boolean isServerModule(String aModuleName) throws Exception /*-{
-		return $wnd.P.serverModules && $wnd.P.serverModules[aModuleName];
+		return !!($wnd.P && $wnd.P.serverModules && $wnd.P.serverModules[aModuleName]);
 	}-*/;
 	
 	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -742,7 +742,7 @@ public class AppClient {
 					if (responseType != null) {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.parseDates(Utils.jsonParse(aResponse.getResponseText())));
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						} else {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						}
@@ -772,7 +772,7 @@ public class AppClient {
 					if (responseType != null) {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
-							return Utils.toJs(Utils.jsonParse(executed.getResponseText()));
+							return Utils.toJs(executed.getResponseText());
 						} else {
 							return Utils.toJs(executed.getResponseText());
 						}

@@ -155,10 +155,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return modelEntity;
     }
 
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * Executed sql query. This method works only in two tier components of a system.\n"
-            + " */")
     public void executeSql(String aSql) throws Exception {
         executeSql(aSql, null);
     }
@@ -167,7 +163,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "/**\n"
             + "* Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
             + "* @param sqlText SQL text for the new entity.\n"
-            + "* @param dbId the concrete database ID (optional).\n"
+            + "* @param dbId Optional. the concrete database ID (optional).\n"
             + "* @return an entity instance.\n"
             + "*/";
 

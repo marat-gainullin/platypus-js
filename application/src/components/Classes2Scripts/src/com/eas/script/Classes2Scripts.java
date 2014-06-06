@@ -8,7 +8,6 @@ package com.eas.script;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.util.PropertiesUtils;
-import com.eas.util.PropertiesUtils.PropBox;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -24,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +63,11 @@ public class Classes2Scripts {
     private static final String JSDOC_TAG = "${JsDoc}";//NOI18N
     private static final String DELEGATE_TAG = "${Delegate}";//NOI18N
     private static final String DELEGATE_OBJECT = "delegate";//NOI18N
+    private static final String INVALIDATOR_PART = ""
+            + "        var invalidatable = null;\n"
+            + "        delegate.setPublishedCollectionInvalidator(function() {\n"
+            + "            invalidatable = null;\n"
+            + "        });\n";
     private static final String DEFAULT_CONSTRUCTOR_JS_DOC = ""
             + "/**\n"//NOI18N
             + " * Generated constructor.\n"//NOI18N
@@ -87,6 +92,18 @@ public class Classes2Scripts {
             + "/**\n"//NOI18N
             + " * Contains the basic dependencies loading.\n"//NOI18N
             + " */\n";//NOI18N
+
+    protected static class MethodedPropBox extends PropertiesUtils.PropBox {
+
+        public Method method;
+        public boolean invalidatable;
+
+        public MethodedPropBox() {
+            super();
+        }
+
+    }
+
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -377,7 +394,7 @@ public class Classes2Scripts {
         return ci;
     }
 
-    private String getPropertyPart(String namespace, PropBox property, int ident) {
+    private String getPropertyPart(String namespace, MethodedPropBox property, int ident) {
         StringBuilder sb = new StringBuilder();
         int i = ident;
         sb.append(getPropertyJsDoc(namespace, property, i));
@@ -387,10 +404,18 @@ public class Classes2Scripts {
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
-        sb.append(getIndentStr(++i));
-        sb.append(String.format("var value = %s.%s;\n", DELEGATE_OBJECT, property.name));
-        sb.append(getIndentStr(i));
-        sb.append("return P.boxAsJs(value);\n");
+        if (property.invalidatable && property.method.getReturnType().isArray()) {
+            sb.append(getIndentStr(++i)).append("if (!invalidatable) {\n")
+                    .append(getIndentStr(++i)).append("var value = delegate.").append(property.name).append(";\n")
+                    .append(getIndentStr(i)).append("invalidatable = P.boxAsJs(value);\n")
+                    .append(getIndentStr(--i)).append("}\n")
+                    .append(getIndentStr(i)).append("return invalidatable;\n");
+        } else {
+            sb.append(getIndentStr(++i));
+            sb.append("var value = ").append(DELEGATE_OBJECT).append(".").append(property.name).append(";\n");
+            sb.append(getIndentStr(i));
+            sb.append("return P.boxAsJs(value);\n");
+        }
         sb.append(getIndentStr(--i));
         sb.append("}");
         if (property.writeable) {
@@ -428,7 +453,7 @@ public class Classes2Scripts {
         for (int p = 0; p < methodParams.length; p++) {
             Parameter param = methodParams[p];
             String pName = param.getName();
-            if(methodAnnotation != null && p < methodAnnotation.params().length){
+            if (methodAnnotation != null && p < methodAnnotation.params().length) {
                 pName = methodAnnotation.params()[p];
             }
             sb.append(delimiter).append(pName);
@@ -457,7 +482,7 @@ public class Classes2Scripts {
         return sb.toString();
     }
 
-    private String getPropertyJsDoc(String namespace, PropBox property, int indent) {
+    private String getPropertyJsDoc(String namespace, MethodedPropBox property, int indent) {
         String jsDoc = property.jsDoc == null || property.jsDoc.isEmpty() ? DEFAULT_PROPERTY_JS_DOC : property.jsDoc;
         jsDoc = formJsDoc(jsDoc);
         jsDoc = appendLine2JsDoc(jsDoc, "@property " + property.name);
@@ -509,18 +534,26 @@ public class Classes2Scripts {
     }
 
     private String getPropsAndMethodsPart(Class clazz, int ident) {
-        FunctionInfo ci = getJsConstructorInfo(clazz);
-        Map<String, PropertiesUtils.PropBox> props = new HashMap<>();
-        List<Method> methods = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
+        boolean invalidatable = false;
+        if (HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz)) {
+            sb.append(INVALIDATOR_PART);
+            invalidatable = true;
+        }
+        FunctionInfo ci = getJsConstructorInfo(clazz);
+        Map<String, MethodedPropBox> props = new HashMap<>();
+        List<Method> methods = new ArrayList<>();
+
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(ScriptFunction.class)) {
                 if (PropertiesUtils.isBeanPatternMethod(method)) {
                     String propName = PropertiesUtils.getPropertyName(method.getName());
-                    PropertiesUtils.PropBox pb = props.get(propName);
+                    MethodedPropBox pb = props.get(propName);
                     if (pb == null) {
-                        pb = new PropertiesUtils.PropBox();
+                        pb = new MethodedPropBox();
                         pb.name = propName;
+                        pb.method = method;
+                        pb.invalidatable = invalidatable;
                         props.put(pb.name, pb);
                     }
                     PropertiesUtils.setPropertyAccessStatus(pb, method.getName());
@@ -533,13 +566,18 @@ public class Classes2Scripts {
                 }
             }
         }
-        for (PropBox property : props.values()) {
+        for (MethodedPropBox property : props.values()) {
             sb.append(getPropertyPart(ci.name, property, ident));
             sb.append("\n");//NOI18N
         }
+        Set<String> generatedMethods = new HashSet<>();
         for (Method method : methods) {
+            if (generatedMethods.contains(method.getName())) {
+                throw new IllegalStateException("API Method \"" + method + "\" is duplicated.");
+            }
             sb.append(getMethodPart(ci.name, method, ident));
             sb.append("\n");//NOI18N
+            generatedMethods.add(method.getName());
         }
         return sb.toString();
     }

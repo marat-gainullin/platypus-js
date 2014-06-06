@@ -74,7 +74,7 @@
         /**
         * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
         * @param sqlText SQL text for the new entity.
-        * @param dbId the concrete database ID (optional).
+        * @param dbId Optional. the concrete database ID (optional).
         * @return an entity instance.
          * @method executeSql
          * @memberOf ApplicationDbModel
@@ -83,20 +83,6 @@
             get: function() {
                 return function(sqlText, datasourceName) {
                     var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Executed sql query. This method works only in two tier components of a system.
-         * @method executeSql
-         * @memberOf ApplicationDbModel
-         */
-        Object.defineProperty(this, "executeSql", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.executeSql(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }

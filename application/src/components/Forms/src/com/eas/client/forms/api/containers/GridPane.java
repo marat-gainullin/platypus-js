@@ -67,18 +67,18 @@ public class GridPane extends Container<JPanel> {
         }
     }
 
-    private static final String CHILD_JSDOC = ""
+    private static final String GRID_CHILD_JSDOC = ""
             + "/**\n"
             + "* Gets the component with the specified row and column.\n"
             + "* @param row the row of the component\n"
             + "* @param column the column of the component\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"row", "column"})
+    @ScriptFunction(jsDoc = GRID_CHILD_JSDOC, params = {"row", "column"})
     public Component<?> child(int aRow, int aCol) {
         int index = aRow * layout.getColumns() + aCol;
         if (index >= 0 && index < getCount()) {
-            return super.child(index);
+            return getComponentWrapper(delegate.getComponent(index));
         } else {
             return null;
         }

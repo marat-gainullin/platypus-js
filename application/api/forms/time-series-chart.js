@@ -242,6 +242,18 @@
         });
 
         /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf TimeSeriesChart
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
         * Height of the component.
          * @property height
          * @memberOf TimeSeriesChart
@@ -253,18 +265,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf TimeSeriesChart
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
@@ -359,21 +359,6 @@
         });
 
         /**
-        * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf TimeSeriesChart
-        */
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf TimeSeriesChart
@@ -385,6 +370,21 @@
             },
             set: function(aValue) {
                 delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Key released event handler function.
+         * @property onKeyReleased
+         * @memberOf TimeSeriesChart
+        */
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
 

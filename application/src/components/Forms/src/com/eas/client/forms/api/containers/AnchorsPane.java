@@ -92,6 +92,12 @@ public class AnchorsPane extends Container<JPanel> {
         Ordering.toFront(delegate, aComp, aCount);
     }
 
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
+    @Override
+    public Component<?> child(int aIndex) {
+        return super.child(aIndex);
+    }
+
     private static final String TO_BACK_JSDOC = ""
             + "/**\n"
             + "* Brings the specified component to back on this panel.\n"

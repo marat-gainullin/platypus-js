@@ -83,16 +83,9 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
-            + " * Requeries model data with callback.\n"
-            + " */")
-    public void requery(JSObject aOnSuccess) throws Exception {
-        requery(aOnSuccess, null);
-    }
-
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * Requeries model data with callback.\n"
-            + " */")
+            + " * Requeries model data. Calls onSuccess callback when complete and onError callback if error occured.\n"
+            + " */",
+            params = {"onSuccess", "onFailure"})
     @Override
     public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         changeLog.clear();

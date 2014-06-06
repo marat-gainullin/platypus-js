@@ -235,10 +235,6 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.clearSelection();
     }
 
-    @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC)
-    public boolean makeVisible(Row aRow) throws Exception {
-        return delegate.makeVisible(aRow);
-    }
     private static final String MAKE_VISIBLE_JSDOC = ""
             + "/**\n"
             + "* Makes specified row visible.\n"
@@ -247,8 +243,8 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC)
-    public boolean makeVisible(Row aRow, boolean need2Select) throws Exception {
-        return delegate.makeVisible(aRow, need2Select);
+    public boolean makeVisible(Row aRow, Boolean need2Select) throws Exception {
+        return delegate.makeVisible(aRow, need2Select != null ? need2Select : false);
     }
     private static final String CELLS_JSDOC = ""
             + "/**\n"

@@ -640,23 +640,25 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         return rowset.isEmpty();
     }
 
-    private static final String DELETE_ROW_AT_CURSOR_JSDOC = ""
+    private static final String DELETE_ROW_JSDOC = ""
             + "/**\n"
-            + " * Deletes the row at the cursor position.\n"
+            + " * Deletes the row by cursor position or by row itself.\n"
+            + " * @param aCursorPosOrInstance row position in terms of cursor API (1-based)"
+            + "| row instance itself. Note! If no cursor position or instance is passed,"
+            + "then row at current cursor position will b e deleted.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = DELETE_ROW_AT_CURSOR_JSDOC)
-    public boolean deleteRow() throws Exception {
-        return delete();
+    @ScriptFunction(jsDoc = DELETE_ROW_JSDOC, params = {"aCursorPosOrInstance"})
+    public boolean deleteRow(Object aCursorPosOrInstance) throws Exception {
+        if(aCursorPosOrInstance instanceof Row){
+            return deleteRow((Row)aCursorPosOrInstance);
+        }else if(aCursorPosOrInstance instanceof Number){
+            return deleteRow(((Number)aCursorPosOrInstance).intValue());
+        }else{
+            return delete();
+        }
     }
-
-    private static final String DELETE_ROW_BY_INDEX_JSDOC = ""
-            + "/**\n"
-            + " * Deletes the row by cursor position.\n"
-            + " * @param aCusorPos row position in terms of cursor API. 1-based.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = DELETE_ROW_BY_INDEX_JSDOC, params = {"aCusorPos"})
+    
     public boolean deleteRow(int aCursorIndex) throws Exception {
         if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
             rowset.deleteAt(aCursorIndex);
@@ -666,13 +668,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    private static final String DELETE_ROW_BY_ROW_JSDOC = ""
-            + "/**\n"
-            + " * Deletes the row passed in.\n"
-            + " * @param aRow A row to be deleted.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = DELETE_ROW_BY_ROW_JSDOC, params = {"aRow"})
     public boolean deleteRow(Row aRow) throws Exception {
         if (aRow != null) {
             int oldSize = rowset.size();

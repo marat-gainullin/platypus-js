@@ -38,28 +38,14 @@
         });
 
         /**
-         * Requeries model data with callback.
+         * Requeries model data. Calls onSuccess callback when complete and onError callback if error occured.
          * @method requery
          * @memberOf ApplicationPlatypusModel
          */
         Object.defineProperty(this, "requery", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.requery(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Requeries model data with callback.
-         * @method requery
-         * @memberOf ApplicationPlatypusModel
-         */
-        Object.defineProperty(this, "requery", {
-            get: function() {
-                return function(arg0, arg1) {
-                    var value = delegate.requery(P.boxAsJava(arg0), P.boxAsJava(arg1));
+                return function(onSuccess, onFailure) {
+                    var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
                     return P.boxAsJs(value);
                 };
             }

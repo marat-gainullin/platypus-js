@@ -198,9 +198,24 @@ P.ServerModule = function(aModuleName) {
     P.boxAsJs = function(aValue) {
         if (aValue) {
             if (aValue.getPublished) {
-                aValue = aValue.getPublished();
+                if(arguments.length > 1) {
+                    var elementClass = arguments[1];
+                    aValue = aValue.getPublished(new elementClass());
+                } else {
+                    aValue = aValue.getPublished();
+                }
             } else if (aValue instanceof JavaDate) {
                 aValue = new Date(aValue.time);
+            } else if(Array.isArray(aValue)){
+                var converted = [];
+                for(var i = 0; i < aValue.length; i++) {
+                    if(arguments.length > 1) {
+                        converted[converted.length] = P.boxAsJs(aValue[i], arguments[1]);
+                    } else {
+                        converted[converted.length] = P.boxAsJs(aValue[i]);
+                    }
+                }
+                return converted;
             }
         }
         return aValue;

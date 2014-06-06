@@ -435,10 +435,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                 if (result instanceof Rowset) {
                     writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
                 } else if (result instanceof String) {
-                    writeResponse((String) result, aHttpResponse, TEXT_CONTENTTYPE);
+                    writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                 } else if (result instanceof JSObject) {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
-                } else if (result != null) {
+                } else {// including null result
                     writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), aHttpResponse);
                 }
             } else if (aPlatypusResponse instanceof AppQueryResponse) {

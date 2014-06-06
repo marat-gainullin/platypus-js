@@ -98,12 +98,6 @@ public class ScrollPane extends Container<JScrollPane> {
         return 1;// to avoid swing's viewports to be included in results
     }
 
-    private static final String CHILD_JSDOC = ""
-            + "/**\n"
-            + "* Gets the container's child component.\n"
-            + "* @return the child component\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = CHILD_JSDOC)
     @Override
     public Component<?> child(int aIndex) {

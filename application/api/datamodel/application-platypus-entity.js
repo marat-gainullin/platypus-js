@@ -322,15 +322,16 @@
         });
 
         /**
-        * Checks if cursor in the position before the first row.
-        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
+        * Positions the rowset cursor on the specified row number. Row number is 1-based.
+        * @param index the row index to check, starting form <code>1</code>.
+        * @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.
+         * @method pos
          * @memberOf ApplicationPlatypusEntity
         */
-        Object.defineProperty(this, "eof", {
+        Object.defineProperty(this, "pos", {
             get: function() {
-                return function() {
-                    var value = delegate.eof();
+                return function(index) {
+                    var value = delegate.pos(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }
@@ -352,6 +353,21 @@
         });
 
         /**
+        * Checks if cursor in the position before the first row.
+        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
+         * @memberOf ApplicationPlatypusEntity
+        */
+        Object.defineProperty(this, "eof", {
+            get: function() {
+                return function() {
+                    var value = delegate.eof();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
         * Moves the rowset cursor to the last row.
         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method last
@@ -361,22 +377,6 @@
             get: function() {
                 return function() {
                     var value = delegate.last();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Positions the rowset cursor on the specified row number. Row number is 1-based.
-        * @param index the row index to check, starting form <code>1</code>.
-        * @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.
-         * @method pos
-         * @memberOf ApplicationPlatypusEntity
-        */
-        Object.defineProperty(this, "pos", {
-            get: function() {
-                return function(index) {
-                    var value = delegate.pos(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }
@@ -399,44 +399,28 @@
         });
 
         /**
-         * Deletes the row at the cursor position.
-         * @method deleteRow
+        * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
          * @memberOf ApplicationPlatypusEntity
-         */
-        Object.defineProperty(this, "deleteRow", {
+        */
+        Object.defineProperty(this, "beforeFirst", {
             get: function() {
                 return function() {
-                    var value = delegate.deleteRow();
+                    var value = delegate.beforeFirst();
                     return P.boxAsJs(value);
                 };
             }
         });
 
         /**
-         * Deletes the row by cursor position.
-         * @param aCusorPos row position in terms of cursor API. 1-based.
-         * @method deleteRow
+        * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
          * @memberOf ApplicationPlatypusEntity
-         */
-        Object.defineProperty(this, "deleteRow", {
+        */
+        Object.defineProperty(this, "afterLast", {
             get: function() {
-                return function(aCusorPos) {
-                    var value = delegate.deleteRow(P.boxAsJava(aCusorPos));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Deletes the row passed in.
-         * @param aRow A row to be deleted.
-         * @method deleteRow
-         * @memberOf ApplicationPlatypusEntity
-         */
-        Object.defineProperty(this, "deleteRow", {
-            get: function() {
-                return function(aRow) {
-                    var value = delegate.deleteRow(P.boxAsJava(aRow));
+                return function() {
+                    var value = delegate.afterLast();
                     return P.boxAsJs(value);
                 };
             }
@@ -473,28 +457,31 @@
         });
 
         /**
-        * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will b e deleted.
+         * @method deleteRow
          * @memberOf ApplicationPlatypusEntity
-        */
-        Object.defineProperty(this, "beforeFirst", {
+         */
+        Object.defineProperty(this, "deleteRow", {
             get: function() {
-                return function() {
-                    var value = delegate.beforeFirst();
+                return function(aCursorPosOrInstance) {
+                    var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
                     return P.boxAsJs(value);
                 };
             }
         });
 
         /**
-        * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
+        * Creates an instance of comparator object using specified constraints objects.
+        * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+        * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
          * @memberOf ApplicationPlatypusEntity
         */
-        Object.defineProperty(this, "afterLast", {
+        Object.defineProperty(this, "createSorting", {
             get: function() {
-                return function() {
-                    var value = delegate.afterLast();
+                return function(arg0) {
+                    var value = delegate.createSorting(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }
@@ -558,22 +545,6 @@
             get: function() {
                 return function(onSuccessCallback, onFailureCallback) {
                     var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Creates an instance of comparator object using specified constraints objects.
-        * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-        * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationPlatypusEntity
-        */
-        Object.defineProperty(this, "createSorting", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.createSorting(P.boxAsJava(arg0));
                     return P.boxAsJs(value);
                 };
             }

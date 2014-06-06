@@ -240,6 +240,12 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, VerticalPosition.CENTER);
     }
 
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
+    @Override
+    public Component<?> child(int aIndex) {
+        return super.child(aIndex);
+    }
+
     @Override
     public Object getPublished() {
         if (published == null) {

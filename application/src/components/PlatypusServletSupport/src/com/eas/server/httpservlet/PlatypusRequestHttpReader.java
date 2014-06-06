@@ -46,7 +46,6 @@ import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -142,6 +141,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     @Override
     public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
         if (isApiUri(rqUri)) {
+            // pure http
             String moduleName = httpRequest.getParameter(PlatypusHttpRequestParams.MODULE_NAME);
             if (moduleName == null || moduleName.isEmpty()) {
                 throw new IllegalArgumentException(MODULE_NAME_PARAMETER_MISSING_MSG);
@@ -154,15 +154,15 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
             rq.setMethodName(methodName);
             String param = httpRequest.getParameter(PlatypusHttpRequestParams.PARAMETER);
             if (param != null) {
-                rq.setArguments(new Object[]{tryParseJson(param)});
+                rq.setArguments(new Object[]{ScriptUtils.parseDates(tryParseJson(param))});
             } else {
                 String[] params = httpRequest.getParameterValues(PlatypusHttpRequestParams.PARAMETER + ARGUMENTS_ARRAY_PARAM_SUFFIX);
                 if (params != null) {
-                    List<Object> paramsList = new ArrayList<>();
-                    for (int i = 0; i < params.length; i++) {
-                        paramsList.add(tryParseJson(params[i]));
+                    List<Object> argsList = new ArrayList<>();
+                    for (String arg : params) {
+                        argsList.add(ScriptUtils.parseDates(tryParseJson(arg)));
                     }
-                    rq.setArguments(paramsList.toArray());
+                    rq.setArguments(argsList.toArray());
                 } else {
                     rq.setArguments(new Object[]{});
                 }

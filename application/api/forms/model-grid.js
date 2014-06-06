@@ -152,6 +152,18 @@
         });
 
         /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf ModelGrid
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
         * Height of the component.
          * @property height
          * @memberOf ModelGrid
@@ -163,18 +175,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelGrid
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
@@ -224,21 +224,6 @@
         });
 
         /**
-        * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf ModelGrid
-        */
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf ModelGrid
@@ -250,6 +235,21 @@
             },
             set: function(aValue) {
                 delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Key released event handler function.
+         * @property onKeyReleased
+         * @memberOf ModelGrid
+        */
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
 
@@ -821,16 +821,15 @@
         });
 
         /**
-        * Makes specified row visible.
-        * @param row the row to make visible.
-        * @param need2select true to select the row (optional).
-         * @method makeVisible
+        * Shows find dialog.
+        * @deprecated Use find() instead. 
+         * @method findSomething
          * @memberOf ModelGrid
         */
-        Object.defineProperty(this, "makeVisible", {
+        Object.defineProperty(this, "findSomething", {
             get: function() {
-                return function(arg0) {
-                    var value = delegate.makeVisible(P.boxAsJava(arg0));
+                return function() {
+                    var value = delegate.findSomething();
                     return P.boxAsJs(value);
                 };
             }
@@ -862,21 +861,6 @@
             get: function() {
                 return function(row) {
                     var value = delegate.unselect(P.boxAsJava(row));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-        * Shows find dialog.
-        * @deprecated Use find() instead. 
-         * @method findSomething
-         * @memberOf ModelGrid
-        */
-        Object.defineProperty(this, "findSomething", {
-            get: function() {
-                return function() {
-                    var value = delegate.findSomething();
                     return P.boxAsJs(value);
                 };
             }

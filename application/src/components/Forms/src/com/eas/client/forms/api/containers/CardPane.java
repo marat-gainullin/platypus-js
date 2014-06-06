@@ -63,12 +63,6 @@ public class CardPane extends Container<JPanel> {
         }
     }
 
-    private static final String CHILD_JSDOC = ""
-            + "/**\n"
-            + "* Gets the component with the specified name from the container.\n"
-            + "* @param cardName the card name\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"name"})
     public Component<?> child(String aCardName) {
         PlatypusCardLayout layout = (PlatypusCardLayout) delegate.getLayout();

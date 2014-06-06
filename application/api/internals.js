@@ -40,9 +40,8 @@
 
     var parseDates = function(aObject) {
         if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
-            var timestamp = Date.parse(aObject);
-            if (!isNaN(timestamp)) {
-                return new Date(timestamp);
+            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test('' + aObject)){
+                return new Date('' + aObject);
             }
         } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
             for (var prop in aObject) {

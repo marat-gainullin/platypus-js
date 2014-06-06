@@ -16,11 +16,11 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Anchors implements HasPublished {
 
-    @ScriptFunction(params = {"left", "width", "right", "top", "height", "bottom"}, jsDoc = "/**\n"
-            + "* Component's binding anchors for anchors layout.\n"
-            + "* Two anchor binding of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>."
-            + "* Parameters values can be provided in pixels, for this set values as a <code>Number</code> or <code>string</code> with 'px' suffix, e.g. '30px'.\n"
-            + "* Also they can be provided in procents with usage of '%' suffixes, e.g. '10%'.\n"
+    @ScriptFunction(params = {"left", "width", "right", "top", "height", "bottom"}, jsDoc = ""
+            + "/**\n"
+            + "* Component's layout anchors for AnchorsPane.\n"
+            + "* Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>."
+            + "* Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.\n"
             + "* @param left a left anchor\n"
             + "* @param width a width value\n"
             + "* @param right a right anchor\n"

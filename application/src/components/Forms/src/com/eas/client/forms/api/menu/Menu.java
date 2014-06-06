@@ -57,13 +57,6 @@ public class Menu extends Container<JMenu> {
         return parent;
     }
 
-    private static final String CHILD_JSDOC = ""
-            + "/**\n"
-            + "* Gets the child item component whith specified index.\n"
-            + "* @param index the component's index in the container.\n"
-            + "* @return the child component\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
     @Override
     public Component<?> child(int aIndex) {

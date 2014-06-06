@@ -113,6 +113,12 @@ public class AbsolutePane extends Container<JPanel> {
         Ordering.toBack(delegate, aComp, aCount);
     }
 
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
+    @Override
+    public Component<?> child(int aIndex) {
+        return super.child(aIndex);
+    }
+
     @Override
     public Object getPublished() {
         if (published == null) {
