@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace TimeSeriesChart
+     * @constructor TimeSeriesChart TimeSeriesChart
      */
     P.TimeSeriesChart = function () {
 
@@ -242,18 +242,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf TimeSeriesChart
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf TimeSeriesChart
@@ -265,6 +253,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf TimeSeriesChart
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

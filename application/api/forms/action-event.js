@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ActionEvent
+     * @constructor ActionEvent ActionEvent
      */
     P.ActionEvent = function () {
 

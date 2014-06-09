@@ -6,7 +6,7 @@
     
     /**
      * 
-     * @namespace Report
+     * @constructor Report Report
      */
     P.Report = function (aReport, aFormat, aName) {
 

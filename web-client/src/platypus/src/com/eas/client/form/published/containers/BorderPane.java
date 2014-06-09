@@ -220,7 +220,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
 				}else
 					published.remove(published.leftComponent);
 			}
@@ -232,7 +232,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
 				}else
 					published.remove(published.topComponent);
 			}
@@ -244,7 +244,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
 				}else
 					published.remove(published.rightComponent);
 			}
@@ -256,7 +256,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
 				}else
 					published.remove(published.bottomComponent);
 			}
@@ -268,32 +268,59 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			},
 			set : function(aChild) {
 				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap(), 32);
+				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
 				}else
 					published.remove(published.centerComponent);
 			}
 		});
 		published.add = function(toAdd, region, aSize) {
 			if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined){
-				if (aSize == undefined || aSize == null) {
-					aSize = 32;
-				}
-				if(!region)
+				if(toAdd.parent == published)
+					throw 'A widget already added to this container';
+				if(!region){
 					region = $wnd.P.VerticalPosition.CENTER;
+				}
+				if(published.centerComponent){
+					throw 'No widget can be added after center widget';
+				}
 				switch (region) {
 					case $wnd.P.VerticalPosition.CENTER:
 						aWidget.@com.eas.client.form.published.containers.BorderPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 						break;  
 					case $wnd.P.VerticalPosition.TOP: 
+						if (!aSize) {
+							aSize = toAdd.height;
+							if (!aSize) {
+								aSize = 32;
+							}
+						}
 						aWidget.@com.eas.client.form.published.containers.BorderPane::addNorth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.VerticalPosition.BOTTOM: 
+						if (!aSize) {
+							aSize = toAdd.height;
+							if (!aSize) {
+								aSize = 32;
+							}
+						}
 						aWidget.@com.eas.client.form.published.containers.BorderPane::addSouth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.HorizontalPosition.LEFT: 
+						if (!aSize) {
+							aSize = toAdd.width;
+							if (!aSize) {
+								aSize = 32
+							}
+						}
 						aWidget.@com.eas.client.form.published.containers.BorderPane::addWest(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.HorizontalPosition.RIGHT: 
+						if (!aSize) {
+							aSize = toAdd.width;
+							if (!aSize) {
+								aSize = 32
+							}
+						}
 						aWidget.@com.eas.client.form.published.containers.BorderPane::addEast(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 				}

@@ -8,7 +8,7 @@
      * A container with Border Layout.
      * @param hgap the horizontal gap (optional).
      * @param vgap the vertical gap (optional).
-     * @namespace BorderPane
+     * @constructor BorderPane BorderPane
      */
     P.BorderPane = function (hgap, vgap) {
 
@@ -278,18 +278,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf BorderPane
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf BorderPane
@@ -301,6 +289,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf BorderPane
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

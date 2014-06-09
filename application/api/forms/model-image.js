@@ -6,7 +6,7 @@
     
     /**
      * A model component that shows an image.
-     * @namespace ModelImage
+     * @constructor ModelImage ModelImage
      */
     P.ModelImage = function () {
 
@@ -315,18 +315,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelImage
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf ModelImage
@@ -338,6 +326,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf ModelImage
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

@@ -7,7 +7,7 @@
     /**
     * <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.
     * @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).
-     * @namespace ToolBar
+     * @constructor ToolBar ToolBar
     */
     P.ToolBar = function () {
 
@@ -277,18 +277,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ToolBar
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf ToolBar
@@ -300,6 +288,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf ToolBar
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

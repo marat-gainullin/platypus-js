@@ -8,7 +8,7 @@
     * A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.
     * @param hgap the horizontal gap (optional).
     * @param vgap the vertical gap (optional).
-     * @namespace CardPane
+     * @constructor CardPane CardPane
     */
     P.CardPane = function (hgap, vgap) {
 
@@ -278,18 +278,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf CardPane
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf CardPane
@@ -301,6 +289,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf CardPane
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

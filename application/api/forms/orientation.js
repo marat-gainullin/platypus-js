@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Orientation
+     * @constructor Orientation Orientation
      */
     P.Orientation = function () {
 

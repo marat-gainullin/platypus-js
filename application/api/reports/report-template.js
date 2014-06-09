@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ReportTemplate
+     * @constructor ReportTemplate ReportTemplate
      */
     P.ReportTemplate = function () {
 

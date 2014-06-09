@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace EntityInstanceInsertEvent
+     * @constructor EntityInstanceInsertEvent EntityInstanceInsertEvent
      */
     P.EntityInstanceInsertEvent = function () {
 

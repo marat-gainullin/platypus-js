@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Insert
+     * @constructor Insert Insert
      */
     P.Insert = function () {
 

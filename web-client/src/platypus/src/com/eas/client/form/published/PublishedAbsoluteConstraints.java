@@ -34,4 +34,8 @@ public class PublishedAbsoluteConstraints extends JavaScriptObject {
 		}
 		return null;
 	}-*/;
+	
+	public static native PublishedAbsoluteConstraints createDefaultAnchors()/*-{
+		return {left: '0px', top: '0px', width: '10px', height: '10px'};
+	}-*/;
 }

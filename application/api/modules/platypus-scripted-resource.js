@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace PlatypusScriptedResource
+     * @constructor PlatypusScriptedResource PlatypusScriptedResource
      */
     P.PlatypusScriptedResource = function () {
 

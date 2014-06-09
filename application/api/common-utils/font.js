@@ -9,7 +9,7 @@
     * @param family a font family name, e.g. 'SansSerif'
     * @param style a FontStyle object
     * @param size the size of the font
-     * @namespace Font
+     * @constructor Font Font
     */
     P.Font = function (family, style, size) {
 

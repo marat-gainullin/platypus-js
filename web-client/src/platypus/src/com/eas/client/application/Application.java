@@ -563,7 +563,7 @@ public class Application {
 			if(!aTarget)
 				aTarget = {};
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
-			var nativeModel = aModel.unwrap();
+			var nativeModel = !!aModel ? aModel.unwrap() : null;
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			return aTarget;

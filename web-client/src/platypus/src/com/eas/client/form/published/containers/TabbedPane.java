@@ -174,6 +174,8 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 		});
 		published.add = function(toAdd, aTabTitle, aTabIcon){
 			if(toAdd && toAdd.unwrap){
+				if(toAdd.parent == published)
+					throw 'A widget already added to this container';
 				if(!aTabTitle)
 					aTabTitle = "";
 				if(!aTabIcon)

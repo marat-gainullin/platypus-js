@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Field
+     * @constructor Field Field
      */
     P.Field = function () {
 

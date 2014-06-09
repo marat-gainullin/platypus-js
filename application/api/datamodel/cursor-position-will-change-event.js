@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace CursorPositionWillChangeEvent
+     * @constructor CursorPositionWillChangeEvent CursorPositionWillChangeEvent
      */
     P.CursorPositionWillChangeEvent = function () {
 

@@ -7,7 +7,7 @@
     /**
     * HTML area component. 
     * @param text the initial text for the HTML area (optional)
-     * @namespace HtmlArea
+     * @constructor HtmlArea HtmlArea
     */
     P.HtmlArea = function (text) {
 
@@ -273,18 +273,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf HtmlArea
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf HtmlArea
@@ -296,6 +284,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf HtmlArea
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

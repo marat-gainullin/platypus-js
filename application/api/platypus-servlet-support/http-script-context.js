@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace HttpScriptContext
+     * @constructor HttpScriptContext HttpScriptContext
      */
     P.HttpScriptContext = function () {
 

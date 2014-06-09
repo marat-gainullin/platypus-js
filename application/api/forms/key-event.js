@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace KeyEvent
+     * @constructor KeyEvent KeyEvent
      */
     P.KeyEvent = function () {
 

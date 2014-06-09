@@ -7,7 +7,7 @@
     /**
     * Style object. Can inherit propeties from the parent style object.
     * @param parent a parent <code>Style</code> (optional)
-     * @namespace Style
+     * @constructor Style Style
     */
     P.Style = function (parent) {
 

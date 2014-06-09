@@ -9,7 +9,7 @@
     * @param text the text of the component (optional).
     * @param selected <code>true</code> if selected (optional).
     * @param actionPerformed On action performed function (optional).
-     * @namespace CheckMenuItem
+     * @constructor CheckMenuItem CheckMenuItem
     */
     P.CheckMenuItem = function (text, selected, actionPerformed) {
 
@@ -269,18 +269,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf CheckMenuItem
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf CheckMenuItem
@@ -292,6 +280,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf CheckMenuItem
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ApplicationDbModel
+     * @constructor ApplicationDbModel ApplicationDbModel
      */
     P.ApplicationDbModel = function () {
 

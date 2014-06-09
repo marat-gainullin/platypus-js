@@ -6,7 +6,7 @@
     
     /**
     * An implementation of a popup menu -- a small window that pops up and displays a series of choices.
-     * @namespace PopupMenu
+     * @constructor PopupMenu PopupMenu
     */
     P.PopupMenu = function () {
 
@@ -276,18 +276,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf PopupMenu
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf PopupMenu
@@ -299,6 +287,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf PopupMenu
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

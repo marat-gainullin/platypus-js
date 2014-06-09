@@ -60,6 +60,8 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade {
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap) {
+				if(toAdd.buttonGroup == published)
+					throw 'A widget already added to this group';
 				aWidget.@com.eas.client.form.published.containers.ButtonGroup::add(Lcom/eas/client/form/published/HasPublished;)(toAdd.unwrap());
 			}
 		}

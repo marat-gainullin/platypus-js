@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Form
+     * @constructor Form Form
      */
     P.Form = function () {
 
@@ -209,18 +209,6 @@
         });
 
         /**
-         * The shown forms registry change event handler function.
-         * @property onChange
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "onChange", {
-            get: function() {
-                var value = delegate.onChange;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
          * The handler function for the form's <i>after maximize</i> event.
          * @property onWindowMaximized
          * @memberOf Form
@@ -232,6 +220,18 @@
             },
             set: function(aValue) {
                 delegate.onWindowMaximized = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * The shown forms registry change event handler function.
+         * @property onChange
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "onChange", {
+            get: function() {
+                var value = delegate.onChange;
+                return P.boxAsJs(value);
             }
         });
 
@@ -251,21 +251,6 @@
         });
 
         /**
-         * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-         * @property formKey
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * The handler function for the form's <i>after restore</i> event.
          * @property onWindowRestored
          * @memberOf Form
@@ -277,6 +262,21 @@
             },
             set: function(aValue) {
                 delegate.onWindowRestored = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+         * @property formKey
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = P.boxAsJava(aValue);
             }
         });
 
@@ -425,21 +425,6 @@
         });
 
         /**
-         * Shows the form as a dialog (modal window).
-         * @param callback a callback handler function
-         * @method showModal
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "showModal", {
-            get: function() {
-                return function(callback) {
-                    var value = delegate.showModal(P.boxAsJava(callback));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
          * Shows the form as an ordinary window.
          * @method show
          * @memberOf Form
@@ -468,30 +453,15 @@
         });
 
         /**
-         * Gets a shown form by its key.
-         * @param key a form key identifier
-         * @return a form from the open forms registry
-         * @method getShownForm
+         * Shows the form as a dialog (modal window).
+         * @param callback a callback handler function
+         * @method showModal
          * @memberOf Form
          */
-        Object.defineProperty(this, "getShownForm", {
+        Object.defineProperty(this, "showModal", {
             get: function() {
-                return function(key) {
-                    var value = delegate.getShownForm(P.boxAsJava(key));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Minimizes this form.
-         * @method minimize
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "minimize", {
-            get: function() {
-                return function() {
-                    var value = delegate.minimize();
+                return function(callback) {
+                    var value = delegate.showModal(P.boxAsJava(callback));
                     return P.boxAsJs(value);
                 };
             }
@@ -506,6 +476,20 @@
             get: function() {
                 return function() {
                     var value = delegate.maximize();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Minimizes this form.
+         * @method minimize
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "minimize", {
+            get: function() {
+                return function() {
+                    var value = delegate.minimize();
                     return P.boxAsJs(value);
                 };
             }
@@ -535,6 +519,22 @@
             get: function() {
                 return function(desktop) {
                     var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Gets a shown form by its key.
+         * @param key a form key identifier
+         * @return a form from the open forms registry
+         * @method getShownForm
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "getShownForm", {
+            get: function() {
+                return function(key) {
+                    var value = delegate.getShownForm(P.boxAsJava(key));
                     return P.boxAsJs(value);
                 };
             }

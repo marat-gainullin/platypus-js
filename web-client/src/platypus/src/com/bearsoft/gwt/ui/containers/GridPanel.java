@@ -147,8 +147,7 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
     @Override
     public Widget getWidget(int row, int column) {
         Widget w = super.getWidget(row, column);
-        assert w instanceof SimplePanel;
-        return ((SimplePanel) w).getWidget();
+        return w instanceof SimplePanel ? ((SimplePanel) w).getWidget() : null;
     }
 
     @Override

@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace FontStyle
+     * @constructor FontStyle FontStyle
      */
     P.FontStyle = function () {
 

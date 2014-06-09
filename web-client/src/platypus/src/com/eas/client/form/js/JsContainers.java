@@ -11,8 +11,7 @@ public class JsContainers {
 		// ***************************************************
 		$wnd.P.BorderPane = function(aVGap, aHGap) {
 			var aComponent = arguments.length > 2 ? arguments[2] : null;
-			if(!aComponent)
-			{
+			if(!aComponent){
 				if(!aVGap)
 					aVGap = 0;
 				if(!aHGap)
@@ -68,8 +67,7 @@ public class JsContainers {
 			};
 			publishComponentProperties(published);
 			
-			if(arguments.length <= 4)
-			{
+			if(arguments.length <= 4){
 				if (aRows == undefined) {
 					throw "aRows argument is required!"
 				}
@@ -92,8 +90,7 @@ public class JsContainers {
 				throw  ' use  "new P.BoxPane()" !';
 			}
 			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if(!aComponent)
-			{
+			if(!aComponent){
 				if(!aOrientation)
 					aOrientation = $wnd.P.Orientation.HORIZONTAL;
 				aComponent = aOrientation == $wnd.P.Orientation.VERTICAL ? @com.eas.client.form.published.containers.VBoxPane::new()() : @com.eas.client.form.published.containers.HBoxPane::new()();
@@ -108,6 +105,8 @@ public class JsContainers {
 			
 			published.add = function(toAdd){
 				if(toAdd && toAdd.unwrap){
+					if(toAdd.parent == published)
+						throw 'A widget already added to this container';
 					if (aOrientation == $wnd.P.Orientation.VERTICAL) {
 						aComponent.@com.eas.client.form.published.containers.VBoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 					} else { 

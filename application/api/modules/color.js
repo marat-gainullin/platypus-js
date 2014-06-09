@@ -9,7 +9,7 @@
     * @param red Green compontent (optional)
     * @param red Blue compontent (optional)
     * @param red Alpha compontent (optional)
-     * @namespace Color
+     * @constructor Color Color
     */
     P.Color = function (red, green, blue, alpha) {
 
@@ -110,24 +110,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property BLACK
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "BLACK", {
-            get: function() {
-                var value = delegate.BLACK;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property MAGENTA
          * @memberOf Color
          */
         Object.defineProperty(this, "MAGENTA", {
             get: function() {
                 var value = delegate.MAGENTA;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property BLACK
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "BLACK", {
+            get: function() {
+                var value = delegate.BLACK;
                 return P.boxAsJs(value);
             }
         });
@@ -146,24 +146,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property CYAN
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "CYAN", {
-            get: function() {
-                var value = delegate.CYAN;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property DARK_GRAY
          * @memberOf Color
          */
         Object.defineProperty(this, "DARK_GRAY", {
             get: function() {
                 var value = delegate.DARK_GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property CYAN
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "CYAN", {
+            get: function() {
+                var value = delegate.CYAN;
                 return P.boxAsJs(value);
             }
         });

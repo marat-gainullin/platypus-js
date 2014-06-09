@@ -9,7 +9,7 @@
     * that is displayed when the user selects an item on the MenuBar.
     * In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.
     * @param text the text for the menu label (optional).
-     * @namespace Menu
+     * @constructor Menu Menu
     */
     P.Menu = function (text) {
 
@@ -294,18 +294,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf Menu
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf Menu
@@ -317,6 +305,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf Menu
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

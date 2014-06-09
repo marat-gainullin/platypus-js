@@ -977,11 +977,9 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 	
 	public static native JavaScriptObject publishFieldsFacade(Fields aFields, Entity aEntity) throws Exception/*-{
-		if(aFields != null)
-		{
+		if(aFields != null){
 			var published = aFields.@com.bearsoft.rowset.metadata.Fields::getPublished()();
-			if(published == null)
-			{
+			if(published == null){
 				published = {
 					getFieldsCount : function() {
 						return aFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();

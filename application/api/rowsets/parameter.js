@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Parameter
+     * @constructor Parameter Parameter
      */
     P.Parameter = function () {
 

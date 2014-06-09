@@ -1,5 +1,8 @@
 load("classpath:internals.js");
-
+/** 
+ * Platypus library namespace global variable.
+ * @namespace P
+ */
 (function() {
     // this === global;
     var global = this;
@@ -18,8 +21,18 @@ load("classpath:internals.js");
      */
 })();
 
+P.HTML5 = "Html5 client";
+P.J2SE = "Java SE client/server environment";
+P.agent = P.J2SE; 
 load("classpath:deps.js");
 
+/**
+ * @static
+ * @param {type} deps
+ * @param {type} aOnSuccess
+ * @param {type} aOnFailure
+ * @returns {undefined}
+ */
 P.require = function(deps, aOnSuccess, aOnFailure) {
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
     try {
@@ -81,6 +94,12 @@ P.require = function(deps, aOnSuccess, aOnFailure) {
     });
 })();
 
+/**
+ * @static
+ * @param {type} aName
+ * @param {type} aTarget
+ * @returns {P.loadModel.publishTo}
+ */
 P.loadModel = function(aName, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
@@ -94,6 +113,13 @@ P.loadModel = function(aName, aTarget) {
     return publishTo;
 };
 
+/**
+ * @static
+ * @param {type} aName
+ * @param {type} aModel
+ * @param {type} aTarget
+ * @returns {P.loadForm.publishTo}
+ */
 P.loadForm = function(aName, aModel, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
@@ -112,6 +138,13 @@ P.loadForm = function(aName, aModel, aTarget) {
     return publishTo;
 };
 
+/**
+ * @static
+ * @param {type} aName
+ * @param {type} aModel
+ * @param {type} aTarget
+ * @returns {P.loadTemplate.publishTo}
+ */
 P.loadTemplate = function(aName, aModel, aTarget) {
     var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
@@ -124,6 +157,11 @@ P.loadTemplate = function(aName, aModel, aTarget) {
     return publishTo;
 };
 
+/**
+ * Constructs server module network proxy.
+ * @constructor
+ * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
+ */
 P.ServerModule = function(aModuleName) {
     var clientHost = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
     var client = clientHost.getPlatypusClient();
@@ -178,12 +216,16 @@ P.ServerModule = function(aModuleName) {
     }
 };
 
-
 (function() {
     var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
     var JavaDate = Java.type("java.util.Date");
     var toPrimitive = ScriptUtils.getToPrimitiveFunc();
 
+    /**
+     * @private
+     * @param {type} aValue
+     * @returns {unresolved}
+     */
     P.boxAsJava = function(aValue) {
         if (aValue) {
             if (aValue.unwrap) {
@@ -195,6 +237,11 @@ P.ServerModule = function(aModuleName) {
         return aValue;
     };
 
+    /**
+     * @private
+     * @param {type} aValue
+     * @returns {unresolved}
+     */
     P.boxAsJs = function(aValue) {
         if (aValue) {
             if (aValue.getPublished) {

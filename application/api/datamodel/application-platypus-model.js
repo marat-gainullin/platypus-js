@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ApplicationPlatypusModel
+     * @constructor ApplicationPlatypusModel ApplicationPlatypusModel
      */
     P.ApplicationPlatypusModel = function () {
 

@@ -49,6 +49,7 @@ public class BorderPane extends Container<JPanel> {
 
     public void add(Component<?> aComp, int aPlace) {
         if (aComp != null) {
+            checkCenterComponent();
             String place;
             switch (aPlace) {
                 case HorizontalPosition.LEFT:
@@ -111,6 +112,7 @@ public class BorderPane extends Container<JPanel> {
 
     @ScriptFunction
     public void setLeftComponent(Component<?> aComp) {
+        checkCenterComponent();
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component oldComp = layout.getLayoutComponent(BorderLayout.WEST);
         if (oldComp == null) {
@@ -141,6 +143,7 @@ public class BorderPane extends Container<JPanel> {
     }
 
     public void setTopComponent(Component<?> aComp) {
+        checkCenterComponent();
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component oldComp = layout.getLayoutComponent(BorderLayout.NORTH);
         if (oldComp == null) {
@@ -172,6 +175,7 @@ public class BorderPane extends Container<JPanel> {
 
     @ScriptFunction
     public void setRightComponent(Component<?> aComp) {
+        checkCenterComponent();
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component oldComp = layout.getLayoutComponent(BorderLayout.EAST);
         if (oldComp == null) {
@@ -203,6 +207,7 @@ public class BorderPane extends Container<JPanel> {
 
     @ScriptFunction
     public void setBottomComponent(Component<?> aComp) {
+        checkCenterComponent();
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component oldComp = layout.getLayoutComponent(BorderLayout.SOUTH);
         if (oldComp == null) {
@@ -214,6 +219,12 @@ public class BorderPane extends Container<JPanel> {
             delegate.repaint();
         }
         add(aComp, VerticalPosition.BOTTOM);
+    }
+
+    private void checkCenterComponent() throws IllegalStateException {
+        if (getCenterComponent() != null) {
+            throw new IllegalStateException("No widget can be added after center widget");
+        }
     }
 
     private static final String CENTER_COMPONENT_JSDOC = ""
@@ -230,6 +241,7 @@ public class BorderPane extends Container<JPanel> {
 
     @ScriptFunction
     public void setCenterComponent(Component<?> aComp) {
+        checkCenterComponent();
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component oldComp = layout.getLayoutComponent(BorderLayout.CENTER);
         if (oldComp != null) {

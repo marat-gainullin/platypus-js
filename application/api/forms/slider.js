@@ -9,7 +9,7 @@
     * @param min the minimum value (optional)
     * @param max the maximum value (optional)
     * @param value the initial value (optional)
-     * @namespace Slider
+     * @constructor Slider Slider
     */
     P.Slider = function (min, max, value) {
 
@@ -260,18 +260,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf Slider
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf Slider
@@ -283,6 +271,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf Slider
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

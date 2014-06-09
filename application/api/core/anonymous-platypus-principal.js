@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace AnonymousPlatypusPrincipal
+     * @constructor AnonymousPlatypusPrincipal AnonymousPlatypusPrincipal
      */
     P.AnonymousPlatypusPrincipal = function () {
 

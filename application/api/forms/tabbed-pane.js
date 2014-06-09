@@ -7,7 +7,7 @@
     /**
      * A component that lets the user switch between a group of components by
      * clicking on a tab with a given title and/or icon.
-     * @namespace TabbedPane
+     * @constructor TabbedPane TabbedPane
      */
     P.TabbedPane = function () {
 
@@ -292,18 +292,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf TabbedPane
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf TabbedPane
@@ -315,6 +303,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf TabbedPane
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

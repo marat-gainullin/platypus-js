@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Delete
+     * @constructor Delete Delete
      */
     P.Delete = function () {
 

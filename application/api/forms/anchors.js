@@ -13,7 +13,7 @@
     * @param top a top anchor
     * @param height a height value
     * @param bottom a bottom anchor
-     * @namespace Anchors
+     * @constructor Anchors Anchors
     */
     P.Anchors = function (left, width, right, top, height, bottom) {
 

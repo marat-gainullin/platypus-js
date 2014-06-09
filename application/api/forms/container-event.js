@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ContainerEvent
+     * @constructor ContainerEvent ContainerEvent
      */
     P.ContainerEvent = function () {
 

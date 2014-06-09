@@ -26,16 +26,22 @@ public class JsModelWidgets {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-
-			if(!injected){
-				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
 			return published;
 		};	
 		
 		// **************************************************************************
+		$wnd.P.ModelImage = function () {
+			throw 'P.ModelImage is unsupported in Html5 client'; 
+		}
+		$wnd.P.ModelMap = function () {
+			throw 'P.ModelMap is unsupported in Html5 client'; 
+		}
+		$wnd.P.ModelScheme = function () {
+			throw 'P.ModelScheme is unsupported in Html5 client'; 
+		}
+		// **************************************************************************
 		$wnd.P.ModelCheckBox = function (aText) {
-			var aComponent = arguments.length>1?arguments[1]:null;
+			var aComponent = arguments.length > 1 ? arguments[1] : null;
 			
 			if (!(this instanceof $wnd.P.ModelCheckBox)) {
 				throw  ' use  "new P.ModelCheckBox()" !';
@@ -50,7 +56,6 @@ public class JsModelWidgets {
 			publishComponentProperties(published);
 
 			if(!injected){
-				aComponent.@com.eas.client.form.published.widgets.model.ModelCheck::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				published.text = aText;
 			}
 			return published;
@@ -72,10 +77,6 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 			publishModelComponentProperties(published);
-
-			if(!injected) {
-				aComponent.@com.eas.client.form.published.widgets.model.ModelFormattedField::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
 			return published;
 		};	
 
@@ -95,10 +96,6 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 			publishModelComponentProperties(published);
-
-			if(!injected) {
-				aComponent.@com.eas.client.form.published.widgets.model.ModelTextArea::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
 			return published;
 		};	
 
@@ -118,9 +115,6 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 			publishModelComponentProperties(published);
-			if(!injected) {
-				aComponent.@com.eas.client.form.published.widgets.model.ModelDate::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
 			return published;
 		};	
 
@@ -140,10 +134,6 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 			publishModelComponentProperties(published);
-
-			if(!injected) {
-				aComponent.@com.eas.client.form.published.widgets.model.ModelDate::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
 			return published;
 		};	
 
@@ -163,10 +153,6 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 			publishModelComponentProperties(published);
-
-			if(!injected) {
-				aComponent.@com.eas.client.form.published.widgets.model.ModelCombo::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
 			return published;
 		};	
 

@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Update
+     * @constructor Update Update
      */
     P.Update = function () {
 

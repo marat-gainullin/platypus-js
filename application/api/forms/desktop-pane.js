@@ -7,7 +7,7 @@
     /**
      * Desktop pane panel component.
      * This component can be used for creating a multi-document GUI or a virtual desktop.
-     * @namespace DesktopPane
+     * @constructor DesktopPane DesktopPane
      */
     P.DesktopPane = function () {
 
@@ -243,18 +243,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf DesktopPane
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf DesktopPane
@@ -266,6 +254,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf DesktopPane
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

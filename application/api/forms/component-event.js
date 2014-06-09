@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ComponentEvent
+     * @constructor ComponentEvent ComponentEvent
      */
     P.ComponentEvent = function () {
 

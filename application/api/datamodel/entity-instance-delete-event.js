@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace EntityInstanceDeleteEvent
+     * @constructor EntityInstanceDeleteEvent EntityInstanceDeleteEvent
      */
     P.EntityInstanceDeleteEvent = function () {
 

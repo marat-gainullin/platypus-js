@@ -329,7 +329,7 @@ public class Classes2Scripts {
     }
 
     private static String getConstructorJsDoc(FunctionInfo ci) {
-        return addIndent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
+        return addIndent(appendLine2JsDoc(formJsDoc(ci.jsDoc), "@constructor " + ci.name + " " + ci.name), CONSTRUCTOR_IDENT_LEVEL);
     }
 
     private static String getIndentStr(int ident) {

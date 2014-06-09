@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ChangeEvent
+     * @constructor ChangeEvent ChangeEvent
      */
     P.ChangeEvent = function () {
 

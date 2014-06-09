@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace SystemPlatypusPrincipal
+     * @constructor SystemPlatypusPrincipal SystemPlatypusPrincipal
      */
     P.SystemPlatypusPrincipal = function () {
 

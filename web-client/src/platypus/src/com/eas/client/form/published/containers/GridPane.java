@@ -118,22 +118,52 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aRow, aCol){
-			if(toAdd && toAdd.unwrap && aRow && aCol){
-				aWidget.@com.eas.client.form.published.containers.GridPane::setWidget(IILcom/google/gwt/user/client/ui/Widget;)(aRow, aCol, toAdd.unwrap());
+			if(toAdd && toAdd.unwrap){
+				if(toAdd.parent == published)
+					throw 'A widget already added to this container';
+				if(arguments.length < 3)
+					throw 'aRow and aCol are required parameters';				
+				aWidget.@com.eas.client.form.published.containers.GridPane::setWidget(IILcom/google/gwt/user/client/ui/Widget;)(1 * aRow, 1 * aCol, toAdd.unwrap());
 			}
 		}
 		published.remove = function(aChild) {
-			if (aChild != undefined && aChild != null && aChild.unwrap != undefined) {
+			if (aChild && aChild.unwrap) {
 				aWidget.@com.eas.client.form.published.containers.GridPane::remove(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());				
 			}
 		};
-		published.cell = function(aRow, aCol) {
-			var widget;
-			if (aCol != undefined && aCol != null) {
-				widget = aWidget.@com.eas.client.form.published.containers.GridPane::getWidget(II)(aRow, aCol);
-				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
+		published.child = function(aRow, aCol) {
+			if (arguments.length > 1) {
+				var widget = aWidget.@com.eas.client.form.published.containers.GridPane::getWidget(II)(1 * aRow, 1 * aCol);
+				return !!widget ? @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget) : null;
 			}else
 				return null;
 		};
+		Object.defineProperty(published, "rows", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.GridPane::getRowCount()();
+			}
+		});
+		Object.defineProperty(published, "columns", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.GridPane::getColumnCount()();
+			}
+		});
+		Object.defineProperty(published, "children", {
+			get : function(){
+				var ch = [];
+				for(var r = 0; r < published.rows; r++){
+					for(var c = 0; c < published.columns; c++){
+						var index = published.columns * r + c;
+						ch[index] = published.child(r, c);
+					}
+				}
+				return ch;
+			}
+		});
+		Object.defineProperty(published, "count", {
+			get : function(){
+				return published.rows * published.columns;
+			}
+		});
 	}-*/;
 }

@@ -152,6 +152,8 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aCardName){
 			if(toAdd && toAdd.unwrap){
+				if(toAdd.parent == published)
+					throw 'A widget already added to this container';
 				aWidget.@com.eas.client.form.published.containers.CardPane::add(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;)(toAdd.unwrap(), aCardName);
 			}
 		};

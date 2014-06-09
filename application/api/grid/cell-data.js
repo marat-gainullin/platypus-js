@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace CellData
+     * @constructor CellData CellData
      */
     P.CellData = function () {
 

@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ChangeValue
+     * @constructor ChangeValue ChangeValue
      */
     P.ChangeValue = function () {
 

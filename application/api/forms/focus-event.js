@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace FocusEvent
+     * @constructor FocusEvent FocusEvent
      */
     P.FocusEvent = function () {
 

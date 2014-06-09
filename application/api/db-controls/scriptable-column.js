@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace ScriptableColumn
+     * @constructor ScriptableColumn ScriptableColumn
      */
     P.ScriptableColumn = function () {
 

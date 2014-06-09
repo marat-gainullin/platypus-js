@@ -101,6 +101,8 @@ public class ToolBar extends Toolbar implements HasJsFacade, HasEnabled, HasComp
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap){
+				if(toAdd.parent == published)
+					throw 'A widget already added to this container';
 				aWidget.@com.eas.client.form.published.containers.ToolBar::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 			}
 		};		

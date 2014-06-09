@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace WindowEvent
+     * @constructor WindowEvent WindowEvent
      */
     P.WindowEvent = function () {
 

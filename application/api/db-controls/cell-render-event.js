@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace CellRenderEvent
+     * @constructor CellRenderEvent CellRenderEvent
      */
     P.CellRenderEvent = function () {
 

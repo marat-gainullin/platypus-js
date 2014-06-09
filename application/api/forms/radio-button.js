@@ -9,7 +9,7 @@
     * @param text Component's text (optional)
     * @param selected <code>true</code> if component is selected (optional)
     * @param actionPerformed On action performed function (optional)
-     * @namespace RadioButton
+     * @constructor RadioButton RadioButton
     */
     P.RadioButton = function (text, selected, actionPerformed) {
 
@@ -290,18 +290,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf RadioButton
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf RadioButton
@@ -313,6 +301,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf RadioButton
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

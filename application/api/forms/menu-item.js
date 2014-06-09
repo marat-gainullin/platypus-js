@@ -9,7 +9,7 @@
     * @param text the text of the component (optional).
     * @param icon the icon of the component (optional).
     * @param actionPerformed the function for the action performed handler (optional).
-     * @namespace MenuItem
+     * @constructor MenuItem MenuItem
     */
     P.MenuItem = function (text, icon, actionPerformed) {
 
@@ -275,18 +275,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf MenuItem
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf MenuItem
@@ -298,6 +286,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf MenuItem
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

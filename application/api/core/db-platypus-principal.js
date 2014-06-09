@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace DbPlatypusPrincipal
+     * @constructor DbPlatypusPrincipal DbPlatypusPrincipal
      */
     P.DbPlatypusPrincipal = function () {
 

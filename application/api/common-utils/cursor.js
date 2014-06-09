@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Cursor
+     * @constructor Cursor Cursor
      */
     P.Cursor = function () {
 

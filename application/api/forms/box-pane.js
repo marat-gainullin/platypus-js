@@ -7,7 +7,7 @@
     /**
      * A container with Box Layout. By default uses horisontal orientation.
      * @param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional).
-     * @namespace BoxPane
+     * @constructor BoxPane BoxPane
      */
     P.BoxPane = function (orientation) {
 
@@ -277,18 +277,6 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf BoxPane
-        */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
         * Height of the component.
          * @property height
          * @memberOf BoxPane
@@ -300,6 +288,18 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf BoxPane
+        */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
             }
         });
 

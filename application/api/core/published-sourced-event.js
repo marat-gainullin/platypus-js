@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace PublishedSourcedEvent
+     * @constructor PublishedSourcedEvent PublishedSourcedEvent
      */
     P.PublishedSourcedEvent = function () {
 

@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace HorizontalPosition
+     * @constructor HorizontalPosition HorizontalPosition
      */
     P.HorizontalPosition = function () {
 

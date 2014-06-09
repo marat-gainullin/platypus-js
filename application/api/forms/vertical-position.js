@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace VerticalPosition
+     * @constructor VerticalPosition VerticalPosition
      */
     P.VerticalPosition = function () {
 

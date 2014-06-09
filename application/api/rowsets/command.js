@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace Command
+     * @constructor Command Command
      */
     P.Command = function () {
 

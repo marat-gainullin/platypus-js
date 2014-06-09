@@ -260,6 +260,8 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 		});
 		published.add = function(toAdd){
 			if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined) {
+				if(toAdd.parent == published)
+					throw 'A widget already added to this container';
 				if (published.firstComponent == null) {
 					published.firstComponent = toAdd;
 				}else {

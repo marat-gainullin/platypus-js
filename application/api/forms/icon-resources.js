@@ -6,7 +6,7 @@
     
     /**
      * Generated constructor.
-     * @namespace IconResources
+     * @constructor IconResources IconResources
      */
     P.IconResources = function () {
 
