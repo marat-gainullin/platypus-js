@@ -631,13 +631,14 @@ public class Application {
 						params[j] = JSON.stringify(arguments[j]);
 					}
 					var nativeClient = @com.eas.client.application.AppClient::getInstance()();
-					return parseDates(JSON.parse(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
-						(!!onSuccess) ?
-						function(aResult){
-							if(onSuccess){
+					if(onSuccess) {
+						nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
+							function(aResult){
 								onSuccess(parseDates(JSON.parse(aResult)));
-							}
-						} : null, onFailure)));
+							}, onFailure);
+					} else {
+						return parseDates(JSON.parse(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)));
+					}
 				};
 			}
 					
