@@ -103,6 +103,11 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
     }
 
     @ScriptFunction
+    public String getText() throws Exception {
+        return delegate.getText();
+    }
+
+    @ScriptFunction
     public String getEmptyText() {
         return delegate.getEmptyText();
     }

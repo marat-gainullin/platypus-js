@@ -2,6 +2,7 @@ package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.RadioGroup;
 import com.eas.client.form.published.HasJsFacade;
+import com.eas.client.form.published.HasPlatypusButtonGroup;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasValue;
@@ -30,13 +31,21 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade {
 	}
 
 	public void add(HasPublished aItem) {
-		if (aItem instanceof HasValue<?>)
+		if (aItem instanceof HasValue<?>){
 			super.add((HasValue<Boolean>) aItem);
+			if(aItem instanceof HasPlatypusButtonGroup){
+				((HasPlatypusButtonGroup)aItem).mutateButtonGroup(this);
+			}
+		}
 	}
 
 	public void remove(HasPublished aItem) {
-		if (aItem instanceof HasValue<?>)
+		if (aItem instanceof HasValue<?>){
 			super.remove((HasValue<Boolean>) aItem);
+			if(aItem instanceof HasPlatypusButtonGroup){
+				((HasPlatypusButtonGroup)aItem).setButtonGroup(null);
+			}
+		}
 	}
 
 	public HasPublished getChild(int i) {

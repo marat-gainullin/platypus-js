@@ -80,7 +80,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	public ModelCombo() {
 		super(new StyledListBox<Row>());
 	}
-
+		
 	public ValueLookup getLookup() {
 		return lookup;
 	}
@@ -169,6 +169,10 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		return decorated;
 	}
 
+	public String getText() {
+		return ((StyledListBox<Row>)decorated).getText();
+	}
+	
 	@Override
 	public String getEmptyText() {
 		return emptyText;
@@ -188,57 +192,62 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	private native static void publish(ModelCombo aWidget, JavaScriptObject aPublished)/*-{
-	                                                                                   Object.defineProperty(aPublished, "emptyText", {
-	                                                                                   get : function() {
-	                                                                                   return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
-	                                                                                   },
-	                                                                                   set : function(aValue) {
-	                                                                                   aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-	                                                                                   }
-	                                                                                   });
-	                                                                                   Object.defineProperty(aPublished, "value", {
-	                                                                                   get : function() {
-	                                                                                   return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());
-	                                                                                   },
-	                                                                                   set : function(aValue) {
-	                                                                                   if (aValue != null) {
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
-	                                                                                   } else {
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)(null);
-	                                                                                   }
-	                                                                                   }
-	                                                                                   });
-	                                                                                   Object.defineProperty(aPublished, "valueField", {
-	                                                                                   get : function() {
-	                                                                                   return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getValueField()());
-	                                                                                   },
-	                                                                                   set : function(aValue) {
-	                                                                                   if (aValue != null)
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
-	                                                                                   else
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(null);
-	                                                                                   }
-	                                                                                   });
-	                                                                                   Object.defineProperty(aPublished, "displayField", {
-	                                                                                   get : function() {
-	                                                                                   return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getDisplayField()());
-	                                                                                   },
-	                                                                                   set : function(aValue) {
-	                                                                                   if (aValue != null)
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
-	                                                                                   else
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(null);
-	                                                                                   }
-	                                                                                   });
-	                                                                                   Object.defineProperty(aPublished, "list", {
-	                                                                                   get : function() {
-	                                                                                   return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::isList()();
-	                                                                                   },
-	                                                                                   set : function(aValue) {
-	                                                                                   aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setList(Z)(false != aValue);
-	                                                                                   }
-	                                                                                   });
-	                                                                                   }-*/;
+		Object.defineProperty(aPublished, "emptyText", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
+		Object.defineProperty(aPublished, "value", {
+			get : function() {
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());
+			},
+			set : function(aValue) {
+				if (aValue != null) {
+					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+				} else {
+					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)(null);
+				}
+		   }
+		});
+		Object.defineProperty(aPublished, "text", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getText()();
+			}
+		});
+		Object.defineProperty(aPublished, "valueField", {
+			get : function() {
+				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getValueField()());
+			},
+			set : function(aValue) {
+				if (aValue != null)
+					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
+				else
+					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(null);
+		   }
+		});
+		Object.defineProperty(aPublished, "displayField", {
+			get : function() {
+				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getDisplayField()());
+			},
+			set : function(aValue) {
+				if (aValue != null)
+					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
+				else
+					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(null);
+		   }
+		});
+		Object.defineProperty(aPublished, "list", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::isList()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setList(Z)(false != aValue);
+			}
+		});
+	}-*/;
 
 	public ModelElementRef getValueElement() {
 		return valueElement;
@@ -325,7 +334,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public Object lookupRowValue(Row aRow) throws Exception {
-		return aRow.getColumnObject(valueElement.getColIndex());
+		return aRow != null ? aRow.getColumnObject(valueElement.getColIndex()) : null;
 	}
 
 	public Object getJsValue() throws Exception {

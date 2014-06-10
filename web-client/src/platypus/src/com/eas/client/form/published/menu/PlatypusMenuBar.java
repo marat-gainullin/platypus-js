@@ -143,6 +143,8 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap){
+				if(toAdd.parent == published)
+					throw 'A widget already added to this menu';
 				aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::add(Lcom/google/gwt/user/client/ui/UIObject;)(toAdd.unwrap());
 			}
 		};

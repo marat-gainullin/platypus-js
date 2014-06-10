@@ -124,22 +124,22 @@ public class PlatypusRadioButton extends RadioButton implements HasJsFacade, Has
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "text", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusCheckBox::getText()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusRadioButton::getText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusCheckBox::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusRadioButton::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(published, "selected", {
 			get : function() {
-				var value = aWidget.@com.eas.client.form.published.widgets.PlatypusCheckBox::getValue()();
+				var value = aWidget.@com.eas.client.form.published.widgets.PlatypusRadioButton::getValue()();
 				if (value == null)
 					return null;
 				else
-					return aWidget.@com.eas.client.form.published.widgets.PlatypusCheckBox::getPlainValue()();
+					return aWidget.@com.eas.client.form.published.widgets.PlatypusRadioButton::getPlainValue()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusCheckBox::setPlainValue(Z)(aValue!=null && (false != aValue));
+				aWidget.@com.eas.client.form.published.widgets.PlatypusRadioButton::setPlainValue(Z)(aValue!=null && (false != aValue));
 			}
 		});
 		Object.defineProperty(published, "buttonGroup", {

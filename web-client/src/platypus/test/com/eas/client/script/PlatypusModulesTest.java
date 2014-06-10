@@ -74,9 +74,13 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 			}
 		};
 		// Schedule the event and return control to the test system.
-		timer.schedule(10 * 1000);
+		timer.schedule(timeOut());
 	}
 
+	protected int timeOut(){
+		return 10 * 1000;
+	}
+	
 	protected void validate() {
 		assertTrue(onSuccessCalled);
 	}

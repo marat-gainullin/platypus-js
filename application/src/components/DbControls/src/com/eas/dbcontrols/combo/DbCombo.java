@@ -156,6 +156,14 @@ public class DbCombo extends DbControlPanel implements DbControl {
         }
     }
 
+    public String getText() throws Exception {
+        if (displayingValue != null) {
+            return String.valueOf(displayingValue);
+        } else {
+            return String.valueOf(achiveDisplayValue(editingValue));
+        }
+    }
+
     public String getRendererText() {
         if (nonListRendererEditor != null) {
             return nonListRendererEditor.getText();

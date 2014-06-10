@@ -154,7 +154,10 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 				for(var r = 0; r < published.rows; r++){
 					for(var c = 0; c < published.columns; c++){
 						var index = published.columns * r + c;
-						ch[index] = published.child(r, c);
+						var comp = published.child(r, c);
+						if(comp != null){
+							ch[ch.length] = comp;
+						}
 					}
 				}
 				return ch;
@@ -162,7 +165,8 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 		});
 		Object.defineProperty(published, "count", {
 			get : function(){
-				return published.rows * published.columns;
+				var ch = published.children;
+				return ch.length;
 			}
 		});
 	}-*/;

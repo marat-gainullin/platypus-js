@@ -36,6 +36,11 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 		((DateTimeBox)decorated).setFormat(new DateBox.DefaultFormat(dtFormat));
 	}
 
+	public String getText() {
+		DateTimeBox box = (DateTimeBox)decorated;
+		return box.getText();
+	}
+	
 	@Override
 	public String getEmptyText() {
 		return emptyText;
@@ -69,6 +74,19 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+			}
+		});
+		Object.defineProperty(aPublished, "text", {
+			get : function() {
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelDate::getText()());
+			}
+		});
+		Object.defineProperty(aPublished, "dateFormat", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelDate::getFormat()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setFormat(Ljava/lang/String;)('' + aValue);
 			}
 		});
 	}-*/;

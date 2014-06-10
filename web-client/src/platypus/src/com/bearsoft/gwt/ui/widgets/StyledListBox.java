@@ -137,6 +137,24 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 		setValue(aValue, false);
 	}
 
+	public String getText(){
+		Integer idx = indicies != null ? indicies.get(value) : null;
+		if(idx != null){
+			return getItemText(idx);
+		}else{
+			return null;
+		}
+	}
+	
+	public String getText(T aValue){
+		Integer idx = indicies.get(aValue);
+		if(idx != null){
+			return getItemText(idx);
+		}else{
+			return null;
+		}
+	}
+	
 	@Override
 	public void setValue(T aValue, boolean fireEvents) {
 		value = aValue;

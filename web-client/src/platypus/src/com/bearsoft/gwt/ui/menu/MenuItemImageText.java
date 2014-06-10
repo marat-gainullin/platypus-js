@@ -68,7 +68,8 @@ public class MenuItemImageText extends MenuItem {
 	}
 
 	protected void regenerate() {
-		SafeHtml generated = MenuItemTemplates.INSTANCE.imageText(imageUri != null ? imageUri.asString() : "", html ? SafeHtmlUtils.fromTrustedString(text) : SafeHtmlUtils.fromString(text));
+		String ltext = text != null ? text : "";
+		SafeHtml generated = MenuItemTemplates.INSTANCE.imageText(imageUri != null ? imageUri.asString() : "", html ? SafeHtmlUtils.fromTrustedString(ltext) : SafeHtmlUtils.fromString(ltext));
 		getElement().setInnerSafeHtml(generated);
 		leftMark = getElement().getFirstChildElement().getFirstChildElement();
 		field = (Element) getElement().getFirstChildElement().getLastChild();

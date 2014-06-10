@@ -108,6 +108,14 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 				aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
+		Object.defineProperty(published, "value", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::getText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
 		Object.defineProperty(published, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();

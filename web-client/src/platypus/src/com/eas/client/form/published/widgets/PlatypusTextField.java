@@ -100,6 +100,14 @@ public class PlatypusTextField extends TextBox implements HasJsFacade, HasEmptyT
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+		Object.defineProperty(published, "value", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusTextField::getText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusTextField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
 		Object.defineProperty(published, "text", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.widgets.PlatypusTextField::getText()();

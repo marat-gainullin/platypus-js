@@ -71,6 +71,7 @@ public class FormattedObjectBox extends ValueBox<Object> {
 
 	}
 
+	protected Object value;
 	protected ObjectFormat format;
 	protected PolymorphParser parser;
 	protected PolymorphRenderer renderer;
@@ -79,13 +80,13 @@ public class FormattedObjectBox extends ValueBox<Object> {
 		super(Document.get().createTextInputElement(), new NoopRenderer(), new NoopParser());
 	}
 
-	public void setFormatType(int aFormatType, String aPattern) throws ParseException{
+	public void setFormatType(int aFormatType, String aPattern) throws ParseException {
 		format = new ObjectFormat(aFormatType, aPattern);
 		renderer = new PolymorphRenderer(format);
 		parser = new PolymorphParser(format);
 		setValue(getValue(), false);
 	}
-	
+
 	/**
 	 * Return the parsed value, or null if the field is empty.
 	 * 
@@ -102,10 +103,15 @@ public class FormattedObjectBox extends ValueBox<Object> {
 	}
 
 	@Override
-	public void setValue(Object value, boolean fireEvents) {
-		if (value != null && format == null) {
+	public Object getValue() {
+		return value;
+	}
+
+	@Override
+	public void setValue(Object aValue, boolean fireEvents) {
+		if (aValue != null && format == null) {
 			try {
-				format = new ObjectFormat(value);
+				format = new ObjectFormat(aValue);
 				renderer = new PolymorphRenderer(format);
 				parser = new PolymorphParser(format);
 			} catch (ParseException e) {
@@ -113,7 +119,8 @@ public class FormattedObjectBox extends ValueBox<Object> {
 			}
 		}
 		Object oldValue = fireEvents ? getValue() : null;
-		setText(renderer.render(value));
+		setText(renderer.render(aValue));
+		value = aValue;
 		if (fireEvents) {
 			Object newValue = getValue();
 			ValueChangeEvent.fireIfNotEqual(this, oldValue, newValue);
@@ -121,11 +128,11 @@ public class FormattedObjectBox extends ValueBox<Object> {
 	}
 
 	public String getPattern() {
-		return format.getPattern();
+		return format != null ? format.getPattern() : null;
 	}
 
 	public void setPattern(String aPattern) throws ParseException {
-		if (aPattern == null ? getPattern() != null : !aPattern.equals(getPattern())) {
+		if (format != null && (aPattern == null ? getPattern() != null : !aPattern.equals(getPattern()))) {
 			format.setPattern(aPattern);
 			setValue(getValue(), false);
 		}

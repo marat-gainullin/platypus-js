@@ -50,7 +50,8 @@ public class MenuItemCheckBox extends MenuItemImageText implements HasValue<Bool
     }
 
     protected SafeHtml generateHtml() {
-        return MenuItemTemplates.INSTANCE.checkBox(html ? SafeHtmlUtils.fromTrustedString(text) : SafeHtmlUtils.fromString(text));
+    	String ltext = text != null ? text : "";
+        return MenuItemTemplates.INSTANCE.checkBox(html ? SafeHtmlUtils.fromTrustedString(ltext) : SafeHtmlUtils.fromString(ltext));
     }
 
     @Override

@@ -113,11 +113,21 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 		Object.defineProperty(published, "value", {
 			get : function() {
 				var value = aWidget.@com.eas.client.form.published.widgets.PlatypusSlider::getValue()();
-				return (value == null ? 0 :	value.@java.lang.Integer::intValue()());
+				return (value == null ? 0 :	value.@java.lang.Double::doubleValue()());
 			},
 			set : function(aValue) {
-				var value = @java.lang.Double::new(Ljava/lang/String;)(''+aValue);
-				aWidget.@com.eas.client.form.published.widgets.PlatypusSlider::setValue(Ljava/lang/Double;)(value);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusSlider::setValue(Ljava/lang/Double;)(aValue != null ? @java.lang.Double::new(D)(1 * aValue) : null);
+			}
+		});
+		Object.defineProperty(published, "text", {
+			get : function() {
+				var v = published.value;
+				return v != null ? published.value + '' : '';
+			},
+			set : function(aValue) {
+				var v = parseFloat(aValue);
+				if(!isNaN(v))
+					published.value = v;
 			}
 		});
 	}-*/;

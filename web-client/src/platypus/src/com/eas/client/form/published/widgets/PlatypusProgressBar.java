@@ -91,7 +91,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	public void setJsName(String aValue) {
 		name = aValue;
 	}
-
+	
 	public String getText() {
 		return text;
 	}
@@ -125,10 +125,20 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "value", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::getValue()();
+				var v = aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::getValue()();
+				if (v != null) {
+					return v.@java.lang.Number::doubleValue()();
+				} else
+					return null;
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::setValue(Ljava/lang/Double;)(aValue);
+				if (aValue != null) {
+					var v = aValue * 1;
+					var d = @java.lang.Double::new(D)(v);
+					aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::setValue(Ljava/lang/Double;Z)(d, true);
+				} else {
+					aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::setValue(Ljava/lang/Double;Z)(null, true);
+				}
 			}
 		});
 		Object.defineProperty(published, "minimum", {
@@ -152,7 +162,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 				return aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::getText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::setText(Ljava/lang/String;)('' + aValue);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 	}-*/;

@@ -50,6 +50,19 @@ public class PasswordField extends Component<JPasswordField> {
         delegate.setText(aValue);
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The value of this component.\n"
+            + " */")
+    public String getValue() {
+        return new String(delegate.getPassword());
+    }
+
+    @ScriptFunction
+    public void setValue(String aValue) {
+        delegate.setText(aValue);
+    }
+    
     private static final String EMPTY_TEXT_JSDOC = ""
             + "/**\n"
             + "* The text to be shown when component's value is absent.\n"

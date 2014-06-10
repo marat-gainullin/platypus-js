@@ -100,6 +100,14 @@ public class PlatypusHtmlEditor extends RichTextArea implements HasJsFacade, Has
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+		Object.defineProperty(published, "value", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::getHTML()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::setHTML(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
 		Object.defineProperty(published, "text", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::getText()();

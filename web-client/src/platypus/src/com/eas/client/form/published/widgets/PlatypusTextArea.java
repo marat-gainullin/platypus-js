@@ -106,6 +106,14 @@ public class PlatypusTextArea extends TextArea implements HasJsFacade, HasEmptyT
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+		Object.defineProperty(published, "value", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusTextArea::getText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusTextArea::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});			
 		Object.defineProperty(published, "text", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.widgets.PlatypusTextArea::getText()();

@@ -80,6 +80,11 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
     public void setEmptyText(String aValue) {
         delegate.setEmptyText(aValue);
     }
+    
+    @ScriptFunction
+    public String getText() throws Exception {
+        return delegate.getRendererText();
+    }
 
     @Override
     public Object getPublished() {

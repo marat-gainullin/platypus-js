@@ -125,7 +125,8 @@ public class GridPane extends Container<JPanel> {
     @Override
     @ScriptFunction
     public int getCount() {
-        return layout.getColumns() * layout.getRows();
+        Component<?>[] comps = getChildren();
+        return comps.length;
     }
 
     @Override
@@ -135,7 +136,10 @@ public class GridPane extends Container<JPanel> {
         for (int i = 0; i < layout.getRows(); i++) {
             for (int j = 0; j < layout.getColumns(); j++) {
                 int index = i * layout.getColumns() + j;
-                ch.add(getComponentWrapper(delegate.getComponent(index)));
+                Component<?> comp = getComponentWrapper(delegate.getComponent(index));
+                if (comp != null) {
+                    ch.add(comp);
+                }
             }
         }
         return ch.toArray(new Component<?>[]{});

@@ -7,6 +7,7 @@ package com.bearsoft.gwt.ui.widgets.grid.cells;
 
 import java.util.Date;
 
+import com.bearsoft.gwt.ui.widgets.DecoratedDateBox;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -22,7 +23,7 @@ public class DateEditorCell extends RenderedPopupEditorCell<Date> {
 	protected DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
 
 	public DateEditorCell() {
-		super(new DateBox());
+		super(new DecoratedDateBox());
 	}
 
 	public DateEditorCell(Widget aEditor) {

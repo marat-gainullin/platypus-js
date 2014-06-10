@@ -61,6 +61,17 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 				}
 			}
 		});
+		Object.defineProperty(aPublished, "text", {
+			get : function() {
+				var v = aPublished.value;
+				return v != null ? aPublished.value + '' : '';
+			},
+			set : function(aValue) {
+				var v = parseFloat(aValue);
+				if(!isNaN(v))
+					aPublished.value = v;
+			}
+		});
 	}-*/;
 
 	@Override

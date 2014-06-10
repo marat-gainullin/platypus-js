@@ -121,8 +121,6 @@ public class JsContainers {
 					return aOrientation;
 				}
 			});
-			
-			return published;
 		};		
 
 		// ***************************************************
@@ -161,8 +159,7 @@ public class JsContainers {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
-			return published;
+			publishIndexedPanel(published);
 		};
 
 		// ***************************************************
@@ -181,7 +178,6 @@ public class JsContainers {
 			publishIndexedPanel(published);
 			if(aChild)
 				published.add(aChild);
-			return published;
 		};		
 		
 		// ***************************************************
@@ -205,7 +201,6 @@ public class JsContainers {
 			};
 			publishComponentProperties(published);
 			publishIndexedPanel(published);
-			return published;
 		};		
 		
 		// ***************************************************
@@ -227,7 +222,6 @@ public class JsContainers {
 			};
 			publishComponentProperties(published);
 			publishIndexedPanel(published);
-			return published;
 		};
 		
 		// ***************************************************
@@ -292,8 +286,7 @@ public class JsContainers {
 				throw  ' use  "new P.Anchors(...)" !';
 			}
 			var aConstraints = arguments.length>6?arguments[6]:null;
-			if(!aConstraints)
-			{
+			if(!aConstraints){
 				aConstraints = @com.eas.client.form.MarginConstraints::new()();
 			}
 			var published = this; 
@@ -384,8 +377,7 @@ public class JsContainers {
 			}
 			if (aBottom) {
 				published.bottom = '' + aBottom;
-			}			
-			return published;
+			}
 		} 
 
 		// ***************************************************

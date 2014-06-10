@@ -41,7 +41,7 @@ public class HtmlArea extends Component<JEditorPane> {
     }
     private static final String TEXT_JSDOC = ""
             + "/**\n"
-            + "* Text on the component.\n"
+            + "* Text of the component.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = TEXT_JSDOC)
@@ -54,6 +54,21 @@ public class HtmlArea extends Component<JEditorPane> {
         delegate.setText(aValue);
     }
 
+    private static final String VALUE_JSDOC = ""
+            + "/**\n"
+            + "* Value of the component.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    public String getValue() {
+        return delegate.getText();
+    }
+
+    @ScriptFunction
+    public void setValue(String aValue) {
+        delegate.setText(aValue);
+    }
+    
     private static final String EMPTY_TEXT_JSDOC = ""
             + "/**\n"
             + "* The text to be shown when component's value is absent.\n"

@@ -53,6 +53,17 @@ public class ModelTextArea extends PublishedDecoratorBox<String> implements HasE
 					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(null);
 			}
 		});
+		Object.defineProperty(aPublished, "text", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::getValue()();
+			},
+			set : function(aValue) {
+				if (aValue != null)
+					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(''+aValue);
+				else
+					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(null);
+			}
+		});
 	}-*/;
 
 	@Override

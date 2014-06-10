@@ -30,6 +30,22 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 		((FormattedObjectBox)decorated).setFormatType(aFormatType, aPattern);
 	}
 	
+	public String getText(){
+		return ((FormattedObjectBox)decorated).getText();
+	}
+	
+	public void setText(String aValue){
+		((FormattedObjectBox)decorated).setText(aValue);
+	}
+	
+	public String getPattern(){
+		return ((FormattedObjectBox)decorated).getPattern();
+	}
+	
+	public void setPattern(String aPattern) throws ParseException{
+		((FormattedObjectBox)decorated).setPattern(aPattern);
+	}
+	
 	@Override
 	public String getEmptyText() {
 		return emptyText;
@@ -64,6 +80,22 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+			}
+		});
+		Object.defineProperty(aPublished, "text", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setText(Ljava/lang/String;)($wnd.P.boxAsJava(aValue));
+			}
+		});
+		Object.defineProperty(aPublished, "format", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getPattern()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setPattern(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 	}-*/;

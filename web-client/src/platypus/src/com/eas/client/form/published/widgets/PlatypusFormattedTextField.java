@@ -20,7 +20,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String emptyText;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
 
 	public PlatypusFormattedTextField() {
@@ -38,9 +38,9 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -52,7 +52,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -87,13 +87,13 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}
