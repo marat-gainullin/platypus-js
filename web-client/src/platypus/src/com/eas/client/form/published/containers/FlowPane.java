@@ -20,7 +20,7 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected boolean enabled;
+	protected boolean enabled = true;
 	protected String name;	
 	protected JavaScriptObject published;
 	
@@ -79,7 +79,13 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 
 	@Override
 	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
 		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

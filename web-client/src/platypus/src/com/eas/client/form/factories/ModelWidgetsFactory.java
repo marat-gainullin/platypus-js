@@ -29,7 +29,7 @@ import com.google.gwt.xml.client.Element;
 
 public class ModelWidgetsFactory extends WidgetsFactory {
 
-	public static final String MODEL_ELEMENT_MISSING = "A model element is requried for model-aware controls";
+	public static final String MODEL_ELEMENT_MISSING = "A model element is required for model-aware controls";
 	protected Model model;
 
 	public ModelWidgetsFactory(Element aFormTag, Model aModel, JavaScriptObject aTarget) {

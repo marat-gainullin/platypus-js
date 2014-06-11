@@ -98,7 +98,7 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 				return aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::getText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::setText(Ljava/lang/String;)(aValue);
+				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(published, "selected", {
@@ -106,7 +106,7 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 				return aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::getPlainValue()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::setPlainValue(Z)(aValue != null && (false != aValue));
+				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::setPlainValue(Z)(aValue != null && !!aValue);
 			}
 		});
 		Object.defineProperty(published, "buttonGroup", {

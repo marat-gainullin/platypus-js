@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.eas.client.form.EventsExecutor;
@@ -20,7 +21,7 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu contextMenu;
-	protected boolean enabled;
+	protected boolean enabled = true;
 	protected String name;
 	protected JavaScriptObject published;
 
@@ -87,7 +88,13 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 
 	@Override
 	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
 		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override
@@ -176,7 +183,7 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 		});
 		Object.defineProperty(published, "verticalTextPosition", {
 			get : function() {
-				var positon = aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::getVerticalTextPosition()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::getVerticalTextPosition()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
@@ -225,7 +232,7 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 		});
 		Object.defineProperty(published, "verticalAlignment", {
 			get : function() {
-				var positon = aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::getVerticalAlignment()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::getVerticalAlignment()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
@@ -253,7 +260,7 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(menu);
 			},
 			set : function(aValue){
-				aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::setMenu(Lcom/google/gwt/user/client/ui/MenuBar;)(aValue.unwrap());
+				aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::setMenu(Lcom/google/gwt/user/client/ui/MenuBar;)(aValue != null ? aValue.unwrap() : null);
 			}
 		});
 	}-*/;

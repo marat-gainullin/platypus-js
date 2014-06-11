@@ -224,7 +224,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 		});
 		Object.defineProperty(published, "verticalTextPosition", {
 			get : function() {
-				var positon = aWidget.@com.eas.client.form.published.widgets.PlatypusToggleButton::getVerticalTextPosition()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusToggleButton::getVerticalTextPosition()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
@@ -273,7 +273,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 		});
 		Object.defineProperty(published, "verticalAlignment", {
 			get : function() {
-				var positon = aWidget.@com.eas.client.form.published.widgets.PlatypusToggleButton::getVerticalAlignment()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusToggleButton::getVerticalAlignment()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 

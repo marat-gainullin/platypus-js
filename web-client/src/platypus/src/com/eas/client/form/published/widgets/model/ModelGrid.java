@@ -66,6 +66,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
@@ -76,7 +77,7 @@ import com.google.gwt.view.client.SetSelectionModel;
  * @author mg
  * 
  */
-public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor {
+public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled {
 
 	public static final int ROWS_HEADER_TYPE_NONE = 0;
 	public static final int ROWS_HEADER_TYPE_USUAL = 1;
@@ -105,6 +106,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		}
 	}
 
+	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
@@ -220,6 +222,22 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	@Override
 	public void setEventsExecutor(EventsExecutor aExecutor) {
 		eventsExecutor = aExecutor;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
+		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

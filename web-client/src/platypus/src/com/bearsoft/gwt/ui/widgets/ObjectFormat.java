@@ -60,8 +60,16 @@ public class ObjectFormat {
 	protected DateTimeFormat dateFormat;
 	protected MaskFormat maskFormat;
 
+	public ObjectFormat(){
+		super();
+	}
+	
 	public ObjectFormat(int aType, String aPattern) throws ParseException {
 		super();
+		setFormatType(aType, aPattern);
+	}
+	
+	public void setFormatType(int aType, String aPattern) throws ParseException{ 
 		type = aType;
 		pattern = aPattern;
 		constructFormat();
@@ -69,6 +77,10 @@ public class ObjectFormat {
 
 	public ObjectFormat(Object aValue) throws ParseException {
 		super();
+		setFormatTypeByValue(aValue);
+	}
+	
+	public void setFormatTypeByValue(Object aValue) throws ParseException{
 		if (aValue instanceof String) {
 			type = MASK;
 			pattern = DEFAULT_MASK_PATTERN;
@@ -103,6 +115,10 @@ public class ObjectFormat {
 		}
 	}
 
+	public boolean isEmpty(){
+		return numberFormat == null && dateFormat == null && maskFormat == null;
+
+	}
 	public String getPattern() {
 		return pattern;
 	}

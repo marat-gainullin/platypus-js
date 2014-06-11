@@ -114,7 +114,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 				return aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(published, "emptyText", {

@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.progress.ProgressBar;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
@@ -17,7 +18,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected boolean enabled;
+	protected boolean enabled = true;
 	protected String name;
 	protected JavaScriptObject published;
 	
@@ -79,7 +80,13 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 
 	@Override
 	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
 		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

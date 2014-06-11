@@ -1,5 +1,7 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
+import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
@@ -10,19 +12,18 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.HasEnabled;
 
 public class PlatypusSpinnerField extends ConstraintedSpinnerBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected boolean enabled;
+	protected boolean enabled = true;
 	protected String name;	
 	protected JavaScriptObject published;
 
 	public PlatypusSpinnerField() {
-		super(new DoubleBox());
+		super(new ExplicitDoubleBox());
 	}
 
 	@Override
@@ -70,7 +71,13 @@ public class PlatypusSpinnerField extends ConstraintedSpinnerBox implements HasJ
 
 	@Override
 	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
 		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

@@ -1,19 +1,19 @@
 package com.eas.client.form.published.widgets.model;
 
+import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DoubleRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.ui.DoubleBox;
 
 public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText {
 
 	protected String emptyText;
 	
 	public ModelSpin() {
-		super(new ConstraintedSpinnerBox(new DoubleBox()));
+		super(new ConstraintedSpinnerBox(new ExplicitDoubleBox()));
 	}
 
 	@Override
@@ -70,6 +70,60 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 				var v = parseFloat(aValue);
 				if(!isNaN(v))
 					aPublished.value = v;
+			}
+		});
+		Object.defineProperty(aPublished, "min", {
+			get : function() {
+				var v = aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::getMin()();
+				if (v != null) {
+					return v.@java.lang.Number::doubleValue()();
+				} else
+					return null;
+			},
+			set : function(aValue) {
+				if (aValue != null) {
+					var v = aValue * 1;
+					var d = @java.lang.Double::new(D)(v);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setMin(Ljava/lang/Double;)(d);
+				} else {
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setMin(Ljava/lang/Double;)(null);
+				}
+			}
+		});
+		Object.defineProperty(aPublished, "max", {
+			get : function() {
+				var v = aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::getMax()();
+				if (v != null) {
+					return v.@java.lang.Number::doubleValue()();
+				} else
+					return null;
+			},
+			set : function(aValue) {
+				if (aValue != null) {
+					var v = aValue * 1;
+					var d = @java.lang.Double::new(D)(v);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setMax(Ljava/lang/Double;)(d);
+				} else {
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setMax(Ljava/lang/Double;)(null);
+				}
+			}
+		});
+		Object.defineProperty(aPublished, "step", {
+			get : function() {
+				var v = aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::getStep()();
+				if (v != null) {
+					return v.@java.lang.Number::doubleValue()();
+				} else
+					return null;
+			},
+			set : function(aValue) {
+				if (aValue != null) {
+					var v = aValue * 1;
+					var d = @java.lang.Double::new(D)(v);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setStep(Ljava/lang/Double;)(d);
+				} else {
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setStep(Ljava/lang/Double;)(null);
+				}
 			}
 		});
 	}-*/;

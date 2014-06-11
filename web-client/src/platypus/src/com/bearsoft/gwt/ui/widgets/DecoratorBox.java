@@ -16,6 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -26,10 +27,11 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  * @param <T>
  */
-public abstract class DecoratorBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, Focusable {
+public abstract class DecoratorBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, Focusable, HasEnabled {
 
 	protected FlowPanel container = new FlowPanel();
 	protected HasValue<T> decorated;
+	protected boolean enabled = true;
 	protected boolean resized;
 	private HandlerRegistration changeValueHandler;
 	protected SimplePanel selectButton = new SimplePanel();
@@ -73,6 +75,22 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 				clearValue();
 			}
 		}, ClickEvent.getType());
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
+		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

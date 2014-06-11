@@ -22,7 +22,11 @@ public class DecoratedDateBox extends DateBox {
 	public Date getValue() {
 		return picker.getValue();
 	}
-
+@Override
+public void setValue(Date date, boolean fireEvents) {
+    // TODO Auto-generated method stub
+    super.setValue(date, fireEvents);
+}
 	@Override
 	public void showDatePicker() {
 		// no op here because of maniac keyboard processing by default

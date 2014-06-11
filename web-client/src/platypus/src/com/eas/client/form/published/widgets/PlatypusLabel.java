@@ -152,7 +152,7 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 		});
 		Object.defineProperty(published, "verticalTextPosition", {
 			get : function() {
-				var positon = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getVerticalTextPosition()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getVerticalTextPosition()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
@@ -201,7 +201,7 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 		});
 		Object.defineProperty(published, "verticalAlignment", {
 			get : function() {
-				var positon = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getVerticalAlignment()();
+				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getVerticalAlignment()();
 				switch(position) { 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
 					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 

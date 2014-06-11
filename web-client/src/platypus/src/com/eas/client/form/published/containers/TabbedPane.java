@@ -1,5 +1,6 @@
 package com.eas.client.form.published.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.TabsDecoratedPanel;
 import com.bearsoft.gwt.ui.widgets.ImageLabel;
 import com.eas.client.ImageResourceCallback;
@@ -25,7 +26,7 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected boolean enabled;
+	protected boolean enabled = true;
 	protected String name;	
 	protected JavaScriptObject published;
 
@@ -88,7 +89,13 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 
 	@Override
 	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
 		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

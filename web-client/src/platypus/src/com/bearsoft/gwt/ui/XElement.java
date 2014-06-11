@@ -172,28 +172,18 @@ public class XElement extends Element {
 	 *            a message to display in the mask
 	 */
 	public final void errorMask(String message) {
-		Element mask = Document.get().createDivElement();
-		mask.getStyle().setLeft(0, Style.Unit.PX);
-		mask.getStyle().setTop(0, Style.Unit.PX);
-		mask.getStyle().setRight(0, Style.Unit.PX);
-		mask.getStyle().setBottom(0, Style.Unit.PX);
-		mask.getStyle().setPosition(Style.Position.ABSOLUTE);
-		mask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		mask.setClassName("p-mask");
-		Element maskInner = Document.get().createDivElement();
-		maskInner.getStyle().setLeft(0, Style.Unit.PX);
-		maskInner.getStyle().setTop(0, Style.Unit.PX);
-		maskInner.getStyle().setRight(0, Style.Unit.PX);
-		maskInner.getStyle().setBottom(0, Style.Unit.PX);
-		maskInner.getStyle().setPosition(Style.Position.ABSOLUTE);
-		maskInner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		maskInner.setInnerText(message);
-		maskInner.setClassName("p-mask-loading-error");
-		mask.appendChild(maskInner);
-		appendChild(mask);
+		mask("p-mask-loading-error");
 	}
 
 	public final void loadMask(){
+		mask("p-mask-loading-start");
+	}
+	
+	public final void disabledMask(){
+		mask("p-mask-loading-start");
+	}
+	
+	public final void mask(String aClassName){
 		Element mask = Document.get().createDivElement();
 		mask.getStyle().setLeft(0, Style.Unit.PX);
 		mask.getStyle().setTop(0, Style.Unit.PX);
@@ -209,11 +199,10 @@ public class XElement extends Element {
 		maskInner.getStyle().setBottom(0, Style.Unit.PX);
 		maskInner.getStyle().setPosition(Style.Position.ABSOLUTE);
 		maskInner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		maskInner.setClassName("p-mask-loading-start");
+		maskInner.setClassName(aClassName);
 		mask.appendChild(maskInner);
 		appendChild(mask);
 	}
-	
 	/**
 	 * Removes a mask over this element to disable user interaction.
 	 * 

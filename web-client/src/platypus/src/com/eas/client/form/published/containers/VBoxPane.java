@@ -20,7 +20,7 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected boolean enabled;
+	protected boolean enabled = true;
 	protected String name;	
 	protected JavaScriptObject published;
 
@@ -78,7 +78,13 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 
 	@Override
 	public void setEnabled(boolean aValue) {
+		boolean oldValue = enabled;
 		enabled = aValue;
+		if(!oldValue && enabled){
+			getElement().<XElement>cast().unmask();
+		}else if(oldValue && !enabled){
+			getElement().<XElement>cast().disabledMask();
+		}
 	}
 
 	@Override

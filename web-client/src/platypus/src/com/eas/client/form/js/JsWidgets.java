@@ -409,10 +409,6 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "background", {
 		    get : function() {
-		    	//if(_background == null) {
-		    	//	var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
-		    	//	return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.backgroundColor);
-		    	//}
 		    	return _background;
 		    },
 		    set : function(aValue) {
@@ -424,10 +420,6 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "backgroundSet", {get : function(){return _background != null;}});
 	    Object.defineProperty(aPublished, "foreground", {
 		    get : function() {
-		    	// if(_foreground == null){
-		    	//	var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
-		    	//	return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.color);
-		    	//}
 		    	return _foreground;
 		    },
 		    set : function(aValue) {
@@ -449,22 +441,6 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "font", {
 		    get : function() {
-		    	if(_font == null)
-		    	{
-		    		var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
-		    		var isItalic = style.fontStyle == "italic";
-		    		var isBold = style.fontWeight == "bold" || style.fontWeight == "bolder"; 
-		    		var platypusFontStyle = $wnd.P.FontStyle.NORMAL;
-		    		if(isItalic)
-		    		{
-		    			if(isBold)
-		    				platypusFontStyle = $wnd.P.FontStyle.BOLD_ITALIC;
-		    			else
-		    				platypusFontStyle = $wnd.P.FontStyle.ITALIC;
-		    		}else if(isBold)
-		    			platypusFontStyle = $wnd.P.FontStyle.BOLD;
-		    		return new $wnd.P.Font(style.fontFamily, platypusFontStyle, parseInt(""+style.fontSize));
-		    	}
 		    	return _font;
 		    },
 		    set : function(aValue) {
@@ -492,20 +468,28 @@ public class JsWidgets {
  	    	
  	    });
 	    Object.defineProperty(aPublished, "cursorSet", { get : function(){return _cursor != null;}});
-	     Object.defineProperty(aPublished, "left", {
+	    var _left = null;
+	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
-    			return aPublished.element.offsetLeft;
+		    	if(_left == null)
+    				_left = aPublished.element.offsetLeft;
+    			return _left;
 		    },
 		    set : function(aValue) {
+		    	_left = aValue;
 		    	if(aPublished.parent instanceof $wnd.P.AbsolutePane || aPublished.parent instanceof $wnd.P.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustLeft(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
  	    });
+ 	    var _top = null;
 	    Object.defineProperty(aPublished, "top", {
 		    get : function() {
-    			return aPublished.element.offsetTop;
+		    	if(_top == null)
+    				_top = aPublished.element.offsetTop;
+    			return _top;
 		    },
 		    set : function(aValue) {
+		    	_top = aValue;
 		    	if(aPublished.parent instanceof $wnd.P.AbsolutePane || aPublished.parent instanceof $wnd.P.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustTop(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
