@@ -41,7 +41,7 @@ public class ScrollPane extends Container<JScrollPane> {
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this container.\n"
+            + "* Sets the specified component as the scroll's view, replacing old view component.\n"
             + "* @param component the component to add\n"
             + "*/";
 
@@ -49,6 +49,7 @@ public class ScrollPane extends Container<JScrollPane> {
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.setViewportView(unwrap(aComp));
+            invalidatePublishedCollection();
             delegate.revalidate();
             delegate.repaint();
         }
@@ -70,14 +71,9 @@ public class ScrollPane extends Container<JScrollPane> {
                 ControlsWrapper.clearPreferredSize(getView());
             }
             delegate.setViewportView(unwrap(aView));
+            invalidatePublishedCollection();
         }
     }
-
-    private static final String REMOVE_JSDOC = ""
-            + "/**\n"
-            + "* Removes the specified component from this container.\n"
-            + "* @param component the component to remove\n"
-            + "*/";
 
     @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
@@ -85,6 +81,7 @@ public class ScrollPane extends Container<JScrollPane> {
         if (aComp == getView()) {
             setView(null);
         }
+        invalidatePublishedCollection();
     }
 
     private static final String COUNT_JSDOC = ""
@@ -95,7 +92,7 @@ public class ScrollPane extends Container<JScrollPane> {
     @ScriptFunction(jsDoc = COUNT_JSDOC)
     @Override
     public int getCount() {
-        return 1;// to avoid swing's viewports to be included in results
+        return getView() != null ? 1 : 0;// to avoid swing's viewports to be included in results
     }
 
     @ScriptFunction(jsDoc = CHILD_JSDOC)

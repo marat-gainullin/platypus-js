@@ -8,6 +8,7 @@ package com.eas.script;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.util.PropertiesUtils;
+import com.eas.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -260,7 +261,7 @@ public class Classes2Scripts {
                 .replace(NULL_PARAMS_TAG, ci.getNullParamsStr())
                 .replace(PARAMS_TAG, ci.getParamsStr())
                 .replace(DELEGATE_TAG, DELEGATE_OBJECT)
-                .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr())
+                .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr(3))
                 .replace(MAX_ARGS_TAG, Integer.toString(ci.params.length))
                 .replace(PROPERTIES_TAG, getPropsAndMethodsPart(clazz, CONSTRUCTOR_IDENT_LEVEL + 1));
         return js;
@@ -502,7 +503,11 @@ public class Classes2Scripts {
         if (!jsDoc.trim().startsWith("/**")) {//NOI18N
             return String.format(JS_DOC_TEMPLATE, jsDoc);
         } else {
-            return jsDoc;
+            String[] lines = jsDoc.split("\n");
+            for(int i = 1; i < lines.length; i++){
+                lines[i] = " " + lines[i].trim();
+            }
+            return StringUtils.join("\n", lines);
         }
 
     }
@@ -616,16 +621,27 @@ public class Classes2Scripts {
             return paramsSb.toString();
         }
 
-        public String getUnwrappedParamsStr() {
-            StringBuilder paramsSb = new StringBuilder();
-            String template = "P.boxAsJava(%s)";//NOI18N
-            for (int i = 0; i < params.length; i++) {
-                paramsSb.append(String.format(template, params[i]));
-                if (i < params.length - 1) {
-                    paramsSb.append(", ");//NOI18N
+        public String getUnwrappedParamsStr(int indent) {
+            StringBuilder argsSb = new StringBuilder();
+            for (int argsCount = params.length; argsCount >= 0; argsCount--) {
+                if (argsCount > 0) {
+                    argsSb.append("arguments.length === ").append(argsCount).append(" ? ");
+                }
+                StringBuilder paramsSb = new StringBuilder();
+                paramsSb.append("new javaClass(");
+                for (int i = 0; i < argsCount; i++) {
+                    paramsSb.append("P.boxAsJava(").append(params[i]).append(")");
+                    if (i < argsCount - 1) {
+                        paramsSb.append(", ");//NOI18N
+                    }
+                }
+                paramsSb.append(")");
+                argsSb.append(paramsSb);
+                if (argsCount > 0) {
+                    argsSb.append("\n").append(getIndentStr(indent)).append(": ");
                 }
             }
-            return paramsSb.toString();
+            return argsSb.toString();
         }
     }
 }

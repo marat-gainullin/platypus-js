@@ -23,7 +23,79 @@ load("classpath:internals.js");
 
 P.HTML5 = "Html5 client";
 P.J2SE = "Java SE client/server environment";
-P.agent = P.J2SE; 
+P.agent = P.J2SE;
+
+/** 
+ * invokeLater - invokes given function in AWT event thread
+ */
+Function.prototype.invokeLater = function() {
+    var SwingUtilities = Java.type("javax.swing.SwingUtilities");
+    var func = this;
+    var args = arguments;
+    SwingUtilities.invokeLater(function() {
+        func.apply(func, args);
+    });
+};
+
+/** 
+ * Thread - schedules given function in the pool thread
+ */
+Function.prototype.invokeDelayed = function() {
+    var SwingUtilities = Java.type("javax.swing.SwingUtilities");
+    var ScriptTimerTask = Java.type("com.eas.client.scripts.ScriptTimerTask");
+
+    var func = this;
+    var args = arguments;
+    if (!args || !args.length || args.length < 1)
+        throw "schedule needs at least 1 argument - timeout value.";
+    var userArgs = [];
+    for (var i = 1; i < args.length; i++) {
+        userArgs.push(args[i]);
+    }
+    ScriptTimerTask.schedule(function() {
+        SwingUtilities.invokeLater(function() {
+            try {
+                func.apply(func, userArgs);
+            } catch (e) {
+                P.Logger.severe(e);
+            }
+        });
+    }, args[0]);
+    // HTML5 client doesn't support cancel feature and so, we don't support it too.
+};
+
+(function() {
+    var Executors = Java.type("java.util.concurrent.Executors");
+    var DeamonThreadFactory = Java.type("com.eas.concurrent.DeamonThreadFactory");
+    var fixedThreadPool = null;
+    /** 
+     * Thread - schedules given function in the pool thread
+     */
+    Function.prototype.invokeBackground = function() {
+        if (!fixedThreadPool) {
+            fixedThreadPool = Executors.newFixedThreadPool(10, new DeamonThreadFactory());
+        }
+        var func = this;
+        var args = arguments;
+        fixedThreadPool.execute(function() {
+            func.apply(func, args);
+        });
+    };
+})();
+
+/** 
+ * Swing invokeAndWait - invokes given function in AWT event thread
+ * and waits for it's completion
+ */
+Function.prototype.invokeAndWait = function() {
+    var SwingUtilities = Java.type("javax.swing.SwingUtilities");
+    var func = this;
+    var args = arguments;
+    SwingUtilities.invokeAndWait(function() {
+        func.apply(func, args);
+    });
+};
+
 load("classpath:deps.js");
 
 /**
@@ -121,21 +193,33 @@ P.loadModel = function(aName, aTarget) {
  * @returns {P.loadForm.publishTo}
  */
 P.loadForm = function(aName, aModel, aTarget) {
-    var publishTo = aTarget ? aTarget : {};
     var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
     var Loader = Java.type('com.eas.client.forms.store.Dom2FormDocument');
     var Form = Java.type('com.eas.client.forms.Form');
 
     var designInfo = Loader.load(Executor.getClient(), aName);
     var form = new Form(aName, designInfo, aModel.unwrap());
-    // publish
-    publishTo.show = function() {
-        form.show();
-    };
-    publishTo.close = function(aValue) {
-        form.close(aValue);
-    };
-    return publishTo;
+    if (aTarget) {
+        P.Form.call(aTarget, form);
+    } else {
+        aTarget = new P.Form(form);
+    }
+    if(!form.title)
+        form.title = aName;
+    var comps = form.publishedComponents;
+    for (var c = 0; c < comps.length; c++) {
+        (function() {
+            var comp = comps[c];
+            if (comp.name) {
+                Object.defineProperty(aTarget, comp.name, {
+                    get: function() {
+                        return comp;
+                    }
+                });
+            }
+        })();
+    }
+    return aTarget;
 };
 
 /**
@@ -219,6 +303,7 @@ P.ServerModule = function(aModuleName) {
 (function() {
     var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
     var JavaDate = Java.type("java.util.Date");
+    var JavaArray = Java.type("java.lang.Object[]");
     var toPrimitive = ScriptUtils.getToPrimitiveFunc();
 
     /**
@@ -227,14 +312,16 @@ P.ServerModule = function(aModuleName) {
      * @returns {unresolved}
      */
     P.boxAsJava = function(aValue) {
-        if (aValue) {
+        if (arguments.length > 0 && aValue != null) {
             if (aValue.unwrap) {
                 aValue = aValue.unwrap();
             } else {
                 aValue = toPrimitive(aValue);
             }
+            return aValue;
+        } else {// undefined -> null
+            return null;
         }
-        return aValue;
     };
 
     /**
@@ -245,7 +332,7 @@ P.ServerModule = function(aModuleName) {
     P.boxAsJs = function(aValue) {
         if (aValue) {
             if (aValue.getPublished) {
-                if(arguments.length > 1) {
+                if (arguments.length > 1) {
                     var elementClass = arguments[1];
                     aValue = aValue.getPublished(new elementClass());
                 } else {
@@ -253,10 +340,10 @@ P.ServerModule = function(aModuleName) {
                 }
             } else if (aValue instanceof JavaDate) {
                 aValue = new Date(aValue.time);
-            } else if(Array.isArray(aValue)){
+            } else if (aValue instanceof JavaArray) {
                 var converted = [];
-                for(var i = 0; i < aValue.length; i++) {
-                    if(arguments.length > 1) {
+                for (var i = 0; i < aValue.length; i++) {
+                    if (arguments.length > 1) {
                         converted[converted.length] = P.boxAsJs(aValue[i], arguments[1]);
                     } else {
                         converted[converted.length] = P.boxAsJs(aValue[i]);

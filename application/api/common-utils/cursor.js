@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -71,24 +72,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property TEXT
-         * @memberOf Cursor
-         */
-        Object.defineProperty(this, "TEXT", {
-            get: function() {
-                var value = delegate.TEXT;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property W_RESIZE
          * @memberOf Cursor
          */
         Object.defineProperty(this, "W_RESIZE", {
             get: function() {
                 var value = delegate.W_RESIZE;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property TEXT
+         * @memberOf Cursor
+         */
+        Object.defineProperty(this, "TEXT", {
+            get: function() {
+                var value = delegate.TEXT;
                 return P.boxAsJs(value);
             }
         });

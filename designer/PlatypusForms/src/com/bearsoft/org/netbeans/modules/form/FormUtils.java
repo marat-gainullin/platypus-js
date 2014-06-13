@@ -176,6 +176,7 @@ public class FormUtils {
             "verifyInputWhenFocusTarget", PROP_HIDDEN,
             "requestFocusEnabled", PROP_HIDDEN,
             "model", PROP_HIDDEN,
+            "published", PROP_HIDDEN,
             "designInfo", PROP_HIDDEN},
         {"javax.swing.JComponent", CLASS_AND_SWING_SUBCLASSES,
             "graphics", PROP_HIDDEN,
@@ -208,12 +209,13 @@ public class FormUtils {
             "scriptScope", PROP_HIDDEN,
             "onRender", PROP_HIDDEN,
             "onSelect", PROP_HIDDEN,
-            "runtime", PROP_HIDDEN},
+            "published", PROP_HIDDEN
+        },
         {"com.eas.dbcontrols.RowsetDbControl", CLASS_AND_SUBCLASSES,
-            "scriptScope", PROP_HIDDEN
+            "published", PROP_HIDDEN
         },
         {"com.eas.dbcontrols.RowsetsDbControl", CLASS_AND_SUBCLASSES,
-            "scriptScope", PROP_HIDDEN
+            "published", PROP_HIDDEN
         },
         {"java.awt.Window", CLASS_AND_SUBCLASSES,
             "focusCycleRootAncestor", PROP_HIDDEN,

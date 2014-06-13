@@ -5,18 +5,23 @@
     });
     
     /**
-    * Drop-down button component.
-    * @param text the text of the component (optional).
-    * @param icon the icon of the component (optional).
-    * @param iconTextGap the text gap (optional).
-    * @param actionPerformed the function for the action performed handler (optional).
+     * Drop-down button component.
+     * @param text the text of the component (optional).
+     * @param icon the icon of the component (optional).
+     * @param iconTextGap the text gap (optional).
+     * @param actionPerformed the function for the action performed handler (optional).
      * @constructor DropDownButton DropDownButton
-    */
+     */
     P.DropDownButton = function (text, icon, iconTextGap, actionPerformed) {
 
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(iconTextGap), P.boxAsJava(actionPerformed));
+              arguments[maxArgs] 
+            : arguments.length === 4 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(iconTextGap), P.boxAsJava(actionPerformed))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(iconTextGap))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(text))
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -41,10 +46,10 @@
         });
 
         /**
-        * Mouse dragged event handler function.
+         * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -68,10 +73,10 @@
         });
 
         /**
-        * Mouse released event handler function.
+         * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -83,10 +88,10 @@
         });
 
         /**
-        * Keyboard focus lost by the component event handler function.
+         * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -98,10 +103,10 @@
         });
 
         /**
-        * Image picture for the button.
+         * Image picture for the button.
          * @property icon
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
@@ -113,10 +118,10 @@
         });
 
         /**
-        * Mouse pressed event handler function.
+         * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -156,10 +161,10 @@
         });
 
         /**
-        * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -171,10 +176,10 @@
         });
 
         /**
-        * Component moved event handler function.
+         * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -201,10 +206,10 @@
         });
 
         /**
-        * Vertical coordinate of the component.
+         * Vertical coordinate of the component.
          * @property top
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -216,10 +221,10 @@
         });
 
         /**
-        * Component resized event handler function.
+         * Component resized event handler function.
          * @property onComponentResized
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -231,10 +236,10 @@
         });
 
         /**
-        * Text on the button.
+         * Text on the button.
          * @property text
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -246,10 +251,10 @@
         });
 
         /**
-        * <code>PopupMenu</code> for the component.
+         * <code>PopupMenu</code> for the component.
          * @property dropDownMenu
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "dropDownMenu", {
             get: function() {
                 var value = delegate.dropDownMenu;
@@ -261,10 +266,10 @@
         });
 
         /**
-        * Mouse entered over the component event handler function.
+         * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -291,10 +296,10 @@
         });
 
         /**
-        * Height of the component.
+         * Height of the component.
          * @property height
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -306,10 +311,10 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
          * @property element
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -318,10 +323,10 @@
         });
 
         /**
-        * Component shown event handler function.
+         * Component shown event handler function.
          * @property onComponentShown
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -333,10 +338,10 @@
         });
 
         /**
-        * Mouse moved event handler function.
+         * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -378,10 +383,10 @@
         });
 
         /**
-        * Component hidden event handler function.
+         * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -393,10 +398,10 @@
         });
 
         /**
-        * The amount of space between the text and the icon displayed in this button.
+         * The amount of space between the text and the icon displayed in this button.
          * @property iconTextGap
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -423,10 +428,10 @@
         });
 
         /**
-        * Main action performed event handler function.
+         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -438,10 +443,10 @@
         });
 
         /**
-        * Key released event handler function.
+         * Key released event handler function.
          * @property onKeyReleased
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -468,10 +473,10 @@
         });
 
         /**
-        * Key typed event handler function.
+         * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -483,10 +488,10 @@
         });
 
         /**
-        * Horizontal position of the text relative to the icon.
+         * Horizontal position of the text relative to the icon.
          * @property horizontalTextPosition
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "horizontalTextPosition", {
             get: function() {
                 var value = delegate.horizontalTextPosition;
@@ -498,10 +503,10 @@
         });
 
         /**
-        * Vertical position of the text relative to the icon.
+         * Vertical position of the text relative to the icon.
          * @property verticalTextPosition
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "verticalTextPosition", {
             get: function() {
                 var value = delegate.verticalTextPosition;
@@ -513,10 +518,10 @@
         });
 
         /**
-        * Mouse wheel moved event handler function.
+         * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -528,10 +533,10 @@
         });
 
         /**
-        * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -540,10 +545,10 @@
         });
 
         /**
-        * Keyboard focus gained by the component event.
+         * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -555,10 +560,10 @@
         });
 
         /**
-        * Horizontal coordinate of the component.
+         * Horizontal coordinate of the component.
          * @property left
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -585,10 +590,10 @@
         });
 
         /**
-        * Mouse clicked event handler function.
+         * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -600,10 +605,10 @@
         });
 
         /**
-        * Mouse exited over the component event handler function.
+         * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -627,10 +632,10 @@
         });
 
         /**
-        * Width of the component.
+         * Width of the component.
          * @property width
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -657,10 +662,10 @@
         });
 
         /**
-        * Key pressed event handler function.
+         * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -672,10 +677,10 @@
         });
 
         /**
-        * Tries to acquire focus for this component.
+         * Tries to acquire focus for this component.
          * @method focus
          * @memberOf DropDownButton
-        */
+         */
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {

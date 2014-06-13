@@ -128,12 +128,6 @@ public class BoxPane extends Container<JPanel> {
         super.clear();
     }
 
-    private static final String REMOVE_JSDOC = ""
-            + "/**\n"
-            + "* Removes the specified component from this container.\n"
-            + "* @param component the component to remove\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {

@@ -5,15 +5,17 @@
     });
     
     /**
-    * <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.
-    * @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).
+     * <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.
+     * @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).
      * @constructor SplitPane SplitPane
-    */
+     */
     P.SplitPane = function (orientation) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass(P.boxAsJava(orientation));
+              arguments[maxArgs] 
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(orientation))
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -42,10 +44,10 @@
         });
 
         /**
-        * Mouse dragged event handler function.
+         * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -69,10 +71,10 @@
         });
 
         /**
-        * Mouse released event handler function.
+         * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -84,10 +86,10 @@
         });
 
         /**
-        * Keyboard focus lost by the component event handler function.
+         * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -99,10 +101,10 @@
         });
 
         /**
-        * Mouse pressed event handler function.
+         * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -142,10 +144,10 @@
         });
 
         /**
-        * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -157,10 +159,10 @@
         });
 
         /**
-        * Component moved event handler function.
+         * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -172,10 +174,10 @@
         });
 
         /**
-        * The split pane divider's location in pixels.
+         * The split pane divider's location in pixels.
          * @property dividerLocation
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "dividerLocation", {
             get: function() {
                 var value = delegate.dividerLocation;
@@ -187,10 +189,10 @@
         });
 
         /**
-        * Component added event hanler function.
+         * Component added event hanler function.
          * @property onComponentAdded
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onComponentAdded", {
             get: function() {
                 var value = delegate.onComponentAdded;
@@ -202,10 +204,10 @@
         });
 
         /**
-        * The second component of the container.
+         * The second component of the container.
          * @property secondComponent
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "secondComponent", {
             get: function() {
                 var value = delegate.secondComponent;
@@ -217,10 +219,10 @@
         });
 
         /**
-        * The first component of the container.
+         * The first component of the container.
          * @property firstComponent
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "firstComponent", {
             get: function() {
                 var value = delegate.firstComponent;
@@ -247,10 +249,10 @@
         });
 
         /**
-        * Vertical coordinate of the component.
+         * Vertical coordinate of the component.
          * @property top
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -262,10 +264,10 @@
         });
 
         /**
-        * Gets the container's children components.
+         * Gets the container's children components.
          * @property children
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "children", {
             get: function() {
                 if (!invalidatable) {
@@ -277,10 +279,10 @@
         });
 
         /**
-        * Component resized event handler function.
+         * Component resized event handler function.
          * @property onComponentResized
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -292,10 +294,10 @@
         });
 
         /**
-        * Mouse entered over the component event handler function.
+         * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -322,10 +324,10 @@
         });
 
         /**
-        * Height of the component.
+         * Height of the component.
          * @property height
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -337,10 +339,10 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
          * @property element
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -349,10 +351,10 @@
         });
 
         /**
-        * Component shown event handler function.
+         * Component shown event handler function.
          * @property onComponentShown
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -364,10 +366,10 @@
         });
 
         /**
-        * The orientation of the container.
+         * The orientation of the container.
          * @property orientation
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "orientation", {
             get: function() {
                 var value = delegate.orientation;
@@ -379,10 +381,10 @@
         });
 
         /**
-        * Mouse moved event handler function.
+         * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -424,10 +426,10 @@
         });
 
         /**
-        * Component hidden event handler function.
+         * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -454,10 +456,10 @@
         });
 
         /**
-        * Gets the number of components in this panel.
+         * Gets the number of components in this panel.
          * @property count
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -466,10 +468,10 @@
         });
 
         /**
-        * Main action performed event handler function.
+         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -481,10 +483,10 @@
         });
 
         /**
-        * Key released event handler function.
+         * Key released event handler function.
          * @property onKeyReleased
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -511,10 +513,10 @@
         });
 
         /**
-        * Key typed event handler function.
+         * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -526,10 +528,10 @@
         });
 
         /**
-        * Mouse wheel moved event handler function.
+         * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -541,10 +543,10 @@
         });
 
         /**
-        * Component removed event handler function.
+         * Component removed event handler function.
          * @property onComponentRemoved
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -556,10 +558,10 @@
         });
 
         /**
-        * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -568,10 +570,10 @@
         });
 
         /**
-        * Keyboard focus gained by the component event.
+         * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -583,10 +585,10 @@
         });
 
         /**
-        * Horizontal coordinate of the component.
+         * Horizontal coordinate of the component.
          * @property left
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -613,10 +615,10 @@
         });
 
         /**
-        * Mouse clicked event handler function.
+         * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -628,10 +630,10 @@
         });
 
         /**
-        * Mouse exited over the component event handler function.
+         * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -643,10 +645,10 @@
         });
 
         /**
-        * <code>true</code> if the pane is one touch expandable.
+         * <code>true</code> if the pane is one touch expandable.
          * @property oneTouchExpandable
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "oneTouchExpandable", {
             get: function() {
                 var value = delegate.oneTouchExpandable;
@@ -670,10 +672,10 @@
         });
 
         /**
-        * Width of the component.
+         * Width of the component.
          * @property width
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -700,10 +702,10 @@
         });
 
         /**
-        * Key pressed event handler function.
+         * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -715,11 +717,11 @@
         });
 
         /**
-        * Appends the specified component to the end of this container.
-        * @param component the component to add.
+         * Appends the specified component to the end of this container.
+         * @param component the component to add.
          * @method add
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "add", {
             get: function() {
                 return function(component) {
@@ -735,7 +737,7 @@
          * @return the child component
          * @method child
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "child", {
             get: function() {
                 return function(index) {
@@ -746,11 +748,11 @@
         });
 
         /**
-        * Removes the specified component from this container.
-        * @param component the component to remove
+         * Removes the specified component from this container.
+         * @param component the component to remove
          * @method remove
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "remove", {
             get: function() {
                 return function(component) {
@@ -761,10 +763,10 @@
         });
 
         /**
-        * Removes all the components from this container.
+         * Removes all the components from this container.
          * @method clear
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "clear", {
             get: function() {
                 return function() {
@@ -775,10 +777,10 @@
         });
 
         /**
-        * Tries to acquire focus for this component.
+         * Tries to acquire focus for this component.
          * @method focus
          * @memberOf SplitPane
-        */
+         */
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {

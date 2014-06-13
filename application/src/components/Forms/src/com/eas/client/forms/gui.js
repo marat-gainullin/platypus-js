@@ -1,120 +1,3 @@
-/*
- * @(#)gui.js	1.1 06/08/06
- *
- * Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * -Redistribution of source code must retain the above copyright notice, this
- *  list of conditions and the following disclaimer.
- *
- * -Redistribution in binary form must reproduce the above copyright notice,
- *  this list of conditions and the following disclaimer in the documentation
- *  and/or other materials provided with the distribution.
- *
- * Neither the name of Sun Microsystems, Inc. or the names of contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * This software is provided "AS IS," without a warranty of any kind. ALL
- * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING
- * ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN MICROSYSTEMS, INC. ("SUN")
- * AND ITS LICENSORS SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE
- * AS A RESULT OF USING, MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS
- * DERIVATIVES. IN NO EVENT WILL SUN OR ITS LICENSORS BE LIABLE FOR ANY LOST
- * REVENUE, PROFIT OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL,
- * INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY
- * OF LIABILITY, ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE,
- * EVEN IF SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- *
- * You acknowledge that this software is not designed, licensed or intended
- * for use in the design, construction, operation or maintenance of any
- * nuclear facility.
- */
-
-/*
- * Few user interface utilities. 
- */
-
-if (this.window === undefined) {
-    this.window = null;
-}
-
-/** 
- * Swing invokeLater - invokes given function in AWT event thread
- */
-Function.prototype.invokeLater = function() {
-    var SwingUtilities = javax.swing.SwingUtilities;
-    var func = this;
-    var args = arguments;
-    SwingUtilities.invokeLater(new java.lang.Runnable() {
-        run: function() {
-            func.apply(func, args);
-        }
-    });
-};
-
-/** 
- * Thread - schedules given function in the pool thread
- */
-Function.prototype.invokeDelayed = function() {
-    var func = this;
-    var args = arguments;
-    if (!args || !args.length || args.length < 1)
-        throw "schedule needs at least 1 argument - timeout value.";
-    var userArgs = [];
-    for (var i = 1; i < args.length; i++) {
-        userArgs.push(args[i]);
-    }
-    var cookie = com.eas.client.scripts.ScriptTimerTask.schedule(new java.lang.Runnable() {
-        run: function() {
-            var SwingUtilities = javax.swing.SwingUtilities;
-            SwingUtilities.invokeLater(new java.lang.Runnable() {
-                run: function() {
-                    try {
-                        func.apply(func, userArgs);
-                    } catch (e) {
-                        Logger.severe(e);
-                    }
-                }
-            });
-        }
-    }, args[0]);
-    /* HTML5 client doesn't support cancel feature and so, we don't support it too.
-    return {
-        cancel: function() {
-            return cookie.cancel(false);
-        }
-    };
-    */
-};
-
-/** 
- * Swing invokeAndWait - invokes given function in AWT event thread
- * and waits for it's completion
- */
-Function.prototype.invokeAndWait = function() {
-    var SwingUtilities = javax.swing.SwingUtilities;
-    var func = this;
-    var args = arguments;
-    SwingUtilities.invokeAndWait(new java.lang.Runnable() {
-        run: function() {
-            func.apply(func, args);
-        }
-    });
-}
-
-/**
- * Am I running in AWT event dispatcher thread?
- */
-function isEventThread() {
-    var SwingUtilities = javax.swing.SwingUtilities;
-    return SwingUtilities.isEventDispatchThread();
-}
-isEventThread.docString = "returns whether the current thread is GUI thread";
-
 /**
  * Opens a file dialog box 
  *
@@ -339,116 +222,15 @@ function confirm(msg, title) {
 }
 confirm.docString = "shows a confirmation message box to the user";
 
-/**
- * Exit the process after confirmation from user 
- * 
- * @param exitCode return code to OS [optional]
- */
-function exit(exitCode) {
-    if (exitCode == undefined)
-        exitCode = 0;
-    if (confirm("Do you really want to exit?")) {
-        java.lang.System.exit(exitCode);
-    }
-}
-exit.docString = "exits jconsole";
-
-// synonym to exit
-var quit = exit;
-
-// if echo function is not defined, define it as synonym
-// for println function
-if (this.echo == undefined) {
-    function echo(str) {
-        println(str);
-    }
-}
-
-SwingConstants = javax.swing.SwingConstants;
-Dimension = java.awt.Dimension;
-Point = java.awt.Point;
-Rectangle = java.awt.Rectangle;
-BorderLayout = java.awt.BorderLayout;
-BoxLayout = javax.swing.BoxLayout;
-FlowLayout = java.awt.FlowLayout;
-GridLayout = java.awt.GridLayout;
-SpringLayout = javax.swing.SpringLayout;
-AlphaComposite = java.awt.AlphaComposite;
-MouseEvent = java.awt.event.MouseEvent;
-KeyEvent = java.awt.event.KeyEvent;
-JFileChooser = javax.swing.JFileChooser;
-FileFilter = javax.swing.filechooser.FileFilter;
-JDesktopPane = javax.swing.JDesktopPane;
-JInternalFrame = javax.swing.JInternalFrame;
-JDialog = javax.swing.JDialog;
-JFrame = javax.swing.JFrame;
-JPanel = javax.swing.JPanel;
-JScrollPane = javax.swing.JScrollPane;
-WindowConstants = javax.swing.WindowConstants;
-
-PlotOrientation = org.jfree.chart.plot.PlotOrientation;
-ChartFactory = org.jfree.chart.ChartFactory;
-ChartPanel = org.jfree.chart.ChartPanel;
-AbstractXYDataset = org.jfree.data.xy.AbstractXYDataset;
-XYDataset = org.jfree.data.xy.XYDataset;
-
 // forms API
 Icon = com.eas.client.forms.IconResources;
 Icons = Icon;
 Orientation = com.eas.client.forms.api.Orientation;
 VerticalPosition = com.eas.client.forms.api.VerticalPosition;
 HorizontalPosition = com.eas.client.forms.api.HorizontalPosition;
-Anchors = com.eas.client.forms.api.Anchors;
 Font = com.eas.gui.Font;
 FontStyle = com.eas.gui.FontStyle;
 Cursor = com.eas.gui.Cursor;
-// components
-Button = com.eas.client.forms.api.components.Button;
-CheckBox = com.eas.client.forms.api.components.CheckBox;
-DesktopPane = com.eas.client.forms.api.components.DesktopPane;
-DropDownButton = com.eas.client.forms.api.components.DropDownButton;
-FormattedField = com.eas.client.forms.api.components.FormattedField;
-HtmlArea = com.eas.client.forms.api.components.HtmlArea;
-Label = com.eas.client.forms.api.components.Label;
-PasswordField = com.eas.client.forms.api.components.PasswordField;
-ProgressBar = com.eas.client.forms.api.components.ProgressBar;
-RadioButton = com.eas.client.forms.api.components.RadioButton;
-Slider = com.eas.client.forms.api.components.Slider;
-TextArea = com.eas.client.forms.api.components.TextArea;
-TextField = com.eas.client.forms.api.components.TextField;
-ToggleButton = com.eas.client.forms.api.components.ToggleButton;
-// model components
-ModelCheckBox = com.eas.client.forms.api.components.model.ModelCheckBox;
-ModelCombo = com.eas.client.forms.api.components.model.ModelCombo;
-ModelDate = com.eas.client.forms.api.components.model.ModelDate;
-ModelGrid = com.eas.client.forms.api.components.model.ModelGrid;
-ModelImage = com.eas.client.forms.api.components.model.ModelImage;
-ModelMap = com.eas.client.forms.api.components.model.ModelMap;
-ModelScheme = com.eas.client.forms.api.components.model.ModelScheme;
-ModelSpin = com.eas.client.forms.api.components.model.ModelSpin;
-ModelFormattedField = com.eas.client.forms.api.components.model.ModelFormattedField;
-ModelTextArea = com.eas.client.forms.api.components.model.ModelTextArea;
-// containers
-AnchorsPane = com.eas.client.forms.api.containers.AnchorsPane;
-BorderPane = com.eas.client.forms.api.containers.BorderPane;
-BoxPane = com.eas.client.forms.api.containers.BoxPane;
-ButtonGroup = com.eas.client.forms.api.containers.ButtonGroup;
-CardPane = com.eas.client.forms.api.containers.CardPane;
-FlowPane = com.eas.client.forms.api.containers.FlowPane;
-GridPane = com.eas.client.forms.api.containers.GridPane;
-ScrollPane = com.eas.client.forms.api.containers.ScrollPane;
-SplitPane = com.eas.client.forms.api.containers.SplitPane;
-TabbedPane = com.eas.client.forms.api.containers.TabbedPane;
-ToolBar = com.eas.client.forms.api.containers.ToolBar;
-AbsolutePane = com.eas.client.forms.api.containers.AbsolutePane;
-// menu
-CheckMenuItem = com.eas.client.forms.api.menu.CheckMenuItem;
-Menu = com.eas.client.forms.api.menu.Menu;
-MenuBar = com.eas.client.forms.api.menu.MenuBar;
-MenuItem = com.eas.client.forms.api.menu.MenuItem;
-PopupMenu = com.eas.client.forms.api.menu.PopupMenu;
-RadioMenuItem = com.eas.client.forms.api.menu.RadioMenuItem;
-
 // key codes
 VK_ENTER = java.awt.event.KeyEvent.VK_ENTER;
 VK_BACK_SPACE = java.awt.event.KeyEvent.VK_BACK_SPACE;
@@ -479,7 +261,7 @@ Object.defineProperty(Form, "shown", {
 
 Form.getShownForm = function(aId) {
     return com.eas.client.forms.FormRunner.getShownForm(aId);
-}
+};
 
 Object.defineProperty(Form, "onChange", {
     get: function() {

@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * The username..
+         * The username..
          * @property name
          * @memberOf SystemPlatypusPrincipal
-        */
+         */
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;

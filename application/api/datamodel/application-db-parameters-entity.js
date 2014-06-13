@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,11 +23,11 @@
             }
         });
         /**
-        * Gets the row at cursor position.
-        * @return the row object or <code>null</code> if cursor is before first or after last position.
+         * Gets the row at cursor position.
+         * @return the row object or <code>null</code> if cursor is before first or after last position.
          * @property cursor
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -35,10 +36,10 @@
         });
 
         /**
-        * The handler function for the event occured before the cursor position changed.
+         * The handler function for the event occured before the cursor position changed.
          * @property willScroll
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "willScroll", {
             get: function() {
                 var value = delegate.willScroll;
@@ -50,10 +51,10 @@
         });
 
         /**
-        * The handler function for the event occured before an entity row has been inserted.
+         * The handler function for the event occured before an entity row has been inserted.
          * @property willInsert
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "willInsert", {
             get: function() {
                 var value = delegate.willInsert;
@@ -65,10 +66,10 @@
         });
 
         /**
-        * The handler function for the event occured after the entity data have been required.
+         * The handler function for the event occured after the entity data have been required.
          * @property onRequeried
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
@@ -77,10 +78,10 @@
         });
 
         /**
-        * The handler function for the event occured after the entity data change.
+         * The handler function for the event occured after the entity data change.
          * @property onChanged
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "onChanged", {
             get: function() {
                 var value = delegate.onChanged;
@@ -92,10 +93,10 @@
         });
 
         /**
-        * The handler function for the event occured after an entity row has been deleted.
+         * The handler function for the event occured after an entity row has been deleted.
          * @property onDeleted
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "onDeleted", {
             get: function() {
                 var value = delegate.onDeleted;
@@ -107,10 +108,10 @@
         });
 
         /**
-        * The handler function for the event occured after the cursor position changed.
+         * The handler function for the event occured after the cursor position changed.
          * @property onScrolled
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "onScrolled", {
             get: function() {
                 var value = delegate.onScrolled;
@@ -122,10 +123,10 @@
         });
 
         /**
-        * The handler function for the event occured after the filter have been applied to the entity.
+         * The handler function for the event occured after the filter have been applied to the entity.
          * @property onFiltered
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "onFiltered", {
             get: function() {
                 var value = delegate.onFiltered;
@@ -148,11 +149,11 @@
         });
 
         /**
-        * Checks if the rowset is empty.
-        * @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.
+         * Checks if the rowset is empty.
+         * @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.
          * @property empty
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "empty", {
             get: function() {
                 var value = delegate.empty;
@@ -161,10 +162,10 @@
         });
 
         /**
-        * The handler function for the event occured after an entity row has been inserted.
+         * The handler function for the event occured after an entity row has been inserted.
          * @property onInserted
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "onInserted", {
             get: function() {
                 var value = delegate.onInserted;
@@ -176,10 +177,10 @@
         });
 
         /**
-        * The handler function for the event occured before the entity data change.
+         * The handler function for the event occured before the entity data change.
          * @property willChange
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "willChange", {
             get: function() {
                 var value = delegate.willChange;
@@ -191,10 +192,10 @@
         });
 
         /**
-        * The rowset size.
+         * The rowset size.
          * @property size
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "size", {
             get: function() {
                 var value = delegate.size;
@@ -203,10 +204,10 @@
         });
 
         /**
-        * Entity's active <code>Filter</code> object.
+         * Entity's active <code>Filter</code> object.
          * @property activeFilter
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "activeFilter", {
             get: function() {
                 var value = delegate.activeFilter;
@@ -215,10 +216,10 @@
         });
 
         /**
-        * Experimental. The constructor funciton for the entity's data array elements.
+         * Experimental. The constructor funciton for the entity's data array elements.
          * @property elementClass
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -230,10 +231,10 @@
         });
 
         /**
-        * The handler function for the event occured before an entity row has been deleted.
+         * The handler function for the event occured before an entity row has been deleted.
          * @property willDelete
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "willDelete", {
             get: function() {
                 var value = delegate.willDelete;
@@ -245,11 +246,11 @@
         });
 
         /**
-        * Moves the rowset cursor to the next row.
-        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * Moves the rowset cursor to the next row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method next
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "next", {
             get: function() {
                 return function() {
@@ -260,12 +261,12 @@
         });
 
         /**
-        * Finds rows using field -- field value pairs.
-        * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-        * @return the rows object's array accordind to the search condition or empty array if nothing is found.
+         * Finds rows using field -- field value pairs.
+         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+         * @return the rows object's array accordind to the search condition or empty array if nothing is found.
          * @method find
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "find", {
             get: function() {
                 return function(pairs) {
@@ -276,12 +277,12 @@
         });
 
         /**
-        * Refreshes rowset, only if any of its parameters has changed.
-        * @param onSuccessCallback the handler function for refresh data on success event (optional).
-        * @param onFailureCallback the handler function for refresh data on failure event (optional).
+         * Refreshes rowset, only if any of its parameters has changed.
+         * @param onSuccessCallback the handler function for refresh data on success event (optional).
+         * @param onFailureCallback the handler function for refresh data on failure event (optional).
          * @method execute
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "execute", {
             get: function() {
                 return function(onSuccessCallback, onFailureCallback) {
@@ -292,11 +293,11 @@
         });
 
         /**
-        * Moves the rowset cursor to the privious row.
-        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * Moves the rowset cursor to the privious row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method prev
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "prev", {
             get: function() {
                 return function() {
@@ -307,11 +308,11 @@
         });
 
         /**
-        * Inserts new row in the rowset and sets cursor on this row. @see push.
-        * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).
+         * Inserts new row in the rowset and sets cursor on this row. @see push.
+         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).
          * @method insert
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "insert", {
             get: function() {
                 return function(arg0) {
@@ -322,11 +323,11 @@
         });
 
         /**
-        * Checks if cursor in the position before the first row.
-        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method eof
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "eof", {
             get: function() {
                 return function() {
@@ -337,11 +338,11 @@
         });
 
         /**
-        * Moves the rowset cursor to the first row.
-        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * Moves the rowset cursor to the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method first
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "first", {
             get: function() {
                 return function() {
@@ -352,11 +353,11 @@
         });
 
         /**
-        * Moves the rowset cursor to the last row.
-        * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * Moves the rowset cursor to the last row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method last
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "last", {
             get: function() {
                 return function() {
@@ -367,12 +368,12 @@
         });
 
         /**
-        * Positions the rowset cursor on the specified row number. Row number is 1-based.
-        * @param index the row index to check, starting form <code>1</code>.
-        * @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.
+         * Positions the rowset cursor on the specified row number. Row number is 1-based.
+         * @param index the row index to check, starting form <code>1</code>.
+         * @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.
          * @method pos
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "pos", {
             get: function() {
                 return function(index) {
@@ -383,12 +384,12 @@
         });
 
         /**
-        * Gets the row at specified index.
-        * @param index the row index, starting form <code>1</code>.
-        * @return the row object or <code>null</code> if no row object have found at the specified index.
+         * Gets the row at specified index.
+         * @param index the row index, starting form <code>1</code>.
+         * @return the row object or <code>null</code> if no row object have found at the specified index.
          * @method getRow
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "getRow", {
             get: function() {
                 return function(index) {
@@ -414,10 +415,10 @@
         });
 
         /**
-        * Moves the rowset cursor to the position before the first row.
+         * Moves the rowset cursor to the position before the first row.
          * @method beforeFirst
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "beforeFirst", {
             get: function() {
                 return function() {
@@ -428,10 +429,10 @@
         });
 
         /**
-        * Moves the rowset cursor to the position after the last row.
+         * Moves the rowset cursor to the position after the last row.
          * @method afterLast
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "afterLast", {
             get: function() {
                 return function() {
@@ -442,10 +443,10 @@
         });
 
         /**
-        * Deletes all rows in the rowset.
+         * Deletes all rows in the rowset.
          * @method deleteAll
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "deleteAll", {
             get: function() {
                 return function() {
@@ -456,12 +457,12 @@
         });
 
         /**
-        * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-        * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-        * @return a comparator object.
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+         * @return a comparator object.
          * @method createFilter
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "createFilter", {
             get: function() {
                 return function(pairs) {
@@ -472,12 +473,12 @@
         });
 
         /**
-        * Finds row by its key. Key must a single property.
-        * @param key the unique identifier of the row.
-        * @return a row object or <code>null</code> if nothing is found.
+         * Finds row by its key. Key must a single property.
+         * @param key the unique identifier of the row.
+         * @return a row object or <code>null</code> if nothing is found.
          * @method findById
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "findById", {
             get: function() {
                 return function(key) {
@@ -488,12 +489,12 @@
         });
 
         /**
-        * Sets the rowset cursor to the specified row.
-        * @param row the row to position the entity cursor.
-        * @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.
+         * Sets the rowset cursor to the specified row.
+         * @param row the row to position the entity cursor.
+         * @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.
          * @method scrollTo
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "scrollTo", {
             get: function() {
                 return function(row) {
@@ -504,11 +505,11 @@
         });
 
         /**
-        * Checks if cursor in the position before the first row.
-        * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
          * @method bof
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "bof", {
             get: function() {
                 return function() {
@@ -519,12 +520,12 @@
         });
 
         /**
-        * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
-        * @param onSuccessCallback the handler function for refresh data on success event (optional).
-        * @param onFailureCallback the handler function for refresh data on failure event (optional).
+         * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccessCallback the handler function for refresh data on success event (optional).
+         * @param onFailureCallback the handler function for refresh data on failure event (optional).
          * @method requery
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "requery", {
             get: function() {
                 return function(onSuccessCallback, onFailureCallback) {
@@ -535,12 +536,12 @@
         });
 
         /**
-        * Creates an instance of comparator object using specified constraints objects.
-        * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-        * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
          * @method createSorting
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "createSorting", {
             get: function() {
                 return function(arg0) {
@@ -551,10 +552,10 @@
         });
 
         /**
-        * Disables automatic model update on parameters change, @see endUpdate method.
+         * Disables automatic model update on parameters change, @see endUpdate method.
          * @method beginUpdate
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "beginUpdate", {
             get: function() {
                 return function() {
@@ -565,10 +566,10 @@
         });
 
         /**
-        * Enables automatic model update on parameters change, @see beginUpdate method.
+         * Enables automatic model update on parameters change, @see beginUpdate method.
          * @method endUpdate
          * @memberOf ApplicationDbParametersEntity
-        */
+         */
         Object.defineProperty(this, "endUpdate", {
             get: function() {
                 return function() {

@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -37,10 +38,10 @@
         });
 
         /**
-        * Mouse dragged event handler function.
+         * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -64,10 +65,10 @@
         });
 
         /**
-        * Mouse released event handler function.
+         * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -79,10 +80,10 @@
         });
 
         /**
-        * Keyboard focus lost by the component event handler function.
+         * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -94,10 +95,10 @@
         });
 
         /**
-        * Mouse pressed event handler function.
+         * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -124,10 +125,10 @@
         });
 
         /**
-        * The current geo position on the map.
+         * The current geo position on the map.
          * @property geoPosition
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "geoPosition", {
             get: function() {
                 var value = delegate.geoPosition;
@@ -149,10 +150,10 @@
         });
 
         /**
-        * The map's mouse tools.
+         * The map's mouse tools.
          * @property tools
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "tools", {
             get: function() {
                 var value = delegate.tools;
@@ -161,10 +162,10 @@
         });
 
         /**
-        * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -176,10 +177,10 @@
         });
 
         /**
-        * Component moved event handler function.
+         * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -191,10 +192,10 @@
         });
 
         /**
-        * The map tiles service URL.
+         * The map tiles service URL.
          * @property backingUrl
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "backingUrl", {
             get: function() {
                 var value = delegate.backingUrl;
@@ -221,10 +222,10 @@
         });
 
         /**
-        * Vertical coordinate of the component.
+         * Vertical coordinate of the component.
          * @property top
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -236,10 +237,10 @@
         });
 
         /**
-        * Component resized event handler function.
+         * Component resized event handler function.
          * @property onComponentResized
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -251,10 +252,10 @@
         });
 
         /**
-        * Mouse entered over the component event handler function.
+         * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -266,10 +267,10 @@
         });
 
         /**
-        * The map's geo pane (read only).
+         * The map's geo pane (read only).
          * @property pane
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "pane", {
             get: function() {
                 var value = delegate.pane;
@@ -293,10 +294,10 @@
         });
 
         /**
-        * Height of the component.
+         * Height of the component.
          * @property height
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -308,10 +309,10 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
          * @property element
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -320,10 +321,10 @@
         });
 
         /**
-        * Component shown event handler function.
+         * Component shown event handler function.
          * @property onComponentShown
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -335,10 +336,10 @@
         });
 
         /**
-        * Mouse moved event handler function.
+         * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -380,10 +381,10 @@
         });
 
         /**
-        * Component hidden event handler function.
+         * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -410,10 +411,10 @@
         });
 
         /**
-        * Main action performed event handler function.
+         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -425,10 +426,10 @@
         });
 
         /**
-        * Key released event handler function.
+         * Key released event handler function.
          * @property onKeyReleased
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -455,10 +456,10 @@
         });
 
         /**
-        * Key typed event handler function.
+         * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -470,10 +471,10 @@
         });
 
         /**
-        * Mouse wheel moved event handler function.
+         * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -485,10 +486,10 @@
         });
 
         /**
-        * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -497,10 +498,10 @@
         });
 
         /**
-        * Keyboard focus gained by the component event.
+         * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -512,10 +513,10 @@
         });
 
         /**
-        * Horizontal coordinate of the component.
+         * Horizontal coordinate of the component.
          * @property left
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -542,10 +543,10 @@
         });
 
         /**
-        * Mouse clicked event handler function.
+         * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -557,10 +558,10 @@
         });
 
         /**
-        * The map's event handler function.
+         * The map's event handler function.
          * @property onEvent
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onEvent", {
             get: function() {
                 var value = delegate.onEvent;
@@ -572,10 +573,10 @@
         });
 
         /**
-        * Mouse exited over the component event handler function.
+         * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -599,10 +600,10 @@
         });
 
         /**
-        * Width of the component.
+         * Width of the component.
          * @property width
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -629,10 +630,10 @@
         });
 
         /**
-        * Key pressed event handler function.
+         * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -644,12 +645,12 @@
         });
 
         /**
-        * Hits to the specified point.
-        * @param hitObject the object to hit, can be either a Point or a Polygon instance.
-        * @return an array of <code>SelectionEntry</code> elements
+         * Hits to the specified point.
+         * @param hitObject the object to hit, can be either a Point or a Polygon instance.
+         * @return an array of <code>SelectionEntry</code> elements
          * @method hit
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "hit", {
             get: function() {
                 return function(hitObject) {
@@ -660,11 +661,11 @@
         });
 
         /**
-        * Selects specified entries.
-        * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
          * @method select
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "select", {
             get: function() {
                 return function(selectionEntries) {
@@ -675,12 +676,12 @@
         });
 
         /**
-        * Gets map's layer by the title.
-        * @param layerTitle the layer's title.
-        * @return an <code>MapLayer</code> instance.
+         * Gets map's layer by the title.
+         * @param layerTitle the layer's title.
+         * @return an <code>MapLayer</code> instance.
          * @method getLayer
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "getLayer", {
             get: function() {
                 return function(layerTitle) {
@@ -691,11 +692,11 @@
         });
 
         /**
-        * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. 
-        * @param area the <code>Geometry</code> of the specified area (optional) 
+         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
+         * @param area the <code>Geometry</code> of the specified area (optional)
          * @method fit
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "fit", {
             get: function() {
                 return function(area) {
@@ -706,15 +707,15 @@
         });
 
         /**
-        * Adds new layer to the map.
-        * @param layerTitle the layer's title.
-        * @param rowset the layer's data.
-        * @param geometryClass the geometry class.
-        * @param styleAttributes the layer's style attributes.
-        * @return <code>MapLayer</code> instance.
+         * Adds new layer to the map.
+         * @param layerTitle the layer's title.
+         * @param rowset the layer's data.
+         * @param geometryClass the geometry class.
+         * @param styleAttributes the layer's style attributes.
+         * @return <code>MapLayer</code> instance.
          * @method addLayer
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "addLayer", {
             get: function() {
                 return function(layerTitle, rowset, geometryClass, styleAttributes) {
@@ -725,12 +726,12 @@
         });
 
         /**
-        * Removes layer by the specified title.
-        * @param layerTitle the layer's title.
-        * @return <code>MapLayer</code> instance.
+         * Removes layer by the specified title.
+         * @param layerTitle the layer's title.
+         * @return <code>MapLayer</code> instance.
          * @method removeLayer
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "removeLayer", {
             get: function() {
                 return function(arg0) {
@@ -741,11 +742,11 @@
         });
 
         /**
-        * Removes all layers of the map.
-        * @return an array of <code>MapLayer</code> instances.
+         * Removes all layers of the map.
+         * @return an array of <code>MapLayer</code> instances.
          * @method removeAllLayers
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "removeAllLayers", {
             get: function() {
                 return function() {
@@ -756,12 +757,12 @@
         });
 
         /**
-        * Transforms point from cartesian to geo coordinate system.
-        * @param point the <code>Point</code> to transform.
-        * @return an tranformed <code>Point</code> instance.
+         * Transforms point from cartesian to geo coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
          * @method cartesian2Geo
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "cartesian2Geo", {
             get: function() {
                 return function(point) {
@@ -772,12 +773,12 @@
         });
 
         /**
-        * Transforms point from geo to cartesian coordinate system.
-        * @param point the <code>Point</code> to transform.
-        * @return an tranformed <code>Point</code> instance.
+         * Transforms point from geo to cartesian coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
          * @method geo2Cartesian
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "geo2Cartesian", {
             get: function() {
                 return function(point) {
@@ -788,12 +789,12 @@
         });
 
         /**
-        * Transforms point from cartesian to screen coordinate system.
-        * @param point the <code>Point</code> to transform.
-        * @return an tranformed <code>Point</code> instance.
+         * Transforms point from cartesian to screen coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
          * @method cartesian2Screen
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "cartesian2Screen", {
             get: function() {
                 return function(point) {
@@ -804,12 +805,12 @@
         });
 
         /**
-        * Tranaforms point from  screen to cartesian coordinate system.
-        * @param point the <code>Point</code> to transform.
-        * @return an tranformed <code>Point</code> instance.
+         * Tranaforms point from  screen to cartesian coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
          * @method screen2Cartesian
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "screen2Cartesian", {
             get: function() {
                 return function(point) {
@@ -820,11 +821,11 @@
         });
 
         /**
-        * Makes map move to the specified geo position.
-        * @param position the position on the map.
+         * Makes map move to the specified geo position.
+         * @param position the position on the map.
          * @method goToGeoPosition
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "goToGeoPosition", {
             get: function() {
                 return function(position) {
@@ -835,12 +836,12 @@
         });
 
         /**
-        * Hits the selection on the specified point.
-        * @param hitPoint the Point to hit.
-        * @return an array of <code>SelectionEntry</code> elements.
+         * Hits the selection on the specified point.
+         * @param hitPoint the Point to hit.
+         * @return an array of <code>SelectionEntry</code> elements.
          * @method hitSelection
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "hitSelection", {
             get: function() {
                 return function(hitPoint) {
@@ -851,10 +852,10 @@
         });
 
         /**
-        * Tries to acquire focus for this component.
+         * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelMap
-        */
+         */
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {

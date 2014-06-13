@@ -49,11 +49,8 @@ public class ProjectRunner {
     public static final String OPTION_PREFIX = PlatypusClientApplication.CMD_SWITCHS_PREFIX;
     public static final String CLASSPATH_OPTION_NAME = "cp"; //NOI18N
     private static final String EXT_DIRECTORY_NAME = "ext"; //NOI18N
+    private static final String API_DIRECTORY_NAME = "api"; //NOI18N
     private static final String CLIENT_APP_NAME = "Application.jar"; //NOI18N
-    private static final String JMX_AUTHENTICATE_OPTION_NAME = "Dcom.sun.management.jmxremote.authenticate"; //NOI18N
-    private static final String JMX_SSL_OPTION_NAME = "Dcom.sun.management.jmxremote.ssl"; //NOI18N
-    private static final String JMX_REMOTE_OPTION_NAME = "Dcom.sun.management.jmxremote"; //NOI18N
-    private static final String JMX_REMOTE_OPTION_PORT_NAME = "Dcom.sun.management.jmxremote.port"; //NOI18N
     private static final String LOG_LEVEL_OPTION_NAME = "D.level"; //NOI18N
     private static final String LOG_HANDLERS_OPTION_NAME = "Dhandlers"; //NOI18N
     private static final String CONSOLE_LOG_HANDLER_NAME = "java.util.logging.ConsoleHandler"; //NOI18N
@@ -64,7 +61,6 @@ public class ProjectRunner {
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
-    private static final int DEBUGGER_CONNECT_MAX_ATTEMPTS = 10;
 
     protected static void saveAll() {
         SaveAllAction action = SystemAction.get(SaveAllAction.class);
@@ -216,7 +212,7 @@ public class ProjectRunner {
             setLogging(arguments, project.getSettings().getClientLogLevel());
 
             arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-            arguments.add(getExtendedClasspath(getExecutablePath(binDir)));
+            arguments.add(getExtendedClasspath(getApiClasspath(getExecutablePath(binDir))));
 
             arguments.add(PlatypusClientApplication.class.getName());
 
@@ -314,9 +310,6 @@ public class ProjectRunner {
                 addArguments(arguments, pps.getRunClientOptions());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
             }
-            if (debug) {
-                arguments.add(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
-            }
             ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
             for (String argument : arguments) {
                 processBuilder = processBuilder.addArgument(argument);
@@ -396,20 +389,6 @@ public class ProjectRunner {
     }
 
     public static void setDebugArguments(List<String> arguments, int port) {
-        arguments.add(OPTION_PREFIX
-                + JMX_AUTHENTICATE_OPTION_NAME
-                + EQUALS_SIGN
-                + FALSE);
-        arguments.add(OPTION_PREFIX
-                + JMX_SSL_OPTION_NAME
-                + EQUALS_SIGN
-                + FALSE);
-        arguments.add(OPTION_PREFIX
-                + JMX_REMOTE_OPTION_NAME);
-        arguments.add(OPTION_PREFIX
-                + JMX_REMOTE_OPTION_PORT_NAME
-                + EQUALS_SIGN
-                + port);
     }
 
     public static String getExtendedClasspath(String executablePath) {
@@ -420,6 +399,16 @@ public class ProjectRunner {
             classpathStr.append(extDir);
             classpathStr.append(File.pathSeparator);
             classpathStr.append(String.format("%s/*", extDir)); //NOI18N
+        }
+        return classpathStr.toString();
+    }
+
+    public static String getApiClasspath(String executablePath) {
+        StringBuilder classpathStr = new StringBuilder(executablePath);
+        File apiDir = getPlatformApiDirectory();
+        if (apiDir.exists() && apiDir.isDirectory()) {
+            classpathStr.append(File.pathSeparator);
+            classpathStr.append(apiDir);
         }
         return classpathStr.toString();
     }
@@ -449,6 +438,14 @@ public class ProjectRunner {
         return extDir;
     }
 
+    private static File getPlatformApiDirectory() {
+        assert PlatypusPlatform.getPlatformHomePath() != null;
+        assert !PlatypusPlatform.getPlatformHomePath().isEmpty();
+        File platformHomeDir = new File(PlatypusPlatform.getPlatformHomePath());
+        File extDir = new File(platformHomeDir, API_DIRECTORY_NAME);
+        return extDir;
+    }
+    
     private static String getExecutablePath(File aBinDir) {
         File clientAppExecutable = new File(aBinDir, CLIENT_APP_NAME);
         if (!clientAppExecutable.exists()) {

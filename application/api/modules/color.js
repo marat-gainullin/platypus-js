@@ -5,17 +5,22 @@
     });
     
     /**
-    * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.* @param red Red compontent (optional)
-    * @param red Green compontent (optional)
-    * @param red Blue compontent (optional)
-    * @param red Alpha compontent (optional)
+     * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.* @param red Red compontent (optional)
+     * @param red Green compontent (optional)
+     * @param red Blue compontent (optional)
+     * @param red Alpha compontent (optional)
      * @constructor Color Color
-    */
+     */
     P.Color = function (red, green, blue, alpha) {
 
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass(P.boxAsJava(red), P.boxAsJava(green), P.boxAsJava(blue), P.boxAsJava(alpha));
+              arguments[maxArgs] 
+            : arguments.length === 4 ? new javaClass(P.boxAsJava(red), P.boxAsJava(green), P.boxAsJava(blue), P.boxAsJava(alpha))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(red), P.boxAsJava(green), P.boxAsJava(blue))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(red), P.boxAsJava(green))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(red))
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {

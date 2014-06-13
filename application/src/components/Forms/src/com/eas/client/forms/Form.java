@@ -9,6 +9,7 @@ import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.events.WindowEventsIProxy;
+import com.eas.controls.wrappers.ButtonGroupWrapper;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.resources.images.IconCache;
 import com.eas.script.AlreadyPublishedException;
@@ -26,6 +27,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.*;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -52,7 +54,7 @@ public class Form implements HasPublished {
             + "/**\n"
             + " * The array of application's shown forms.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = SHOWN_JSDOC)
     public static Form[] getShownForms() {
         synchronized (Form.class) {
@@ -72,7 +74,7 @@ public class Form implements HasPublished {
             + " * @param key a form key identifier\n"
             + " * @return a form from the open forms registry\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = SHOWN_FORM_JSDOC, params = {"key"})
     public static Form getShownForm(String aFormKey) {
         synchronized (Form.class) {
@@ -84,6 +86,7 @@ public class Form implements HasPublished {
             + "/**\n"
             + " * The shown forms registry change event handler function.\n"
             + " */";
+
     @ScriptFunction(jsDoc = ON_CHANGE_JSDOC)
     public static JSObject getOnChange() {
         return onChange;
@@ -179,6 +182,7 @@ public class Form implements HasPublished {
     protected ApplicationModel<?, ?, ?, ?> model;
     protected JPanel view;
     protected Map<String, JComponent> components;
+    protected Collection<JSObject> publishedComponents = new ArrayList<>();
     protected String formKey;
     private static JSObject publisher;
     protected Object published;
@@ -218,8 +222,8 @@ public class Form implements HasPublished {
 
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
-    } 
-    
+    }
+
     // Script interface
     private static final String SHOW_JSDOC = ""
             + "/**\n"
@@ -1299,35 +1303,29 @@ public class Form implements HasPublished {
         components = new HashMap<>();
         components.putAll(factory.getNonvisuals());
         components.putAll(factory.getComponents());
-        /*
-         for (Entry<String, JComponent> entry : components.entrySet()) {
-         if (view != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
-         defineProperty(entry.getKey(), publishComponent(entry.getValue(), Form.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
-         }
-         }
-         for (Entry<String, JComponent> entry : components.entrySet()) {
-         if (view != entry.getValue() && (entry.getValue() instanceof ButtonGroupWrapper)) {
-         defineProperty(entry.getKey(), publishComponent(entry.getValue(), Form.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
-         }
-         }
-         Form.super.delete(VIEW_SCRIPT_NAME);
-         ControlsWrapper viewWrapper = new ControlsWrapper(view);
-         (new PanelDesignInfo()).accept(viewWrapper);
-         defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), Form.this), READONLY);
-         */
+        for (Entry<String, JComponent> entry : components.entrySet()) {
+            if (view != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
+                String cName = entry.getKey();
+                ControlDesignInfo aDesignInfo = factory.getControlDesignInfos().get(cName);
+                JComponent aComp = entry.getValue();
+                ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
+                aDesignInfo.accept(apiWrapper);
+                com.eas.client.forms.api.Component<?> comp = apiWrapper.getResult();
+                JSObject compPublished = (JSObject) ((HasPublished) comp).getPublished();
+                ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(comp);
+                if (eventsProxy != null) {
+                    eventsProxy.setEventThis(compPublished);
+                }
+                publishedComponents.add(compPublished);
+            }
+        }
     }
 
-    protected static Object publishComponent(JComponent aComp, ControlDesignInfo aDesignInfo) {
-        ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
-        aDesignInfo.accept(apiWrapper);
-        JSObject published = null;// TODO: implement publish
-        ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(apiWrapper.getResult());
-        if (eventsProxy != null) {
-            eventsProxy.setEventThis(published);
-        }
-        if (aComp instanceof HasPublished) {
-            ((HasPublished) aComp).setPublished(published);
-        }
-        return published;
+    public JSObject[] getPublishedComponents() {
+        Collection<JSObject> copy = new ArrayList<>();
+        copy.addAll(publishedComponents);
+        publishedComponents.clear();
+        return copy.toArray(new JSObject[]{});
     }
+    
 }

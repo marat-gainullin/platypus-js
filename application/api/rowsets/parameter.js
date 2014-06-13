@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * The field's type information.
+         * The field's type information.
          * @property typeInfo
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "typeInfo", {
             get: function() {
                 var value = delegate.typeInfo;
@@ -37,10 +38,10 @@
         });
 
         /**
-        * Determines if field is nullable.
+         * Determines if field is nullable.
          * @property nullable
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
@@ -52,10 +53,10 @@
         });
 
         /**
-        * Indicates that this field is a foreign key to another table or it is a self-reference key.
+         * Indicates that this field is a foreign key to another table or it is a self-reference key.
          * @property fk
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "fk", {
             get: function() {
                 var value = delegate.fk;
@@ -79,10 +80,10 @@
         });
 
         /**
-        * The precision of the field.
+         * The precision of the field.
          * @property precision
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "precision", {
             get: function() {
                 var value = delegate.precision;
@@ -94,10 +95,10 @@
         });
 
         /**
-        * The scale of the field.
+         * The scale of the field.
          * @property scale
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "scale", {
             get: function() {
                 var value = delegate.scale;
@@ -109,10 +110,10 @@
         });
 
         /**
-        * The description of the field.
+         * The description of the field.
          * @property description
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "description", {
             get: function() {
                 var value = delegate.description;
@@ -124,10 +125,10 @@
         });
 
         /**
-        * Determines if the field is signed.
+         * Determines if the field is signed.
          * @property signed
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "signed", {
             get: function() {
                 var value = delegate.signed;
@@ -139,10 +140,10 @@
         });
 
         /**
-        * This field schema name.
+         * This field schema name.
          * @property schemaName
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "schemaName", {
             get: function() {
                 var value = delegate.schemaName;
@@ -154,10 +155,10 @@
         });
 
         /**
-        * This field table's name.
+         * This field table's name.
          * @property tableName
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "tableName", {
             get: function() {
                 var value = delegate.tableName;
@@ -184,12 +185,12 @@
         });
 
         /**
-        * The original name of the field.
-        * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
-        * but be able to generate right update sql clauses for multiple tables.
+         * The original name of the field.
+         * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
+         * but be able to generate right update sql clauses for multiple tables.
          * @property originalName
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "originalName", {
             get: function() {
                 var value = delegate.originalName;
@@ -201,10 +202,10 @@
         });
 
         /**
-        * The size of the field.
+         * The size of the field.
          * @property size
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "size", {
             get: function() {
                 var value = delegate.size;
@@ -216,10 +217,10 @@
         });
 
         /**
-        * Determines if this field is readonly.
+         * Determines if this field is readonly.
          * @property readonly
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -231,10 +232,10 @@
         });
 
         /**
-        * The name of the field.
+         * The name of the field.
          * @property name
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -261,10 +262,10 @@
         });
 
         /**
-        * Determines that this field is a primary key.
+         * Determines that this field is a primary key.
          * @property pk
          * @memberOf Parameter
-        */
+         */
         Object.defineProperty(this, "pk", {
             get: function() {
                 var value = delegate.pk;

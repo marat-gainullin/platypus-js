@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * The new value.
+         * The new value.
          * @property newValue
          * @memberOf EntityInstanceChangeEvent
-        */
+         */
         Object.defineProperty(this, "newValue", {
             get: function() {
                 var value = delegate.newValue;
@@ -34,10 +35,10 @@
         });
 
         /**
-        * The changed property name.
+         * The changed property name.
          * @property propertyName
          * @memberOf EntityInstanceChangeEvent
-        */
+         */
         Object.defineProperty(this, "propertyName", {
             get: function() {
                 var value = delegate.propertyName;
@@ -46,10 +47,10 @@
         });
 
         /**
-        * The old value.
+         * The old value.
          * @property oldValue
          * @memberOf EntityInstanceChangeEvent
-        */
+         */
         Object.defineProperty(this, "oldValue", {
             get: function() {
                 var value = delegate.oldValue;
@@ -58,10 +59,10 @@
         });
 
         /**
-        * The source object of the event.
+         * The source object of the event.
          * @property source
          * @memberOf EntityInstanceChangeEvent
-        */
+         */
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -70,10 +71,10 @@
         });
 
         /**
-        * The updated element.
+         * The updated element.
          * @property object
          * @memberOf EntityInstanceChangeEvent
-        */
+         */
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

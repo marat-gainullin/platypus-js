@@ -5,14 +5,18 @@
     });
     
     /**
-     * 
+     *
      * @constructor Report Report
      */
     P.Report = function (aReport, aFormat, aName) {
 
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass(P.boxAsJava(aReport), P.boxAsJava(aFormat), P.boxAsJava(aName));
+              arguments[maxArgs] 
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(aReport), P.boxAsJava(aFormat), P.boxAsJava(aName))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(aReport), P.boxAsJava(aFormat))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(aReport))
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {

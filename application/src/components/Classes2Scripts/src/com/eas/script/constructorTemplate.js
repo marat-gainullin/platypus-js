@@ -9,7 +9,8 @@ ${JsDoc}
 
         var maxArgs = ${MaxArgs};
         var ${Delegate} = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass(${UnwrappedParams});
+              arguments[maxArgs] 
+            : ${UnwrappedParams};
 
         Object.defineProperty(this, "unwrap", {
             get: function() {

@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * Alt key is down on this event.
+         * Alt key is down on this event.
          * @property altDown
          * @memberOf KeyEvent
-        */
+         */
         Object.defineProperty(this, "altDown", {
             get: function() {
                 var value = delegate.altDown;
@@ -34,10 +35,10 @@
         });
 
         /**
-        * Ctrl key is down on this event.
+         * Ctrl key is down on this event.
          * @property controlDown
          * @memberOf KeyEvent
-        */
+         */
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
@@ -46,10 +47,10 @@
         });
 
         /**
-        * Shift key is down on this event.
+         * Shift key is down on this event.
          * @property shiftDown
          * @memberOf KeyEvent
-        */
+         */
         Object.defineProperty(this, "shiftDown", {
             get: function() {
                 var value = delegate.shiftDown;
@@ -58,10 +59,10 @@
         });
 
         /**
-        * Meta key is down on this event.
+         * Meta key is down on this event.
          * @property metaDown
          * @memberOf KeyEvent
-        */
+         */
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
@@ -70,10 +71,10 @@
         });
 
         /**
-        * The source component object of the event.
+         * The source component object of the event.
          * @property source
          * @memberOf KeyEvent
-        */
+         */
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -82,10 +83,10 @@
         });
 
         /**
-        * Key code associated with this event.
+         * Key code associated with this event.
          * @property key
          * @memberOf KeyEvent
-        */
+         */
         Object.defineProperty(this, "key", {
             get: function() {
                 var value = delegate.key;

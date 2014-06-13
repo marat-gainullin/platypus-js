@@ -67,12 +67,12 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
         }
     }
 
-    private static final String REMOVE_JSDOC = ""
+    private static final String GROUP_REMOVE_JSDOC = ""
             + "/**\n"
             + "* Removes the specified component from the group.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = REMOVE_JSDOC)
+    @ScriptFunction(jsDoc = GROUP_REMOVE_JSDOC)
     @Override
     public void remove(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {

@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.api.containers;
 
+import com.eas.client.forms.api.Anchors;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.Ordering;
@@ -13,6 +14,9 @@ import com.eas.controls.layouts.margin.MarginConstraints;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.awt.Dimension;
+import java.awt.Point;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
@@ -48,9 +52,18 @@ public class AnchorsPane extends Container<JPanel> {
             + "*/";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
-    public void add(Component<?> aComp, JSObject aAnchors) {
+    public void add(Component<?> aComp, Object oAnchors) {
         if (aComp != null) {
-            delegate.add(unwrap(aComp), scriptable2MarginConstraints(aAnchors));
+            JComponent comp = unwrap(aComp);
+            MarginConstraints c;
+            if (oAnchors != null) {
+                c = oAnchors instanceof Anchors ? anchors2MarginConstraints((Anchors)oAnchors) : scriptable2MarginConstraints((JSObject) oAnchors);
+            } else {
+                Point location = comp.getLocation();
+                Dimension size = comp.getSize();
+                c = new MarginConstraints(new Margin(location.x, true), new Margin(location.y, true), null, null, new Margin(size.width, true), new Margin(size.height, true));
+            }
+            delegate.add(comp, c);
             delegate.revalidate();
             delegate.repaint();
         }
@@ -71,7 +84,23 @@ public class AnchorsPane extends Container<JPanel> {
         Margin bottom = MarginConstraintsDesignInfo.parseMargin(oBottom != null ? JSType.toString(oBottom) : null);
         return new MarginConstraints(left, top, right, bottom, width, height);
     }
-
+    
+    protected MarginConstraints anchors2MarginConstraints(Anchors aAnchors) {
+        Object oLeft = aAnchors.getLeft();
+        Object oWidth = aAnchors.getWidth();
+        Object oTop = aAnchors.getTop();
+        Object oHeight = aAnchors.getHeight();
+        Object oRight = aAnchors.getRight();
+        Object oBottom = aAnchors.getBottom();
+        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? JSType.toString(oLeft) : null);
+        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? JSType.toString(oWidth) : null);
+        Margin right = MarginConstraintsDesignInfo.parseMargin(oRight != null ? JSType.toString(oRight) : null);
+        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? JSType.toString(oTop) : null);
+        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? JSType.toString(oHeight) : null);
+        Margin bottom = MarginConstraintsDesignInfo.parseMargin(oBottom != null ? JSType.toString(oBottom) : null);
+        return new MarginConstraints(left, top, right, bottom, width, height);
+    }
+    
     public void toFront(Component aComp) {
         Ordering.toFront(delegate, aComp);
     }

@@ -5,16 +5,17 @@
     });
     
     /**
-    * MenuSeparator provides a general purpose component for
-    * implementing divider lines - most commonly used as a divider
-    * between menu items that breaks them up into logical groupings.
+     * MenuSeparator provides a general purpose component for
+     * implementing divider lines - most commonly used as a divider
+     * between menu items that breaks them up into logical groupings.
      * @constructor MenuSeparator MenuSeparator
-    */
+     */
     P.MenuSeparator = function () {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -39,10 +40,10 @@
         });
 
         /**
-        * Mouse dragged event handler function.
+         * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -54,10 +55,10 @@
         });
 
         /**
-        * The parent container.
+         * The parent container.
          * @property parent
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parent;
@@ -66,10 +67,10 @@
         });
 
         /**
-        * Mouse released event handler function.
+         * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -81,10 +82,10 @@
         });
 
         /**
-        * Keyboard focus lost by the component event handler function.
+         * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -96,10 +97,10 @@
         });
 
         /**
-        * Mouse pressed event handler function.
+         * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -139,10 +140,10 @@
         });
 
         /**
-        * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -154,10 +155,10 @@
         });
 
         /**
-        * Component moved event handler function.
+         * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -184,10 +185,10 @@
         });
 
         /**
-        * Vertical coordinate of the component.
+         * Vertical coordinate of the component.
          * @property top
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -199,10 +200,10 @@
         });
 
         /**
-        * Component resized event handler function.
+         * Component resized event handler function.
          * @property onComponentResized
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -214,10 +215,10 @@
         });
 
         /**
-        * Mouse entered over the component event handler function.
+         * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -244,10 +245,10 @@
         });
 
         /**
-        * Height of the component.
+         * Height of the component.
          * @property height
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -259,10 +260,10 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
          * @property element
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -271,10 +272,10 @@
         });
 
         /**
-        * Component shown event handler function.
+         * Component shown event handler function.
          * @property onComponentShown
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -286,10 +287,10 @@
         });
 
         /**
-        * Mouse moved event handler function.
+         * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -331,10 +332,10 @@
         });
 
         /**
-        * Component hidden event handler function.
+         * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -361,10 +362,10 @@
         });
 
         /**
-        * Main action performed event handler function.
+         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -376,10 +377,10 @@
         });
 
         /**
-        * Key released event handler function.
+         * Key released event handler function.
          * @property onKeyReleased
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -406,10 +407,10 @@
         });
 
         /**
-        * Key typed event handler function.
+         * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -421,10 +422,10 @@
         });
 
         /**
-        * Mouse wheel moved event handler function.
+         * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -436,10 +437,10 @@
         });
 
         /**
-        * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -448,10 +449,10 @@
         });
 
         /**
-        * Keyboard focus gained by the component event.
+         * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -463,10 +464,10 @@
         });
 
         /**
-        * Horizontal coordinate of the component.
+         * Horizontal coordinate of the component.
          * @property left
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -493,10 +494,10 @@
         });
 
         /**
-        * Mouse clicked event handler function.
+         * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -508,10 +509,10 @@
         });
 
         /**
-        * Mouse exited over the component event handler function.
+         * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -535,10 +536,10 @@
         });
 
         /**
-        * Width of the component.
+         * Width of the component.
          * @property width
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -565,10 +566,10 @@
         });
 
         /**
-        * Key pressed event handler function.
+         * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -580,10 +581,10 @@
         });
 
         /**
-        * Tries to acquire focus for this component.
+         * Tries to acquire focus for this component.
          * @method focus
          * @memberOf MenuSeparator
-        */
+         */
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {

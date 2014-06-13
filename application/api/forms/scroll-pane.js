@@ -5,15 +5,17 @@
     });
     
     /**
-    * Provides a scrollable view of a lightweight component.
-    * @param view the component to display in the scrollpane's viewport (optional)
+     * Provides a scrollable view of a lightweight component.
+     * @param view the component to display in the scrollpane's viewport (optional)
      * @constructor ScrollPane ScrollPane
-    */
+     */
     P.ScrollPane = function (view) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass(P.boxAsJava(view));
+              arguments[maxArgs] 
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(view))
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -42,10 +44,10 @@
         });
 
         /**
-        * Mouse dragged event handler function.
+         * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -69,10 +71,10 @@
         });
 
         /**
-        * Mouse released event handler function.
+         * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -84,10 +86,10 @@
         });
 
         /**
-        * Keyboard focus lost by the component event handler function.
+         * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -99,10 +101,10 @@
         });
 
         /**
-        * Mouse pressed event handler function.
+         * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -142,10 +144,10 @@
         });
 
         /**
-        * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -157,10 +159,10 @@
         });
 
         /**
-        * Component moved event handler function.
+         * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -172,10 +174,10 @@
         });
 
         /**
-        * Component added event hanler function.
+         * Component added event hanler function.
          * @property onComponentAdded
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onComponentAdded", {
             get: function() {
                 var value = delegate.onComponentAdded;
@@ -187,10 +189,10 @@
         });
 
         /**
-        * The specified component as the scroll pane view.
+         * The specified component as the scroll pane view.
          * @property view
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "view", {
             get: function() {
                 var value = delegate.view;
@@ -214,10 +216,10 @@
         });
 
         /**
-        * Vertical coordinate of the component.
+         * Vertical coordinate of the component.
          * @property top
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -229,10 +231,10 @@
         });
 
         /**
-        * Gets the container's children components.
+         * Gets the container's children components.
          * @property children
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "children", {
             get: function() {
                 if (!invalidatable) {
@@ -244,10 +246,10 @@
         });
 
         /**
-        * Component resized event handler function.
+         * Component resized event handler function.
          * @property onComponentResized
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -259,10 +261,10 @@
         });
 
         /**
-        * Mouse entered over the component event handler function.
+         * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -289,10 +291,10 @@
         });
 
         /**
-        * Height of the component.
+         * Height of the component.
          * @property height
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -304,10 +306,10 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
          * @property element
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -316,10 +318,10 @@
         });
 
         /**
-        * Component shown event handler function.
+         * Component shown event handler function.
          * @property onComponentShown
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -331,10 +333,10 @@
         });
 
         /**
-        * Mouse moved event handler function.
+         * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -376,10 +378,10 @@
         });
 
         /**
-        * Component hidden event handler function.
+         * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -406,10 +408,10 @@
         });
 
         /**
-        * Gets the number of components in this panel.
+         * Gets the number of components in this panel.
          * @property count
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -418,10 +420,10 @@
         });
 
         /**
-        * Main action performed event handler function.
+         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -433,10 +435,10 @@
         });
 
         /**
-        * Key released event handler function.
+         * Key released event handler function.
          * @property onKeyReleased
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -463,10 +465,10 @@
         });
 
         /**
-        * Key typed event handler function.
+         * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -478,10 +480,10 @@
         });
 
         /**
-        * Mouse wheel moved event handler function.
+         * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -493,10 +495,10 @@
         });
 
         /**
-        * Component removed event handler function.
+         * Component removed event handler function.
          * @property onComponentRemoved
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -508,10 +510,10 @@
         });
 
         /**
-        * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -520,10 +522,10 @@
         });
 
         /**
-        * Keyboard focus gained by the component event.
+         * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -535,10 +537,10 @@
         });
 
         /**
-        * Horizontal coordinate of the component.
+         * Horizontal coordinate of the component.
          * @property left
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -565,10 +567,10 @@
         });
 
         /**
-        * Mouse clicked event handler function.
+         * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -580,10 +582,10 @@
         });
 
         /**
-        * Mouse exited over the component event handler function.
+         * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -607,10 +609,10 @@
         });
 
         /**
-        * Width of the component.
+         * Width of the component.
          * @property width
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -637,10 +639,10 @@
         });
 
         /**
-        * Key pressed event handler function.
+         * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -652,11 +654,11 @@
         });
 
         /**
-        * Appends the specified component to the end of this container.
-        * @param component the component to add
+         * Appends the specified component to the end of this container.
+         * @param component the component to add
          * @method add
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "add", {
             get: function() {
                 return function(component) {
@@ -667,11 +669,11 @@
         });
 
         /**
-        * Removes the specified component from this container.
-        * @param component the component to remove
+         * Removes the specified component from this container.
+         * @param component the component to remove
          * @method remove
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "remove", {
             get: function() {
                 return function(component) {
@@ -687,7 +689,7 @@
          * @return the child component
          * @method child
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "child", {
             get: function() {
                 return function(arg0) {
@@ -698,10 +700,10 @@
         });
 
         /**
-        * Removes all the components from this container.
+         * Removes all the components from this container.
          * @method clear
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "clear", {
             get: function() {
                 return function() {
@@ -712,10 +714,10 @@
         });
 
         /**
-        * Tries to acquire focus for this component.
+         * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ScrollPane
-        */
+         */
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {

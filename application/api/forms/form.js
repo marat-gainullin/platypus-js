@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -209,6 +210,18 @@
         });
 
         /**
+         * The shown forms registry change event handler function.
+         * @property onChange
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "onChange", {
+            get: function() {
+                var value = delegate.onChange;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * The handler function for the form's <i>after maximize</i> event.
          * @property onWindowMaximized
          * @memberOf Form
@@ -220,18 +233,6 @@
             },
             set: function(aValue) {
                 delegate.onWindowMaximized = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * The shown forms registry change event handler function.
-         * @property onChange
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "onChange", {
-            get: function() {
-                var value = delegate.onChange;
-                return P.boxAsJs(value);
             }
         });
 
@@ -251,21 +252,6 @@
         });
 
         /**
-         * The handler function for the form's <i>after restore</i> event.
-         * @property onWindowRestored
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "onWindowRestored", {
-            get: function() {
-                var value = delegate.onWindowRestored;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onWindowRestored = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * The form key. Used to identify a form instance. Initialy set to the form's application element name.
          * @property formKey
          * @memberOf Form
@@ -277,6 +263,21 @@
             },
             set: function(aValue) {
                 delegate.formKey = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * The handler function for the form's <i>after restore</i> event.
+         * @property onWindowRestored
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "onWindowRestored", {
+            get: function() {
+                var value = delegate.onWindowRestored;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onWindowRestored = P.boxAsJava(aValue);
             }
         });
 
@@ -510,21 +511,6 @@
         });
 
         /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        Object.defineProperty(this, "showInternalFrame", {
-            get: function() {
-                return function(desktop) {
-                    var value = delegate.showInternalFrame(P.boxAsJava(desktop));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
          * Gets a shown form by its key.
          * @param key a form key identifier
          * @return a form from the open forms registry
@@ -535,6 +521,21 @@
             get: function() {
                 return function(key) {
                     var value = delegate.getShownForm(P.boxAsJava(key));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
+         * @memberOf Form
+         */
+        Object.defineProperty(this, "showInternalFrame", {
+            get: function() {
+                return function(desktop) {
+                    var value = delegate.showInternalFrame(P.boxAsJava(desktop));
                     return P.boxAsJs(value);
                 };
             }

@@ -93,7 +93,7 @@ public abstract class Container<D extends JComponent> extends Component<D> imple
         return ch.toArray(new Component<?>[]{});
     }
 
-    private static final String REMOVE_JSDOC = ""
+    protected static final String REMOVE_JSDOC = ""
             + "/**\n"
             + "* Removes the specified component from this container.\n"
             + "* @param component the component to remove\n"

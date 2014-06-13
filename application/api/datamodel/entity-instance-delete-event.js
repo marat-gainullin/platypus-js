@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * The deleted element.
+         * The deleted element.
          * @property deleted
          * @memberOf EntityInstanceDeleteEvent
-        */
+         */
         Object.defineProperty(this, "deleted", {
             get: function() {
                 var value = delegate.deleted;
@@ -34,10 +35,10 @@
         });
 
         /**
-        * The source object of the event.
+         * The source object of the event.
          * @property source
          * @memberOf EntityInstanceDeleteEvent
-        */
+         */
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

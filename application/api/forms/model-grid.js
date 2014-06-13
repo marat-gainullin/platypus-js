@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -34,10 +35,10 @@
         });
 
         /**
-        * Mouse released event handler function.
+         * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -64,10 +65,10 @@
         });
 
         /**
-        * Component moved event handler function.
+         * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -79,10 +80,10 @@
         });
 
         /**
-        * Determines if grid allows row insertion.
+         * Determines if grid allows row insertion.
          * @property insertable
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "insertable", {
             get: function() {
                 var value = delegate.insertable;
@@ -110,10 +111,10 @@
         });
 
         /**
-        * Mouse entered over the component event handler function.
+         * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -125,10 +126,10 @@
         });
 
         /**
-        *  Gets the array of selected rows.
+         *  Gets the array of selected rows.
          * @property selected
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "selected", {
             get: function() {
                 var value = delegate.selected;
@@ -152,10 +153,10 @@
         });
 
         /**
-        * Height of the component.
+         * Height of the component.
          * @property height
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -167,10 +168,10 @@
         });
 
         /**
-        * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
          * @property element
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -179,10 +180,10 @@
         });
 
         /**
-        * Component shown event handler function.
+         * Component shown event handler function.
          * @property onComponentShown
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -209,10 +210,10 @@
         });
 
         /**
-        * Component hidden event handler function.
+         * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -224,10 +225,10 @@
         });
 
         /**
-        * Main action performed event handler function.
+         * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -239,10 +240,10 @@
         });
 
         /**
-        * Key released event handler function.
+         * Key released event handler function.
          * @property onKeyReleased
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -269,10 +270,10 @@
         });
 
         /**
-        * Key typed event handler function.
+         * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -284,10 +285,10 @@
         });
 
         /**
-        * Mouse wheel moved event handler function.
+         * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -299,10 +300,10 @@
         });
 
         /**
-        * Horizontal coordinate of the component.
+         * Horizontal coordinate of the component.
          * @property left
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -314,11 +315,11 @@
         });
 
         /**
-        * Gets all grid selected cells as an array.
-        * <b>WARNING!!! All selected cells will be copied.</b>
+         * Gets all grid selected cells as an array.
+         * <b>WARNING!!! All selected cells will be copied.</b>
          * @property selectedCells
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "selectedCells", {
             get: function() {
                 var value = delegate.selectedCells;
@@ -342,10 +343,10 @@
         });
 
         /**
-        * Determines if grid shows vertical lines.
+         * Determines if grid shows vertical lines.
          * @property showVerticalLines
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "showVerticalLines", {
             get: function() {
                 var value = delegate.showVerticalLines;
@@ -384,10 +385,10 @@
         });
 
         /**
-        * Mouse dragged event handler function.
+         * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -399,10 +400,10 @@
         });
 
         /**
-        * Keyboard focus lost by the component event handler function.
+         * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -414,10 +415,10 @@
         });
 
         /**
-        * Gets grid columns as an array.
+         * Gets grid columns as an array.
          * @property columns
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "columns", {
             get: function() {
                 var value = delegate.columns;
@@ -426,10 +427,10 @@
         });
 
         /**
-        * Determines if grid allows to delete rows.
+         * Determines if grid allows to delete rows.
          * @property deletable
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "deletable", {
             get: function() {
                 var value = delegate.deletable;
@@ -441,10 +442,10 @@
         });
 
         /**
-        * Mouse pressed event handler function.
+         * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -469,10 +470,10 @@
         });
 
         /**
-        * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -499,10 +500,10 @@
         });
 
         /**
-        * Vertical coordinate of the component.
+         * Vertical coordinate of the component.
          * @property top
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -514,10 +515,10 @@
         });
 
         /**
-        * Component resized event handler function.
+         * Component resized event handler function.
          * @property onComponentResized
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -529,10 +530,10 @@
         });
 
         /**
-        * Odd rows color.
+         * Odd rows color.
          * @property oddRowsColor
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "oddRowsColor", {
             get: function() {
                 var value = delegate.oddRowsColor;
@@ -544,10 +545,10 @@
         });
 
         /**
-        * Mouse moved event handler function.
+         * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -574,10 +575,10 @@
         });
 
         /**
-        * Determines if gris cells are editable.
+         * Determines if gris cells are editable.
          * @property editable
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "editable", {
             get: function() {
                 var value = delegate.editable;
@@ -604,10 +605,10 @@
         });
 
         /**
-        * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -616,11 +617,11 @@
         });
 
         /**
-        * Gets all grid cells as an array.
-        * <b>WARNING!!! All cells will be copied.</b>
+         * Gets all grid cells as an array.
+         * <b>WARNING!!! All cells will be copied.</b>
          * @property cells
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "cells", {
             get: function() {
                 var value = delegate.cells;
@@ -629,10 +630,10 @@
         });
 
         /**
-        * Keyboard focus gained by the component event.
+         * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -644,10 +645,10 @@
         });
 
         /**
-        * The height of grid's rows.
+         * The height of grid's rows.
          * @property rowsHeight
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "rowsHeight", {
             get: function() {
                 var value = delegate.rowsHeight;
@@ -659,10 +660,10 @@
         });
 
         /**
-        * Mouse clicked event handler function.
+         * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -674,10 +675,10 @@
         });
 
         /**
-        * Mouse exited over the component event handler function.
+         * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -689,10 +690,10 @@
         });
 
         /**
-        * The color of the grid.
+         * The color of the grid.
          * @property gridColor
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "gridColor", {
             get: function() {
                 var value = delegate.gridColor;
@@ -704,10 +705,10 @@
         });
 
         /**
-        * Determines if grid shows horizontal lines.
+         * Determines if grid shows horizontal lines.
          * @property showHorizontalLines
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "showHorizontalLines", {
             get: function() {
                 var value = delegate.showHorizontalLines;
@@ -719,10 +720,10 @@
         });
 
         /**
-        * Width of the component.
+         * Width of the component.
          * @property width
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -734,10 +735,10 @@
         });
 
         /**
-        * Determines if grid shows odd rows if other color.
+         * Determines if grid shows odd rows if other color.
          * @property showOddRowsInOtherColor
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "showOddRowsInOtherColor", {
             get: function() {
                 var value = delegate.showOddRowsInOtherColor;
@@ -764,10 +765,10 @@
         });
 
         /**
-        * Key pressed event handler function.
+         * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -779,10 +780,10 @@
         });
 
         /**
-        * Shows find dialog.
+         * Shows find dialog.
          * @method find
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "find", {
             get: function() {
                 return function() {
@@ -793,10 +794,10 @@
         });
 
         /**
-        *  Gets the array of selected rows.
+         *  Gets the array of selected rows.
          * @method select
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "select", {
             get: function() {
                 return function(arg0) {
@@ -807,10 +808,10 @@
         });
 
         /**
-        * Clears current selection.
+         * Clears current selection.
          * @method clearSelection
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "clearSelection", {
             get: function() {
                 return function() {
@@ -821,12 +822,12 @@
         });
 
         /**
-        * Makes specified row visible.
-        * @param row the row to make visible.
-        * @param need2select true to select the row (optional).
+         * Makes specified row visible.
+         * @param row the row to make visible.
+         * @param need2select true to select the row (optional).
          * @method makeVisible
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "makeVisible", {
             get: function() {
                 return function(arg0, arg1) {
@@ -837,11 +838,11 @@
         });
 
         /**
-        * Unselects the specified row.
-        * @param row the row to be unselected
+         * Unselects the specified row.
+         * @param row the row to be unselected
          * @method unselect
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "unselect", {
             get: function() {
                 return function(row) {
@@ -852,11 +853,11 @@
         });
 
         /**
-        * Shows find dialog.
-        * @deprecated Use find() instead. 
+         * Shows find dialog.
+         * @deprecated Use find() instead.
          * @method findSomething
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "findSomething", {
             get: function() {
                 return function() {
@@ -867,10 +868,10 @@
         });
 
         /**
-        * Tries to acquire focus for this component.
+         * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelGrid
-        */
+         */
         Object.defineProperty(this, "focus", {
             get: function() {
                 return function() {

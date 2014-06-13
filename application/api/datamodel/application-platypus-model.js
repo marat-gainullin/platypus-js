@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -52,12 +53,12 @@
         });
 
         /**
-        * Refreshes the model, only if any of its parameters has changed.
-        * @param onSuccessCallback the handler function for refresh data on success event (optional).
-        * @param onFailureCallback the handler function for refresh data on failure event (optional).
+         * Refreshes the model, only if any of its parameters has changed.
+         * @param onSuccessCallback the handler function for refresh data on success event (optional).
+         * @param onFailureCallback the handler function for refresh data on failure event (optional).
          * @method execute
          * @memberOf ApplicationPlatypusModel
-        */
+         */
         Object.defineProperty(this, "execute", {
             get: function() {
                 return function(onSuccessCallback, onFailureCallback) {
@@ -68,12 +69,12 @@
         });
 
         /**
-        * Creates new entity of model, based on application query.
-        * @param queryId the query application element ID.
-        * @return a new entity.
+         * Creates new entity of model, based on application query.
+         * @param queryId the query application element ID.
+         * @return a new entity.
          * @method loadEntity
          * @memberOf ApplicationPlatypusModel
-        */
+         */
         Object.defineProperty(this, "loadEntity", {
             get: function() {
                 return function(queryId) {

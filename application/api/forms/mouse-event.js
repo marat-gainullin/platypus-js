@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,11 +23,11 @@
             }
         });
         /**
-        * Which, if any, of the mouse buttons has changed state.
-        * Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.
+         * Which, if any, of the mouse buttons has changed state.
+         * Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.
          * @property button
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "button", {
             get: function() {
                 var value = delegate.button;
@@ -35,10 +36,10 @@
         });
 
         /**
-        * Alt key is down on this event.
+         * Alt key is down on this event.
          * @property altDown
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "altDown", {
             get: function() {
                 var value = delegate.altDown;
@@ -47,10 +48,10 @@
         });
 
         /**
-        * Ctrl key is down on this event.
+         * Ctrl key is down on this event.
          * @property controlDown
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
@@ -59,10 +60,10 @@
         });
 
         /**
-        * Shift key is down on this event.
+         * Shift key is down on this event.
          * @property shiftDown
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "shiftDown", {
             get: function() {
                 var value = delegate.shiftDown;
@@ -71,10 +72,10 @@
         });
 
         /**
-        * The number of mouse clicks associated with this event.
+         * The number of mouse clicks associated with this event.
          * @property clickCount
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "clickCount", {
             get: function() {
                 var value = delegate.clickCount;
@@ -83,10 +84,10 @@
         });
 
         /**
-        * X cursor coordinate in component's space.
+         * X cursor coordinate in component's space.
          * @property X
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "X", {
             get: function() {
                 var value = delegate.X;
@@ -95,10 +96,10 @@
         });
 
         /**
-        * Meta key is down on this event.
+         * Meta key is down on this event.
          * @property metaDown
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
@@ -107,10 +108,10 @@
         });
 
         /**
-        * Y cursor coordinate in component's space.
+         * Y cursor coordinate in component's space.
          * @property Y
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "Y", {
             get: function() {
                 var value = delegate.Y;
@@ -119,10 +120,10 @@
         });
 
         /**
-        * The source component object of the event.
+         * The source component object of the event.
          * @property source
          * @memberOf MouseEvent
-        */
+         */
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

@@ -18,6 +18,7 @@ import javax.security.auth.login.FailedLoginException;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -48,7 +49,8 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String CLIENT_REQUIRED_AFTER_LOGIN_MSG = "After successfull login there must be a client.";
     public static final String MISSING_SUCH_APP_ELEMENT_MSG = "Application element with name specified (%s) is absent. Nothing to do, so exit.";
     public static final String NON_RUNNABLE_APP_ELEMENT_MSG = "Application element specified (%s) is of non-runnable type. Nothing to do, so exit.";
-    public static final String STOP_BEFORE_RUN_CMD_SWITCH = "stopBeforeRun";
+    public static final String SHOW_FUNC_MISSING_MSG = "'show' function missing in %s instance";
+    public static final String EXECUTE_FUNC_MISSING_MSG = "'execute' function missing in %s instance";
     public static final String BAD_APPLICATION_PATH_MSG = "Application path must follow applicationpath (ap) parameter";
     public static final String APPLICATION_PATH_NOT_EXISTS_MSG = "Application path does not exist.";
     public static final String APPLICATION_PATH_NOT_DIRECTORY_MSG = "Application path must point to a directory.";
@@ -60,7 +62,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected PlatypusPrincipal principal;
     protected AppCache appCache;
     protected String startScriptPath;
-    protected boolean needInitialBreak;
     // auto login
     protected String url;
     private String defDatasource;
@@ -78,7 +79,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             app.run();
         } catch (Throwable t) {
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, t);
-            System.exit(255);
+            System.exit(0xff);
         }
     }
 
@@ -269,9 +270,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 } else {
                     throw new IllegalArgumentException("syntax: -appElement <application element id>");
                 }
-            } else if ((CMD_SWITCHS_PREFIX + STOP_BEFORE_RUN_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                needInitialBreak = true;
-                i++;
             } else {
                 int consumed = dsArgs.consume(args, i);
                 if (consumed > 0) {
@@ -301,32 +299,37 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         if (startScriptPath != null) {
             ApplicationElement appElement = client.getAppCache().get(startScriptPath);
             if (appElement != null) {
-                if (appElement.getType() == ClientConstants.ET_FORM) {
-                    EventQueue.invokeLater(() -> {
-                        try {
-                            PlatypusScriptedResource.executeScriptResource(appElement.getId());
-                        } catch (Exception ex) {
-                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                PlatypusScriptedResource.executeScriptResource(appElement.getId());
+                if (appElement.getType() == ClientConstants.ET_FORM
+                        || appElement.getType() == ClientConstants.ET_REPORT
+                        || appElement.getType() == ClientConstants.ET_COMPONENT) {
+                    final JSObject instance = ScriptUtils.createModule(appElement.getId());
+                    if (appElement.getType() == ClientConstants.ET_FORM) {
+                        EventQueue.invokeLater(() -> {
+                            Object oShow = instance.getMember("show");
+                            if (oShow instanceof JSObject && ((JSObject) oShow).isFunction()) {
+                                ((JSObject) oShow).call(instance, new Object[]{});
+                            } else {
+                                Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(SHOW_FUNC_MISSING_MSG, appElement.getId()));
+                                exit(0);
+                            }
+                        });
+                    } else {
+                        Object oShow = instance.getMember("execute");
+                        if (oShow instanceof JSObject && ((JSObject) oShow).isFunction()) {
+                            ((JSObject) oShow).call(instance, new Object[]{});
+                        } else {
+                            Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(EXECUTE_FUNC_MISSING_MSG, appElement.getId()));
+                            exit(0);
                         }
-                    });
-                    // When all windows are disposed, java VM exit automatically.
-                } else if (appElement.getType() == ClientConstants.ET_REPORT
-                        || appElement.getType() == ClientConstants.ET_COMPONENT
-                        || appElement.getType() == ClientConstants.ET_RESOURCE) {
-                    PlatypusScriptedResource.executeScriptResource(appElement.getId());
-                } else {
-                    Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(NON_RUNNABLE_APP_ELEMENT_MSG, startScriptPath));
-                    // no actions, so just exit.
-                    exit(0);
+                    }
                 }
             } else {
                 Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(MISSING_SUCH_APP_ELEMENT_MSG, startScriptPath));
-                // no actions, so just exit.
                 exit(0);
             }
         } else {
             Logger.getLogger(PlatypusClientApplication.class.getName()).severe(APP_ELEMENT_MISSING_MSG);
-            // no actions, so just exit.
             exit(0);
         }
     }

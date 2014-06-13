@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * HTTP request, when invoked by HTTP protocol.
+         * HTTP request, when invoked by HTTP protocol.
          * @property request
          * @memberOf HttpScriptContext
-        */
+         */
         Object.defineProperty(this, "request", {
             get: function() {
                 var value = delegate.request;
@@ -34,10 +35,10 @@
         });
 
         /**
-        * HTTP response, when invoked by HTTP protocol.
+         * HTTP response, when invoked by HTTP protocol.
          * @property response
          * @memberOf HttpScriptContext
-        */
+         */
         Object.defineProperty(this, "response", {
             get: function() {
                 var value = delegate.response;

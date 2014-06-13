@@ -12,7 +12,8 @@
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
-            arguments[maxArgs] : new javaClass();
+              arguments[maxArgs] 
+            : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
             get: function() {
@@ -22,10 +23,10 @@
             }
         });
         /**
-        * The inserted element.
+         * The inserted element.
          * @property inserted
          * @memberOf EntityInstanceInsertEvent
-        */
+         */
         Object.defineProperty(this, "inserted", {
             get: function() {
                 var value = delegate.inserted;
@@ -34,10 +35,10 @@
         });
 
         /**
-        * The source object of the event.
+         * The source object of the event.
          * @property source
          * @memberOf EntityInstanceInsertEvent
-        */
+         */
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -46,10 +47,10 @@
         });
 
         /**
-        * The inserted element.
+         * The inserted element.
          * @property object
          * @memberOf EntityInstanceInsertEvent
-        */
+         */
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

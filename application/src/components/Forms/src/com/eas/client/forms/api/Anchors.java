@@ -67,4 +67,28 @@ public class Anchors implements HasPublished {
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
+
+    public Object getLeft() {
+        return left;
+    }
+
+    public Object getTop() {
+        return top;
+    }
+
+    public Object getRight() {
+        return right;
+    }
+
+    public Object getBottom() {
+        return bottom;
+    }
+
+    public Object getWidth() {
+        return width;
+    }
+
+    public Object getHeight() {
+        return height;
+    }
 }

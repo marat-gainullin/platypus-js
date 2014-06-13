@@ -11,6 +11,8 @@ import com.eas.client.forms.api.VerticalPosition;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -86,7 +88,17 @@ public class BorderPane extends Container<JPanel> {
             + "*/";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "place", "size"})
-    public void add(Component<?> aComp, int aPlace, int aSize) {
+    public void add(Component<?> aComp, Integer aPlace, Integer aSize) {
+        aPlace = aPlace != null ? aPlace : HorizontalPosition.CENTER;
+        if (aPlace != HorizontalPosition.CENTER && aSize != null) {
+            JComponent comp = unwrap(aComp);
+            Dimension prefSize = comp.getPreferredSize();
+            if (aPlace == HorizontalPosition.LEFT || aPlace == HorizontalPosition.RIGHT) {
+                comp.setPreferredSize(new Dimension(aSize, prefSize.height));
+            } else {
+                comp.setPreferredSize(new Dimension(prefSize.width, aSize));
+            }
+        }
         add(aComp, aPlace);
     }
 

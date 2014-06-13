@@ -89,6 +89,7 @@ public class GridPane extends Container<JPanel> {
         delegate.repaint();
     }
 
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {
         for (int i = 0; i < layout.getRows(); i++) {
