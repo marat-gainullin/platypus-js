@@ -757,10 +757,14 @@ public class FormUtils {
     
     private static void initComponentClasses2DefaultEventHandlers() {
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.Button.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.ToggleButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.DropDownButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.CheckBox.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.RadioButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.TextField.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.MenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.CheckMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.RadioMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.Label.class, ON_MOUSE_CLICKED_EVENT_HANDLER_NAME);
         
     }

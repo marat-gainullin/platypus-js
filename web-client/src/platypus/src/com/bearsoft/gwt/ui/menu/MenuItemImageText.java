@@ -7,6 +7,11 @@ package com.bearsoft.gwt.ui.menu;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -16,7 +21,7 @@ import com.google.gwt.user.client.ui.MenuItem;
  * 
  * @author mg
  */
-public class MenuItemImageText extends MenuItem {
+public class MenuItemImageText extends MenuItem implements HasHandlers {
 
 	protected String text;
 	protected boolean html;
@@ -24,6 +29,8 @@ public class MenuItemImageText extends MenuItem {
 	//
 	protected Element leftMark;
 	protected Element field;
+	//
+	private HandlerManager handlerManager;
 
 	public MenuItemImageText(String aText, boolean asHtml, SafeUri aImageUri, Scheduler.ScheduledCommand aCommand) {
 		super("", aCommand);
@@ -31,6 +38,49 @@ public class MenuItemImageText extends MenuItem {
 		html = asHtml;
 		imageUri = aImageUri;
 		regenerate();
+	}
+
+	/**
+	 * Adds this handler to the widget.
+	 * 
+	 * @param <H>
+	 *            the type of handler to add
+	 * @param type
+	 *            the event type
+	 * @param handler
+	 *            the handler
+	 * @return {@link HandlerRegistration} used to remove the handler
+	 */
+	public final <H extends EventHandler> HandlerRegistration addHandler(final H handler, GwtEvent.Type<H> type) {
+		return ensureHandlers().addHandler(type, handler);
+	}
+
+	/**
+	 * Ensures the existence of the handler manager.
+	 * 
+	 * @return the handler manager
+	 * */
+	HandlerManager ensureHandlers() {
+		return handlerManager == null ? handlerManager = createHandlerManager() : handlerManager;
+	}
+
+	HandlerManager getHandlerManager() {
+		return handlerManager;
+	}
+
+	@Override
+	public void fireEvent(GwtEvent<?> event) {
+		ensureHandlers().fireEvent(event);
+	}
+
+	/**
+	 * Creates the {@link HandlerManager} used by this Widget. You can override
+	 * this method to create a custom {@link HandlerManager}.
+	 * 
+	 * @return the {@link HandlerManager} you want to use
+	 */
+	protected HandlerManager createHandlerManager() {
+		return new HandlerManager(this);
 	}
 
 	@Override

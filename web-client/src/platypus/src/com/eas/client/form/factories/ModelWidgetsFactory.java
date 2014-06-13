@@ -58,124 +58,115 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 				String formatPattern = aTag.getAttribute("format");
 				int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.MASK);
 				final ModelWidgetBounder<Object> modelElement = modelElementTag != null ? new ModelWidgetBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
+				ModelFormattedField mText = new ModelFormattedField();
+				mText.setFormatType(formatType, formatPattern);
 				if (modelElement != null) {
-					ModelFormattedField mText = new ModelFormattedField();
-					mText.setFormatType(formatType, formatPattern);
 					modelElement.setWidget(mText);
 					mText.setModelElement(modelElement);
-					PublishedComponent published = Publisher.publish(mText);
-					mText.setEditable(!readonly);
-					mText.setSelectOnly(selectOnly);
-					if (aTag.hasAttribute("emptyText"))
-						mText.setEmptyText(aTag.getAttribute("emptyText"));					
-					processGeneralProperties(mText, aTag, published);
-					return mText;
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				}
+				PublishedComponent published = Publisher.publish(mText);
+				mText.setEditable(!readonly);
+				mText.setSelectOnly(selectOnly);
+				if (aTag.hasAttribute("emptyText"))
+					mText.setEmptyText(aTag.getAttribute("emptyText"));
+				processGeneralProperties(mText, aTag, published);
+				return mText;
 			} else if ("DbTextDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final ModelWidgetBounder<String> modelElement = modelElementTag != null ? new ModelWidgetBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
+				ModelTextArea mTextArea = new ModelTextArea();
 				if (modelElement != null) {
-					ModelTextArea mTextArea = new ModelTextArea();
 					modelElement.setWidget(mTextArea);
 					mTextArea.setModelElement(modelElement);
-					PublishedComponent published = Publisher.publish(mTextArea);
-					mTextArea.setEditable(!readonly);
-					mTextArea.setSelectOnly(selectOnly);
-					if (aTag.hasAttribute("emptyText"))
-						mTextArea.setEmptyText(aTag.getAttribute("emptyText"));
-					processGeneralProperties(mTextArea, aTag, published);
-					return mTextArea;
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				}
+				PublishedComponent published = Publisher.publish(mTextArea);
+				mTextArea.setEditable(!readonly);
+				mTextArea.setSelectOnly(selectOnly);
+				if (aTag.hasAttribute("emptyText"))
+					mTextArea.setEmptyText(aTag.getAttribute("emptyText"));
+				processGeneralProperties(mTextArea, aTag, published);
+				return mTextArea;
 			} else if ("DbDateDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final ModelWidgetBounder<Date> modelElement = modelElementTag != null ? new ModelWidgetBounder<Date>(modelElementTag, model, new DateRowValueConverter()) : null;
-				if (modelElement != null) {
-					String dateFormat = aTag.getAttribute("dateFormat");
+				String dateFormat = aTag.getAttribute("dateFormat");
 
-					ModelDate mDate = new ModelDate();
-					mDate.setFormat(dateFormat);
+				ModelDate mDate = new ModelDate();
+				mDate.setFormat(dateFormat);
+				if (modelElement != null) {
 					modelElement.setWidget(mDate);
 					mDate.setModelElement(modelElement);
-					PublishedComponent published = Publisher.publish(mDate);
-					mDate.setEditable(!readonly);
-					mDate.setSelectOnly(selectOnly);
-					if (aTag.hasAttribute("emptyText"))
-						mDate.setEmptyText(aTag.getAttribute("emptyText"));
-					processGeneralProperties(mDate, aTag, published);
-					return mDate;
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				}
+				PublishedComponent published = Publisher.publish(mDate);
+				mDate.setEditable(!readonly);
+				mDate.setSelectOnly(selectOnly);
+				if (aTag.hasAttribute("emptyText"))
+					mDate.setEmptyText(aTag.getAttribute("emptyText"));
+				processGeneralProperties(mDate, aTag, published);
+				return mDate;
 			} else if ("DbImageDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final ModelWidgetBounder<String> modelElement = modelElementTag != null ? new ModelWidgetBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
-				if (modelElement != null) {
-					return createStubLabel(aTag, "Type 'ModelImage' is unsupported.");
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				return createStubLabel(aTag, "Type 'ModelImage' is unsupported.");
 			} else if ("DbCheckDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final ModelWidgetBounder<Boolean> modelElement = modelElementTag != null ? new ModelWidgetBounder<Boolean>(modelElementTag, model, new BooleanRowValueConverter()) : null;
+				ModelCheck mCheck = new ModelCheck();
 				if (modelElement != null) {
-					ModelCheck mCheck = new ModelCheck();
 					modelElement.setWidget(mCheck);
 					mCheck.setModelElement(modelElement);
-					PublishedComponent published = Publisher.publish(mCheck);
-					mCheck.setEditable(!readonly);
-					mCheck.setSelectOnly(selectOnly);
-					if (aTag.hasAttribute("text"))
-						mCheck.setText(aTag.getAttribute("text"));
-					processGeneralProperties(mCheck, aTag, published);
+				}
+				PublishedComponent published = Publisher.publish(mCheck);
+				mCheck.setEditable(!readonly);
+				mCheck.setSelectOnly(selectOnly);
+				if (aTag.hasAttribute("text"))
+					mCheck.setText(aTag.getAttribute("text"));
+				processGeneralProperties(mCheck, aTag, published);
 
-					return mCheck;
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				return mCheck;
 			} else if ("DbSpinDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final ModelWidgetBounder<Double> modelElement = modelElementTag != null ? new ModelWidgetBounder<Double>(modelElementTag, model, new DoubleRowValueConverter()) : null;
+				ModelSpin mSpin = new ModelSpin();
 				if (modelElement != null) {
-					ModelSpin mSpin = new ModelSpin();
 					modelElement.setWidget(mSpin);
 					mSpin.setModelElement(modelElement);
-					PublishedComponent published = Publisher.publish(mSpin);
-					mSpin.setEditable(!readonly);
-					mSpin.setSelectOnly(selectOnly);
-					if (aTag.hasAttribute("emptyText"))
-						mSpin.setEmptyText(aTag.getAttribute("emptyText"));
-					processGeneralProperties(mSpin, aTag, published);
+				}
+				PublishedComponent published = Publisher.publish(mSpin);
+				mSpin.setEditable(!readonly);
+				mSpin.setSelectOnly(selectOnly);
+				if (aTag.hasAttribute("emptyText"))
+					mSpin.setEmptyText(aTag.getAttribute("emptyText"));
+				processGeneralProperties(mSpin, aTag, published);
 
-					if (aTag.hasAttribute("min"))
-						mSpin.setMin(Double.valueOf(aTag.getAttribute("min")));
-					else
-						mSpin.setMin(-Double.MAX_VALUE);
-					if (aTag.hasAttribute("max"))
-						mSpin.setMax(Double.valueOf(aTag.getAttribute("max")));
-					else
-						mSpin.setMax(Double.MAX_VALUE);
-					if (aTag.hasAttribute("step"))
-						mSpin.setStep(Double.valueOf(aTag.getAttribute("step")));
+				if (aTag.hasAttribute("min"))
+					mSpin.setMin(Double.valueOf(aTag.getAttribute("min")));
+				else
+					mSpin.setMin(-Double.MAX_VALUE);
+				if (aTag.hasAttribute("max"))
+					mSpin.setMax(Double.valueOf(aTag.getAttribute("max")));
+				else
+					mSpin.setMax(Double.MAX_VALUE);
+				if (aTag.hasAttribute("step"))
+					mSpin.setStep(Double.valueOf(aTag.getAttribute("step")));
 
-					return mSpin;
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				return mSpin;
 			} else if ("DbComboDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-				if (modelElementTag != null) {
-					final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aTag, "valueField"), model);
-					final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aTag, "displayField"), model);
-					final ModelWidgetBounder<Row> modelElement = modelElementTag != null ? new ModelWidgetBounder<Row>(modelElementTag, model, new RowRowValueConverter()) : null;
-					boolean list = Utils.getBooleanAttribute(aTag, "list", true);
+				final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aTag, "valueField"), model);
+				final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aTag, "displayField"), model);
+				final ModelWidgetBounder<Row> modelElement = modelElementTag != null ? new ModelWidgetBounder<Row>(modelElementTag, model, new RowRowValueConverter()) : null;
+				boolean list = Utils.getBooleanAttribute(aTag, "list", true);
 
-					ModelCombo mCombo = new ModelCombo();
+				ModelCombo mCombo = new ModelCombo();
+				if (modelElement != null) {
 					modelElement.setWidget(mCombo);
 					mCombo.setModelElement(modelElement);
-					mCombo.setValueElement(valueRef);
-					mCombo.setDisplayElement(displayRef);
-					PublishedComponent published = Publisher.publish(mCombo);
-					mCombo.setEditable(!readonly);
-					mCombo.setSelectOnly(selectOnly);
-					mCombo.setList(list);
-					if (aTag.hasAttribute("emptyText"))
-						mCombo.setEmptyText(aTag.getAttribute("emptyText"));
-					processGeneralProperties(mCombo, aTag, published);
-					return mCombo;
-				} else
-					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+				}
+				mCombo.setValueElement(valueRef);
+				mCombo.setDisplayElement(displayRef);
+				PublishedComponent published = Publisher.publish(mCombo);
+				mCombo.setEditable(!readonly);
+				mCombo.setSelectOnly(selectOnly);
+				mCombo.setList(list);
+				if (aTag.hasAttribute("emptyText"))
+					mCombo.setEmptyText(aTag.getAttribute("emptyText"));
+				processGeneralProperties(mCombo, aTag, published);
+				return mCombo;
 			}
 		}
 		return super.createWidget(aTag);

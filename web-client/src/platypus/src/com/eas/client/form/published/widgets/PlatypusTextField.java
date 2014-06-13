@@ -2,6 +2,9 @@ package com.eas.client.form.published.widgets;
 
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.HasEventsExecutor;
@@ -11,10 +14,12 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class PlatypusTextField extends TextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor {
+public class PlatypusTextField extends TextBox implements HasActionHandlers, HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -24,6 +29,37 @@ public class PlatypusTextField extends TextBox implements HasJsFacade, HasEmptyT
 
 	public PlatypusTextField() {
 		super();
+	}
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<String>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+					ActionEvent.fire(PlatypusTextField.this, PlatypusTextField.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusTextField";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
 	}
 
 	@Override

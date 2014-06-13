@@ -340,7 +340,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource.getRowset()));
+				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource != null ? rowsSource.getRowset() : null));
 				super.addColumn(true, 0, col, SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else {

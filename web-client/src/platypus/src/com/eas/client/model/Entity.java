@@ -1947,7 +1947,7 @@ public class Entity implements RowsetListener, HasPublished{
 			// call script method
 			Boolean sRes = null;
 			try {
-				sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeScroll, JsEvents.publishCursorPositionWillChangeEvent(jsPublished, aEvent.getNewRowIndex()));
+				sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeScroll, JsEvents.publishCursorPositionWillChangeEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
@@ -2094,7 +2094,7 @@ public class Entity implements RowsetListener, HasPublished{
 				publishRows(jsPublished);
 			internalExecuteChildren(false);
 			// call script method
-			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
+			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
 			}
@@ -2116,7 +2116,7 @@ public class Entity implements RowsetListener, HasPublished{
 			//
 			if (jsPublished != null)
 				publishRows(jsPublished);
-			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
+			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				/*
 				 * if (model.isPending()) model.enqueueEvent(new
@@ -2144,7 +2144,7 @@ public class Entity implements RowsetListener, HasPublished{
 			if ((!rowset.isBeforeFirst() && !rowset.isAfterLast()) || !rowset.first())
 				internalExecuteChildren(false);
 			// call script method
-			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
+			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				/*
 				 * if (model.isPending()) model.enqueueEvent(new

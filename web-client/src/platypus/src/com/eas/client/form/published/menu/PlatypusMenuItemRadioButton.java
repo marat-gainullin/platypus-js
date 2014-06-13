@@ -2,14 +2,20 @@ package com.eas.client.form.published.menu;
 
 import com.bearsoft.gwt.ui.menu.MenuItemRadioButton;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPlatypusButtonGroup;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.containers.ButtonGroup;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 
-public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements HasJsFacade, HasPlatypusButtonGroup, HasEventsExecutor {
+public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasEventsExecutor {
 
 	protected EventsExecutor eventsExecutor;
 	protected JavaScriptObject published;
@@ -24,6 +30,37 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 	public PlatypusMenuItemRadioButton(Boolean aValue, String aText, boolean asHtml) {
 	    super(aValue, aText, asHtml);
     }
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+					ActionEvent.fire(PlatypusMenuItemRadioButton.this, PlatypusMenuItemRadioButton.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusMenuItemRadioButton";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
+	}
 
 	@Override
 	public EventsExecutor getEventsExecutor() {

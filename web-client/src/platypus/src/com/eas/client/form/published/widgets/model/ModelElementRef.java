@@ -56,7 +56,7 @@ public class ModelElementRef {
 				}
 			}
 		} else {
-			Logger.getLogger(ModelElementRef.class.getName()).log(Level.SEVERE,
+			Logger.getLogger(ModelElementRef.class.getName()).log(Level.WARNING,
 			        "Model's entity missing while controls binding. Entity name: " + entityId + "; " + (isField ? "field" : "parameter") + " name: " + fieldName);
 		}
 	}

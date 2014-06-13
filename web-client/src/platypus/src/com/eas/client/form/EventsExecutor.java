@@ -26,8 +26,6 @@ import com.eas.client.form.js.JsEvents;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -35,7 +33,6 @@ import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasBlurHandlers;
-import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
 import com.google.gwt.event.dom.client.HasFocusHandlers;
@@ -67,11 +64,8 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
-import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -87,8 +81,7 @@ public class EventsExecutor {
 	private JavaScriptObject mouseWheelMoved;
 	private JavaScriptObject mouseDragged;
 	private JavaScriptObject mouseMoved;
-	private JavaScriptObject stateChanged;// TODO: Make it clear if it is about
-	                                      // tabs, radio group or a combo items.
+	// TODO: Add event for tabs, radio group, cards and a combo items selection.
 	private JavaScriptObject componentResized;
 	private JavaScriptObject componentMoved;
 	private JavaScriptObject componentShown;
@@ -154,10 +147,6 @@ public class EventsExecutor {
 
 	public JavaScriptObject getMouseMoved() {
 		return mouseMoved;
-	}
-
-	public JavaScriptObject getStateChanged() {
-		return stateChanged;
 	}
 
 	public JavaScriptObject getComponentResized() {
@@ -447,43 +436,6 @@ public class EventsExecutor {
 				} else if (component instanceof HasMouseMoveHandlers) {
 					mouseMoveReg = ((HasMouseMoveHandlers) component).addMouseMoveHandler(handler);
 				}
-			}
-		}
-	}
-
-	protected HandlerRegistration stateChangedReg;
-	protected HandlerRegistration selectionChangedReg;
-
-	public void setStateChanged(JavaScriptObject aValue) {
-		if (stateChanged != aValue) {
-			if (stateChangedReg != null) {
-				stateChangedReg.removeHandler();
-				stateChangedReg = null;
-			}
-			if (selectionChangedReg != null) {
-				selectionChangedReg.removeHandler();
-				selectionChangedReg = null;
-			}
-			stateChanged = aValue;
-			if (stateChanged != null) {
-				if (component instanceof HasChangeHandlers)
-					stateChangedReg = ((HasChangeHandlers) component).addChangeHandler(new ChangeHandler() {
-						@Override
-						public void onChange(ChangeEvent event) {
-							executeEvent(actionPerformed, JsEvents.publish(event));
-						}
-
-					});
-				if (component instanceof HasSelectionHandlers<?>)
-					selectionChangedReg = ((HasSelectionHandlers<Object>) component).addSelectionHandler(new SelectionHandler<Object>() {
-						@Override
-						public void onSelection(SelectionEvent<Object> event) {
-							if (stateChanged != null) {
-								JavaScriptObject publishedEvent = JsEvents.publish(event);
-								executeEvent(stateChanged, publishedEvent);
-							}
-						}
-					});
 			}
 		}
 	}

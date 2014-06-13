@@ -4,12 +4,17 @@ import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -17,7 +22,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 
-public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
+public class PlatypusSplitButton extends DropDownButton implements HasActionHandlers, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu contextMenu;
@@ -41,6 +46,37 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 	protected void showMenu() {
 		if (menu instanceof PlatypusPopupMenu)
 			((PlatypusPopupMenu)menu).showRelativeTo(chevron);
+	}
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					ActionEvent.fire(PlatypusSplitButton.this, PlatypusSplitButton.this);
+				}
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusSplitButton";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
 	}
 
 	@Override

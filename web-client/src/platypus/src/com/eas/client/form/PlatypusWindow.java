@@ -79,7 +79,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected static void shownFormsChanged(JavaScriptObject aSource) {
 		if (onChange != null) {
 			try {
-				Utils.executeScriptEventVoid(JsEvents.getFormsClass(), onChange, JsEvents.publishScriptSourcedEvent(aSource));
+				Utils.executeScriptEventVoid(JsEvents.getFormsClass(), onChange, JsEvents.publishSourcedEvent(aSource));
 			} catch (Exception ex) {
 				Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
 			}
@@ -440,7 +440,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
         Object.defineProperty(aPublished, "view", {
 	        get : function() {
-	        	return aView;
+	        	return aView.@com.eas.client.form.published.HasPublished::getPublished()();
 	        } 
         });
         Object.defineProperty(aPublished, "formKey", {

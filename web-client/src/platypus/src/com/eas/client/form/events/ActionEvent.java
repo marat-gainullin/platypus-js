@@ -2,7 +2,6 @@ package com.eas.client.form.events;
 
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 
 public class ActionEvent extends GwtEvent<ActionHandler>{
 
@@ -19,7 +18,7 @@ public class ActionEvent extends GwtEvent<ActionHandler>{
      * @param source the source of the handlers
      * @param target the target
      */
-    public static void fire(HasActionHandlers source, Widget target) {
+    public static void fire(HasActionHandlers source, UIObject target) {
         if (TYPE != null) {
             ActionEvent event = new ActionEvent(target);
             source.fireEvent(event);

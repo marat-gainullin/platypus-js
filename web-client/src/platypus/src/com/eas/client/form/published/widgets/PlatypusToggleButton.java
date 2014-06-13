@@ -65,7 +65,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusButton";
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusToggleButton";
 					clickReg.removeHandler();
 					clickReg = null;
 				}
