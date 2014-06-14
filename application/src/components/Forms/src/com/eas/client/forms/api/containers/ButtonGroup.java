@@ -33,7 +33,6 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     protected ButtonGroup(ButtonGroupWrapper aDelegate) {
         super();
         setDelegate(aDelegate);
-        Component[] comps = getChildren();
         settingButtonGroup = true;
         try {
             for (Component comp : getChildren()) {
@@ -56,6 +55,7 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     public void add(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {
             delegate.add(unwrap(aComp));
+            invalidatePublishedCollection();
             if (aComp instanceof HasGroup) {
                 settingButtonGroup = true;
                 try {
@@ -77,6 +77,7 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     public void remove(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {
             delegate.remove(unwrap(aComp));
+            invalidatePublishedCollection();
             if (aComp instanceof HasGroup) {
                 settingButtonGroup = true;
                 try {
@@ -94,6 +95,10 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
         return super.child(aIndex);
     }
 
+    public void clearSelection(){
+        delegate.clearSelection();
+    }
+    
     @Override
     public Object getPublished() {
         if (published == null) {

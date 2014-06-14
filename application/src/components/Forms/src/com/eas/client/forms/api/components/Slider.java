@@ -37,10 +37,14 @@ public class Slider extends Component<JSlider> {
         setDelegate(new JSlider(orientation, min, max, value));
     }
 
+    public Slider() {
+        this(Orientation.HORIZONTAL);
+    }
+
     public Slider(int aOrientation) {
         this(aOrientation, 0, 0, 0);
     }
-
+    
     public Slider(int min, int max, int value) {
         this(Orientation.HORIZONTAL, min, max, value);
     }
@@ -113,7 +117,18 @@ public class Slider extends Component<JSlider> {
     public void setValue(int aValue) {
         delegate.setValue(aValue);
     }
-
+    
+    @ScriptFunction
+    public String getText() throws Exception{
+        int value = delegate.getValue();
+        return String.valueOf(value);
+    }
+    
+    @ScriptFunction
+    public void setText(String aValue) throws Exception{
+        setValue(Integer.valueOf(aValue));
+    }
+    
     @Override
     public Object getPublished() {
         if (published == null) {

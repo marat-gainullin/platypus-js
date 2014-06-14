@@ -18,33 +18,36 @@ import jdk.nashorn.api.scripting.JSObject;
 @ScriptObj(jsDoc = "/**\n"
         + "* Mouse cursor constansts.\n"
         + "*/")
-public class Cursor implements HasPublished {
+public class Cursor implements HasPublished{
 
-    public static final Cursor CROSSHAIR = new Cursor(java.awt.Cursor.CROSSHAIR_CURSOR);
-    public static final Cursor DEFAULT = new Cursor(java.awt.Cursor.DEFAULT_CURSOR);
-    public static final Cursor AUTO = DEFAULT;
-    public static final Cursor E_RESIZE = new Cursor(java.awt.Cursor.E_RESIZE_CURSOR);
-    public static final Cursor HAND = new Cursor(java.awt.Cursor.HAND_CURSOR);
-    public static final Cursor MOVE = new Cursor(java.awt.Cursor.MOVE_CURSOR);
-    public static final Cursor NE_RESIZE = new Cursor(java.awt.Cursor.NE_RESIZE_CURSOR);
-    public static final Cursor NW_RESIZE = new Cursor(java.awt.Cursor.NW_RESIZE_CURSOR);
-    public static final Cursor N_RESIZE = new Cursor(java.awt.Cursor.N_RESIZE_CURSOR);
-    public static final Cursor SE_RESIZE = new Cursor(java.awt.Cursor.SE_RESIZE_CURSOR);
-    public static final Cursor SW_RESIZE = new Cursor(java.awt.Cursor.SW_RESIZE_CURSOR);
-    public static final Cursor S_RESIZE = new Cursor(java.awt.Cursor.S_RESIZE_CURSOR);
-    public static final Cursor TEXT = new Cursor(java.awt.Cursor.TEXT_CURSOR);
-    public static final Cursor WAIT = new Cursor(java.awt.Cursor.WAIT_CURSOR);
-    public static final Cursor W_RESIZE = new Cursor(java.awt.Cursor.W_RESIZE_CURSOR);
+    private static final Cursor CROSSHAIR = new Cursor(java.awt.Cursor.CROSSHAIR_CURSOR);
+    private static final Cursor DEFAULT = new Cursor(java.awt.Cursor.DEFAULT_CURSOR);
+    private static final Cursor AUTO = DEFAULT;
+    private static final Cursor E_RESIZE = new Cursor(java.awt.Cursor.E_RESIZE_CURSOR);
+    private static final Cursor HAND = new Cursor(java.awt.Cursor.HAND_CURSOR);
+    private static final Cursor MOVE = new Cursor(java.awt.Cursor.MOVE_CURSOR);
+    private static final Cursor NE_RESIZE = new Cursor(java.awt.Cursor.NE_RESIZE_CURSOR);
+    private static final Cursor NW_RESIZE = new Cursor(java.awt.Cursor.NW_RESIZE_CURSOR);
+    private static final Cursor N_RESIZE = new Cursor(java.awt.Cursor.N_RESIZE_CURSOR);
+    private static final Cursor SE_RESIZE = new Cursor(java.awt.Cursor.SE_RESIZE_CURSOR);
+    private static final Cursor SW_RESIZE = new Cursor(java.awt.Cursor.SW_RESIZE_CURSOR);
+    private static final Cursor S_RESIZE = new Cursor(java.awt.Cursor.S_RESIZE_CURSOR);
+    private static final Cursor TEXT = new Cursor(java.awt.Cursor.TEXT_CURSOR);
+    private static final Cursor WAIT = new Cursor(java.awt.Cursor.WAIT_CURSOR);
+    private static final Cursor W_RESIZE = new Cursor(java.awt.Cursor.W_RESIZE_CURSOR);
 
-    private static JSObject publisher;
     protected java.awt.Cursor delegate;
     protected Object published;
+    private static JSObject publisher;
 
-    protected Cursor(java.awt.Cursor aDelegate) {
+    public Cursor(java.awt.Cursor aDelegate) {
+        super();
         delegate = aDelegate;
     }
 
-    protected Cursor(int aCursorType) {
+    @ScriptFunction(params = {"aType"})
+    public Cursor(int aCursorType) {
+        super();
         delegate = new java.awt.Cursor(aCursorType);
     }
 
@@ -57,78 +60,63 @@ public class Cursor implements HasPublished {
         return delegate.getName();
     }
 
-    @ScriptFunction
-    public Cursor getCROSSHAIR() {
+    public static Cursor getCROSSHAIR() {
         return CROSSHAIR;
     }
 
-    @ScriptFunction
-    public Cursor getDEFAULT() {
+    public static Cursor getDEFAULT() {
         return DEFAULT;
     }
 
-    @ScriptFunction
-    public Cursor getAUTO() {
+    public static Cursor getAUTO() {
         return AUTO;
     }
 
-    @ScriptFunction
-    public Cursor getE_RESIZE() {
+    public static Cursor getE_RESIZE() {
         return E_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getHAND() {
+    public static Cursor getHAND() {
         return HAND;
     }
 
-    @ScriptFunction
-    public Cursor getMOVE() {
+    public static Cursor getMOVE() {
         return MOVE;
     }
 
-    @ScriptFunction
-    public Cursor getNE_RESIZE() {
+    public static Cursor getNE_RESIZE() {
         return NE_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getNW_RESIZE() {
+    public static Cursor getNW_RESIZE() {
         return NW_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getN_RESIZE() {
+    public static Cursor getN_RESIZE() {
         return N_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getSE_RESIZE() {
+    public static Cursor getSE_RESIZE() {
         return SE_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getSW_RESIZE() {
+    public static Cursor getSW_RESIZE() {
         return SW_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getS_RESIZE() {
+    public static Cursor getS_RESIZE() {
         return S_RESIZE;
     }
 
-    @ScriptFunction
-    public Cursor getTEXT() {
+    public static Cursor getTEXT() {
         return TEXT;
     }
 
-    @ScriptFunction
-    public Cursor getWAIT() {
+    public static Cursor getWAIT() {
         return WAIT;
     }
 
-    @ScriptFunction
-    public Cursor getW_RESIZE() {
+    public static Cursor getW_RESIZE() {
         return W_RESIZE;
     }
 

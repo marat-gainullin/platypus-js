@@ -48,7 +48,10 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         if (getValueField() != aField) {
             ModelElementRef modelRef = fieldToModelRef(aField);
             delegate.setValueField(modelRef);
-            invalidate();
+            delegate.configure();
+            delegate.setEditingValue(delegate.getValueFromRowset());
+            delegate.revalidate();
+            delegate.repaint();
         }
     }
 
@@ -67,7 +70,10 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         if (getDisplayField() != aField) {
             ModelElementRef modelRef = fieldToModelRef(aField);
             delegate.setDisplayField(modelRef);
-            invalidate();
+            delegate.configure();
+            delegate.setEditingValue(delegate.getValueFromRowset());
+            delegate.revalidate();
+            delegate.repaint();
         }
     }
 
@@ -84,7 +90,10 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
     @ScriptFunction
     public void setList(boolean aValue) throws Exception {
         delegate.setList(aValue);
-        invalidate();
+        delegate.configure();
+        delegate.setEditingValue(delegate.getValueFromRowset());
+        delegate.revalidate();
+        delegate.repaint();
     }
 
     private static final String EDITABLE_JSDOC = ""

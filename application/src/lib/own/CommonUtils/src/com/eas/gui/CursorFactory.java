@@ -12,36 +12,35 @@ package com.eas.gui;
 public class CursorFactory {
 
     public static Cursor getCursor(int aAwtCursorType) {
-        switch(aAwtCursorType)
-        {
+        switch (aAwtCursorType) {
             case java.awt.Cursor.CROSSHAIR_CURSOR:
-                return Cursor.CROSSHAIR;
+                return Cursor.getCROSSHAIR();
             case java.awt.Cursor.DEFAULT_CURSOR:
-                return Cursor.DEFAULT;
+                return Cursor.getDEFAULT();
             case java.awt.Cursor.E_RESIZE_CURSOR:
-                return Cursor.E_RESIZE;
+                return Cursor.getE_RESIZE();
             case java.awt.Cursor.HAND_CURSOR:
-                return Cursor.HAND;
+                return Cursor.getHAND();
             case java.awt.Cursor.MOVE_CURSOR:
-                return Cursor.MOVE;
+                return Cursor.getMOVE();
             case java.awt.Cursor.NE_RESIZE_CURSOR:
-                return Cursor.NE_RESIZE;
+                return Cursor.getNE_RESIZE();
             case java.awt.Cursor.NW_RESIZE_CURSOR:
-                return Cursor.NW_RESIZE;
+                return Cursor.getNW_RESIZE();
             case java.awt.Cursor.N_RESIZE_CURSOR:
-                return Cursor.N_RESIZE;
+                return Cursor.getN_RESIZE();
             case java.awt.Cursor.SE_RESIZE_CURSOR:
-                return Cursor.SE_RESIZE;
+                return Cursor.getSE_RESIZE();
             case java.awt.Cursor.SW_RESIZE_CURSOR:
-                return Cursor.SW_RESIZE;
+                return Cursor.getSW_RESIZE();
             case java.awt.Cursor.S_RESIZE_CURSOR:
-                return Cursor.S_RESIZE;
+                return Cursor.getS_RESIZE();
             case java.awt.Cursor.TEXT_CURSOR:
-                return Cursor.TEXT;
+                return Cursor.getTEXT();
             case java.awt.Cursor.WAIT_CURSOR:
-                return Cursor.WAIT;
+                return Cursor.getWAIT();
             case java.awt.Cursor.W_RESIZE_CURSOR:
-                return Cursor.W_RESIZE;
+                return Cursor.getW_RESIZE();
             default:
                 return new Cursor(aAwtCursorType);
         }

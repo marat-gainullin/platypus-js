@@ -70,9 +70,9 @@ public class ButtonGroupWrapper extends JComponent {
 
     @Override
     public void removeAll() {
-        for (AbstractButton ab : Collections.list(group.getElements())) {
+        Collections.list(group.getElements()).stream().forEach((ab) -> {
             group.remove(ab);
-        }
+        });
     }
 
     @Override
@@ -87,5 +87,9 @@ public class ButtonGroupWrapper extends JComponent {
         } else {
             return null;
         }
+    }
+
+    public void clearSelection() {
+        group.clearSelection();
     }
 }

@@ -15,9 +15,6 @@ import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JPanel;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -28,36 +25,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public abstract class ScalarModelComponent<D extends DbControlPanel> extends Component<D> {
 
-    protected boolean valid = true;
-
     public ScalarModelComponent() {
         super();
-    }
-
-    protected void validate() {
-        try {
-            if (!valid) {
-                valid = true;
-                delegate.configure();
-                delegate.setEditingValue(delegate.getValueFromRowset());
-                delegate.revalidate();
-                delegate.repaint();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(ScalarModelComponent.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    protected void invalidate() {
-        if (valid) {
-            valid = false;
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    validate();
-                }
-            });
-        }
     }
 
     private static final String FIELD_JSDOC = ""
@@ -75,7 +44,10 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         if (getField() != aField) {
             ModelElementRef modelRef = fieldToModelRef(aField);
             delegate.setDatamodelElement(modelRef);
-            invalidate();
+            delegate.configure();
+            delegate.setEditingValue(delegate.getValueFromRowset());
+            delegate.revalidate();
+            delegate.repaint();
         }
     }
 
@@ -119,12 +91,14 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     public Object getValue() throws Exception {
-        validate();
         return delegate.getValue();
     }
 
     @ScriptFunction
     public void setValue(Object aValue) throws Exception {
+        if (aValue instanceof Number) {
+            aValue = ((Number) aValue).doubleValue();
+        }
         delegate.setValue(aValue);
     }
     protected JPanel errorPanel = new JPanel();
@@ -156,7 +130,7 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
 
     protected ModelElementRef fieldToModelRef(Field aField) throws Exception {
         if (aField != null) {
-                return new ModelElementRef(aField, true, null);
+            return new ModelElementRef(aField, true, null);
         }
         return null;
     }
@@ -167,12 +141,12 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
             + "*/";
 
     @ScriptFunction(jsDoc = MODEL_JSDOC)
-    public ApplicationModel<?, ?, ?, ?> getModel(){
+    public ApplicationModel<?, ?, ?, ?> getModel() {
         return delegate.getModel();
     }
-    
-    public void setModel(ApplicationModel<?, ?, ?, ?> aModel) throws Exception{
+
+    public void setModel(ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         delegate.setModel(aModel);
     }
-    
+
 }

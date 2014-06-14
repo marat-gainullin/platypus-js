@@ -90,6 +90,10 @@ public class RadioButton extends Component<JRadioButton> implements HasGroup {
     @ScriptFunction
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
+        if(!aValue && delegate.isSelected() && group != null){
+            group.clearSelection();
+            delegate.setSelected(aValue);
+        }
     }
 
     @ScriptFunction(jsDoc = ""

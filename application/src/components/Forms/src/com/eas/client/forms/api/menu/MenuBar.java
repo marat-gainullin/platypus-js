@@ -8,6 +8,7 @@ import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import jdk.nashorn.api.scripting.JSObject;
@@ -41,8 +42,13 @@ public class MenuBar extends Container<JMenuBar> {
             + "*/";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"menu"})
-    public void add(Menu aMenu) {
-        delegate.add((JMenu) unwrap(aMenu));
+    public void add(Component<?> aMenu) {
+        JComponent jComp = unwrap(aMenu);
+        if (jComp instanceof JMenu) {
+            delegate.add((JMenu) jComp);
+        } else {
+            delegate.add(jComp);
+        }
     }
 
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})

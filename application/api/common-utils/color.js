@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.scripts.ScriptColor");
+    var javaClass = Java.type("com.eas.gui.ScriptColor");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Color(null, null, null, null, aDelegate);
     });
@@ -151,24 +151,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property DARK_GRAY
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "DARK_GRAY", {
-            get: function() {
-                var value = delegate.DARK_GRAY;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property CYAN
          * @memberOf Color
          */
         Object.defineProperty(this, "CYAN", {
             get: function() {
                 var value = delegate.CYAN;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property DARK_GRAY
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "DARK_GRAY", {
+            get: function() {
+                var value = delegate.DARK_GRAY;
                 return P.boxAsJs(value);
             }
         });

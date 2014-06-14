@@ -8,11 +8,6 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusClient;
-import com.eas.script.AlreadyPublishedException;
-import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
-import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import java.io.File;
@@ -42,17 +37,12 @@ import jdk.nashorn.api.scripting.URLReader;
  *
  * @author vv
  */
-@ScriptObj(name = "Resource", jsDoc = "/**\n"
-        + "* Support object for resources loading.\n"
-        + "*/")
-public class PlatypusScriptedResource implements HasPublished {
+public class PlatypusScriptedResource {
 
     private static final Pattern pattern = Pattern.compile("https?://.*");
     protected static Client client;
     protected static AppCache cache;
     protected static PrincipalHost principalHost;
-    private static JSObject publisher;
-    protected Object published;
 
     /**
      * Initializes a static fields.
@@ -107,11 +97,6 @@ public class PlatypusScriptedResource implements HasPublished {
      * @return Bytes for resource
      * @throws Exception If some error occurs when reading the resource
      */
-    @ScriptFunction(params = {"path"}, jsDoc = "/**\n"
-            + "* Loads a resource's bytes either from disk or from datatbase.\n"
-            + "* @param path a relative path to the resource\n"
-            + "* @return the resource as a bytes array\n"
-            + "*/")
     public static byte[] load(String aResourceId) throws Exception {
         if (aResourceId != null && !aResourceId.isEmpty()) {
             Matcher htppMatcher = pattern.matcher(aResourceId);
@@ -175,13 +160,6 @@ public class PlatypusScriptedResource implements HasPublished {
      * @return Resource's text
      * @throws Exception If some error occurs when reading the resource
      */
-    @ScriptFunction(params = {"path", "encoding"}, jsDoc = ""
-            + "/**\n"
-            + "* Loads a resource as text.\n"
-            + "* @param path an relative path to the resource\n"
-            + "* @param encoding an name of the specific encoding, UTF-8 by default (optional). Note: If a resource is loaded via http, http response content type header's charset have a priority.\n"
-            + "* @return the resource as a <code>string</code>\n"
-            + "*/")
     public static String loadText(String aResourceId, String aEncodingName) throws Exception {
         if (aEncodingName == null) {
             aEncodingName = SettingsConstants.COMMON_ENCODING;
@@ -240,29 +218,6 @@ public class PlatypusScriptedResource implements HasPublished {
     }
     public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to {0}";
 
-    @Override
-    public Object getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = publisher.call(null, new Object[]{this});
-        }
-        return published;
-    }
-
-    @Override
-    public void setPublished(Object aValue) {
-        if (published != null) {
-            throw new AlreadyPublishedException();
-        }
-        published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
-
     protected static String normalizeResourcePath(String aPath) throws Exception {
         if (aPath.startsWith("/")) {
             throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
@@ -274,16 +229,6 @@ public class PlatypusScriptedResource implements HasPublished {
         return uri.normalize().getPath();
     }
 
-    @ScriptFunction(params = {"aResourceName"}, jsDoc = ""
-            + "/**\n"
-            + "* Translates an application element name into local path name.\n"
-            + "* Takes into account file cache in case of in-database application storage."
-            + "* Bypasses http[s] urls."
-            + "* Extension is omitted to give client code a chance to load various parts of an"
-            + "application element (e.g. js source file or model definition or form/report template)."
-            + "* @param aResourceName an relative path to the resource in an application.\n"
-            + "* @return The local path name to the application element files without extension.\n"
-            + "*/")
     public static String translateScriptPath(String aResourceId) throws Exception {
         if (aResourceId != null && !aResourceId.isEmpty()) {
             Matcher httpMatcher = pattern.matcher(aResourceId);

@@ -97,6 +97,17 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
         delegate.setEmptyText(aValue);
     }
 
+    @ScriptFunction
+    public String getText() throws Exception{
+        Object value = getValue();
+        return value != null ? value.toString() : null;
+    }
+    
+    @ScriptFunction
+    public void setText(String aValue) throws Exception{
+        setValue(Double.valueOf(aValue));
+    }
+    
     @Override
     public Object getPublished() {
         if (published == null) {

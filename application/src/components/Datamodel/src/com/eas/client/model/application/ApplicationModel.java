@@ -28,6 +28,7 @@ import java.io.*;
 import java.sql.Types;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -61,8 +62,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         };
     }
 
-    public E[] entities() {
-        return (E[]) entities.values().toArray();
+    public Collection<E> entities() {
+        return entities.values();
     }
 
     @Override

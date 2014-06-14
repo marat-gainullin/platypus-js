@@ -19,7 +19,7 @@ import javax.swing.text.MaskFormatter;
  */
 public class RendererOptimisticDateFormatter extends DateFormatter {
 
-    protected MaskFormatter mf = null;
+    protected MaskFormatter mf;
 
     public RendererOptimisticDateFormatter(SimpleDateFormat lFormat) {
         super(lFormat);

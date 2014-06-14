@@ -654,7 +654,7 @@
         });
 
         /**
-         * Appends the specified component to the end of this container.
+         * Sets the specified component as the scroll's view, replacing old view component.
          * @param component the component to add
          * @method add
          * @memberOf ScrollPane

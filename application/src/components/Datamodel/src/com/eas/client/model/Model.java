@@ -16,8 +16,6 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
-import com.eas.script.AlreadyPublishedException;
-import com.eas.script.HasPublished;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import org.w3c.dom.Document;

@@ -49,6 +49,13 @@ public class FormattedField extends Component<JFormattedTextField> {
     public String getText() {
         return delegate.getText();
     }
+
+    @ScriptFunction
+    public void setText(String aValue) throws ParseException {
+        delegate.setText(aValue);
+        delegate.commitEdit();
+    }
+
     private static final String VALUE_JSDOC = ""
             + "/**\n"
             + "* The value of this component.\n"
@@ -61,6 +68,12 @@ public class FormattedField extends Component<JFormattedTextField> {
 
     @ScriptFunction
     public void setValue(Object aValue) {
+        if (aValue instanceof Number) {
+            aValue = ((Number) aValue).doubleValue();
+        }
+        if (delegate.getFormatterFactory() == null && aValue instanceof String) {
+            delegate.setFormatterFactory(ControlsUtils.formatterFactoryByFormat(getFormat(), ControlsUtils.MASK));
+        }
         delegate.setValue(ScriptUtils.toJava(aValue));
     }
     private static final String FORMAT_JSDOC = ""

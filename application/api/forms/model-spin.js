@@ -23,36 +23,6 @@
             }
         });
         /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * Gets the parent of this component.
          * @property parent
          * @memberOf ModelSpin
@@ -80,51 +50,6 @@
         });
 
         /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
-         * @property emptyText
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "emptyText", {
-            get: function() {
-                var value = delegate.emptyText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.emptyText = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onMousePressed", {
-            get: function() {
-                var value = delegate.onMousePressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMousePressed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * The foreground color of this component.
          * @property foreground
          * @memberOf ModelSpin
@@ -136,34 +61,6 @@
             },
             set: function(aValue) {
                 delegate.foreground = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "error", {
-            get: function() {
-                var value = delegate.error;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "enabled", {
-            get: function() {
-                var value = delegate.enabled;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.enabled = P.boxAsJava(aValue);
             }
         });
 
@@ -183,66 +80,6 @@
         });
 
         /**
-         * Component's selection event handler function.
-         * @property onSelect
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onSelect", {
-            get: function() {
-                var value = delegate.onSelect;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onSelect = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Determines the lower bound of spinner's value. If it's null, valus is unlimited at lower bound.
-         * @property min
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "min", {
-            get: function() {
-                var value = delegate.min;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.min = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "componentPopupMenu", {
-            get: function() {
-                var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "top", {
-            get: function() {
-                var value = delegate.top;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.top = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * Component's rendering event handler function.
          * @property onRender
          * @memberOf ModelSpin
@@ -254,21 +91,6 @@
             },
             set: function(aValue) {
                 delegate.onRender = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onComponentResized", {
-            get: function() {
-                var value = delegate.onComponentResized;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentResized = P.boxAsJava(aValue);
             }
         });
 
@@ -285,6 +107,21 @@
         });
 
         /**
+         * Generated property jsDoc.
+         * @property text
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "text", {
+            get: function() {
+                var value = delegate.text;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.text = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf ModelSpin
@@ -296,21 +133,6 @@
             },
             set: function(aValue) {
                 delegate.onMouseEntered = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Component's value.
-         * @property value
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
             }
         });
 
@@ -372,36 +194,6 @@
         });
 
         /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onMouseMoved", {
-            get: function() {
-                var value = delegate.onMouseMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseMoved = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * Determines whether this component should be visible when its parent is visible.
          * @property visible
          * @memberOf ModelSpin
@@ -417,21 +209,6 @@
         });
 
         /**
-         * Determines the upper bound of spinner's value. If it's null, valus is unlimited at upper bound.
-         * @property max
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "max", {
-            get: function() {
-                var value = delegate.max;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.max = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf ModelSpin
@@ -443,36 +220,6 @@
             },
             set: function(aValue) {
                 delegate.onComponentHidden = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Determines if component is editable.
-         * @property editable
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "editable", {
-            get: function() {
-                var value = delegate.editable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
 
@@ -552,18 +299,6 @@
         });
 
         /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
          * Model entity's field.
          * @property field
          * @memberOf ModelSpin
@@ -575,21 +310,6 @@
             },
             set: function(aValue) {
                 delegate.field = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "onFocusGained", {
-            get: function() {
-                var value = delegate.onFocusGained;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusGained = P.boxAsJava(aValue);
             }
         });
 
@@ -624,6 +344,313 @@
         });
 
         /**
+         * Gets name of this component.
+         * @property name
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * The mouse <code>Cursor</code> over this component.
+         * @property cursor
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Mouse dragged event handler function.
+         * @property onMouseDragged
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Keyboard focus lost by the component event handler function.
+         * @property onFocusLost
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property emptyText
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "emptyText", {
+            get: function() {
+                var value = delegate.emptyText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.emptyText = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Mouse pressed event handler function.
+         * @property onMousePressed
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onMousePressed", {
+            get: function() {
+                var value = delegate.onMousePressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMousePressed = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * An error message of this component.
+         * Validation procedure may set this property and subsequent focus lost event will clear it.
+         * @property error
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "error", {
+            get: function() {
+                var value = delegate.error;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         * @property enabled
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "enabled", {
+            get: function() {
+                var value = delegate.enabled;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.enabled = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Component's selection event handler function.
+         * @property onSelect
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onSelect", {
+            get: function() {
+                var value = delegate.onSelect;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onSelect = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Determines the lower bound of spinner's value. If it's null, valus is unlimited at lower bound.
+         * @property min
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "min", {
+            get: function() {
+                var value = delegate.min;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.min = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * <code>PopupMenu</code> that assigned for this component.
+         * @property componentPopupMenu
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Vertical coordinate of the component.
+         * @property top
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "top", {
+            get: function() {
+                var value = delegate.top;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.top = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Component resized event handler function.
+         * @property onComponentResized
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onComponentResized", {
+            get: function() {
+                var value = delegate.onComponentResized;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentResized = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Component's value.
+         * @property value
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.value;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.value = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Mouse moved event handler function.
+         * @property onMouseMoved
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onMouseMoved", {
+            get: function() {
+                var value = delegate.onMouseMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseMoved = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * True if this component is completely opaque.
+         * @property opaque
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Determines the upper bound of spinner's value. If it's null, valus is unlimited at upper bound.
+         * @property max
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "max", {
+            get: function() {
+                var value = delegate.max;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.max = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Determines if component is editable.
+         * @property editable
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "editable", {
+            get: function() {
+                var value = delegate.editable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.editable = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+         * @property nextFocusableComponent
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "nextFocusableComponent", {
+            get: function() {
+                var value = delegate.nextFocusableComponent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         * @property component
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Keyboard focus gained by the component event.
+         * @property onFocusGained
+         * @memberOf ModelSpin
+         */
+        Object.defineProperty(this, "onFocusGained", {
+            get: function() {
+                var value = delegate.onFocusGained;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusGained = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf ModelSpin
@@ -650,18 +677,6 @@
             },
             set: function(aValue) {
                 delegate.onMouseExited = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Gets name of this component.
-         * @property name
-         * @memberOf ModelSpin
-         */
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
             }
         });
 

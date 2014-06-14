@@ -1304,13 +1304,16 @@ public class Form implements HasPublished {
         components.putAll(factory.getNonvisuals());
         components.putAll(factory.getComponents());
         for (Entry<String, JComponent> entry : components.entrySet()) {
-            if (view != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
+            if (view != entry.getValue()) {
                 String cName = entry.getKey();
                 ControlDesignInfo aDesignInfo = factory.getControlDesignInfos().get(cName);
                 JComponent aComp = entry.getValue();
                 ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
                 aDesignInfo.accept(apiWrapper);
                 com.eas.client.forms.api.Component<?> comp = apiWrapper.getResult();
+                if(aComp instanceof ButtonGroupWrapper){
+                    aComp.setName(cName);
+                }
                 JSObject compPublished = (JSObject) ((HasPublished) comp).getPublished();
                 ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(comp);
                 if (eventsProxy != null) {

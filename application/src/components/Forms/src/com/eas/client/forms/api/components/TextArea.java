@@ -7,6 +7,7 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.Component;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.text.DecimalFormat;
 import javax.swing.JTextPane;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -40,6 +41,21 @@ public class TextArea extends Component<JTextPane> {
         setDelegate(aDelegate);
     }
 
+    @ScriptFunction
+    public Object getValue(){
+        return getText();
+    }
+    
+    @ScriptFunction
+    public void setValue(Object aValue){
+        if(aValue instanceof Number){
+            Number n = (Number)aValue;
+            DecimalFormat df = new DecimalFormat();
+            aValue = df.format(n.doubleValue());
+        }
+        setText(aValue != null ? aValue.toString() : null);
+    }
+    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The text contained in this component.\n"

@@ -29,6 +29,7 @@ public class MenuSeparator extends Component<JSeparator> {
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public MenuSeparator() {
         super();
+        setDelegate(new JSeparator());
     }
 
     protected MenuSeparator(JSeparator aDelegate) {

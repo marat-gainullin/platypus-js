@@ -415,34 +415,6 @@
         });
 
         /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        Object.defineProperty(this, "beforeFirst", {
-            get: function() {
-                return function() {
-                    var value = delegate.beforeFirst();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        Object.defineProperty(this, "afterLast", {
-            get: function() {
-                return function() {
-                    var value = delegate.afterLast();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
          * Deletes all rows in the rowset.
          * @method deleteAll
          * @memberOf ApplicationPlatypusParametersEntity
@@ -467,6 +439,34 @@
             get: function() {
                 return function(pairs) {
                     var value = delegate.createFilter(P.boxAsJava(pairs));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        Object.defineProperty(this, "beforeFirst", {
+            get: function() {
+                return function() {
+                    var value = delegate.beforeFirst();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        Object.defineProperty(this, "afterLast", {
+            get: function() {
+                return function() {
+                    var value = delegate.afterLast();
                     return P.boxAsJs(value);
                 };
             }

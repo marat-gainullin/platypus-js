@@ -123,14 +123,14 @@ public class DbDate extends DbControlPanel implements DbControl {
         if (dateFormat == null ? aValue != null : !dateFormat.equals(aValue)) {
             dateFormat = convertString2DateFormat(aValue.trim());
             /*
-            if (dateRenderer != null) {
-                DateFormatter df = new RendererOptimisticDateFormatter(convertString2DateFormat(dateFormat));
-                dateRenderer.setFormatterFactory(new DefaultFormatterFactory(df));
-            }
-            if (dateEditor != null) {
-                dateEditor.setDateFormat(convertString2DateFormat(dateFormat));
-            }
-            */ 
+             if (dateRenderer != null) {
+             DateFormatter df = new RendererOptimisticDateFormatter(convertString2DateFormat(dateFormat));
+             dateRenderer.setFormatterFactory(new DefaultFormatterFactory(df));
+             }
+             if (dateEditor != null) {
+             dateEditor.setDateFormat(convertString2DateFormat(dateFormat));
+             }
+             */
         }
     }
 
@@ -456,26 +456,17 @@ public class DbDate extends DbControlPanel implements DbControl {
     private boolean isOnlyTimeFormat() {
         Matcher timeMatcher = TIME_PATTERN.matcher(dateFormat);
         Matcher noTimeMatcher = NO_TIME_PATTERN.matcher(dateFormat);
-        if (timeMatcher.find() && !noTimeMatcher.find()) {
-            return true;
-        } else {
-            return false;
-        }
+        return timeMatcher.find() && !noTimeMatcher.find();
     }
 
     private boolean isOnlyDateFormat() {
         Matcher timeMatcher = TIME_PATTERN.matcher(dateFormat);
         Matcher noTimeMatcher = NO_TIME_PATTERN.matcher(dateFormat);
-        if (!timeMatcher.find() && noTimeMatcher.find()) {
-            return true;
-        } else {
-            return false;
-        }
+        return !timeMatcher.find() && noTimeMatcher.find();
     }
-    
-    
+
     protected String emptyText;
-    
+
     public String getEmptyText() {
         return emptyText;
     }

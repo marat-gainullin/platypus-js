@@ -260,6 +260,21 @@
         });
 
         /**
+         * Generated property jsDoc.
+         * @property value
+         * @memberOf TextArea
+         */
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.value;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.value = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * The tooltip string that has been set with.
          * @property toolTipText
          * @memberOf TextArea

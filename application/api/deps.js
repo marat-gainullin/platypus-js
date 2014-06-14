@@ -2,6 +2,7 @@
  * Contains the basic dependencies loading.
  */
 try {
+    load('classpath:common-utils/color.js');
     load('classpath:common-utils/cursor.js');
     load('classpath:common-utils/font-style.js');
     load('classpath:common-utils/font.js');
@@ -72,7 +73,6 @@ try {
     load('classpath:forms/grid-pane.js');
     load('classpath:forms/horizontal-position.js');
     load('classpath:forms/html-area.js');
-    load('classpath:forms/icon-resources.js');
     load('classpath:forms/key-event.js');
     load('classpath:forms/label.js');
     load('classpath:forms/line-chart.js');
@@ -119,14 +119,6 @@ try {
     printf('grid API loaded.');
 } catch (e) {
     printf('grid API skipped.');
-}
-
-try {
-    load('classpath:modules/color.js');
-    load('classpath:modules/platypus-scripted-resource.js');
-    printf('modules API loaded.');
-} catch (e) {
-    printf('modules API skipped.');
 }
 
 try {

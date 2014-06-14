@@ -42,6 +42,17 @@ public class Menu extends Container<JMenu> {
         setDelegate(aDelegate);
     }
 
+    @Override
+    protected void setDelegate(JMenu aDelegate) {
+        if(delegate != null && delegate.getPopupMenu() != null){
+            delegate.getPopupMenu().removeContainerListener(invalidatorListener);
+        }
+        super.setDelegate(aDelegate);
+        if(delegate != null && delegate.getPopupMenu() != null){
+            delegate.getPopupMenu().addContainerListener(invalidatorListener);
+        }
+    }
+
     private static final String PARENT_JSDOC = ""
             + "/**\n"
             + "* The parent container.\n"

@@ -270,6 +270,21 @@
         });
 
         /**
+         * Generated property jsDoc.
+         * @property text
+         * @memberOf ModelTextArea
+         */
+        Object.defineProperty(this, "text", {
+            get: function() {
+                var value = delegate.text;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.text = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf ModelTextArea
@@ -285,7 +300,7 @@
         });
 
         /**
-         * Component's value.
+         * Generated property jsDoc.
          * @property value
          * @memberOf ModelTextArea
          */

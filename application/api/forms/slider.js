@@ -219,6 +219,21 @@
         });
 
         /**
+         * Generated property jsDoc.
+         * @property text
+         * @memberOf Slider
+         */
+        Object.defineProperty(this, "text", {
+            get: function() {
+                var value = delegate.text;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.text = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf Slider

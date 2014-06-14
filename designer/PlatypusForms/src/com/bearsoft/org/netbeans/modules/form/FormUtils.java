@@ -671,7 +671,7 @@ public class FormUtils {
         com.eas.gui.Font.class,
         com.eas.gui.FontStyle.class,
         com.eas.gui.Cursor.class,
-        com.eas.client.scripts.ScriptColor.class,
+        com.eas.gui.ScriptColor.class,
         com.eas.client.forms.api.Anchors.class,
         com.eas.client.forms.api.VerticalPosition.class,
         com.eas.client.forms.api.HorizontalPosition.class,

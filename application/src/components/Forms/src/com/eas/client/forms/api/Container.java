@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.api;
 
-import static com.eas.client.forms.api.Component.getEventsProxy;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublishedInvalidatableCollection;

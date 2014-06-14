@@ -4,7 +4,7 @@
  */
 package com.eas.client.chart;
 
-import com.eas.client.scripts.ScriptColor;
+import com.eas.gui.ScriptColor;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptUtils;
 import java.text.DecimalFormat;

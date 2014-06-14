@@ -7,6 +7,8 @@ package com.eas.client.forms.api.components.model;
 import com.eas.dbcontrols.date.DbDate;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -57,7 +59,8 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
     @ScriptFunction
     public void setExpanded(boolean aValue) throws Exception {
         delegate.setExpanded(aValue);
-        invalidate();
+        delegate.revalidate();
+        delegate.repaint();
     }
 
     @ScriptFunction
@@ -66,9 +69,8 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
     }
 
     @ScriptFunction
-    public void setDateFormat(String aValue) {
+    public void setDateFormat(String aValue) throws Exception {
         delegate.setDateFormat(aValue);
-        invalidate();
     }
 
     @ScriptFunction
@@ -80,10 +82,25 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
     public void setEmptyText(String aValue) {
         delegate.setEmptyText(aValue);
     }
-    
+
     @ScriptFunction
     public String getText() throws Exception {
-        return delegate.getRendererText();
+        if (delegate.getValue() == null) {
+            return null;
+        } else {
+            SimpleDateFormat format = new SimpleDateFormat(delegate.getDateFormat());
+            return format.format(delegate.getValue());
+        }
+    }
+
+    @ScriptFunction
+    public void setText(String aValue) throws Exception {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(delegate.getDateFormat());
+            delegate.setValue(format.parse(aValue));
+        } catch (ParseException ex) {
+            // no op
+        }
     }
 
     @Override

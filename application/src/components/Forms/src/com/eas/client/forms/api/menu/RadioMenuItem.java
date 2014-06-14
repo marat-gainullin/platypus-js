@@ -94,8 +94,13 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements Ha
         return delegate.isSelected();
     }
 
+    @ScriptFunction
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
+        if(!aValue && delegate.isSelected() && group != null){
+            group.clearSelection();
+            delegate.setSelected(aValue);
+        }
     }
 
     @ScriptFunction(jsDoc = ""

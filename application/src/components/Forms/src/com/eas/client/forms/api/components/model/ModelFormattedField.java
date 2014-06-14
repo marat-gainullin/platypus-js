@@ -72,6 +72,7 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
         }
     }
 
+    @ScriptFunction
     public void setFormat(String aValue) throws ParseException {
         if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
             JFormattedTextField delegateFf = (JFormattedTextField) delegate.getFocusTargetComponent();
@@ -80,6 +81,27 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
                     ControlsUtils.applyFormat(delegateFf.getFormatter(), aValue);
                 }
             }
+        }
+    }
+
+    @ScriptFunction
+    public String getText() throws Exception {
+        Object value = getValue();
+        if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
+            JFormattedTextField formatField = (JFormattedTextField) delegate.getFocusTargetComponent();
+            return formatField.getText();
+        } else {
+            return value != null ? value instanceof String ? (String) value : value.toString() : null;
+        }
+    }
+
+    @ScriptFunction
+    public void setText(String aValue) throws Exception {
+        if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
+            JFormattedTextField formatField = (JFormattedTextField) delegate.getFocusTargetComponent();
+            formatField.setText(aValue);
+            formatField.commitEdit();
+            setValue(formatField.getValue());
         }
     }
 

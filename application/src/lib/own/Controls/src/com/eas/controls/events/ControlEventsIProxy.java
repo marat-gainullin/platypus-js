@@ -92,7 +92,7 @@ public class ControlEventsIProxy implements MouseListener,
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(ControlEventsIProxy.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ControlEventsIProxy.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return null;
         }
     }

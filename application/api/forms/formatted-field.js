@@ -238,6 +238,9 @@
             get: function() {
                 var value = delegate.text;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.text = P.boxAsJava(aValue);
             }
         });
 

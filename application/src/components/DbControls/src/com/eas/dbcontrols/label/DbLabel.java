@@ -229,6 +229,12 @@ public class DbLabel extends DbControlPanel implements DbControl {
     }
 
     @Override
+    public void setEditingValue(Object aValue) {
+        initializeEditor();
+        super.setEditingValue(aValue);
+    }
+
+    @Override
     protected void applyFont() {
         if (singlelineText != null) {
             singlelineText.setFont(getFont());

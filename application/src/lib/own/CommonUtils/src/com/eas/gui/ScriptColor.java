@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.scripts;
+package com.eas.gui;
 
 import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
@@ -28,9 +28,9 @@ public class ScriptColor extends java.awt.Color implements HasPublished {
     @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
             + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space."
             + "* @param red Red compontent (optional)\n"
-            + "* @param red Green compontent (optional)\n"
-            + "* @param red Blue compontent (optional)\n"
-            + "* @param red Alpha compontent (optional)\n"
+            + "* @param green Green compontent (optional)\n"
+            + "* @param blue Blue compontent (optional)\n"
+            + "* @param alpha Alpha compontent (optional)\n"
             + "*/")
     public ScriptColor(int r, int g, int b, int a) {
         super(r, g, b, a);
