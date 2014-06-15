@@ -99,6 +99,7 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
     protected Component<?> result;
 
     public ControlsWrapper(JComponent aTarget) {
+        super();
         target = aTarget;
     }
 
@@ -228,7 +229,7 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
 
     @Override
     public void visit(FormDesignInfo fdi) {
-        throw new UnsupportedOperationException("Form shouldn't be wrapped");
+        result = ContainerWrapper.wrap((JPanel) target, target.getLayout());
     }
 
     @Override

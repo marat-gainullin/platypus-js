@@ -456,6 +456,36 @@
         });
 
         /**
+         * Horizontal position of the text relative to the icon.
+         * @property horizontalTextPosition
+         * @memberOf MenuItem
+         */
+        Object.defineProperty(this, "horizontalTextPosition", {
+            get: function() {
+                var value = delegate.horizontalTextPosition;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.horizontalTextPosition = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Vertical position of the text relative to the icon.
+         * @property verticalTextPosition
+         * @memberOf MenuItem
+         */
+        Object.defineProperty(this, "verticalTextPosition", {
+            get: function() {
+                var value = delegate.verticalTextPosition;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.verticalTextPosition = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf MenuItem

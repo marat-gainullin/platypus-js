@@ -6,9 +6,12 @@ package com.eas.client.forms.api.menu;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.client.forms.api.HorizontalPosition;
+import com.eas.client.forms.api.VerticalPosition;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -95,6 +98,80 @@ public class MenuItem extends Component<JMenuItem> {
     @ScriptFunction
     public void setIcon(Icon aValue) {
         delegate.setIcon(aValue);
+    }
+
+    private static final String HORIZONTAL_TEXT_POSITION_JSDOC = ""
+            + "/**\n"
+            + "* Horizontal position of the text relative to the icon.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = HORIZONTAL_TEXT_POSITION_JSDOC)
+    public int getHorizontalTextPosition() {
+        switch (delegate.getHorizontalTextPosition()) {
+            case JLabel.LEFT:
+                return HorizontalPosition.LEFT;
+            case JLabel.CENTER:
+                return HorizontalPosition.CENTER;
+            case JLabel.RIGHT:
+                return HorizontalPosition.RIGHT;
+            default:
+                return HorizontalPosition.LEFT;
+        }
+    }
+
+    @ScriptFunction
+    public void setHorizontalTextPosition(int aValue) {
+        switch (aValue) {
+            case HorizontalPosition.LEFT:
+                delegate.setHorizontalTextPosition(JLabel.LEFT);
+                break;
+            case HorizontalPosition.CENTER:
+                delegate.setHorizontalTextPosition(JLabel.CENTER);
+                break;
+            case HorizontalPosition.RIGHT:
+                delegate.setHorizontalTextPosition(JLabel.RIGHT);
+                break;
+            default:
+                delegate.setHorizontalTextPosition(JLabel.LEFT);
+                break;
+        }
+    }
+
+    private static final String VERTICAL_TEXT_POSITION_JSDOC = ""
+            + "/**\n"
+            + "* Vertical position of the text relative to the icon.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VERTICAL_TEXT_POSITION_JSDOC)
+    public int getVerticalTextPosition() {
+        switch (delegate.getVerticalTextPosition()) {
+            case JLabel.TOP:
+                return VerticalPosition.TOP;
+            case JLabel.CENTER:
+                return VerticalPosition.CENTER;
+            case JLabel.BOTTOM:
+                return VerticalPosition.BOTTOM;
+            default:
+                return VerticalPosition.CENTER;
+        }
+    }
+
+    @ScriptFunction
+    public void setVerticalTextPosition(int aValue) {
+        switch (aValue) {
+            case VerticalPosition.TOP:
+                delegate.setVerticalTextPosition(JLabel.TOP);
+                break;
+            case VerticalPosition.CENTER:
+                delegate.setVerticalTextPosition(JLabel.CENTER);
+                break;
+            case VerticalPosition.BOTTOM:
+                delegate.setVerticalTextPosition(JLabel.BOTTOM);
+                break;
+            default:
+                delegate.setVerticalTextPosition(JLabel.CENTER);
+                break;
+        }
     }
 
     @Override

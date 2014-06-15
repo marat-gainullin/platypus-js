@@ -87,13 +87,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
 
     protected Object published;
 
-    @Override
-    public Object getPublished() {
-        return published;
-    }
-
-    @Override
-    public void setPublished(Object aValue) {
+    public void injectPublished(Object aValue) {
         published = aValue;
     }
 

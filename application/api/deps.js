@@ -4,7 +4,6 @@
 try {
     load('classpath:common-utils/color.js');
     load('classpath:common-utils/cursor.js');
-    load('classpath:common-utils/font-style.js');
     load('classpath:common-utils/font.js');
     load('classpath:common-utils/style.js');
     printf('common-utils API loaded.');
@@ -71,7 +70,6 @@ try {
     load('classpath:forms/form.js');
     load('classpath:forms/formatted-field.js');
     load('classpath:forms/grid-pane.js');
-    load('classpath:forms/horizontal-position.js');
     load('classpath:forms/html-area.js');
     load('classpath:forms/key-event.js');
     load('classpath:forms/label.js');
@@ -91,7 +89,6 @@ try {
     load('classpath:forms/model-spin.js');
     load('classpath:forms/model-text-area.js');
     load('classpath:forms/mouse-event.js');
-    load('classpath:forms/orientation.js');
     load('classpath:forms/password-field.js');
     load('classpath:forms/pie-chart.js');
     load('classpath:forms/popup-menu.js');
@@ -107,7 +104,6 @@ try {
     load('classpath:forms/time-series-chart.js');
     load('classpath:forms/toggle-button.js');
     load('classpath:forms/tool-bar.js');
-    load('classpath:forms/vertical-position.js');
     load('classpath:forms/window-event.js');
     printf('forms API loaded.');
 } catch (e) {

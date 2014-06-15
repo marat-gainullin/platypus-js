@@ -21,23 +21,37 @@ load("classpath:internals.js");
      */
 
     // core imports
+    var ExecutorsClass = Java.type("java.util.concurrent.Executors");
+    var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
+    var JavaArrayClass = Java.type("java.lang.Object[]");
+    var FileClass = Java.type("java.io.File");
+    var JavaDateClass = Java.type("java.util.Date");
+    var LoggerClass = Java.type("java.util.logging.Logger");
+    var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.PlatypusScriptedResource");
-    var ExecutorsClass = Java.type("java.util.concurrent.Executors");
     var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
     var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
-    var JavaDateClass = Java.type("java.util.Date");
-    var JavaArrayClass = Java.type("java.lang.Object[]");
-    var LoggerClass = Java.type("java.util.logging.Logger");
-    var FileClass = Java.type("java.io.File");
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
+    var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
+    var TemplateLoaderClass = Java.type('com.eas.client.reports.store.Dom2ReportDocument');
+    var ModelLoaderClass = Java.type('com.eas.client.scripts.store.Dom2ModelDocument');
+    var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
+    var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
+    var CreateRequestClass = Java.type('com.eas.client.threetier.requests.CreateServerModuleRequest');
     // gui imports
+    var KeyEventClass = Java.type("java.awt.event.KeyEvent");
     var SwingUtilitiesClass = Java.type("javax.swing.SwingUtilities");
-    var ColorClass = Java.type("com.eas.gui.ScriptColor");
     var FileChooserClass = Java.type("javax.swing.JFileChooser");
     var ColorChooserClass = Java.type("javax.swing.JColorChooser");
-    var FormClass = Java.type("com.eas.client.forms.Form");
     var OptionPaneClass = Java.type("javax.swing.JOptionPane");
+    var ColorClass = Java.type("com.eas.gui.ScriptColor");
+    var FormClass = Java.type("com.eas.client.forms.Form");
+    var FormLoaderClass = Java.type('com.eas.client.forms.store.Dom2FormDocument');
+    var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
+    var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
+    var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
+    var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
     Object.defineProperty(P, "J2SE", {value: "Java SE client/server environment"});
@@ -59,7 +73,7 @@ load("classpath:internals.js");
         var func = this;
         var args = arguments;
         if (!args || !args.length || args.length < 1)
-            throw "schedule needs at least 1 argument - timeout value.";
+            throw "invokeDelayed needs at least 1 argument - timeout value.";
         var userArgs = [];
         for (var i = 1; i < args.length; i++) {
             userArgs.push(args[i]);
@@ -94,10 +108,9 @@ load("classpath:internals.js");
      * and waits for it's completion
      */
     Function.prototype.invokeAndWait = function() {
-        var SwingUtilities = Java.type("javax.swing.SwingUtilities");
         var func = this;
         var args = arguments;
-        SwingUtilities.invokeAndWait(function() {
+        SwingUtilitiesClass.invokeAndWait(function() {
             func.apply(func, args);
         });
     };
@@ -139,8 +152,7 @@ load("classpath:internals.js");
             if (c) {
                 cached[aName] = new c();
             } else {
-                var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-                Executor.executeScriptResource(aName);
+                ScriptedResourceClass.executeScriptResource(aName);
                 c = g[aName];
                 if (c) {
                     cached[aName] = new c();
@@ -166,11 +178,7 @@ load("classpath:internals.js");
      * @returns {P.loadModel.publishTo}
      */
     P.loadModel = function(aName, aTarget) {
-        var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-        var Loader = Java.type('com.eas.client.scripts.store.Dom2ModelDocument');
-        var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
-        var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
-        var model = Loader.load(Executor.getClient(), aName);
+        var model = ModelLoaderClass.load(ScriptedResourceClass.getClient(), aName);
         var modelCTor;
         if (model instanceof TwoTierModelClass) {
             modelCTor = P.ApplicationDbModel;
@@ -206,11 +214,8 @@ load("classpath:internals.js");
      * @returns {P.loadForm.publishTo}
      */
     P.loadForm = function(aName, aModel, aTarget) {
-        var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-        var Loader = Java.type('com.eas.client.forms.store.Dom2FormDocument');
-        var Form = Java.type('com.eas.client.forms.Form');
-        var designInfo = Loader.load(Executor.getClient(), aName);
-        var form = new Form(aName, designInfo, aModel.unwrap());
+        var designInfo = FormLoaderClass.load(ScriptedResourceClass.getClient(), aName);
+        var form = new FormClass(aName, designInfo, aModel.unwrap());
         if (aTarget) {
             P.Form.call(aTarget, form);
         } else {
@@ -242,9 +247,7 @@ load("classpath:internals.js");
      */
     P.loadTemplate = function(aName, aModel, aTarget) {
         var publishTo = aTarget ? aTarget : {};
-        var Executor = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-        var Loader = Java.type('com.eas.client.reports.store.Dom2ReportDocument');
-        var template = Loader.load(Executor.getClient(), aName, aModel.unwrap());
+        var template = TemplateLoaderClass.load(ScriptedResourceClass.getClient(), aName, aModel.unwrap());
         // publish
         publishTo.generateReport = function() {
             return template.generateReport();
@@ -257,12 +260,9 @@ load("classpath:internals.js");
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
     P.ServerModule = function(aModuleName) {
-        var clientHost = Java.type('com.eas.client.scripts.PlatypusScriptedResource');
-        var client = clientHost.getPlatypusClient();
+        var client = ScriptedResourceClass.getPlatypusClient();
         if (client) {
-            var CreateRequest = Java.type('com.eas.client.threetier.requests.CreateServerModuleRequest');
-            var Generator = Java.type('com.bearsoft.rowset.utils.IDGenerator');
-            var request = new CreateRequest(Generator.genID(), aModuleName);
+            var request = new CreateRequestClass(IDGeneratorClass.genID(), aModuleName);
             client.executeRequest(request);
             var responce = request.getResponse();
             if (responce.isPermitted()) {
@@ -354,13 +354,10 @@ load("classpath:internals.js");
                 }
                 return converted;
             }
+            aValue = EngineUtilsClass.unwrap(aValue);
         }
         return aValue;
     };
-    Object.defineProperty(P, "selectFile", {
-        value: function(aCallback) {
-        }
-    });
 
     var Resource = {};
     Object.defineProperty(Resource, "load", {
@@ -423,6 +420,7 @@ load("classpath:internals.js");
     });
     Object.defineProperty(Resource, "upload", {
         value: function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
+            printf("upload() is not implemented for J2SE");
         }
     });
     Object.defineProperty(Resource, "applicationPath", {
@@ -435,6 +433,7 @@ load("classpath:internals.js");
     });
     Object.defineProperty(P, "logout", {
         value: function(onSuccess, onFailure) {
+            printf("logout() is not implemented for J2SE");
         }
     });
 
@@ -484,7 +483,6 @@ load("classpath:internals.js");
     Object.defineProperty(P.Cursor, "WAIT", {value: new P.Cursor(3)});
     Object.defineProperty(P.Cursor, "W_RESIZE", {value: new P.Cursor(10)});
 
-    var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
     var Icon = {};
     Object.defineProperty(P, "Icon", {value: Icon});
     Object.defineProperty(Icon, "load", {
@@ -493,22 +491,20 @@ load("classpath:internals.js");
         }
     });
     P.Icons = P.Icon;
-    var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
     var IDGenerator = {};
 
     Object.defineProperty(P, "IDGenerator", {value: IDGenerator});
     Object.defineProperty(IDGenerator, "genID", {
         value: function() {
-            return IDGeneratorClass.genId();
+            return IDGeneratorClass.genID();
         }
     });
     Object.defineProperty(P, "ID", {value: IDGenerator});
     Object.defineProperty(IDGenerator, "generate", {
         value: function() {
-            return IDGeneratorClass.genId();
+            return IDGeneratorClass.genID();
         }
     });
-    var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
     var MD5Generator = {};
     Object.defineProperty(P, "MD5Generator", {value: MD5Generator});
     Object.defineProperty(MD5Generator, "generate", {
@@ -527,6 +523,9 @@ load("classpath:internals.js");
     var applicationLogger = LoggerClass.getLogger("Application");
     var Logger = {};
     Object.defineProperty(P, "Logger", {value: Logger});
+    Object.defineProperty(Logger, "config", {value: function(aMessage) {
+            applicationLogger.config(aMessage !== null ? "" + aMessage : null);
+        }});
     Object.defineProperty(Logger, "severe", {value: function(aMessage) {
             applicationLogger.severe(aMessage !== null ? "" + aMessage : null);
         }});
@@ -546,9 +545,7 @@ load("classpath:internals.js");
             applicationLogger.finest(aMessage !== null ? "" + aMessage : null);
         }});
 
-
-    var KeyEventClass = Java.type("java.awt.event.KeyEvent");
-    Object.defineProperty(P, "KEY_ALT", {value: KeyEventClass.KEY_ALT});
+    Object.defineProperty(P, "VK_ALT", {value: KeyEventClass.VK_ALT});
     Object.defineProperty(P, "VK_BACKSPACE", {value: KeyEventClass.VK_BACK_SPACE});
     Object.defineProperty(P, "VK_DELETE", {value: KeyEventClass.VK_DELETE});
     Object.defineProperty(P, "VK_DOWN", {value: KeyEventClass.VK_DOWN});
@@ -593,11 +590,18 @@ load("classpath:internals.js");
     fileDialog.docString = "show a file dialog box";
 
     function selectFile(curDir, aCallback) {
-        (function() {
-            var file = fileDialog(curDir, false);
-            aCallback(file);
-        }).invokeLater();
+        if (aCallback) {
+            (function() {
+                var file = fileDialog(curDir, false);
+                aCallback(file);
+            }).invokeLater();
+        } else {
+            return fileDialog(curDir, false);
+        }
     }
+    Object.defineProperty(P, "selectFile", {
+        value: selectFile
+    });
 
     /**
      * Opens a directory dialog box 
@@ -605,7 +609,7 @@ load("classpath:internals.js");
      * @param curDir current directory [optional]
      * @return selected directory or else null
      */
-    function selectDirectory(curDir) {
+    function directoryDialog(curDir) {
         var result;
         function _dirDialog() {
             if (curDir === undefined) {
@@ -624,8 +628,21 @@ load("classpath:internals.js");
         _dirDialog();
         return result;
     }
-    selectDirectory.docString = "shows a directory dialog box";
+    directoryDialog.docString = "shows a directory dialog box";
+    function selectDirectory(curDir, aCallback) {
+        if (aCallback) {
+            (function() {
+                var file = directoryDialog(curDir);
+                aCallback(file);
+            }).invokeLater();
+        } else {
+            return directoryDialog(curDir);
+        }
+    }
 
+    Object.defineProperty(P, "selectDirectory", {
+        value: selectDirectory
+    });
     /**
      * Opens a color chooser dialog box 
      *
@@ -633,7 +650,7 @@ load("classpath:internals.js");
      * @param color default color [optional]
      * @return choosen color or default color
      */
-    function selectColor(title, color) {
+    function colorDialog(title, color) {
         var result;
         function _colorDialog() {
             if (!title) {
@@ -642,13 +659,27 @@ load("classpath:internals.js");
             if (!color) {
                 color = P.Color.BLACK;
             }
-            var res = ColorChooserClass.showDialog(null, title, color.unwrap().unwrap());
+            var res = ColorChooserClass.showDialog(null, title, color ? color.unwrap() : null);
             result = res ? (new ColorClass(res)).getPublished() : null;
         }
         _colorDialog();
         return result;
     }
-    selectColor.docString = "shows a color chooser dialog box";
+    colorDialog.docString = "shows a color chooser dialog box";
+    function selectColor(title, color, aCallback) {
+        if (aCallback) {
+            (function() {
+                var selected = colorDialog(title, color);
+                aCallback(selected);
+            }).invokeLater();
+        } else {
+            return colorDialog(title, color);
+        }
+    }
+    
+    Object.defineProperty(P, "selectColor", {
+        value: selectColor
+    });
 
     function readString(aFileName, aEncoding) {
         var encoding = 'utf-8';
@@ -658,6 +689,9 @@ load("classpath:internals.js");
         return FileUtilsClass.readString(new FileClass(aFileName), encoding);
     }
 
+    Object.defineProperty(P, "readString", {
+        value: readString
+    });
     function writeString(aFileName, aText, aEncoding) {
         var encoding = 'utf-8';
         if (aEncoding) {
@@ -665,6 +699,10 @@ load("classpath:internals.js");
         }
         FileUtilsClass.writeString(new FileClass(aFileName), aText, encoding);
     }
+    Object.defineProperty(P, "writeString", {
+        value: writeString
+    });
+
     Object.defineProperty(P.Form, "shown", {
         get: function() {
             var nativeArray = FormClass.getShownForms();
@@ -714,6 +752,9 @@ load("classpath:internals.js");
         _msgBox();
     }
     msgBox.docString = "shows MessageBox to the user";
+    Object.defineProperty(P, "msgBox", {
+        value: msgBox
+    });
 
     /**
      * Shows an information alert box
@@ -725,6 +766,9 @@ load("classpath:internals.js");
         msgBox(msg, title, OptionPaneClass.INFORMATION_MESSAGE);
     }
     alert.docString = "shows an alert message box to the user";
+    Object.defineProperty(P, "alert", {
+        value: alert
+    });
 
     /**
      * Shows an error alert box
@@ -736,7 +780,9 @@ load("classpath:internals.js");
         msgBox(msg, title, OptionPaneClass.ERROR_MESSAGE);
     }
     error.docString = "shows an error message box to the user";
-
+    Object.defineProperty(P, "error", {
+        value: error
+    });
 
     /**
      * Shows a warning alert box
@@ -748,7 +794,9 @@ load("classpath:internals.js");
         msgBox(msg, title, OptionPaneClass.WARNING_MESSAGE);
     }
     warn.docString = "shows a warning message box to the user";
-
+    Object.defineProperty(P, "warn", {
+        value: warn
+    });
 
     /**
      * Shows a prompt dialog box
@@ -772,6 +820,9 @@ load("classpath:internals.js");
         return result;
     }
     prompt.docString = "shows a prompt box to the user and returns the answer";
+    Object.defineProperty(P, "prompt", {
+        value: prompt
+    });
 
     /**
      * Shows a confirmation dialog box
@@ -792,4 +843,64 @@ load("classpath:internals.js");
         return result === OptionPaneClass.YES_OPTION;
     }
     confirm.docString = "shows a confirmation message box to the user";
+    Object.defineProperty(P, "confirm", {
+        value: confirm
+    });
+
+    var HorizontalPosition = {};
+    Object.defineProperty(HorizontalPosition, "LEFT", {
+        value: HorizontalPositionClass.LEFT
+    });
+    Object.defineProperty(HorizontalPosition, "CENTER", {
+        value: HorizontalPositionClass.CENTER
+    });
+    Object.defineProperty(HorizontalPosition, "RIGHT", {
+        value: HorizontalPositionClass.RIGHT
+    });
+    Object.defineProperty(P, "HorizontalPosition", {
+        value: HorizontalPosition
+    });
+//
+    var VerticalPosition = {};
+    Object.defineProperty(VerticalPosition, "TOP", {
+        value: VerticalPositionClass.TOP
+    });
+    Object.defineProperty(VerticalPosition, "CENTER", {
+        value: VerticalPositionClass.CENTER
+    });
+    Object.defineProperty(VerticalPosition, "BOTTOM", {
+        value: VerticalPositionClass.BOTTOM
+    });
+    Object.defineProperty(P, "VerticalPosition", {
+        value: VerticalPosition
+    });
+//
+    var Orientation = {};
+    Object.defineProperty(Orientation, "HORIZONTAL", {
+        value: OrientationClass.HORIZONTAL
+    });
+    Object.defineProperty(Orientation, "VERTICAL", {
+        value: OrientationClass.VERTICAL
+    });
+    Object.defineProperty(P, "Orientation", {
+        value: Orientation
+    });
+    //
+    var FontStyleClass = Java.type("com.eas.gui.FontStyle");
+    var FontStyle = {};
+    Object.defineProperty(FontStyle, "ITALIC", {
+        value: FontStyleClass.ITALIC
+    });
+    Object.defineProperty(FontStyle, "BOLD", {
+        value: FontStyleClass.BOLD
+    });
+    Object.defineProperty(FontStyle, "BOLD_ITALIC", {
+        value: FontStyleClass.BOLD_ITALIC
+    });
+    Object.defineProperty(FontStyle, "NORMAL", {
+        value: FontStyleClass.NORMAL
+    });
+    Object.defineProperty(P, "FontStyle", {
+        value: FontStyle
+    });
 })();

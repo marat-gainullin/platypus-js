@@ -90,13 +90,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
-    @Override
-    public Object getPublished() {
-        return published;
-    }
-
-    @Override
-    public void setPublished(Object aValue) {
+    public void injectPublished(Object aValue) {
         published = aValue;
     }
 
@@ -612,7 +606,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
             if (row != null) {
                 rowIds = row.getPKValues();
             }
-            CellRenderEvent event = new CellRenderEvent(this, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row);
+            CellRenderEvent event = new CellRenderEvent(new DummyHasPublished(published), rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row);
             Object retValue = ScriptUtils.toJava(onRender.call(published, new Object[]{event.getPublished()}));
             if (retValue instanceof Boolean) {
                 handled = (Boolean) retValue;

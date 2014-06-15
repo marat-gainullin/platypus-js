@@ -10,12 +10,12 @@ import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
 import com.eas.client.forms.api.menu.PopupMenu;
-import com.eas.gui.ScriptColor;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.gui.CascadedStyle;
 import com.eas.gui.Cursor;
 import com.eas.gui.Font;
+import com.eas.gui.ScriptColor;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -28,6 +28,8 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.FontUIResource;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -42,6 +44,8 @@ public abstract class Component<D extends JComponent> implements HasPublished {
 
     protected Font font;
     protected Cursor cursor;
+    protected ScriptColor background;
+    protected ScriptColor foreground;
     protected String errorMessage;
     protected D delegate;
     protected Object published;
@@ -97,12 +101,12 @@ public abstract class Component<D extends JComponent> implements HasPublished {
 
     @ScriptFunction(jsDoc = BACKGROUND_JSDOC)
     public ScriptColor getBackground() {
-        Color awtColor = delegate.getBackground();
-        return awtColor instanceof ScriptColor ? (ScriptColor)awtColor : awtColor != null ? new ScriptColor(awtColor) : null;
+        return background;
     }
 
     @ScriptFunction
     public void setBackground(ScriptColor aValue) {
+        background = aValue;
         delegate.setBackground(aValue);
     }
     private static final String FOREGROUND_JSDOC = ""
@@ -112,12 +116,12 @@ public abstract class Component<D extends JComponent> implements HasPublished {
 
     @ScriptFunction(jsDoc = FOREGROUND_JSDOC)
     public ScriptColor getForeground() {
-        Color awtColor = delegate.getForeground();
-        return awtColor instanceof ScriptColor ? (ScriptColor)awtColor : awtColor != null ? new ScriptColor(awtColor) : null;
+        return foreground;
     }
 
     @ScriptFunction
     public void setForeground(ScriptColor aValue) {
+        foreground = aValue;
         delegate.setForeground(aValue);
     }
     private static final String VISIBLE_JSDOC = ""
@@ -214,9 +218,6 @@ public abstract class Component<D extends JComponent> implements HasPublished {
 
     @ScriptFunction(jsDoc = FONT_JSDOC)
     public Font getFont() {
-        if (font == null && delegate.getFont() != null) {
-            font = new Font(delegate.getFont().getFamily(), CascadedStyle.nativeFontStyleToFontStyle(delegate.getFont()), delegate.getFont().getSize());
-        }
         return font;
     }
 

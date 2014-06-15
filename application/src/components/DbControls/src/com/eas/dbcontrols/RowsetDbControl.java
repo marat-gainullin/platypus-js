@@ -5,14 +5,13 @@
 package com.eas.dbcontrols;
 
 import com.bearsoft.rowset.Row;
-import com.eas.script.HasPublished;
 
 /**
  * Interace for rowset data aware control.
  * Rowset controls views and edits one rowset. Example is DbGrid.
  * @author mg
  */
-public interface RowsetDbControl extends DbControl, HasPublished {
+public interface RowsetDbControl extends DbControl {
 
     public boolean makeVisible(Row aRow, boolean needToSelect) throws Exception;
 

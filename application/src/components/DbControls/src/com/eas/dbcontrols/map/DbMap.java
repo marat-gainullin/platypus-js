@@ -167,13 +167,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         initializeDesign();
     }
 
-    @Override
-    public Object getPublished() {
-        return published;
-    }
-
-    @Override
-    public void setPublished(Object aValue) {
+    public void injectPublished(Object aValue) {
         published = aValue;
     }
 

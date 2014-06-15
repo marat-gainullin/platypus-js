@@ -7,7 +7,6 @@ package com.eas.dbcontrols;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.gui.CascadedStyle;
-import com.eas.script.HasPublished;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import jdk.nashorn.api.scripting.JSObject;
@@ -20,7 +19,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @see InitializingMethod
  * @author mg
  */
-public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCellEditor, HasPublished {
+public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCellEditor{
 
     public void configure() throws Exception;
 
@@ -84,6 +83,8 @@ public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCell
 
     public void extraCellControls(JSObject aSelectFunction, boolean nullable) throws Exception;
 
+    public void injectPublished(Object aPublished);
+    
     public boolean haveNullerAction();
 
     /**

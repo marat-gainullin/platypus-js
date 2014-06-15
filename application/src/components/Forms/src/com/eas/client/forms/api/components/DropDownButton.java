@@ -172,7 +172,7 @@ public class DropDownButton extends Component<JDropDownButton> {
 
     @ScriptFunction(jsDoc = VERTICAL_TEXT_POSITION_JSDOC)
     public int getVerticalTextPosition() {
-        switch (delegate.getHorizontalTextPosition()) {
+        switch (delegate.getVerticalTextPosition()) {
             case JLabel.TOP:
                 return VerticalPosition.TOP;
             case JLabel.CENTER:

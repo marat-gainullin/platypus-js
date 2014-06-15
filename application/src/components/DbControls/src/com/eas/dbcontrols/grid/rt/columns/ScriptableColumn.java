@@ -243,10 +243,10 @@ public class ScriptableColumn implements HasPublished {
         published = jsColumn;
         if (viewColumn != null) {
             if (viewColumn.getCellEditor() instanceof ScalarDbControl) {
-                ((ScalarDbControl) viewColumn.getCellEditor()).setPublished(published);
+                ((ScalarDbControl) viewColumn.getCellEditor()).injectPublished(published);
             }
             if (viewColumn.getCellRenderer() instanceof ScalarDbControl) {
-                ((ScalarDbControl) viewColumn.getCellRenderer()).setPublished(published);
+                ((ScalarDbControl) viewColumn.getCellRenderer()).injectPublished(published);
             }
         }
         if (modelColumn != null) {

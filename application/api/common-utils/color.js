@@ -6,9 +6,9 @@
     
     /**
      * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.* @param red Red compontent (optional)
-     * @param red Green compontent (optional)
-     * @param red Blue compontent (optional)
-     * @param red Alpha compontent (optional)
+     * @param green Green compontent (optional)
+     * @param blue Blue compontent (optional)
+     * @param alpha Alpha compontent (optional)
      * @constructor Color Color
      */
     P.Color = function (red, green, blue, alpha) {

@@ -3,6 +3,7 @@ package com.eas.client.scripts;
 import com.eas.client.AppCache;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.store.Dom2ScriptDocument;

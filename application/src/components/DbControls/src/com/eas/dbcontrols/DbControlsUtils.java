@@ -77,95 +77,94 @@ public class DbControlsUtils {
     static {
         // Numbers
         typesControls.put(java.sql.Types.BIGINT, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.DECIMAL, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.DOUBLE, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.FLOAT, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.INTEGER, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.NUMERIC, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.REAL, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.SMALLINT, new Class<?>[]{
-                    DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbSpin.class, DbCheck.class, DbLabel.class, DbText.class, DbCombo.class
+        });
         // Logical
         typesControls.put(java.sql.Types.BOOLEAN, new Class<?>[]{
-                    DbCheck.class
-                });
+            DbCheck.class
+        });
         typesControls.put(java.sql.Types.BIT, new Class<?>[]{
-                    DbCheck.class
-                });
+            DbCheck.class
+        });
         // Binaries
         typesControls.put(java.sql.Types.VARBINARY, new Class<?>[]{
-                    DbImage.class, DbScheme.class
-                });
+            DbImage.class, DbScheme.class
+        });
         typesControls.put(java.sql.Types.BINARY, new Class<?>[]{
-                    DbImage.class, DbScheme.class
-                });
+            DbImage.class, DbScheme.class
+        });
         typesControls.put(java.sql.Types.BLOB, new Class<?>[]{
-                    DbImage.class, DbScheme.class
-                });
+            DbImage.class, DbScheme.class
+        });
         typesControls.put(java.sql.Types.LONGVARBINARY, new Class<?>[]{
-                    DbImage.class, DbScheme.class
-                });
+            DbImage.class, DbScheme.class
+        });
         // Strings
         typesControls.put(java.sql.Types.CHAR, new Class<?>[]{
-                    DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.CLOB, new Class<?>[]{
-                    DbLabel.class, DbText.class, //, DbCombo.class
-                });
+            DbLabel.class, DbText.class, //, DbCombo.class
+        });
         typesControls.put(java.sql.Types.LONGNVARCHAR, new Class<?>[]{
-                    DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.LONGVARCHAR, new Class<?>[]{
-                    DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.NCHAR, new Class<?>[]{
-                    DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.NCLOB, new Class<?>[]{
-                    DbLabel.class, DbText.class//, DbCombo.class
-                });
+            DbLabel.class, DbText.class//, DbCombo.class
+        });
         typesControls.put(java.sql.Types.NVARCHAR, new Class<?>[]{
-                    DbLabel.class, DbText.class, DbCombo.class
-                });
+            DbLabel.class, DbText.class, DbCombo.class
+        });
         typesControls.put(java.sql.Types.VARCHAR, new Class<?>[]{
-                    DbLabel.class, DbText.class, DbCombo.class, DbCheck.class
-                });
+            DbLabel.class, DbText.class, DbCombo.class, DbCheck.class
+        });
         typesControls.put(java.sql.Types.SQLXML, new Class<?>[]{
-                    DbLabel.class, DbText.class//, DbCombo.class
-                });
+            DbLabel.class, DbText.class//, DbCombo.class
+        });
         // Dates, times
         typesControls.put(java.sql.Types.DATE, new Class<?>[]{
-                    DbDate.class
-                });
+            DbDate.class
+        });
         typesControls.put(java.sql.Types.TIME, new Class<?>[]{
-                    DbDate.class
-                });
+            DbDate.class
+        });
         typesControls.put(java.sql.Types.TIMESTAMP, new Class<?>[]{
-                    DbDate.class
-                });
+            DbDate.class
+        });
         // Others
         typesControls.put(java.sql.Types.STRUCT, new Class<?>[]{
-                    DbLabel.class
-                });
+            DbLabel.class
+        });
         typesControls.put(java.sql.Types.OTHER, new Class<?>[]{
-                    DbLabel.class
-                });
-
+            DbLabel.class
+        });
 
         controlsDesignClasses.put(DbCheck.class, DbCheckDesignInfo.class);
         controlsDesignClasses.put(DbCombo.class, DbComboDesignInfo.class);
@@ -219,8 +218,7 @@ public class DbControlsUtils {
         if (aControlClass != null) {
             Class<?>[] controlClasses = typesControls.get(aType);
             if (controlClasses != null) {
-                for (int i = 0; i < controlClasses.length; i++) {
-                    Class<?> controlClass = controlClasses[i];
+                for (Class<?> controlClass : controlClasses) {
                     if (controlClass != null && controlClass.isAssignableFrom(aControlClass)) {
                         return true;
                     }
@@ -234,8 +232,7 @@ public class DbControlsUtils {
         if (aDesignInfoClass != null) {
             Class<?>[] controlClasses = typesControls.get(aType);
             if (controlClasses != null) {
-                for (int i = 0; i < controlClasses.length; i++) {
-                    Class<?> controlClass = controlClasses[i];
+                for (Class<?> controlClass : controlClasses) {
                     Class<?> designInfoClass = controlsDesignClasses.get(controlClass);
                     if (designInfoClass != null && designInfoClass.isAssignableFrom(aDesignInfoClass)) {
                         return true;
@@ -329,12 +326,12 @@ public class DbControlsUtils {
             InputMap im = new InputMap();
             Object[] keys = am.keys();
             if (keys != null) {
-                for (int i = 0; i < keys.length; i++) {
-                    Action action = am.get(keys[i]);
+                for (Object key : keys) {
+                    Action action = am.get(key);
                     if (action != null) {
                         Object stroke = action.getValue(Action.ACCELERATOR_KEY);
                         if (stroke != null && stroke instanceof KeyStroke) {
-                            im.put((KeyStroke) stroke, keys[i]);
+                            im.put((KeyStroke) stroke, key);
                         }
                     }
                 }
@@ -353,14 +350,12 @@ public class DbControlsUtils {
         }
         return res;
     }
-    
-    public static java.awt.Font toNativeFont(Font aFont)
-    {
-        return new java.awt.Font(aFont.getFamily(), CascadedStyle.fontStyleToNativeFontStyle(aFont.getStyle()), aFont.getSize());
+
+    public static java.awt.Font toNativeFont(Font aFont) {
+        return aFont != null ? new java.awt.Font(aFont.getFamily(), CascadedStyle.fontStyleToNativeFontStyle(aFont.getStyle()), aFont.getSize()) : null;
     }
 
-    public static Font toFont(java.awt.Font aNativeFont)
-    {
-        return new Font(aNativeFont.getFamily(), CascadedStyle.nativeFontStyleToFontStyle(aNativeFont), aNativeFont.getSize());
+    public static Font toFont(java.awt.Font aNativeFont) {
+        return aNativeFont != null ? new Font(aNativeFont.getFamily(), CascadedStyle.nativeFontStyleToFontStyle(aNativeFont), aNativeFont.getSize()) : null;
     }
 }
