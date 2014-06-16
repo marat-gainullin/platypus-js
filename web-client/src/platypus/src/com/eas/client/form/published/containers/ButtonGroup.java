@@ -1,19 +1,37 @@
 package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.RadioGroup;
+import com.eas.client.form.events.AddEvent;
+import com.eas.client.form.events.AddHandler;
+import com.eas.client.form.events.HasAddHandlers;
+import com.eas.client.form.events.HasRemoveHandlers;
+import com.eas.client.form.events.RemoveEvent;
+import com.eas.client.form.events.RemoveHandler;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPlatypusButtonGroup;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.UIObject;
 
-public class ButtonGroup extends RadioGroup implements HasJsFacade {
+public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandlers {
 
 	protected String name;
 	protected JavaScriptObject published;
 
 	public ButtonGroup() {
 		super();
+	}
+
+	@Override
+	public HandlerRegistration addAddHandler(AddHandler handler) {
+		return addHandler(handler, AddEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addRemoveHandler(RemoveHandler handler) {
+		return addHandler(handler, RemoveEvent.getType());
 	}
 
 	@Override
@@ -31,19 +49,21 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade {
 	}
 
 	public void add(HasPublished aItem) {
-		if (aItem instanceof HasValue<?>){
+		if (aItem instanceof HasValue<?>) {
 			super.add((HasValue<Boolean>) aItem);
-			if(aItem instanceof HasPlatypusButtonGroup){
-				((HasPlatypusButtonGroup)aItem).mutateButtonGroup(this);
+			if (aItem instanceof HasPlatypusButtonGroup) {
+				((HasPlatypusButtonGroup) aItem).mutateButtonGroup(this);
+				AddEvent.fire(this, (UIObject)aItem);
 			}
 		}
 	}
 
 	public void remove(HasPublished aItem) {
-		if (aItem instanceof HasValue<?>){
+		if (aItem instanceof HasValue<?>) {
 			super.remove((HasValue<Boolean>) aItem);
-			if(aItem instanceof HasPlatypusButtonGroup){
-				((HasPlatypusButtonGroup)aItem).setButtonGroup(null);
+			if (aItem instanceof HasPlatypusButtonGroup) {
+				((HasPlatypusButtonGroup) aItem).setButtonGroup(null);
+				RemoveEvent.fire(this, (UIObject)aItem);
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 package com.eas.client.form.events;
 
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.UIObject;
 
 public class RemoveEvent extends GwtEvent<RemoveHandler>{
 
@@ -18,7 +18,7 @@ public class RemoveEvent extends GwtEvent<RemoveHandler>{
      * @param source the source of the handlers
      * @param target the target
      */
-    public static void fire(HasRemoveHandlers source, Widget target) {
+    public static void fire(HasRemoveHandlers source, UIObject target) {
         if (TYPE != null) {
             RemoveEvent event = new RemoveEvent(target);
             source.fireEvent(event);
@@ -34,14 +34,14 @@ public class RemoveEvent extends GwtEvent<RemoveHandler>{
         return TYPE != null ? TYPE : (TYPE = new Type<>());
     }
 
-    private final Widget widget;
+    private final UIObject widget;
 
     /**
      * Creates a new close event.
      *
      * @param aWidget the target
      */
-    protected RemoveEvent(Widget aWidget) {
+    protected RemoveEvent(UIObject aWidget) {
         widget = aWidget;
     }
 
@@ -55,7 +55,7 @@ public class RemoveEvent extends GwtEvent<RemoveHandler>{
      *
      * @return the target
      */
-    public Widget getWidget() {
+    public UIObject getWidget() {
         return widget;
     }
 

@@ -13,6 +13,8 @@ import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
 import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsEvents;
+import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.Entity;
@@ -143,10 +145,12 @@ public abstract class MixedTest extends ModelBaseTest {
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
+		AppClient client = initDevelopTestClient();
 		JsWidgets.init();
+		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
-		AppClient client = initDevelopTestClient();
+		JsEvents.init();
 		Application.publish(client);
 		Loader l = new Loader(client);
 		l.loadQueries(queries(), new Runnable() {

@@ -25,6 +25,12 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.RowKeyProvider;
+import com.eas.client.form.events.HasHideHandlers;
+import com.eas.client.form.events.HasShowHandlers;
+import com.eas.client.form.events.HideEvent;
+import com.eas.client.form.events.HideHandler;
+import com.eas.client.form.events.ShowEvent;
+import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.grid.FindWindow;
 import com.eas.client.form.grid.RowsetPositionSelectionHandler;
 import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
@@ -59,6 +65,9 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -77,7 +86,7 @@ import com.google.gwt.view.client.SetSelectionModel;
  * @author mg
  * 
  */
-public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled {
+public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
 
 	public static final int ROWS_HEADER_TYPE_NONE = 0;
 	public static final int ROWS_HEADER_TYPE_USUAL = 1;
@@ -212,6 +221,34 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 
 	public ListHandler<Row> getSortHandler() {
 		return sortHandler;
+	}
+
+	@Override
+	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+		return addHandler(handler, ResizeEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addHideHandler(HideHandler handler) {
+		return addHandler(handler, HideEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addShowHandler(ShowHandler handler) {
+		return addHandler(handler, ShowEvent.getType());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		boolean oldValue = isVisible();
+		super.setVisible(visible);
+		if (oldValue != visible) {
+			if (visible) {
+				ShowEvent.fire(this, this);
+			} else {
+				HideEvent.fire(this, this);
+			}
+		}
 	}
 
 	@Override
@@ -852,6 +889,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 					}
 				}
 			}
+			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
 

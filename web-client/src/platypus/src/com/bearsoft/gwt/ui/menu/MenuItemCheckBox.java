@@ -11,8 +11,6 @@ import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -24,7 +22,6 @@ import com.google.gwt.user.client.ui.HasValue;
  */
 public class MenuItemCheckBox extends MenuItemImageText implements HasValue<Boolean>, HasValueChangeHandlers<Boolean> {
 
-    protected HandlerManager handlerManager = new HandlerManager(this);
     protected Boolean value;
     protected InputElement inputElem;
 
@@ -80,12 +77,7 @@ public class MenuItemCheckBox extends MenuItemImageText implements HasValue<Bool
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
-        return handlerManager.addHandler(ValueChangeEvent.getType(), handler);
-    }
-
-    @Override
-    public void fireEvent(GwtEvent<?> event) {
-        handlerManager.fireEvent(event);
+        return addHandler(handler, ValueChangeEvent.getType());
     }
 
 }

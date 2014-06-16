@@ -5,6 +5,12 @@
  */
 package com.bearsoft.gwt.ui.menu;
 
+import com.eas.client.form.events.HasHideHandlers;
+import com.eas.client.form.events.HasShowHandlers;
+import com.eas.client.form.events.HideEvent;
+import com.eas.client.form.events.HideHandler;
+import com.eas.client.form.events.ShowEvent;
+import com.eas.client.form.events.ShowHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.EventHandler;
@@ -21,7 +27,7 @@ import com.google.gwt.user.client.ui.MenuItem;
  * 
  * @author mg
  */
-public class MenuItemImageText extends MenuItem implements HasHandlers {
+public class MenuItemImageText extends MenuItem implements HasHandlers, HasShowHandlers, HasHideHandlers {
 
 	protected String text;
 	protected boolean html;
@@ -38,6 +44,29 @@ public class MenuItemImageText extends MenuItem implements HasHandlers {
 		html = asHtml;
 		imageUri = aImageUri;
 		regenerate();
+	}
+
+	@Override
+	public HandlerRegistration addHideHandler(HideHandler handler) {
+		return addHandler(handler, HideEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addShowHandler(ShowHandler handler) {
+		return addHandler(handler, ShowEvent.getType());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		boolean oldValue = isVisible();
+		super.setVisible(visible);
+		if (oldValue != visible) {
+			if (visible) {
+				ShowEvent.fire(this, this);
+			} else {
+				HideEvent.fire(this, this);
+			}
+		}
 	}
 
 	/**

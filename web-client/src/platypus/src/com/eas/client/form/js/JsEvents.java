@@ -389,11 +389,11 @@ public class JsEvents {
 	}-*/;
 	
 	public native static JavaScriptObject publish(FocusEvent aEvent)/*-{
-		return $wnd.P.FocusEvent(aEvent);
+		return new $wnd.P.FocusEvent(aEvent);
 	}-*/;
 
 	public native static JavaScriptObject publish(BlurEvent aEvent)/*-{
-		return $wnd.P.FocusEvent(aEvent);
+		return new $wnd.P.FocusEvent(aEvent);
 	}-*/;
 
 	public native static JavaScriptObject publish(ResizeEvent aEvent)/*-{
@@ -413,15 +413,15 @@ public class JsEvents {
 	}-*/;
 
 	public native static JavaScriptObject publish(AddEvent aEvent)/*-{
-		return $wnd.P.ContainerEvent(aEvent, true); 
+		return new $wnd.P.ContainerEvent(aEvent, true); 
 	}-*/;
 
 	public native static JavaScriptObject publish(RemoveEvent aEvent)/*-{
-		return $wnd.P.ContainerEvent(aEvent, false);
+		return new $wnd.P.ContainerEvent(aEvent, false);
 	}-*/;
 	
 	public native static JavaScriptObject publish(ActionEvent aEvent)/*-{
-		return $wnd.P.ContainerEvent(aEvent, false);
+		return new $wnd.P.ContainerEvent(aEvent, false);
 	}-*/;
 
 }

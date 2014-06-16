@@ -422,7 +422,7 @@ public class EventsExecutor {
 							event.stopPropagation();
 							if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
 								mouseState = MOUSE.MOVED;
-								executeEvent(mouseMoved, null);
+								executeEvent(mouseMoved, JsEvents.publish(event));
 							} else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
 								mouseState = MOUSE.DRAGGED;
 								executeEvent(mouseDragged, JsEvents.publish(event));

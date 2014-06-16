@@ -19,6 +19,7 @@ import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 
 /**
  * Provides specific completion for the JavaScript documents.
+ *
  * @author vv
  */
 public class ModuleCompletionProvider implements CompletionProvider {
@@ -61,20 +62,21 @@ public class ModuleCompletionProvider implements CompletionProvider {
     }
 
     protected static CompletionContext getCompletionContext(CompletionContext initialContext, List<CompletionPoint.CompletionToken> completionTokens, int caretOffset) throws Exception {
-        if (initialContext == null) {
-            throw new NullPointerException("Initial context is null.");
-        }
-        CompletionContext completionContext = initialContext;
-        if (completionTokens != null) {
-            Iterator<CompletionToken> i = completionTokens.iterator();
-            while (i.hasNext()) {
-                completionContext = completionContext.getChildContext(i.next(), caretOffset);
-                if (completionContext == null) {
-                    break;
+        if (initialContext != null) {
+            CompletionContext completionContext = initialContext;
+            if (completionTokens != null) {
+                Iterator<CompletionToken> i = completionTokens.iterator();
+                while (i.hasNext()) {
+                    completionContext = completionContext.getChildContext(i.next(), caretOffset);
+                    if (completionContext == null) {
+                        break;
+                    }
+                    caretOffset = 0;
                 }
-                caretOffset = 0;
             }
+            return completionContext;
+        } else {
+            return null;
         }
-        return completionContext;
     }
 }

@@ -6,6 +6,12 @@ import java.util.List;
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.window.WindowUI;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.HasHideHandlers;
+import com.eas.client.form.events.HasShowHandlers;
+import com.eas.client.form.events.HideEvent;
+import com.eas.client.form.events.HideHandler;
+import com.eas.client.form.events.ShowEvent;
+import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
@@ -15,6 +21,9 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -27,7 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
+public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -43,6 +52,34 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	public DesktopPane() {
 		super();
 		getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+	}
+
+	@Override
+	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+		return addHandler(handler, ResizeEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addHideHandler(HideHandler handler) {
+		return addHandler(handler, HideEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addShowHandler(ShowHandler handler) {
+		return addHandler(handler, ShowEvent.getType());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		boolean oldValue = isVisible();
+		super.setVisible(visible);
+		if (oldValue != visible) {
+			if (visible) {
+				ShowEvent.fire(this, this);
+			} else {
+				HideEvent.fire(this, this);
+			}
+		}
 	}
 
 	@Override
@@ -162,6 +199,9 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	@Override
 	public void onResize() {
 		refreshConsideredPosition();
+		if(isAttached()){
+			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
+		}
 	}
 
 	private void refreshConsideredPosition() {

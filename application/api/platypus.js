@@ -766,7 +766,7 @@ load("classpath:internals.js");
         msgBox(msg, title, OptionPaneClass.INFORMATION_MESSAGE);
     }
     alert.docString = "shows an alert message box to the user";
-    Object.defineProperty(P, "alert", {
+    Object.defineProperty(global, "alert", {
         value: alert
     });
 
@@ -820,7 +820,7 @@ load("classpath:internals.js");
         return result;
     }
     prompt.docString = "shows a prompt box to the user and returns the answer";
-    Object.defineProperty(P, "prompt", {
+    Object.defineProperty(global, "prompt", {
         value: prompt
     });
 
@@ -843,7 +843,7 @@ load("classpath:internals.js");
         return result === OptionPaneClass.YES_OPTION;
     }
     confirm.docString = "shows a confirmation message box to the user";
-    Object.defineProperty(P, "confirm", {
+    Object.defineProperty(global, "confirm", {
         value: confirm
     });
 
