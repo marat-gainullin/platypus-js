@@ -9,6 +9,8 @@ import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.Orientation;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JSplitPane;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -136,6 +138,19 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.repaint();
     }
 
+    @ScriptFunction(jsDoc = COUNT_JSDOC)
+    @Override
+    public int getCount() {
+        int count = 0;
+        if (getFirstComponent() != null) {
+            count++;
+        }
+        if (getSecondComponent() != null) {
+            count++;
+        }
+        return count;
+    }
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
@@ -154,7 +169,31 @@ public class SplitPane extends Container<JSplitPane> {
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
     @Override
     public Component<?> child(int aIndex) {
-        return super.child(aIndex);
+        List<Component<?>> children = new ArrayList<>();
+        Component<?> first = getFirstComponent();
+        if (first != null) {
+            children.add(first);
+        }
+        Component<?> second = getSecondComponent();
+        if (second != null) {
+            children.add(second);
+        }
+        return children.get(aIndex);//IndexOutOfBoundsExeption is ok
+    }
+
+    @ScriptFunction(jsDoc = CHILDREN_JSDOC)
+    @Override
+    public Component<?>[] getChildren() {
+        List<Component<?>> children = new ArrayList<>();
+        Component<?> first = getFirstComponent();
+        if (first != null) {
+            children.add(first);
+        }
+        Component<?> second = getSecondComponent();
+        if (second != null) {
+            children.add(second);
+        }
+        return children.toArray(new Component<?>[]{});
     }
 
     @Override

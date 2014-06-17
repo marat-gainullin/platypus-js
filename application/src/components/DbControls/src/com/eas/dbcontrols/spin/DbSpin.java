@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
@@ -55,14 +56,14 @@ public class DbSpin extends DbControlPanel implements DbControl {
     protected double step = 1;
     protected NullableSpinner spin;
     protected NullableSpinnerNumberModel spinModel;
-    private Double dummyNumber = 0.0;
+    private Double dummyNumber;
 
     public Double getMin() {
         return min;
     }
 
     public void setMin(Double aValue) throws Exception {
-        if (min != aValue) {
+        if (!Objects.equals(min, aValue)) {
             min = aValue;
             if (spinModel != null) {
                 spinModel.setMin(aValue);
@@ -75,7 +76,7 @@ public class DbSpin extends DbControlPanel implements DbControl {
     }
 
     public void setMax(Double aValue) throws Exception {
-        if (max != aValue) {
+        if (!Objects.equals(max, aValue)) {
             max = aValue;
             if (spinModel != null) {
                 spinModel.setMax(aValue);

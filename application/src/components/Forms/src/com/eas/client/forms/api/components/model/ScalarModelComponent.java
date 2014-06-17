@@ -15,6 +15,8 @@ import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -27,6 +29,18 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
 
     public ScalarModelComponent() {
         super();
+    }
+
+    @Override
+    protected void setDelegate(D aDelegate) {
+        super.setDelegate(aDelegate);
+        if(delegate != null){
+            try {
+                delegate.configure();
+            } catch (Exception ex) {
+                Logger.getLogger(ScalarModelComponent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     private static final String FIELD_JSDOC = ""

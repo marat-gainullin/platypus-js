@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -26,13 +25,10 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ControlEventsIProxy implements MouseListener,
         MouseWheelListener,
-        ChangeListener,
         ComponentListener,
         MouseMotionListener,
         ContainerListener,
-        ItemListener,
         ActionListener,
-        //HierarchyListener,
         FocusListener,
         PropertyChangeListener,
         KeyListener {
@@ -44,14 +40,12 @@ public class ControlEventsIProxy implements MouseListener,
     public static final int mouseEntered = 4;
     public static final int mouseExited = 5;
     public static final int mouseWheelMoved = 6;
-    public static final int stateChanged = 7;
     public static final int componentResized = 8;
     public static final int componentMoved = 9;
     public static final int componentShown = 10;
     public static final int componentHidden = 11;
     public static final int mouseDragged = 12;
     public static final int mouseMoved = 13;
-    public static final int itemStateChanged = 14;
     public static final int actionPerformed = 15;
     public static final int focusGained = 16;
     public static final int focusLost = 17;
@@ -114,13 +108,16 @@ public class ControlEventsIProxy implements MouseListener,
     }
 
     private void reflectionInvokeARListener(String name, Class aClass) {
+        reflectionInvokeARListener(mHandlee, name, aClass, this);
+    }
+    
+    public static void reflectionInvokeARListener(Component mHandlee, String name, Class<?> aListenerClass, Object aListenerInstance) {
         if (mHandlee != null) {
-            Class[] mparams = new Class[1];
+            Class[] mparams = new Class[]{aListenerClass};
             try {
-                mparams[0] = aClass;
                 Method setter = mHandlee.getClass().getMethod(name, mparams);
                 if (setter != null) {
-                    setter.invoke(mHandlee, this);
+                    setter.invoke(mHandlee, aListenerInstance);
                 }
             } catch (Exception e) {
                 /* ignore*/
@@ -212,11 +209,6 @@ public class ControlEventsIProxy implements MouseListener,
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
-        executeEvent(stateChanged, e);
-    }
-
-    @Override
     public void componentResized(ComponentEvent e) {
         executeEvent(componentResized, e);
     }
@@ -254,11 +246,6 @@ public class ControlEventsIProxy implements MouseListener,
     @Override
     public void mouseMoved(MouseEvent e) {
         executeEvent(mouseMoved, e);
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        executeEvent(itemStateChanged, e);
     }
 
     @Override

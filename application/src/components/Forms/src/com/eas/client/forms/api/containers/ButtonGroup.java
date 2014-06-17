@@ -7,9 +7,16 @@ package com.eas.client.forms.api.containers;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.HasGroup;
+import com.eas.client.forms.api.events.ChangeEvent;
 import com.eas.controls.wrappers.ButtonGroupWrapper;
+import com.eas.script.EventMethod;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JComponent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -19,6 +26,9 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ButtonGroup extends Container<ButtonGroupWrapper> {
 
     protected JSObject onItemSelected;
+    protected ItemListener itemListener = (ItemEvent e) -> {
+        fireItemSelected();
+    };
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -47,10 +57,22 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
         }
     }
 
+    @Override
+    protected void setDelegate(ButtonGroupWrapper aDelegate) {
+        if (delegate != null) {
+            delegate.removeItemListener(itemListener);
+        }
+        super.setDelegate(aDelegate);
+        if (delegate != null) {
+            delegate.addItemListener(itemListener);
+        }
+    }
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Event that is fired when one of the components is selected in this group.\n"
             + " */")
+    @EventMethod(eventClass = ChangeEvent.class)
     public JSObject getOnItemSelected() {
         return onItemSelected;
     }
@@ -71,7 +93,8 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     @ScriptFunction(jsDoc = ADD_JSDOC)
     public void add(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {
-            delegate.add(unwrap(aComp));
+            JComponent itemDelegate = unwrap(aComp);
+            delegate.add(itemDelegate);
             invalidatePublishedCollection();
             if (aComp instanceof HasGroup) {
                 settingButtonGroup = true;
@@ -93,7 +116,8 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     @Override
     public void remove(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {
-            delegate.remove(unwrap(aComp));
+            JComponent itemDelegate = unwrap(aComp);
+            delegate.remove(itemDelegate);
             invalidatePublishedCollection();
             if (aComp instanceof HasGroup) {
                 settingButtonGroup = true;
@@ -114,6 +138,15 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
 
     public void clearSelection() {
         delegate.clearSelection();
+        fireItemSelected();
+    }
+
+    protected void fireItemSelected() {
+        try {
+            onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(new javax.swing.event.ChangeEvent(delegate)).getPublished()});
+        } catch (Exception ex) {
+            Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -132,5 +165,4 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
-
 }

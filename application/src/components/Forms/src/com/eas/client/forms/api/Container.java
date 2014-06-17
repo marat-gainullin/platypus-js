@@ -78,7 +78,7 @@ public abstract class Container<D extends JComponent> extends Component<D> imple
         return getComponentWrapper(delegate.getComponent(aIndex));
     }
 
-    private static final String CHILDREN_JSDOC = ""
+    protected static final String CHILDREN_JSDOC = ""
             + "/**\n"
             + "* Gets the container's children components.\n"
             + "*/";
@@ -117,7 +117,7 @@ public abstract class Container<D extends JComponent> extends Component<D> imple
         delegate.repaint();
     }
 
-    private static final String COUNT_JSDOC = ""
+    protected static final String COUNT_JSDOC = ""
             + "/**\n"
             + "* Gets the number of components in this panel.\n"
             + "*/";

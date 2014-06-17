@@ -221,6 +221,7 @@ load("classpath:internals.js");
         } else {
             aTarget = new P.Form(form);
         }
+        form.injectPublished(aTarget);
         if (!form.title)
             form.title = aName;
         var comps = form.publishedComponents;

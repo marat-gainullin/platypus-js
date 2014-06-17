@@ -20,7 +20,6 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -28,8 +27,6 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.plaf.FontUIResource;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**

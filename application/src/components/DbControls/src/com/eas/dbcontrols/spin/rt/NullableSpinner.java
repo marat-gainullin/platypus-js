@@ -15,9 +15,13 @@ import javax.swing.JSpinner;
 public class NullableSpinner extends JSpinner {
 
     public NullableSpinner(NullableSpinnerNumberModel aModel) {
-        super(aModel);
+        super();
+        Object oldValue = aModel.getValue();
+        aModel.setValue(0.0d);
+        setModel(aModel);
+        aModel.setValue(oldValue);
     }
-    
+
     @Override
     public void commitEdit() throws ParseException {
         if (getModel().getValue() != null) {
@@ -30,10 +34,9 @@ public class NullableSpinner extends JSpinner {
         super.setOpaque(aValue);
         JComponent editor = getEditor();
         editor.setOpaque(aValue);
-        if(editor instanceof NumberEditor)
-        {
-            ((NumberEditor)editor).getTextField().setOpaque(aValue);
+        if (editor instanceof NumberEditor) {
+            ((NumberEditor) editor).getTextField().setOpaque(aValue);
         }
     }
-    
+
 }

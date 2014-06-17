@@ -4,8 +4,10 @@
  */
 package com.eas.client.forms.api;
 
+import com.eas.client.forms.Form;
 import com.eas.client.forms.api.events.EventsWrapper;
 import com.eas.controls.events.WindowEventsIProxy;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -13,8 +15,11 @@ import com.eas.controls.events.WindowEventsIProxy;
  */
 public class FormWindowEventsIProxy extends WindowEventsIProxy {
 
-    public FormWindowEventsIProxy() {
+    protected Form form;
+
+    public FormWindowEventsIProxy(Form aForm) {
         super();
+        form = aForm;
     }
 
     @Override
@@ -22,6 +27,10 @@ public class FormWindowEventsIProxy extends WindowEventsIProxy {
         if (anEvent instanceof java.awt.event.MouseEvent) {
             anEvent = EventsWrapper.wrap((java.awt.event.MouseEvent) anEvent);
         } else if (anEvent instanceof java.awt.event.WindowEvent) {
+            if (eventThis == null) {
+                setEventThis((JSObject) form.getPublished());
+            }
+            ((java.awt.event.WindowEvent) anEvent).setSource(form);
             anEvent = EventsWrapper.wrap((java.awt.event.WindowEvent) anEvent);
         } else if (anEvent instanceof java.awt.event.KeyEvent) {
             anEvent = EventsWrapper.wrap((java.awt.event.KeyEvent) anEvent);

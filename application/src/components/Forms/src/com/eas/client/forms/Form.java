@@ -199,6 +199,10 @@ public class Form implements HasPublished {
         published = aValue;
     }
 
+    public void injectPublished(JSObject aValue){
+        published = aValue;
+    }
+    
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
@@ -1274,7 +1278,7 @@ public class Form implements HasPublished {
         alwaysOnTop = aDocument.isAlwaysOnTop();
         locationByPlatform = aDocument.isLocationByPlatform();
         designedViewSize = aDocument.getDesignedPreferredSize();
-        windowHandler = new FormWindowEventsIProxy();
+        windowHandler = new FormWindowEventsIProxy(this);
         final DbSwingFactory factory = new FormFactory(model);
         final FormDesignInfo fdi = aDocument;//.copy();
         fdi.accept(factory);
