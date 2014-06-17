@@ -29,7 +29,7 @@ public class FormCompletionContext extends CompletionContext {
     private final FormModuleCompletionContext parentContext;
 
     public FormCompletionContext(FormModuleCompletionContext aParentContext) {
-        super(null);
+        super(Form.class);
         parentContext = aParentContext;
     }
 
@@ -38,7 +38,6 @@ public class FormCompletionContext extends CompletionContext {
         super.applyCompletionItems(point, offset, resultSet);
         addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
         fillComponents(point, resultSet);
-
     }
 
     @Override

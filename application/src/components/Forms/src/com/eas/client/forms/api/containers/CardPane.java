@@ -19,6 +19,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class CardPane extends Container<JPanel> {
 
+    protected JSObject onItemSelected;
+    
     public CardPane() {
         this(0, 0);
     }
@@ -45,6 +47,21 @@ public class CardPane extends Container<JPanel> {
         assert aDelegate != null;
         assert aDelegate.getLayout() instanceof CardLayout;
         setDelegate(aDelegate);
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when one of the components is selected in this card pane.\n"
+            + " */")
+    public JSObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    @ScriptFunction
+    public void setOnItemSelected(JSObject aValue) {
+        if (onItemSelected != aValue) {
+            onItemSelected = aValue;
+        }
     }
 
     private static final String ADD_JSDOC = ""

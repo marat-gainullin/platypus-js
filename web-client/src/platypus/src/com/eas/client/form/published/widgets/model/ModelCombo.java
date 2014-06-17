@@ -19,6 +19,9 @@ import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.CrossUpdater;
 import com.eas.client.form.RowKeyProvider;
 import com.eas.client.form.combo.ValueLookup;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
@@ -29,9 +32,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.bearsoft.rowset.events.RowChangeEvent;
 
-public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText {
+public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText, HasActionHandlers {
 
 	protected CrossUpdater updater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
 
@@ -81,6 +87,37 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		super(new StyledListBox<Row>());
 	}
 		
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<Row>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<Row> event) {
+					ActionEvent.fire(ModelCombo.this, ModelCombo.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
+	}
+
 	public ValueLookup getLookup() {
 		return lookup;
 	}

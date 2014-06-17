@@ -18,6 +18,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ButtonGroup extends Container<ButtonGroupWrapper> {
 
+    protected JSObject onItemSelected;
+
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + " * Creates a multiple-exclusion scope for a set of buttons.\n"
@@ -42,6 +44,21 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
             }
         } finally {
             settingButtonGroup = false;
+        }
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when one of the components is selected in this group.\n"
+            + " */")
+    public JSObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    @ScriptFunction
+    public void setOnItemSelected(JSObject aValue) {
+        if (onItemSelected != aValue) {
+            onItemSelected = aValue;
         }
     }
 
@@ -95,10 +112,10 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
         return super.child(aIndex);
     }
 
-    public void clearSelection(){
+    public void clearSelection() {
         delegate.clearSelection();
     }
-    
+
     @Override
     public Object getPublished() {
         if (published == null) {

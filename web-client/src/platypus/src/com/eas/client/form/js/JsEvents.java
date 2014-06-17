@@ -341,7 +341,7 @@ public class JsEvents {
 	}-*/;
 	
 	public native static JavaScriptObject publishWindowEvent(Object aEvent, JavaScriptObject aWindow)/*-{
-		return new $wnd.WindowEvent(aWindow);
+		return new $wnd.P.WindowEvent(aWindow);
 	}-*/;
 
 	public native static JavaScriptObject publish(MouseDownEvent aEvent)/*-{

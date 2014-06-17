@@ -29,6 +29,8 @@ public class TabbedPane extends Container<JTabbedPane> {
             + " * clicking on a tab with a given title and/or icon.\n"
             + " */";
 
+    protected JSObject onItemSelected;
+    
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public TabbedPane() {
         super();
@@ -38,6 +40,21 @@ public class TabbedPane extends Container<JTabbedPane> {
     protected TabbedPane(JTabbedPane aDelegate) {
         super();
         setDelegate(aDelegate);
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when one of the components is selected in this tabbed pane.\n"
+            + " */")
+    public JSObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    @ScriptFunction
+    public void setOnItemSelected(JSObject aValue) {
+        if (onItemSelected != aValue) {
+            onItemSelected = aValue;
+        }
     }
 
     private static final String ADD_JSDOC = ""

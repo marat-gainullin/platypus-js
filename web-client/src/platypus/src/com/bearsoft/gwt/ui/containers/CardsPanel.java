@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget, RequiresResize, ProvidesResize {
 
-    private Widget visibleWidget;
+    protected Widget visibleWidget;
 
     private int hgap;
     private int vgap;

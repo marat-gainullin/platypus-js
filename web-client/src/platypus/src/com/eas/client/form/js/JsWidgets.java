@@ -769,6 +769,15 @@ public class JsWidgets {
 				},
 				configurable : true
 			});
+			Object.defineProperty(published, "onItemSelected", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getItemSelected()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setItemSelected(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
 		}
 	
 	}-*/;

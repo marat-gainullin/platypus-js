@@ -31,8 +31,11 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,7 +45,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  */
 public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
-        HasRemoveHandlers {
+        HasRemoveHandlers, HasSelectionHandlers<Widget> {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -89,6 +92,21 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 	@Override
 	public HandlerRegistration addShowHandler(ShowHandler handler) {
 		return addHandler(handler, ShowEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addSelectionHandler(SelectionHandler<Widget> handler) {
+		return addHandler(handler, SelectionEvent.getType());
+	}
+
+	@Override
+	public void showWidget(int index) {
+		Widget oldWidget = visibleWidget;
+		super.showWidget(index);
+		Widget newWidget = visibleWidget;
+		if (oldWidget != newWidget) {
+			SelectionEvent.fire(this, newWidget);
+		}
 	}
 
 	@Override

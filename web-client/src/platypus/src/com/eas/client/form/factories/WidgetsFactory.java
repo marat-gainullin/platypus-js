@@ -449,6 +449,7 @@ public class WidgetsFactory {
 		ButtonGroup buttonGroup = new ButtonGroup();
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		toggleGroups.put(widgetName, buttonGroup);
+		buttonGroup.setJsName(widgetName);
 		buttonGroup.setPublished(Publisher.publish(buttonGroup));
 		target.<Utils.JsObject> cast().inject(widgetName, buttonGroup.getPublished());
 	}

@@ -28,16 +28,13 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
-import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSelectionHandlers<Widget>, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
+public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
         HasResizeHandlers, HasAddHandlers, HasRemoveHandlers {
 
 	protected EventsExecutor eventsExecutor;
@@ -46,18 +43,8 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 	protected String name;
 	protected JavaScriptObject published;
 
-	protected Widget selected;
-
 	public TabbedPane() {
 		super(30, Style.Unit.PX);
-		tabs.addSelectionHandler(new SelectionHandler<Integer>() {
-
-			@Override
-			public void onSelection(SelectionEvent<Integer> event) {
-				selected = event.getSelectedItem() != -1 ? tabs.getWidget(event.getSelectedItem()) : null;
-			}
-
-		});
 	}
 
 	@Override

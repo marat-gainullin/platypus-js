@@ -324,6 +324,18 @@
         });
 
         /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf SplitPane
+         */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * Height of the component.
          * @property height
          * @memberOf SplitPane
@@ -335,18 +347,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf SplitPane
-         */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
