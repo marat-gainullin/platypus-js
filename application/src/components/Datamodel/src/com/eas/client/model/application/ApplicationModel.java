@@ -255,7 +255,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "/**\n"
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
-            + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.\n"
             + "* @param callback the function to be envoked after the data changes saved (optional).\n"
             + "*/";
 
@@ -279,8 +280,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
-            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method, but the model still attempts to commit.\n"
-            + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit.\n"
+            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)

@@ -6,7 +6,7 @@ package com.bearsoft.rowset;
 
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.Delete; 
+import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.dataflow.DatabaseFlowProvider;
@@ -189,8 +189,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Registers
-     * <code>PropertyChangeListener</code> on this rowset.
+     * Registers <code>PropertyChangeListener</code> on this rowset.
      *
      * @param aListener <code>PropertyChangeListener</code> to be registered.
      */
@@ -199,8 +198,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Removes
-     * <code>PropertyChangeListener</code> from this rowset.
+     * Removes <code>PropertyChangeListener</code> from this rowset.
      *
      * @param aListener <code>PropertyChangeListener</code> to be removed.
      */
@@ -209,8 +207,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Registers
-     * <code>RowsetListener</code> on this rowset.
+     * Registers <code>RowsetListener</code> on this rowset.
      *
      * @param aListener <code>RowsetListener</code> to be registered.
      */
@@ -219,8 +216,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Removes
-     * <code>RowsetListener</code> from this rowset.
+     * Removes <code>RowsetListener</code> from this rowset.
      *
      * @param aListener <code>RowsetListener</code> to be removed.
      */
@@ -238,8 +234,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Returns current
-     * <code>OrderersFactory</code> object, installed on this rowset.
+     * Returns current <code>OrderersFactory</code> object, installed on this
+     * rowset.
      *
      * @return Currently installed <code>OrderersFactory</code> object
      */
@@ -248,8 +244,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Installed
-     * <code>OrderersFactory</code> object on this rowset.
+     * Installed <code>OrderersFactory</code> object on this rowset.
      *
      * @param orderersFactory Factory object to install.
      */
@@ -270,6 +265,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * Columns definition setter.
      *
      * @param aFields Columns definition.
+     * @throws com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException
      */
     public void setFields(Fields aFields) throws InvalidFieldsExceptionException {
         if (!current.isEmpty()) {
@@ -438,6 +434,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * rowset.
      *
      * @param aParams Parameters values, ordered with some unknown criteria.
+     * @throws java.lang.Exception
      * @see Parameters
      */
     public void refresh(Parameters aParams) throws Exception {
@@ -453,7 +450,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
                         setFields(rs.getFields());
                     }
                     List<Row> rows = rs.getCurrent();
-                    rs.setCurrent(new ArrayList<Row>());
+                    rs.setCurrent(new ArrayList<>());
                     setCurrent(rows);
                     currentToOriginal();
                     invalidateFilters();
@@ -476,6 +473,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      *
      * @return Status of the next page fetching. True if some data have been
      * fetched, false otherwise.
+     * @throws java.lang.Exception
      * @see RowsetNextPageEvent
      */
     public boolean nextPage() throws Exception {
@@ -488,7 +486,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
                         int fetched = rs.getCurrent().size();
                         if (fetched > 0) {
                             setCurrent(rs.getCurrent());
-                            rs.setCurrent(new ArrayList<Row>());
+                            rs.setCurrent(new ArrayList<>());
                             currentToOriginal();
                             invalidateFilters();
                             rowsetChangeSupport.fireNextPageFetchedEvent();
@@ -571,10 +569,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     private void unsubscribeFromRows(List<Row> aRows) {
-        for (Row row : aRows) {
+        aRows.forEach((Row row) -> {
             row.removePropertyChangeListener(this);
             row.removeVetoableChangeListener(this);
-        }
+        });
     }
 
     /**
@@ -584,17 +582,19 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * @param aRows
      */
     private void subscribeOnRows(List<Row> aRows) {
-        for (Row row : aRows) {
+        aRows.forEach((Row row) -> {
             row.addPropertyChangeListener(this);
             row.addVetoableChangeListener(this);
             // hack. We extremely need a way to set row's fields without related processing
             row.fields = fields;
-        }
+        });
     }
 
     /**
      * Moves cursor on pre first position. Cusor position becomes 0.
      *
+     * @return
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      * @see #absolute(int aCursorPos)
      * @see #getCursorPos()
      * @see #size()
@@ -646,10 +646,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * Moves cursor to the first position in the rowset. It won't to position
      * the rowset if it is empty. After that, position becomes 1 if this method
      * returns true. If this method returns false, than position remains
-     * unchnaged. Takes into account
-     * <code>showOriginal</code> flag
+     * unchnaged. Takes into account <code>showOriginal</code> flag
      *
      * @return True if rowset is on the first position, and false if it is not.
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      * @see #absolute(int aCursorPos)
      * @see #getCursorPos()
      * @see #size()
@@ -683,10 +683,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * Moves cursor to the last position in the rowset. It won't to position the
      * rowset if it is empty. After that, position equals to rows count if this
      * method returns true. If this method returns false, than position remains
-     * unchnaged. Takes into account
-     * <code>showOriginal</code> flag
+     * unchnaged. Takes into account <code>showOriginal</code> flag
      *
      * @return True if rowset is on the last position, and false if it is not.
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      * @see #absolute(int aCursorPos)
      * @see #getCursorPos()
      * @see #size()
@@ -720,10 +720,11 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * Moves cursor to the after last position in the rowset. It won't to
      * position the rowset if it is empty. After positioning, position equals to
      * rows count+1 if this method returns true. If this method returns false,
-     * than position remains 0. Takes into account
-     * <code>showOriginal</code> flag
+     * than position remains 0. Takes into account <code>showOriginal</code>
+     * flag
      *
      * @return True if has been positioned, and false if it hasn't.
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      * @see #absolute(int aCursorPos)
      * @see #getCursorPos()
      * @see #size()
@@ -777,6 +778,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * @return True if new position is on the next row. False if the rowset is
      * empty or cursor becomes after last position. In this case cusor is moved,
      * but method returns false.
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      * @see #absolute(int aCursorPos)
      * @see #getCursorPos()
      * @see #size()
@@ -822,6 +824,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * @return True if new position is on the previous row. False if the rowset
      * is empty or cursor becomes before first position. In this case cusor is
      * moved, but method returns false.
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      * @see #absolute(int aCursorPos)
      * @see #getCursorPos()
      * @see #size()
@@ -954,7 +957,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Positions the rowset cursor on the specified row number. Row number is 1-based.
+     * Positions the rowset cursor on the specified row number. Row number is
+     * 1-based.
      *
      * @param aCursorPos Cursor position you whant to be setted in this rowset.
      * @return True if cursor position in rowset equals to aCursorPos.
@@ -994,7 +998,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Returns a row by ordinal number. Row number is 1-based.
+     * Returns a row by ordinal number. Row number is 1 - based.
      *
      * @param aRowNumber Row number you whant to be used to locate the row.
      * @return Row if speciified row number is valid, null otherwise.
@@ -1039,20 +1043,21 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Simple insert method. Inserts a new
-     * <code>Row</code> in this rowset in both original and current rows
-     * vectors. Initialization with current filter values is performed.
+     * Simple insert method. Inserts a new <code>Row</code> in this rowset in
+     * both original and current rows vectors. Initialization with current
+     * filter values is performed.
+     *
+     * @throws com.bearsoft.rowset.exceptions.RowsetException
      */
     public void insert() throws RowsetException {
         insert(new Object[]{});
     }
 
     /**
-     * Simple insert method. Inserts a new
-     * <code>Row</code> in this rowset in both original and current rows arrays.
-     * First, filter's values are used for initialization, than
-     * <code>initingValues</code> specified is used. Takes into account
-     * <code>showOriginal</code> flag. If
+     * Simple insert method. Inserts a new <code>Row</code> in this rowset in
+     * both original and current rows arrays. First, filter's values are used
+     * for initialization, than <code>initingValues</code> specified is used.
+     * Takes into account <code>showOriginal</code> flag. If
      * <code>showOriginal</code> flag is setted, than no action is performed.
      *
      * @param initingValues Values inserting row to be initialized with.
@@ -1072,13 +1077,13 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Simple insert method. Inserts a new
-     * <code>Row</code> in this rowset in both original and current rows arrays.
-     * First, filter's values are used for initialization, than
-     * <code>initingValues</code> specified is used. Takes into account
-     * <code>showOriginal</code> flag. If
+     * Simple insert method. Inserts a new <code>Row</code> in this rowset in
+     * both original and current rows arrays. First, filter's values are used
+     * for initialization, than <code>initingValues</code> specified is used.
+     * Takes into account <code>showOriginal</code> flag. If
      * <code>showOriginal</code> flag is setted, than no action is performed.
      *
+     * @param insertAt
      * @param initingValues Values inserting row to be initialized with.
      * @throws RowsetException
      */
@@ -1096,11 +1101,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Collections - like insert method. Inserts a passed
-     * <code>Row</code> in this rowset in both original and current rows
-     * vectors. Initialization with current filter values is performed.
+     * Collections - like insert method. Inserts a passed <code>Row</code> in
+     * this rowset in both original and current rows vectors. Initialization
+     * with current filter values is performed.
      *
      * @param toInsert A row to insertt in the rowset.
+     * @param aAjusting
      * @throws RowsetException
      */
     public void insert(Row toInsert, boolean aAjusting) throws RowsetException {
@@ -1108,11 +1114,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Row insert method. Inserts a passed
-     * <code>Row</code> in this rowset in both original and current rows arrays.
-     * First, filter's values are used for initialization, than
-     * <code>initingValues</code> specified is used. Takes into account
-     * <code>showOriginal</code> flag. If
+     * Row insert method. Inserts a passed <code>Row</code> in this rowset in
+     * both original and current rows arrays. First, filter's values are used
+     * for initialization, than <code>initingValues</code> specified is used.
+     * Takes into account <code>showOriginal</code> flag. If
      * <code>showOriginal</code> flag is setted, than no action is performed.
      *
      * @param toInsert A row to insert in the rowset.
@@ -1135,11 +1140,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Row insert method. Inserts a passed
-     * <code>Row</code> in this rowset in both original and current rows arrays.
-     * First, filter's values are used for initialization, than
-     * <code>initingValues</code> specified is used. Takes into account
-     * <code>showOriginal</code> flag. If
+     * Row insert method. Inserts a passed <code>Row</code> in this rowset in
+     * both original and current rows arrays. First, filter's values are used
+     * for initialization, than <code>initingValues</code> specified is used.
+     * Takes into account <code>showOriginal</code> flag. If
      * <code>showOriginal</code> flag is setted, than no action is performed.
      *
      * @param toInsert A row to insert in the rowset.
@@ -1220,6 +1224,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      *
      * @param aRow A <code>Row</code> to initialize.
      * @param values Values the specified <code>Row</code> to initialize with.
+     * @throws com.bearsoft.rowset.exceptions.RowsetException
      */
     protected void initColumns(Row aRow, Object... values) throws RowsetException {
         if (aRow != null) {
@@ -1238,7 +1243,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             if (values != null && values.length > 0 && Math.IEEEremainder(values.length, 2.0f) == 0.0f) {
                 for (int i = 0; i < values.length - 1; i += 2) {
                     if (values[i] != null && (values[i] instanceof Integer || values[i] instanceof Double || values[i] instanceof Field)) {
-                        int colIndex = 0;
+                        int colIndex;
                         if (values[i] instanceof Field) {
                             Field field = (Field) values[i];
                             colIndex = fields.find(field.getName());
@@ -1344,8 +1349,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Returns if
-     * <code>showOriginal</code> flag is set.
+     * Returns if <code>showOriginal</code> flag is set.
      *
      * @return True if showOriginal flag is set.
      */
@@ -1354,8 +1358,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Sets
-     * <code>showOriginal</code> flag to this rowset.
+     * Sets <code>showOriginal</code> flag to this rowset.
      *
      * @param aShowOriginal Flag, indicating this rowset show original rows
      * vector.
@@ -1373,10 +1376,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     /**
      * Deletes current row. It means current row is marked as deleted and
      * removed from cuurent rows vector. If cursor is not on the valid position
-     * no action is performed. Takes into account
-     * <code>showOriginal</code> flag. If
-     * <code>showOriginal</code> flag is setted, than no action is performed. If
-     * <code>showOriginal</code> flag setted, than no action is performed.
+     * no action is performed. Takes into account <code>showOriginal</code>
+     * flag. If <code>showOriginal</code> flag is setted, than no action is
+     * performed. If <code>showOriginal</code> flag setted, than no action is
+     * performed.
      *
      * @see #delete(java.util.Set)
      * @see #deleteAll()
@@ -1414,12 +1417,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     /**
      * Deletes all rows in the rowset. Rows are marked as deleted and removed
      * from cuurent rows vector. After deleting, cursor position becomes invalid
-     * and both
-     * <code>isBeforeFirst()</code> and
-     * <code>isAfterLast()</code> must return true. Subsequent calls to this
-     * method perform no action. Takes into account
-     * <code>showOriginal</code> flag. If
-     * <code>showOriginal</code> flag setted, than no action is performed.
+     * and both <code>isBeforeFirst()</code> and <code>isAfterLast()</code> must
+     * return true. Subsequent calls to this method perform no action. Takes
+     * into account <code>showOriginal</code> flag. If <code>showOriginal</code>
+     * flag setted, than no action is performed.
      *
      * @see #isBeforeFirst()
      * @see #isAfterLast()
@@ -1475,7 +1476,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * removed from cuurent rows vector. After deleting, cursor position becomes
      * invalid and rowset may be repositioned.
      *
-     * @param rows2Delete Set of rows to be deleted from the rowset
+     * @param aRows2Delete Set of rows to be deleted from the rowset
      * @see #isBeforeFirst()
      * @see #isAfterLast()
      * @see #delete()
@@ -1530,7 +1531,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * removed from cuurent rows vector. After deleting, cursor position becomes
      * invalid and rowset may be repositioned.
      *
-     * @param aRowIndex Index of row to be deleted from the rowset. aRowIndex is 1-based.
+     * @param aRowIndex Index of row to be deleted from the rowset. aRowIndex is
+     * 1-based.
      * @see #isBeforeFirst()
      * @see #isAfterLast()
      * @see #delete()
@@ -1538,12 +1540,16 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * @throws RowsetException
      */
     public void deleteAt(int aRowIndex) throws RowsetException {
+        deleteAt(aRowIndex, false);
+    }
+
+    public void deleteAt(int aRowIndex, boolean aIsAjusting) throws RowsetException {
         if (!showOriginal) {
             boolean wasBeforeFirst = isBeforeFirst();
             boolean wasAfterLast = isAfterLast();
             Row row = current.get(aRowIndex - 1);
             assert row != null;
-            if (rowsetChangeSupport.fireWillDeleteEvent(row, false)) { // the deletion will fire non-ajusting event
+            if (rowsetChangeSupport.fireWillDeleteEvent(row, aIsAjusting)) { // the deletion will fire non-ajusting event
                 invalidateLocators();
                 row.setDeleted();
                 row.removePropertyChangeListener(this);
@@ -1553,7 +1559,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
                 removeRowFromFilters(row, -1);
                 modified = true;
                 currentRowPos = aRowIndex;
-                rowsetChangeSupport.fireRowDeletedEvent(row, false); // the deletion will fire non-ajusting event
+                rowsetChangeSupport.fireRowDeletedEvent(row, aIsAjusting); // the deletion will fire non-ajusting event
                 currentRowPos = Math.min(currentRowPos, current.size());
             }
             if (current.isEmpty()) {
@@ -1762,6 +1768,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      *
      * @param colIndex Index of particular field. 1-Based.
      * @param aValue Value you whant to be setted to field.
+     * @return
      * @throws RowsetException
      */
     public boolean updateObject(int colIndex, Object aValue) throws RowsetException {
@@ -1773,7 +1780,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     private int extractColIndex(PropertyChangeEvent evt) {
-        int colIndex = 0;
+        int colIndex;
         if (evt.getPropagationId() != null && evt.getPropagationId() instanceof Integer) {
             colIndex = (Integer) evt.getPropagationId();
         } else {
@@ -1791,7 +1798,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             if (!rowsetChangeSupport.fireWillChangeEvent((Row) evt.getSource(), colIndex, evt.getOldValue(), evt.getNewValue())) {
                 throw new PropertyVetoException("One of rowset's change listeners have prohibited a column change", evt);
             }
-        } catch (RowsetException ex) {
+        } catch (InvalidCursorPositionException ex) {
             throw new PropertyVetoException(ex.getMessage(), evt);
         }
     }
@@ -1820,9 +1827,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Returns
-     * <code>Row</code> at current cursor position. Doesn't perform current
-     * position check, so it has to be called internally.
+     * Returns <code>Row</code> at current cursor position. Doesn't perform
+     * current position check, so it has to be called internally.
      *
      * @return <code>Row</code> at current cursor position.
      */
@@ -1846,7 +1852,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      */
     public void currentToOriginal() {
         original.clear();
-        List<Row> lcurrent = null;
+        List<Row> lcurrent;
         if (activeFilter != null && activeFilter.isApplied()) {
             lcurrent = activeFilter.getOriginalRows();
         } else {
@@ -1869,6 +1875,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     /**
      * Cancels modifications maded to this rowset. After that no difference
      * between original and current rows vectors and row's data have place.
+     *
+     * @throws com.bearsoft.rowset.exceptions.RowsetException
      */
     public void originalToCurrent() throws RowsetException {
         Filter wasFilter = activeFilter;
@@ -1996,8 +2004,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
     /**
      * Creates locator, that doesn't distinguish the null key and key that is
-     * not found in the rowset by
-     * <code>aParentColIndex</code> with
+     * not found in the rowset by <code>aParentColIndex</code> with
      * <code>aByPkLocator</code>
      *
      * @param aParentColIndex Index of column that is used to achive key values
@@ -2056,10 +2063,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      */
     public void invalidateLocators() {
         if (locators != null) {
-            for (Locator loc : locators) {
+            locators.forEach((Locator loc) -> {
                 assert loc != null;
                 loc.invalidate();
-            }
+            });
         }
     }
 
@@ -2070,11 +2077,11 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     protected void invalidateFilters() {
         activeFilter = null;
         if (filters != null) {
-            for (Filter filter : filters) {
+            filters.forEach((Filter filter) -> {
                 assert filter != null;
                 filter.deactivate();
                 filter.invalidate();
-            }
+            });
         }
     }
 
@@ -2086,12 +2093,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      */
     public void invalidateLocatorsByColIndex(int aColIndex) {
         if (locators != null) {
-            for (Locator loc : locators) {
+            locators.forEach((Locator loc) -> {
                 assert loc != null;
                 if (loc.getFields().contains(aColIndex)) {
                     loc.invalidate();
                 }
-            }
+            });
         }
     }
 
@@ -2127,8 +2134,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
                 }
             }
             if (!met) {
-                ChangeValue[] newdata = new ChangeValue[insertChange.data.length+1];
-                newdata[newdata.length-1] = new ChangeValue(field.getName(), newValue, field.getTypeInfo());
+                ChangeValue[] newdata = new ChangeValue[insertChange.data.length + 1];
+                newdata[newdata.length - 1] = new ChangeValue(field.getName(), newValue, field.getTypeInfo());
                 System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
                 insertChange.data = newdata;
                 insertComplemented = true;

@@ -4,7 +4,7 @@ load("classpath:internals.js");
      * Platypus library namespace global variable.
      * @namespace P
      */
-// this === global;
+    //this === global;
     var global = this;
     var oldP = global.P;
     global.P = {};
@@ -28,6 +28,7 @@ load("classpath:internals.js");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
+    var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.PlatypusScriptedResource");
     var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
@@ -145,15 +146,14 @@ load("classpath:internals.js");
         }
     };
     var cached = {};
-    var g = this;
     var getModule = function(aName) {
         if (!cached[aName]) {
-            var c = g[aName];
+            var c = global[aName];
             if (c) {
                 cached[aName] = new c();
             } else {
                 ScriptedResourceClass.executeScriptResource(aName);
-                c = g[aName];
+                c = global[aName];
                 if (c) {
                     cached[aName] = new c();
                 } else {
@@ -171,6 +171,118 @@ load("classpath:internals.js");
     Object.defineProperty(PModules, "get", {
         value: getModule
     });
+
+    function BoundArray(delegate) {
+        var target = this;
+        var rowset = delegate.unwrap().getRowset();
+        var adapter = new RowsetJSAdapterClass();
+        rowset.addRowsetListener(adapter);
+        adapter.rowsetFiltered = function() {
+            Array.prototype.splice.call(target, 0, target.length);
+            var rows = rowset.current;
+            var publishedRows = [];
+            rows.forEach(function(aRow) {
+                publishedRows.push(aRow.getPublished());
+            });
+            Array.prototype.push.apply(target, publishedRows);
+        };
+        adapter.rowsetRequeried = function(event) {
+            adapter.rowsetFiltered();
+        };
+        adapter.rowsetNextPageFetched = function(event) {
+            adapter.rowsetFiltered();
+        };
+        adapter.rowsetSaved = function(event) {
+            // ignore
+        };
+        adapter.rowsetRolledback = function(event) {
+            // ignore
+        };
+        adapter.rowsetScrolled = function(event) {
+            // ignore
+        };
+        adapter.rowsetSorted = function(event) {
+            adapter.rowsetFiltered();
+        };
+        adapter.rowInserted = function(event) {
+            if (!event.ajusting)
+                adapter.rowsetFiltered();
+        };
+        adapter.rowChanged = function(event) {
+            if (event.oldRowCount != event.newRowCount) {
+                adapter.rowsetFiltered();
+            }
+        };
+        adapter.rowDeleted = function(event) {
+            if (!event.ajusting)
+                adapter.rowsetFiltered();
+        };
+
+        Object.defineProperty(target, "fill", {
+            value: function() {
+                throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
+            }
+        });
+        Object.defineProperty(target, "pop", {
+            value: function() {
+                if (!rowset.empty) {
+                    var res = rowset.getRow(rowset.size());
+                    rowset.deleteAt(rowset.size() - 1, true);
+                    Array.prototype.pop.call(target);
+                    return res.getPublished();
+                }
+            }
+        });
+        Object.defineProperty(target, "push", {
+            value: function() {
+                if (arguments.length > 1) {
+                    for (var a = 0; a < arguments.length; a++) {
+                        rowset.insertAt(rowset.size(), arguments[a], a < arguments.length - 1);
+                    }
+                } else if (arguments.length === 1) {
+                    rowset.insertAt(rowset.size(), arguments[0], true);
+                    Array.prototype.push.call(target, arguments[0]);
+                }
+                return target.length;
+            }
+        });
+        Object.defineProperty(target, "reverse", {
+            value: function() {
+            }
+        });
+        Object.defineProperty(target, "shift", {
+            value: function() {
+                if (!rowset.empty) {
+                    var res = rowset.getRow(1);
+                    rowset.deleteAt(0);
+                    Array.prototype.shift.call(target);
+                    return res.getPublished();
+                }
+            }
+        });
+        Object.defineProperty(target, "sort", {
+            value: function() {
+            }
+        });
+        Object.defineProperty(target, "splice", {
+            value: function() {
+            }
+        });
+        Object.defineProperty(target, "unshift", {
+            value: function() {
+                if (arguments.length > 1) {
+                    for (var a = 0; a < arguments.length; a++) {
+                        rowset.insertAt(a, arguments[a], a < arguments.length - 1);
+                    }
+                } else if (arguments.length === 1) {
+                    rowset.insertAt(0, arguments[0], true);
+                    Array.prototype.unshift.call(target, arguments[0]);
+                }
+                return target.length;
+            }
+        });
+    }
+
     /**
      * @static
      * @param {type} aName
@@ -195,6 +307,7 @@ load("classpath:internals.js");
         Object.defineProperty(aTarget, "params", {
             value: model.getParametersEntity().getPublished()
         });
+
         var entities = model.entities();
         for (var e in entities) {
             var entity = entities[e];
@@ -677,7 +790,7 @@ load("classpath:internals.js");
             return colorDialog(title, color);
         }
     }
-    
+
     Object.defineProperty(P, "selectColor", {
         value: selectColor
     });

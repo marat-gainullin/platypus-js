@@ -544,7 +544,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     @ScriptFunction(jsDoc = ENQEUE_UPDATE_JSDOC)
     public abstract void enqueueUpdate() throws Exception;
-    
+
     private static final String EXECUTE_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Applies the updates into the database and commits the transaction.\n"
@@ -650,15 +650,15 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     @ScriptFunction(jsDoc = DELETE_ROW_JSDOC, params = {"aCursorPosOrInstance"})
     public boolean deleteRow(Object aCursorPosOrInstance) throws Exception {
-        if(aCursorPosOrInstance instanceof Row){
-            return deleteRow((Row)aCursorPosOrInstance);
-        }else if(aCursorPosOrInstance instanceof Number){
-            return deleteRow(((Number)aCursorPosOrInstance).intValue());
-        }else{
+        if (aCursorPosOrInstance instanceof Row) {
+            return deleteRow((Row) aCursorPosOrInstance);
+        } else if (aCursorPosOrInstance instanceof Number) {
+            return deleteRow(((Number) aCursorPosOrInstance).intValue());
+        } else {
             return delete();
         }
     }
-    
+
     public boolean deleteRow(int aCursorIndex) throws Exception {
         if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
             rowset.deleteAt(aCursorIndex);
@@ -678,7 +678,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return false;
         }
     }
-    
+
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Experimental. The constructor funciton for the entity's data array elements.\n"
@@ -693,7 +693,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     public void setElementClass(JSObject aValue) {
         setInstanceConstructor(aValue);
     }
-    
+
     private static final String ON_CHANGED_JSDOC = ""
             + "/**\n"
             + "* The handler function for the event occured after the entity data change.\n"
@@ -814,7 +814,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     public void setWillScroll(JSObject aValue) {
         setOnBeforeScroll(aValue);
     }
-    
+
     public void putOrmDefinition(String aName, JSObject aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormDefinitions.containsKey(aName)) {
@@ -934,13 +934,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         return onBeforeScroll;
     }
 
+    private static final String ON_FILTERED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after the entity's data have been filtered.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
+    @EventMethod(eventClass = PublishedSourcedEvent.class)
     public JSObject getOnFiltered() {
         return onFiltered;
     }
 
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
-            + "* The handler function for the event occured after the entity data have been required.\n"
+            + "* The handler function for the event occured after the entity's data have been required.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
@@ -997,12 +1003,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         changeSupport.firePropertyChange("onBeforeScroll", oldValue, aValue);
     }
 
-    private static final String ON_FILTERED_JSDOC = ""
-            + "/**\n"
-            + "* The handler function for the event occured after the filter have been applied to the entity.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
+    @ScriptFunction
     @EventMethod(eventClass = PublishedSourcedEvent.class)
     public void setOnFiltered(JSObject aValue) {
         JSObject oldValue = onFiltered;
@@ -1010,6 +1011,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         changeSupport.firePropertyChange("onFiltered", oldValue, aValue);
     }
 
+    @ScriptFunction
     public void setOnRequeried(JSObject aValue) {
         JSObject oldValue = onRequeried;
         onRequeried = aValue;
