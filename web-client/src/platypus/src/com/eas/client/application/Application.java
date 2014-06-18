@@ -1084,8 +1084,12 @@ public class Application {
 		String url = Document.get().getURL();
 		if (url != null) {
 			int pos = url.indexOf('#');
-			if (pos > -1)
-				platypusModules.put(url.substring(pos + 1), null);
+			if (pos > -1) {
+				String module = url.substring(pos + 1);
+				if (!module.isEmpty()) {
+					platypusModules.put(module, null);
+				}
+			}	
 		}
 		return platypusModules;
 	}
