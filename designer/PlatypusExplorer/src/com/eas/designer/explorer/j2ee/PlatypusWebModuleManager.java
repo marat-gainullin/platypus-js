@@ -45,7 +45,6 @@ import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -108,7 +107,7 @@ public class PlatypusWebModuleManager {
             + "};\n";//NOI18N
     protected final PlatypusProjectImpl project;
     protected final FileObject projectDir;
-    protected FileObject webAppDir;
+    protected FileObject webContentDir;
     protected FileObject webInfDir;
     protected FileObject metaInfDir;
     protected FileObject publicDir;
@@ -120,7 +119,7 @@ public class PlatypusWebModuleManager {
 
     /**
      * Runs the web application.
-     *
+     * @param appElementId id for starting element
      * @param isDebug true if debug mode to be activated
      * @return URL to open in browser
      *
@@ -158,10 +157,11 @@ public class PlatypusWebModuleManager {
      * @throws IOException I/O exception if unable to clear.
      */
     public void clearWebDir() throws IOException {
+        PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
         if (webDirExists()) {
-            webAppDir = projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY);
-            if (webAppDir != null && webAppDir.isFolder()) {
-                webInfDir = webAppDir.getFileObject(PlatypusWebModule.WEB_INF_DIRECTORY);
+            webContentDir = projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY);
+            if (webContentDir != null && webContentDir.isFolder()) {
+                webInfDir = webModule.getWebInfDir();
                 if (webInfDir != null && webInfDir.isFolder()) {
                     FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
                     if (libsDir != null && libsDir.isFolder()) {
@@ -173,7 +173,7 @@ public class PlatypusWebModuleManager {
                     }
                 }
             }
-            FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
+            FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
             if (pwcDir != null && pwcDir.isFolder()) {
                 FileUtils.clearDirectory(FileUtil.toFile(pwcDir));
             }
@@ -186,13 +186,14 @@ public class PlatypusWebModuleManager {
 
     /**
      * Creates an web application skeleton if not created yet.
+     * @throws java.lang.Exception
      */
     protected void prepareWebApplication() throws Exception {
         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Preparing_Web_App"));//NOI18N
-        webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
-        webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
-        metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
-        publicDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.PUBLIC_DIRECTORY);
+        webContentDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
+        webInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_INF_DIRECTORY);
+        metaInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.META_INF_DIRECTORY);
+        publicDir = createFolderIfNotExists(webContentDir, PlatypusWebModule.PUBLIC_DIRECTORY);
         prepareJars();
         preparePlatypusWebClient();
         prepareResources();
@@ -217,9 +218,9 @@ public class PlatypusWebModuleManager {
     }
 
     private void preparePlatypusWebClient() throws IOException, PlatformHomePathException {
-        FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
+        FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
         if (pwcDir == null) {
-            pwcDir = webAppDir.createFolder(PLATYPUS_WEB_CLIENT_DIR_NAME);
+            pwcDir = webContentDir.createFolder(PLATYPUS_WEB_CLIENT_DIR_NAME);
         }
         FileObject pwcSourceDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory()).getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
         if (pwcSourceDir == null) {
@@ -240,9 +241,9 @@ public class PlatypusWebModuleManager {
     }
 
     private void copyResourceIfNotExists(String filePath) throws IOException {
-        FileObject fo = webAppDir.getFileObject(filePath);
+        FileObject fo = projectDir.getFileObject(filePath);
         if (fo == null) {
-            fo = webAppDir.createData(filePath);
+            fo = projectDir.createData(filePath);
             try (InputStream is = PlatypusWebModuleManager.class.getResourceAsStream(J2EE_RESOURCES_PACKAGE + filePath);
                     OutputStream os = fo.getOutputStream()) {
                 FileUtil.copy(is, os);
@@ -253,8 +254,8 @@ public class PlatypusWebModuleManager {
     /**
      * Recursively copies directory's content.
      *
-     * @param source directory
-     * @param destination directory
+     * @param sourceDir 
+     * @param targetDir
      * @throws IOException if some I/O problem occurred.
      */
     protected static void copyContent(FileObject sourceDir, FileObject targetDir) throws IOException {
@@ -281,6 +282,7 @@ public class PlatypusWebModuleManager {
      * Sets up an web application.
      *
      * @param aJmp Web Module
+     * @throws java.lang.Exception
      */
     protected void setupWebApplication(J2eeModuleProvider aJmp) throws Exception {
         WebAppManager webAppConfigurator = WebAppManagerFactory.getInstance().createWebAppManager(project, aJmp);
@@ -313,9 +315,9 @@ public class PlatypusWebModuleManager {
 
     protected void setStartApplicationElement(String appElementId) throws IOException {
         if (appElementId != null && !appElementId.isEmpty()) {
-            FileObject startJs = webAppDir.getFileObject(START_JS_FILE_NAME);
+            FileObject startJs = webContentDir.getFileObject(START_JS_FILE_NAME);
             if (startJs == null) {
-                startJs = webAppDir.createData(START_JS_FILE_NAME);
+                startJs = webContentDir.createData(START_JS_FILE_NAME);
             }
             String starupScript = String.format(START_JS_FILE_TEMPLATE, appElementId, appElementId);
             FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);

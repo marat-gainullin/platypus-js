@@ -116,7 +116,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
 
     @Override
     public FileObject getContentDirectory() throws IOException {
-        return project.getProjectDirectory().getFileObject(WEB_DIRECTORY);
+        return project.getProjectDirectory();
     }
 
     @Override
