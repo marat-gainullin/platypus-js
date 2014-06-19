@@ -176,7 +176,7 @@ public class Classes2Scripts {
             throw new IllegalArgumentException("Only directory can be used as dest."); // NOI18N
         }
         for (File c : destDirectory.listFiles()) {
-            if (!"platypus.js".equals(c.getName()) && !"internals.js".equals(c.getName())) {
+            if (!"platypus.js".equals(c.getName()) && !"internals.js".equals(c.getName()) && !"http-script-context.js".equals(c.getName())) {
                 FileUtils.delete(c);
             }
         }
