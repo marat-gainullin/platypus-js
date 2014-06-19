@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor KeyEvent KeyEvent
      */
-    P.KeyEvent = function () {
+    P.KeyEvent = function KeyEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(KeyEvent.superclass)
+            KeyEvent.superclass.constructor.apply(this, arguments);
         /**
          * Alt key is down on this event.
          * @property altDown

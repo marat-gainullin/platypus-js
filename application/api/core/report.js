@@ -8,7 +8,7 @@
      *
      * @constructor Report Report
      */
-    P.Report = function (aReport, aFormat, aName) {
+    P.Report = function Report(aReport, aFormat, aName) {
 
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
@@ -19,12 +19,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Report.superclass)
+            Report.superclass.constructor.apply(this, arguments);
         /**
          * Runs printing.
          * @method print

@@ -9,7 +9,7 @@
      * @param text the initial text for the HTML area (optional)
      * @constructor HtmlArea HtmlArea
      */
-    P.HtmlArea = function (text) {
+    P.HtmlArea = function HtmlArea(text) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(HtmlArea.superclass)
+            HtmlArea.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

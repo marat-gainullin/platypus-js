@@ -9,7 +9,7 @@
      * @param view the component to display in the scrollpane's viewport (optional)
      * @constructor ScrollPane ScrollPane
      */
-    P.ScrollPane = function (view) {
+    P.ScrollPane = function ScrollPane(view) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ScrollPane.superclass)
+            ScrollPane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

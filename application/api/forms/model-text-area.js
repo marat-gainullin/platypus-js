@@ -8,7 +8,7 @@
      * A model components for a text area.
      * @constructor ModelTextArea ModelTextArea
      */
-    P.ModelTextArea = function () {
+    P.ModelTextArea = function ModelTextArea() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelTextArea.superclass)
+            ModelTextArea.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

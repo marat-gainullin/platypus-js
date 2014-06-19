@@ -9,7 +9,7 @@
      * @param parent a parent <code>Style</code> (optional)
      * @constructor Style Style
      */
-    P.Style = function (parent) {
+    P.Style = function Style(parent) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Style.superclass)
+            Style.superclass.constructor.apply(this, arguments);
         /**
          * A background color associated with this style.
          * @property background

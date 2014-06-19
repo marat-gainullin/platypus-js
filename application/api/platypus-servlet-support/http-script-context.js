@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor HttpScriptContext HttpScriptContext
      */
-    P.HttpScriptContext = function () {
+    P.HttpScriptContext = function HttpScriptContext() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(HttpScriptContext.superclass)
+            HttpScriptContext.superclass.constructor.apply(this, arguments);
         /**
          * HTTP request, when invoked by HTTP protocol.
          * @property request

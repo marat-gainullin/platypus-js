@@ -11,7 +11,7 @@
      * @param alpha Alpha compontent (optional)
      * @constructor Color Color
      */
-    P.Color = function (red, green, blue, alpha) {
+    P.Color = function Color(red, green, blue, alpha) {
 
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
@@ -23,12 +23,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Color.superclass)
+            Color.superclass.constructor.apply(this, arguments);
         /**
          * Generated property jsDoc.
          * @property WHITE
@@ -115,24 +115,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property MAGENTA
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "MAGENTA", {
-            get: function() {
-                var value = delegate.MAGENTA;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property BLACK
          * @memberOf Color
          */
         Object.defineProperty(this, "BLACK", {
             get: function() {
                 var value = delegate.BLACK;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property MAGENTA
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "MAGENTA", {
+            get: function() {
+                var value = delegate.MAGENTA;
                 return P.boxAsJs(value);
             }
         });
@@ -151,24 +151,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property DARK_GRAY
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "DARK_GRAY", {
-            get: function() {
-                var value = delegate.DARK_GRAY;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property CYAN
          * @memberOf Color
          */
         Object.defineProperty(this, "CYAN", {
             get: function() {
                 var value = delegate.CYAN;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property DARK_GRAY
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "DARK_GRAY", {
+            get: function() {
+                var value = delegate.DARK_GRAY;
                 return P.boxAsJs(value);
             }
         });

@@ -8,7 +8,7 @@
      * A model component that shows a data grid.
      * @constructor ModelGrid ModelGrid
      */
-    P.ModelGrid = function () {
+    P.ModelGrid = function ModelGrid() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelGrid.superclass)
+            ModelGrid.superclass.constructor.apply(this, arguments);
         /**
          * Gets the parent of this component.
          * @property parent

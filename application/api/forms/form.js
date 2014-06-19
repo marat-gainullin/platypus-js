@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor Form Form
      */
-    P.Form = function () {
+    P.Form = function Form() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Form.superclass)
+            Form.superclass.constructor.apply(this, arguments);
         /**
          * The handler function for the form's <i>before open</i> event.
          * @property onWindowOpened

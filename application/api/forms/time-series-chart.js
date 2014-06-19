@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor TimeSeriesChart TimeSeriesChart
      */
-    P.TimeSeriesChart = function () {
+    P.TimeSeriesChart = function TimeSeriesChart() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(TimeSeriesChart.superclass)
+            TimeSeriesChart.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

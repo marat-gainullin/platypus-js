@@ -8,7 +8,7 @@
      * A model component that shows a date.
      * @constructor ModelFormattedField ModelFormattedField
      */
-    P.ModelFormattedField = function () {
+    P.ModelFormattedField = function ModelFormattedField() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelFormattedField.superclass)
+            ModelFormattedField.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

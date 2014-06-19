@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor Parameter Parameter
      */
-    P.Parameter = function () {
+    P.Parameter = function Parameter() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Parameter.superclass)
+            Parameter.superclass.constructor.apply(this, arguments);
         /**
          * The field's type information.
          * @property typeInfo

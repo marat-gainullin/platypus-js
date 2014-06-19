@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ApplicationDbModel ApplicationDbModel
      */
-    P.ApplicationDbModel = function () {
+    P.ApplicationDbModel = function ApplicationDbModel() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ApplicationDbModel.superclass)
+            ApplicationDbModel.superclass.constructor.apply(this, arguments);
         /**
          * Saves model data changes.
          * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.

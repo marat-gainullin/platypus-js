@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor EntityInstanceChangeEvent EntityInstanceChangeEvent
      */
-    P.EntityInstanceChangeEvent = function () {
+    P.EntityInstanceChangeEvent = function EntityInstanceChangeEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(EntityInstanceChangeEvent.superclass)
+            EntityInstanceChangeEvent.superclass.constructor.apply(this, arguments);
         /**
          * The new value.
          * @property newValue

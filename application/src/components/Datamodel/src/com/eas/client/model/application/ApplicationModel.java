@@ -23,6 +23,7 @@ import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import java.io.*;
 import java.sql.Types;
@@ -73,36 +74,35 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             throw new AlreadyPublishedException();
         }
         published = aValue;
-        /*
-         if (published != null && published instanceof ScriptableObject) {
-         for (ReferenceRelation<E> aRelation : referenceRelations) {
-         String scalarPropertyName = aRelation.getScalarPropertyName();
-         if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-         scalarPropertyName = aRelation.getRightEntity().getName();
-         }
-         if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-         aRelation.getLeftEntity().putOrmDefinition(
-         scalarPropertyName,
-         ScriptUtils.scalarPropertyDefinition(
-         (Scriptable) aRelation.getRightEntity().getPublished(),
-         aRelation.getRightField().getName(),
-         aRelation.getLeftField().getName()));
-         }
-         String collectionPropertyName = aRelation.getCollectionPropertyName();
-         if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-         collectionPropertyName = aRelation.getLeftEntity().getName();
-         }
-         if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-         aRelation.getRightEntity().putOrmDefinition(
-         collectionPropertyName,
-         ScriptUtils.collectionPropertyDefinition(
-         (Scriptable) aRelation.getLeftEntity().getPublished(),
-         aRelation.getRightField().getName(),
-         aRelation.getLeftField().getName()));
-         }
-         }
-         }
-         */
+    }
+
+    public void createORMDefinitions() {
+        referenceRelations.stream().forEach((ReferenceRelation<E> aRelation) -> {
+            String scalarPropertyName = aRelation.getScalarPropertyName();
+            if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                scalarPropertyName = aRelation.getRightEntity().getName();
+            }
+            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                aRelation.getLeftEntity().putOrmDefinition(
+                        scalarPropertyName,
+                        ScriptUtils.scalarPropertyDefinition(
+                                (JSObject) aRelation.getRightEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName()));
+            }
+            String collectionPropertyName = aRelation.getCollectionPropertyName();
+            if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                collectionPropertyName = aRelation.getLeftEntity().getName();
+            }
+            if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                aRelation.getRightEntity().putOrmDefinition(
+                        collectionPropertyName,
+                        ScriptUtils.collectionPropertyDefinition(
+                                (JSObject) aRelation.getLeftEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName()));
+            }
+        });
     }
 
     @Override

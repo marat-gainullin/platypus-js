@@ -9,7 +9,7 @@
      * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning "on" one of those buttons turns off all other buttons in the group.
      * @constructor ButtonGroup ButtonGroup
      */
-    P.ButtonGroup = function () {
+    P.ButtonGroup = function ButtonGroup() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -17,12 +17,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ButtonGroup.superclass)
+            ButtonGroup.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

@@ -11,7 +11,7 @@
      * @param value the initial value (optional)
      * @constructor Slider Slider
      */
-    P.Slider = function (min, max, value) {
+    P.Slider = function Slider(min, max, value) {
 
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
@@ -22,12 +22,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Slider.superclass)
+            Slider.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

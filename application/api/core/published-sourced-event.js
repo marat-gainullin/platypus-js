@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor PublishedSourcedEvent PublishedSourcedEvent
      */
-    P.PublishedSourcedEvent = function () {
+    P.PublishedSourcedEvent = function PublishedSourcedEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(PublishedSourcedEvent.superclass)
+            PublishedSourcedEvent.superclass.constructor.apply(this, arguments);
         /**
          * The source object of the event.
          * @property source

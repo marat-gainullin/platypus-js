@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ApplicationDbParametersEntity ApplicationDbParametersEntity
      */
-    P.ApplicationDbParametersEntity = function () {
+    P.ApplicationDbParametersEntity = function ApplicationDbParametersEntity() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ApplicationDbParametersEntity.superclass)
+            ApplicationDbParametersEntity.superclass.constructor.apply(this, arguments);
         /**
          * Gets the row at cursor position.
          * @return the row object or <code>null</code> if cursor is before first or after last position.
@@ -66,7 +66,7 @@
         });
 
         /**
-         * The handler function for the event occured after the entity data have been required.
+         * The handler function for the event occured after the entity's data have been required.
          * @property onRequeried
          * @memberOf ApplicationDbParametersEntity
          */
@@ -74,6 +74,9 @@
             get: function() {
                 var value = delegate.onRequeried;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onRequeried = P.boxAsJava(aValue);
             }
         });
 
@@ -123,7 +126,7 @@
         });
 
         /**
-         * The handler function for the event occured after the filter have been applied to the entity.
+         * The handler function for the event occured after the entity's data have been filtered.
          * @property onFiltered
          * @memberOf ApplicationDbParametersEntity
          */
@@ -137,14 +140,19 @@
             }
         });
 
-        /** * Returns cursor-substitute entity.
+        /**
+         * Returns cursor-substitute entity.
+         * Sunstitute's cursor is used when in original entity's cursor some field's value is null.
          * @property substitute
          * @memberOf ApplicationDbParametersEntity
-         * Sunstitute's cursor is used when in original entity's cursor some field's value is null./*
+         */
         Object.defineProperty(this, "substitute", {
             get: function() {
                 var value = delegate.substitute;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.substitute = P.boxAsJava(aValue);
             }
         });
 
@@ -415,34 +423,6 @@
         });
 
         /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
-         * @memberOf ApplicationDbParametersEntity
-         */
-        Object.defineProperty(this, "beforeFirst", {
-            get: function() {
-                return function() {
-                    var value = delegate.beforeFirst();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
-         * @memberOf ApplicationDbParametersEntity
-         */
-        Object.defineProperty(this, "afterLast", {
-            get: function() {
-                return function() {
-                    var value = delegate.afterLast();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
          * Deletes all rows in the rowset.
          * @method deleteAll
          * @memberOf ApplicationDbParametersEntity
@@ -467,6 +447,34 @@
             get: function() {
                 return function(pairs) {
                     var value = delegate.createFilter(P.boxAsJava(pairs));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
+         * @memberOf ApplicationDbParametersEntity
+         */
+        Object.defineProperty(this, "beforeFirst", {
+            get: function() {
+                return function() {
+                    var value = delegate.beforeFirst();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
+         * @memberOf ApplicationDbParametersEntity
+         */
+        Object.defineProperty(this, "afterLast", {
+            get: function() {
+                return function() {
+                    var value = delegate.afterLast();
                     return P.boxAsJs(value);
                 };
             }

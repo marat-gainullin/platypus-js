@@ -10,7 +10,7 @@
      * @param max the maximum value (optional)
      * @constructor ProgressBar ProgressBar
      */
-    P.ProgressBar = function (min, max) {
+    P.ProgressBar = function ProgressBar(min, max) {
 
         var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
@@ -20,12 +20,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ProgressBar.superclass)
+            ProgressBar.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

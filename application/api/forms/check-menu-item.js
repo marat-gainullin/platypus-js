@@ -11,7 +11,7 @@
      * @param actionPerformed On action performed function (optional).
      * @constructor CheckMenuItem CheckMenuItem
      */
-    P.CheckMenuItem = function (text, selected, actionPerformed) {
+    P.CheckMenuItem = function CheckMenuItem(text, selected, actionPerformed) {
 
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
@@ -22,12 +22,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(CheckMenuItem.superclass)
+            CheckMenuItem.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

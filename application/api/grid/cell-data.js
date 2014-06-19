@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor CellData CellData
      */
-    P.CellData = function () {
+    P.CellData = function CellData() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(CellData.superclass)
+            CellData.superclass.constructor.apply(this, arguments);
         /**
          * The cell's data.
          * @property data

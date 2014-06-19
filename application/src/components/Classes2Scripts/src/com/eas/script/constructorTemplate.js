@@ -5,7 +5,7 @@
     });
     
 ${JsDoc}
-    P.${Name} = function (${Params}) {
+    P.${Name} = function ${Name}(${Params}) {
 
         var maxArgs = ${MaxArgs};
         var ${Delegate} = arguments.length > maxArgs ?
@@ -13,12 +13,12 @@ ${JsDoc}
             : ${UnwrappedParams};
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return ${Delegate};
-                };
+            value: function() {
+                return ${Delegate};
             }
         });
+        if(${Name}.superclass)
+            ${Name}.superclass.constructor.apply(this, arguments);
 ${Props}
         delegate.setPublished(this);
     };

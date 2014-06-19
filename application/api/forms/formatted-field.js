@@ -9,7 +9,7 @@
      * @param value the value for the formatted field (optional)
      * @constructor FormattedField FormattedField
      */
-    P.FormattedField = function (value) {
+    P.FormattedField = function FormattedField(value) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(FormattedField.superclass)
+            FormattedField.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

@@ -6,10 +6,13 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import java.beans.*;
 import java.math.BigDecimal;
 import java.util.*;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This class serves as the values holder.
@@ -18,13 +21,14 @@ import java.util.*;
  */
 public class Row implements HasPublished {
 
+    private static JSObject publisher;
     protected Fields fields;
     protected Converter converter = new RowsetConverter();
     protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(this);
     protected BitSet updated = new BitSet(10);
-    protected boolean deleted = false;
-    protected boolean inserted = false;
+    protected boolean deleted;
+    protected boolean inserted;
     protected List<Object> originalValues = new ArrayList<>();
     protected List<Object> currentValues = new ArrayList<>();
     protected Insert insertChange;
@@ -41,7 +45,7 @@ public class Row implements HasPublished {
      * Constructs the row with column count equals to colCount values vectors
      * allocated.
      *
-     * @param colCount - column count that you whant to be in this row.
+     * @param aFields
      */
     public Row(Fields aFields) {
         super();
@@ -144,13 +148,10 @@ public class Row implements HasPublished {
 
     /**
      * Returns whether the row is updated at whole or partially. The updated
-     * flag is
-     * <code>true</code> if
-     * <code>setColumnObject()</code> or
+     * flag is <code>true</code> if <code>setColumnObject()</code> or
      * <code>setUpdated()</code> methods have been invoked between invocations
-     * of
-     * <code>currentToOriginal()</code> or
-     * <code>originalToCurrent()</code> methods.
+     * of <code>currentToOriginal()</code> or <code>originalToCurrent()</code>
+     * methods.
      *
      * @return Whether the row is updated.
      * @see #setColumnObject(int, Object)
@@ -174,9 +175,8 @@ public class Row implements HasPublished {
     }
 
     /**
-     * Returns whether the row is deleted. The deleted flag is
-     * <code>true</code> if
-     * <code>setDeleted()</code> method has been invoked.
+     * Returns whether the row is deleted. The deleted flag is <code>true</code>
+     * if <code>setDeleted()</code> method has been invoked.
      *
      * @return Whether the row is deleted.
      */
@@ -200,8 +200,7 @@ public class Row implements HasPublished {
 
     /**
      * Returns whether the row is inserted. The inserted flag is
-     * <code>true</code> if
-     * <code>setInserted()</code> method has been invoked.
+     * <code>true</code> if <code>setInserted()</code> method has been invoked.
      *
      * @return Whether the row is inserted.
      */
@@ -224,6 +223,7 @@ public class Row implements HasPublished {
         inserted = true;
         insertChange = aInsert;
     }
+
     /**
      * Clears the inserted flag.
      */
@@ -283,6 +283,7 @@ public class Row implements HasPublished {
      * the range of [1: <code>getColumnCount()</code>].
      * @param aColValue value that you whant to be setted to the column as the
      * current column value.
+     * @return
      * @throws InvalidColIndexException if colIndex < 1 or colIndex >
      * <code>getColumnCount()</code>
      */
@@ -491,11 +492,24 @@ public class Row implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 
     @Override
-    public void setPublished(Object aTag) {
-        published = aTag;
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

@@ -9,7 +9,7 @@
      * @param text the text for the component (optional)
      * @constructor TextArea TextArea
      */
-    P.TextArea = function (text) {
+    P.TextArea = function TextArea(text) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(TextArea.superclass)
+            TextArea.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

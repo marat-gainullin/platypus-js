@@ -8,7 +8,7 @@
      * An implementation of a popup menu -- a small window that pops up and displays a series of choices.
      * @constructor PopupMenu PopupMenu
      */
-    P.PopupMenu = function () {
+    P.PopupMenu = function PopupMenu() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(PopupMenu.superclass)
+            PopupMenu.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

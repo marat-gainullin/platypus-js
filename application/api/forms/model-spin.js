@@ -8,7 +8,7 @@
      * A model component that represents a combination of a numeric text box and arrow buttons to change the value incrementally.
      * @constructor ModelSpin ModelSpin
      */
-    P.ModelSpin = function () {
+    P.ModelSpin = function ModelSpin() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelSpin.superclass)
+            ModelSpin.superclass.constructor.apply(this, arguments);
         /**
          * Gets the parent of this component.
          * @property parent

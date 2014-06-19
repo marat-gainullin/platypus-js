@@ -11,7 +11,7 @@
      * @param actionPerformed the function for the action performed handler (optional).
      * @constructor MenuItem MenuItem
      */
-    P.MenuItem = function (text, icon, actionPerformed) {
+    P.MenuItem = function MenuItem(text, icon, actionPerformed) {
 
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
@@ -22,12 +22,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(MenuItem.superclass)
+            MenuItem.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

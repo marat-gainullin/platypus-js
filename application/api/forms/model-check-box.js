@@ -9,7 +9,7 @@
      * @param text the text of the component (optional).
      * @constructor ModelCheckBox ModelCheckBox
      */
-    P.ModelCheckBox = function (text) {
+    P.ModelCheckBox = function ModelCheckBox(text) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelCheckBox.superclass)
+            ModelCheckBox.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

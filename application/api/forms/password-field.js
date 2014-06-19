@@ -9,7 +9,7 @@
      * @param text the text for the component (optional).
      * @constructor PasswordField PasswordField
      */
-    P.PasswordField = function (text) {
+    P.PasswordField = function PasswordField(text) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(PasswordField.superclass)
+            PasswordField.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

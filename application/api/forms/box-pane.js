@@ -9,7 +9,7 @@
      * @param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional).
      * @constructor BoxPane BoxPane
      */
-    P.BoxPane = function (orientation) {
+    P.BoxPane = function BoxPane(orientation) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(BoxPane.superclass)
+            BoxPane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

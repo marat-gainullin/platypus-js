@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ChangeValue ChangeValue
      */
-    P.ChangeValue = function () {
+    P.ChangeValue = function ChangeValue() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ChangeValue.superclass)
+            ChangeValue.superclass.constructor.apply(this, arguments);
         /**
          * Name of changed property.
          * @property name
