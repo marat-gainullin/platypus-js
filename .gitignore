@@ -4,6 +4,7 @@
 *.xml~
 *.gwt-log
 *.zip
+*.log
 *genfiles.properties
 *private.properties
 *.properties~
