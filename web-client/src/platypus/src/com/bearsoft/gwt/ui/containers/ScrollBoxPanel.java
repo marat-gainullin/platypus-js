@@ -88,7 +88,7 @@ public class ScrollBoxPanel extends ScrollPanel implements IndexedPanel {
 
 	@Override
     public int getWidgetCount() {
-	    return 1;
+	    return getWidget() == null ? 0 : 1;
     }
 
 	@Override

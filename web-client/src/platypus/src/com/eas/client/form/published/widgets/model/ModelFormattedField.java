@@ -7,15 +7,52 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 
-public class ModelFormattedField extends PublishedDecoratorBox<Object> implements HasEmptyText {
+public class ModelFormattedField extends PublishedDecoratorBox<Object> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
 	
 	public ModelFormattedField() {
 		super(new FormattedObjectBox());
+	}
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<Object>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<Object> event) {
+					ActionEvent.fire(ModelFormattedField.this, ModelFormattedField.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelFormattedField";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
 	}
 
 	public String getFormat(){

@@ -6,9 +6,15 @@ package com.eas.controls.wrappers;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.ItemSelectable;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  *
@@ -16,6 +22,7 @@ import java.util.Map.Entry;
  */
 public class PlatypusCardLayout extends CardLayout {
 
+    protected Set<ItemListener> changeListeners = new HashSet<>();
     protected Map<String, Component> comps = new HashMap<>();
 
     public PlatypusCardLayout(int hgap, int vgap) {
@@ -43,5 +50,43 @@ public class PlatypusCardLayout extends CardLayout {
 
     public Component getComponent(String aCardName) {
         return comps.get(aCardName);
+    }
+
+    @Override
+    public void show(Container parent, String name) {
+        super.show(parent, name);
+        fireStateChanged();
+    }
+
+    protected void fireStateChanged() {
+        
+        ItemEvent e = new ItemEvent(new ItemSelectable() {
+
+            @Override
+            public Object[] getSelectedObjects() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void addItemListener(ItemListener l) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void removeItemListener(ItemListener l) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        }, 0, null, 0);
+        changeListeners.stream().forEach((l) -> {
+            l.itemStateChanged(e);
+        });
+    }
+
+    public void addChangeListener(ItemListener l) {
+        changeListeners.add(l);
+    }
+
+    public void removeChangeListener(ItemListener l) {
+        changeListeners.remove(l);
     }
 }

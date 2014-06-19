@@ -8,6 +8,7 @@ import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
 import com.eas.client.application.Loader;
 import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
@@ -41,6 +42,7 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
+		JsEvents.init();
 		Application.publish(client);
 		Loader loader = new Loader(client);
 		loader.load(Collections.singleton(testsModuleName()), new RunnableAdapter() {

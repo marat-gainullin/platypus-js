@@ -6,11 +6,11 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AbsolutePane extends MarginsPane {
-	
+
 	public AbsolutePane() {
 		super();
 	}
-	
+
 	@Override
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {
@@ -20,12 +20,12 @@ public class AbsolutePane extends MarginsPane {
 			}
 		}
 	}
-	
+
 	@Override
 	public void add(Widget aChild, PublishedAbsoluteConstraints aConstraints) {
-	    super.add(aChild, aConstraints != null ? aConstraints : PublishedAbsoluteConstraints.createDefaultAnchors());
+		super.add(aChild, aConstraints != null ? aConstraints : PublishedAbsoluteConstraints.createDefaultAnchors());
 	}
-	
+
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aConstraints) {
 			if(toAdd && toAdd.unwrap) {

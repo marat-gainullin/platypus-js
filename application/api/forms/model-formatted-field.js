@@ -330,6 +330,18 @@
         });
 
         /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf ModelFormattedField
+         */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * Height of the component.
          * @property height
          * @memberOf ModelFormattedField
@@ -341,18 +353,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelFormattedField
-         */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 

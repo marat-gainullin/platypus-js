@@ -7,12 +7,14 @@ package com.eas.client.forms.api.containers;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.events.ChangeEvent;
-import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.script.EventMethod;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeListener;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -29,6 +31,16 @@ public class TabbedPane extends Container<JTabbedPane> {
             + " * clicking on a tab with a given title and/or icon.\n"
             + " */";
 
+    protected JSObject onItemSelected;
+    
+    protected ChangeListener tabsChangeListener = (javax.swing.event.ChangeEvent e) -> {
+        try {
+            onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(e).getPublished()});
+        } catch (Exception ex) {
+            Logger.getLogger(TabbedPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    };
+    
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public TabbedPane() {
         super();
@@ -38,6 +50,33 @@ public class TabbedPane extends Container<JTabbedPane> {
     protected TabbedPane(JTabbedPane aDelegate) {
         super();
         setDelegate(aDelegate);
+    }
+
+    @Override
+    protected void setDelegate(JTabbedPane aDelegate) {
+        if(delegate != null){
+            delegate.removeChangeListener(tabsChangeListener);
+        }
+        super.setDelegate(aDelegate);
+        if(delegate != null){
+            delegate.addChangeListener(tabsChangeListener);
+        }
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when one of the components is selected in this tabbed pane.\n"
+            + " */")
+    @EventMethod(eventClass = ChangeEvent.class)
+    public JSObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    @ScriptFunction
+    public void setOnItemSelected(JSObject aValue) {
+        if (onItemSelected != aValue) {
+            onItemSelected = aValue;
+        }
     }
 
     private static final String ADD_JSDOC = ""
@@ -95,26 +134,6 @@ public class TabbedPane extends Container<JTabbedPane> {
     @ScriptFunction
     public void setSelectedIndex(int aIndex) {
         delegate.setSelectedIndex(aIndex);
-    }
-
-    private static final String ON_STATE_CHANGED_JSDOC = ""
-            + "/**\n"
-            + " * Selected tab change event handler function.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = ON_STATE_CHANGED_JSDOC)
-    @EventMethod(eventClass = ChangeEvent.class)
-    public JSObject getOnStateChanged() {
-        ControlEventsIProxy proxy = getEventsProxy(delegate);
-        return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.stateChanged) : null;
-    }
-
-    @ScriptFunction
-    public void setOnStateChanged(JSObject aValue) {
-        ControlEventsIProxy proxy = checkEventsProxy(delegate);
-        if (proxy != null) {
-            proxy.getHandlers().put(ControlEventsIProxy.stateChanged, aValue);
-        }
     }
 
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})

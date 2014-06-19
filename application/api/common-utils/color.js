@@ -151,24 +151,24 @@
 
         /**
          * Generated property jsDoc.
-         * @property CYAN
-         * @memberOf Color
-         */
-        Object.defineProperty(this, "CYAN", {
-            get: function() {
-                var value = delegate.CYAN;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Generated property jsDoc.
          * @property DARK_GRAY
          * @memberOf Color
          */
         Object.defineProperty(this, "DARK_GRAY", {
             get: function() {
                 var value = delegate.DARK_GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Generated property jsDoc.
+         * @property CYAN
+         * @memberOf Color
+         */
+        Object.defineProperty(this, "CYAN", {
+            get: function() {
+                var value = delegate.CYAN;
                 return P.boxAsJs(value);
             }
         });

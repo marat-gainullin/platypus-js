@@ -153,6 +153,18 @@
         });
 
         /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf ModelGrid
+         */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * Height of the component.
          * @property height
          * @memberOf ModelGrid
@@ -164,18 +176,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelGrid
-         */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
@@ -822,6 +822,21 @@
         });
 
         /**
+         * Shows find dialog.
+         * @deprecated Use find() instead.
+         * @method findSomething
+         * @memberOf ModelGrid
+         */
+        Object.defineProperty(this, "findSomething", {
+            get: function() {
+                return function() {
+                    var value = delegate.findSomething();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
          * Makes specified row visible.
          * @param row the row to make visible.
          * @param need2select true to select the row (optional).
@@ -847,21 +862,6 @@
             get: function() {
                 return function(row) {
                     var value = delegate.unselect(P.boxAsJava(row));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Shows find dialog.
-         * @deprecated Use find() instead.
-         * @method findSomething
-         * @memberOf ModelGrid
-         */
-        Object.defineProperty(this, "findSomething", {
-            get: function() {
-                return function() {
-                    var value = delegate.findSomething();
                     return P.boxAsJs(value);
                 };
             }

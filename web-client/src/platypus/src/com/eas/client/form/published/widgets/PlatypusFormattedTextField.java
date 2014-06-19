@@ -4,6 +4,15 @@ import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
+import com.eas.client.form.events.HasHideHandlers;
+import com.eas.client.form.events.HasShowHandlers;
+import com.eas.client.form.events.HideEvent;
+import com.eas.client.form.events.HideHandler;
+import com.eas.client.form.events.ShowEvent;
+import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.HasEventsExecutor;
@@ -13,9 +22,15 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusFormattedTextField extends FormattedObjectBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor {
+public class PlatypusFormattedTextField extends FormattedObjectBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasActionHandlers, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -25,6 +40,72 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	public PlatypusFormattedTextField() {
 		super();
+	}
+
+	@Override
+	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+		return addHandler(handler, ResizeEvent.getType());
+	}
+
+	@Override
+	public void onResize() {
+		if(isAttached()){
+			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
+		}
+	}
+
+	@Override
+	public HandlerRegistration addHideHandler(HideHandler handler) {
+		return addHandler(handler, HideEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addShowHandler(ShowHandler handler) {
+		return addHandler(handler, ShowEvent.getType());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		boolean oldValue = isVisible();
+		super.setVisible(visible);
+		if (oldValue != visible) {
+			if (visible) {
+				ShowEvent.fire(this, this);
+			} else {
+				HideEvent.fire(this, this);
+			}
+		}
+	}
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<Object>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<Object> event) {
+					ActionEvent.fire(PlatypusFormattedTextField.this, PlatypusFormattedTextField.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusFormattedTextField";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
 	}
 
 	@Override

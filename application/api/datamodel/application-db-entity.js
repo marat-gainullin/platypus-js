@@ -323,15 +323,16 @@
         });
 
         /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
+         * Positions the rowset cursor on the specified row number. Row number is 1-based.
+         * @param index the row index to check, starting form <code>1</code>.
+         * @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.
+         * @method pos
          * @memberOf ApplicationDbEntity
          */
-        Object.defineProperty(this, "eof", {
+        Object.defineProperty(this, "pos", {
             get: function() {
-                return function() {
-                    var value = delegate.eof();
+                return function(index) {
+                    var value = delegate.pos(P.boxAsJava(index));
                     return P.boxAsJs(value);
                 };
             }
@@ -353,6 +354,21 @@
         });
 
         /**
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
+         * @memberOf ApplicationDbEntity
+         */
+        Object.defineProperty(this, "eof", {
+            get: function() {
+                return function() {
+                    var value = delegate.eof();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
          * Moves the rowset cursor to the last row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method last
@@ -368,16 +384,15 @@
         });
 
         /**
-         * Positions the rowset cursor on the specified row number. Row number is 1-based.
-         * @param index the row index to check, starting form <code>1</code>.
-         * @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.
-         * @method pos
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will b e deleted.
+         * @method deleteRow
          * @memberOf ApplicationDbEntity
          */
-        Object.defineProperty(this, "pos", {
+        Object.defineProperty(this, "deleteRow", {
             get: function() {
-                return function(index) {
-                    var value = delegate.pos(P.boxAsJava(index));
+                return function(aCursorPosOrInstance) {
+                    var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
                     return P.boxAsJs(value);
                 };
             }
@@ -400,15 +415,28 @@
         });
 
         /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will b e deleted.
-         * @method deleteRow
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
          * @memberOf ApplicationDbEntity
          */
-        Object.defineProperty(this, "deleteRow", {
+        Object.defineProperty(this, "beforeFirst", {
             get: function() {
-                return function(aCursorPosOrInstance) {
-                    var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+                return function() {
+                    var value = delegate.beforeFirst();
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
+         * @memberOf ApplicationDbEntity
+         */
+        Object.defineProperty(this, "afterLast", {
+            get: function() {
+                return function() {
+                    var value = delegate.afterLast();
                     return P.boxAsJs(value);
                 };
             }
@@ -439,34 +467,6 @@
             get: function() {
                 return function(pairs) {
                     var value = delegate.createFilter(P.boxAsJava(pairs));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
-         * @memberOf ApplicationDbEntity
-         */
-        Object.defineProperty(this, "beforeFirst", {
-            get: function() {
-                return function() {
-                    var value = delegate.beforeFirst();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
-         * @memberOf ApplicationDbEntity
-         */
-        Object.defineProperty(this, "afterLast", {
-            get: function() {
-                return function() {
-                    var value = delegate.afterLast();
                     return P.boxAsJs(value);
                 };
             }

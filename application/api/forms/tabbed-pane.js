@@ -293,6 +293,18 @@
         });
 
         /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf TabbedPane
+         */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * Height of the component.
          * @property height
          * @memberOf TabbedPane
@@ -304,18 +316,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf TabbedPane
-         */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
@@ -523,6 +523,21 @@
             },
             set: function(aValue) {
                 delegate.selectedIndex = P.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Event that is fired when one of the components is selected in this tabbed pane.
+         * @property onItemSelected
+         * @memberOf TabbedPane
+         */
+        Object.defineProperty(this, "onItemSelected", {
+            get: function() {
+                var value = delegate.onItemSelected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onItemSelected = P.boxAsJava(aValue);
             }
         });
 

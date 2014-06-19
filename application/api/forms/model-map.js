@@ -294,6 +294,18 @@
         });
 
         /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf ModelMap
+         */
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * Height of the component.
          * @property height
          * @memberOf ModelMap
@@ -305,18 +317,6 @@
             },
             set: function(aValue) {
                 delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelMap
-         */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
             }
         });
 
@@ -645,6 +645,21 @@
         });
 
         /**
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
+         * @memberOf ModelMap
+         */
+        Object.defineProperty(this, "select", {
+            get: function() {
+                return function(selectionEntries) {
+                    var value = delegate.select(P.boxAsJava(selectionEntries));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
          * Hits to the specified point.
          * @param hitObject the object to hit, can be either a Point or a Polygon instance.
          * @return an array of <code>SelectionEntry</code> elements
@@ -655,21 +670,6 @@
             get: function() {
                 return function(hitObject) {
                     var value = delegate.hit(P.boxAsJava(hitObject));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        Object.defineProperty(this, "select", {
-            get: function() {
-                return function(selectionEntries) {
-                    var value = delegate.select(P.boxAsJava(selectionEntries));
                     return P.boxAsJs(value);
                 };
             }

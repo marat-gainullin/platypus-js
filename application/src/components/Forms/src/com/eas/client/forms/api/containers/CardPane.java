@@ -6,10 +6,15 @@ package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.client.forms.api.events.ChangeEvent;
 import com.eas.controls.wrappers.PlatypusCardLayout;
+import com.eas.script.EventMethod;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import java.awt.CardLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -18,6 +23,15 @@ import jdk.nashorn.api.scripting.JSObject;
  * @author mg
  */
 public class CardPane extends Container<JPanel> {
+
+    protected JSObject onItemSelected;
+    protected ItemListener cardsChangeListener = (ItemEvent e) -> {
+        try {
+            onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(new javax.swing.event.ChangeEvent(CardPane.this)).getPublished()});
+        } catch (Exception ex) {
+            Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    };
 
     public CardPane() {
         this(0, 0);
@@ -43,8 +57,37 @@ public class CardPane extends Container<JPanel> {
     protected CardPane(JPanel aDelegate) {
         super();
         assert aDelegate != null;
-        assert aDelegate.getLayout() instanceof CardLayout;
+        assert aDelegate.getLayout() instanceof PlatypusCardLayout;
         setDelegate(aDelegate);
+    }
+
+    @Override
+    protected void setDelegate(JPanel aDelegate) {
+        if (delegate != null) {
+            PlatypusCardLayout layout = (PlatypusCardLayout) aDelegate.getLayout();
+            layout.removeChangeListener(cardsChangeListener);
+        }
+        super.setDelegate(aDelegate);
+        if (delegate != null) {
+            PlatypusCardLayout layout = (PlatypusCardLayout) aDelegate.getLayout();
+            layout.addChangeListener(cardsChangeListener);
+        }
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when one of the components is selected in this card pane.\n"
+            + " */")
+    @EventMethod(eventClass = ChangeEvent.class)
+    public JSObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    @ScriptFunction
+    public void setOnItemSelected(JSObject aValue) {
+        if (onItemSelected != aValue) {
+            onItemSelected = aValue;
+        }
     }
 
     private static final String ADD_JSDOC = ""

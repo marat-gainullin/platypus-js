@@ -27,7 +27,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -50,12 +49,6 @@ public class Form implements HasPublished {
     protected static final Map<String, Form> showingForms = new HashMap<>();
     protected static JSObject onChange;
 
-    private static final String SHOWN_JSDOC = ""
-            + "/**\n"
-            + " * The array of application's shown forms.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = SHOWN_JSDOC)
     public static Form[] getShownForms() {
         synchronized (Form.class) {
             List<Form> notNullForms = new ArrayList<>();
@@ -68,26 +61,12 @@ public class Form implements HasPublished {
         }
     }
 
-    private static final String SHOWN_FORM_JSDOC = ""
-            + "/**\n"
-            + " * Gets a shown form by its key.\n"
-            + " * @param key a form key identifier\n"
-            + " * @return a form from the open forms registry\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = SHOWN_FORM_JSDOC, params = {"key"})
     public static Form getShownForm(String aFormKey) {
         synchronized (Form.class) {
             return showingForms.get(aFormKey);
         }
     }
 
-    private static final String ON_CHANGE_JSDOC = ""
-            + "/**\n"
-            + " * The shown forms registry change event handler function.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = ON_CHANGE_JSDOC)
     public static JSObject getOnChange() {
         return onChange;
     }
@@ -220,6 +199,10 @@ public class Form implements HasPublished {
         published = aValue;
     }
 
+    public void injectPublished(JSObject aValue){
+        published = aValue;
+    }
+    
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
@@ -1295,7 +1278,7 @@ public class Form implements HasPublished {
         alwaysOnTop = aDocument.isAlwaysOnTop();
         locationByPlatform = aDocument.isLocationByPlatform();
         designedViewSize = aDocument.getDesignedPreferredSize();
-        windowHandler = new FormWindowEventsIProxy();
+        windowHandler = new FormWindowEventsIProxy(this);
         final DbSwingFactory factory = new FormFactory(model);
         final FormDesignInfo fdi = aDocument;//.copy();
         fdi.accept(factory);

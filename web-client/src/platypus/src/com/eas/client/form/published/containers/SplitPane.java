@@ -3,6 +3,18 @@ package com.eas.client.form.published.containers;
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.SplittedPanel;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.AddEvent;
+import com.eas.client.form.events.AddHandler;
+import com.eas.client.form.events.HasAddHandlers;
+import com.eas.client.form.events.HasHideHandlers;
+import com.eas.client.form.events.HasRemoveHandlers;
+import com.eas.client.form.events.HasShowHandlers;
+import com.eas.client.form.events.HideEvent;
+import com.eas.client.form.events.HideHandler;
+import com.eas.client.form.events.RemoveEvent;
+import com.eas.client.form.events.RemoveHandler;
+import com.eas.client.form.events.ShowEvent;
+import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
@@ -11,11 +23,15 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
+public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
+        HasRemoveHandlers {
 
 	public static int HORIZONTAL_SPLIT = 1;
 	public static int VERTICAL_SPLIT = 0;
@@ -23,7 +39,7 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled = true;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
 
 	protected Widget firstWidget;
@@ -39,6 +55,52 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 	}
 
 	@Override
+	public HandlerRegistration addAddHandler(AddHandler handler) {
+		return addHandler(handler, AddEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addRemoveHandler(RemoveHandler handler) {
+		return addHandler(handler, RemoveEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+		return addHandler(handler, ResizeEvent.getType());
+	}
+
+	@Override
+	public void onResize() {
+		super.onResize();
+		if (isAttached()) {
+			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
+		}
+	}
+
+	@Override
+	public HandlerRegistration addHideHandler(HideHandler handler) {
+		return addHandler(handler, HideEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addShowHandler(ShowHandler handler) {
+		return addHandler(handler, ShowEvent.getType());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		boolean oldValue = isVisible();
+		super.setVisible(visible);
+		if (oldValue != visible) {
+			if (visible) {
+				ShowEvent.fire(this, this);
+			} else {
+				HideEvent.fire(this, this);
+			}
+		}
+	}
+
+	@Override
 	public EventsExecutor getEventsExecutor() {
 		return eventsExecutor;
 	}
@@ -49,9 +111,9 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -63,7 +125,7 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -85,10 +147,10 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -133,6 +195,45 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 				add(secondWidget);
 			}
 		}
+	}
+
+	@Override
+	public void addWest(Widget widget, double size) {
+		super.addWest(widget, size);
+		AddEvent.fire(this, widget);
+	}
+
+	@Override
+	public void addEast(Widget widget, double size) {
+		super.addEast(widget, size);
+		AddEvent.fire(this, widget);
+	}
+
+	@Override
+	public void addNorth(Widget widget, double size) {
+		super.addNorth(widget, size);
+		AddEvent.fire(this, widget);
+	}
+
+	@Override
+	public void addSouth(Widget widget, double size) {
+		super.addSouth(widget, size);
+		AddEvent.fire(this, widget);
+	}
+
+	@Override
+	public void add(Widget widget) {
+		super.add(widget);
+		AddEvent.fire(this, widget);
+	}
+
+	@Override
+	public boolean remove(Widget child) {
+		boolean res = super.remove(child);
+		if (res) {
+			RemoveEvent.fire(this, child);
+		}
+		return res;
 	}
 
 	public boolean isOneTouchExpandable() {

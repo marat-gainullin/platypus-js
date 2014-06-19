@@ -10,6 +10,7 @@ import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.DummyControlValue;
+import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
@@ -39,6 +40,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected JLabel iconLabel = new JLabel(" ");
     protected JToolBar extraTools = new JToolBar();
     protected Set<CellEditorListener> editorListeners = new HashSet<>();
+    protected Set<ActionListener> actionListeners = new HashSet<>();
     protected Object editingValue;
     protected int updateCounter;
     protected boolean borderless = true;
@@ -90,6 +92,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
+    @Override
     public void injectPublished(Object aValue) {
         published = aValue;
     }
@@ -164,6 +167,9 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     public DbControlPanel() {
         super();
+        extraTools.setBorder(null);
+        extraTools.setBorderPainted(false);
+        extraTools.setFloatable(false);
         addFocusListener(new DbControlFocusAdapter());
         setOpaque(true);
         iconLabel.setOpaque(true);
@@ -209,11 +215,15 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     protected void checkEvents(Component aComp) {
         if (aComp != null && model != null) {
+            ControlEventsIProxy.reflectionInvokeARListener(aComp, "addActionListener", ActionListener.class, (ActionListener) (ActionEvent e) -> {
+                fireActionPerformed(e);
+            });
             aComp.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
-                    if (mls != null) {
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
                         for (MouseListener ml : mls) {
                             ml.mouseClicked(e);
                         }
@@ -223,7 +233,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
-                    if (mls != null) {
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
                         for (MouseListener ml : mls) {
                             ml.mousePressed(e);
                         }
@@ -233,7 +244,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
-                    if (mls != null) {
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
                         for (MouseListener ml : mls) {
                             ml.mouseReleased(e);
                         }
@@ -243,7 +255,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
-                    if (mls != null) {
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
                         for (MouseListener ml : mls) {
                             ml.mouseEntered(e);
                         }
@@ -253,7 +266,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 @Override
                 public void mouseExited(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
-                    if (mls != null) {
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
                         for (MouseListener ml : mls) {
                             ml.mouseExited(e);
                         }
@@ -263,9 +277,10 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
             aComp.addMouseMotionListener(new MouseMotionListener() {
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    MouseMotionListener[] mmls = getMouseMotionListeners();
-                    if (mmls != null) {
-                        for (MouseMotionListener mml : mmls) {
+                    MouseMotionListener[] mls = getMouseMotionListeners();
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        for (MouseMotionListener mml : mls) {
                             mml.mouseDragged(e);
                         }
                     }
@@ -273,18 +288,20 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
                 @Override
                 public void mouseMoved(MouseEvent e) {
-                    MouseMotionListener[] mmls = getMouseMotionListeners();
-                    if (mmls != null) {
-                        for (MouseMotionListener mml : mmls) {
+                    MouseMotionListener[] mls = getMouseMotionListeners();
+                    if (mls != null && e.getSource() instanceof Component) {
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        for (MouseMotionListener mml : mls) {
                             mml.mouseMoved(e);
                         }
                     }
                 }
             });
             aComp.addMouseWheelListener((MouseWheelEvent e) -> {
-                MouseWheelListener[] mwls = getMouseWheelListeners();
-                if (mwls != null) {
-                    for (MouseWheelListener mwl : mwls) {
+                MouseWheelListener[] mls = getMouseWheelListeners();
+                if (mls != null && e.getSource() instanceof Component) {
+                    e = (MouseWheelEvent) SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                    for (MouseWheelListener mwl : mls) {
                         mwl.mouseWheelMoved(e);
                     }
                 }
@@ -295,6 +312,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void focusGained(FocusEvent e) {
                     FocusListener[] fls = getFocusListeners();
                     if (fls != null) {
+                        e.setSource(DbControlPanel.this);
                         for (FocusListener fl : fls) {
                             if (!(fl instanceof DbControlFocusAdapter)) {
                                 fl.focusGained(e);
@@ -307,6 +325,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void focusLost(FocusEvent e) {
                     FocusListener[] fls = getFocusListeners();
                     if (fls != null) {
+                        e.setSource(DbControlPanel.this);
                         for (FocusListener fl : fls) {
                             if (!(fl instanceof DbControlFocusAdapter)) {
                                 fl.focusLost(e);
@@ -321,6 +340,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void keyTyped(KeyEvent e) {
                     KeyListener[] kls = getKeyListeners();
                     if (kls != null) {
+                        e.setSource(DbControlPanel.this);
                         for (KeyListener kl : kls) {
                             kl.keyTyped(e);
                         }
@@ -331,6 +351,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void keyPressed(KeyEvent e) {
                     KeyListener[] kls = getKeyListeners();
                     if (kls != null) {
+                        e.setSource(DbControlPanel.this);
                         for (KeyListener kl : kls) {
                             kl.keyPressed(e);
                         }
@@ -341,6 +362,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void keyReleased(KeyEvent e) {
                     KeyListener[] kls = getKeyListeners();
                     if (kls != null) {
+                        e.setSource(DbControlPanel.this);
                         for (KeyListener kl : kls) {
                             kl.keyReleased(e);
                         }
@@ -729,6 +751,22 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public void removeCellEditorListener(CellEditorListener l) {
         editorListeners.remove(l);
     }
+
+    public void addActionListener(ActionListener l) {
+        actionListeners.add(l);
+    }
+
+    public void removeActionListener(ActionListener l) {
+        actionListeners.add(l);
+    }
+    
+    protected void fireActionPerformed(ActionEvent e){
+        e.setSource(this);
+        actionListeners.stream().forEach((l) -> {
+            l.actionPerformed(e);
+        });
+    }
+    
     // datamodel interacting
     protected ModelElementRef datamodelElement;
     protected ApplicationModel<?, ?, ?, ?> model;
@@ -922,7 +960,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public void configure() throws Exception {
         cleanup();
         if (standalone) {
-            if (model != null && datamodelElement != null) {
+            if (model != null/* && datamodelElement != null*/) {
                 kind = InitializingMethod.UNDEFINED;
                 unbind();
                 bind();
@@ -947,8 +985,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
             Fields fields = rsEntity.getFields();
             Field field = fields.get(colIndex);
             if (field != null) {
-                extraTools.setBorder(null);
-                extraTools.setFloatable(false);
                 if (onSelect != null) {
                     JButton btnSelectingField = new JButton();
                     btnSelectingField.setAction(new FieldValueSelectorAction());

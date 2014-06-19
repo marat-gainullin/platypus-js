@@ -1,7 +1,7 @@
 package com.eas.client.form.events;
 
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.UIObject;
 
 public class AddEvent extends GwtEvent<AddHandler>{
 
@@ -18,7 +18,7 @@ public class AddEvent extends GwtEvent<AddHandler>{
      * @param source the source of the handlers
      * @param target the target
      */
-    public static void fire(HasAddHandlers source, Widget target) {
+    public static void fire(HasAddHandlers source, UIObject target) {
         if (TYPE != null) {
             AddEvent event = new AddEvent(target);
             source.fireEvent(event);
@@ -34,14 +34,14 @@ public class AddEvent extends GwtEvent<AddHandler>{
         return TYPE != null ? TYPE : (TYPE = new Type<>());
     }
 
-    private final Widget widget;
+    private final UIObject widget;
 
     /**
      * Creates a new close event.
      *
      * @param aWidget the target
      */
-    protected AddEvent(Widget aWidget) {
+    protected AddEvent(UIObject aWidget) {
         widget = aWidget;
     }
 
@@ -55,7 +55,7 @@ public class AddEvent extends GwtEvent<AddHandler>{
      *
      * @return the target
      */
-    public Widget getWidget() {
+    public UIObject getWidget() {
         return widget;
     }
 

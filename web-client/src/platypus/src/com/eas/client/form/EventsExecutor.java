@@ -23,6 +23,7 @@ import com.eas.client.form.events.RemoveHandler;
 import com.eas.client.form.events.ShowEvent;
 import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.js.JsEvents;
+import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -64,8 +65,11 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -81,7 +85,6 @@ public class EventsExecutor {
 	private JavaScriptObject mouseWheelMoved;
 	private JavaScriptObject mouseDragged;
 	private JavaScriptObject mouseMoved;
-	// TODO: Add event for tabs, radio group, cards and a combo items selection.
 	private JavaScriptObject componentResized;
 	private JavaScriptObject componentMoved;
 	private JavaScriptObject componentShown;
@@ -93,6 +96,8 @@ public class EventsExecutor {
 	private JavaScriptObject keyTyped;
 	private JavaScriptObject keyPressed;
 	private JavaScriptObject keyReleased;
+	// TODO: Add event for tabs, radio group and cards selection.
+	private JavaScriptObject itemSelected;
 
 	private static enum MOUSE {
 		NULL, PRESSED, MOVED, DRAGGED
@@ -222,20 +227,20 @@ public class EventsExecutor {
 	}
 
 	protected HandlerRegistration actionPerformedReg;
-	
+
 	public void setActionPerformed(JavaScriptObject aValue) {
-		if(actionPerformed != aValue){
-			if(actionPerformedReg != null)
+		if (actionPerformed != aValue) {
+			if (actionPerformedReg != null)
 				actionPerformedReg.removeHandler();
 			actionPerformed = aValue;
-			if(actionPerformed != null && component instanceof HasActionHandlers){
-				actionPerformedReg = ((HasActionHandlers)component).addActionHandler(new ActionHandler(){
+			if (actionPerformed != null && component instanceof HasActionHandlers) {
+				actionPerformedReg = ((HasActionHandlers) component).addActionHandler(new ActionHandler() {
 
 					@Override
-                    public void onAction(ActionEvent event) {
+					public void onAction(ActionEvent event) {
 						executeEvent(actionPerformed, JsEvents.publish(event));
-                    }
-					
+					}
+
 				});
 			}
 		}
@@ -422,7 +427,7 @@ public class EventsExecutor {
 							event.stopPropagation();
 							if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
 								mouseState = MOUSE.MOVED;
-								executeEvent(mouseMoved, null);
+								executeEvent(mouseMoved, JsEvents.publish(event));
 							} else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
 								mouseState = MOUSE.DRAGGED;
 								executeEvent(mouseDragged, JsEvents.publish(event));
@@ -678,6 +683,32 @@ public class EventsExecutor {
 							event.stopPropagation();
 							executeEvent(keyReleased, JsEvents.publish(event));
 						}
+					}
+
+				});
+			}
+		}
+	}
+
+	public JavaScriptObject getItemSelected() {
+		return itemSelected;
+	}
+
+	protected HandlerRegistration selectedItemReg;
+
+	public void setItemSelected(JavaScriptObject aValue) {
+		if (itemSelected != aValue) {
+			if (selectedItemReg != null) {
+				selectedItemReg.removeHandler();
+			}
+			itemSelected = aValue;
+			if (component instanceof HasSelectionHandlers<?>) {
+				selectedItemReg = ((HasSelectionHandlers<Object>) component).addSelectionHandler(new SelectionHandler<Object>() {
+
+					@Override
+					public void onSelection(SelectionEvent<Object> event) {
+						JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
+						executeEvent(itemSelected, JsEvents.publishSourcedEvent(published));
 					}
 
 				});

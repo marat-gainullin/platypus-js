@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.HasImageResource;
@@ -65,6 +60,8 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	protected LayoutPanel tabBarContainer;
 	protected Widget tabBar;
 	protected Widget tabsContent;
+	//
+	protected Widget selected;
 
 	public TabsDecoratedPanel(double aBarHeight, Style.Unit aBarUnit) {
 		super();
@@ -118,7 +115,8 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
-				SelectionEvent.fire(TabsDecoratedPanel.this, tabs.getWidget(event.getSelectedItem()));
+				selected = event.getSelectedItem() != -1 ? tabs.getWidget(event.getSelectedItem()) : null;
+				SelectionEvent.fire(TabsDecoratedPanel.this, selected);
 			}
 
 		});

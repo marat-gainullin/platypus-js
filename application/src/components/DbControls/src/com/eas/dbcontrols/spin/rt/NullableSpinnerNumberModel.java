@@ -18,8 +18,8 @@ import javax.swing.event.ChangeListener;
 public class NullableSpinnerNumberModel extends SpinnerNumberModel {
 
     protected Number value;
-    protected BigDecimal min = null;
-    protected BigDecimal max = null;
+    protected BigDecimal min;
+    protected BigDecimal max;
     protected Number step;
     protected boolean editable = true;
     protected Set<ChangeListener> valueChangeListeners = new HashSet<>();
@@ -183,8 +183,8 @@ public class NullableSpinnerNumberModel extends SpinnerNumberModel {
     protected void fireStateChanged() {
         super.fireStateChanged();
         ChangeEvent changeEvent = new ChangeEvent(this);
-        for (ChangeListener l : valueChangeListeners) {
+        valueChangeListeners.stream().forEach((l) -> {
             l.stateChanged(changeEvent);
-        }
+        });
     }
 }

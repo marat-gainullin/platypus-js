@@ -1,19 +1,58 @@
 package com.eas.client.form.published.widgets.model;
 
+import java.util.Date;
+
 import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DoubleRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 
-public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText {
+public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
 	
 	public ModelSpin() {
 		super(new ConstraintedSpinnerBox(new ExplicitDoubleBox()));
+	}
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<Double>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<Double> event) {
+					ActionEvent.fire(ModelSpin.this, ModelSpin.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelSpin";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
 	}
 
 	@Override

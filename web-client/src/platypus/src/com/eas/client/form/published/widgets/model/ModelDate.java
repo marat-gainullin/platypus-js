@@ -7,13 +7,19 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyText {
+public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
     private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
@@ -22,6 +28,37 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 	public ModelDate() {
 		super(new DateTimeBox());
 		format = DEFAULT_FORMAT.getDateTimeFormat().getPattern();
+	}
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addValueChangeHandler(new ValueChangeHandler<Date>() {
+
+				@Override
+                public void onValueChange(ValueChangeEvent<Date> event) {
+					ActionEvent.fire(ModelDate.this, ModelDate.this);
+                }
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
 	}
 
 	public String getFormat() {

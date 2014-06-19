@@ -48,6 +48,18 @@
         });
 
         /**
+         * The number of mouse clicks associated with this event.
+         * @property clickCount
+         * @memberOf MouseEvent
+         */
+        Object.defineProperty(this, "clickCount", {
+            get: function() {
+                var value = delegate.clickCount;
+                return P.boxAsJs(value);
+            }
+        });
+
+        /**
          * Ctrl key is down on this event.
          * @property controlDown
          * @memberOf MouseEvent
@@ -72,13 +84,13 @@
         });
 
         /**
-         * The number of mouse clicks associated with this event.
-         * @property clickCount
+         * Meta key is down on this event.
+         * @property metaDown
          * @memberOf MouseEvent
          */
-        Object.defineProperty(this, "clickCount", {
+        Object.defineProperty(this, "metaDown", {
             get: function() {
-                var value = delegate.clickCount;
+                var value = delegate.metaDown;
                 return P.boxAsJs(value);
             }
         });
@@ -91,18 +103,6 @@
         Object.defineProperty(this, "X", {
             get: function() {
                 var value = delegate.X;
-                return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Meta key is down on this event.
-         * @property metaDown
-         * @memberOf MouseEvent
-         */
-        Object.defineProperty(this, "metaDown", {
-            get: function() {
-                var value = delegate.metaDown;
                 return P.boxAsJs(value);
             }
         });

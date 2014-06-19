@@ -25,6 +25,7 @@ import com.eas.client.RunnableAdapter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
@@ -957,6 +958,7 @@ public class Application {
 		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
+		JsEvents.init();
 		publish(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
