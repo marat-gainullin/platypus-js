@@ -8,7 +8,7 @@
      * A model component that shows a map.
      * @constructor ModelMap ModelMap
      */
-    P.ModelMap = function () {
+    P.ModelMap = function ModelMap() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelMap.superclass)
+            ModelMap.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor
@@ -645,21 +645,6 @@
         });
 
         /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        Object.defineProperty(this, "select", {
-            get: function() {
-                return function(selectionEntries) {
-                    var value = delegate.select(P.boxAsJava(selectionEntries));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-        /**
          * Hits to the specified point.
          * @param hitObject the object to hit, can be either a Point or a Polygon instance.
          * @return an array of <code>SelectionEntry</code> elements
@@ -670,6 +655,21 @@
             get: function() {
                 return function(hitObject) {
                     var value = delegate.hit(P.boxAsJava(hitObject));
+                    return P.boxAsJs(value);
+                };
+            }
+        });
+
+        /**
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
+         * @memberOf ModelMap
+         */
+        Object.defineProperty(this, "select", {
+            get: function() {
+                return function(selectionEntries) {
+                    var value = delegate.select(P.boxAsJava(selectionEntries));
                     return P.boxAsJs(value);
                 };
             }

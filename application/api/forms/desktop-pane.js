@@ -9,7 +9,7 @@
      * This component can be used for creating a multi-document GUI or a virtual desktop.
      * @constructor DesktopPane DesktopPane
      */
-    P.DesktopPane = function () {
+    P.DesktopPane = function DesktopPane() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -17,12 +17,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(DesktopPane.superclass)
+            DesktopPane.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

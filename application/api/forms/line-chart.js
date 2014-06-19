@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor LineChart LineChart
      */
-    P.LineChart = function () {
+    P.LineChart = function LineChart() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(LineChart.superclass)
+            LineChart.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

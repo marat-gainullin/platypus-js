@@ -9,7 +9,7 @@
      * @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).
      * @constructor ToolBar ToolBar
      */
-    P.ToolBar = function () {
+    P.ToolBar = function ToolBar() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -17,12 +17,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ToolBar.superclass)
+            ToolBar.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

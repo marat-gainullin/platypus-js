@@ -8,7 +8,7 @@
      * A container with Absolute Layout.
      * @constructor AbsolutePane AbsolutePane
      */
-    P.AbsolutePane = function () {
+    P.AbsolutePane = function AbsolutePane() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(AbsolutePane.superclass)
+            AbsolutePane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

@@ -8,7 +8,7 @@
      *
      * @constructor Cursor Cursor
      */
-    P.Cursor = function (aType) {
+    P.Cursor = function Cursor(aType) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -17,12 +17,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Cursor.superclass)
+            Cursor.superclass.constructor.apply(this, arguments);
 
         delegate.setPublished(this);
     };

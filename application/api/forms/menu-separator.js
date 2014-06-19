@@ -10,7 +10,7 @@
      * between menu items that breaks them up into logical groupings.
      * @constructor MenuSeparator MenuSeparator
      */
-    P.MenuSeparator = function () {
+    P.MenuSeparator = function MenuSeparator() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(MenuSeparator.superclass)
+            MenuSeparator.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

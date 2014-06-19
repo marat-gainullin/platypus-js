@@ -8,7 +8,7 @@
      * A model component that combines a button or editable field and a drop-down list.
      * @constructor ModelCombo ModelCombo
      */
-    P.ModelCombo = function () {
+    P.ModelCombo = function ModelCombo() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelCombo.superclass)
+            ModelCombo.superclass.constructor.apply(this, arguments);
         /**
          * Gets the parent of this component.
          * @property parent

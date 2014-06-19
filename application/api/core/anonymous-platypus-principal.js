@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor AnonymousPlatypusPrincipal AnonymousPlatypusPrincipal
      */
-    P.AnonymousPlatypusPrincipal = function () {
+    P.AnonymousPlatypusPrincipal = function AnonymousPlatypusPrincipal() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(AnonymousPlatypusPrincipal.superclass)
+            AnonymousPlatypusPrincipal.superclass.constructor.apply(this, arguments);
         /**
          * The username..
          * @property name

@@ -23,6 +23,7 @@ import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import java.io.*;
 import java.sql.Types;
@@ -73,36 +74,35 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             throw new AlreadyPublishedException();
         }
         published = aValue;
-        /*
-         if (published != null && published instanceof ScriptableObject) {
-         for (ReferenceRelation<E> aRelation : referenceRelations) {
-         String scalarPropertyName = aRelation.getScalarPropertyName();
-         if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-         scalarPropertyName = aRelation.getRightEntity().getName();
-         }
-         if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-         aRelation.getLeftEntity().putOrmDefinition(
-         scalarPropertyName,
-         ScriptUtils.scalarPropertyDefinition(
-         (Scriptable) aRelation.getRightEntity().getPublished(),
-         aRelation.getRightField().getName(),
-         aRelation.getLeftField().getName()));
-         }
-         String collectionPropertyName = aRelation.getCollectionPropertyName();
-         if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-         collectionPropertyName = aRelation.getLeftEntity().getName();
-         }
-         if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-         aRelation.getRightEntity().putOrmDefinition(
-         collectionPropertyName,
-         ScriptUtils.collectionPropertyDefinition(
-         (Scriptable) aRelation.getLeftEntity().getPublished(),
-         aRelation.getRightField().getName(),
-         aRelation.getLeftField().getName()));
-         }
-         }
-         }
-         */
+    }
+
+    public void createORMDefinitions() {
+        referenceRelations.stream().forEach((ReferenceRelation<E> aRelation) -> {
+            String scalarPropertyName = aRelation.getScalarPropertyName();
+            if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                scalarPropertyName = aRelation.getRightEntity().getName();
+            }
+            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                aRelation.getLeftEntity().putOrmDefinition(
+                        scalarPropertyName,
+                        ScriptUtils.scalarPropertyDefinition(
+                                (JSObject) aRelation.getRightEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName()));
+            }
+            String collectionPropertyName = aRelation.getCollectionPropertyName();
+            if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                collectionPropertyName = aRelation.getLeftEntity().getName();
+            }
+            if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                aRelation.getRightEntity().putOrmDefinition(
+                        collectionPropertyName,
+                        ScriptUtils.collectionPropertyDefinition(
+                                (JSObject) aRelation.getLeftEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName()));
+            }
+        });
     }
 
     @Override
@@ -255,7 +255,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "/**\n"
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
-            + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.\n"
             + "* @param callback the function to be envoked after the data changes saved (optional).\n"
             + "*/";
 
@@ -279,8 +280,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
-            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method, but the model still attempts to commit.\n"
-            + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit.\n"
+            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)

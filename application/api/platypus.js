@@ -1,18 +1,20 @@
-load("classpath:internals.js");
 (function() {
+    load("classpath:internals.js");
     /** 
      * Platypus library namespace global variable.
      * @namespace P
      */
-// this === global;
+    //this === global;
     var global = this;
     var oldP = global.P;
     global.P = {};
-    global.P.restore = function() {
-        var ns = global.P;
-        global.P = oldP;
-        return ns;
-    };
+    Object.defineProperty(global.P, "restore", {
+        value: function() {
+            var ns = global.P;
+            global.P = oldP;
+            return ns;
+        }
+    });
     /*
      global.P = this; // global scope of api - for legacy applications
      global.P.restore = function() {
@@ -22,12 +24,17 @@ load("classpath:internals.js");
 
     // core imports
     var ExecutorsClass = Java.type("java.util.concurrent.Executors");
+    var Lock = Java.type("java.util.concurrent.locks.ReentrantLock");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
+    var RowClass = Java.type("com.bearsoft.rowset.Row");
+    var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
+    var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
+    var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.PlatypusScriptedResource");
     var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
@@ -123,7 +130,7 @@ load("classpath:internals.js");
      * @param {type} aOnFailure
      * @returns {undefined}
      */
-    P.require = function(deps, aOnSuccess, aOnFailure) {
+    function require(deps, aOnSuccess, aOnFailure) {
         try {
             if (deps) {
                 if (Array.isArray(deps)) {
@@ -143,17 +150,27 @@ load("classpath:internals.js");
             else
                 throw e;
         }
-    };
+    }
+    Object.defineProperty(P, "require", {value: require});
+    function extend(Child, Parent) {
+        var F = function() {
+        };
+        F.prototype = Parent.prototype;
+        Child.prototype = new F();
+        Child.prototype.constructor = Child;
+        Child.superclass = Parent.prototype;
+    }
+    Object.defineProperty(P, "extend", {value: extend});
+
     var cached = {};
-    var g = this;
-    var getModule = function(aName) {
+    function getModule(aName) {
         if (!cached[aName]) {
-            var c = g[aName];
+            var c = global[aName];
             if (c) {
                 cached[aName] = new c();
             } else {
                 ScriptedResourceClass.executeScriptResource(aName);
-                c = g[aName];
+                c = global[aName];
                 if (c) {
                     cached[aName] = new c();
                 } else {
@@ -162,7 +179,8 @@ load("classpath:internals.js");
             }
         }
         return cached[aName];
-    };
+    }
+    ;
     ScriptUtilsClass.setGetModuleFunc(getModule);
     var PModules = {};
     Object.defineProperty(P, "Modules", {
@@ -171,6 +189,226 @@ load("classpath:internals.js");
     Object.defineProperty(PModules, "get", {
         value: getModule
     });
+
+    function BoundArray() {
+        BoundArray.superclass.constructor.apply(this, arguments);
+        var target = this;
+        var rowset = this.unwrap().getRowset();
+        var adapter = new RowsetJSAdapterClass();
+        rowset.addRowsetListener(adapter);
+        adapter.rowsetFiltered = function() {
+            Array.prototype.splice.call(target, 0, target.length);
+            var rows = rowset.current;
+            var publishedRows = [];
+            rows.forEach(function(aRow) {
+                publishedRows.push(aRow.getPublished());
+            });
+            Array.prototype.push.apply(target, publishedRows);
+        };
+        adapter.rowsetRequeried = function(event) {
+            adapter.rowsetFiltered();
+        };
+        adapter.rowsetNextPageFetched = function(event) {
+            adapter.rowsetFiltered();
+        };
+        adapter.rowsetSaved = function(event) {
+            // ignore
+        };
+        adapter.rowsetRolledback = function(event) {
+            // ignore
+        };
+        adapter.rowsetScrolled = function(event) {
+            // ignore
+        };
+        adapter.rowsetSorted = function(event) {
+            adapter.rowsetFiltered();
+        };
+        adapter.rowInserted = function(event) {
+            if (!event.ajusting)
+                adapter.rowsetFiltered();
+        };
+        adapter.rowChanged = function(event) {
+            if (event.oldRowCount != event.newRowCount) {
+                adapter.rowsetFiltered();
+            }
+        };
+        adapter.rowDeleted = function(event) {
+            if (!event.ajusting)
+                adapter.rowsetFiltered();
+        };
+
+        Object.defineProperty(target, "fill", {
+            value: function() {
+                throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
+            }
+        });
+        Object.defineProperty(target, "pop", {
+            value: function() {
+                if (!rowset.empty) {
+                    var res = rowset.getRow(rowset.size());
+                    rowset.deleteAt(rowset.size() - 1, true);
+                    Array.prototype.pop.call(target);
+                    return res.getPublished();
+                }
+            }
+        });
+        Object.defineProperty(target, "push", {
+            value: function() {
+                if (arguments.length > 1) {
+                    for (var a = 0; a < arguments.length; a++) {
+                        if (arguments[a].unwrap)
+                            rowset.insertAt(rowset.size(), arguments[a].unwrap(), a < arguments.length - 1);
+                    }
+                } else if (arguments.length === 1) {
+                    if (arguments[0].unwrap) {
+                        rowset.insertAt(rowset.size(), arguments[0].unwrap(), true);
+                        Array.prototype.push.call(target, arguments[0]);
+                    }
+                }
+                return target.length;
+            }
+        });
+        Object.defineProperty(target, "reverse", {
+            value: function() {
+                rowset.reverse();
+            }
+        });
+        Object.defineProperty(target, "shift", {
+            value: function() {
+                if (!rowset.empty) {
+                    var res = rowset.getRow(1);
+                    rowset.deleteAt(0);
+                    Array.prototype.shift.call(target);
+                    return res.getPublished();
+                }
+            }
+        });
+        var defaultCompareFunction = function(o1, o2) {
+            var s1 = (o1 + '');
+            var s2 = (o2 + '');
+            return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+        };
+        Object.defineProperty(target, "sort", {
+            value: function() {
+                if (arguments.length > 0 && arguments[0] instanceof RowsComparatorClass) {
+                    rowset.sort(arguments[0]);
+                } else {
+                    var compareFunc = defaultCompareFunction;
+                    if (arguments.length > 0 && typeof arguments[0] === 'function') {
+                        compareFunc = arguments[0];
+                    }
+                    Array.prototype.sort.call(target, compareFunc);
+                }
+                return target;
+            }
+        });
+        Object.defineProperty(target, "splice", {
+            value: function() {
+                if (arguments.length > 0) {
+                    var beginToDeleteAt = arguments[0];
+                    var howManyToDelete = Number.MAX_VALUE;
+                    if (arguments.length > 1) {
+                        howManyToDelete = arguments[1];
+                    }
+                    var needToAdd = arguments.length > 2;
+                    var deleted = [];
+                    while (!rowset.empty && deleted.length < howManyToDelete) {
+                        var rowToDelete = rowset.getRow(beginToDeleteAt + 1);
+                        deleted.push(rowToDelete);
+                        rowset.deleteAt(beginToDeleteAt, needToAdd);
+                    }
+                    var insertAt = beginToDeleteAt;
+                    for (var a = 2; a < arguments.length; a++) {
+                        if (arguments[a].unwrap) {
+                            rowset.insertAt(insertAt, arguments[a].unwrap(), a < arguments.length - 1);
+                            insertAt++;
+                        }
+                    }
+                    return deleted;
+                } else {
+                    return [];
+                }
+            }
+        });
+        Object.defineProperty(target, "unshift", {
+            value: function() {
+                if (arguments.length > 1) {
+                    for (var a = 0; a < arguments.length; a++) {
+                        if (arguments[a].unwrap) {
+                            rowset.insertAt(a, arguments[a].unwrap(), a < arguments.length - 1);
+                        }
+                    }
+                } else if (arguments.length === 1) {
+                    if (arguments[0].unwrap) {
+                        rowset.insertAt(0, arguments[0].unwrap(), true);
+                        Array.prototype.unshift.call(target, arguments[0]);
+                    }
+                }
+                return target.length;
+            }
+        });
+    }
+
+    RowClass.setPublisher(function(aDelegate) {
+        var nnFields = aDelegate.getFields();
+        var instanceCTor = nnFields.getInstanceConstructor();
+        var target = !!instanceCTor ? new instanceCTor() : {};
+        var nFields = nnFields.toCollection();
+        // plain mutable properties
+        for (var n = 0; n < nFields.length; n++) {
+            (function() {
+                var colIndex = n + 1;
+                var nField = nFields[n];
+                var valueAccessorDesc = {
+                    get : function(){
+                        return boxAsJs(aDelegate.getColumnObject(colIndex));
+                    },
+                    set : function(aValue){
+                        aDelegate.setColumnObject(colIndex, boxAsJava(aValue));
+                    }
+                };
+                Object.defineProperty(target, nField.name, valueAccessorDesc);
+                Object.defineProperty(target, n, valueAccessorDesc);
+            })();
+            if(!target.schema)
+                Object.defineProperty(target, "schema", {value : nFields.getPublished()});
+        }
+        // ORM mutable scalar and readonly collection properties
+        var ormDefs = nnFields.getOrmDefinitions();
+        for(var o in ormDefs.keySet()){
+            var def = ormDefs.get(o);
+            Object.defineProperty(target, o, def);
+        }
+        aDelegate.setPublished(target);
+        // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
+    });
+    FieldsClass.setPublisher(function(aDelegate) {
+        var target = {};
+        var nFields = aDelegate.toCollection();
+        for (var n = 0; n < nFields.length; n++) {
+            (function() {
+                var nField = nFields[n];
+                var pField = nField.getPublished();
+                Object.defineProperty(target, nField.name, {
+                    value: pField
+                });
+                Object.defineProperty(target, n, {
+                    value: pField
+                });
+            })();
+        }
+        Object.defineProperty(target, "length", {
+            value: nFields.length
+        });
+        aDelegate.setPublished(target);
+    });
+
+    extend(BoundArray, Array);
+    extend(P.ApplicationDbEntity, BoundArray);
+    extend(P.ApplicationPlatypusEntity, BoundArray);
+    extend(P.ApplicationDbParametersEntity, BoundArray);
+    extend(P.ApplicationPlatypusParametersEntity, BoundArray);
+
     /**
      * @static
      * @param {type} aName
@@ -192,18 +430,66 @@ load("classpath:internals.js");
         } else {
             aTarget = new modelCTor(model);
         }
-        Object.defineProperty(aTarget, "params", {
-            value: model.getParametersEntity().getPublished()
-        });
+        function publishEntity(aEntity, aName) {
+            var published = EngineUtilsClass.unwrap(aEntity.getPublished());
+            var pSchema = {};
+            Object.defineProperty(published, "schema", {
+                value: pSchema
+            });
+            var nFields = aEntity.getFields().toCollection();
+            for (var n = 0; n < nFields.length; n++) {
+                (function() {
+                    var nField = nFields[n];
+                    // params shortcuts
+                    if (aEntity instanceof P.ApplicationDbParametersEntity
+                            || aEntity instanceof P.ApplicationPlatypusParametersEntity) {
+                        var valueDesc = {
+                            get: function() {
+                                return boxAsJs(nField.value);
+                            },
+                            set: function(aValue) {
+                                nField.value = boxAsJava(aValue);
+                            }
+                        };
+                        Object.defineProperty(published, nField.name, valueDesc);
+                        Object.defineProperty(published, n, valueDesc);
+                    }
+                    // schema
+                    var schemaDesc = {
+                        value: nField.getPublished()
+                    };
+                    Object.defineProperty(pSchema, nField.name, schemaDesc);
+                    Object.defineProperty(pSchema, n, schemaDesc);
+                })();
+            }
+            // params shortcuts
+            if (aEntity instanceof P.ApplicationDbParametersEntity
+                    || aEntity instanceof P.ApplicationPlatypusParametersEntity) {
+                Object.defineProperty(published, "length", {
+                    get: function() {
+                        return nFields.length;
+                    }
+                });
+            }
+            Object.defineProperty(pSchema, "length", {
+                get: function() {
+                    return nFields.length;
+                }
+            });
+            Object.defineProperty(aTarget, aName, {
+                value: published
+            });
+        }
+        var pEntity = model.getParametersEntity();
+        publishEntity(pEntity, "params");
         var entities = model.entities();
         for (var e in entities) {
             var entity = entities[e];
             if (entity.name) {
-                Object.defineProperty(aTarget, entity.name, {
-                    value: entity.getPublished()
-                });
+                publishEntity(entity, entity.name);
             }
         }
+        model.createORMDefinitions();
         return aTarget;
     };
     /**
@@ -315,7 +601,7 @@ load("classpath:internals.js");
      * @param {type} aValue
      * @returns {unresolved}
      */
-    P.boxAsJava = function(aValue) {
+    function boxAsJava(aValue) {
         //---------------------- Don't change to !== because of undefined 
         if (arguments.length > 0 && aValue != null) {
             if (aValue.unwrap) {
@@ -327,13 +613,17 @@ load("classpath:internals.js");
         } else {// undefined -> null
             return null;
         }
-    };
+    }
+    ;
+    Object.defineProperty(P, "boxAsJava", {
+        value: boxAsJava
+    });
     /**
      * @private
      * @param {type} aValue
      * @returns {unresolved}
      */
-    P.boxAsJs = function(aValue) {
+    function boxAsJs(aValue) {
         if (aValue) {
             if (aValue.getPublished) {
                 if (arguments.length > 1) {
@@ -348,9 +638,9 @@ load("classpath:internals.js");
                 var converted = [];
                 for (var i = 0; i < aValue.length; i++) {
                     if (arguments.length > 1) {
-                        converted[converted.length] = P.boxAsJs(aValue[i], arguments[1]);
+                        converted[converted.length] = boxAsJs(aValue[i], arguments[1]);
                     } else {
-                        converted[converted.length] = P.boxAsJs(aValue[i]);
+                        converted[converted.length] = boxAsJs(aValue[i]);
                     }
                 }
                 return converted;
@@ -358,7 +648,11 @@ load("classpath:internals.js");
             aValue = EngineUtilsClass.unwrap(aValue);
         }
         return aValue;
-    };
+    }
+    ;
+    Object.defineProperty(P, "boxAsJs", {
+        value: boxAsJs
+    });
 
     var Resource = {};
     Object.defineProperty(Resource, "load", {
@@ -677,7 +971,7 @@ load("classpath:internals.js");
             return colorDialog(title, color);
         }
     }
-    
+
     Object.defineProperty(P, "selectColor", {
         value: selectColor
     });

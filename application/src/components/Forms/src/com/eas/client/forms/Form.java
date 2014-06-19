@@ -1083,6 +1083,7 @@ public class Form implements HasPublished {
         return alwaysOnTop;
     }
 
+    @ScriptFunction()
     public void setAlwaysOnTop(boolean aValue) {
         alwaysOnTop = aValue;
         if (surface instanceof JDialog) {

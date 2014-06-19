@@ -10,7 +10,7 @@
      * @param vgap the vertical gap (optional).
      * @constructor BorderPane BorderPane
      */
-    P.BorderPane = function (hgap, vgap) {
+    P.BorderPane = function BorderPane(hgap, vgap) {
 
         var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
@@ -20,12 +20,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(BorderPane.superclass)
+            BorderPane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

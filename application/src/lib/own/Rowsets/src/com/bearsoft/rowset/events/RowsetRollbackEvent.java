@@ -10,13 +10,13 @@ import com.bearsoft.rowset.Rowset;
  *
  * @author mg
  */
-public class RowsetRollbackEvent extends RowsetEvent{
-    
+public class RowsetRollbackEvent extends RowsetEvent {
+
     /**
      * The event constructor.
+     * @param source
      */
-    public RowsetRollbackEvent(Rowset source)
-    {
+    public RowsetRollbackEvent(Rowset source) {
         super(source, RowsetEventMoment.AFTER);
     }
 }

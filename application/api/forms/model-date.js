@@ -8,7 +8,7 @@
      * A model component that shows a date.
      * @constructor ModelDate ModelDate
      */
-    P.ModelDate = function () {
+    P.ModelDate = function ModelDate() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelDate.superclass)
+            ModelDate.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

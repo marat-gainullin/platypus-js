@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function () {
+    P.ReportTemplate = function ReportTemplate() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ReportTemplate.superclass)
+            ReportTemplate.superclass.constructor.apply(this, arguments);
         /**
          * Generate report from template.
          * @method generateReport

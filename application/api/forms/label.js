@@ -11,7 +11,7 @@
      * @param iconTextGap the text gap (optional)
      * @constructor Label Label
      */
-    P.Label = function (text, icon, iconTextGap) {
+    P.Label = function Label(text, icon, iconTextGap) {
 
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
@@ -22,12 +22,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Label.superclass)
+            Label.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

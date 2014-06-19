@@ -10,9 +10,12 @@
 package com.bearsoft.rowset.metadata;
 
 import com.bearsoft.rowset.utils.CollectionEditingSupport;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This class is intended to hold rowset's fields information. Supports clone,
@@ -22,12 +25,15 @@ import java.util.*;
 public class Fields implements HasPublished {
 
     private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
+    private static JSObject publisher;
     protected String tableDescription;
     protected List<Field> fields = new ArrayList<>();
     // Map of field name to it's index (0-based)
     protected Map<String, Integer> fieldsHash;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
+    protected JSObject instanceConstructor;
+    protected Map<String, Object> ormDefinitions = new HashMap<>();
     protected Object published;
 
     /**
@@ -59,6 +65,31 @@ public class Fields implements HasPublished {
                 setTableDescription(sDesc);
             }
         }
+    }
+
+    /**
+     * Rowset's rows' wrapper class-closure function
+     *
+     * @return
+     */
+    public JSObject getInstanceConstructor() {
+        return instanceConstructor;
+    }
+
+    public void setInstanceConstructor(JSObject aValue) {
+        instanceConstructor = aValue;
+    }
+
+    public void putOrmDefinition(String aName, JSObject aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormDefinitions.containsKey(aName)) {
+                ormDefinitions.put(aName, aDefinition);
+            }
+        }
+    }
+
+    public Map<String, Object> getOrmDefinitions() {
+        return Collections.unmodifiableMap(ormDefinitions);
     }
 
     public PropertyChangeSupport getChangeSupport() {
@@ -183,7 +214,7 @@ public class Fields implements HasPublished {
             Field param = fields.get(i);
             String paramName = param.getName();
             if (paramName != null && paramName.toLowerCase().startsWith(aPrefix.toLowerCase())) {
-                int existingNumber = 1;
+                int existingNumber;
                 String maybeNumber = paramName.substring(aPrefix.length());
                 if (maybeNumber != null && !maybeNumber.isEmpty()) {
                     try {
@@ -243,6 +274,7 @@ public class Fields implements HasPublished {
     /**
      * Creates new field with the specified name.
      *
+     * @param aName
      * @return New <code>Field</code> instance.
      * @see #createNewField()
      * @see #getDefaultNamePrefix()
@@ -412,17 +444,13 @@ public class Fields implements HasPublished {
         }
 
         List<Field> oldFields = new ArrayList<>();
-        for (Field f : fields) {
-            oldFields.add(f);
-        }
+        oldFields.addAll(fields);
         Field[] farr = new Field[newOrder.length];
         for (int i = 0; i < oldFields.size(); i++) {
             farr[newOrder[i] - 1] = oldFields.get(i);
         }
         fields = new ArrayList<>();
-        for (int i = 0; i < farr.length; i++) {
-            fields.add(farr[i]);
-        }
+        fields.addAll(Arrays.asList(farr));
         invalidateFieldsHash();
         collectionSupport.fireReodered();
 
@@ -522,11 +550,24 @@ public class Fields implements HasPublished {
 
     @Override
     public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 
     @Override
     public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

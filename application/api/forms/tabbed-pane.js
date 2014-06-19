@@ -9,7 +9,7 @@
      * clicking on a tab with a given title and/or icon.
      * @constructor TabbedPane TabbedPane
      */
-    P.TabbedPane = function () {
+    P.TabbedPane = function TabbedPane() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -17,12 +17,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(TabbedPane.superclass)
+            TabbedPane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
@@ -66,21 +66,6 @@
             get: function() {
                 var value = delegate.parent;
                 return P.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Selected tab change event handler function.
-         * @property onStateChanged
-         * @memberOf TabbedPane
-         */
-        Object.defineProperty(this, "onStateChanged", {
-            get: function() {
-                var value = delegate.onStateChanged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onStateChanged = P.boxAsJava(aValue);
             }
         });
 

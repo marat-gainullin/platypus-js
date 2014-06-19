@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor AppPlatypusPrincipal AppPlatypusPrincipal
      */
-    P.AppPlatypusPrincipal = function () {
+    P.AppPlatypusPrincipal = function AppPlatypusPrincipal() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(AppPlatypusPrincipal.superclass)
+            AppPlatypusPrincipal.superclass.constructor.apply(this, arguments);
         /**
          * The username..
          * @property name

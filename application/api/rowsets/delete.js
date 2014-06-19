@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor Delete Delete
      */
-    P.Delete = function () {
+    P.Delete = function Delete() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Delete.superclass)
+            Delete.superclass.constructor.apply(this, arguments);
         /**
          * Indicated if the change is consumed.
          * @property consumed

@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor MouseEvent MouseEvent
      */
-    P.MouseEvent = function () {
+    P.MouseEvent = function MouseEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(MouseEvent.superclass)
+            MouseEvent.superclass.constructor.apply(this, arguments);
         /**
          * Which, if any, of the mouse buttons has changed state.
          * Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.

@@ -173,12 +173,15 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 							tabs.selectTab(content);
 							pp.hide();
 							Widget targetTab = tabs.getTabWidget(content);
-							int tabCenterX = targetTab.getParent().getElement().getOffsetLeft() + targetTab.getParent().getElement().getOffsetWidth() / 2;
-							int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
+							int tabCenterX = targetTab.getParent().getElement().getOffsetLeft()
+									+ targetTab.getParent().getElement().getOffsetWidth() / 2;
+							int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth()
+									- chevron.getElement().getOffsetWidth();
 							int newOffsetLeft = tabBarParentWidth / 2 - tabCenterX;
 
 							Widget lastTab = tabs.getTabWidget(tabs.getWidgetCount() - 1);
-							int rightMostX = lastTab.getParent().getElement().getOffsetLeft() + lastTab.getParent().getElement().getOffsetWidth();
+							int rightMostX = lastTab.getParent().getElement().getOffsetLeft()
+									+ lastTab.getParent().getElement().getOffsetWidth();
 							int width = rightMostX + newOffsetLeft;
 							if (width > tabBarParentWidth) {
 								tabBar.getElement().getStyle().setLeft(Math.min(newOffsetLeft, 0), Style.Unit.PX);
@@ -194,7 +197,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 						imageUri = UriUtils.fromTrustedString(image.getUrl());
 					} else if (w instanceof HasImageResource) {
 						HasImageResource imageHost = (HasImageResource) w;
-						imageUri = imageHost.getImageResource().getSafeUri();
+						if (imageHost.getImageResource() != null) {
+							imageUri = imageHost.getImageResource().getSafeUri();
+						}
 					}
 					if (w instanceof HasHTML) {
 						HasHTML h = (HasHTML) w;

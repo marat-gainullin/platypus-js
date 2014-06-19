@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor PieChart PieChart
      */
-    P.PieChart = function () {
+    P.PieChart = function PieChart() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(PieChart.superclass)
+            PieChart.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

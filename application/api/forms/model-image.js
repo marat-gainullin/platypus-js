@@ -8,7 +8,7 @@
      * A model component that shows an image.
      * @constructor ModelImage ModelImage
      */
-    P.ModelImage = function () {
+    P.ModelImage = function ModelImage() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ModelImage.superclass)
+            ModelImage.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

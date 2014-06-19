@@ -59,31 +59,31 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
 	public static final String BAD_FLOW_PROVIDER_RESULT_MSG = "Flow Provider must return at least an empty rowset";
 	// multi-tier transactions support
-	protected String sessionId = null;
+	protected String sessionId;
 	// support for data flows.
-	protected FlowProvider flow = null;
+	protected FlowProvider flow;
 	protected TransactionListener.Registration transactionRegisration;
 	// rowset's metadata
-	protected Fields fields = null;
+	protected Fields fields;
 	// rowset's data
 	protected List<Row> original = new ArrayList<>();
 	protected List<Row> current = new ArrayList<>();
 	// data view capabilities
-	protected int currentRowPos = 0; // before first position
-	protected boolean showOriginal = false;
+	protected int currentRowPos; // before first position
+	protected boolean showOriginal;
 	// data processing
 	protected Set<Filter> filters = new HashSet<>(); // filters
 	protected Set<Locator> locators = new HashSet<>(); // locators
-	protected Filter activeFilter = null;
-	protected Row insertingRow = null;
+	protected Filter activeFilter;
+	protected Row insertingRow;
 	// client code interaction
 	protected PropertyChangeSupport propertyChangeSupport;
 	protected RowsetChangeSupport rowsetChangeSupport;
 	protected OrderersFactory orderersFactory;
 	protected boolean pending;
-	protected boolean transacted = false;
+	protected boolean transacted;
 	protected boolean immediateFilter = true;
-	protected boolean modified = false;
+	protected boolean modified;
 
 	/**
 	 * Simple constructor.

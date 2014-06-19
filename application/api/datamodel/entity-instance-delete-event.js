@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor EntityInstanceDeleteEvent EntityInstanceDeleteEvent
      */
-    P.EntityInstanceDeleteEvent = function () {
+    P.EntityInstanceDeleteEvent = function EntityInstanceDeleteEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(EntityInstanceDeleteEvent.superclass)
+            EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
         /**
          * The deleted element.
          * @property deleted

@@ -11,7 +11,7 @@
      * @param text the text for the menu label (optional).
      * @constructor Menu Menu
      */
-    P.Menu = function (text) {
+    P.Menu = function Menu(text) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -20,12 +20,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Menu.superclass)
+            Menu.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

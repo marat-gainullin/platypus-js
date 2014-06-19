@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor FocusEvent FocusEvent
      */
-    P.FocusEvent = function () {
+    P.FocusEvent = function FocusEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(FocusEvent.superclass)
+            FocusEvent.superclass.constructor.apply(this, arguments);
         /**
          * The source component object of the event.
          * @property source

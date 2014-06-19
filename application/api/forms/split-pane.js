@@ -9,7 +9,7 @@
      * @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).
      * @constructor SplitPane SplitPane
      */
-    P.SplitPane = function (orientation) {
+    P.SplitPane = function SplitPane(orientation) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(SplitPane.superclass)
+            SplitPane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

@@ -13,7 +13,7 @@
      * @param actionPerformed the function for the action performed handler (optional)
      * @constructor ToggleButton ToggleButton
      */
-    P.ToggleButton = function (text, icon, iconTextGap, actionPerformed) {
+    P.ToggleButton = function ToggleButton(text, icon, iconTextGap, actionPerformed) {
 
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
@@ -25,12 +25,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ToggleButton.superclass)
+            ToggleButton.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

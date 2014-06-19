@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ContainerEvent ContainerEvent
      */
-    P.ContainerEvent = function () {
+    P.ContainerEvent = function ContainerEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ContainerEvent.superclass)
+            ContainerEvent.superclass.constructor.apply(this, arguments);
         /**
          * The source component object of the event.
          * @property source

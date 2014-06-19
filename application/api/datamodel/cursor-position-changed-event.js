@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor CursorPositionChangedEvent CursorPositionChangedEvent
      */
-    P.CursorPositionChangedEvent = function () {
+    P.CursorPositionChangedEvent = function CursorPositionChangedEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(CursorPositionChangedEvent.superclass)
+            CursorPositionChangedEvent.superclass.constructor.apply(this, arguments);
         /**
          * Cursor position the cursor was on.
          * @property oldIndex

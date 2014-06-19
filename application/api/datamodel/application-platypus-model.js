@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ApplicationPlatypusModel ApplicationPlatypusModel
      */
-    P.ApplicationPlatypusModel = function () {
+    P.ApplicationPlatypusModel = function ApplicationPlatypusModel() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(ApplicationPlatypusModel.superclass)
+            ApplicationPlatypusModel.superclass.constructor.apply(this, arguments);
         /**
          * Saves model data changes. Calls aCallback when done.
          * If model can't apply the changed, than exception is thrown.

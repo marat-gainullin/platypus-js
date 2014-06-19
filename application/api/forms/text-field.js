@@ -9,7 +9,7 @@
      * @param text the initial text for the component (optional)
      * @constructor TextField TextField
      */
-    P.TextField = function (text) {
+    P.TextField = function TextField(text) {
 
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
@@ -18,12 +18,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(TextField.superclass)
+            TextField.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

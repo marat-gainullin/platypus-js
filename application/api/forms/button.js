@@ -12,7 +12,7 @@
      * @param actionPerformed the function for the action performed handler(optional)
      * @constructor Button Button
      */
-    P.Button = function (text, icon, iconTextGap, actionPerformed) {
+    P.Button = function Button(text, icon, iconTextGap, actionPerformed) {
 
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
@@ -24,12 +24,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(Button.superclass)
+            Button.superclass.constructor.apply(this, arguments);
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor

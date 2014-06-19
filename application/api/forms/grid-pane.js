@@ -12,7 +12,7 @@
      * @param vgap the vertical gap (optional).
      * @constructor GridPane GridPane
      */
-    P.GridPane = function (rows, cols, hgap, vgap) {
+    P.GridPane = function GridPane(rows, cols, hgap, vgap) {
 
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
@@ -24,12 +24,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(GridPane.superclass)
+            GridPane.superclass.constructor.apply(this, arguments);
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;

@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor DbPlatypusPrincipal DbPlatypusPrincipal
      */
-    P.DbPlatypusPrincipal = function () {
+    P.DbPlatypusPrincipal = function DbPlatypusPrincipal() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(DbPlatypusPrincipal.superclass)
+            DbPlatypusPrincipal.superclass.constructor.apply(this, arguments);
         /**
          * The username..
          * @property name

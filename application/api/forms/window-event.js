@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor WindowEvent WindowEvent
      */
-    P.WindowEvent = function () {
+    P.WindowEvent = function WindowEvent() {
 
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
@@ -16,12 +16,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
+        if(WindowEvent.superclass)
+            WindowEvent.superclass.constructor.apply(this, arguments);
         /**
          * The source component object of the event.
          * @property source
