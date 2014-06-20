@@ -9,7 +9,6 @@
      * @constructor ScriptableColumn ScriptableColumn
      */
     P.ScriptableColumn = function ScriptableColumn() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,139 +21,178 @@
         });
         if(ScriptableColumn.superclass)
             ScriptableColumn.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "ScriptableColumn", {value: ScriptableColumn});
+    Object.defineProperty(ScriptableColumn.prototype, "visible", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.visible;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.visible = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * Determines if column is visible.
          * @property visible
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.visible = true;
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "readonly", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.readonly;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.readonly = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * Determines if column is readonly.
          * @property readonly
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "readonly", {
-            get: function() {
-                var value = delegate.readonly;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.readonly = true;
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "onRender", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onRender;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onRender = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * On render column event.
          * @property onRender
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "onRender", {
-            get: function() {
-                var value = delegate.onRender;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onRender = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.onRender = {};
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "name", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.name;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * The name of the column.
          * @property name
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.ScriptableColumn.prototype.name = '';
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "width", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.width;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.width = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * Width of the column.
          * @property width
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "width", {
-            get: function() {
-                var value = delegate.width;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.width = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.width = 0;
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "resizeable", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.resizeable;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.resizeable = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * Determines if column is resizeable.
          * @property resizeable
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "resizeable", {
-            get: function() {
-                var value = delegate.resizeable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.resizeable = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.resizeable = true;
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "sortable", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.sortable;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.sortable = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * Determines if column is sortable.
          * @property sortable
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "sortable", {
-            get: function() {
-                var value = delegate.sortable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.sortable = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.sortable = true;
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "title", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.title;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.title = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * The title of the column.
          * @property title
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "title", {
-            get: function() {
-                var value = delegate.title;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.title = P.boxAsJava(aValue);
-            }
-        });
-
+        P.ScriptableColumn.prototype.title = '';
+    }
+    Object.defineProperty(ScriptableColumn.prototype, "onSelect", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onSelect;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onSelect = P.boxAsJava(aValue);
+        }
+    });
+    if(!ScriptableColumn){
         /**
          * On select column event.
          * @property onSelect
          * @memberOf ScriptableColumn
          */
-        Object.defineProperty(this, "onSelect", {
-            get: function() {
-                var value = delegate.onSelect;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onSelect = P.boxAsJava(aValue);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.ScriptableColumn.prototype.onSelect = {};
+    }
 })();

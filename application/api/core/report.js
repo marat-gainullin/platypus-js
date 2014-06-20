@@ -9,7 +9,6 @@
      * @constructor Report Report
      */
     P.Report = function Report(aReport, aFormat, aName) {
-
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -25,49 +24,56 @@
         });
         if(Report.superclass)
             Report.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "Report", {value: Report});
+    Object.defineProperty(Report.prototype, "print", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.print();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Report){
         /**
          * Runs printing.
          * @method print
          * @memberOf Report
          */
-        Object.defineProperty(this, "print", {
-            get: function() {
-                return function() {
-                    var value = delegate.print();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Report.prototype.print = function(){};
+    }
+    Object.defineProperty(Report.prototype, "save", {
+        value: function(aFileName) {
+            var delegate = this.unwrap();
+            var value = delegate.save(P.boxAsJava(aFileName));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Report){
         /**
          * Saves the report at a specified location.
          * @method save
          * @memberOf Report
          * @param aFileName Name of a file, the generated report should be save in. */
-        Object.defineProperty(this, "save", {
-            get: function() {
-                return function(aFileName) {
-                    var value = delegate.save(P.boxAsJava(aFileName));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Report.prototype.save = function(aFileName){};
+    }
+    Object.defineProperty(Report.prototype, "show", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.show();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Report){
         /**
          * Shows report as Excel application.
          * @method show
          * @memberOf Report
          */
-        Object.defineProperty(this, "show", {
-            get: function() {
-                return function() {
-                    var value = delegate.show();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.Report.prototype.show = function(){};
+    }
 })();

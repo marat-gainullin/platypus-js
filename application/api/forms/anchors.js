@@ -16,7 +16,6 @@
      * @constructor Anchors Anchors
      */
     P.Anchors = function Anchors(left, width, right, top, height, bottom) {
-
         var maxArgs = 6;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -35,7 +34,11 @@
         });
         if(Anchors.superclass)
             Anchors.superclass.constructor.apply(this, arguments);
-
         delegate.setPublished(this);
-    };
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "Anchors", {value: Anchors});
 })();

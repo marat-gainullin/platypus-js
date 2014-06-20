@@ -9,7 +9,6 @@
      * @constructor ChangeValue ChangeValue
      */
     P.ChangeValue = function ChangeValue() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,31 +21,41 @@
         });
         if(ChangeValue.superclass)
             ChangeValue.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "ChangeValue", {value: ChangeValue});
+    Object.defineProperty(ChangeValue.prototype, "name", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.name;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!ChangeValue){
         /**
          * Name of changed property.
          * @property name
          * @memberOf ChangeValue
          */
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.ChangeValue.prototype.name = '';
+    }
+    Object.defineProperty(ChangeValue.prototype, "value", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.value;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!ChangeValue){
         /**
          * New value.
          * @property value
          * @memberOf ChangeValue
          */
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.ChangeValue.prototype.value = {};
+    }
 })();

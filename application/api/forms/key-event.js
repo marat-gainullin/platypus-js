@@ -9,7 +9,6 @@
      * @constructor KeyEvent KeyEvent
      */
     P.KeyEvent = function KeyEvent() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,79 +21,101 @@
         });
         if(KeyEvent.superclass)
             KeyEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "KeyEvent", {value: KeyEvent});
+    Object.defineProperty(KeyEvent.prototype, "altDown", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.altDown;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!KeyEvent){
         /**
          * Alt key is down on this event.
          * @property altDown
          * @memberOf KeyEvent
          */
-        Object.defineProperty(this, "altDown", {
-            get: function() {
-                var value = delegate.altDown;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.KeyEvent.prototype.altDown = true;
+    }
+    Object.defineProperty(KeyEvent.prototype, "controlDown", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.controlDown;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!KeyEvent){
         /**
          * Ctrl key is down on this event.
          * @property controlDown
          * @memberOf KeyEvent
          */
-        Object.defineProperty(this, "controlDown", {
-            get: function() {
-                var value = delegate.controlDown;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.KeyEvent.prototype.controlDown = true;
+    }
+    Object.defineProperty(KeyEvent.prototype, "shiftDown", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.shiftDown;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!KeyEvent){
         /**
          * Shift key is down on this event.
          * @property shiftDown
          * @memberOf KeyEvent
          */
-        Object.defineProperty(this, "shiftDown", {
-            get: function() {
-                var value = delegate.shiftDown;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.KeyEvent.prototype.shiftDown = true;
+    }
+    Object.defineProperty(KeyEvent.prototype, "metaDown", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.metaDown;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!KeyEvent){
         /**
          * Meta key is down on this event.
          * @property metaDown
          * @memberOf KeyEvent
          */
-        Object.defineProperty(this, "metaDown", {
-            get: function() {
-                var value = delegate.metaDown;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.KeyEvent.prototype.metaDown = true;
+    }
+    Object.defineProperty(KeyEvent.prototype, "source", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.source;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!KeyEvent){
         /**
          * The source component object of the event.
          * @property source
          * @memberOf KeyEvent
          */
-        Object.defineProperty(this, "source", {
-            get: function() {
-                var value = delegate.source;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.KeyEvent.prototype.source = {};
+    }
+    Object.defineProperty(KeyEvent.prototype, "key", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.key;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!KeyEvent){
         /**
          * Key code associated with this event.
          * @property key
          * @memberOf KeyEvent
          */
-        Object.defineProperty(this, "key", {
-            get: function() {
-                var value = delegate.key;
-                return P.boxAsJs(value);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.KeyEvent.prototype.key = 0;
+    }
 })();

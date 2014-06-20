@@ -9,7 +9,6 @@
      * @constructor Field Field
      */
     P.Field = function Field() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,138 +21,192 @@
         });
         if(Field.superclass)
             Field.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "Field", {value: Field});
+    Object.defineProperty(Field.prototype, "typeInfo", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.typeInfo;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.typeInfo = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The field's type information.
          * @property typeInfo
          * @memberOf Field
          */
-        Object.defineProperty(this, "typeInfo", {
-            get: function() {
-                var value = delegate.typeInfo;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.typeInfo = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.typeInfo = {};
+    }
+    Object.defineProperty(Field.prototype, "nullable", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.nullable;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.nullable = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * Determines if field is nullable.
          * @property nullable
          * @memberOf Field
          */
-        Object.defineProperty(this, "nullable", {
-            get: function() {
-                var value = delegate.nullable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nullable = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.nullable = true;
+    }
+    Object.defineProperty(Field.prototype, "fk", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.fk;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Field){
         /**
          * Indicates that this field is a foreign key to another table or it is a self-reference key.
          * @property fk
          * @memberOf Field
          */
-        Object.defineProperty(this, "fk", {
-            get: function() {
-                var value = delegate.fk;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.Field.prototype.fk = true;
+    }
+    Object.defineProperty(Field.prototype, "precision", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.precision;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.precision = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The precision of the field.
          * @property precision
          * @memberOf Field
          */
-        Object.defineProperty(this, "precision", {
-            get: function() {
-                var value = delegate.precision;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.precision = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.precision = 0;
+    }
+    Object.defineProperty(Field.prototype, "scale", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.scale;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.scale = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The scale of the field.
          * @property scale
          * @memberOf Field
          */
-        Object.defineProperty(this, "scale", {
-            get: function() {
-                var value = delegate.scale;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.scale = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.scale = 0;
+    }
+    Object.defineProperty(Field.prototype, "description", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.description;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.description = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The description of the field.
          * @property description
          * @memberOf Field
          */
-        Object.defineProperty(this, "description", {
-            get: function() {
-                var value = delegate.description;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.description = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.description = '';
+    }
+    Object.defineProperty(Field.prototype, "signed", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.signed;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.signed = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * Determines if the field is signed.
          * @property signed
          * @memberOf Field
          */
-        Object.defineProperty(this, "signed", {
-            get: function() {
-                var value = delegate.signed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.signed = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.signed = true;
+    }
+    Object.defineProperty(Field.prototype, "schemaName", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.schemaName;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.schemaName = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * This field schema name.
          * @property schemaName
          * @memberOf Field
          */
-        Object.defineProperty(this, "schemaName", {
-            get: function() {
-                var value = delegate.schemaName;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.schemaName = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.schemaName = '';
+    }
+    Object.defineProperty(Field.prototype, "tableName", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.tableName;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.tableName = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * This field table's name.
          * @property tableName
          * @memberOf Field
          */
-        Object.defineProperty(this, "tableName", {
-            get: function() {
-                var value = delegate.tableName;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.tableName = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.tableName = '';
+    }
+    Object.defineProperty(Field.prototype, "originalName", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.originalName;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.originalName = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The original name of the field.
          * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
@@ -161,77 +214,82 @@
          * @property originalName
          * @memberOf Field
          */
-        Object.defineProperty(this, "originalName", {
-            get: function() {
-                var value = delegate.originalName;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.originalName = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.originalName = '';
+    }
+    Object.defineProperty(Field.prototype, "size", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.size;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.size = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The size of the field.
          * @property size
          * @memberOf Field
          */
-        Object.defineProperty(this, "size", {
-            get: function() {
-                var value = delegate.size;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.size = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.size = 0;
+    }
+    Object.defineProperty(Field.prototype, "readonly", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.readonly;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.readonly = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * Determines if this field is readonly.
          * @property readonly
          * @memberOf Field
          */
-        Object.defineProperty(this, "readonly", {
-            get: function() {
-                var value = delegate.readonly;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.readonly = true;
+    }
+    Object.defineProperty(Field.prototype, "name", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.name;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.name = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * The name of the field.
          * @property name
          * @memberOf Field
          */
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.name = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Field.prototype.name = '';
+    }
+    Object.defineProperty(Field.prototype, "pk", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.pk;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.pk = P.boxAsJava(aValue);
+        }
+    });
+    if(!Field){
         /**
          * Determines that this field is a primary key.
          * @property pk
          * @memberOf Field
          */
-        Object.defineProperty(this, "pk", {
-            get: function() {
-                var value = delegate.pk;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.pk = P.boxAsJava(aValue);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.Field.prototype.pk = true;
+    }
 })();

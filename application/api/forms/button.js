@@ -13,7 +13,6 @@
      * @constructor Button Button
      */
     P.Button = function Button(text, icon, iconTextGap, actionPerformed) {
-
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -30,652 +29,824 @@
         });
         if(Button.superclass)
             Button.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "Button", {value: Button});
+    Object.defineProperty(Button.prototype, "cursor", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.cursor;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.cursor = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * The mouse <code>Cursor</code> over this component.
          * @property cursor
          * @memberOf Button
          */
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.cursor = {};
+    }
+    Object.defineProperty(Button.prototype, "onMouseDragged", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseDragged;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseDragged = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse dragged event handler function.
          * @property onMouseDragged
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseDragged = {};
+    }
+    Object.defineProperty(Button.prototype, "parent", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.parent;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Button){
         /**
          * Gets the parent of this component.
          * @property parent
          * @memberOf Button
          */
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.Button.prototype.parent = {};
+    }
+    Object.defineProperty(Button.prototype, "onMouseReleased", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseReleased;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseReleased = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse released event handler function.
          * @property onMouseReleased
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseReleased", {
-            get: function() {
-                var value = delegate.onMouseReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseReleased = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseReleased = {};
+    }
+    Object.defineProperty(Button.prototype, "onFocusLost", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onFocusLost;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onFocusLost = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Keyboard focus lost by the component event handler function.
          * @property onFocusLost
          * @memberOf Button
          */
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onFocusLost = {};
+    }
+    Object.defineProperty(Button.prototype, "icon", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.icon;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.icon = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Image picture for the button.
          * @property icon
          * @memberOf Button
          */
-        Object.defineProperty(this, "icon", {
-            get: function() {
-                var value = delegate.icon;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.icon = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.icon = {};
+    }
+    Object.defineProperty(Button.prototype, "onMousePressed", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMousePressed;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMousePressed = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse pressed event handler function.
          * @property onMousePressed
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMousePressed", {
-            get: function() {
-                var value = delegate.onMousePressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMousePressed = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMousePressed = {};
+    }
+    Object.defineProperty(Button.prototype, "foreground", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.foreground;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.foreground = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * The foreground color of this component.
          * @property foreground
          * @memberOf Button
          */
-        Object.defineProperty(this, "foreground", {
-            get: function() {
-                var value = delegate.foreground;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.foreground = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.foreground = {};
+    }
+    Object.defineProperty(Button.prototype, "error", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.error;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Button){
         /**
          * An error message of this component.
          * Validation procedure may set this property and subsequent focus lost event will clear it.
          * @property error
          * @memberOf Button
          */
-        Object.defineProperty(this, "error", {
-            get: function() {
-                var value = delegate.error;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.Button.prototype.error = '';
+    }
+    Object.defineProperty(Button.prototype, "enabled", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.enabled;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.enabled = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
          * @property enabled
          * @memberOf Button
          */
-        Object.defineProperty(this, "enabled", {
-            get: function() {
-                var value = delegate.enabled;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.enabled = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.enabled = true;
+    }
+    Object.defineProperty(Button.prototype, "onComponentMoved", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onComponentMoved;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onComponentMoved = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Component moved event handler function.
          * @property onComponentMoved
          * @memberOf Button
          */
-        Object.defineProperty(this, "onComponentMoved", {
-            get: function() {
-                var value = delegate.onComponentMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentMoved = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onComponentMoved = {};
+    }
+    Object.defineProperty(Button.prototype, "componentPopupMenu", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.componentPopupMenu;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.componentPopupMenu = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * <code>PopupMenu</code> that assigned for this component.
          * @property componentPopupMenu
          * @memberOf Button
          */
-        Object.defineProperty(this, "componentPopupMenu", {
-            get: function() {
-                var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.componentPopupMenu = {};
+    }
+    Object.defineProperty(Button.prototype, "top", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.top;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.top = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Vertical coordinate of the component.
          * @property top
          * @memberOf Button
          */
-        Object.defineProperty(this, "top", {
-            get: function() {
-                var value = delegate.top;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.top = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.top = 0;
+    }
+    Object.defineProperty(Button.prototype, "onComponentResized", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onComponentResized;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onComponentResized = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Component resized event handler function.
          * @property onComponentResized
          * @memberOf Button
          */
-        Object.defineProperty(this, "onComponentResized", {
-            get: function() {
-                var value = delegate.onComponentResized;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentResized = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onComponentResized = {};
+    }
+    Object.defineProperty(Button.prototype, "text", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.text;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.text = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Text on the button.
          * @property text
          * @memberOf Button
          */
-        Object.defineProperty(this, "text", {
-            get: function() {
-                var value = delegate.text;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.text = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.text = '';
+    }
+    Object.defineProperty(Button.prototype, "onMouseEntered", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseEntered;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseEntered = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse entered over the component event handler function.
          * @property onMouseEntered
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseEntered", {
-            get: function() {
-                var value = delegate.onMouseEntered;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseEntered = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseEntered = {};
+    }
+    Object.defineProperty(Button.prototype, "toolTipText", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.toolTipText;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.toolTipText = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * The tooltip string that has been set with.
          * @property toolTipText
          * @memberOf Button
          */
-        Object.defineProperty(this, "toolTipText", {
-            get: function() {
-                var value = delegate.toolTipText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf Button
-         */
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.Button.prototype.toolTipText = '';
+    }
+    Object.defineProperty(Button.prototype, "height", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.height;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.height = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Height of the component.
          * @property height
          * @memberOf Button
          */
-        Object.defineProperty(this, "height", {
-            get: function() {
-                var value = delegate.height;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.height = 0;
+    }
+    Object.defineProperty(Button.prototype, "element", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.element;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Button){
+        /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         * @property element
+         * @memberOf Button
+         */
+        P.Button.prototype.element = {};
+    }
+    Object.defineProperty(Button.prototype, "onComponentShown", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onComponentShown;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onComponentShown = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Component shown event handler function.
          * @property onComponentShown
          * @memberOf Button
          */
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onComponentShown = {};
+    }
+    Object.defineProperty(Button.prototype, "onMouseMoved", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseMoved;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseMoved = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse moved event handler function.
          * @property onMouseMoved
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseMoved", {
-            get: function() {
-                var value = delegate.onMouseMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseMoved = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseMoved = {};
+    }
+    Object.defineProperty(Button.prototype, "opaque", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.opaque;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.opaque = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * True if this component is completely opaque.
          * @property opaque
          * @memberOf Button
          */
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.opaque = true;
+    }
+    Object.defineProperty(Button.prototype, "visible", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.visible;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.visible = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Determines whether this component should be visible when its parent is visible.
          * @property visible
          * @memberOf Button
          */
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.visible = true;
+    }
+    Object.defineProperty(Button.prototype, "onComponentHidden", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onComponentHidden;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onComponentHidden = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Component hidden event handler function.
          * @property onComponentHidden
          * @memberOf Button
          */
-        Object.defineProperty(this, "onComponentHidden", {
-            get: function() {
-                var value = delegate.onComponentHidden;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentHidden = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onComponentHidden = {};
+    }
+    Object.defineProperty(Button.prototype, "iconTextGap", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.iconTextGap;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.iconTextGap = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * The amount of space between the text and the icon displayed in this button.
          * @property iconTextGap
          * @memberOf Button
          */
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.iconTextGap = 0;
+    }
+    Object.defineProperty(Button.prototype, "nextFocusableComponent", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.nextFocusableComponent;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.nextFocusableComponent = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
          * @property nextFocusableComponent
          * @memberOf Button
          */
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.nextFocusableComponent = {};
+    }
+    Object.defineProperty(Button.prototype, "onActionPerformed", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onActionPerformed;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onActionPerformed = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Main action performed event handler function.
          * @property onActionPerformed
          * @memberOf Button
          */
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onActionPerformed = {};
+    }
+    Object.defineProperty(Button.prototype, "onKeyReleased", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onKeyReleased;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onKeyReleased = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Key released event handler function.
          * @property onKeyReleased
          * @memberOf Button
          */
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onKeyReleased = {};
+    }
+    Object.defineProperty(Button.prototype, "focusable", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.focusable;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.focusable = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Determines whether this component may be focused.
          * @property focusable
          * @memberOf Button
          */
-        Object.defineProperty(this, "focusable", {
-            get: function() {
-                var value = delegate.focusable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.focusable = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.focusable = true;
+    }
+    Object.defineProperty(Button.prototype, "onKeyTyped", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onKeyTyped;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onKeyTyped = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Key typed event handler function.
          * @property onKeyTyped
          * @memberOf Button
          */
-        Object.defineProperty(this, "onKeyTyped", {
-            get: function() {
-                var value = delegate.onKeyTyped;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyTyped = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onKeyTyped = {};
+    }
+    Object.defineProperty(Button.prototype, "horizontalTextPosition", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.horizontalTextPosition;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.horizontalTextPosition = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Horizontal position of the text relative to the icon.
          * @property horizontalTextPosition
          * @memberOf Button
          */
-        Object.defineProperty(this, "horizontalTextPosition", {
-            get: function() {
-                var value = delegate.horizontalTextPosition;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.horizontalTextPosition = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.horizontalTextPosition = 0;
+    }
+    Object.defineProperty(Button.prototype, "verticalTextPosition", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.verticalTextPosition;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.verticalTextPosition = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Vertical position of the text relative to the icon.
          * @property verticalTextPosition
          * @memberOf Button
          */
-        Object.defineProperty(this, "verticalTextPosition", {
-            get: function() {
-                var value = delegate.verticalTextPosition;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.verticalTextPosition = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.verticalTextPosition = 0;
+    }
+    Object.defineProperty(Button.prototype, "onMouseWheelMoved", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseWheelMoved;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse wheel moved event handler function.
          * @property onMouseWheelMoved
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseWheelMoved", {
-            get: function() {
-                var value = delegate.onMouseWheelMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseWheelMoved = {};
+    }
+    Object.defineProperty(Button.prototype, "component", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.component;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Button){
         /**
          * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          * @property component
          * @memberOf Button
          */
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.Button.prototype.component = {};
+    }
+    Object.defineProperty(Button.prototype, "onFocusGained", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onFocusGained;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onFocusGained = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Keyboard focus gained by the component event.
          * @property onFocusGained
          * @memberOf Button
          */
-        Object.defineProperty(this, "onFocusGained", {
-            get: function() {
-                var value = delegate.onFocusGained;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusGained = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onFocusGained = {};
+    }
+    Object.defineProperty(Button.prototype, "left", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.left;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.left = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Horizontal coordinate of the component.
          * @property left
          * @memberOf Button
          */
-        Object.defineProperty(this, "left", {
-            get: function() {
-                var value = delegate.left;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.left = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.left = 0;
+    }
+    Object.defineProperty(Button.prototype, "background", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.background;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.background = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * The background color of this component.
          * @property background
          * @memberOf Button
          */
-        Object.defineProperty(this, "background", {
-            get: function() {
-                var value = delegate.background;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.background = {};
+    }
+    Object.defineProperty(Button.prototype, "onMouseClicked", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseClicked;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseClicked = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse clicked event handler function.
          * @property onMouseClicked
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseClicked = {};
+    }
+    Object.defineProperty(Button.prototype, "onMouseExited", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onMouseExited;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onMouseExited = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Mouse exited over the component event handler function.
          * @property onMouseExited
          * @memberOf Button
          */
-        Object.defineProperty(this, "onMouseExited", {
-            get: function() {
-                var value = delegate.onMouseExited;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseExited = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onMouseExited = {};
+    }
+    Object.defineProperty(Button.prototype, "name", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.name;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Button){
         /**
          * Gets name of this component.
          * @property name
          * @memberOf Button
          */
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.Button.prototype.name = '';
+    }
+    Object.defineProperty(Button.prototype, "width", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.width;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.width = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Width of the component.
          * @property width
          * @memberOf Button
          */
-        Object.defineProperty(this, "width", {
-            get: function() {
-                var value = delegate.width;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.width = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.width = 0;
+    }
+    Object.defineProperty(Button.prototype, "font", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.font;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.font = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * The font of this component.
          * @property font
          * @memberOf Button
          */
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.font = {};
+    }
+    Object.defineProperty(Button.prototype, "onKeyPressed", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.onKeyPressed;
+            return P.boxAsJs(value);
+        },
+        set: function(aValue) {
+            var delegate = this.unwrap();
+            delegate.onKeyPressed = P.boxAsJava(aValue);
+        }
+    });
+    if(!Button){
         /**
          * Key pressed event handler function.
          * @property onKeyPressed
          * @memberOf Button
          */
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-
+        P.Button.prototype.onKeyPressed = {};
+    }
+    Object.defineProperty(Button.prototype, "focus", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!Button){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Button
          */
-        Object.defineProperty(this, "focus", {
-            get: function() {
-                return function() {
-                    var value = delegate.focus();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.Button.prototype.focus = function(){};
+    }
 })();

@@ -6,7 +6,6 @@
     
 ${JsDoc}
     P.${Name} = function ${Name}(${Params}) {
-
         var maxArgs = ${MaxArgs};
         var ${Delegate} = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,7 +18,7 @@ ${JsDoc}
         });
         if(${Name}.superclass)
             ${Name}.superclass.constructor.apply(this, arguments);
-${Props}
         delegate.setPublished(this);
-    };
-})();
+${Body}    }
+    Object.defineProperty(P, "${Name}", {value: ${Name}});
+${Props}})();

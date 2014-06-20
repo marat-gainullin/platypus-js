@@ -9,7 +9,6 @@
      * @constructor ActionEvent ActionEvent
      */
     P.ActionEvent = function ActionEvent() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,19 +21,26 @@
         });
         if(ActionEvent.superclass)
             ActionEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "ActionEvent", {value: ActionEvent});
+    Object.defineProperty(ActionEvent.prototype, "source", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.source;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!ActionEvent){
         /**
          * The source component object of the event.
          * @property source
          * @memberOf ActionEvent
          */
-        Object.defineProperty(this, "source", {
-            get: function() {
-                var value = delegate.source;
-                return P.boxAsJs(value);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.ActionEvent.prototype.source = {};
+    }
 })();

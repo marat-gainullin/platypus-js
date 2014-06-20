@@ -60,13 +60,14 @@ public class Classes2Scripts {
     private static final String NULL_PARAMS_TAG = "${NullParams}";//NOI18N
     private static final String UNWRAPPED_PARAMS_TAG = "${UnwrappedParams}";//NOI18N
     private static final String MAX_ARGS_TAG = "${MaxArgs}";//NOI18N
+    private static final String BODY_TAG = "${Body}";
     private static final String PROPERTIES_TAG = "${Props}";//NOI18N
     private static final String JSDOC_TAG = "${JsDoc}";//NOI18N
     private static final String DELEGATE_TAG = "${Delegate}";//NOI18N
     private static final String DELEGATE_OBJECT = "delegate";//NOI18N
     private static final String INVALIDATOR_PART = ""
             + "        var invalidatable = null;\n"
-            + "        delegate.setPublishedCollectionInvalidator(function() {\n"
+            + "        " + DELEGATE_OBJECT + ".setPublishedCollectionInvalidator(function() {\n"
             + "            invalidatable = null;\n"
             + "        });\n";
     private static final String DEFAULT_CONSTRUCTOR_JS_DOC = ""
@@ -263,7 +264,8 @@ public class Classes2Scripts {
                 .replace(DELEGATE_TAG, DELEGATE_OBJECT)
                 .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr(3))
                 .replace(MAX_ARGS_TAG, Integer.toString(ci.params.length))
-                .replace(PROPERTIES_TAG, getPropsAndMethodsPart(clazz, CONSTRUCTOR_IDENT_LEVEL + 1));
+                .replace(BODY_TAG, INVALIDATOR_PART)
+                .replace(PROPERTIES_TAG, getPropsAndMethodsPart(clazz, CONSTRUCTOR_IDENT_LEVEL));
         return js;
     }
 
@@ -398,21 +400,21 @@ public class Classes2Scripts {
     private String getPropertyPart(String namespace, MethodedPropBox property, int ident) {
         StringBuilder sb = new StringBuilder();
         int i = ident;
-        sb.append(getPropertyJsDoc(namespace, property, i));
-        sb.append("\n");
         sb.append(getIndentStr(i));
-        sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", property.name));
+        sb.append("Object.defineProperty(").append(namespace).append(".prototype, \"").append(property.name).append("\", {\n");
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
+        sb.append(getIndentStr(++i));
+        sb.append("var " + DELEGATE_OBJECT + " = this.unwrap();\n");
         if (property.invalidatable && property.method.getReturnType().isArray()) {
-            sb.append(getIndentStr(++i)).append("if (!invalidatable) {\n")
-                    .append(getIndentStr(++i)).append("var value = delegate.").append(property.name).append(";\n")
+            sb.append(getIndentStr(i)).append("if (!invalidatable) {\n")
+                    .append(getIndentStr(++i)).append("var value = " + DELEGATE_OBJECT + ".").append(property.name).append(";\n")
                     .append(getIndentStr(i)).append("invalidatable = P.boxAsJs(value);\n")
                     .append(getIndentStr(--i)).append("}\n")
                     .append(getIndentStr(i)).append("return invalidatable;\n");
         } else {
-            sb.append(getIndentStr(++i));
+            sb.append(getIndentStr(i));
             sb.append("var value = ").append(DELEGATE_OBJECT).append(".").append(property.name).append(";\n");
             sb.append(getIndentStr(i));
             sb.append("return P.boxAsJs(value);\n");
@@ -424,7 +426,9 @@ public class Classes2Scripts {
             sb.append(getIndentStr(i));
             sb.append("set: function(aValue) {\n");
             sb.append(getIndentStr(++i));
-            sb.append(String.format("delegate.%s = P.boxAsJava(aValue);\n", property.name));
+            sb.append("var ").append(DELEGATE_OBJECT).append(" = this.unwrap();\n");
+            sb.append(getIndentStr(i));
+            sb.append(DELEGATE_OBJECT).append(".").append(property.name).append(" = P.boxAsJava(aValue);\n");
             sb.append(getIndentStr(--i));
             sb.append("}\n");
         } else {
@@ -432,54 +436,77 @@ public class Classes2Scripts {
         }
         sb.append(getIndentStr(--i));
         sb.append("});\n");
+        sb.append(getIndentStr(i)).append("if(!").append(namespace).append("){\n");
+        sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
+        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(property.name).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
+        sb.append(getIndentStr(--i)).append("}");
         return sb.toString();
+    }
+    
+    private String getDefaultLiteralOfType(String aTypeName) {
+        if ("Number".equals(aTypeName)) {
+            return "0";
+        } else if ("Date".equals(aTypeName)) {
+            return "new Date()";
+        } else if (aTypeName != null && aTypeName.startsWith("[]")) {
+            return aTypeName;
+        } else if ("Boolean".equals(aTypeName)) {
+            return "true";
+        } else if ("String".equals(aTypeName)) {
+            return "''";
+        } else {
+            return "{}";
+        }
     }
 
     private String getMethodPart(String namespace, Method method, int ident) {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
         int i = ident;
-        sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ident));
-        sb.append("\n");
         sb.append(getIndentStr(i));
-        sb.append(String.format("Object.defineProperty(this, \"%s\", {\n", method.getName()));
+        sb.append("Object.defineProperty(").append(namespace).append(".prototype, \"").append(method.getName()).append("\", {\n");
         sb.append(getIndentStr(++i));
-        sb.append("get: function() {\n");
-        sb.append(getIndentStr(++i));
-        sb.append("return function(");
-        StringBuilder params = new StringBuilder();
+        sb.append("value: function(");
+        StringBuilder paramsInCall = new StringBuilder();
+        StringBuilder formalParams = new StringBuilder();
         String delimiter = "";
         ScriptFunction methodAnnotation = method.getAnnotation(ScriptFunction.class);
         Parameter[] methodParams = method.getParameters();
+        
         for (int p = 0; p < methodParams.length; p++) {
             Parameter param = methodParams[p];
             String pName = param.getName();
             if (methodAnnotation != null && p < methodAnnotation.params().length) {
                 pName = methodAnnotation.params()[p];
             }
-            sb.append(delimiter).append(pName);
-            params.append(delimiter).append("P.boxAsJava(").append(pName).append(")");
+            formalParams.append(delimiter).append(pName);
+            paramsInCall.append(delimiter).append("P.boxAsJava(").append(pName).append(")");
             if (delimiter.isEmpty()) {
                 delimiter = ", ";
             }
         }
+        sb.append(formalParams);
         sb.append(") {\n");
         sb.append(getIndentStr(++i));
+        sb.append("var ").append(DELEGATE_OBJECT).append(" = this.unwrap();\n");
+        sb.append(getIndentStr(i));
         sb.append("var value = ")
                 .append(DELEGATE_OBJECT)
                 .append(".")
                 .append(method.getName())
                 .append("(")
-                .append(params)
+                .append(paramsInCall)
                 .append(");\n");
         sb.append(getIndentStr(i));
         sb.append("return P.boxAsJs(value);\n");
         sb.append(getIndentStr(--i));
-        sb.append("};\n");
-        sb.append(getIndentStr(--i));
         sb.append("}\n");
         sb.append(getIndentStr(--i));
         sb.append("});\n");
+        sb.append(getIndentStr(i)).append("if(!").append(namespace).append("){\n");
+        sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ++i)).append("\n");
+        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(method.getName()).append(" = function(").append(formalParams).append("){};\n");
+        sb.append(getIndentStr(--i)).append("}");
         return sb.toString();
     }
 
@@ -504,7 +531,7 @@ public class Classes2Scripts {
             return String.format(JS_DOC_TEMPLATE, jsDoc);
         } else {
             String[] lines = jsDoc.split("\n");
-            for(int i = 1; i < lines.length; i++){
+            for (int i = 1; i < lines.length; i++) {
                 lines[i] = " " + lines[i].trim();
             }
             return StringUtils.join("\n", lines);
@@ -540,11 +567,7 @@ public class Classes2Scripts {
 
     private String getPropsAndMethodsPart(Class clazz, int ident) {
         StringBuilder sb = new StringBuilder();
-        boolean invalidatable = false;
-        if (HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz)) {
-            sb.append(INVALIDATOR_PART);
-            invalidatable = true;
-        }
+        boolean invalidatable = HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz);
         FunctionInfo ci = getJsConstructorInfo(clazz);
         Map<String, MethodedPropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
@@ -604,7 +627,7 @@ public class Classes2Scripts {
                 return "";//NOI18N
             }
             StringBuilder paramsSb = new StringBuilder();
-            for (int i = 0; i < params.length; i++) {
+            for (String param : params) {
                 paramsSb.append("null, ");//NOI18N
             }
             return paramsSb.toString();

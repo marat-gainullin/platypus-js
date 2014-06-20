@@ -93,7 +93,7 @@ public class JsDoc {
         /**
          * Marker for a module's constructor.
          */
-        public static final String MODULE_TAG = "@module";
+        public static final String MODULE_TAG = "@constructor";
         
         /**
          * Annotation for defining application element's name.

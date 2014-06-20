@@ -12,7 +12,6 @@
      * @constructor Font Font
      */
     P.Font = function Font(family, style, size) {
-
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -28,7 +27,11 @@
         });
         if(Font.superclass)
             Font.superclass.constructor.apply(this, arguments);
-
         delegate.setPublished(this);
-    };
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "Font", {value: Font});
 })();

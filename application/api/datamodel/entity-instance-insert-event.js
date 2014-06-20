@@ -9,7 +9,6 @@
      * @constructor EntityInstanceInsertEvent EntityInstanceInsertEvent
      */
     P.EntityInstanceInsertEvent = function EntityInstanceInsertEvent() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,43 +21,56 @@
         });
         if(EntityInstanceInsertEvent.superclass)
             EntityInstanceInsertEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "EntityInstanceInsertEvent", {value: EntityInstanceInsertEvent});
+    Object.defineProperty(EntityInstanceInsertEvent.prototype, "inserted", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.inserted;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!EntityInstanceInsertEvent){
         /**
          * The inserted element.
          * @property inserted
          * @memberOf EntityInstanceInsertEvent
          */
-        Object.defineProperty(this, "inserted", {
-            get: function() {
-                var value = delegate.inserted;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.EntityInstanceInsertEvent.prototype.inserted = {};
+    }
+    Object.defineProperty(EntityInstanceInsertEvent.prototype, "source", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.source;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!EntityInstanceInsertEvent){
         /**
          * The source object of the event.
          * @property source
          * @memberOf EntityInstanceInsertEvent
          */
-        Object.defineProperty(this, "source", {
-            get: function() {
-                var value = delegate.source;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.EntityInstanceInsertEvent.prototype.source = {};
+    }
+    Object.defineProperty(EntityInstanceInsertEvent.prototype, "object", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.object;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!EntityInstanceInsertEvent){
         /**
          * The inserted element.
          * @property object
          * @memberOf EntityInstanceInsertEvent
          */
-        Object.defineProperty(this, "object", {
-            get: function() {
-                var value = delegate.object;
-                return P.boxAsJs(value);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.EntityInstanceInsertEvent.prototype.object = {};
+    }
 })();

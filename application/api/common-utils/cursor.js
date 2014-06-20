@@ -9,7 +9,6 @@
      * @constructor Cursor Cursor
      */
     P.Cursor = function Cursor(aType) {
-
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -23,7 +22,11 @@
         });
         if(Cursor.superclass)
             Cursor.superclass.constructor.apply(this, arguments);
-
         delegate.setPublished(this);
-    };
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "Cursor", {value: Cursor});
 })();

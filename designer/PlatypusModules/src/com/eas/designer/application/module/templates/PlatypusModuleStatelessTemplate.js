@@ -3,7 +3,7 @@
  * @author ${user}
  * @stateless
  * @public 
- * @module
+ * @constructor
  */
 function ${appElementName}(){
     var self = this, model = P.loadModel(this.constructor.name);

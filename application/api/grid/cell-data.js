@@ -9,7 +9,6 @@
      * @constructor CellData CellData
      */
     P.CellData = function CellData() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,43 +21,56 @@
         });
         if(CellData.superclass)
             CellData.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "CellData", {value: CellData});
+    Object.defineProperty(CellData.prototype, "data", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.data;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!CellData){
         /**
          * The cell's data.
          * @property data
          * @memberOf CellData
          */
-        Object.defineProperty(this, "data", {
-            get: function() {
-                var value = delegate.data;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.CellData.prototype.data = {};
+    }
+    Object.defineProperty(CellData.prototype, "display", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.display;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!CellData){
         /**
          * The displayed text.
          * @property display
          * @memberOf CellData
          */
-        Object.defineProperty(this, "display", {
-            get: function() {
-                var value = delegate.display;
-                return P.boxAsJs(value);
-            }
-        });
-
+        P.CellData.prototype.display = {};
+    }
+    Object.defineProperty(CellData.prototype, "style", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.style;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!CellData){
         /**
          * The cell's style.
          * @property style
          * @memberOf CellData
          */
-        Object.defineProperty(this, "style", {
-            get: function() {
-                var value = delegate.style;
-                return P.boxAsJs(value);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.CellData.prototype.style = {};
+    }
 })();

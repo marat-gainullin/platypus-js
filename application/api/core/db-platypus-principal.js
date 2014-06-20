@@ -9,7 +9,6 @@
      * @constructor DbPlatypusPrincipal DbPlatypusPrincipal
      */
     P.DbPlatypusPrincipal = function DbPlatypusPrincipal() {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,19 +21,26 @@
         });
         if(DbPlatypusPrincipal.superclass)
             DbPlatypusPrincipal.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+        var invalidatable = null;
+        delegate.setPublishedCollectionInvalidator(function() {
+            invalidatable = null;
+        });
+    }
+    Object.defineProperty(P, "DbPlatypusPrincipal", {value: DbPlatypusPrincipal});
+    Object.defineProperty(DbPlatypusPrincipal.prototype, "name", {
+        get: function() {
+            var delegate = this.unwrap();
+            var value = delegate.name;
+            return P.boxAsJs(value);
+        }
+    });
+    if(!DbPlatypusPrincipal){
         /**
          * The username..
          * @property name
          * @memberOf DbPlatypusPrincipal
          */
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-
-
-        delegate.setPublished(this);
-    };
+        P.DbPlatypusPrincipal.prototype.name = '';
+    }
 })();
