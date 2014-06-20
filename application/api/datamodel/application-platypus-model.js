@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ApplicationPlatypusModel ApplicationPlatypusModel
      */
-    P.ApplicationPlatypusModel = function ApplicationPlatypusModel() {
+    P.ApplicationPlatypusModel = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,23 +19,17 @@
                 return delegate;
             }
         });
-        if(ApplicationPlatypusModel.superclass)
-            ApplicationPlatypusModel.superclass.constructor.apply(this, arguments);
+        if(P.ApplicationPlatypusModel.superclass)
+            P.ApplicationPlatypusModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
-    }
-    Object.defineProperty(P, "ApplicationPlatypusModel", {value: ApplicationPlatypusModel});
-    Object.defineProperty(ApplicationPlatypusModel.prototype, "save", {
+    };        Object.defineProperty(P.ApplicationPlatypusModel.prototype, "save", {
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.save(P.boxAsJava(arg0));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationPlatypusModel){
+    if(!P.ApplicationPlatypusModel){
         /**
          * Saves model data changes. Calls aCallback when done.
          * If model can't apply the changed, than exception is thrown.
@@ -45,14 +39,14 @@
          * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().
         P.ApplicationPlatypusModel.prototype.save = function(arg0){};
     }
-    Object.defineProperty(ApplicationPlatypusModel.prototype, "requery", {
+    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "requery", {
         value: function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationPlatypusModel){
+    if(!P.ApplicationPlatypusModel){
         /**
          * Requeries model data. Calls onSuccess callback when complete and onError callback if error occured.
          * @method requery
@@ -60,14 +54,14 @@
          */
         P.ApplicationPlatypusModel.prototype.requery = function(onSuccess, onFailure){};
     }
-    Object.defineProperty(ApplicationPlatypusModel.prototype, "execute", {
+    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "execute", {
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationPlatypusModel){
+    if(!P.ApplicationPlatypusModel){
         /**
          * Refreshes the model, only if any of its parameters has changed.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -77,14 +71,14 @@
          */
         P.ApplicationPlatypusModel.prototype.execute = function(onSuccessCallback, onFailureCallback){};
     }
-    Object.defineProperty(ApplicationPlatypusModel.prototype, "loadEntity", {
+    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "loadEntity", {
         value: function(queryId) {
             var delegate = this.unwrap();
             var value = delegate.loadEntity(P.boxAsJava(queryId));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationPlatypusModel){
+    if(!P.ApplicationPlatypusModel){
         /**
          * Creates new entity of model, based on application query.
          * @param queryId the query application element ID.
@@ -94,4 +88,5 @@
          */
         P.ApplicationPlatypusModel.prototype.loadEntity = function(queryId){};
     }
+
 })();

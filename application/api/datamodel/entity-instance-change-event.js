@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor EntityInstanceChangeEvent EntityInstanceChangeEvent
      */
-    P.EntityInstanceChangeEvent = function EntityInstanceChangeEvent() {
+    P.EntityInstanceChangeEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,88 +19,78 @@
                 return delegate;
             }
         });
-        if(EntityInstanceChangeEvent.superclass)
-            EntityInstanceChangeEvent.superclass.constructor.apply(this, arguments);
+        if(P.EntityInstanceChangeEvent.superclass)
+            P.EntityInstanceChangeEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "newValue", {
+            get: function() {
+                var value = delegate.newValue;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "EntityInstanceChangeEvent", {value: EntityInstanceChangeEvent});
-    Object.defineProperty(EntityInstanceChangeEvent.prototype, "newValue", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.newValue;
-            return P.boxAsJs(value);
+        if(!P.EntityInstanceChangeEvent){
+            /**
+             * The new value.
+             * @property newValue
+             * @memberOf EntityInstanceChangeEvent
+             */
+            P.EntityInstanceChangeEvent.prototype.newValue = {};
         }
-    });
-    if(!EntityInstanceChangeEvent){
-        /**
-         * The new value.
-         * @property newValue
-         * @memberOf EntityInstanceChangeEvent
-         */
-        P.EntityInstanceChangeEvent.prototype.newValue = {};
-    }
-    Object.defineProperty(EntityInstanceChangeEvent.prototype, "propertyName", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.propertyName;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "propertyName", {
+            get: function() {
+                var value = delegate.propertyName;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.EntityInstanceChangeEvent){
+            /**
+             * The changed property name.
+             * @property propertyName
+             * @memberOf EntityInstanceChangeEvent
+             */
+            P.EntityInstanceChangeEvent.prototype.propertyName = '';
         }
-    });
-    if(!EntityInstanceChangeEvent){
-        /**
-         * The changed property name.
-         * @property propertyName
-         * @memberOf EntityInstanceChangeEvent
-         */
-        P.EntityInstanceChangeEvent.prototype.propertyName = '';
-    }
-    Object.defineProperty(EntityInstanceChangeEvent.prototype, "oldValue", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.oldValue;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "oldValue", {
+            get: function() {
+                var value = delegate.oldValue;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.EntityInstanceChangeEvent){
+            /**
+             * The old value.
+             * @property oldValue
+             * @memberOf EntityInstanceChangeEvent
+             */
+            P.EntityInstanceChangeEvent.prototype.oldValue = {};
         }
-    });
-    if(!EntityInstanceChangeEvent){
-        /**
-         * The old value.
-         * @property oldValue
-         * @memberOf EntityInstanceChangeEvent
-         */
-        P.EntityInstanceChangeEvent.prototype.oldValue = {};
-    }
-    Object.defineProperty(EntityInstanceChangeEvent.prototype, "source", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.source;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "source", {
+            get: function() {
+                var value = delegate.source;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.EntityInstanceChangeEvent){
+            /**
+             * The source object of the event.
+             * @property source
+             * @memberOf EntityInstanceChangeEvent
+             */
+            P.EntityInstanceChangeEvent.prototype.source = {};
         }
-    });
-    if(!EntityInstanceChangeEvent){
-        /**
-         * The source object of the event.
-         * @property source
-         * @memberOf EntityInstanceChangeEvent
-         */
-        P.EntityInstanceChangeEvent.prototype.source = {};
-    }
-    Object.defineProperty(EntityInstanceChangeEvent.prototype, "object", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.object;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "object", {
+            get: function() {
+                var value = delegate.object;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.EntityInstanceChangeEvent){
+            /**
+             * The updated element.
+             * @property object
+             * @memberOf EntityInstanceChangeEvent
+             */
+            P.EntityInstanceChangeEvent.prototype.object = {};
         }
-    });
-    if(!EntityInstanceChangeEvent){
-        /**
-         * The updated element.
-         * @property object
-         * @memberOf EntityInstanceChangeEvent
-         */
-        P.EntityInstanceChangeEvent.prototype.object = {};
-    }
+    };    
 })();

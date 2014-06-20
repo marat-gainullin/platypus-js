@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ApplicationDbModel ApplicationDbModel
      */
-    P.ApplicationDbModel = function ApplicationDbModel() {
+    P.ApplicationDbModel = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,23 +19,17 @@
                 return delegate;
             }
         });
-        if(ApplicationDbModel.superclass)
-            ApplicationDbModel.superclass.constructor.apply(this, arguments);
+        if(P.ApplicationDbModel.superclass)
+            P.ApplicationDbModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
-    }
-    Object.defineProperty(P, "ApplicationDbModel", {value: ApplicationDbModel});
-    Object.defineProperty(ApplicationDbModel.prototype, "save", {
+    };        Object.defineProperty(P.ApplicationDbModel.prototype, "save", {
         value: function(callback) {
             var delegate = this.unwrap();
             var value = delegate.save(P.boxAsJava(callback));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationDbModel){
+    if(!P.ApplicationDbModel){
         /**
          * Saves model data changes.
          * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.
@@ -46,14 +40,14 @@
          */
         P.ApplicationDbModel.prototype.save = function(callback){};
     }
-    Object.defineProperty(ApplicationDbModel.prototype, "requery", {
+    Object.defineProperty(P.ApplicationDbModel.prototype, "requery", {
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationDbModel){
+    if(!P.ApplicationDbModel){
         /**
          * Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -63,14 +57,14 @@
          */
         P.ApplicationDbModel.prototype.requery = function(onSuccessCallback, onFailureCallback){};
     }
-    Object.defineProperty(ApplicationDbModel.prototype, "createEntity", {
+    Object.defineProperty(P.ApplicationDbModel.prototype, "createEntity", {
         value: function(sqlText, datasourceName) {
             var delegate = this.unwrap();
             var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationDbModel){
+    if(!P.ApplicationDbModel){
         /**
          * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
          * @param sqlText SQL text for the new entity.
@@ -81,14 +75,14 @@
          */
         P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName){};
     }
-    Object.defineProperty(ApplicationDbModel.prototype, "executeSql", {
+    Object.defineProperty(P.ApplicationDbModel.prototype, "executeSql", {
         value: function(sqlText, datasourceName) {
             var delegate = this.unwrap();
             var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationDbModel){
+    if(!P.ApplicationDbModel){
         /**
          * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
          * @param sqlText SQL text for the new entity.
@@ -99,14 +93,14 @@
          */
         P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName){};
     }
-    Object.defineProperty(ApplicationDbModel.prototype, "execute", {
+    Object.defineProperty(P.ApplicationDbModel.prototype, "execute", {
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationDbModel){
+    if(!P.ApplicationDbModel){
         /**
          * Refreshes the model, only if any of its parameters has changed.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -116,14 +110,14 @@
          */
         P.ApplicationDbModel.prototype.execute = function(onSuccessCallback, onFailureCallback){};
     }
-    Object.defineProperty(ApplicationDbModel.prototype, "loadEntity", {
+    Object.defineProperty(P.ApplicationDbModel.prototype, "loadEntity", {
         value: function(queryId) {
             var delegate = this.unwrap();
             var value = delegate.loadEntity(P.boxAsJava(queryId));
             return P.boxAsJs(value);
         }
     });
-    if(!ApplicationDbModel){
+    if(!P.ApplicationDbModel){
         /**
          * Creates new entity of model, based on application query.
          * @param queryId the query application element ID.
@@ -133,4 +127,5 @@
          */
         P.ApplicationDbModel.prototype.loadEntity = function(queryId){};
     }
+
 })();

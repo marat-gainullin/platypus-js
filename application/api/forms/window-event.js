@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor WindowEvent WindowEvent
      */
-    P.WindowEvent = function WindowEvent() {
+    P.WindowEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,28 +19,22 @@
                 return delegate;
             }
         });
-        if(WindowEvent.superclass)
-            WindowEvent.superclass.constructor.apply(this, arguments);
+        if(P.WindowEvent.superclass)
+            P.WindowEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "source", {
+            get: function() {
+                var value = delegate.source;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "WindowEvent", {value: WindowEvent});
-    Object.defineProperty(WindowEvent.prototype, "source", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.source;
-            return P.boxAsJs(value);
+        if(!P.WindowEvent){
+            /**
+             * The source component object of the event.
+             * @property source
+             * @memberOf WindowEvent
+             */
+            P.WindowEvent.prototype.source = {};
         }
-    });
-    if(!WindowEvent){
-        /**
-         * The source component object of the event.
-         * @property source
-         * @memberOf WindowEvent
-         */
-        P.WindowEvent.prototype.source = {};
-    }
+    };    
 })();

@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor SystemPlatypusPrincipal SystemPlatypusPrincipal
      */
-    P.SystemPlatypusPrincipal = function SystemPlatypusPrincipal() {
+    P.SystemPlatypusPrincipal = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,28 +19,22 @@
                 return delegate;
             }
         });
-        if(SystemPlatypusPrincipal.superclass)
-            SystemPlatypusPrincipal.superclass.constructor.apply(this, arguments);
+        if(P.SystemPlatypusPrincipal.superclass)
+            P.SystemPlatypusPrincipal.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "SystemPlatypusPrincipal", {value: SystemPlatypusPrincipal});
-    Object.defineProperty(SystemPlatypusPrincipal.prototype, "name", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.name;
-            return P.boxAsJs(value);
+        if(!P.SystemPlatypusPrincipal){
+            /**
+             * The username..
+             * @property name
+             * @memberOf SystemPlatypusPrincipal
+             */
+            P.SystemPlatypusPrincipal.prototype.name = '';
         }
-    });
-    if(!SystemPlatypusPrincipal){
-        /**
-         * The username..
-         * @property name
-         * @memberOf SystemPlatypusPrincipal
-         */
-        P.SystemPlatypusPrincipal.prototype.name = '';
-    }
+    };    
 })();

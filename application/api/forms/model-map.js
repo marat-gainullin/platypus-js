@@ -8,7 +8,7 @@
      * A model component that shows a map.
      * @constructor ModelMap ModelMap
      */
-    P.ModelMap = function ModelMap() {
+    P.ModelMap = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,809 +19,741 @@
                 return delegate;
             }
         });
-        if(ModelMap.superclass)
-            ModelMap.superclass.constructor.apply(this, arguments);
+        if(P.ModelMap.superclass)
+            P.ModelMap.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
         });
-    }
-    Object.defineProperty(P, "ModelMap", {value: ModelMap});
-    Object.defineProperty(ModelMap.prototype, "cursor", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.cursor;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.cursor = P.boxAsJava(aValue);
+        if(!P.ModelMap){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.cursor = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.cursor = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseDragged", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseDragged;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseDragged = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseDragged = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseDragged = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "parent", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.parent;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parent;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Gets the parent of this component.
+             * @property parent
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.parent = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Gets the parent of this component.
-         * @property parent
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.parent = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseReleased", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseReleased;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseReleased = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseReleased", {
+            get: function() {
+                var value = delegate.onMouseReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse released event handler function.
+             * @property onMouseReleased
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseReleased = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse released event handler function.
-         * @property onMouseReleased
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseReleased = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onFocusLost", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onFocusLost;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onFocusLost = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onFocusLost = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onFocusLost = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMousePressed", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMousePressed;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMousePressed = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMousePressed", {
+            get: function() {
+                var value = delegate.onMousePressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMousePressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMousePressed = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMousePressed = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "foreground", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.foreground;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.foreground = P.boxAsJava(aValue);
+        Object.defineProperty(this, "foreground", {
+            get: function() {
+                var value = delegate.foreground;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.foreground = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The foreground color of this component.
+             * @property foreground
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.foreground = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The foreground color of this component.
-         * @property foreground
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.foreground = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "geoPosition", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.geoPosition;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "geoPosition", {
+            get: function() {
+                var value = delegate.geoPosition;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The current geo position on the map.
+             * @property geoPosition
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.geoPosition = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The current geo position on the map.
-         * @property geoPosition
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.geoPosition = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "error", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.error;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "error", {
+            get: function() {
+                var value = delegate.error;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.error = '';
         }
-    });
-    if(!ModelMap){
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.error = '';
-    }
-    Object.defineProperty(ModelMap.prototype, "tools", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.tools;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "tools", {
+            get: function() {
+                var value = delegate.tools;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The map's mouse tools.
+             * @property tools
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.tools = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The map's mouse tools.
-         * @property tools
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.tools = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "enabled", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.enabled;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.enabled = P.boxAsJava(aValue);
+        Object.defineProperty(this, "enabled", {
+            get: function() {
+                var value = delegate.enabled;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.enabled = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.enabled = true;
         }
-    });
-    if(!ModelMap){
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.enabled = true;
-    }
-    Object.defineProperty(ModelMap.prototype, "onComponentMoved", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentMoved;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentMoved = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentMoved", {
+            get: function() {
+                var value = delegate.onComponentMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Component moved event handler function.
+             * @property onComponentMoved
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onComponentMoved = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Component moved event handler function.
-         * @property onComponentMoved
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onComponentMoved = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "backingUrl", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.backingUrl;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.backingUrl = P.boxAsJava(aValue);
+        Object.defineProperty(this, "backingUrl", {
+            get: function() {
+                var value = delegate.backingUrl;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.backingUrl = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The map tiles service URL.
+             * @property backingUrl
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.backingUrl = '';
         }
-    });
-    if(!ModelMap){
-        /**
-         * The map tiles service URL.
-         * @property backingUrl
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.backingUrl = '';
-    }
-    Object.defineProperty(ModelMap.prototype, "componentPopupMenu", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.componentPopupMenu;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.componentPopupMenu = P.boxAsJava(aValue);
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.componentPopupMenu = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.componentPopupMenu = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "top", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.top;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.top = P.boxAsJava(aValue);
+        Object.defineProperty(this, "top", {
+            get: function() {
+                var value = delegate.top;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.top = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.top = 0;
         }
-    });
-    if(!ModelMap){
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.top = 0;
-    }
-    Object.defineProperty(ModelMap.prototype, "onComponentResized", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentResized;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentResized = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentResized", {
+            get: function() {
+                var value = delegate.onComponentResized;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentResized = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onComponentResized = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onComponentResized = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseEntered", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseEntered;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseEntered = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseEntered", {
+            get: function() {
+                var value = delegate.onMouseEntered;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseEntered = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseEntered = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse entered over the component event handler function.
-         * @property onMouseEntered
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseEntered = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "pane", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.pane;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "pane", {
+            get: function() {
+                var value = delegate.pane;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The map's geo pane (read only).
+             * @property pane
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.pane = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The map's geo pane (read only).
-         * @property pane
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.pane = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "toolTipText", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.toolTipText;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.toolTipText = P.boxAsJava(aValue);
+        Object.defineProperty(this, "toolTipText", {
+            get: function() {
+                var value = delegate.toolTipText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.toolTipText = '';
         }
-    });
-    if(!ModelMap){
-        /**
-         * The tooltip string that has been set with.
-         * @property toolTipText
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.toolTipText = '';
-    }
-    Object.defineProperty(ModelMap.prototype, "height", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.height;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.height = P.boxAsJava(aValue);
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.element = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Height of the component.
-         * @property height
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.height = 0;
-    }
-    Object.defineProperty(ModelMap.prototype, "element", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.element;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "height", {
+            get: function() {
+                var value = delegate.height;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.height = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.height = 0;
         }
-    });
-    if(!ModelMap){
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.element = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onComponentShown", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentShown;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentShown = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onComponentShown = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Component shown event handler function.
-         * @property onComponentShown
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onComponentShown = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseMoved", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseMoved;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseMoved = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseMoved", {
+            get: function() {
+                var value = delegate.onMouseMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseMoved = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseMoved = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "opaque", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.opaque;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.opaque = P.boxAsJava(aValue);
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.opaque = true;
         }
-    });
-    if(!ModelMap){
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.opaque = true;
-    }
-    Object.defineProperty(ModelMap.prototype, "visible", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.visible;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.visible = P.boxAsJava(aValue);
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.visible = true;
         }
-    });
-    if(!ModelMap){
-        /**
-         * Determines whether this component should be visible when its parent is visible.
-         * @property visible
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.visible = true;
-    }
-    Object.defineProperty(ModelMap.prototype, "onComponentHidden", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentHidden;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentHidden = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentHidden", {
+            get: function() {
+                var value = delegate.onComponentHidden;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentHidden = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Component hidden event handler function.
+             * @property onComponentHidden
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onComponentHidden = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Component hidden event handler function.
-         * @property onComponentHidden
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onComponentHidden = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "nextFocusableComponent", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.nextFocusableComponent;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.nextFocusableComponent = P.boxAsJava(aValue);
+        Object.defineProperty(this, "nextFocusableComponent", {
+            get: function() {
+                var value = delegate.nextFocusableComponent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.nextFocusableComponent = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.nextFocusableComponent = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onActionPerformed", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onActionPerformed;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onActionPerformed = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onKeyReleased = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Main action performed event handler function.
-         * @property onActionPerformed
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onActionPerformed = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onKeyReleased", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onKeyReleased;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onKeyReleased = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onActionPerformed = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onKeyReleased = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "focusable", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focusable;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.focusable = P.boxAsJava(aValue);
+        Object.defineProperty(this, "focusable", {
+            get: function() {
+                var value = delegate.focusable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.focusable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Determines whether this component may be focused.
+             * @property focusable
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.focusable = true;
         }
-    });
-    if(!ModelMap){
-        /**
-         * Determines whether this component may be focused.
-         * @property focusable
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.focusable = true;
-    }
-    Object.defineProperty(ModelMap.prototype, "onKeyTyped", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onKeyTyped;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onKeyTyped = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onKeyTyped", {
+            get: function() {
+                var value = delegate.onKeyTyped;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyTyped = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Key typed event handler function.
+             * @property onKeyTyped
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onKeyTyped = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Key typed event handler function.
-         * @property onKeyTyped
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onKeyTyped = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseWheelMoved", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseWheelMoved;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseWheelMoved", {
+            get: function() {
+                var value = delegate.onMouseWheelMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseWheelMoved = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse wheel moved event handler function.
-         * @property onMouseWheelMoved
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseWheelMoved = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "component", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.component;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.component = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.component = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onFocusGained", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onFocusGained;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onFocusGained = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onFocusGained", {
+            get: function() {
+                var value = delegate.onFocusGained;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusGained = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onFocusGained = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onFocusGained = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "left", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.left;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.left = P.boxAsJava(aValue);
+        Object.defineProperty(this, "left", {
+            get: function() {
+                var value = delegate.left;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.left = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Horizontal coordinate of the component.
+             * @property left
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.left = 0;
         }
-    });
-    if(!ModelMap){
-        /**
-         * Horizontal coordinate of the component.
-         * @property left
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.left = 0;
-    }
-    Object.defineProperty(ModelMap.prototype, "background", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.background;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.background = P.boxAsJava(aValue);
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.background = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The background color of this component.
-         * @property background
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.background = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseClicked", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseClicked;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseClicked = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseClicked = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse clicked event handler function.
-         * @property onMouseClicked
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseClicked = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onEvent", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onEvent;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onEvent = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onEvent", {
+            get: function() {
+                var value = delegate.onEvent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onEvent = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The map's event handler function.
+             * @property onEvent
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onEvent = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * The map's event handler function.
-         * @property onEvent
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onEvent = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onMouseExited", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseExited;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseExited = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseExited", {
+            get: function() {
+                var value = delegate.onMouseExited;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseExited = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Mouse exited over the component event handler function.
+             * @property onMouseExited
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onMouseExited = {};
         }
-    });
-    if(!ModelMap){
-        /**
-         * Mouse exited over the component event handler function.
-         * @property onMouseExited
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onMouseExited = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "name", {
-        get: function() {
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.name = '';
+        }
+        Object.defineProperty(this, "width", {
+            get: function() {
+                var value = delegate.width;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.width = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Width of the component.
+             * @property width
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.width = 0;
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onKeyPressed = {};
+        }
+    };        Object.defineProperty(P.ModelMap.prototype, "select", {
+        value: function(selectionEntries) {
             var delegate = this.unwrap();
-            var value = delegate.name;
+            var value = delegate.select(P.boxAsJava(selectionEntries));
             return P.boxAsJs(value);
         }
     });
-    if(!ModelMap){
+    if(!P.ModelMap){
         /**
-         * Gets name of this component.
-         * @property name
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
          * @memberOf ModelMap
          */
-        P.ModelMap.prototype.name = '';
+        P.ModelMap.prototype.select = function(selectionEntries){};
     }
-    Object.defineProperty(ModelMap.prototype, "width", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.width;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.width = P.boxAsJava(aValue);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Width of the component.
-         * @property width
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.width = 0;
-    }
-    Object.defineProperty(ModelMap.prototype, "font", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.font;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.font = P.boxAsJava(aValue);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * The font of this component.
-         * @property font
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.font = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "onKeyPressed", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onKeyPressed;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onKeyPressed = P.boxAsJava(aValue);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Key pressed event handler function.
-         * @property onKeyPressed
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.onKeyPressed = {};
-    }
-    Object.defineProperty(ModelMap.prototype, "hit", {
+    Object.defineProperty(P.ModelMap.prototype, "hit", {
         value: function(hitObject) {
             var delegate = this.unwrap();
             var value = delegate.hit(P.boxAsJava(hitObject));
             return P.boxAsJs(value);
         }
     });
-    if(!ModelMap){
+    if(!P.ModelMap){
         /**
          * Hits to the specified point.
          * @param hitObject the object to hit, can be either a Point or a Polygon instance.
@@ -831,30 +763,14 @@
          */
         P.ModelMap.prototype.hit = function(hitObject){};
     }
-    Object.defineProperty(ModelMap.prototype, "select", {
-        value: function(selectionEntries) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(selectionEntries));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.select = function(selectionEntries){};
-    }
-    Object.defineProperty(ModelMap.prototype, "getLayer", {
+    Object.defineProperty(P.ModelMap.prototype, "getLayer", {
         value: function(layerTitle) {
             var delegate = this.unwrap();
             var value = delegate.getLayer(P.boxAsJava(layerTitle));
             return P.boxAsJs(value);
         }
     });
-    if(!ModelMap){
+    if(!P.ModelMap){
         /**
          * Gets map's layer by the title.
          * @param layerTitle the layer's title.
@@ -864,14 +780,14 @@
          */
         P.ModelMap.prototype.getLayer = function(layerTitle){};
     }
-    Object.defineProperty(ModelMap.prototype, "fit", {
+    Object.defineProperty(P.ModelMap.prototype, "fit", {
         value: function(area) {
             var delegate = this.unwrap();
             var value = delegate.fit(P.boxAsJava(area));
             return P.boxAsJs(value);
         }
     });
-    if(!ModelMap){
+    if(!P.ModelMap){
         /**
          * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
          * @param area the <code>Geometry</code> of the specified area (optional)
@@ -880,148 +796,14 @@
          */
         P.ModelMap.prototype.fit = function(area){};
     }
-    Object.defineProperty(ModelMap.prototype, "removeLayer", {
-        value: function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeLayer(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Removes layer by the specified title.
-         * @param layerTitle the layer's title.
-         * @return <code>MapLayer</code> instance.
-         * @method removeLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.removeLayer = function(arg0){};
-    }
-    Object.defineProperty(ModelMap.prototype, "removeAllLayers", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.removeAllLayers();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Removes all layers of the map.
-         * @return an array of <code>MapLayer</code> instances.
-         * @method removeAllLayers
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.removeAllLayers = function(){};
-    }
-    Object.defineProperty(ModelMap.prototype, "cartesian2Geo", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.cartesian2Geo(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Transforms point from cartesian to geo coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method cartesian2Geo
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.cartesian2Geo = function(point){};
-    }
-    Object.defineProperty(ModelMap.prototype, "geo2Cartesian", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.geo2Cartesian(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Transforms point from geo to cartesian coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method geo2Cartesian
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.geo2Cartesian = function(point){};
-    }
-    Object.defineProperty(ModelMap.prototype, "cartesian2Screen", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.cartesian2Screen(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Transforms point from cartesian to screen coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method cartesian2Screen
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.cartesian2Screen = function(point){};
-    }
-    Object.defineProperty(ModelMap.prototype, "screen2Cartesian", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.screen2Cartesian(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Tranaforms point from  screen to cartesian coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method screen2Cartesian
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.screen2Cartesian = function(point){};
-    }
-    Object.defineProperty(ModelMap.prototype, "goToGeoPosition", {
-        value: function(position) {
-            var delegate = this.unwrap();
-            var value = delegate.goToGeoPosition(P.boxAsJava(position));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Makes map move to the specified geo position.
-         * @param position the position on the map.
-         * @method goToGeoPosition
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.goToGeoPosition = function(position){};
-    }
-    Object.defineProperty(ModelMap.prototype, "hitSelection", {
-        value: function(hitPoint) {
-            var delegate = this.unwrap();
-            var value = delegate.hitSelection(P.boxAsJava(hitPoint));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!ModelMap){
-        /**
-         * Hits the selection on the specified point.
-         * @param hitPoint the Point to hit.
-         * @return an array of <code>SelectionEntry</code> elements.
-         * @method hitSelection
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.hitSelection = function(hitPoint){};
-    }
-    Object.defineProperty(ModelMap.prototype, "addLayer", {
+    Object.defineProperty(P.ModelMap.prototype, "addLayer", {
         value: function(layerTitle, rowset, geometryClass, styleAttributes) {
             var delegate = this.unwrap();
             var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
             return P.boxAsJs(value);
         }
     });
-    if(!ModelMap){
+    if(!P.ModelMap){
         /**
          * Adds new layer to the map.
          * @param layerTitle the layer's title.
@@ -1034,14 +816,148 @@
          */
         P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes){};
     }
-    Object.defineProperty(ModelMap.prototype, "focus", {
+    Object.defineProperty(P.ModelMap.prototype, "removeLayer", {
+        value: function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeLayer(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Removes layer by the specified title.
+         * @param layerTitle the layer's title.
+         * @return <code>MapLayer</code> instance.
+         * @method removeLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.removeLayer = function(arg0){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "removeAllLayers", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.removeAllLayers();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Removes all layers of the map.
+         * @return an array of <code>MapLayer</code> instances.
+         * @method removeAllLayers
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.removeAllLayers = function(){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "cartesian2Geo", {
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.cartesian2Geo(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Transforms point from cartesian to geo coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method cartesian2Geo
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.cartesian2Geo = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "geo2Cartesian", {
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.geo2Cartesian(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Transforms point from geo to cartesian coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method geo2Cartesian
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.geo2Cartesian = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "cartesian2Screen", {
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.cartesian2Screen(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Transforms point from cartesian to screen coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method cartesian2Screen
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.cartesian2Screen = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "screen2Cartesian", {
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.screen2Cartesian(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Tranaforms point from  screen to cartesian coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method screen2Cartesian
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.screen2Cartesian = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "goToGeoPosition", {
+        value: function(position) {
+            var delegate = this.unwrap();
+            var value = delegate.goToGeoPosition(P.boxAsJava(position));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Makes map move to the specified geo position.
+         * @param position the position on the map.
+         * @method goToGeoPosition
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.goToGeoPosition = function(position){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "hitSelection", {
+        value: function(hitPoint) {
+            var delegate = this.unwrap();
+            var value = delegate.hitSelection(P.boxAsJava(hitPoint));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Hits the selection on the specified point.
+         * @param hitPoint the Point to hit.
+         * @return an array of <code>SelectionEntry</code> elements.
+         * @method hitSelection
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.hitSelection = function(hitPoint){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "focus", {
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
             return P.boxAsJs(value);
         }
     });
-    if(!ModelMap){
+    if(!P.ModelMap){
         /**
          * Tries to acquire focus for this component.
          * @method focus
@@ -1049,4 +965,5 @@
          */
         P.ModelMap.prototype.focus = function(){};
     }
+
 })();

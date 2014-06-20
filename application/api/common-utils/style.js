@@ -9,7 +9,7 @@
      * @param parent a parent <code>Style</code> (optional)
      * @constructor Style Style
      */
-    P.Style = function Style(parent) {
+    P.Style = function (parent) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -21,134 +21,121 @@
                 return delegate;
             }
         });
-        if(Style.superclass)
-            Style.superclass.constructor.apply(this, arguments);
+        if(P.Style.superclass)
+            P.Style.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "Style", {value: Style});
-    Object.defineProperty(Style.prototype, "background", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.background;
-            return P.boxAsJs(value);
+        if(!P.Style){
+            /**
+             * A background color associated with this style.
+             * @property background
+             * @memberOf Style
+             */
+            P.Style.prototype.background = {};
         }
-    });
-    if(!Style){
-        /**
-         * A background color associated with this style.
-         * @property background
-         * @memberOf Style
-         */
-        P.Style.prototype.background = {};
-    }
-    Object.defineProperty(Style.prototype, "icon", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.icon;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "icon", {
+            get: function() {
+                var value = delegate.icon;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * An icon associated with this style.
+             * @property icon
+             * @memberOf Style
+             */
+            P.Style.prototype.icon = {};
         }
-    });
-    if(!Style){
-        /**
-         * An icon associated with this style.
-         * @property icon
-         * @memberOf Style
-         */
-        P.Style.prototype.icon = {};
-    }
-    Object.defineProperty(Style.prototype, "folderIcon", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.folderIcon;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "folderIcon", {
+            get: function() {
+                var value = delegate.folderIcon;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * A forlder icon associated with this style.
+             * @property folderIcon
+             * @memberOf Style
+             */
+            P.Style.prototype.folderIcon = {};
         }
-    });
-    if(!Style){
-        /**
-         * A forlder icon associated with this style.
-         * @property folderIcon
-         * @memberOf Style
-         */
-        P.Style.prototype.folderIcon = {};
-    }
-    Object.defineProperty(Style.prototype, "foreground", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.foreground;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "foreground", {
+            get: function() {
+                var value = delegate.foreground;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * A foreground color associated with this style.
+             * @property foreground
+             * @memberOf Style
+             */
+            P.Style.prototype.foreground = {};
         }
-    });
-    if(!Style){
-        /**
-         * A foreground color associated with this style.
-         * @property foreground
-         * @memberOf Style
-         */
-        P.Style.prototype.foreground = {};
-    }
-    Object.defineProperty(Style.prototype, "openFolderIcon", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.openFolderIcon;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "openFolderIcon", {
+            get: function() {
+                var value = delegate.openFolderIcon;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * An open forlder icon associated with this style.
+             * @property openFolderIcon
+             * @memberOf Style
+             */
+            P.Style.prototype.openFolderIcon = {};
         }
-    });
-    if(!Style){
-        /**
-         * An open forlder icon associated with this style.
-         * @property openFolderIcon
-         * @memberOf Style
-         */
-        P.Style.prototype.openFolderIcon = {};
-    }
-    Object.defineProperty(Style.prototype, "align", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.align;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "align", {
+            get: function() {
+                var value = delegate.align;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * An align constraint associated with this style:
+             * CENTER = 0; TOP = 1; LEFT = 2; BOTTOM = 3; RIGHT = 4.
+             * @property align
+             * @memberOf Style
+             */
+            P.Style.prototype.align = 0;
         }
-    });
-    if(!Style){
-        /**
-         * An align constraint associated with this style:
-         * CENTER = 0; TOP = 1; LEFT = 2; BOTTOM = 3; RIGHT = 4.
-         * @property align
-         * @memberOf Style
-         */
-        P.Style.prototype.align = 0;
-    }
-    Object.defineProperty(Style.prototype, "leafIcon", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.leafIcon;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "leafIcon", {
+            get: function() {
+                var value = delegate.leafIcon;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * A leaf icon associated with this style.
+             * @property leafIcon
+             * @memberOf Style
+             */
+            P.Style.prototype.leafIcon = {};
         }
-    });
-    if(!Style){
-        /**
-         * A leaf icon associated with this style.
-         * @property leafIcon
-         * @memberOf Style
-         */
-        P.Style.prototype.leafIcon = {};
-    }
-    Object.defineProperty(Style.prototype, "font", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.font;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Style){
+            /**
+             * A font associated with this style.
+             * @property font
+             * @memberOf Style
+             */
+            P.Style.prototype.font = {};
         }
-    });
-    if(!Style){
-        /**
-         * A font associated with this style.
-         * @property font
-         * @memberOf Style
-         */
-        P.Style.prototype.font = {};
-    }
+    };    
 })();

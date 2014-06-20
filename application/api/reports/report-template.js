@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function ReportTemplate() {
+    P.ReportTemplate = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,23 +19,17 @@
                 return delegate;
             }
         });
-        if(ReportTemplate.superclass)
-            ReportTemplate.superclass.constructor.apply(this, arguments);
+        if(P.ReportTemplate.superclass)
+            P.ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
-    }
-    Object.defineProperty(P, "ReportTemplate", {value: ReportTemplate});
-    Object.defineProperty(ReportTemplate.prototype, "generateReport", {
+    };        Object.defineProperty(P.ReportTemplate.prototype, "generateReport", {
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.generateReport();
             return P.boxAsJs(value);
         }
     });
-    if(!ReportTemplate){
+    if(!P.ReportTemplate){
         /**
          * Generate report from template.
          * @method generateReport
@@ -43,4 +37,5 @@
          */
         P.ReportTemplate.prototype.generateReport = function(){};
     }
+
 })();

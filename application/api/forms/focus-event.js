@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor FocusEvent FocusEvent
      */
-    P.FocusEvent = function FocusEvent() {
+    P.FocusEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,28 +19,22 @@
                 return delegate;
             }
         });
-        if(FocusEvent.superclass)
-            FocusEvent.superclass.constructor.apply(this, arguments);
+        if(P.FocusEvent.superclass)
+            P.FocusEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "source", {
+            get: function() {
+                var value = delegate.source;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "FocusEvent", {value: FocusEvent});
-    Object.defineProperty(FocusEvent.prototype, "source", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.source;
-            return P.boxAsJs(value);
+        if(!P.FocusEvent){
+            /**
+             * The source component object of the event.
+             * @property source
+             * @memberOf FocusEvent
+             */
+            P.FocusEvent.prototype.source = {};
         }
-    });
-    if(!FocusEvent){
-        /**
-         * The source component object of the event.
-         * @property source
-         * @memberOf FocusEvent
-         */
-        P.FocusEvent.prototype.source = {};
-    }
+    };    
 })();

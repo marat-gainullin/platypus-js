@@ -10,7 +10,7 @@
      * between menu items that breaks them up into logical groupings.
      * @constructor MenuSeparator MenuSeparator
      */
-    P.MenuSeparator = function MenuSeparator() {
+    P.MenuSeparator = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -21,726 +21,649 @@
                 return delegate;
             }
         });
-        if(MenuSeparator.superclass)
-            MenuSeparator.superclass.constructor.apply(this, arguments);
+        if(P.MenuSeparator.superclass)
+            P.MenuSeparator.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
         });
-    }
-    Object.defineProperty(P, "MenuSeparator", {value: MenuSeparator});
-    Object.defineProperty(MenuSeparator.prototype, "cursor", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.cursor;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.cursor = P.boxAsJava(aValue);
+        if(!P.MenuSeparator){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.cursor = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.cursor = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseDragged", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseDragged;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseDragged = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseDragged = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseDragged = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "parent", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.parent;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parent;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * The parent container.
+             * @property parent
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.parent = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * The parent container.
-         * @property parent
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.parent = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseReleased", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseReleased;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseReleased = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseReleased", {
+            get: function() {
+                var value = delegate.onMouseReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse released event handler function.
+             * @property onMouseReleased
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseReleased = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse released event handler function.
-         * @property onMouseReleased
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseReleased = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onFocusLost", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onFocusLost;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onFocusLost = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onFocusLost = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onFocusLost = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMousePressed", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMousePressed;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMousePressed = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMousePressed", {
+            get: function() {
+                var value = delegate.onMousePressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMousePressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMousePressed = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMousePressed = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "foreground", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.foreground;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.foreground = P.boxAsJava(aValue);
+        Object.defineProperty(this, "foreground", {
+            get: function() {
+                var value = delegate.foreground;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.foreground = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * The foreground color of this component.
+             * @property foreground
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.foreground = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * The foreground color of this component.
-         * @property foreground
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.foreground = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "error", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.error;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "error", {
+            get: function() {
+                var value = delegate.error;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.error = '';
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.error = '';
-    }
-    Object.defineProperty(MenuSeparator.prototype, "enabled", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.enabled;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.enabled = P.boxAsJava(aValue);
+        Object.defineProperty(this, "enabled", {
+            get: function() {
+                var value = delegate.enabled;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.enabled = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.enabled = true;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.enabled = true;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onComponentMoved", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentMoved;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentMoved = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentMoved", {
+            get: function() {
+                var value = delegate.onComponentMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Component moved event handler function.
+             * @property onComponentMoved
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onComponentMoved = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Component moved event handler function.
-         * @property onComponentMoved
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onComponentMoved = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "componentPopupMenu", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.componentPopupMenu;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.componentPopupMenu = P.boxAsJava(aValue);
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.componentPopupMenu = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.componentPopupMenu = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "top", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.top;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.top = P.boxAsJava(aValue);
+        Object.defineProperty(this, "top", {
+            get: function() {
+                var value = delegate.top;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.top = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.top = 0;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.top = 0;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onComponentResized", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentResized;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentResized = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentResized", {
+            get: function() {
+                var value = delegate.onComponentResized;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentResized = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onComponentResized = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onComponentResized = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseEntered", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseEntered;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseEntered = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseEntered", {
+            get: function() {
+                var value = delegate.onMouseEntered;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseEntered = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseEntered = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse entered over the component event handler function.
-         * @property onMouseEntered
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseEntered = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "toolTipText", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.toolTipText;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.toolTipText = P.boxAsJava(aValue);
+        Object.defineProperty(this, "toolTipText", {
+            get: function() {
+                var value = delegate.toolTipText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.toolTipText = '';
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * The tooltip string that has been set with.
-         * @property toolTipText
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.toolTipText = '';
-    }
-    Object.defineProperty(MenuSeparator.prototype, "height", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.height;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.height = P.boxAsJava(aValue);
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.element = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Height of the component.
-         * @property height
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.height = 0;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "element", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.element;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "height", {
+            get: function() {
+                var value = delegate.height;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.height = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.height = 0;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.element = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onComponentShown", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentShown;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentShown = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onComponentShown = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Component shown event handler function.
-         * @property onComponentShown
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onComponentShown = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseMoved", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseMoved;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseMoved = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseMoved", {
+            get: function() {
+                var value = delegate.onMouseMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseMoved = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseMoved = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "opaque", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.opaque;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.opaque = P.boxAsJava(aValue);
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.opaque = true;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.opaque = true;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "visible", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.visible;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.visible = P.boxAsJava(aValue);
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.visible = true;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Determines whether this component should be visible when its parent is visible.
-         * @property visible
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.visible = true;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onComponentHidden", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onComponentHidden;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onComponentHidden = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onComponentHidden", {
+            get: function() {
+                var value = delegate.onComponentHidden;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentHidden = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Component hidden event handler function.
+             * @property onComponentHidden
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onComponentHidden = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Component hidden event handler function.
-         * @property onComponentHidden
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onComponentHidden = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "nextFocusableComponent", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.nextFocusableComponent;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.nextFocusableComponent = P.boxAsJava(aValue);
+        Object.defineProperty(this, "nextFocusableComponent", {
+            get: function() {
+                var value = delegate.nextFocusableComponent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.nextFocusableComponent = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.nextFocusableComponent = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onActionPerformed", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onActionPerformed;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onActionPerformed = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onKeyReleased = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Main action performed event handler function.
-         * @property onActionPerformed
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onActionPerformed = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onKeyReleased", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onKeyReleased;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onKeyReleased = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onActionPerformed = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onKeyReleased = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "focusable", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focusable;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.focusable = P.boxAsJava(aValue);
+        Object.defineProperty(this, "focusable", {
+            get: function() {
+                var value = delegate.focusable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.focusable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Determines whether this component may be focused.
+             * @property focusable
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.focusable = true;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Determines whether this component may be focused.
-         * @property focusable
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.focusable = true;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onKeyTyped", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onKeyTyped;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onKeyTyped = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onKeyTyped", {
+            get: function() {
+                var value = delegate.onKeyTyped;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyTyped = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Key typed event handler function.
+             * @property onKeyTyped
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onKeyTyped = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Key typed event handler function.
-         * @property onKeyTyped
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onKeyTyped = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseWheelMoved", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseWheelMoved;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseWheelMoved", {
+            get: function() {
+                var value = delegate.onMouseWheelMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseWheelMoved = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse wheel moved event handler function.
-         * @property onMouseWheelMoved
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseWheelMoved = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "component", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.component;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.component = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.component = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onFocusGained", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onFocusGained;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onFocusGained = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onFocusGained", {
+            get: function() {
+                var value = delegate.onFocusGained;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusGained = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onFocusGained = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onFocusGained = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "left", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.left;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.left = P.boxAsJava(aValue);
+        Object.defineProperty(this, "left", {
+            get: function() {
+                var value = delegate.left;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.left = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Horizontal coordinate of the component.
+             * @property left
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.left = 0;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Horizontal coordinate of the component.
-         * @property left
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.left = 0;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "background", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.background;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.background = P.boxAsJava(aValue);
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.background = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * The background color of this component.
-         * @property background
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.background = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseClicked", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseClicked;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseClicked = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseClicked = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse clicked event handler function.
-         * @property onMouseClicked
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseClicked = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onMouseExited", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onMouseExited;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onMouseExited = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onMouseExited", {
+            get: function() {
+                var value = delegate.onMouseExited;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseExited = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Mouse exited over the component event handler function.
+             * @property onMouseExited
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onMouseExited = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Mouse exited over the component event handler function.
-         * @property onMouseExited
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onMouseExited = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "name", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.name;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.name = '';
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Gets name of this component.
-         * @property name
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.name = '';
-    }
-    Object.defineProperty(MenuSeparator.prototype, "width", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.width;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.width = P.boxAsJava(aValue);
+        Object.defineProperty(this, "width", {
+            get: function() {
+                var value = delegate.width;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.width = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Width of the component.
+             * @property width
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.width = 0;
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Width of the component.
-         * @property width
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.width = 0;
-    }
-    Object.defineProperty(MenuSeparator.prototype, "font", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.font;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.font = P.boxAsJava(aValue);
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.font = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * The font of this component.
-         * @property font
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.font = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "onKeyPressed", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.onKeyPressed;
-            return P.boxAsJs(value);
-        },
-        set: function(aValue) {
-            var delegate = this.unwrap();
-            delegate.onKeyPressed = P.boxAsJava(aValue);
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onKeyPressed = {};
         }
-    });
-    if(!MenuSeparator){
-        /**
-         * Key pressed event handler function.
-         * @property onKeyPressed
-         * @memberOf MenuSeparator
-         */
-        P.MenuSeparator.prototype.onKeyPressed = {};
-    }
-    Object.defineProperty(MenuSeparator.prototype, "focus", {
+    };        Object.defineProperty(P.MenuSeparator.prototype, "focus", {
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
             return P.boxAsJs(value);
         }
     });
-    if(!MenuSeparator){
+    if(!P.MenuSeparator){
         /**
          * Tries to acquire focus for this component.
          * @method focus
@@ -748,4 +671,5 @@
          */
         P.MenuSeparator.prototype.focus = function(){};
     }
+
 })();

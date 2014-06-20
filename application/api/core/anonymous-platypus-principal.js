@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor AnonymousPlatypusPrincipal AnonymousPlatypusPrincipal
      */
-    P.AnonymousPlatypusPrincipal = function AnonymousPlatypusPrincipal() {
+    P.AnonymousPlatypusPrincipal = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,28 +19,22 @@
                 return delegate;
             }
         });
-        if(AnonymousPlatypusPrincipal.superclass)
-            AnonymousPlatypusPrincipal.superclass.constructor.apply(this, arguments);
+        if(P.AnonymousPlatypusPrincipal.superclass)
+            P.AnonymousPlatypusPrincipal.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "AnonymousPlatypusPrincipal", {value: AnonymousPlatypusPrincipal});
-    Object.defineProperty(AnonymousPlatypusPrincipal.prototype, "name", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.name;
-            return P.boxAsJs(value);
+        if(!P.AnonymousPlatypusPrincipal){
+            /**
+             * The username..
+             * @property name
+             * @memberOf AnonymousPlatypusPrincipal
+             */
+            P.AnonymousPlatypusPrincipal.prototype.name = '';
         }
-    });
-    if(!AnonymousPlatypusPrincipal){
-        /**
-         * The username..
-         * @property name
-         * @memberOf AnonymousPlatypusPrincipal
-         */
-        P.AnonymousPlatypusPrincipal.prototype.name = '';
-    }
+    };    
 })();

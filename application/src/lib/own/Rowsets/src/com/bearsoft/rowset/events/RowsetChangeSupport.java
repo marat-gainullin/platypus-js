@@ -10,9 +10,11 @@ import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Class intended to hold Rowset's listeners and fire Rowset's events.
+ *
  * @author mg
  */
 public class RowsetChangeSupport {
@@ -22,6 +24,7 @@ public class RowsetChangeSupport {
 
     /**
      * The constructor.
+     *
      * @param aRowset The events source.
      */
     public RowsetChangeSupport(Rowset aRowset) {
@@ -30,7 +33,9 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Registers <code>RowsetListener</code> on this <code>RowsetChangeSupport</code>.
+     * Registers <code>RowsetListener</code> on this
+     * <code>RowsetChangeSupport</code>.
+     *
      * @param aListener <code>RowsetListener</code> to be registered.
      */
     public void addRowsetListener(RowsetListener aListener) {
@@ -38,7 +43,9 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Removes <code>RowsetListener</code> from this <code>RowsetChangeSupport</code>.
+     * Removes <code>RowsetListener</code> from this
+     * <code>RowsetChangeSupport</code>.
+     *
      * @param aListener <code>RowsetListener</code> to be removed.
      */
     public void removeRowsetListener(RowsetListener aListener) {
@@ -47,6 +54,7 @@ public class RowsetChangeSupport {
 
     /**
      * Returns a set of <code>RowsetListener</code> instances.
+     *
      * @return <code>RowsetListener</code> instances set.
      */
     public Set<RowsetListener> getRowsetListeners() {
@@ -58,10 +66,12 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willScroll</code> event to all registered listeners.
-     * The scrolling might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
-     * @param aNewRowIndex Row index that will be cursor position when scrolling will be performed.
+     * Fires <code>willScroll</code> event to all registered listeners. The
+     * scrolling might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
+     * @param aNewRowIndex Row index that will be cursor position when scrolling
+     * will be performed.
      * @return Whether event source may perform the scrolling.
      * @throws InvalidCursorPositionException
      */
@@ -87,9 +97,10 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willSort</code> event to all registered listeners.
-     * The sorting might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willSort</code> event to all registered listeners. The
+     * sorting might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @return Whether event source may perform the sorting.
      * @throws InvalidCursorPositionException
      */
@@ -115,9 +126,10 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willRequery</code> event to all registered listeners.
-     * The requering might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willRequery</code> event to all registered listeners. The
+     * requering might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @return Whether event source may perform the requering.
      * @throws InvalidCursorPositionException
      */
@@ -146,6 +158,7 @@ public class RowsetChangeSupport {
      * Fires <code>willNextPageFetch</code> event to all registered listeners.
      * The fetching might be vetoed by one of the registered listeners.
      * Nevetheless the event will be propagated to all the registered listeners.
+     *
      * @return Whether event source may perform the paging.
      * @throws InvalidCursorPositionException
      */
@@ -171,9 +184,10 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willFilter</code> event to all registered listeners.
-     * The filtering might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willFilter</code> event to all registered listeners. The
+     * filtering might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @return Whether event source may perform the filtering.
      * @throws InvalidCursorPositionException
      */
@@ -199,10 +213,13 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willChange</code> event to all registered listeners.
-     * The changing might be vetoed by one of the registered listeners.
-     * Nevertheless the event will be propagated to all the registered listeners.
-     * @param aFieldIndex Rowset's column(field) index the changing will be performed at.
+     * Fires <code>willChange</code> event to all registered listeners. The
+     * changing might be vetoed by one of the registered listeners. Nevertheless
+     * the event will be propagated to all the registered listeners.
+     *
+     * @param aChangedRow
+     * @param aFieldIndex Rowset's column(field) index the changing will be
+     * performed at.
      * @param aOldValue The old value of the updating column.
      * @param aNewValue The value that is to be setted to the updating column.
      * @return Whether event source may perform the changing.
@@ -230,9 +247,10 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willInsert</code> event to all registered listeners.
-     * The inserting might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willInsert</code> event to all registered listeners. The
+     * inserting might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @param aRow The row is to be inserted to the rowset.
      * @return Whether event source may perform the inserting.
      * @throws InvalidCursorPositionException
@@ -242,11 +260,13 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willInsert</code> event to all registered listeners.
-     * The inserting might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willInsert</code> event to all registered listeners. The
+     * inserting might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @param aRow The row is to be inserted to the rowset.
-     * @param aAjusting Flag, indicating that the event is a series of similar events element.
+     * @param aAjusting Flag, indicating that the event is a series of similar
+     * events element.
      * @return Whether event source may perform the inserting.
      * @throws InvalidCursorPositionException
      */
@@ -273,6 +293,7 @@ public class RowsetChangeSupport {
 
     /**
      * Private utility method for restoring rowset's position.
+     *
      * @param oldRowPos Position to be setted to the Rowset.
      */
     private void restoreRowsetPosition(int oldRowPos) throws InvalidCursorPositionException {
@@ -286,9 +307,10 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willDelete</code> event to all registered listeners.
-     * The deleting might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willDelete</code> event to all registered listeners. The
+     * deleting might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @param aRow The row is to be deleted from the rowset.
      * @return Whether event source may perform the deleting.
      * @throws InvalidCursorPositionException
@@ -298,14 +320,16 @@ public class RowsetChangeSupport {
     }
 
     /**
-     * Fires <code>willDelete</code> event to all registered listeners.
-     * The deleting might be vetoed by one of the registered listeners.
-     * Nevetheless the event will be propagated to all the registered listeners.
+     * Fires <code>willDelete</code> event to all registered listeners. The
+     * deleting might be vetoed by one of the registered listeners. Nevetheless
+     * the event will be propagated to all the registered listeners.
+     *
      * @param aRow The row is to be deleted from the rowset.
-     * @param aAjusting Ajusting flag. See <code>firerowDeletedEvent()</code> javadoc.
+     * @param aAjusting Ajusting flag. See <code>firerowDeletedEvent()</code>
+     * javadoc.
      * @return Whether event source may perform the deleting.
      * @throws InvalidCursorPositionException
-     * @see #fireRowDeletedEvent(com.bearsoft.rowset.Row, boolean) 
+     * @see #fireRowDeletedEvent(com.bearsoft.rowset.Row, boolean)
      */
     public boolean fireWillDeleteEvent(Row aRow, boolean aAjusting) throws InvalidCursorPositionException {
         boolean res = true;
@@ -327,17 +351,29 @@ public class RowsetChangeSupport {
         return res;
     }
 
+    protected void notifyListeners(Consumer<RowsetListener> aOperation) {
+        RowsetListener[] listeners = rowsetListeners.toArray(new RowsetListener[]{});
+        for (RowsetListener l : listeners) {
+            if (l instanceof RowsetEventsEarlyAccess) {
+                aOperation.accept(l);
+            }
+        }
+        for (RowsetListener l : listeners) {
+            if (l != null && !(l instanceof RowsetEventsEarlyAccess)) {
+                aOperation.accept(l);
+            }
+        }
+    }
+
     /**
      * Fires requeriedEvent event to all registered listeners.
      */
     public void fireRequeriedEvent() {
         if (rowsetListeners != null) {
             RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetRequeried(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetRequeried(event);
+            });
         }
     }
 
@@ -347,11 +383,9 @@ public class RowsetChangeSupport {
     public void fireNextPageFetchedEvent() {
         if (rowsetListeners != null) {
             RowsetNextPageEvent event = new RowsetNextPageEvent(source, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetNextPageFetched(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetNextPageFetched(event);
+            });
         }
     }
 
@@ -361,11 +395,9 @@ public class RowsetChangeSupport {
     public void fireFilteredEvent() {
         if (rowsetListeners != null) {
             RowsetFilterEvent event = new RowsetFilterEvent(source, source.getActiveFilter(), RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetFiltered(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetFiltered(event);
+            });
         }
     }
 
@@ -375,11 +407,9 @@ public class RowsetChangeSupport {
     public void fireSavedEvent() {
         if (rowsetListeners != null) {
             RowsetSaveEvent event = new RowsetSaveEvent(source);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetSaved(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetSaved(event);
+            });
         }
     }
 
@@ -389,26 +419,24 @@ public class RowsetChangeSupport {
     public void fireRolledbackEvent() {
         if (rowsetListeners != null) {
             RowsetRollbackEvent event = new RowsetRollbackEvent(source);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetRolledback(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetRolledback(event);
+            });
         }
     }
-    
+
     /**
      * Fires scrolledEvent event to all registered listeners.
-     * @param oldRowIndex Rowset's cursor position, that was actual before the scrolling has been performed.
+     *
+     * @param oldRowIndex Rowset's cursor position, that was actual before the
+     * scrolling has been performed.
      */
     public void fireScrolledEvent(int oldRowIndex) {
         if (rowsetListeners != null) {
             RowsetScrollEvent event = new RowsetScrollEvent(source, oldRowIndex, source.getCursorPos(), RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetScrolled(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetScrolled(event);
+            });
         }
     }
 
@@ -418,16 +446,15 @@ public class RowsetChangeSupport {
     public void fireSortedEvent() {
         if (rowsetListeners != null) {
             RowsetSortEvent event = new RowsetSortEvent(source, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowsetSorted(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetSorted(event);
+            });
         }
     }
 
     /**
-     * Fires rowChangedEvent event to all registered listeners.
+     * @param aChangedRow Fires rowChangedEvent event to all registered
+     * listeners.
      * @param aOldValue Old value of row's column at <code>aFieldIndex</code>.
      * @param aFieldIndex Field (column) index of the upadated column.
      * @throws InvalidColIndexException
@@ -439,6 +466,8 @@ public class RowsetChangeSupport {
 
     /**
      * Fires rowChangedEvent event to all registered listeners.
+     *
+     * @param aChangedRow
      * @param aOldValue Old value of row's column at <code>aFieldIndex</code>.
      * @param aNewValue New value of row's column at <code>aFieldIndex</code>.
      * @param aFieldIndex Field (column) index of the upadated column.
@@ -448,40 +477,39 @@ public class RowsetChangeSupport {
     public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidColIndexException, InvalidCursorPositionException {
         if (rowsetListeners != null) {
             RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowChanged(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowChanged(event);
+            });
         }
     }
 
     /**
      * Fires rowInsertedEvent event to all registered listeners.
+     *
      * @param aRow Row was inserted to the rowset.
-    
-    public void fireRowInsertedEvent(Row aRow) {
-    fireRowInsertedEvent(aRow, false);
-    }
+     *
+     * public void fireRowInsertedEvent(Row aRow) { fireRowInsertedEvent(aRow,
+     * false); }
      */
     /**
      * Fires rowInsertedEvent event to all registered listeners.
+     *
      * @param aRow Row was inserted to the rowset.
-     * @param aAjusting Flag, indicating that the event is a series of similar events element.
+     * @param aAjusting Flag, indicating that the event is a series of similar
+     * events element.
      */
     public void fireRowInsertedEvent(Row aRow, boolean aAjusting) {
         if (rowsetListeners != null) {
             RowsetInsertEvent event = new RowsetInsertEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowInserted(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowInserted(event);
+            });
         }
     }
 
     /**
      * Fires rowDeletedEvent event to all registered listeners.
+     *
      * @param aRow Row was deleted from the rowset.
      */
     public void fireRowDeletedEvent(Row aRow) {
@@ -490,17 +518,17 @@ public class RowsetChangeSupport {
 
     /**
      * Fires rowDeletedEvent event to all registered listeners.
+     *
      * @param aRow Row was deleted from the rowset.
-     * @param aAjusting If true, the event is marked as series of similar events element.
+     * @param aAjusting If true, the event is marked as series of similar events
+     * element.
      */
     public void fireRowDeletedEvent(Row aRow, boolean aAjusting) {
         if (rowsetListeners != null) {
             RowsetDeleteEvent event = new RowsetDeleteEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    l.rowDeleted(event);
-                }
-            }
+            notifyListeners((RowsetListener l) -> {
+                l.rowDeleted(event);
+            });
         }
     }
 }

@@ -202,10 +202,10 @@
             Array.prototype.push.apply(target, publishedRows);
         };
         adapter.rowsetRequeried = function(event) {
-            adapter.rowsetFiltered();
+            adapter.rowsetFiltered(null);
         };
         adapter.rowsetNextPageFetched = function(event) {
-            adapter.rowsetFiltered();
+            adapter.rowsetFiltered(null);
         };
         adapter.rowsetSaved = function(event) {
             // ignore
@@ -217,20 +217,20 @@
             // ignore
         };
         adapter.rowsetSorted = function(event) {
-            adapter.rowsetFiltered();
+            adapter.rowsetFiltered(null);
         };
         adapter.rowInserted = function(event) {
             if (!event.ajusting)
-                adapter.rowsetFiltered();
+                adapter.rowsetFiltered(null);
         };
         adapter.rowChanged = function(event) {
             if (event.oldRowCount != event.newRowCount) {
-                adapter.rowsetFiltered();
+                adapter.rowsetFiltered(null);
             }
         };
         adapter.rowDeleted = function(event) {
             if (!event.ajusting)
-                adapter.rowsetFiltered();
+                adapter.rowsetFiltered(null);
         };
 
         Object.defineProperty(target, "fill", {
@@ -351,7 +351,7 @@
         var target = !!instanceCTor ? new instanceCTor() : {};
         var nFields = nnFields.toCollection();
         // plain mutable properties
-        for (var n = 0; n < nFields.length; n++) {
+        for (var n = 0; n < nFields.size(); n++) {
             (function() {
                 var colIndex = n + 1;
                 var nField = nFields[n];
@@ -366,13 +366,13 @@
                 Object.defineProperty(target, nField.name, valueAccessorDesc);
                 Object.defineProperty(target, n, valueAccessorDesc);
             })();
-            if (!target.schema)
-                Object.defineProperty(target, "schema", {value: nFields.getPublished()});
         }
+        if (!target.schema)
+            Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
         // ORM mutable scalar and readonly collection properties
         var ormDefs = nnFields.getOrmDefinitions();
-        for (var o in ormDefs.keySet()) {
-            var def = ormDefs.get(o);
+        for each (var o in ormDefs.keySet()) {
+            var def = EngineUtilsClass.unwrap(ormDefs.get(o));
             Object.defineProperty(target, o, def);
         }
         aDelegate.setPublished(target);
@@ -381,7 +381,7 @@
     FieldsClass.setPublisher(function(aDelegate) {
         var target = {};
         var nFields = aDelegate.toCollection();
-        for (var n = 0; n < nFields.length; n++) {
+        for (var n = 0; n < nFields.size(); n++) {
             (function() {
                 var nField = nFields[n];
                 var pField = nField.getPublished();
@@ -394,7 +394,7 @@
             })();
         }
         Object.defineProperty(target, "length", {
-            value: nFields.length
+            value: nFields.size()
         });
         aDelegate.setPublished(target);
     });
@@ -426,19 +426,19 @@
         } else {
             aTarget = new modelCTor(model);
         }
-        function publishEntity(aEntity, aName) {
-            var published = EngineUtilsClass.unwrap(aEntity.getPublished());
+        function publishEntity(nEntity, aName) {
+            var published = EngineUtilsClass.unwrap(nEntity.getPublished());
             var pSchema = {};
             Object.defineProperty(published, "schema", {
                 value: pSchema
             });
-            var nFields = aEntity.getFields().toCollection();
-            for (var n = 0; n < nFields.length; n++) {
+            var nFields = nEntity.getFields().toCollection();
+            for (var n = 0; n < nFields.size(); n++) {
                 (function() {
                     var nField = nFields[n];
                     // params shortcuts
-                    if (aEntity instanceof P.ApplicationDbParametersEntity
-                            || aEntity instanceof P.ApplicationPlatypusParametersEntity) {
+                    if (published instanceof P.ApplicationDbParametersEntity
+                            || published instanceof P.ApplicationPlatypusParametersEntity) {
                         var valueDesc = {
                             get: function() {
                                 return boxAsJs(nField.value);
@@ -459,17 +459,17 @@
                 })();
             }
             // params shortcuts
-            if (aEntity instanceof P.ApplicationDbParametersEntity
-                    || aEntity instanceof P.ApplicationPlatypusParametersEntity) {
+            if (published instanceof P.ApplicationDbParametersEntity
+                    || published instanceof P.ApplicationPlatypusParametersEntity) {
                 Object.defineProperty(published, "length", {
                     get: function() {
-                        return nFields.length;
+                        return nFields.size();
                     }
                 });
             }
             Object.defineProperty(pSchema, "length", {
                 get: function() {
-                    return nFields.length;
+                    return nFields.size();
                 }
             });
             Object.defineProperty(aTarget, aName, {
@@ -479,8 +479,7 @@
         var pEntity = model.getParametersEntity();
         publishEntity(pEntity, "params");
         var entities = model.entities();
-        for (var e in entities) {
-            var entity = entities[e];
+        for each (var entity in entities) {
             if (entity.name) {
                 publishEntity(entity, entity.name);
             }
@@ -488,7 +487,6 @@
         model.createORMDefinitions();
         return aTarget;
     }
-    ;
     Object.defineProperty(P, "loadModel", {value: loadModel});
     /**
      * @static
@@ -523,7 +521,6 @@
         }
         return aTarget;
     }
-    ;
     Object.defineProperty(P, "loadForm", {value: loadForm});
     /**
      * @static
@@ -541,7 +538,6 @@
         };
         return publishTo;
     }
-    ;
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
     /**
      * Constructs server module network proxy.
@@ -1201,7 +1197,7 @@
     });
     Object.defineProperty(P, "FontStyle", {
         value: FontStyle
-    }); 
+    });
 })();
 if (!P) {
     /** 
@@ -1240,7 +1236,7 @@ if (!P) {
     P.ID = {generate: function(aValue) {
             return "";
         }};
-    
+
     /**
      * Md5 hash generator
      * @type type

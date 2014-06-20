@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor EntityInstanceDeleteEvent EntityInstanceDeleteEvent
      */
-    P.EntityInstanceDeleteEvent = function EntityInstanceDeleteEvent() {
+    P.EntityInstanceDeleteEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,43 +19,36 @@
                 return delegate;
             }
         });
-        if(EntityInstanceDeleteEvent.superclass)
-            EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
+        if(P.EntityInstanceDeleteEvent.superclass)
+            P.EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "deleted", {
+            get: function() {
+                var value = delegate.deleted;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "EntityInstanceDeleteEvent", {value: EntityInstanceDeleteEvent});
-    Object.defineProperty(EntityInstanceDeleteEvent.prototype, "deleted", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.deleted;
-            return P.boxAsJs(value);
+        if(!P.EntityInstanceDeleteEvent){
+            /**
+             * The deleted element.
+             * @property deleted
+             * @memberOf EntityInstanceDeleteEvent
+             */
+            P.EntityInstanceDeleteEvent.prototype.deleted = {};
         }
-    });
-    if(!EntityInstanceDeleteEvent){
-        /**
-         * The deleted element.
-         * @property deleted
-         * @memberOf EntityInstanceDeleteEvent
-         */
-        P.EntityInstanceDeleteEvent.prototype.deleted = {};
-    }
-    Object.defineProperty(EntityInstanceDeleteEvent.prototype, "source", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.source;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "source", {
+            get: function() {
+                var value = delegate.source;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.EntityInstanceDeleteEvent){
+            /**
+             * The source object of the event.
+             * @property source
+             * @memberOf EntityInstanceDeleteEvent
+             */
+            P.EntityInstanceDeleteEvent.prototype.source = {};
         }
-    });
-    if(!EntityInstanceDeleteEvent){
-        /**
-         * The source object of the event.
-         * @property source
-         * @memberOf EntityInstanceDeleteEvent
-         */
-        P.EntityInstanceDeleteEvent.prototype.source = {};
-    }
+    };    
 })();

@@ -11,7 +11,7 @@
      * @param alpha Alpha compontent (optional)
      * @constructor Color Color
      */
-    P.Color = function Color(red, green, blue, alpha) {
+    P.Color = function (red, green, blue, alpha) {
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -26,208 +26,190 @@
                 return delegate;
             }
         });
-        if(Color.superclass)
-            Color.superclass.constructor.apply(this, arguments);
+        if(P.Color.superclass)
+            P.Color.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "WHITE", {
+            get: function() {
+                var value = delegate.WHITE;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "Color", {value: Color});
-    Object.defineProperty(Color.prototype, "WHITE", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.WHITE;
-            return P.boxAsJs(value);
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property WHITE
+             * @memberOf Color
+             */
+            P.Color.prototype.WHITE = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property WHITE
-         * @memberOf Color
-         */
-        P.Color.prototype.WHITE = {};
-    }
-    Object.defineProperty(Color.prototype, "GRAY", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.GRAY;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "GRAY", {
+            get: function() {
+                var value = delegate.GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property GRAY
+             * @memberOf Color
+             */
+            P.Color.prototype.GRAY = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property GRAY
-         * @memberOf Color
-         */
-        P.Color.prototype.GRAY = {};
-    }
-    Object.defineProperty(Color.prototype, "BLUE", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.BLUE;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "BLUE", {
+            get: function() {
+                var value = delegate.BLUE;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property BLUE
+             * @memberOf Color
+             */
+            P.Color.prototype.BLUE = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property BLUE
-         * @memberOf Color
-         */
-        P.Color.prototype.BLUE = {};
-    }
-    Object.defineProperty(Color.prototype, "GREEN", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.GREEN;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "GREEN", {
+            get: function() {
+                var value = delegate.GREEN;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property GREEN
+             * @memberOf Color
+             */
+            P.Color.prototype.GREEN = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property GREEN
-         * @memberOf Color
-         */
-        P.Color.prototype.GREEN = {};
-    }
-    Object.defineProperty(Color.prototype, "RED", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.RED;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "RED", {
+            get: function() {
+                var value = delegate.RED;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property RED
+             * @memberOf Color
+             */
+            P.Color.prototype.RED = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property RED
-         * @memberOf Color
-         */
-        P.Color.prototype.RED = {};
-    }
-    Object.defineProperty(Color.prototype, "PINK", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.PINK;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "PINK", {
+            get: function() {
+                var value = delegate.PINK;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property PINK
+             * @memberOf Color
+             */
+            P.Color.prototype.PINK = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property PINK
-         * @memberOf Color
-         */
-        P.Color.prototype.PINK = {};
-    }
-    Object.defineProperty(Color.prototype, "LIGHT_GRAY", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.LIGHT_GRAY;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "LIGHT_GRAY", {
+            get: function() {
+                var value = delegate.LIGHT_GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property LIGHT_GRAY
+             * @memberOf Color
+             */
+            P.Color.prototype.LIGHT_GRAY = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property LIGHT_GRAY
-         * @memberOf Color
-         */
-        P.Color.prototype.LIGHT_GRAY = {};
-    }
-    Object.defineProperty(Color.prototype, "BLACK", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.BLACK;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "MAGENTA", {
+            get: function() {
+                var value = delegate.MAGENTA;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property MAGENTA
+             * @memberOf Color
+             */
+            P.Color.prototype.MAGENTA = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property BLACK
-         * @memberOf Color
-         */
-        P.Color.prototype.BLACK = {};
-    }
-    Object.defineProperty(Color.prototype, "MAGENTA", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.MAGENTA;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "BLACK", {
+            get: function() {
+                var value = delegate.BLACK;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property BLACK
+             * @memberOf Color
+             */
+            P.Color.prototype.BLACK = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property MAGENTA
-         * @memberOf Color
-         */
-        P.Color.prototype.MAGENTA = {};
-    }
-    Object.defineProperty(Color.prototype, "YELLOW", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.YELLOW;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "YELLOW", {
+            get: function() {
+                var value = delegate.YELLOW;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property YELLOW
+             * @memberOf Color
+             */
+            P.Color.prototype.YELLOW = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property YELLOW
-         * @memberOf Color
-         */
-        P.Color.prototype.YELLOW = {};
-    }
-    Object.defineProperty(Color.prototype, "CYAN", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.CYAN;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "DARK_GRAY", {
+            get: function() {
+                var value = delegate.DARK_GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property DARK_GRAY
+             * @memberOf Color
+             */
+            P.Color.prototype.DARK_GRAY = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property CYAN
-         * @memberOf Color
-         */
-        P.Color.prototype.CYAN = {};
-    }
-    Object.defineProperty(Color.prototype, "DARK_GRAY", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.DARK_GRAY;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "CYAN", {
+            get: function() {
+                var value = delegate.CYAN;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property CYAN
+             * @memberOf Color
+             */
+            P.Color.prototype.CYAN = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property DARK_GRAY
-         * @memberOf Color
-         */
-        P.Color.prototype.DARK_GRAY = {};
-    }
-    Object.defineProperty(Color.prototype, "ORANGE", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.ORANGE;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "ORANGE", {
+            get: function() {
+                var value = delegate.ORANGE;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property ORANGE
+             * @memberOf Color
+             */
+            P.Color.prototype.ORANGE = {};
         }
-    });
-    if(!Color){
-        /**
-         * Generated property jsDoc.
-         * @property ORANGE
-         * @memberOf Color
-         */
-        P.Color.prototype.ORANGE = {};
-    }
+    };    
 })();

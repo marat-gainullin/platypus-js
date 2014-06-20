@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor CellRenderEvent CellRenderEvent
      */
-    P.CellRenderEvent = function CellRenderEvent() {
+    P.CellRenderEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,88 +19,78 @@
                 return delegate;
             }
         });
-        if(CellRenderEvent.superclass)
-            CellRenderEvent.superclass.constructor.apply(this, arguments);
+        if(P.CellRenderEvent.superclass)
+            P.CellRenderEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "columnId", {
+            get: function() {
+                var value = delegate.columnId;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "CellRenderEvent", {value: CellRenderEvent});
-    Object.defineProperty(CellRenderEvent.prototype, "columnId", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.columnId;
-            return P.boxAsJs(value);
+        if(!P.CellRenderEvent){
+            /**
+             * The cell's column ID.
+             * @property columnId
+             * @memberOf CellRenderEvent
+             */
+            P.CellRenderEvent.prototype.columnId = {};
         }
-    });
-    if(!CellRenderEvent){
-        /**
-         * The cell's column ID.
-         * @property columnId
-         * @memberOf CellRenderEvent
-         */
-        P.CellRenderEvent.prototype.columnId = {};
-    }
-    Object.defineProperty(CellRenderEvent.prototype, "id", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.id;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "id", {
+            get: function() {
+                var value = delegate.id;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CellRenderEvent){
+            /**
+             * The primary key of the data object.
+             * @property id
+             * @memberOf CellRenderEvent
+             */
+            P.CellRenderEvent.prototype.id = {};
         }
-    });
-    if(!CellRenderEvent){
-        /**
-         * The primary key of the data object.
-         * @property id
-         * @memberOf CellRenderEvent
-         */
-        P.CellRenderEvent.prototype.id = {};
-    }
-    Object.defineProperty(CellRenderEvent.prototype, "source", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.source;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "source", {
+            get: function() {
+                var value = delegate.source;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CellRenderEvent){
+            /**
+             * The source object of the event.
+             * @property source
+             * @memberOf CellRenderEvent
+             */
+            P.CellRenderEvent.prototype.source = {};
         }
-    });
-    if(!CellRenderEvent){
-        /**
-         * The source object of the event.
-         * @property source
-         * @memberOf CellRenderEvent
-         */
-        P.CellRenderEvent.prototype.source = {};
-    }
-    Object.defineProperty(CellRenderEvent.prototype, "cell", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.cell;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "cell", {
+            get: function() {
+                var value = delegate.cell;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CellRenderEvent){
+            /**
+             * The "abstract" cell.
+             * @property cell
+             * @memberOf CellRenderEvent
+             */
+            P.CellRenderEvent.prototype.cell = {};
         }
-    });
-    if(!CellRenderEvent){
-        /**
-         * The "abstract" cell.
-         * @property cell
-         * @memberOf CellRenderEvent
-         */
-        P.CellRenderEvent.prototype.cell = {};
-    }
-    Object.defineProperty(CellRenderEvent.prototype, "object", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.object;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "object", {
+            get: function() {
+                var value = delegate.object;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CellRenderEvent){
+            /**
+             * The cell's row object.
+             * @property object
+             * @memberOf CellRenderEvent
+             */
+            P.CellRenderEvent.prototype.object = {};
         }
-    });
-    if(!CellRenderEvent){
-        /**
-         * The cell's row object.
-         * @property object
-         * @memberOf CellRenderEvent
-         */
-        P.CellRenderEvent.prototype.object = {};
-    }
+    };    
 })();

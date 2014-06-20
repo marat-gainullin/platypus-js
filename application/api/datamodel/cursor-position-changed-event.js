@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor CursorPositionChangedEvent CursorPositionChangedEvent
      */
-    P.CursorPositionChangedEvent = function CursorPositionChangedEvent() {
+    P.CursorPositionChangedEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,58 +19,50 @@
                 return delegate;
             }
         });
-        if(CursorPositionChangedEvent.superclass)
-            CursorPositionChangedEvent.superclass.constructor.apply(this, arguments);
+        if(P.CursorPositionChangedEvent.superclass)
+            P.CursorPositionChangedEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "oldIndex", {
+            get: function() {
+                var value = delegate.oldIndex;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "CursorPositionChangedEvent", {value: CursorPositionChangedEvent});
-    Object.defineProperty(CursorPositionChangedEvent.prototype, "oldIndex", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.oldIndex;
-            return P.boxAsJs(value);
+        if(!P.CursorPositionChangedEvent){
+            /**
+             * Cursor position the cursor was on.
+             * @property oldIndex
+             * @memberOf CursorPositionChangedEvent
+             */
+            P.CursorPositionChangedEvent.prototype.oldIndex = 0;
         }
-    });
-    if(!CursorPositionChangedEvent){
-        /**
-         * Cursor position the cursor was on.
-         * @property oldIndex
-         * @memberOf CursorPositionChangedEvent
-         */
-        P.CursorPositionChangedEvent.prototype.oldIndex = 0;
-    }
-    Object.defineProperty(CursorPositionChangedEvent.prototype, "source", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.source;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "source", {
+            get: function() {
+                var value = delegate.source;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CursorPositionChangedEvent){
+            /**
+             * The source object of the event.
+             * @property source
+             * @memberOf CursorPositionChangedEvent
+             */
+            P.CursorPositionChangedEvent.prototype.source = {};
         }
-    });
-    if(!CursorPositionChangedEvent){
-        /**
-         * The source object of the event.
-         * @property source
-         * @memberOf CursorPositionChangedEvent
-         */
-        P.CursorPositionChangedEvent.prototype.source = {};
-    }
-    Object.defineProperty(CursorPositionChangedEvent.prototype, "newIndex", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.newIndex;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "newIndex", {
+            get: function() {
+                var value = delegate.newIndex;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CursorPositionChangedEvent){
+            /**
+             * Cursor position the cursor has been set on.
+             * @property newIndex
+             * @memberOf CursorPositionChangedEvent
+             */
+            P.CursorPositionChangedEvent.prototype.newIndex = 0;
         }
-    });
-    if(!CursorPositionChangedEvent){
-        /**
-         * Cursor position the cursor has been set on.
-         * @property newIndex
-         * @memberOf CursorPositionChangedEvent
-         */
-        P.CursorPositionChangedEvent.prototype.newIndex = 0;
-    }
+    };    
 })();

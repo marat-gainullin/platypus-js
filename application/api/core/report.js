@@ -8,7 +8,7 @@
      *
      * @constructor Report Report
      */
-    P.Report = function Report(aReport, aFormat, aName) {
+    P.Report = function (aReport, aFormat, aName) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,23 +22,17 @@
                 return delegate;
             }
         });
-        if(Report.superclass)
-            Report.superclass.constructor.apply(this, arguments);
+        if(P.Report.superclass)
+            P.Report.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
-    }
-    Object.defineProperty(P, "Report", {value: Report});
-    Object.defineProperty(Report.prototype, "print", {
+    };        Object.defineProperty(P.Report.prototype, "print", {
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.print();
             return P.boxAsJs(value);
         }
     });
-    if(!Report){
+    if(!P.Report){
         /**
          * Runs printing.
          * @method print
@@ -46,14 +40,14 @@
          */
         P.Report.prototype.print = function(){};
     }
-    Object.defineProperty(Report.prototype, "save", {
+    Object.defineProperty(P.Report.prototype, "save", {
         value: function(aFileName) {
             var delegate = this.unwrap();
             var value = delegate.save(P.boxAsJava(aFileName));
             return P.boxAsJs(value);
         }
     });
-    if(!Report){
+    if(!P.Report){
         /**
          * Saves the report at a specified location.
          * @method save
@@ -61,14 +55,14 @@
          * @param aFileName Name of a file, the generated report should be save in. */
         P.Report.prototype.save = function(aFileName){};
     }
-    Object.defineProperty(Report.prototype, "show", {
+    Object.defineProperty(P.Report.prototype, "show", {
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.show();
             return P.boxAsJs(value);
         }
     });
-    if(!Report){
+    if(!P.Report){
         /**
          * Shows report as Excel application.
          * @method show
@@ -76,4 +70,5 @@
          */
         P.Report.prototype.show = function(){};
     }
+
 })();

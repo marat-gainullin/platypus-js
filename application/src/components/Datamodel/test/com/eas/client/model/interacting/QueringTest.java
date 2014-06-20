@@ -8,12 +8,10 @@ import com.bearsoft.rowset.Rowset;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.BaseTest;
-import com.eas.client.model.DataScriptEventsListener;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
 import static org.junit.Assert.*;
@@ -395,37 +393,22 @@ public class QueringTest extends BaseTest {
 
             ModelState state = new ModelState(model);
 
-            DataScriptEventsListener scriptListener = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_PO_VELICHINE);
             EntityDataListener dataListener = new EntityDataListener();
             state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset().addRowsetListener(dataListener);
-            model.addScriptEventsListener(scriptListener);
 
-            DataScriptEventsListener scriptListener1 = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_PO_VELICHINE_1);
             EntityDataListener dataListener1 = new EntityDataListener();
             state.EDINICI_IZMERENIJA_PO_VELICHINE_1.getRowset().addRowsetListener(dataListener1);
-            model.addScriptEventsListener(scriptListener1);
 
-            DataScriptEventsListener scriptListener2 = new DataScriptEventsListener(state.NAIMENOVANIA_SI_PO_VELICHINE);
             EntityDataListener dataListener2 = new EntityDataListener();
             state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset().addRowsetListener(dataListener2);
-            model.addScriptEventsListener(scriptListener2);
 
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
 
             int pkColIndex = rowset.getFields().find("ID");
             dataListener.reset();
-            scriptListener.reset();
             dataListener1.reset();
-            scriptListener1.reset();
             dataListener2.reset();
-            scriptListener2.reset();
             rowset.beforeFirst();
-            assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
             while (rowset.next()) {
                 Object oPk = rowset.getObject(pkColIndex);
                 assertNotNull(oPk);
@@ -438,40 +421,15 @@ public class QueringTest extends BaseTest {
                         assertEquals(4, edRowset1.size());
                     }
                 }
-                assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
             }
-            assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
             rowset.first();
-            assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
 /////////////////////////////////////////
 
             state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset().removeRowsetListener(dataListener);
-            model.removeScriptEventsListener(scriptListener);
 
             dataListener1.reset();
-            scriptListener1.reset();
             dataListener2.reset();
-            scriptListener2.reset();
             rowset.beforeFirst();
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
             while (rowset.next()) {
                 Object oPk = rowset.getObject(pkColIndex);
                 assertNotNull(oPk);
@@ -480,44 +438,16 @@ public class QueringTest extends BaseTest {
                     if (lPk.equals(FilteringTest.DLINA)) {
                         Rowset edRowset = state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset();
                         assertEquals(4, edRowset.size());
-                        assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                        assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                        assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                        assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                         edRowset.beforeFirst();
-                        assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                        assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                        assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                        assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                         while (edRowset.next()) {
                             assertEquals(4, state.EDINICI_IZMERENIJA_PO_VELICHINE_1.getRowset().size());
                             assertEquals(0, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset().size());
 
-                            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                         }
-                        assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                        assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                        assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                        assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                         edRowset.first();
-                        assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                        assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                        assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                        assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                     }
                 }
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
             }
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
             rowset.first();
         }
     }

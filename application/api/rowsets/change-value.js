@@ -8,7 +8,7 @@
      * Generated constructor.
      * @constructor ChangeValue ChangeValue
      */
-    P.ChangeValue = function ChangeValue() {
+    P.ChangeValue = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,43 +19,36 @@
                 return delegate;
             }
         });
-        if(ChangeValue.superclass)
-            ChangeValue.superclass.constructor.apply(this, arguments);
+        if(P.ChangeValue.superclass)
+            P.ChangeValue.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
         });
-    }
-    Object.defineProperty(P, "ChangeValue", {value: ChangeValue});
-    Object.defineProperty(ChangeValue.prototype, "name", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.name;
-            return P.boxAsJs(value);
+        if(!P.ChangeValue){
+            /**
+             * Name of changed property.
+             * @property name
+             * @memberOf ChangeValue
+             */
+            P.ChangeValue.prototype.name = '';
         }
-    });
-    if(!ChangeValue){
-        /**
-         * Name of changed property.
-         * @property name
-         * @memberOf ChangeValue
-         */
-        P.ChangeValue.prototype.name = '';
-    }
-    Object.defineProperty(ChangeValue.prototype, "value", {
-        get: function() {
-            var delegate = this.unwrap();
-            var value = delegate.value;
-            return P.boxAsJs(value);
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.value;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ChangeValue){
+            /**
+             * New value.
+             * @property value
+             * @memberOf ChangeValue
+             */
+            P.ChangeValue.prototype.value = {};
         }
-    });
-    if(!ChangeValue){
-        /**
-         * New value.
-         * @property value
-         * @memberOf ChangeValue
-         */
-        P.ChangeValue.prototype.value = {};
-    }
+    };    
 })();
