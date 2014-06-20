@@ -6,6 +6,7 @@ package com.eas.designer.application.query;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.utils.CollectionListener;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
@@ -90,7 +91,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         readonlyChanged(!readonly, readonly);
     }
 
-    protected class QueryModelModifiedObserver implements ModelEditingListener<QueryEntity>, PropertyChangeListener {
+    protected class QueryModelModifiedObserver implements ModelEditingListener<QueryEntity>, PropertyChangeListener, CollectionListener {
 
         @Override
         public void entityAdded(QueryEntity e) {
@@ -123,6 +124,36 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
+            modelModified = true;
+        }
+
+        @Override
+        public void added(Object c, Object v) {
+            modelModified = true;
+        }
+
+        @Override
+        public void added(Object c, Collection clctn) {
+            modelModified = true;
+        }
+
+        @Override
+        public void removed(Object c, Object v) {
+            modelModified = true;
+        }
+
+        @Override
+        public void removed(Object c, Collection clctn) {
+            modelModified = true;
+        }
+
+        @Override
+        public void reodered(Object c) {
+            modelModified = true;
+        }
+
+        @Override
+        public void cleared(Object c) {
             modelModified = true;
         }
     }
@@ -209,6 +240,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         QueryModelModifiedObserver changesObserver = new QueryModelModifiedObserver();
         model.addEditingListener(changesObserver);
         model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
+        model.getParametersEntity().getFields().getCollectionSupport().addListener(changesObserver);
         for (QueryEntity entity : model.getEntities().values()) {
             entity.getChangeSupport().addPropertyChangeListener(changesObserver);
         }

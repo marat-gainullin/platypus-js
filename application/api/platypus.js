@@ -375,7 +375,7 @@
             var def = EngineUtilsClass.unwrap(ormDefs.get(o));
             Object.defineProperty(target, o, def);
         }
-        aDelegate.setPublished(target);
+        return target;
         // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
     });
     FieldsClass.setPublisher(function(aDelegate) {
@@ -396,7 +396,7 @@
         Object.defineProperty(target, "length", {
             value: nFields.size()
         });
-        aDelegate.setPublished(target);
+        return target;
     });
 
     extend(BoundArray, Array);
@@ -626,12 +626,7 @@
     function boxAsJs(aValue) {
         if (aValue) {
             if (aValue.getPublished) {
-                if (arguments.length > 1) {
-                    var elementClass = arguments[1];
-                    aValue = aValue.getPublished(new elementClass());
-                } else {
-                    aValue = aValue.getPublished();
-                }
+                aValue = aValue.getPublished();
             } else if (aValue instanceof JavaDateClass) {
                 aValue = new Date(aValue.time);
             } else if (aValue instanceof JavaArrayClass) {
