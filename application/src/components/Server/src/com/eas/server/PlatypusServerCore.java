@@ -103,6 +103,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
+    private final ThreadLocal<Object> currentRequest = new ThreadLocal<>();
+    private final ThreadLocal<Object> currentResponse = new ThreadLocal<>();
 
     public PlatypusServerCore(ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
@@ -278,5 +280,19 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
 
     public AppElementsFilter getBrowsersFilter() {
         return browsersFilter;
+    }
+
+    /**
+     * @return the currentRequest
+     */
+    public ThreadLocal<Object> getCurrentRequest() {
+        return currentRequest;
+    }
+
+    /**
+     * @return the currentResponse
+     */
+    public ThreadLocal<Object> getCurrentResponse() {
+        return currentResponse;
     }
 }

@@ -153,10 +153,11 @@ public class PlatypusHttpServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        currentRequest.set(request);
-        try {
-            if (!checkUpload(request, response)) {
-                if (serverCore != null) {
+        if (!checkUpload(request, response)) {
+            if (serverCore != null) {
+                serverCore.getCurrentRequest().set(request);
+                serverCore.getCurrentResponse().set(response);
+                try {
                     HttpSession httpSession = request.getSession(true);
                     if (httpSession != null) {
                         SessionManager sessionManager = serverCore.getSessionManager();
@@ -182,20 +183,21 @@ public class PlatypusHttpServlet extends HttpServlet {
                             sessionManager.setCurrentSession(null);
                         }
                     }
-                } else {
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, CORE_MISSING_MSG);
+                } catch (Exception ex) {
+                    throw new ServletException(ex);
+                } finally {
+                    serverCore.getCurrentRequest().set(null);
+                    serverCore.getCurrentResponse().set(null);
                 }
+            } else {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, CORE_MISSING_MSG);
             }
-        } catch (Exception ex) {
-            throw new ServletException(ex);
-        } finally {
-            currentRequest.set(null);
         }
     }
 
     private PlatypusPrincipal getPrincipal(final HttpServletRequest aRequest) {
         if (aRequest.getUserPrincipal() != null) {
-            return new WebPlatypusPrincipal(aRequest.getUserPrincipal().getName(), this);
+            return new WebPlatypusPrincipal(aRequest.getUserPrincipal().getName(), serverCore);
         } else {
             return new AnonymousPlatypusPrincipal(aRequest.getSession().getId());
         }
@@ -505,19 +507,6 @@ public class PlatypusHttpServlet extends HttpServlet {
             handler = new FilteredAppElementRequestHandler(serverCore, aSession, (FilteredAppElementRequest) rq);
         } else {
             handler = RequestHandlerFactory.getHandler(serverCore, aSession, rq);
-        }
-        if (handler instanceof ExecuteServerModuleMethodRequestHandler) {
-            ((ExecuteServerModuleMethodRequestHandler) handler).setExecuteEventsCallback(new ExecuteServerModuleMethodRequestHandler.ExecuteEventsCallback() {
-                @Override
-                public void beforeExecute(JSObject ssr) {
-                    //ssr.defineProperty(HTTP_HOST_OBJECT_NAME, HttpScriptContext.getInstance(ssr, aHttpRequest, aHttpResponse), ScriptableObject.READONLY);
-                }
-
-                @Override
-                public void afterExecute(JSObject ssr) {
-                    //ssr.delete(HTTP_HOST_OBJECT_NAME);
-                }
-            });
         }
         return handler;
     }

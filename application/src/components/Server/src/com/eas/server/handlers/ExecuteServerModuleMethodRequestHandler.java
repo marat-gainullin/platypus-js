@@ -33,14 +33,8 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
      * There are cases when a request needs to be complemented by temporarily
      * environment. Such as http request/response facades of servlet container
      */
-    private ExecuteEventsCallback executeCallback;
-
     public ExecuteServerModuleMethodRequestHandler(PlatypusServerCore aServerCore, Session aSession, ExecuteServerModuleMethodRequest aRequest) {
         super(aServerCore, aSession, aRequest);
-    }
-
-    public void setExecuteEventsCallback(ExecuteEventsCallback anexecuteCallback) {
-        executeCallback = anexecuteCallback;
     }
 
     @Override
@@ -80,16 +74,10 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                     }
                 }
                 if (moduleInstance != null) {
-                    if (executeCallback != null) {
-                        executeCallback.beforeExecute(moduleInstance);
-                    }
                     Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
                     Object oFun = moduleInstance.getMember(methodName);
                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                         Object result = ((JSObject) oFun).call(moduleInstance, getRequest().getArguments());
-                        if (executeCallback != null) {
-                            executeCallback.afterExecute(moduleInstance);
-                        }
                         return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
                     } else {
                         throw new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName()));
@@ -103,19 +91,5 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
         } else {
             throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName));
         }
-    }
-
-    /**
-     * There are cases when a request needs to be complemented by temporarily
-     * environment. Such as http request/response facades of servlet container.
-     * Because of temporarily nature of such environment, we have to inject some
-     * properties into ServerScriptRunner before a method execution and delete
-     * it from there after a method execution.
-     */
-    public interface ExecuteEventsCallback {
-
-        void beforeExecute(JSObject runner);
-
-        void afterExecute(JSObject runner);
     }
 }
