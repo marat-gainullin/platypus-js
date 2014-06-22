@@ -4,15 +4,15 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.designer.application.project.ClientType;
-import com.eas.designer.application.project.AppServerType;
 import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
+import com.eas.designer.application.platform.PlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
+import com.eas.designer.application.project.AppServerType;
+import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
-import com.eas.designer.application.platform.PlatformHomePathException;
-import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.explorer.platform.PlatypusPlatformDialog;
 import com.eas.designer.explorer.server.PlatypusServerInstance;
 import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
@@ -28,6 +28,9 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.api.debugger.DebuggerInfo;
+import org.netbeans.api.debugger.DebuggerManager;
+import org.netbeans.api.debugger.jpda.AttachingDICookie;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
@@ -103,25 +106,11 @@ public class ProjectRunner {
                 Future<Integer> runningProgram = start(project, appElementId, true);
                 if (runningProgram != null) {
                     try {
-                        /* attach debugger to the running client program
-                        DebuggerEnvironment clientEnv = new DebuggerEnvironment(project);
-                        clientEnv.host = LOCAL_HOSTNAME;
-                        clientEnv.port = project.getSettings().getDebugClientPort();
-                        clientEnv.runningProgram = runningProgram;
-                        clientEnv.runningElement = project.getSettings().getRunElement();
-                        DebuggerUtils.attachDebugger(clientEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
-                                */
+                        DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create("Platypus debugger attach", new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, project.getSettings().getDebugClientPort())}));
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
                         if (project.getSettings().getRunAppServerType() == AppServerType.PLATYPUS_SERVER) {
                             try {
-                                /* attach debugger to the running server program
-                                DebuggerEnvironment serverEnv = new DebuggerEnvironment(project);
-                                serverEnv.host = LOCAL_HOSTNAME;
-                                serverEnv.port = project.getSettings().getDebugServerPort();
-                                serverEnv.runningProgram = null;
-                                serverEnv.runningElement = null;
-                                DebuggerUtils.attachDebugger(serverEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
-                                        */
+                                DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create("Platypus debugger attach", new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, project.getSettings().getDebugServerPort())}));
                                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                             } catch (Exception ex) {
                                 ErrorManager.getDefault().notify(ex);
@@ -157,7 +146,8 @@ public class ProjectRunner {
         PlatypusProjectSettings pps = project.getSettings();
         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         String appUrl = null;
-        if (!pps.isNotStartServer()) {
+        boolean startServer = !pps.isNotStartServer();
+        if (startServer) {
             if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
                 PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
                 if (serverInstance.getServerState() == ServerState.STOPPED) {
@@ -205,7 +195,7 @@ public class ProjectRunner {
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_VM_Run_Options"), pps.getRunClientVmOptions()));//NOI18N
             }
             if (debug) {
-                setDebugArguments(arguments, project.getSettings().getDebugClientPort());
+                ProjectRunner.setDebugArguments(arguments, project.getSettings().getDebugClientPort());
             }
 
             io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
@@ -238,7 +228,7 @@ public class ProjectRunner {
                 DatabaseConnection[] dataSources = ConnectionManager.getDefault().getConnections();
                 for (DatabaseConnection connection : dataSources) {
                     if (isConnectionValid(connection)) {
-                        if (connection.getDisplayName() == null ? pps.getDefaultDataSourceName()== null : connection.getDisplayName().equals(pps.getDefaultDataSourceName())) {
+                        if (connection.getDisplayName() == null ? pps.getDefaultDataSourceName() == null : connection.getDisplayName().equals(pps.getDefaultDataSourceName())) {
                             defaultDatabaseConnection = connection;
                         }
                         arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_RESOURCE_CONF_PARAM);
@@ -262,7 +252,7 @@ public class ProjectRunner {
                 if (defaultDatabaseConnection != null) {
                     arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.DEF_DATASOURCE_CONF_PARAM);
                     arguments.add(pps.getDefaultDataSourceName());
-                } else if (pps.getDefaultDataSourceName()!= null && !pps.getDefaultDataSourceName().isEmpty()) {
+                } else if (pps.getDefaultDataSourceName() != null && !pps.getDefaultDataSourceName().isEmpty()) {
                     io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Missing_App_Database"));
                 }
 
@@ -318,10 +308,8 @@ public class ProjectRunner {
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
             Future<Integer> clientTask = service.run();
-            if (clientTask != null) {
-                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Client_Started"));//NOI18N
-                io.getOut().println();
-            }
+            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Client_Started"));//NOI18N
+            io.getOut().println();
             return clientTask;
         } else if (ClientType.WEB_BROWSER.equals(pps.getRunClientType())) {
             try {
@@ -389,6 +377,8 @@ public class ProjectRunner {
     }
 
     public static void setDebugArguments(List<String> arguments, int port) {
+        arguments.add("Xdebug");
+        arguments.add("Xrunjdwp:transport=dt_socket,suspend=y,server=y,address="+port);
     }
 
     public static String getExtendedClasspath(String executablePath) {
@@ -445,7 +435,7 @@ public class ProjectRunner {
         File extDir = new File(platformHomeDir, API_DIRECTORY_NAME);
         return extDir;
     }
-    
+
     private static String getExecutablePath(File aBinDir) {
         File clientAppExecutable = new File(aBinDir, CLIENT_APP_NAME);
         if (!clientAppExecutable.exists()) {
