@@ -31,12 +31,13 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers {
+public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
+		HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled = true;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
 
 	public VBoxPane() {
@@ -66,7 +67,7 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 	@Override
 	public void onResize() {
 		super.onResize();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -105,9 +106,9 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -119,7 +120,7 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -141,10 +142,10 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -175,13 +176,13 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 
 	public void ajustHeight(Widget aChild, int aValue) {
 		if (aChild != null) {
-			XElement xwe = aChild.getElement().<XElement>cast();
+			XElement xwe = aChild.getElement().<XElement> cast();
 			int hDelta = xwe.getOffsetHeight() - xwe.getContentHeight();
 			xwe.getStyle().setHeight(aValue - hDelta, Style.Unit.PX);
 			onResize();
 		}
 	}
-	
+
 	@Override
 	public JavaScriptObject getPublished() {
 		return published;
@@ -199,4 +200,16 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{
 	}-*/;
+
+	@Override
+	public int getTop(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getOffsetTop();
+	}
+
+	@Override
+	public int getLeft(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return 0;
+	}
 }
