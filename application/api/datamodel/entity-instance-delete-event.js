@@ -9,44 +9,46 @@
      * @constructor EntityInstanceDeleteEvent EntityInstanceDeleteEvent
      */
     P.EntityInstanceDeleteEvent = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The deleted element.
-         * @property deleted
-         * @memberOf EntityInstanceDeleteEvent
-         */
+        if(P.EntityInstanceDeleteEvent.superclass)
+            P.EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "deleted", {
             get: function() {
                 var value = delegate.deleted;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The source object of the event.
-         * @property source
-         * @memberOf EntityInstanceDeleteEvent
-         */
+        if(!P.EntityInstanceDeleteEvent){
+            /**
+             * The deleted element.
+             * @property deleted
+             * @memberOf EntityInstanceDeleteEvent
+             */
+            P.EntityInstanceDeleteEvent.prototype.deleted = {};
+        }
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.EntityInstanceDeleteEvent){
+            /**
+             * The source object of the event.
+             * @property source
+             * @memberOf EntityInstanceDeleteEvent
+             */
+            P.EntityInstanceDeleteEvent.prototype.source = {};
+        }
+    };    
 })();

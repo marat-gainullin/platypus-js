@@ -9,44 +9,46 @@
      * @constructor HttpScriptContext HttpScriptContext
      */
     P.HttpScriptContext = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * HTTP request, when invoked by HTTP protocol.
-         * @property request
-         * @memberOf HttpScriptContext
-         */
+        if(P.HttpScriptContext.superclass)
+            P.HttpScriptContext.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "request", {
             get: function() {
                 var value = delegate.request;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * HTTP response, when invoked by HTTP protocol.
-         * @property response
-         * @memberOf HttpScriptContext
-         */
+        if(!P.HttpScriptContext){
+            /**
+             * HTTP request, when invoked by HTTP protocol.
+             * @property request
+             * @memberOf HttpScriptContext
+             */
+            P.HttpScriptContext.prototype.request = {};
+        }
         Object.defineProperty(this, "response", {
             get: function() {
                 var value = delegate.response;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.HttpScriptContext){
+            /**
+             * HTTP response, when invoked by HTTP protocol.
+             * @property response
+             * @memberOf HttpScriptContext
+             */
+            P.HttpScriptContext.prototype.response = {};
+        }
+    };    
 })();

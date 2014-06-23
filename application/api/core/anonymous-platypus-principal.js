@@ -9,32 +9,32 @@
      * @constructor AnonymousPlatypusPrincipal AnonymousPlatypusPrincipal
      */
     P.AnonymousPlatypusPrincipal = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The username..
-         * @property name
-         * @memberOf AnonymousPlatypusPrincipal
-         */
+        if(P.AnonymousPlatypusPrincipal.superclass)
+            P.AnonymousPlatypusPrincipal.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.AnonymousPlatypusPrincipal){
+            /**
+             * The username..
+             * @property name
+             * @memberOf AnonymousPlatypusPrincipal
+             */
+            P.AnonymousPlatypusPrincipal.prototype.name = '';
+        }
+    };    
 })();

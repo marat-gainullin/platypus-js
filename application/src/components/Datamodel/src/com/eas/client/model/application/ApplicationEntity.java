@@ -71,9 +71,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected JSObject onRequeried;
     protected JSObject onFiltered;
     //
-    protected JSObject instanceConstructor;
     protected Object published;
-    protected Map<String, Object> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
     protected transient Rowset rowset;
     protected transient boolean filteredWhileAjusting;
@@ -157,9 +155,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 Locator loc = checkUserLocator(constraints);
                 if (loc.find(keyValues.toArray())) {
                     TaggedList<RowWrap> subSet = loc.getSubSet();
-                    for (RowWrap rw : subSet) {
+                    subSet.stream().forEach((rw) -> {
                         found.add(rw.getRow());
-                    }
+                    });
                 }
             }
         } else {
@@ -544,7 +542,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     @ScriptFunction(jsDoc = ENQEUE_UPDATE_JSDOC)
     public abstract void enqueueUpdate() throws Exception;
-    
+
     private static final String EXECUTE_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Applies the updates into the database and commits the transaction.\n"
@@ -650,15 +648,15 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     @ScriptFunction(jsDoc = DELETE_ROW_JSDOC, params = {"aCursorPosOrInstance"})
     public boolean deleteRow(Object aCursorPosOrInstance) throws Exception {
-        if(aCursorPosOrInstance instanceof Row){
-            return deleteRow((Row)aCursorPosOrInstance);
-        }else if(aCursorPosOrInstance instanceof Number){
-            return deleteRow(((Number)aCursorPosOrInstance).intValue());
-        }else{
+        if (aCursorPosOrInstance instanceof Row) {
+            return deleteRow((Row) aCursorPosOrInstance);
+        } else if (aCursorPosOrInstance instanceof Number) {
+            return deleteRow(((Number) aCursorPosOrInstance).intValue());
+        } else {
             return delete();
         }
     }
-    
+
     public boolean deleteRow(int aCursorIndex) throws Exception {
         if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
             rowset.deleteAt(aCursorIndex);
@@ -678,7 +676,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return false;
         }
     }
-    
+
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Experimental. The constructor funciton for the entity's data array elements.\n"
@@ -686,14 +684,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
     public JSObject getElementClass() {
-        return getInstanceConstructor();
+        return rowset.getFields().getInstanceConstructor();
     }
 
     @ScriptFunction
     public void setElementClass(JSObject aValue) {
-        setInstanceConstructor(aValue);
+        rowset.getFields().setInstanceConstructor(aValue);
     }
-    
+
     private static final String ON_CHANGED_JSDOC = ""
             + "/**\n"
             + "* The handler function for the event occured after the entity data change.\n"
@@ -814,11 +812,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     public void setWillScroll(JSObject aValue) {
         setOnBeforeScroll(aValue);
     }
-    
+
     public void putOrmDefinition(String aName, JSObject aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            if (!ormDefinitions.containsKey(aName)) {
-                ormDefinitions.put(aName, aDefinition);
+            Map<String, Object> defs = rowset.getFields().getOrmDefinitions();
+            if (!defs.containsKey(aName)) {
+                rowset.getFields().putOrmDefinition(aName, aDefinition);
             } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
             }
@@ -826,15 +825,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     public Map<String, Object> getOrmDefinitions() {
-        return Collections.unmodifiableMap(ormDefinitions);
-    }
-
-    public JSObject getInstanceConstructor() {
-        return instanceConstructor;
-    }
-
-    public void setInstanceConstructor(JSObject aValue) {
-        instanceConstructor = aValue;
+        return rowset.getFields().getOrmDefinitions();
     }
 
     @Override
@@ -858,10 +849,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
      * @return Cursor substitute entity.
      */
     @ScriptFunction(jsDoc = ""
-            + "/**"
+            + "/**\n"
             + " * Returns cursor-substitute entity.\n"
-            + " * Sunstitute's cursor is used when in original entity's cursor some field's value is null."
-            + "/*")
+            + " * Sunstitute's cursor is used when in original entity's cursor some field's value is null.\n"
+            + " */")
     public E getSubstitute() {
         return substitute;
     }
@@ -872,6 +863,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
      *
      * @param aValue Cursor substitute entity to be set.
      */
+    @ScriptFunction
     public void setSubstitute(E aValue) {
         if (aValue != this) {
             substitute = aValue;
@@ -934,13 +926,20 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         return onBeforeScroll;
     }
 
+    private static final String ON_FILTERED_JSDOC = ""
+            + "/**\n"
+            + "* The handler function for the event occured after the entity's data have been filtered.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
+    @EventMethod(eventClass = PublishedSourcedEvent.class)
     public JSObject getOnFiltered() {
         return onFiltered;
     }
 
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
-            + "* The handler function for the event occured after the entity data have been required.\n"
+            + "* The handler function for the event occured after the entity's data have been required.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
@@ -997,12 +996,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         changeSupport.firePropertyChange("onBeforeScroll", oldValue, aValue);
     }
 
-    private static final String ON_FILTERED_JSDOC = ""
-            + "/**\n"
-            + "* The handler function for the event occured after the filter have been applied to the entity.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
+    @ScriptFunction
     @EventMethod(eventClass = PublishedSourcedEvent.class)
     public void setOnFiltered(JSObject aValue) {
         JSObject oldValue = onFiltered;
@@ -1010,6 +1004,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         changeSupport.firePropertyChange("onFiltered", oldValue, aValue);
     }
 
+    @ScriptFunction
     public void setOnRequeried(JSObject aValue) {
         JSObject oldValue = onRequeried;
         onRequeried = aValue;
@@ -1054,17 +1049,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     public Rowset getRowset() throws Exception {
-        /*
-         if (rowset == null) {
-         try {
-         execute();
-         } catch (Exception ex) {
-         rowset = null;
-         rowsetFilter = null;
-         throw ex;
-         }
-         }
-         */
         return rowset;
     }
 
@@ -1184,14 +1168,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         executed = aExecuted;
         Set<Relation<E>> rels = getOutRelations();
         if (rels != null) {
-            for (Relation<E> outRel : rels) {
-                if (outRel != null) {
-                    E ent = outRel.getRightEntity();
-                    if (ent != null) {
-                        ent.setExecutedRecursivly(aExecuted);
-                    }
+            rels.forEach((Relation<E> outRel) -> {
+                if (outRel != null && outRel.getRightEntity() != null) {
+                    outRel.getRightEntity().setExecutedRecursivly(aExecuted);
                 }
-            }
+            });
         }
     }
 
@@ -1228,11 +1209,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Set<Relation<E>> rels = getOutRelations();
             if (rels != null) {
                 Set<E> toExecute = new HashSet<>();
-                for (Relation<E> outRel : rels) {
+                rels.forEach((Relation<E> outRel) -> {
                     if (outRel != null && outRel.getRightEntity() != null) {
                         toExecute.add(outRel.getRightEntity());
                     }
-                }
+                });
                 for (E entity : toExecute) {
                     entity.internalExecute(refresh);
                 }
@@ -1250,14 +1231,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             if (rels != null) {
                 Field onlyField = getFields().get(aOnlyFieldIndex);
                 Set<E> toExecute = new HashSet<>();
-                for (Relation<E> outRel : rels) {
+                rels.forEach((Relation<E> outRel) -> {
                     if (outRel != null) {
                         E ent = outRel.getRightEntity();
                         if (ent != null && outRel.getLeftField() == onlyField) {
                             toExecute.add(ent);
                         }
                     }
-                }
+                });
                 for (E entity : toExecute) {
                     entity.internalExecute(refresh);
                 }
@@ -1271,16 +1252,16 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     public static <E extends ApplicationEntity<?, ?, E>> Set<E> internalExecuteChildrenImpl(boolean refresh, Collection<E> toExecute) throws Exception {
         Set<E> childrenToExecute = new HashSet<>();
-        for (E entity : toExecute) {
+        toExecute.forEach((E entity) -> {
             Set<Relation<E>> rels = entity.getOutRelations();
             if (rels != null) {
-                for (Relation<E> outRel : rels) {
+                rels.forEach((Relation<E> outRel) -> {
                     if (outRel != null && outRel.getRightEntity() != null) {
                         childrenToExecute.add(outRel.getRightEntity());
                     }
-                }
+                });
             }
-        }
+        });
         for (E entity : childrenToExecute) {
             entity.internalExecute(refresh);
         }
@@ -1470,11 +1451,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             assert rowset != null;
             Set<Relation<E>> inRels = getInRelations();
             if (inRels != null) {
-                for (Relation<E> rel : inRels) {
+                inRels.forEach((Relation<E> rel) -> {
                     if (rel != null && rel.isRightField()) {
                         rtInFilterRelations.add(rel);
                     }
-                }
+                });
             }
         }
     }
@@ -1485,10 +1466,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         if (rowsetFilter == null && !rtInFilterRelations.isEmpty()) {
             List<Field> constraints = new ArrayList<>();
             // enumerate filtering relations ...
-            for (Relation<E> rel : rtInFilterRelations) {
+            rtInFilterRelations.forEach((Relation<E> rel) -> {
                 assert rel != null && rel.isRightField();
                 constraints.add(rel.getRightField());
-            }
+            });
             if (!constraints.isEmpty()) {
                 rowsetFilter = rowset.createFilter();
                 rowsetFilter.beginConstrainting();
@@ -1593,7 +1574,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         Object res = null;
         if (aHandler != null) {
             try {
-                model.fireScriptEventExecuting(aEvent);
                 return ScriptUtils.toJava(aHandler.call(getPublished(), new Object[]{aEvent.getPublished()}));
             } catch (Exception ex) {
                 if (!(ex instanceof IllegalStateException) || ex.getMessage() == null || !ex.getMessage().equals("break")) {

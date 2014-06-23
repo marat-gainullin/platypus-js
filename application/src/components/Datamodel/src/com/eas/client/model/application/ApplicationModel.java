@@ -11,10 +11,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
-import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Model;
-import com.eas.client.model.ModelScriptEventsListener;
-import com.eas.client.model.ModelScriptEventsSupport;
 import com.eas.client.model.Relation;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
@@ -23,6 +20,7 @@ import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import java.io.*;
 import java.sql.Types;
@@ -52,7 +50,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
-    protected ModelScriptEventsSupport scriptEventsSupport = new ModelScriptEventsSupport();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
@@ -73,36 +70,35 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             throw new AlreadyPublishedException();
         }
         published = aValue;
-        /*
-         if (published != null && published instanceof ScriptableObject) {
-         for (ReferenceRelation<E> aRelation : referenceRelations) {
-         String scalarPropertyName = aRelation.getScalarPropertyName();
-         if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-         scalarPropertyName = aRelation.getRightEntity().getName();
-         }
-         if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-         aRelation.getLeftEntity().putOrmDefinition(
-         scalarPropertyName,
-         ScriptUtils.scalarPropertyDefinition(
-         (Scriptable) aRelation.getRightEntity().getPublished(),
-         aRelation.getRightField().getName(),
-         aRelation.getLeftField().getName()));
-         }
-         String collectionPropertyName = aRelation.getCollectionPropertyName();
-         if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-         collectionPropertyName = aRelation.getLeftEntity().getName();
-         }
-         if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-         aRelation.getRightEntity().putOrmDefinition(
-         collectionPropertyName,
-         ScriptUtils.collectionPropertyDefinition(
-         (Scriptable) aRelation.getLeftEntity().getPublished(),
-         aRelation.getRightField().getName(),
-         aRelation.getLeftField().getName()));
-         }
-         }
-         }
-         */
+    }
+
+    public void createORMDefinitions() {
+        referenceRelations.stream().forEach((ReferenceRelation<E> aRelation) -> {
+            String scalarPropertyName = aRelation.getScalarPropertyName();
+            if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                scalarPropertyName = aRelation.getRightEntity().getName();
+            }
+            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                aRelation.getLeftEntity().putOrmDefinition(
+                        scalarPropertyName,
+                        ScriptUtils.scalarPropertyDefinition(
+                                (JSObject) aRelation.getRightEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName()));
+            }
+            String collectionPropertyName = aRelation.getCollectionPropertyName();
+            if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                collectionPropertyName = aRelation.getLeftEntity().getName();
+            }
+            if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                aRelation.getRightEntity().putOrmDefinition(
+                        collectionPropertyName,
+                        ScriptUtils.collectionPropertyDefinition(
+                                (JSObject) aRelation.getLeftEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName()));
+            }
+        });
     }
 
     @Override
@@ -167,9 +163,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 toDel.add(rel);
             }
         }
-        for (ReferenceRelation<E> rel : toDel) {
+        toDel.stream().forEach((rel) -> {
             removeReferenceRelation(rel);
-        }
+        });
     }
 
     @Override
@@ -203,18 +199,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 || type == Types.BOOLEAN
                 || type == Types.BLOB
                 || type == Types.CLOB;
-    }
-
-    public void addScriptEventsListener(ModelScriptEventsListener l) {
-        scriptEventsSupport.addListener(l);
-    }
-
-    public void removeScriptEventsListener(ModelScriptEventsListener l) {
-        scriptEventsSupport.removeListener(l);
-    }
-
-    public void fireScriptEventExecuting(PublishedSourcedEvent aEvent) {
-        scriptEventsSupport.fireScriptEventExecuting(aEvent);
     }
 
     public void beginSavingCurrentRowIndexes() {
@@ -255,7 +239,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "/**\n"
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
-            + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.\n"
             + "* @param callback the function to be envoked after the data changes saved (optional).\n"
             + "*/";
 
@@ -279,8 +264,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
-            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method, but the model still attempts to commit.\n"
-            + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit.\n"
+            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)

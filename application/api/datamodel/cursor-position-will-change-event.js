@@ -9,56 +9,60 @@
      * @constructor CursorPositionWillChangeEvent CursorPositionWillChangeEvent
      */
     P.CursorPositionWillChangeEvent = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * Cursor position the cursor is still on.
-         * @property oldIndex
-         * @memberOf CursorPositionWillChangeEvent
-         */
+        if(P.CursorPositionWillChangeEvent.superclass)
+            P.CursorPositionWillChangeEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "oldIndex", {
             get: function() {
                 var value = delegate.oldIndex;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The source object of the event.
-         * @property source
-         * @memberOf CursorPositionWillChangeEvent
-         */
+        if(!P.CursorPositionWillChangeEvent){
+            /**
+             * Cursor position the cursor is still on.
+             * @property oldIndex
+             * @memberOf CursorPositionWillChangeEvent
+             */
+            P.CursorPositionWillChangeEvent.prototype.oldIndex = 0;
+        }
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Cursor position the cursor will be set on.
-         * @property newIndex
-         * @memberOf CursorPositionWillChangeEvent
-         */
+        if(!P.CursorPositionWillChangeEvent){
+            /**
+             * The source object of the event.
+             * @property source
+             * @memberOf CursorPositionWillChangeEvent
+             */
+            P.CursorPositionWillChangeEvent.prototype.source = {};
+        }
         Object.defineProperty(this, "newIndex", {
             get: function() {
                 var value = delegate.newIndex;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.CursorPositionWillChangeEvent){
+            /**
+             * Cursor position the cursor will be set on.
+             * @property newIndex
+             * @memberOf CursorPositionWillChangeEvent
+             */
+            P.CursorPositionWillChangeEvent.prototype.newIndex = 0;
+        }
+    };    
 })();

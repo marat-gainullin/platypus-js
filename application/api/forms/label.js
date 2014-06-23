@@ -12,7 +12,6 @@
      * @constructor Label Label
      */
     P.Label = function (text, icon, iconTextGap) {
-
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,17 +21,13 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf Label
-         */
+        if(P.Label.superclass)
+            P.Label.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -42,12 +37,14 @@
                 delegate.cursor = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf Label
+             */
+            P.Label.prototype.cursor = {};
+        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -57,24 +54,28 @@
                 delegate.onMouseDragged = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets the parent of this component.
-         * @property parent
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseDragged = {};
+        }
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parent;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Mouse released event handler function.
-         * @property onMouseReleased
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Gets the parent of this component.
+             * @property parent
+             * @memberOf Label
+             */
+            P.Label.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -84,12 +85,14 @@
                 delegate.onMouseReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse released event handler function.
+             * @property onMouseReleased
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseReleased = {};
+        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -99,12 +102,14 @@
                 delegate.onFocusLost = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The graphic image (glyph, icon) that the label displays.
-         * @property icon
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf Label
+             */
+            P.Label.prototype.onFocusLost = {};
+        }
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
@@ -114,12 +119,14 @@
                 delegate.icon = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The graphic image (glyph, icon) that the label displays.
+             * @property icon
+             * @memberOf Label
+             */
+            P.Label.prototype.icon = {};
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -129,12 +136,14 @@
                 delegate.onMousePressed = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The foreground color of this component.
-         * @property foreground
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf Label
+             */
+            P.Label.prototype.onMousePressed = {};
+        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -144,25 +153,29 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The foreground color of this component.
+             * @property foreground
+             * @memberOf Label
+             */
+            P.Label.prototype.foreground = {};
+        }
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf Label
+             */
+            P.Label.prototype.error = '';
+        }
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -172,12 +185,14 @@
                 delegate.enabled = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component moved event handler function.
-         * @property onComponentMoved
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf Label
+             */
+            P.Label.prototype.enabled = true;
+        }
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -187,12 +202,14 @@
                 delegate.onComponentMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Component moved event handler function.
+             * @property onComponentMoved
+             * @memberOf Label
+             */
+            P.Label.prototype.onComponentMoved = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -202,12 +219,14 @@
                 delegate.componentPopupMenu = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf Label
+             */
+            P.Label.prototype.componentPopupMenu = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -217,12 +236,14 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf Label
+             */
+            P.Label.prototype.top = 0;
+        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -232,12 +253,14 @@
                 delegate.onComponentResized = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The text string that the label displays.
-         * @property text
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf Label
+             */
+            P.Label.prototype.onComponentResized = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -247,12 +270,14 @@
                 delegate.text = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse entered over the component event handler function.
-         * @property onMouseEntered
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The text string that the label displays.
+             * @property text
+             * @memberOf Label
+             */
+            P.Label.prototype.text = '';
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -262,12 +287,14 @@
                 delegate.onMouseEntered = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The tooltip string that has been set with.
-         * @property toolTipText
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseEntered = {};
+        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -277,24 +304,28 @@
                 delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf Label
+             */
+            P.Label.prototype.toolTipText = '';
+        }
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Height of the component.
-         * @property height
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Label
+             */
+            P.Label.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -304,12 +335,14 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component shown event handler function.
-         * @property onComponentShown
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf Label
+             */
+            P.Label.prototype.height = 0;
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -319,12 +352,14 @@
                 delegate.onComponentShown = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf Label
+             */
+            P.Label.prototype.onComponentShown = {};
+        }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -334,12 +369,14 @@
                 delegate.onMouseMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseMoved = {};
+        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -349,12 +386,14 @@
                 delegate.opaque = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component should be visible when its parent is visible.
-         * @property visible
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf Label
+             */
+            P.Label.prototype.opaque = true;
+        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -364,12 +403,14 @@
                 delegate.visible = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component hidden event handler function.
-         * @property onComponentHidden
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf Label
+             */
+            P.Label.prototype.visible = true;
+        }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -379,12 +420,14 @@
                 delegate.onComponentHidden = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The amount of space between the text and the icon displayed in this label.
-         * @property iconTextGap
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Component hidden event handler function.
+             * @property onComponentHidden
+             * @memberOf Label
+             */
+            P.Label.prototype.onComponentHidden = {};
+        }
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -394,12 +437,14 @@
                 delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The amount of space between the text and the icon displayed in this label.
+             * @property iconTextGap
+             * @memberOf Label
+             */
+            P.Label.prototype.iconTextGap = 0;
+        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -409,27 +454,14 @@
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Main action performed event handler function.
-         * @property onActionPerformed
-         * @memberOf Label
-         */
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf Label
+             */
+            P.Label.prototype.nextFocusableComponent = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -439,12 +471,31 @@
                 delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component may be focused.
-         * @property focusable
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf Label
+             */
+            P.Label.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Label
+             */
+            P.Label.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
@@ -454,12 +505,14 @@
                 delegate.focusable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key typed event handler function.
-         * @property onKeyTyped
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Determines whether this component may be focused.
+             * @property focusable
+             * @memberOf Label
+             */
+            P.Label.prototype.focusable = true;
+        }
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -469,12 +522,14 @@
                 delegate.onKeyTyped = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Horizontal position of the text relative to the icon.
-         * @property horizontalTextPosition
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Key typed event handler function.
+             * @property onKeyTyped
+             * @memberOf Label
+             */
+            P.Label.prototype.onKeyTyped = {};
+        }
         Object.defineProperty(this, "horizontalTextPosition", {
             get: function() {
                 var value = delegate.horizontalTextPosition;
@@ -484,12 +539,14 @@
                 delegate.horizontalTextPosition = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Vertical position of the text relative to the icon.
-         * @property verticalTextPosition
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Horizontal position of the text relative to the icon.
+             * @property horizontalTextPosition
+             * @memberOf Label
+             */
+            P.Label.prototype.horizontalTextPosition = 0;
+        }
         Object.defineProperty(this, "verticalTextPosition", {
             get: function() {
                 var value = delegate.verticalTextPosition;
@@ -499,12 +556,14 @@
                 delegate.verticalTextPosition = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse wheel moved event handler function.
-         * @property onMouseWheelMoved
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Vertical position of the text relative to the icon.
+             * @property verticalTextPosition
+             * @memberOf Label
+             */
+            P.Label.prototype.verticalTextPosition = 0;
+        }
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -514,12 +573,14 @@
                 delegate.onMouseWheelMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Horizontal position of the text with the icon relative to the component's size.
-         * @property horizontalAlignment
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseWheelMoved = {};
+        }
         Object.defineProperty(this, "horizontalAlignment", {
             get: function() {
                 var value = delegate.horizontalAlignment;
@@ -529,24 +590,28 @@
                 delegate.horizontalAlignment = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Horizontal position of the text with the icon relative to the component's size.
+             * @property horizontalAlignment
+             * @memberOf Label
+             */
+            P.Label.prototype.horizontalAlignment = 0;
+        }
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf Label
+             */
+            P.Label.prototype.component = {};
+        }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -556,12 +621,14 @@
                 delegate.onFocusGained = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Horizontal coordinate of the component.
-         * @property left
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf Label
+             */
+            P.Label.prototype.onFocusGained = {};
+        }
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -571,12 +638,14 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The background color of this component.
-         * @property background
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Horizontal coordinate of the component.
+             * @property left
+             * @memberOf Label
+             */
+            P.Label.prototype.left = 0;
+        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -586,12 +655,14 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse clicked event handler function.
-         * @property onMouseClicked
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf Label
+             */
+            P.Label.prototype.background = {};
+        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -601,12 +672,14 @@
                 delegate.onMouseClicked = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse exited over the component event handler function.
-         * @property onMouseExited
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseClicked = {};
+        }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -616,24 +689,28 @@
                 delegate.onMouseExited = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets name of this component.
-         * @property name
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Mouse exited over the component event handler function.
+             * @property onMouseExited
+             * @memberOf Label
+             */
+            P.Label.prototype.onMouseExited = {};
+        }
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Width of the component.
-         * @property width
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Label
+             */
+            P.Label.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -643,12 +720,14 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Vertical position of the text with the icon relative to the component's size.
-         * @property verticalAlignment
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Width of the component.
+             * @property width
+             * @memberOf Label
+             */
+            P.Label.prototype.width = 0;
+        }
         Object.defineProperty(this, "verticalAlignment", {
             get: function() {
                 var value = delegate.verticalAlignment;
@@ -658,12 +737,14 @@
                 delegate.verticalAlignment = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The font of this component.
-         * @property font
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * Vertical position of the text with the icon relative to the component's size.
+             * @property verticalAlignment
+             * @memberOf Label
+             */
+            P.Label.prototype.verticalAlignment = 0;
+        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -673,12 +754,14 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key pressed event handler function.
-         * @property onKeyPressed
-         * @memberOf Label
-         */
+        if(!P.Label){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf Label
+             */
+            P.Label.prototype.font = {};
+        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -688,22 +771,28 @@
                 delegate.onKeyPressed = P.boxAsJava(aValue);
             }
         });
-
+        if(!P.Label){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf Label
+             */
+            P.Label.prototype.onKeyPressed = {};
+        }
+    };        Object.defineProperty(P.Label.prototype, "focus", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Label){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Label
          */
-        Object.defineProperty(this, "focus", {
-            get: function() {
-                return function() {
-                    var value = delegate.focus();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.Label.prototype.focus = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

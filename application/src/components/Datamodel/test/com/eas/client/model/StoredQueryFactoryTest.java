@@ -483,14 +483,14 @@ public class StoredQueryFactoryTest extends BaseTest {
                 Fields fields = testQuery.getFields();
                 assertNotNull(fields);
                 assertTrue(fields.getFieldsCount() == 23);
-                assertNotNull(fields.get("MDENT_ID"));
-                assertTrue(fields.get("MDENT_ID").isPk());
-                assertNotNull(fields.get("MDLOG_ID"));
+                assertNotNull(fields.get("MdENT_ID"));
+                assertTrue(fields.get("MDENT_iD").isPk());
+                assertNotNull(fields.get("MDlOG_ID"));
                 assertTrue(fields.get("MDLOG_ID").isPk());
                 assertFalse(fields.getPrimaryKeys().isEmpty());
                 assertEquals(2, fields.getPrimaryKeys().size());
-                assertEquals("MDENT_ID", fields.getPrimaryKeys().get(0).getName());
-                assertEquals("MDLOG_ID", fields.getPrimaryKeys().get(1).getName());
+                assertEquals("mdent_id", fields.getPrimaryKeys().get(0).getName());
+                assertEquals("mdlog_id", fields.getPrimaryKeys().get(1).getName());
             } finally {
                 deleteEntity(queryId, client);
             }

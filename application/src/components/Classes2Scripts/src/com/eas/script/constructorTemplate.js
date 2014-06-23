@@ -6,20 +6,18 @@
     
 ${JsDoc}
     P.${Name} = function (${Params}) {
-
         var maxArgs = ${MaxArgs};
         var ${Delegate} = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : ${UnwrappedParams};
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return ${Delegate};
-                };
+            value: function() {
+                return ${Delegate};
             }
         });
-${Props}
+        if(P.${Name}.superclass)
+            P.${Name}.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+${Props}${Body}    };    ${Methods}
 })();

@@ -52,11 +52,11 @@ public class Form implements HasPublished {
     public static Form[] getShownForms() {
         synchronized (Form.class) {
             List<Form> notNullForms = new ArrayList<>();
-            for (Form f : showingForms.values()) {
+            showingForms.values().forEach((Form f) -> {
                 if (f != null) {
                     notNullForms.add(f);
                 }
-            }
+            });
             return notNullForms.toArray(new Form[]{});
         }
     }
@@ -1083,6 +1083,7 @@ public class Form implements HasPublished {
         return alwaysOnTop;
     }
 
+    @ScriptFunction()
     public void setAlwaysOnTop(boolean aValue) {
         alwaysOnTop = aValue;
         if (surface instanceof JDialog) {

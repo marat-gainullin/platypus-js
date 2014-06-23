@@ -10,7 +10,6 @@
      * @constructor FormattedField FormattedField
      */
     P.FormattedField = function (value) {
-
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -18,17 +17,13 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf FormattedField
-         */
+        if(P.FormattedField.superclass)
+            P.FormattedField.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -38,12 +33,14 @@
                 delegate.cursor = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.cursor = {};
+        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -53,24 +50,28 @@
                 delegate.onMouseDragged = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets the parent of this component.
-         * @property parent
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseDragged = {};
+        }
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parent;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Mouse released event handler function.
-         * @property onMouseReleased
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Gets the parent of this component.
+             * @property parent
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -80,12 +81,14 @@
                 delegate.onMouseReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse released event handler function.
+             * @property onMouseReleased
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseReleased = {};
+        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -95,12 +98,14 @@
                 delegate.onFocusLost = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The text to be shown when component's value is absent.
-         * @property emptyText
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onFocusLost = {};
+        }
         Object.defineProperty(this, "emptyText", {
             get: function() {
                 var value = delegate.emptyText;
@@ -110,12 +115,14 @@
                 delegate.emptyText = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The text to be shown when component's value is absent.
+             * @property emptyText
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.emptyText = '';
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -125,12 +132,14 @@
                 delegate.onMousePressed = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The foreground color of this component.
-         * @property foreground
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMousePressed = {};
+        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -140,25 +149,29 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The foreground color of this component.
+             * @property foreground
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.foreground = {};
+        }
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.error = '';
+        }
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -168,12 +181,14 @@
                 delegate.enabled = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component moved event handler function.
-         * @property onComponentMoved
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.enabled = true;
+        }
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -183,12 +198,14 @@
                 delegate.onComponentMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Component moved event handler function.
+             * @property onComponentMoved
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onComponentMoved = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -198,12 +215,14 @@
                 delegate.componentPopupMenu = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.componentPopupMenu = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -213,12 +232,14 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.top = 0;
+        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -228,12 +249,14 @@
                 delegate.onComponentResized = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Text on the component.
-         * @property text
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onComponentResized = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -243,12 +266,14 @@
                 delegate.text = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse entered over the component event handler function.
-         * @property onMouseEntered
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Text on the component.
+             * @property text
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.text = '';
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -258,12 +283,14 @@
                 delegate.onMouseEntered = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The value of this component.
-         * @property value
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseEntered = {};
+        }
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;
@@ -273,12 +300,14 @@
                 delegate.value = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The tooltip string that has been set with.
-         * @property toolTipText
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The value of this component.
+             * @property value
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.value = {};
+        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -288,24 +317,28 @@
                 delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.toolTipText = '';
+        }
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Height of the component.
-         * @property height
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -315,12 +348,14 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component shown event handler function.
-         * @property onComponentShown
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.height = 0;
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -330,12 +365,14 @@
                 delegate.onComponentShown = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onComponentShown = {};
+        }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -345,12 +382,14 @@
                 delegate.onMouseMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseMoved = {};
+        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -360,12 +399,14 @@
                 delegate.opaque = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component should be visible when its parent is visible.
-         * @property visible
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.opaque = true;
+        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -375,12 +416,14 @@
                 delegate.visible = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component hidden event handler function.
-         * @property onComponentHidden
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.visible = true;
+        }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -390,12 +433,14 @@
                 delegate.onComponentHidden = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Component hidden event handler function.
+             * @property onComponentHidden
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onComponentHidden = {};
+        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -405,12 +450,14 @@
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Field text format.
-         * @property format
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.nextFocusableComponent = {};
+        }
         Object.defineProperty(this, "format", {
             get: function() {
                 var value = delegate.format;
@@ -420,27 +467,14 @@
                 delegate.format = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Main action performed event handler function.
-         * @property onActionPerformed
-         * @memberOf FormattedField
-         */
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Field text format.
+             * @property format
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.format = '';
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -450,12 +484,31 @@
                 delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component may be focused.
-         * @property focusable
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
@@ -465,12 +518,14 @@
                 delegate.focusable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key typed event handler function.
-         * @property onKeyTyped
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Determines whether this component may be focused.
+             * @property focusable
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.focusable = true;
+        }
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -480,12 +535,14 @@
                 delegate.onKeyTyped = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse wheel moved event handler function.
-         * @property onMouseWheelMoved
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Key typed event handler function.
+             * @property onKeyTyped
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onKeyTyped = {};
+        }
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -495,24 +552,28 @@
                 delegate.onMouseWheelMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseWheelMoved = {};
+        }
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.component = {};
+        }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -522,12 +583,14 @@
                 delegate.onFocusGained = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Horizontal coordinate of the component.
-         * @property left
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onFocusGained = {};
+        }
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -537,12 +600,14 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The background color of this component.
-         * @property background
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Horizontal coordinate of the component.
+             * @property left
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.left = 0;
+        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -552,12 +617,14 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse clicked event handler function.
-         * @property onMouseClicked
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.background = {};
+        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -567,12 +634,14 @@
                 delegate.onMouseClicked = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse exited over the component event handler function.
-         * @property onMouseExited
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseClicked = {};
+        }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -582,24 +651,28 @@
                 delegate.onMouseExited = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets name of this component.
-         * @property name
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Mouse exited over the component event handler function.
+             * @property onMouseExited
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseExited = {};
+        }
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Width of the component.
-         * @property width
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -609,12 +682,14 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The font of this component.
-         * @property font
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * Width of the component.
+             * @property width
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.width = 0;
+        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -624,12 +699,14 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key pressed event handler function.
-         * @property onKeyPressed
-         * @memberOf FormattedField
-         */
+        if(!P.FormattedField){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.font = {};
+        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -639,22 +716,28 @@
                 delegate.onKeyPressed = P.boxAsJava(aValue);
             }
         });
-
+        if(!P.FormattedField){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onKeyPressed = {};
+        }
+    };        Object.defineProperty(P.FormattedField.prototype, "focus", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.FormattedField){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf FormattedField
          */
-        Object.defineProperty(this, "focus", {
-            get: function() {
-                return function() {
-                    var value = delegate.focus();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.FormattedField.prototype.focus = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

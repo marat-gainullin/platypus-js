@@ -1,7 +1,7 @@
 /**
  * Datasource module is stateless data fetch/apply provider.
  * @author ${user}
- * @module 
+ * @constructor 
  */
 function ${appElementName}(){
     var self = this, model = P.loadModel(this.constructor.name);

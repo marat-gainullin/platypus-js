@@ -9,56 +9,60 @@
      * @constructor CellData CellData
      */
     P.CellData = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The cell's data.
-         * @property data
-         * @memberOf CellData
-         */
+        if(P.CellData.superclass)
+            P.CellData.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The displayed text.
-         * @property display
-         * @memberOf CellData
-         */
+        if(!P.CellData){
+            /**
+             * The cell's data.
+             * @property data
+             * @memberOf CellData
+             */
+            P.CellData.prototype.data = {};
+        }
         Object.defineProperty(this, "display", {
             get: function() {
                 var value = delegate.display;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The cell's style.
-         * @property style
-         * @memberOf CellData
-         */
+        if(!P.CellData){
+            /**
+             * The displayed text.
+             * @property display
+             * @memberOf CellData
+             */
+            P.CellData.prototype.display = {};
+        }
         Object.defineProperty(this, "style", {
             get: function() {
                 var value = delegate.style;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.CellData){
+            /**
+             * The cell's style.
+             * @property style
+             * @memberOf CellData
+             */
+            P.CellData.prototype.style = {};
+        }
+    };    
 })();

@@ -38,9 +38,9 @@ public class RowsComparator implements Comparator<Row> {
     @Override
     public int compare(Row r1, Row r2) {
         assert criteria != null;
-        for (int i = 0; i < criteria.size(); i++) {
+        for (SortingCriterion criteria1 : criteria) {
             try {
-                SortingCriterion cr = criteria.get(i);
+                SortingCriterion cr = criteria1;
                 assert cr != null;
                 assert cr.getColIndex() > 0;
                 Object o1 = r1.getColumnObject(cr.getColIndex());
@@ -65,7 +65,7 @@ public class RowsComparator implements Comparator<Row> {
                         return cr.isAscending() ? cRes : -cRes;
                     }
                 }
-            } catch (InvalidColIndexException ex) {
+            }catch (InvalidColIndexException ex) {
                 Logger.getLogger(RowsComparator.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

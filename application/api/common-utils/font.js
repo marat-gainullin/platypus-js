@@ -12,7 +12,6 @@
      * @constructor Font Font
      */
     P.Font = function (family, style, size) {
-
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,13 +21,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-
+        if(P.Font.superclass)
+            P.Font.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    };    
 })();

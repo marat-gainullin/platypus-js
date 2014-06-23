@@ -10,7 +10,6 @@
      * @constructor ModelCheckBox ModelCheckBox
      */
     P.ModelCheckBox = function (text) {
-
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -18,17 +17,13 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf ModelCheckBox
-         */
+        if(P.ModelCheckBox.superclass)
+            P.ModelCheckBox.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -38,12 +33,14 @@
                 delegate.cursor = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.cursor = {};
+        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -53,24 +50,28 @@
                 delegate.onMouseDragged = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets the parent of this component.
-         * @property parent
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseDragged = {};
+        }
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parent;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Mouse released event handler function.
-         * @property onMouseReleased
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Gets the parent of this component.
+             * @property parent
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -80,12 +81,14 @@
                 delegate.onMouseReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse released event handler function.
+             * @property onMouseReleased
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseReleased = {};
+        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -95,12 +98,14 @@
                 delegate.onFocusLost = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onFocusLost = {};
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -110,12 +115,14 @@
                 delegate.onMousePressed = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The foreground color of this component.
-         * @property foreground
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMousePressed = {};
+        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -125,25 +132,29 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * The foreground color of this component.
+             * @property foreground
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.foreground = {};
+        }
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.error = '';
+        }
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -153,12 +164,14 @@
                 delegate.enabled = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component moved event handler function.
-         * @property onComponentMoved
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.enabled = true;
+        }
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -168,12 +181,14 @@
                 delegate.onComponentMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component's selection event handler function.
-         * @property onSelect
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Component moved event handler function.
+             * @property onComponentMoved
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onComponentMoved = {};
+        }
         Object.defineProperty(this, "onSelect", {
             get: function() {
                 var value = delegate.onSelect;
@@ -183,12 +198,14 @@
                 delegate.onSelect = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Component's selection event handler function.
+             * @property onSelect
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onSelect = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -198,12 +215,14 @@
                 delegate.componentPopupMenu = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.componentPopupMenu = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -213,12 +232,14 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component's rendering event handler function.
-         * @property onRender
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.top = 0;
+        }
         Object.defineProperty(this, "onRender", {
             get: function() {
                 var value = delegate.onRender;
@@ -228,12 +249,14 @@
                 delegate.onRender = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Component's rendering event handler function.
+             * @property onRender
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onRender = {};
+        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -243,23 +266,28 @@
                 delegate.onComponentResized = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Model of the component. It will be used for data binding.
-         * @property model
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onComponentResized = {};
+        }
         Object.defineProperty(this, "model", {
             get: function() {
                 var value = delegate.model;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * @property text
-         * @memberOf ModelCheckBox
-         * Text on the check box.*/
+        if(!P.ModelCheckBox){
+            /**
+             * Model of the component. It will be used for data binding.
+             * @property model
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.model = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -269,12 +297,13 @@
                 delegate.text = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse entered over the component event handler function.
-         * @property onMouseEntered
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * @property text
+             * @memberOf ModelCheckBox
+             * Text on the check box.*/
+            P.ModelCheckBox.prototype.text = '';
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -284,12 +313,14 @@
                 delegate.onMouseEntered = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component's value.
-         * @property value
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseEntered = {};
+        }
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;
@@ -299,12 +330,14 @@
                 delegate.value = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The tooltip string that has been set with.
-         * @property toolTipText
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Component's value.
+             * @property value
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.value = {};
+        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -314,24 +347,28 @@
                 delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.toolTipText = '';
+        }
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Height of the component.
-         * @property height
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -341,12 +378,14 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component shown event handler function.
-         * @property onComponentShown
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.height = 0;
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -356,12 +395,14 @@
                 delegate.onComponentShown = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onComponentShown = {};
+        }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -371,12 +412,14 @@
                 delegate.onMouseMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseMoved = {};
+        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -386,12 +429,14 @@
                 delegate.opaque = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component should be visible when its parent is visible.
-         * @property visible
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.opaque = true;
+        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -401,12 +446,14 @@
                 delegate.visible = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component hidden event handler function.
-         * @property onComponentHidden
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.visible = true;
+        }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -416,11 +463,14 @@
                 delegate.onComponentHidden = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * @property editable
-         * @memberOf ModelCheckBox
-         * Determines if component is editable.*/
+        if(!P.ModelCheckBox){
+            /**
+             * Component hidden event handler function.
+             * @property onComponentHidden
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onComponentHidden = {};
+        }
         Object.defineProperty(this, "editable", {
             get: function() {
                 var value = delegate.editable;
@@ -430,12 +480,13 @@
                 delegate.editable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * @property editable
+             * @memberOf ModelCheckBox
+             * Determines if component is editable.*/
+            P.ModelCheckBox.prototype.editable = true;
+        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -445,27 +496,14 @@
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Main action performed event handler function.
-         * @property onActionPerformed
-         * @memberOf ModelCheckBox
-         */
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.nextFocusableComponent = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -475,12 +513,31 @@
                 delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component may be focused.
-         * @property focusable
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
@@ -490,12 +547,14 @@
                 delegate.focusable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key typed event handler function.
-         * @property onKeyTyped
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Determines whether this component may be focused.
+             * @property focusable
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.focusable = true;
+        }
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -505,12 +564,14 @@
                 delegate.onKeyTyped = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse wheel moved event handler function.
-         * @property onMouseWheelMoved
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Key typed event handler function.
+             * @property onKeyTyped
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onKeyTyped = {};
+        }
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -520,24 +581,28 @@
                 delegate.onMouseWheelMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseWheelMoved = {};
+        }
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Model entity's field.
-         * @property field
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.component = {};
+        }
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
@@ -547,12 +612,14 @@
                 delegate.field = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Model entity's field.
+             * @property field
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.field = {};
+        }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -562,12 +629,14 @@
                 delegate.onFocusGained = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Horizontal coordinate of the component.
-         * @property left
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onFocusGained = {};
+        }
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -577,12 +646,14 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The background color of this component.
-         * @property background
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Horizontal coordinate of the component.
+             * @property left
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.left = 0;
+        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -592,12 +663,14 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse clicked event handler function.
-         * @property onMouseClicked
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.background = {};
+        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -607,12 +680,14 @@
                 delegate.onMouseClicked = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse exited over the component event handler function.
-         * @property onMouseExited
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseClicked = {};
+        }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -622,24 +697,28 @@
                 delegate.onMouseExited = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets name of this component.
-         * @property name
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Mouse exited over the component event handler function.
+             * @property onMouseExited
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onMouseExited = {};
+        }
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Width of the component.
-         * @property width
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -649,12 +728,14 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The font of this component.
-         * @property font
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * Width of the component.
+             * @property width
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.width = 0;
+        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -664,12 +745,14 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key pressed event handler function.
-         * @property onKeyPressed
-         * @memberOf ModelCheckBox
-         */
+        if(!P.ModelCheckBox){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.font = {};
+        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -679,36 +762,43 @@
                 delegate.onKeyPressed = P.boxAsJava(aValue);
             }
         });
-
+        if(!P.ModelCheckBox){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onKeyPressed = {};
+        }
+    };        Object.defineProperty(P.ModelCheckBox.prototype, "redraw", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelCheckBox){
         /**
          * Redraw the component.
          * @method redraw
          * @memberOf ModelCheckBox
          */
-        Object.defineProperty(this, "redraw", {
-            get: function() {
-                return function() {
-                    var value = delegate.redraw();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ModelCheckBox.prototype.redraw = function(){};
+    }
+    Object.defineProperty(P.ModelCheckBox.prototype, "focus", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelCheckBox){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelCheckBox
          */
-        Object.defineProperty(this, "focus", {
-            get: function() {
-                return function() {
-                    var value = delegate.focus();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.ModelCheckBox.prototype.focus = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

@@ -16,7 +16,6 @@
      * @constructor Anchors Anchors
      */
     P.Anchors = function (left, width, right, top, height, bottom) {
-
         var maxArgs = 6;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -29,13 +28,12 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-
+        if(P.Anchors.superclass)
+            P.Anchors.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    };    
 })();

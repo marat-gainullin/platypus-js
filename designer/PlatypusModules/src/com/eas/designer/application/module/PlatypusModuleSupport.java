@@ -4,17 +4,13 @@
  */
 package com.eas.designer.application.module;
 
-import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.explorer.DataObjectProvider;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.Serializable;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -32,9 +28,7 @@ import org.netbeans.core.spi.multiview.CloseOperationHandler;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
-import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
-import org.openide.NotifyDescriptor;
 import org.openide.awt.UndoRedo;
 import org.openide.cookies.CloseCookie;
 import org.openide.cookies.EditCookie;
@@ -50,7 +44,6 @@ import org.openide.text.CloneableEditor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.DataEditorSupport;
 import org.openide.text.PositionRef;
-import org.openide.util.UserQuestionException;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;

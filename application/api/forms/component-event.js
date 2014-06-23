@@ -9,32 +9,32 @@
      * @constructor ComponentEvent ComponentEvent
      */
     P.ComponentEvent = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * The source component object of the event.
-         * @property source
-         * @memberOf ComponentEvent
-         */
+        if(P.ComponentEvent.superclass)
+            P.ComponentEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.ComponentEvent){
+            /**
+             * The source component object of the event.
+             * @property source
+             * @memberOf ComponentEvent
+             */
+            P.ComponentEvent.prototype.source = {};
+        }
+    };    
 })();

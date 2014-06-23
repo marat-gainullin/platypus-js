@@ -4,6 +4,9 @@
  */
 package com.eas.designer.application.module;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.ModelEditingListener;
@@ -26,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -48,7 +52,7 @@ import org.openide.util.Exceptions;
 @MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
 public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {
 
-    protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener {
+    protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener, CollectionListener<Fields, Field> {
 
         @Override
         public void entityAdded(ApplicationDbEntity e) {
@@ -86,6 +90,36 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
         private void setModelModified() {
             getLookup().lookup(PlatypusModuleSupport.class).setModelModified(true);
+        }
+
+        @Override
+        public void added(Fields c, Field v) {
+            setModelModified();
+        }
+
+        @Override
+        public void added(Fields c, Collection<Field> clctn) {
+            setModelModified();
+        }
+
+        @Override
+        public void removed(Fields c, Field v) {
+            setModelModified();
+        }
+
+        @Override
+        public void removed(Fields c, Collection<Field> clctn) {
+            setModelModified();
+        }
+
+        @Override
+        public void reodered(Fields c) {
+            setModelModified();
+        }
+
+        @Override
+        public void cleared(Fields c) {
+            setModelModified();
         }
     }
 
@@ -211,6 +245,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             ApplicationDbModelModifiedObserver changesObserver = new ApplicationDbModelModifiedObserver();
             model.addEditingListener(changesObserver);
             model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
+            model.getParametersEntity().getFields().getCollectionSupport().addListener(changesObserver);
             for (ApplicationDbEntity entity : model.getEntities().values()) {
                 entity.getChangeSupport().addPropertyChangeListener(changesObserver);
             }

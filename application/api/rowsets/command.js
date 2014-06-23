@@ -9,82 +9,89 @@
      * @constructor Command Command
      */
     P.Command = function () {
-
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
-            get: function() {
-                return function() {
-                    return delegate;
-                };
+            value: function() {
+                return delegate;
             }
         });
-        /**
-         * Indicated if the change is consumed.
-         * @property consumed
-         * @memberOf Command
-         */
+        if(P.Command.superclass)
+            P.Command.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "consumed", {
             get: function() {
                 var value = delegate.consumed;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Indicates the change's type (Insert, Update, Delete or Command).
-         * @property type
-         * @memberOf Command
-         */
+        if(!P.Command){
+            /**
+             * Indicated if the change is consumed.
+             * @property consumed
+             * @memberOf Command
+             */
+            P.Command.prototype.consumed = true;
+        }
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Parameters of command.
-         * @property parameters
-         * @memberOf Command
-         */
+        if(!P.Command){
+            /**
+             * Indicates the change's type (Insert, Update, Delete or Command).
+             * @property type
+             * @memberOf Command
+             */
+            P.Command.prototype.type = '';
+        }
         Object.defineProperty(this, "parameters", {
             get: function() {
                 var value = delegate.parameters;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Command sql text to be applied in a database.
-         * @property command
-         * @memberOf Command
-         */
+        if(!P.Command){
+            /**
+             * Parameters of command.
+             * @property parameters
+             * @memberOf Command
+             */
+            P.Command.prototype.parameters = [];
+        }
         Object.defineProperty(this, "command", {
             get: function() {
                 var value = delegate.command;
                 return P.boxAsJs(value);
             }
         });
-
+        if(!P.Command){
+            /**
+             * Command sql text to be applied in a database.
+             * @property command
+             * @memberOf Command
+             */
+            P.Command.prototype.command = '';
+        }
+    };        Object.defineProperty(P.Command.prototype, "consume", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.consume();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Command){
         /**
          * Consumes the change, so other validators and database applier won't apply it.
          * @method consume
          * @memberOf Command
          */
-        Object.defineProperty(this, "consume", {
-            get: function() {
-                return function() {
-                    var value = delegate.consume();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.Command.prototype.consume = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();
