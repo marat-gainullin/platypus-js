@@ -331,20 +331,6 @@
              */
             P.ModelMap.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -361,6 +347,20 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -730,23 +730,9 @@
              */
             P.ModelMap.prototype.onKeyPressed = {};
         }
-    };        Object.defineProperty(P.ModelMap.prototype, "select", {
-        value: function(selectionEntries) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(selectionEntries));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.select = function(selectionEntries){};
-    }
+    };
     Object.defineProperty(P.ModelMap.prototype, "hit", {
+        enumerable: true,
         value: function(hitObject) {
             var delegate = this.unwrap();
             var value = delegate.hit(P.boxAsJava(hitObject));
@@ -763,7 +749,25 @@
          */
         P.ModelMap.prototype.hit = function(hitObject){};
     }
+    Object.defineProperty(P.ModelMap.prototype, "select", {
+        enumerable: true,
+        value: function(selectionEntries) {
+            var delegate = this.unwrap();
+            var value = delegate.select(P.boxAsJava(selectionEntries));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.select = function(selectionEntries){};
+    }
     Object.defineProperty(P.ModelMap.prototype, "getLayer", {
+        enumerable: true,
         value: function(layerTitle) {
             var delegate = this.unwrap();
             var value = delegate.getLayer(P.boxAsJava(layerTitle));
@@ -780,7 +784,150 @@
          */
         P.ModelMap.prototype.getLayer = function(layerTitle){};
     }
+    Object.defineProperty(P.ModelMap.prototype, "removeLayer", {
+        enumerable: true,
+        value: function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeLayer(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Removes layer by the specified title.
+         * @param layerTitle the layer's title.
+         * @return <code>MapLayer</code> instance.
+         * @method removeLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.removeLayer = function(arg0){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "removeAllLayers", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.removeAllLayers();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Removes all layers of the map.
+         * @return an array of <code>MapLayer</code> instances.
+         * @method removeAllLayers
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.removeAllLayers = function(){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "cartesian2Geo", {
+        enumerable: true,
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.cartesian2Geo(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Transforms point from cartesian to geo coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method cartesian2Geo
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.cartesian2Geo = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "geo2Cartesian", {
+        enumerable: true,
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.geo2Cartesian(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Transforms point from geo to cartesian coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method geo2Cartesian
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.geo2Cartesian = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "cartesian2Screen", {
+        enumerable: true,
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.cartesian2Screen(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Transforms point from cartesian to screen coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method cartesian2Screen
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.cartesian2Screen = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "screen2Cartesian", {
+        enumerable: true,
+        value: function(point) {
+            var delegate = this.unwrap();
+            var value = delegate.screen2Cartesian(P.boxAsJava(point));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Tranaforms point from  screen to cartesian coordinate system.
+         * @param point the <code>Point</code> to transform.
+         * @return an tranformed <code>Point</code> instance.
+         * @method screen2Cartesian
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.screen2Cartesian = function(point){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "goToGeoPosition", {
+        enumerable: true,
+        value: function(position) {
+            var delegate = this.unwrap();
+            var value = delegate.goToGeoPosition(P.boxAsJava(position));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Makes map move to the specified geo position.
+         * @param position the position on the map.
+         * @method goToGeoPosition
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.goToGeoPosition = function(position){};
+    }
+    Object.defineProperty(P.ModelMap.prototype, "hitSelection", {
+        enumerable: true,
+        value: function(hitPoint) {
+            var delegate = this.unwrap();
+            var value = delegate.hitSelection(P.boxAsJava(hitPoint));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Hits the selection on the specified point.
+         * @param hitPoint the Point to hit.
+         * @return an array of <code>SelectionEntry</code> elements.
+         * @method hitSelection
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.hitSelection = function(hitPoint){};
+    }
     Object.defineProperty(P.ModelMap.prototype, "fit", {
+        enumerable: true,
         value: function(area) {
             var delegate = this.unwrap();
             var value = delegate.fit(P.boxAsJava(area));
@@ -797,6 +944,7 @@
         P.ModelMap.prototype.fit = function(area){};
     }
     Object.defineProperty(P.ModelMap.prototype, "addLayer", {
+        enumerable: true,
         value: function(layerTitle, rowset, geometryClass, styleAttributes) {
             var delegate = this.unwrap();
             var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
@@ -816,141 +964,8 @@
          */
         P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes){};
     }
-    Object.defineProperty(P.ModelMap.prototype, "removeLayer", {
-        value: function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeLayer(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Removes layer by the specified title.
-         * @param layerTitle the layer's title.
-         * @return <code>MapLayer</code> instance.
-         * @method removeLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.removeLayer = function(arg0){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "removeAllLayers", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.removeAllLayers();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Removes all layers of the map.
-         * @return an array of <code>MapLayer</code> instances.
-         * @method removeAllLayers
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.removeAllLayers = function(){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "cartesian2Geo", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.cartesian2Geo(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Transforms point from cartesian to geo coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method cartesian2Geo
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.cartesian2Geo = function(point){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "geo2Cartesian", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.geo2Cartesian(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Transforms point from geo to cartesian coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method geo2Cartesian
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.geo2Cartesian = function(point){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "cartesian2Screen", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.cartesian2Screen(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Transforms point from cartesian to screen coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method cartesian2Screen
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.cartesian2Screen = function(point){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "screen2Cartesian", {
-        value: function(point) {
-            var delegate = this.unwrap();
-            var value = delegate.screen2Cartesian(P.boxAsJava(point));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Tranaforms point from  screen to cartesian coordinate system.
-         * @param point the <code>Point</code> to transform.
-         * @return an tranformed <code>Point</code> instance.
-         * @method screen2Cartesian
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.screen2Cartesian = function(point){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "goToGeoPosition", {
-        value: function(position) {
-            var delegate = this.unwrap();
-            var value = delegate.goToGeoPosition(P.boxAsJava(position));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Makes map move to the specified geo position.
-         * @param position the position on the map.
-         * @method goToGeoPosition
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.goToGeoPosition = function(position){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "hitSelection", {
-        value: function(hitPoint) {
-            var delegate = this.unwrap();
-            var value = delegate.hitSelection(P.boxAsJava(hitPoint));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Hits the selection on the specified point.
-         * @param hitPoint the Point to hit.
-         * @return an array of <code>SelectionEntry</code> elements.
-         * @method hitSelection
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.hitSelection = function(hitPoint){};
-    }
     Object.defineProperty(P.ModelMap.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

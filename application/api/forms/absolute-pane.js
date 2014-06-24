@@ -306,20 +306,6 @@
              */
             P.AbsolutePane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.AbsolutePane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf AbsolutePane
-             */
-            P.AbsolutePane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -336,6 +322,20 @@
              * @memberOf AbsolutePane
              */
             P.AbsolutePane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AbsolutePane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf AbsolutePane
+             */
+            P.AbsolutePane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -723,7 +723,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.AbsolutePane.prototype, "add", {
+    };
+    Object.defineProperty(P.AbsolutePane.prototype, "add", {
+        enumerable: true,
         value: function(component, anchors) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
@@ -741,6 +743,7 @@
         P.AbsolutePane.prototype.add = function(component, anchors){};
     }
     Object.defineProperty(P.AbsolutePane.prototype, "toBack", {
+        enumerable: true,
         value: function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.toBack(P.boxAsJava(arg0), P.boxAsJava(arg1));
@@ -758,6 +761,7 @@
         P.AbsolutePane.prototype.toBack = function(arg0, arg1){};
     }
     Object.defineProperty(P.AbsolutePane.prototype, "toFront", {
+        enumerable: true,
         value: function(component, count) {
             var delegate = this.unwrap();
             var value = delegate.toFront(P.boxAsJava(component), P.boxAsJava(count));
@@ -775,6 +779,7 @@
         P.AbsolutePane.prototype.toFront = function(component, count){};
     }
     Object.defineProperty(P.AbsolutePane.prototype, "child", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
@@ -783,7 +788,7 @@
     });
     if(!P.AbsolutePane){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -792,6 +797,7 @@
         P.AbsolutePane.prototype.child = function(index){};
     }
     Object.defineProperty(P.AbsolutePane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -808,6 +814,7 @@
         P.AbsolutePane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.AbsolutePane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -823,6 +830,7 @@
         P.AbsolutePane.prototype.clear = function(){};
     }
     Object.defineProperty(P.AbsolutePane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

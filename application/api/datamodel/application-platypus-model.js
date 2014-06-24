@@ -22,7 +22,9 @@
         if(P.ApplicationPlatypusModel.superclass)
             P.ApplicationPlatypusModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };        Object.defineProperty(P.ApplicationPlatypusModel.prototype, "save", {
+    };
+    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "save", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.save(P.boxAsJava(arg0));
@@ -40,6 +42,7 @@
         P.ApplicationPlatypusModel.prototype.save = function(arg0){};
     }
     Object.defineProperty(P.ApplicationPlatypusModel.prototype, "requery", {
+        enumerable: true,
         value: function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
@@ -55,6 +58,7 @@
         P.ApplicationPlatypusModel.prototype.requery = function(onSuccess, onFailure){};
     }
     Object.defineProperty(P.ApplicationPlatypusModel.prototype, "execute", {
+        enumerable: true,
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
@@ -72,6 +76,7 @@
         P.ApplicationPlatypusModel.prototype.execute = function(onSuccessCallback, onFailureCallback){};
     }
     Object.defineProperty(P.ApplicationPlatypusModel.prototype, "loadEntity", {
+        enumerable: true,
         value: function(queryId) {
             var delegate = this.unwrap();
             var value = delegate.loadEntity(P.boxAsJava(queryId));

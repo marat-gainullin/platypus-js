@@ -371,20 +371,6 @@
              */
             P.ModelFormattedField.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelFormattedField){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelFormattedField
-             */
-            P.ModelFormattedField.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -401,6 +387,20 @@
              * @memberOf ModelFormattedField
              */
             P.ModelFormattedField.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -804,7 +804,9 @@
              */
             P.ModelFormattedField.prototype.onKeyPressed = {};
         }
-    };        Object.defineProperty(P.ModelFormattedField.prototype, "redraw", {
+    };
+    Object.defineProperty(P.ModelFormattedField.prototype, "redraw", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.redraw();
@@ -820,6 +822,7 @@
         P.ModelFormattedField.prototype.redraw = function(){};
     }
     Object.defineProperty(P.ModelFormattedField.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

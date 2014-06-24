@@ -36,5 +36,6 @@
              */
             P.AnonymousPlatypusPrincipal.prototype.name = '';
         }
-    };    
+    };
+
 })();

@@ -64,5 +64,6 @@
              */
             P.CursorPositionChangedEvent.prototype.newIndex = 0;
         }
-    };    
+    };
+
 })();

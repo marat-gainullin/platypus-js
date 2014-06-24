@@ -327,7 +327,9 @@
              */
             P.Parameter.prototype.value = {};
         }
-    };        Object.defineProperty(P.Parameter.prototype, "assignFrom", {
+    };
+    Object.defineProperty(P.Parameter.prototype, "assignFrom", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.assignFrom(P.boxAsJava(arg0));

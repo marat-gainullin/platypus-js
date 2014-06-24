@@ -327,20 +327,6 @@
              */
             P.Menu.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Menu
-             */
-            P.Menu.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -357,6 +343,20 @@
              * @memberOf Menu
              */
             P.Menu.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Menu
+             */
+            P.Menu.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -744,7 +744,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.Menu.prototype, "add", {
+    };
+    Object.defineProperty(P.Menu.prototype, "add", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component));
@@ -761,6 +763,7 @@
         P.Menu.prototype.add = function(component){};
     }
     Object.defineProperty(P.Menu.prototype, "child", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
@@ -769,7 +772,7 @@
     });
     if(!P.Menu){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -778,6 +781,7 @@
         P.Menu.prototype.child = function(index){};
     }
     Object.defineProperty(P.Menu.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -794,6 +798,7 @@
         P.Menu.prototype.remove = function(component){};
     }
     Object.defineProperty(P.Menu.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -809,6 +814,7 @@
         P.Menu.prototype.clear = function(){};
     }
     Object.defineProperty(P.Menu.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

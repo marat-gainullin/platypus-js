@@ -170,20 +170,6 @@
              */
             P.ModelGrid.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -200,6 +186,20 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -883,7 +883,9 @@
              */
             P.ModelGrid.prototype.onKeyPressed = {};
         }
-    };        Object.defineProperty(P.ModelGrid.prototype, "find", {
+    };
+    Object.defineProperty(P.ModelGrid.prototype, "find", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.find();
@@ -899,6 +901,7 @@
         P.ModelGrid.prototype.find = function(){};
     }
     Object.defineProperty(P.ModelGrid.prototype, "select", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.select(P.boxAsJava(arg0));
@@ -914,6 +917,7 @@
         P.ModelGrid.prototype.select = function(arg0){};
     }
     Object.defineProperty(P.ModelGrid.prototype, "clearSelection", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clearSelection();
@@ -928,23 +932,8 @@
          */
         P.ModelGrid.prototype.clearSelection = function(){};
     }
-    Object.defineProperty(P.ModelGrid.prototype, "findSomething", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.findSomething();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
-        /**
-         * Shows find dialog.
-         * @deprecated Use find() instead.
-         * @method findSomething
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.findSomething = function(){};
-    }
     Object.defineProperty(P.ModelGrid.prototype, "makeVisible", {
+        enumerable: true,
         value: function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.makeVisible(P.boxAsJava(arg0), P.boxAsJava(arg1));
@@ -962,6 +951,7 @@
         P.ModelGrid.prototype.makeVisible = function(arg0, arg1){};
     }
     Object.defineProperty(P.ModelGrid.prototype, "unselect", {
+        enumerable: true,
         value: function(row) {
             var delegate = this.unwrap();
             var value = delegate.unselect(P.boxAsJava(row));
@@ -977,7 +967,25 @@
          */
         P.ModelGrid.prototype.unselect = function(row){};
     }
+    Object.defineProperty(P.ModelGrid.prototype, "findSomething", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.findSomething();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelGrid){
+        /**
+         * Shows find dialog.
+         * @deprecated Use find() instead.
+         * @method findSomething
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.findSomething = function(){};
+    }
     Object.defineProperty(P.ModelGrid.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

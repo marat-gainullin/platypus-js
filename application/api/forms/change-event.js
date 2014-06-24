@@ -36,5 +36,6 @@
              */
             P.ChangeEvent.prototype.source = {};
         }
-    };    
+    };
+
 })();

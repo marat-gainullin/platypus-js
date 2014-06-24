@@ -78,7 +78,9 @@
              */
             P.Command.prototype.command = '';
         }
-    };        Object.defineProperty(P.Command.prototype, "consume", {
+    };
+    Object.defineProperty(P.Command.prototype, "consume", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.consume();

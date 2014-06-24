@@ -310,20 +310,6 @@
              */
             P.ProgressBar.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -340,6 +326,20 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -726,7 +726,9 @@
              */
             P.ProgressBar.prototype.onKeyPressed = {};
         }
-    };        Object.defineProperty(P.ProgressBar.prototype, "focus", {
+    };
+    Object.defineProperty(P.ProgressBar.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

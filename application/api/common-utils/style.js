@@ -137,5 +137,6 @@
              */
             P.Style.prototype.font = {};
         }
-    };    
+    };
+
 })();

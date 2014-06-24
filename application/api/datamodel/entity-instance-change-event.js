@@ -92,5 +92,6 @@
              */
             P.EntityInstanceChangeEvent.prototype.object = {};
         }
-    };    
+    };
+
 })();

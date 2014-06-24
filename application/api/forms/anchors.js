@@ -35,5 +35,6 @@
         if(P.Anchors.superclass)
             P.Anchors.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };    
+    };
+
 })();

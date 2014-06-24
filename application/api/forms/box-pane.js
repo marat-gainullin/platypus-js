@@ -308,20 +308,6 @@
              */
             P.BoxPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -338,6 +324,20 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -739,7 +739,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.BoxPane.prototype, "add", {
+    };
+    Object.defineProperty(P.BoxPane.prototype, "add", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component));
@@ -756,6 +758,7 @@
         P.BoxPane.prototype.add = function(component){};
     }
     Object.defineProperty(P.BoxPane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -772,6 +775,7 @@
         P.BoxPane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.BoxPane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -787,6 +791,7 @@
         P.BoxPane.prototype.clear = function(){};
     }
     Object.defineProperty(P.BoxPane.prototype, "child", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
@@ -795,7 +800,7 @@
     });
     if(!P.BoxPane){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -804,6 +809,7 @@
         P.BoxPane.prototype.child = function(index){};
     }
     Object.defineProperty(P.BoxPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

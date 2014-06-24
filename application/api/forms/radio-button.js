@@ -329,20 +329,6 @@
              */
             P.RadioButton.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -359,6 +345,20 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -728,7 +728,9 @@
              */
             P.RadioButton.prototype.onKeyPressed = {};
         }
-    };        Object.defineProperty(P.RadioButton.prototype, "focus", {
+    };
+    Object.defineProperty(P.RadioButton.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

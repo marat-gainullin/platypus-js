@@ -285,7 +285,9 @@
              */
             P.ApplicationDbEntity.prototype.willDelete = {};
         }
-    };        Object.defineProperty(P.ApplicationDbEntity.prototype, "next", {
+    };
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "next", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.next();
@@ -302,6 +304,7 @@
         P.ApplicationDbEntity.prototype.next = function(){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "find", {
+        enumerable: true,
         value: function(pairs) {
             var delegate = this.unwrap();
             var value = delegate.find(P.boxAsJava(pairs));
@@ -319,6 +322,7 @@
         P.ApplicationDbEntity.prototype.find = function(pairs){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "execute", {
+        enumerable: true,
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
@@ -336,6 +340,7 @@
         P.ApplicationDbEntity.prototype.execute = function(onSuccessCallback, onFailureCallback){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "prev", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.prev();
@@ -352,6 +357,7 @@
         P.ApplicationDbEntity.prototype.prev = function(){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "insert", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.insert(P.boxAsJava(arg0));
@@ -367,7 +373,59 @@
          */
         P.ApplicationDbEntity.prototype.insert = function(arg0){};
     }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "eof", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.eof();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.eof = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "first", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.first();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Moves the rowset cursor to the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method first
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.first = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "last", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.last();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Moves the rowset cursor to the last row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method last
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.last = function(){};
+    }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "pos", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.pos(P.boxAsJava(index));
@@ -384,117 +442,8 @@
          */
         P.ApplicationDbEntity.prototype.pos = function(index){};
     }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "first", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.first();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Moves the rowset cursor to the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method first
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.first = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "eof", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.eof();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.eof = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "last", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.last();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Moves the rowset cursor to the last row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method last
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.last = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "beforeFirst", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.beforeFirst();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.beforeFirst = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "afterLast", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.afterLast();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.afterLast = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteAll", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.deleteAll();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Deletes all rows in the rowset.
-         * @method deleteAll
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.deleteAll = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "createFilter", {
-        value: function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-         * @return a comparator object.
-         * @method createFilter
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createFilter = function(pairs){};
-    }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "getRow", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.getRow(P.boxAsJava(index));
@@ -512,6 +461,7 @@
         P.ApplicationDbEntity.prototype.getRow = function(index){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteRow", {
+        enumerable: true,
         value: function(aCursorPosOrInstance) {
             var delegate = this.unwrap();
             var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
@@ -527,7 +477,74 @@
          */
         P.ApplicationDbEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
     }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "createFilter", {
+        enumerable: true,
+        value: function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.createFilter(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+         * @return a comparator object.
+         * @method createFilter
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createFilter = function(pairs){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "beforeFirst", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.beforeFirst();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.beforeFirst = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "afterLast", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.afterLast();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.afterLast = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteAll", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.deleteAll();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Deletes all rows in the rowset.
+         * @method deleteAll
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.deleteAll = function(){};
+    }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "findById", {
+        enumerable: true,
         value: function(key) {
             var delegate = this.unwrap();
             var value = delegate.findById(P.boxAsJava(key));
@@ -545,6 +562,7 @@
         P.ApplicationDbEntity.prototype.findById = function(key){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "scrollTo", {
+        enumerable: true,
         value: function(row) {
             var delegate = this.unwrap();
             var value = delegate.scrollTo(P.boxAsJava(row));
@@ -562,6 +580,7 @@
         P.ApplicationDbEntity.prototype.scrollTo = function(row){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "bof", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.bof();
@@ -578,6 +597,7 @@
         P.ApplicationDbEntity.prototype.bof = function(){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "requery", {
+        enumerable: true,
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
@@ -595,6 +615,7 @@
         P.ApplicationDbEntity.prototype.requery = function(onSuccessCallback, onFailureCallback){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "createSorting", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.createSorting(P.boxAsJava(arg0));
@@ -612,6 +633,7 @@
         P.ApplicationDbEntity.prototype.createSorting = function(arg0){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "beginUpdate", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.beginUpdate();
@@ -627,6 +649,7 @@
         P.ApplicationDbEntity.prototype.beginUpdate = function(){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "endUpdate", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.endUpdate();

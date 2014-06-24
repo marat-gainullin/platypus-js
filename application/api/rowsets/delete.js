@@ -64,7 +64,9 @@
              */
             P.Delete.prototype.type = '';
         }
-    };        Object.defineProperty(P.Delete.prototype, "consume", {
+    };
+    Object.defineProperty(P.Delete.prototype, "consume", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.consume();

@@ -51,20 +51,6 @@
              */
             P.MouseEvent.prototype.altDown = true;
         }
-        Object.defineProperty(this, "clickCount", {
-            get: function() {
-                var value = delegate.clickCount;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MouseEvent){
-            /**
-             * The number of mouse clicks associated with this event.
-             * @property clickCount
-             * @memberOf MouseEvent
-             */
-            P.MouseEvent.prototype.clickCount = 0;
-        }
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
@@ -93,19 +79,19 @@
              */
             P.MouseEvent.prototype.shiftDown = true;
         }
-        Object.defineProperty(this, "metaDown", {
+        Object.defineProperty(this, "clickCount", {
             get: function() {
-                var value = delegate.metaDown;
+                var value = delegate.clickCount;
                 return P.boxAsJs(value);
             }
         });
         if(!P.MouseEvent){
             /**
-             * Meta key is down on this event.
-             * @property metaDown
+             * The number of mouse clicks associated with this event.
+             * @property clickCount
              * @memberOf MouseEvent
              */
-            P.MouseEvent.prototype.metaDown = true;
+            P.MouseEvent.prototype.clickCount = 0;
         }
         Object.defineProperty(this, "X", {
             get: function() {
@@ -120,6 +106,20 @@
              * @memberOf MouseEvent
              */
             P.MouseEvent.prototype.X = 0;
+        }
+        Object.defineProperty(this, "metaDown", {
+            get: function() {
+                var value = delegate.metaDown;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MouseEvent){
+            /**
+             * Meta key is down on this event.
+             * @property metaDown
+             * @memberOf MouseEvent
+             */
+            P.MouseEvent.prototype.metaDown = true;
         }
         Object.defineProperty(this, "Y", {
             get: function() {
@@ -149,5 +149,6 @@
              */
             P.MouseEvent.prototype.source = {};
         }
-    };    
+    };
+
 })();

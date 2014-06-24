@@ -328,20 +328,6 @@
              */
             P.GridPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -358,6 +344,20 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -759,7 +759,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.GridPane.prototype, "add", {
+    };
+    Object.defineProperty(P.GridPane.prototype, "add", {
+        enumerable: true,
         value: function(component, row, column) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component), P.boxAsJava(row), P.boxAsJava(column));
@@ -778,6 +780,7 @@
         P.GridPane.prototype.add = function(component, row, column){};
     }
     Object.defineProperty(P.GridPane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -794,6 +797,7 @@
         P.GridPane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.GridPane.prototype, "child", {
+        enumerable: true,
         value: function(row, column) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
@@ -811,6 +815,7 @@
         P.GridPane.prototype.child = function(row, column){};
     }
     Object.defineProperty(P.GridPane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -826,6 +831,7 @@
         P.GridPane.prototype.clear = function(){};
     }
     Object.defineProperty(P.GridPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

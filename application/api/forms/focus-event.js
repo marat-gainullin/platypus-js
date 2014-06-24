@@ -36,5 +36,6 @@
              */
             P.FocusEvent.prototype.source = {};
         }
-    };    
+    };
+
 })();

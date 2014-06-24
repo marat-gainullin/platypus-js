@@ -310,20 +310,6 @@
              */
             P.BorderPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -340,6 +326,20 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -814,7 +814,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.BorderPane.prototype, "add", {
+    };
+    Object.defineProperty(P.BorderPane.prototype, "add", {
+        enumerable: true,
         value: function(component, place, size) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component), P.boxAsJava(place), P.boxAsJava(size));
@@ -833,6 +835,7 @@
         P.BorderPane.prototype.add = function(component, place, size){};
     }
     Object.defineProperty(P.BorderPane.prototype, "child", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
@@ -841,7 +844,7 @@
     });
     if(!P.BorderPane){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -850,6 +853,7 @@
         P.BorderPane.prototype.child = function(index){};
     }
     Object.defineProperty(P.BorderPane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -866,6 +870,7 @@
         P.BorderPane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.BorderPane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -881,6 +886,7 @@
         P.BorderPane.prototype.clear = function(){};
     }
     Object.defineProperty(P.BorderPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

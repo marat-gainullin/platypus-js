@@ -211,5 +211,6 @@
              */
             P.Color.prototype.ORANGE = {};
         }
-    };    
+    };
+
 })();

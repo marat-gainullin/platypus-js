@@ -36,5 +36,6 @@
              */
             P.PublishedSourcedEvent.prototype.source = {};
         }
-    };    
+    };
+
 })();

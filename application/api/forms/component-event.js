@@ -36,5 +36,6 @@
              */
             P.ComponentEvent.prototype.source = {};
         }
-    };    
+    };
+
 })();

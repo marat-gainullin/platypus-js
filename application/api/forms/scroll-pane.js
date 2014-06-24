@@ -322,20 +322,6 @@
              */
             P.ScrollPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -352,6 +338,20 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -739,7 +739,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.ScrollPane.prototype, "add", {
+    };
+    Object.defineProperty(P.ScrollPane.prototype, "add", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component));
@@ -756,6 +758,7 @@
         P.ScrollPane.prototype.add = function(component){};
     }
     Object.defineProperty(P.ScrollPane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -772,6 +775,7 @@
         P.ScrollPane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.ScrollPane.prototype, "child", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(arg0));
@@ -780,7 +784,7 @@
     });
     if(!P.ScrollPane){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -789,6 +793,7 @@
         P.ScrollPane.prototype.child = function(arg0){};
     }
     Object.defineProperty(P.ScrollPane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -804,6 +809,7 @@
         P.ScrollPane.prototype.clear = function(){};
     }
     Object.defineProperty(P.ScrollPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

@@ -307,20 +307,6 @@
              */
             P.ButtonGroup.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -337,6 +323,20 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -741,7 +741,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.ButtonGroup.prototype, "add", {
+    };
+    Object.defineProperty(P.ButtonGroup.prototype, "add", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(arg0));
@@ -757,6 +759,7 @@
         P.ButtonGroup.prototype.add = function(arg0){};
     }
     Object.defineProperty(P.ButtonGroup.prototype, "remove", {
+        enumerable: true,
         value: function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(arg0));
@@ -772,6 +775,7 @@
         P.ButtonGroup.prototype.remove = function(arg0){};
     }
     Object.defineProperty(P.ButtonGroup.prototype, "child", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
@@ -780,7 +784,7 @@
     });
     if(!P.ButtonGroup){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -789,6 +793,7 @@
         P.ButtonGroup.prototype.child = function(index){};
     }
     Object.defineProperty(P.ButtonGroup.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -804,6 +809,7 @@
         P.ButtonGroup.prototype.clear = function(){};
     }
     Object.defineProperty(P.ButtonGroup.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

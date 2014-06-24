@@ -497,6 +497,8 @@ public class Classes2Scripts {
         sb.append(getIndentStr(i));
         sb.append("Object.defineProperty(P.").append(namespace).append(".prototype, \"").append(method.getName()).append("\", {\n");
         sb.append(getIndentStr(++i));
+        sb.append("enumerable: true,\n");
+        sb.append(getIndentStr(i));
         sb.append("value: function(");
         StringBuilder paramsInCall = new StringBuilder();
         StringBuilder formalParams = new StringBuilder();

@@ -307,20 +307,6 @@
              */
             P.TabbedPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -337,6 +323,20 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -775,7 +775,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.TabbedPane.prototype, "add", {
+    };
+    Object.defineProperty(P.TabbedPane.prototype, "add", {
+        enumerable: true,
         value: function(component, text) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text));
@@ -794,6 +796,7 @@
         P.TabbedPane.prototype.add = function(component, text){};
     }
     Object.defineProperty(P.TabbedPane.prototype, "child", {
+        enumerable: true,
         value: function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
@@ -802,7 +805,7 @@
     });
     if(!P.TabbedPane){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -811,6 +814,7 @@
         P.TabbedPane.prototype.child = function(index){};
     }
     Object.defineProperty(P.TabbedPane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -827,6 +831,7 @@
         P.TabbedPane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.TabbedPane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -842,6 +847,7 @@
         P.TabbedPane.prototype.clear = function(){};
     }
     Object.defineProperty(P.TabbedPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

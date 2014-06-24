@@ -118,13 +118,6 @@ try {
 }
 
 try {
-    load('classpath:platypus-servlet-support/http-script-context.js');
-    printf('platypus-servlet-support API loaded.');
-} catch (e) {
-    printf('platypus-servlet-support API skipped.');
-}
-
-try {
     load('classpath:reports/report-template.js');
     printf('reports API loaded.');
 } catch (e) {

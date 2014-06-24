@@ -272,23 +272,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-             * @property formKey
-             * @memberOf Form
-             */
-            P.Form.prototype.formKey = '';
-        }
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -305,6 +288,23 @@
              * @memberOf Form
              */
             P.Form.prototype.onWindowRestored = {};
+        }
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+             * @property formKey
+             * @memberOf Form
+             */
+            P.Form.prototype.formKey = '';
         }
         Object.defineProperty(this, "maximized", {
             get: function() {
@@ -439,7 +439,9 @@
              */
             P.Form.prototype.opacity = 0;
         }
-    };        Object.defineProperty(P.Form.prototype, "close", {
+    };
+    Object.defineProperty(P.Form.prototype, "close", {
+        enumerable: true,
         value: function(obj) {
             var delegate = this.unwrap();
             var value = delegate.close(P.boxAsJava(obj));
@@ -455,7 +457,40 @@
          */
         P.Form.prototype.close = function(obj){};
     }
+    Object.defineProperty(P.Form.prototype, "show", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.show();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
+        /**
+         * Shows the form as an ordinary window.
+         * @method show
+         * @memberOf Form
+         */
+        P.Form.prototype.show = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "toFront", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.toFront();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
+        /**
+         * Moves form to the front position.
+         * @method toFront
+         * @memberOf Form
+         */
+        P.Form.prototype.toFront = function(){};
+    }
     Object.defineProperty(P.Form.prototype, "showModal", {
+        enumerable: true,
         value: function(callback) {
             var delegate = this.unwrap();
             var value = delegate.showModal(P.boxAsJava(callback));
@@ -471,52 +506,8 @@
          */
         P.Form.prototype.showModal = function(callback){};
     }
-    Object.defineProperty(P.Form.prototype, "toFront", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.toFront();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
-        /**
-         * Moves form to the front position.
-         * @method toFront
-         * @memberOf Form
-         */
-        P.Form.prototype.toFront = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "show", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.show();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
-        /**
-         * Shows the form as an ordinary window.
-         * @method show
-         * @memberOf Form
-         */
-        P.Form.prototype.show = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "minimize", {
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.minimize();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
-        /**
-         * Minimizes this form.
-         * @method minimize
-         * @memberOf Form
-         */
-        P.Form.prototype.minimize = function(){};
-    }
     Object.defineProperty(P.Form.prototype, "maximize", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.maximize();
@@ -531,7 +522,24 @@
          */
         P.Form.prototype.maximize = function(){};
     }
+    Object.defineProperty(P.Form.prototype, "minimize", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.minimize();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
+        /**
+         * Minimizes this form.
+         * @method minimize
+         * @memberOf Form
+         */
+        P.Form.prototype.minimize = function(){};
+    }
     Object.defineProperty(P.Form.prototype, "restore", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
@@ -547,6 +555,7 @@
         P.Form.prototype.restore = function(){};
     }
     Object.defineProperty(P.Form.prototype, "showInternalFrame", {
+        enumerable: true,
         value: function(desktop) {
             var delegate = this.unwrap();
             var value = delegate.showInternalFrame(P.boxAsJava(desktop));

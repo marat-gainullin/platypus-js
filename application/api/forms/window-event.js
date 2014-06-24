@@ -36,5 +36,6 @@
              */
             P.WindowEvent.prototype.source = {};
         }
-    };    
+    };
+
 })();

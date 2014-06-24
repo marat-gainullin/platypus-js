@@ -22,7 +22,9 @@
         if(P.ApplicationDbModel.superclass)
             P.ApplicationDbModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };        Object.defineProperty(P.ApplicationDbModel.prototype, "save", {
+    };
+    Object.defineProperty(P.ApplicationDbModel.prototype, "save", {
+        enumerable: true,
         value: function(callback) {
             var delegate = this.unwrap();
             var value = delegate.save(P.boxAsJava(callback));
@@ -41,6 +43,7 @@
         P.ApplicationDbModel.prototype.save = function(callback){};
     }
     Object.defineProperty(P.ApplicationDbModel.prototype, "requery", {
+        enumerable: true,
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
@@ -58,6 +61,7 @@
         P.ApplicationDbModel.prototype.requery = function(onSuccessCallback, onFailureCallback){};
     }
     Object.defineProperty(P.ApplicationDbModel.prototype, "createEntity", {
+        enumerable: true,
         value: function(sqlText, datasourceName) {
             var delegate = this.unwrap();
             var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
@@ -76,6 +80,7 @@
         P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName){};
     }
     Object.defineProperty(P.ApplicationDbModel.prototype, "executeSql", {
+        enumerable: true,
         value: function(sqlText, datasourceName) {
             var delegate = this.unwrap();
             var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
@@ -94,6 +99,7 @@
         P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName){};
     }
     Object.defineProperty(P.ApplicationDbModel.prototype, "execute", {
+        enumerable: true,
         value: function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
@@ -111,6 +117,7 @@
         P.ApplicationDbModel.prototype.execute = function(onSuccessCallback, onFailureCallback){};
     }
     Object.defineProperty(P.ApplicationDbModel.prototype, "loadEntity", {
+        enumerable: true,
         value: function(queryId) {
             var delegate = this.unwrap();
             var value = delegate.loadEntity(P.boxAsJava(queryId));

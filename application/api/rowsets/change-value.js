@@ -50,5 +50,6 @@
              */
             P.ChangeValue.prototype.value = {};
         }
-    };    
+    };
+
 })();

@@ -273,20 +273,6 @@
              */
             P.DesktopPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -303,6 +289,20 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -669,7 +669,9 @@
              */
             P.DesktopPane.prototype.onKeyPressed = {};
         }
-    };        Object.defineProperty(P.DesktopPane.prototype, "closeAll", {
+    };
+    Object.defineProperty(P.DesktopPane.prototype, "closeAll", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.closeAll();
@@ -685,6 +687,7 @@
         P.DesktopPane.prototype.closeAll = function(){};
     }
     Object.defineProperty(P.DesktopPane.prototype, "minimizeAll", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.minimizeAll();
@@ -700,6 +703,7 @@
         P.DesktopPane.prototype.minimizeAll = function(){};
     }
     Object.defineProperty(P.DesktopPane.prototype, "restoreAll", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.restoreAll();
@@ -715,6 +719,7 @@
         P.DesktopPane.prototype.restoreAll = function(){};
     }
     Object.defineProperty(P.DesktopPane.prototype, "maximizeAll", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.maximizeAll();
@@ -730,6 +735,7 @@
         P.DesktopPane.prototype.maximizeAll = function(){};
     }
     Object.defineProperty(P.DesktopPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

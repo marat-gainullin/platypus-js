@@ -310,20 +310,6 @@
              */
             P.CardPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -340,6 +326,20 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -744,7 +744,9 @@
         delegate.setPublishedCollectionInvalidator(function() {
             invalidatable = null;
         });
-    };        Object.defineProperty(P.CardPane.prototype, "add", {
+    };
+    Object.defineProperty(P.CardPane.prototype, "add", {
+        enumerable: true,
         value: function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(arg0), P.boxAsJava(arg1));
@@ -762,6 +764,7 @@
         P.CardPane.prototype.add = function(arg0, arg1){};
     }
     Object.defineProperty(P.CardPane.prototype, "show", {
+        enumerable: true,
         value: function(name) {
             var delegate = this.unwrap();
             var value = delegate.show(P.boxAsJava(name));
@@ -778,6 +781,7 @@
         P.CardPane.prototype.show = function(name){};
     }
     Object.defineProperty(P.CardPane.prototype, "child", {
+        enumerable: true,
         value: function(name) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(name));
@@ -786,7 +790,7 @@
     });
     if(!P.CardPane){
         /**
-         * Gets the container's nth component.
+         * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
          * @method child
@@ -795,6 +799,7 @@
         P.CardPane.prototype.child = function(name){};
     }
     Object.defineProperty(P.CardPane.prototype, "remove", {
+        enumerable: true,
         value: function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
@@ -811,6 +816,7 @@
         P.CardPane.prototype.remove = function(component){};
     }
     Object.defineProperty(P.CardPane.prototype, "clear", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
@@ -826,6 +832,7 @@
         P.CardPane.prototype.clear = function(){};
     }
     Object.defineProperty(P.CardPane.prototype, "focus", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.focus();

@@ -22,7 +22,9 @@
         if(P.ReportTemplate.superclass)
             P.ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };        Object.defineProperty(P.ReportTemplate.prototype, "generateReport", {
+    };
+    Object.defineProperty(P.ReportTemplate.prototype, "generateReport", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.generateReport();

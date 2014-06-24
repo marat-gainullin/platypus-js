@@ -25,7 +25,9 @@
         if(P.Report.superclass)
             P.Report.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };        Object.defineProperty(P.Report.prototype, "print", {
+    };
+    Object.defineProperty(P.Report.prototype, "print", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.print();
@@ -41,6 +43,7 @@
         P.Report.prototype.print = function(){};
     }
     Object.defineProperty(P.Report.prototype, "save", {
+        enumerable: true,
         value: function(aFileName) {
             var delegate = this.unwrap();
             var value = delegate.save(P.boxAsJava(aFileName));
@@ -56,6 +59,7 @@
         P.Report.prototype.save = function(aFileName){};
     }
     Object.defineProperty(P.Report.prototype, "show", {
+        enumerable: true,
         value: function() {
             var delegate = this.unwrap();
             var value = delegate.show();

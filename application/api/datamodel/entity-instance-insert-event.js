@@ -64,5 +64,6 @@
              */
             P.EntityInstanceInsertEvent.prototype.object = {};
         }
-    };    
+    };
+
 })();
