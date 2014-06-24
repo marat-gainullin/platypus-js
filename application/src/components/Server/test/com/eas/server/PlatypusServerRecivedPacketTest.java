@@ -8,7 +8,7 @@ import com.eas.client.DatabaseAppCache;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.sensors.positioning.PacketReciever;
+import com.eas.sensors.api.PacketReciever;
 import com.eas.sensors.positioning.PositioningPacket;
 import java.io.IOException;
 import java.net.InetSocketAddress;

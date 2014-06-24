@@ -11,6 +11,7 @@ import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
 import com.eas.script.JsDoc;
+import com.eas.sensors.api.SensorsFactory;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
 import com.eas.server.mina.platypus.RequestDecoder;
 import com.eas.server.mina.platypus.ResponseEncoder;
@@ -48,6 +49,7 @@ public class PlatypusServer extends PlatypusServerCore {
     public final static String HTTPS_PROTOCOL = "https";
     public final static int DEFAULT_EXECUTOR_POOL_SIZE = 16;
     private final ExecutorService bgTasksExecutor;
+    private final SensorsFactory acceptorsFactory;
     private final InetSocketAddress[] listenAddresses;
     private final Map<Integer, String> portsProtocols;
     private final Map<Integer, Integer> portsSessionIdleTimeouts;
@@ -69,6 +71,7 @@ public class PlatypusServer extends PlatypusServerCore {
         portsSessionIdleCheckIntervals = aPortsSessionIdleCheckInterval;
         portsNumWorkerThreads = aPortsNumWorkerThreads;
         sslContext = aSslContext;
+        acceptorsFactory = getAcceptorsFactory();
     }
 
     public void start() throws Exception {
@@ -91,26 +94,23 @@ public class PlatypusServer extends PlatypusServerCore {
     }
 
     public void enqueuePlatypusRequest(final Request aRequest, final Runnable onFailure, final Runnable onSuccess) throws Exception {
-        bgTasksExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final RequestHandler handler = RequestHandlerFactory.getHandler(PlatypusServer.this, sessionManager.getSystemSession(), aRequest);
-                    handler.run();
-                    if (handler.getResponse() instanceof ErrorResponse) {
-                        if (onFailure != null) {
-                            onFailure.run();
-                        }
-                    } else {
-                        if (onSuccess != null) {
-                            onSuccess.run();
-                        }
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
+        bgTasksExecutor.execute(() -> {
+            try {
+                final RequestHandler handler = RequestHandlerFactory.getHandler(PlatypusServer.this, sessionManager.getSystemSession(), aRequest);
+                handler.run();
+                if (handler.getResponse() instanceof ErrorResponse) {
                     if (onFailure != null) {
                         onFailure.run();
                     }
+                } else {
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
+                if (onFailure != null) {
+                    onFailure.run();
                 }
             }
         });
@@ -148,7 +148,7 @@ public class PlatypusServer extends PlatypusServerCore {
 
     private void tryToInitializeAndBindSensorAcceptor(String protocol, InetSocketAddress s) throws IOException, Exception {
         Logger logger = Logger.getLogger(ServerMain.class.getName());
-        if (com.eas.sensors.positioning.AcceptorsFactory.isSupported(protocol)) {
+        if (acceptorsFactory != null && acceptorsFactory.isSupported(protocol)) {
             String acceptorModuleId = findAcceptorModule(protocol);
             if (acceptorModuleId != null) {
                 Integer numWorkerThreads = portsNumWorkerThreads != null ? portsNumWorkerThreads.get(s.getPort()) : null;
@@ -164,7 +164,7 @@ public class PlatypusServer extends PlatypusServerCore {
                     sessionIdleCheckInterval = 360;
                 }
 
-                IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId, numWorkerThreads));
+                IoAcceptor sensorAcceptor = acceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId, numWorkerThreads));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
                     logger.info(String.format("Listening on %s; protocol: %s", s.toString(), protocol));
@@ -232,5 +232,20 @@ public class PlatypusServer extends PlatypusServerCore {
             sb.append("Enabled protocols: ").append(sslFilter.getEnabledProtocols()).append("\n");
         }
         logger.info(sb.toString());
+    }
+    
+    private SensorsFactory getAcceptorsFactory() {
+        SensorsFactory factory = null;
+        try {
+            Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.positioning.AcceptorsFactory");
+            factory = acceptorsFactoryClass.newInstance();
+        } catch (ClassNotFoundException e) {
+            //no op            
+        } catch (InstantiationException ex) {
+            Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return factory;
     }
 }
