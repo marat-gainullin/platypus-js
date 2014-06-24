@@ -5,9 +5,10 @@
 package com.eas.server.handlers;
 
 import com.eas.script.ScriptUtils;
+import com.eas.sensors.api.Packet;
+import com.eas.sensors.api.PacketReciever;
 import com.eas.sensors.positioning.DevicesCommunication;
 import com.eas.sensors.positioning.DevicesCommunication.DeviceRequest;
-import com.eas.sensors.positioning.PacketReciever;
 import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
 import com.eas.sensors.retranslate.RetranslateIoHandler;
@@ -50,7 +51,7 @@ public class PositioningPacketReciever implements PacketReciever {
     }
 
     @Override
-    public Object received(PositioningPacket aPacket) throws Exception {
+    public Object received(Packet aPacket) throws Exception {
         Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
         if (result != null) {
              result = ScriptUtils.toJava(result);
@@ -149,17 +150,17 @@ public class PositioningPacketReciever implements PacketReciever {
      * @param aDeviceID
      * @return
      */
-    @Override
+    //@Override TODO
     public DevicesCommunication.DeviceRequest getRequest(String aDeviceID) {
         return PositioningIoHandler.devicesRequests.getRequest(aDeviceID);
     }
 
-    @Override
+    //@Override TODO
     public DeviceRequest getWaitingRequest(String aDeviceID) {
         return PositioningIoHandler.waitingRequests.getRequest(aDeviceID);
     }
 
-    @Override
+    //@Override TODO
     public void putWaitingRequest(String aDeviceID, DeviceRequest aRequest) {
         PositioningIoHandler.waitingRequests.putRequest(aDeviceID, aRequest);
     }
