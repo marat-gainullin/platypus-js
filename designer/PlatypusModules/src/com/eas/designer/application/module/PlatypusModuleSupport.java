@@ -108,6 +108,9 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
     public void setModelModified(boolean aValue) {
         modelModified = aValue;
+        // Undoable edits will mark whole dataobject as modified.
+        // Only specific modified status is setted here.
+        // Model's modified staus is the case.
     }
 
     /**

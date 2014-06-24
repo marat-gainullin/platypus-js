@@ -5,6 +5,7 @@
 package com.eas.designer.application.query;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -91,71 +92,80 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         readonlyChanged(!readonly, readonly);
     }
 
-    protected class QueryModelModifiedObserver implements ModelEditingListener<QueryEntity>, PropertyChangeListener, CollectionListener {
+    protected class QueryModelModifiedObserver implements ModelEditingListener<QueryEntity>, PropertyChangeListener, CollectionListener<Fields, Field> {
 
         @Override
         public void entityAdded(QueryEntity e) {
-            modelModified = true;
+            setModelModified(true);
             e.getChangeSupport().addPropertyChangeListener(this);
         }
 
         @Override
         public void entityRemoved(QueryEntity e) {
-            modelModified = true;
+            setModelModified(true);
             e.getChangeSupport().removePropertyChangeListener(this);
         }
 
         @Override
         public void relationAdded(Relation<QueryEntity> rel) {
-            modelModified = true;
+            setModelModified(true);
             rel.getChangeSupport().addPropertyChangeListener(this);
         }
 
         @Override
         public void relationRemoved(Relation<QueryEntity> rel) {
-            modelModified = true;
+            setModelModified(true);
             rel.getChangeSupport().removePropertyChangeListener(this);
         }
 
         @Override
         public void entityIndexesChanged(QueryEntity e) {
-            modelModified = true;
+            setModelModified(true);
         }
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            modelModified = true;
+            setModelModified(true);
         }
 
         @Override
-        public void added(Object c, Object v) {
-            modelModified = true;
+        public void added(Fields c, Field v) {
+            setModelModified(true);
+            v.getChangeSupport().addPropertyChangeListener(this);
         }
 
         @Override
-        public void added(Object c, Collection clctn) {
-            modelModified = true;
+        public void added(Fields c, Collection<Field> clctn) {
+            setModelModified(true);
+            for (Field v : clctn) {
+                v.getChangeSupport().addPropertyChangeListener(this);
+            }
         }
 
         @Override
-        public void removed(Object c, Object v) {
-            modelModified = true;
+        public void removed(Fields c, Field v) {
+            setModelModified(true);
+            v.getChangeSupport().removePropertyChangeListener(this);
         }
 
         @Override
-        public void removed(Object c, Collection clctn) {
-            modelModified = true;
+        public void removed(Fields c, Collection<Field> clctn) {
+            setModelModified(true);
+            for (Field v : clctn) {
+                v.getChangeSupport().removePropertyChangeListener(this);
+            }
         }
 
         @Override
-        public void reodered(Object c) {
-            modelModified = true;
+        public void reodered(Fields c) {
+            setModelModified(true);
         }
 
         @Override
-        public void cleared(Object c) {
-            modelModified = true;
+        public void cleared(Fields c) {
+            setModelModified(true);
         }
+
     }
 
     // reflectioned properties
@@ -192,6 +202,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected transient NbEditorDocument sqlTextDocument;
     protected transient NbEditorDocument sqlFullTextDocument;
     // runtime 
+    protected transient QueryModelModifiedObserver modelChangesObserver = new QueryModelModifiedObserver();
     protected transient boolean modelModified;
     protected transient boolean sqlModified;
     protected transient boolean fullSqlModified;
@@ -237,15 +248,17 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
         model = XmlDom2QueryModel.transform(getClient(), modelDoc);
 
-        QueryModelModifiedObserver changesObserver = new QueryModelModifiedObserver();
-        model.addEditingListener(changesObserver);
-        model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
-        model.getParametersEntity().getFields().getCollectionSupport().addListener(changesObserver);
+        model.addEditingListener(modelChangesObserver);
+        model.getParametersEntity().getChangeSupport().addPropertyChangeListener(modelChangesObserver);
+        model.getParametersEntity().getFields().getCollectionSupport().addListener(modelChangesObserver);
+        for (Field param : model.getParametersEntity().getFields().toCollection()) {
+            param.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
+        }
         for (QueryEntity entity : model.getEntities().values()) {
-            entity.getChangeSupport().addPropertyChangeListener(changesObserver);
+            entity.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
         }
         for (Relation<QueryEntity> rel : model.getRelations()) {
-            rel.getChangeSupport().addPropertyChangeListener(changesObserver);
+            rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
         }
 
         datasourceName = model.getDbId();
@@ -469,6 +482,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     public void setModelModified(boolean aValue) {
         modelModified = aValue;
+        // Undoable edits will mark whole dataobject as modified.
+        // Only specific modified status is setted here.
+        // Model's modified staus is the case.
     }
 
     public ModelNode<QueryEntity, QueryModel> getModelNode() throws Exception {
@@ -556,6 +572,11 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         modelNode = null;
         statement = null;
         commitedStatement = null;
+        if (model != null) {
+            for (Field param : model.getParametersEntity().getFields().toCollection()) {
+                param.getChangeSupport().removePropertyChangeListener(modelChangesObserver);
+            }
+        }
         model = null;
         modelModified = false;
         if (sqlTextDocument != null) {

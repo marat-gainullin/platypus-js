@@ -181,20 +181,26 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             }
         } else if (aClient instanceof DatabasesClient) {
             DatabasesClient dbClient = (DatabasesClient) aClient;
-            if (aUserName != null && !aUserName.isEmpty() && aPassword != null) {
-                String passwordMd5 = MD5Generator.generate(String.valueOf(aPassword));
-                try {
-                    principal = DatabasesClient.credentialsToPrincipalWithBasicAuthentication(dbClient, aUserName, passwordMd5);
-                } catch (Exception ex) {
-                    throw new FailedLoginException(ex.getMessage());
+            try {
+                if (aUserName != null && !aUserName.isEmpty() && aPassword != null) {
+                    String passwordMd5 = MD5Generator.generate(String.valueOf(aPassword));
+                    try {
+                        principal = DatabasesClient.credentialsToPrincipalWithBasicAuthentication(dbClient, aUserName, passwordMd5);
+                    } catch (Exception ex) {
+                        throw new FailedLoginException(ex.getMessage());
+                    }
+                    if (principal == null) {
+                        throw new FailedLoginException("User name or password is incorrect");
+                    }
+                } else {
+                    throw new FailedLoginException("Missing user name and/or password");
                 }
-                if (principal == null) {
-                    throw new FailedLoginException("User name or password is incorrect");
+            } catch (FailedLoginException ex) {
+                if (anonymousEnabled) {
+                    principal = new AnonymousPlatypusPrincipal("anonymous-" + IDGenerator.genID());
+                } else {
+                    throw ex;
                 }
-            } else if (anonymousEnabled) {
-                principal = new AnonymousPlatypusPrincipal("anonymous-" + IDGenerator.genID());
-            } else {
-                throw new FailedLoginException("User name and password are required while anonymous access is disabled.");
             }
             dbClient.setPrincipalHost(this);
             dbClient.setContextHost(this);
