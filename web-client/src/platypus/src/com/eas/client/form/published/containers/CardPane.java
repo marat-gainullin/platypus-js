@@ -44,8 +44,8 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
-        HasRemoveHandlers, HasSelectionHandlers<Widget> {
+public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
+		HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<Widget>, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -262,4 +262,16 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 			aWidget.@com.eas.client.form.published.containers.CardPane::show(Ljava/lang/String;)(aCardName);
 		};			
 	}-*/;
+
+	@Override
+	public int getTop(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return 0;
+	}
+
+	@Override
+	public int getLeft(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return 0;
+	}
 }

@@ -31,8 +31,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
-        HasRemoveHandlers {
+public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
+		HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
 
 	/**
 	 * Used to set the vertical scroll bar policy so that vertical scrollbars
@@ -303,4 +303,16 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 			}
 		});
 	}-*/;
+
+	@Override
+	public int getTop(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return 0;
+	}
+
+	@Override
+	public int getLeft(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return 0;
+	}
 }

@@ -471,8 +471,9 @@ public class JsWidgets {
 	    var _left = null;
 	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
-		    	if(_left == null)
-    				_left = aPublished.element.offsetLeft;
+		    	if(aPublished.parent){
+    				_left = aPublished.parent.unwrap().@com.eas.client.form.published.containers.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+		    	}
     			return _left;
 		    },
 		    set : function(aValue) {
@@ -484,8 +485,9 @@ public class JsWidgets {
  	    var _top = null;
 	    Object.defineProperty(aPublished, "top", {
 		    get : function() {
-		    	if(_top == null)
-    				_top = aPublished.element.offsetTop;
+		    	if(aPublished.parent){
+    				_top = aPublished.parent.unwrap().@com.eas.client.form.published.containers.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+		    	}
     			return _top;
 		    },
 		    set : function(aValue) {
