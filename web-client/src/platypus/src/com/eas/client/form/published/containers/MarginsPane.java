@@ -38,8 +38,8 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.dom.client.Style;
 
-public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
-        HasResizeHandlers, HasAddHandlers, HasRemoveHandlers {
+public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished, HasJsFacade, HasEnabled, HasComponentPopupMenu,
+		HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -355,8 +355,8 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 	public void toFront(Widget aWidget) {
 		if (aWidget != null) {
 			getElement().insertBefore(aWidget.getElement().getParentNode(), getElement().getLastChild()); // exclude
-			                                                                                              // last
-			                                                                                              // element
+																											// last
+																											// element
 		}
 	}
 
@@ -367,8 +367,8 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 			Element widgetElement = aWidget.getElement().getParentElement();
 			int index = container.getChildIndex(widgetElement);
 			if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude
-				                                                                 // last
-				                                                                 // element
+																					// last
+																					// element
 				getElement().insertBefore(widgetElement, container.getLastChild());
 			} else {
 				getElement().insertAfter(widgetElement, container.getChild(index + aCount));
@@ -405,5 +405,17 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 	@Override
 	public void setPublished(JavaScriptObject aValue) {
 		published = aValue;
+	}
+
+	@Override
+	public int getTop(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getParentElement().getOffsetTop();
+	}
+
+	@Override
+	public int getLeft(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getParentElement().getOffsetLeft();
 	}
 }

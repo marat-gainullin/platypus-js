@@ -15,8 +15,7 @@
      * @param bottom a bottom anchor
      * @constructor Anchors Anchors
      */
-    P.Anchors = function Anchors(left, width, right, top, height, bottom) {
-
+    P.Anchors = function (left, width, right, top, height, bottom) {
         var maxArgs = 6;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -33,9 +32,8 @@
                 return delegate;
             }
         });
-        if(Anchors.superclass)
-            Anchors.superclass.constructor.apply(this, arguments);
-
+        if(P.Anchors.superclass)
+            P.Anchors.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    };    
 })();

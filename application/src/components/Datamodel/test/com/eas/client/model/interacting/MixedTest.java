@@ -8,12 +8,10 @@ import com.bearsoft.rowset.Rowset;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.BaseTest;
-import com.eas.client.model.DataScriptEventsListener;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
 import static org.junit.Assert.*;
@@ -342,92 +340,32 @@ public class MixedTest extends BaseTest {
             model.requery();
             ModelState state = new ModelState(model);
 
-            DataScriptEventsListener scriptListener1 = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_PO_VELICHINE);
             EntityDataListener dataListener1 = new EntityDataListener();
             state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset().addRowsetListener(dataListener1);
-            model.addScriptEventsListener(scriptListener1);
 
-            DataScriptEventsListener scriptListener2 = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_PO_VELICHINE_1);
             EntityDataListener dataListener2 = new EntityDataListener();
             state.EDINICI_IZMERENIJA_PO_VELICHINE_1.getRowset().addRowsetListener(dataListener2);
-            model.addScriptEventsListener(scriptListener2);
 
-            DataScriptEventsListener scriptListener3 = new DataScriptEventsListener(state.NAIMENOVANIA_SI_PO_VELICHINE);
             EntityDataListener dataListener3 = new EntityDataListener();
             state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset().addRowsetListener(dataListener3);
-            model.addScriptEventsListener(scriptListener3);
 
-            DataScriptEventsListener scriptListener4 = new DataScriptEventsListener(state.NAIMENOVANIA_SI_PO_VELICHINE_1);
             EntityDataListener dataListener4 = new EntityDataListener();
             state.NAIMENOVANIA_SI_PO_VELICHINE_1.getRowset().addRowsetListener(dataListener4);
-            model.addScriptEventsListener(scriptListener4);
 
             Rowset izmVel = state.IZMERJAEMIE_VELICHINI.getRowset();
             Rowset naimSi = state.NAIMENOVANIE_SI.getRowset();
             assertNotNull(izmVel);
             assertNotNull(naimSi);
-            scriptListener1.reset();
             dataListener1.reset();
-            scriptListener2.reset();
             dataListener2.reset();
-            scriptListener3.reset();
             dataListener3.reset();
-            scriptListener4.reset();
             dataListener4.reset();
             izmVel.beforeFirst();
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertEquals(dataListener3.getEvents(), scriptListener3.getEvents());
-            assertEquals(dataListener4.getEvents(), scriptListener4.getEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-            assertTrue(dataListener3.getScrollEvents() >= scriptListener3.getScrollEvents());
-            assertTrue(dataListener4.getScrollEvents() >= scriptListener4.getScrollEvents());
             while (izmVel.next()) {
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertEquals(dataListener3.getEvents(), scriptListener3.getEvents());
-                assertEquals(dataListener4.getEvents(), scriptListener4.getEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                assertTrue(dataListener3.getScrollEvents() >= scriptListener3.getScrollEvents());
-                assertTrue(dataListener4.getScrollEvents() >= scriptListener4.getScrollEvents());
                 naimSi.beforeFirst();
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertEquals(dataListener3.getEvents(), scriptListener3.getEvents());
-                assertEquals(dataListener4.getEvents(), scriptListener4.getEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                assertTrue(dataListener3.getScrollEvents() >= scriptListener3.getScrollEvents());
-                assertTrue(dataListener4.getScrollEvents() >= scriptListener4.getScrollEvents());
                 while (naimSi.next()) {
-                    assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                    assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                    assertEquals(dataListener3.getEvents(), scriptListener3.getEvents());
-                    assertEquals(dataListener4.getEvents(), scriptListener4.getEvents());
-                    assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                    assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                    assertTrue(dataListener3.getScrollEvents() >= scriptListener3.getScrollEvents());
-                    assertTrue(dataListener4.getScrollEvents() >= scriptListener4.getScrollEvents());
                 }
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertEquals(dataListener3.getEvents(), scriptListener3.getEvents());
-                assertEquals(dataListener4.getEvents(), scriptListener4.getEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                assertTrue(dataListener3.getScrollEvents() >= scriptListener3.getScrollEvents());
-                assertTrue(dataListener4.getScrollEvents() >= scriptListener4.getScrollEvents());
             }
-            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-            assertEquals(dataListener3.getEvents(), scriptListener3.getEvents());
-            assertEquals(dataListener4.getEvents(), scriptListener4.getEvents());
-            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-            assertTrue(dataListener3.getScrollEvents() >= scriptListener3.getScrollEvents());
-            assertTrue(dataListener4.getScrollEvents() >= scriptListener4.getScrollEvents());
         }
     }
 }

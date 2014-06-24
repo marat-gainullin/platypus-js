@@ -5,8 +5,7 @@
     });
     
 ${JsDoc}
-    P.${Name} = function ${Name}(${Params}) {
-
+    P.${Name} = function (${Params}) {
         var maxArgs = ${MaxArgs};
         var ${Delegate} = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -17,9 +16,8 @@ ${JsDoc}
                 return ${Delegate};
             }
         });
-        if(${Name}.superclass)
-            ${Name}.superclass.constructor.apply(this, arguments);
-${Props}
+        if(P.${Name}.superclass)
+            P.${Name}.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+${Props}${Body}    };    ${Methods}
 })();

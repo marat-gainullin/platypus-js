@@ -6,7 +6,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class RowsetJSAdapter extends RowsetAdapter {
+public class RowsetJSAdapter extends RowsetAdapter implements RowsetEventsEarlyAccess {
 
     public JSObject rowsetFiltered;
     public JSObject rowsetRequeried;

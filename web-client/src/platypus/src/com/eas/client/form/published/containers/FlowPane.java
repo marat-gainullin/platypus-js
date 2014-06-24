@@ -31,8 +31,8 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
-        HasRemoveHandlers {
+public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
+		HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -215,4 +215,16 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 			}
 		}
 	}-*/;
+
+	@Override
+	public int getTop(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getOffsetTop();
+	}
+
+	@Override
+	public int getLeft(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getOffsetLeft();
+	}
 }

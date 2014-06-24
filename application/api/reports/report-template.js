@@ -8,8 +8,7 @@
      * Generated constructor.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function ReportTemplate() {
-
+    P.ReportTemplate = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,23 +19,23 @@
                 return delegate;
             }
         });
-        if(ReportTemplate.superclass)
-            ReportTemplate.superclass.constructor.apply(this, arguments);
+        if(P.ReportTemplate.superclass)
+            P.ReportTemplate.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
+    };        Object.defineProperty(P.ReportTemplate.prototype, "generateReport", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.generateReport();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ReportTemplate){
         /**
          * Generate report from template.
          * @method generateReport
          * @memberOf ReportTemplate
          */
-        Object.defineProperty(this, "generateReport", {
-            get: function() {
-                return function() {
-                    var value = delegate.generateReport();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.ReportTemplate.prototype.generateReport = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

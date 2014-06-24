@@ -8,8 +8,7 @@
      * Generated constructor.
      * @constructor DbPlatypusPrincipal DbPlatypusPrincipal
      */
-    P.DbPlatypusPrincipal = function DbPlatypusPrincipal() {
-
+    P.DbPlatypusPrincipal = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,21 +19,22 @@
                 return delegate;
             }
         });
-        if(DbPlatypusPrincipal.superclass)
-            DbPlatypusPrincipal.superclass.constructor.apply(this, arguments);
-        /**
-         * The username..
-         * @property name
-         * @memberOf DbPlatypusPrincipal
-         */
+        if(P.DbPlatypusPrincipal.superclass)
+            P.DbPlatypusPrincipal.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.DbPlatypusPrincipal){
+            /**
+             * The username..
+             * @property name
+             * @memberOf DbPlatypusPrincipal
+             */
+            P.DbPlatypusPrincipal.prototype.name = '';
+        }
+    };    
 })();

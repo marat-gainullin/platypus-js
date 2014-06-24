@@ -69,7 +69,7 @@ public abstract class Container<D extends JComponent> extends Component<D> imple
 
     protected static final String CHILD_JSDOC = ""
             + "/**\n"
-            + " * Gets the container's nth component.\n"
+            + " * Gets the container's n-th component.\n"
             + " * @param index the component's index in the container\n"
             + " * @return the child component\n"
             + "*/";

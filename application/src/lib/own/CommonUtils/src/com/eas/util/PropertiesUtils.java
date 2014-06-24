@@ -22,7 +22,7 @@ public class PropertiesUtils {
         return ((method.getName().startsWith(BEANY_PREFIX_GET) || method.getName().startsWith(BEANY_PREFIX_IS)) && method.getParameterTypes().length == 0)
                 || (method.getName().startsWith(BEANY_PREFIX_SET) && method.getParameterTypes().length == 1);
     }
-    
+
     public static String getPropertyName(String methodName) {
         String capitalizedPropName = null;
         if (methodName.startsWith(PropertiesUtils.BEANY_PREFIX_GET) || methodName.startsWith(PropertiesUtils.BEANY_PREFIX_SET)) {
@@ -51,7 +51,7 @@ public class PropertiesUtils {
             pb.eventClass = method.getAnnotation(EventMethod.class).eventClass();
         }
     }
-    
+
     public static void setPropertyAccessStatus(PropBox pb, String methodName) {
         if (methodName.startsWith(PropertiesUtils.BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_IS)) {
             pb.readable = true;
@@ -71,7 +71,7 @@ public class PropertiesUtils {
                 || Float.TYPE.equals(clazz)
                 || Double.TYPE.equals(clazz);
     }
-    
+
     public static String getTypeName(Class<?> aType) {
         if (!aType.equals(Void.TYPE)) {
             if (isNumberClass(aType)) {
@@ -96,15 +96,16 @@ public class PropertiesUtils {
         }
         return null;
     }
-    
+
     public static class PropBox {
+
         public String name;
         public String typeName;
         public Class<?> eventClass;
         public boolean readable;
         public boolean writeable;
         public String jsDoc;
-        
+
         public String readMethodName;
         public String writeMethodName;
     }

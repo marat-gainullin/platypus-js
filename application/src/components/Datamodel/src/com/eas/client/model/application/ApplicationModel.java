@@ -11,10 +11,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
-import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Model;
-import com.eas.client.model.ModelScriptEventsListener;
-import com.eas.client.model.ModelScriptEventsSupport;
 import com.eas.client.model.Relation;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
@@ -53,7 +50,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
-    protected ModelScriptEventsSupport scriptEventsSupport = new ModelScriptEventsSupport();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
@@ -167,9 +163,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 toDel.add(rel);
             }
         }
-        for (ReferenceRelation<E> rel : toDel) {
+        toDel.stream().forEach((rel) -> {
             removeReferenceRelation(rel);
-        }
+        });
     }
 
     @Override
@@ -203,18 +199,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 || type == Types.BOOLEAN
                 || type == Types.BLOB
                 || type == Types.CLOB;
-    }
-
-    public void addScriptEventsListener(ModelScriptEventsListener l) {
-        scriptEventsSupport.addListener(l);
-    }
-
-    public void removeScriptEventsListener(ModelScriptEventsListener l) {
-        scriptEventsSupport.removeListener(l);
-    }
-
-    public void fireScriptEventExecuting(PublishedSourcedEvent aEvent) {
-        scriptEventsSupport.fireScriptEventExecuting(aEvent);
     }
 
     public void beginSavingCurrentRowIndexes() {

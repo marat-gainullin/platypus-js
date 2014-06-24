@@ -11,8 +11,7 @@
      * @param actionPerformed On action performed function (optional).
      * @constructor RadioMenuItem RadioMenuItem
      */
-    P.RadioMenuItem = function RadioMenuItem(text, selected, actionPerformed) {
-
+    P.RadioMenuItem = function (text, selected, actionPerformed) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -26,13 +25,9 @@
                 return delegate;
             }
         });
-        if(RadioMenuItem.superclass)
-            RadioMenuItem.superclass.constructor.apply(this, arguments);
-        /**
-         * The mouse <code>Cursor</code> over this component.
-         * @property cursor
-         * @memberOf RadioMenuItem
-         */
+        if(P.RadioMenuItem.superclass)
+            P.RadioMenuItem.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -42,12 +37,14 @@
                 delegate.cursor = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse dragged event handler function.
-         * @property onMouseDragged
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.cursor = {};
+        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -57,24 +54,28 @@
                 delegate.onMouseDragged = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The parent container.
-         * @property parent
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseDragged = {};
+        }
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parent;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Mouse released event handler function.
-         * @property onMouseReleased
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The parent container.
+             * @property parent
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -84,12 +85,14 @@
                 delegate.onMouseReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Keyboard focus lost by the component event handler function.
-         * @property onFocusLost
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse released event handler function.
+             * @property onMouseReleased
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseReleased = {};
+        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -99,12 +102,14 @@
                 delegate.onFocusLost = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse pressed event handler function.
-         * @property onMousePressed
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onFocusLost = {};
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -114,12 +119,14 @@
                 delegate.onMousePressed = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The foreground color of this component.
-         * @property foreground
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMousePressed = {};
+        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -129,25 +136,29 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * An error message of this component.
-         * Validation procedure may set this property and subsequent focus lost event will clear it.
-         * @property error
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The foreground color of this component.
+             * @property foreground
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.foreground = {};
+        }
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-         * @property enabled
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.error = '';
+        }
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -157,12 +168,14 @@
                 delegate.enabled = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component moved event handler function.
-         * @property onComponentMoved
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.enabled = true;
+        }
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -172,12 +185,14 @@
                 delegate.onComponentMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>PopupMenu</code> that assigned for this component.
-         * @property componentPopupMenu
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Component moved event handler function.
+             * @property onComponentMoved
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onComponentMoved = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -187,12 +202,14 @@
                 delegate.componentPopupMenu = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Vertical coordinate of the component.
-         * @property top
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.componentPopupMenu = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -202,12 +219,14 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component resized event handler function.
-         * @property onComponentResized
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.top = 0;
+        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -217,24 +236,28 @@
                 delegate.onComponentResized = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The menu item text.
-         * @property text
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onComponentResized = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Mouse entered over the component event handler function.
-         * @property onMouseEntered
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The menu item text.
+             * @property text
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.text = '';
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -244,12 +267,14 @@
                 delegate.onMouseEntered = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if the menu item is selected.
-         * @property selected
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseEntered = {};
+        }
         Object.defineProperty(this, "selected", {
             get: function() {
                 var value = delegate.selected;
@@ -259,12 +284,14 @@
                 delegate.selected = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The tooltip string that has been set with.
-         * @property toolTipText
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * <code>true</code> if the menu item is selected.
+             * @property selected
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.selected = true;
+        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -274,24 +301,28 @@
                 delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level html element. Applicable only in HTML5 client.
-         * @property element
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.toolTipText = '';
+        }
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Height of the component.
-         * @property height
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -301,12 +332,14 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component shown event handler function.
-         * @property onComponentShown
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.height = 0;
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -316,12 +349,14 @@
                 delegate.onComponentShown = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse moved event handler function.
-         * @property onMouseMoved
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onComponentShown = {};
+        }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -331,12 +366,14 @@
                 delegate.onMouseMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The ButtonGroup this component belongs to.
-         * @property buttonGroup
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseMoved = {};
+        }
         Object.defineProperty(this, "buttonGroup", {
             get: function() {
                 var value = delegate.buttonGroup;
@@ -346,12 +383,14 @@
                 delegate.buttonGroup = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * True if this component is completely opaque.
-         * @property opaque
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The ButtonGroup this component belongs to.
+             * @property buttonGroup
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.buttonGroup = {};
+        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -361,12 +400,14 @@
                 delegate.opaque = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component should be visible when its parent is visible.
-         * @property visible
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.opaque = true;
+        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -376,12 +417,14 @@
                 delegate.visible = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Component hidden event handler function.
-         * @property onComponentHidden
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.visible = true;
+        }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -391,12 +434,14 @@
                 delegate.onComponentHidden = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         * @property nextFocusableComponent
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Component hidden event handler function.
+             * @property onComponentHidden
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onComponentHidden = {};
+        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -406,27 +451,14 @@
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Main action performed event handler function.
-         * @property onActionPerformed
-         * @memberOf RadioMenuItem
-         */
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Key released event handler function.
-         * @property onKeyReleased
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.nextFocusableComponent = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -436,12 +468,31 @@
                 delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this component may be focused.
-         * @property focusable
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
@@ -451,12 +502,14 @@
                 delegate.focusable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key typed event handler function.
-         * @property onKeyTyped
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Determines whether this component may be focused.
+             * @property focusable
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.focusable = true;
+        }
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -466,12 +519,14 @@
                 delegate.onKeyTyped = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse wheel moved event handler function.
-         * @property onMouseWheelMoved
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Key typed event handler function.
+             * @property onKeyTyped
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onKeyTyped = {};
+        }
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -481,24 +536,28 @@
                 delegate.onMouseWheelMoved = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-         * @property component
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseWheelMoved = {};
+        }
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Keyboard focus gained by the component event.
-         * @property onFocusGained
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.component = {};
+        }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -508,12 +567,14 @@
                 delegate.onFocusGained = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Horizontal coordinate of the component.
-         * @property left
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onFocusGained = {};
+        }
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -523,12 +584,14 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The background color of this component.
-         * @property background
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Horizontal coordinate of the component.
+             * @property left
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.left = 0;
+        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -538,12 +601,14 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse clicked event handler function.
-         * @property onMouseClicked
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.background = {};
+        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -553,12 +618,14 @@
                 delegate.onMouseClicked = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Mouse exited over the component event handler function.
-         * @property onMouseExited
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseClicked = {};
+        }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -568,24 +635,28 @@
                 delegate.onMouseExited = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Gets name of this component.
-         * @property name
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Mouse exited over the component event handler function.
+             * @property onMouseExited
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onMouseExited = {};
+        }
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Width of the component.
-         * @property width
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -595,12 +666,14 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The font of this component.
-         * @property font
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * Width of the component.
+             * @property width
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.width = 0;
+        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -610,12 +683,14 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Key pressed event handler function.
-         * @property onKeyPressed
-         * @memberOf RadioMenuItem
-         */
+        if(!P.RadioMenuItem){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.font = {};
+        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -625,22 +700,28 @@
                 delegate.onKeyPressed = P.boxAsJava(aValue);
             }
         });
-
+        if(!P.RadioMenuItem){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onKeyPressed = {};
+        }
+    };        Object.defineProperty(P.RadioMenuItem.prototype, "focus", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.RadioMenuItem){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf RadioMenuItem
          */
-        Object.defineProperty(this, "focus", {
-            get: function() {
-                return function() {
-                    var value = delegate.focus();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.RadioMenuItem.prototype.focus = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

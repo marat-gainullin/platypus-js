@@ -6,6 +6,7 @@ package com.eas.designer.application.query;
 
 import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.explorer.DataObjectProvider;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
@@ -45,7 +46,8 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         OpenedPaneEditorCookie,
         CloseCookie,
         SaveCookie,
-        DataObjectProvider {
+        DataObjectProvider,
+        ModelUndoProvider{
 
     public Rectangle findPlaceForEntityAdd(int aInitialX, int aInitialY) {
         if (!allEditors.isEmpty()) {
@@ -198,6 +200,11 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
     }
 
     public UndoRedo.Manager getUndo() {
+        return undo;
+    }
+
+    @Override
+    public UndoRedo.Manager getModelUndo() {
         return undo;
     }
 

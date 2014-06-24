@@ -8,8 +8,7 @@
      * Generated constructor.
      * @constructor Field Field
      */
-    P.Field = function Field() {
-
+    P.Field = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,13 +19,9 @@
                 return delegate;
             }
         });
-        if(Field.superclass)
-            Field.superclass.constructor.apply(this, arguments);
-        /**
-         * The field's type information.
-         * @property typeInfo
-         * @memberOf Field
-         */
+        if(P.Field.superclass)
+            P.Field.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "typeInfo", {
             get: function() {
                 var value = delegate.typeInfo;
@@ -36,12 +31,14 @@
                 delegate.typeInfo = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines if field is nullable.
-         * @property nullable
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The field's type information.
+             * @property typeInfo
+             * @memberOf Field
+             */
+            P.Field.prototype.typeInfo = {};
+        }
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
@@ -51,24 +48,28 @@
                 delegate.nullable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Indicates that this field is a foreign key to another table or it is a self-reference key.
-         * @property fk
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * Determines if field is nullable.
+             * @property nullable
+             * @memberOf Field
+             */
+            P.Field.prototype.nullable = true;
+        }
         Object.defineProperty(this, "fk", {
             get: function() {
                 var value = delegate.fk;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The precision of the field.
-         * @property precision
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * Indicates that this field is a foreign key to another table or it is a self-reference key.
+             * @property fk
+             * @memberOf Field
+             */
+            P.Field.prototype.fk = true;
+        }
         Object.defineProperty(this, "precision", {
             get: function() {
                 var value = delegate.precision;
@@ -78,12 +79,14 @@
                 delegate.precision = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The scale of the field.
-         * @property scale
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The precision of the field.
+             * @property precision
+             * @memberOf Field
+             */
+            P.Field.prototype.precision = 0;
+        }
         Object.defineProperty(this, "scale", {
             get: function() {
                 var value = delegate.scale;
@@ -93,12 +96,14 @@
                 delegate.scale = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The description of the field.
-         * @property description
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The scale of the field.
+             * @property scale
+             * @memberOf Field
+             */
+            P.Field.prototype.scale = 0;
+        }
         Object.defineProperty(this, "description", {
             get: function() {
                 var value = delegate.description;
@@ -108,12 +113,14 @@
                 delegate.description = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines if the field is signed.
-         * @property signed
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The description of the field.
+             * @property description
+             * @memberOf Field
+             */
+            P.Field.prototype.description = '';
+        }
         Object.defineProperty(this, "signed", {
             get: function() {
                 var value = delegate.signed;
@@ -123,12 +130,14 @@
                 delegate.signed = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * This field schema name.
-         * @property schemaName
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * Determines if the field is signed.
+             * @property signed
+             * @memberOf Field
+             */
+            P.Field.prototype.signed = true;
+        }
         Object.defineProperty(this, "schemaName", {
             get: function() {
                 var value = delegate.schemaName;
@@ -138,12 +147,14 @@
                 delegate.schemaName = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * This field table's name.
-         * @property tableName
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * This field schema name.
+             * @property schemaName
+             * @memberOf Field
+             */
+            P.Field.prototype.schemaName = '';
+        }
         Object.defineProperty(this, "tableName", {
             get: function() {
                 var value = delegate.tableName;
@@ -153,14 +164,14 @@
                 delegate.tableName = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The original name of the field.
-         * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
-         * but be able to generate right update sql clauses for multiple tables.
-         * @property originalName
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * This field table's name.
+             * @property tableName
+             * @memberOf Field
+             */
+            P.Field.prototype.tableName = '';
+        }
         Object.defineProperty(this, "originalName", {
             get: function() {
                 var value = delegate.originalName;
@@ -170,12 +181,16 @@
                 delegate.originalName = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The size of the field.
-         * @property size
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The original name of the field.
+             * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
+             * but be able to generate right update sql clauses for multiple tables.
+             * @property originalName
+             * @memberOf Field
+             */
+            P.Field.prototype.originalName = '';
+        }
         Object.defineProperty(this, "size", {
             get: function() {
                 var value = delegate.size;
@@ -185,12 +200,14 @@
                 delegate.size = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines if this field is readonly.
-         * @property readonly
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The size of the field.
+             * @property size
+             * @memberOf Field
+             */
+            P.Field.prototype.size = 0;
+        }
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -200,12 +217,14 @@
                 delegate.readonly = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The name of the field.
-         * @property name
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * Determines if this field is readonly.
+             * @property readonly
+             * @memberOf Field
+             */
+            P.Field.prototype.readonly = true;
+        }
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -215,12 +234,14 @@
                 delegate.name = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines that this field is a primary key.
-         * @property pk
-         * @memberOf Field
-         */
+        if(!P.Field){
+            /**
+             * The name of the field.
+             * @property name
+             * @memberOf Field
+             */
+            P.Field.prototype.name = '';
+        }
         Object.defineProperty(this, "pk", {
             get: function() {
                 var value = delegate.pk;
@@ -230,8 +251,13 @@
                 delegate.pk = P.boxAsJava(aValue);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.Field){
+            /**
+             * Determines that this field is a primary key.
+             * @property pk
+             * @memberOf Field
+             */
+            P.Field.prototype.pk = true;
+        }
+    };    
 })();

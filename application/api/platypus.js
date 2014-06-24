@@ -1,9 +1,5 @@
 (function() {
     load("classpath:internals.js");
-    /** 
-     * Platypus library namespace global variable.
-     * @namespace P
-     */
     //this === global;
     var global = this;
     var oldP = global.P;
@@ -206,10 +202,10 @@
             Array.prototype.push.apply(target, publishedRows);
         };
         adapter.rowsetRequeried = function(event) {
-            adapter.rowsetFiltered();
+            adapter.rowsetFiltered(null);
         };
         adapter.rowsetNextPageFetched = function(event) {
-            adapter.rowsetFiltered();
+            adapter.rowsetFiltered(null);
         };
         adapter.rowsetSaved = function(event) {
             // ignore
@@ -221,20 +217,20 @@
             // ignore
         };
         adapter.rowsetSorted = function(event) {
-            adapter.rowsetFiltered();
+            adapter.rowsetFiltered(null);
         };
         adapter.rowInserted = function(event) {
             if (!event.ajusting)
-                adapter.rowsetFiltered();
+                adapter.rowsetFiltered(null);
         };
         adapter.rowChanged = function(event) {
             if (event.oldRowCount != event.newRowCount) {
-                adapter.rowsetFiltered();
+                adapter.rowsetFiltered(null);
             }
         };
         adapter.rowDeleted = function(event) {
             if (!event.ajusting)
-                adapter.rowsetFiltered();
+                adapter.rowsetFiltered(null);
         };
 
         Object.defineProperty(target, "fill", {
@@ -355,37 +351,37 @@
         var target = !!instanceCTor ? new instanceCTor() : {};
         var nFields = nnFields.toCollection();
         // plain mutable properties
-        for (var n = 0; n < nFields.length; n++) {
+        for (var n = 0; n < nFields.size(); n++) {
             (function() {
                 var colIndex = n + 1;
                 var nField = nFields[n];
                 var valueAccessorDesc = {
-                    get : function(){
+                    get: function() {
                         return boxAsJs(aDelegate.getColumnObject(colIndex));
                     },
-                    set : function(aValue){
+                    set: function(aValue) {
                         aDelegate.setColumnObject(colIndex, boxAsJava(aValue));
                     }
                 };
                 Object.defineProperty(target, nField.name, valueAccessorDesc);
                 Object.defineProperty(target, n, valueAccessorDesc);
             })();
-            if(!target.schema)
-                Object.defineProperty(target, "schema", {value : nFields.getPublished()});
         }
+        if (!target.schema)
+            Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
         // ORM mutable scalar and readonly collection properties
         var ormDefs = nnFields.getOrmDefinitions();
-        for(var o in ormDefs.keySet()){
-            var def = ormDefs.get(o);
+        for each (var o in ormDefs.keySet()) {
+            var def = EngineUtilsClass.unwrap(ormDefs.get(o));
             Object.defineProperty(target, o, def);
         }
-        aDelegate.setPublished(target);
+        return target;
         // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
     });
     FieldsClass.setPublisher(function(aDelegate) {
         var target = {};
         var nFields = aDelegate.toCollection();
-        for (var n = 0; n < nFields.length; n++) {
+        for (var n = 0; n < nFields.size(); n++) {
             (function() {
                 var nField = nFields[n];
                 var pField = nField.getPublished();
@@ -398,9 +394,9 @@
             })();
         }
         Object.defineProperty(target, "length", {
-            value: nFields.length
+            value: nFields.size()
         });
-        aDelegate.setPublished(target);
+        return target;
     });
 
     extend(BoundArray, Array);
@@ -415,7 +411,7 @@
      * @param {type} aTarget
      * @returns {P.loadModel.publishTo}
      */
-    P.loadModel = function(aName, aTarget) {
+    function loadModel(aName, aTarget) {
         var model = ModelLoaderClass.load(ScriptedResourceClass.getClient(), aName);
         var modelCTor;
         if (model instanceof TwoTierModelClass) {
@@ -430,19 +426,19 @@
         } else {
             aTarget = new modelCTor(model);
         }
-        function publishEntity(aEntity, aName) {
-            var published = EngineUtilsClass.unwrap(aEntity.getPublished());
+        function publishEntity(nEntity, aName) {
+            var published = EngineUtilsClass.unwrap(nEntity.getPublished());
             var pSchema = {};
             Object.defineProperty(published, "schema", {
                 value: pSchema
             });
-            var nFields = aEntity.getFields().toCollection();
-            for (var n = 0; n < nFields.length; n++) {
+            var nFields = nEntity.getFields().toCollection();
+            for (var n = 0; n < nFields.size(); n++) {
                 (function() {
                     var nField = nFields[n];
                     // params shortcuts
-                    if (aEntity instanceof P.ApplicationDbParametersEntity
-                            || aEntity instanceof P.ApplicationPlatypusParametersEntity) {
+                    if (published instanceof P.ApplicationDbParametersEntity
+                            || published instanceof P.ApplicationPlatypusParametersEntity) {
                         var valueDesc = {
                             get: function() {
                                 return boxAsJs(nField.value);
@@ -463,17 +459,17 @@
                 })();
             }
             // params shortcuts
-            if (aEntity instanceof P.ApplicationDbParametersEntity
-                    || aEntity instanceof P.ApplicationPlatypusParametersEntity) {
+            if (published instanceof P.ApplicationDbParametersEntity
+                    || published instanceof P.ApplicationPlatypusParametersEntity) {
                 Object.defineProperty(published, "length", {
                     get: function() {
-                        return nFields.length;
+                        return nFields.size();
                     }
                 });
             }
             Object.defineProperty(pSchema, "length", {
                 get: function() {
-                    return nFields.length;
+                    return nFields.size();
                 }
             });
             Object.defineProperty(aTarget, aName, {
@@ -483,15 +479,15 @@
         var pEntity = model.getParametersEntity();
         publishEntity(pEntity, "params");
         var entities = model.entities();
-        for (var e in entities) {
-            var entity = entities[e];
+        for each (var entity in entities) {
             if (entity.name) {
                 publishEntity(entity, entity.name);
             }
         }
         model.createORMDefinitions();
         return aTarget;
-    };
+    }
+    Object.defineProperty(P, "loadModel", {value: loadModel});
     /**
      * @static
      * @param {type} aName
@@ -499,7 +495,7 @@
      * @param {type} aTarget
      * @returns {P.loadForm.publishTo}
      */
-    P.loadForm = function(aName, aModel, aTarget) {
+    function loadForm(aName, aModel, aTarget) {
         var designInfo = FormLoaderClass.load(ScriptedResourceClass.getClient(), aName);
         var form = new FormClass(aName, designInfo, aModel.unwrap());
         if (aTarget) {
@@ -524,7 +520,8 @@
             })();
         }
         return aTarget;
-    };
+    }
+    Object.defineProperty(P, "loadForm", {value: loadForm});
     /**
      * @static
      * @param {type} aName
@@ -532,7 +529,7 @@
      * @param {type} aTarget
      * @returns {P.loadTemplate.publishTo}
      */
-    P.loadTemplate = function(aName, aModel, aTarget) {
+    function loadTemplate(aName, aModel, aTarget) {
         var publishTo = aTarget ? aTarget : {};
         var template = TemplateLoaderClass.load(ScriptedResourceClass.getClient(), aName, aModel.unwrap());
         // publish
@@ -540,13 +537,14 @@
             return template.generateReport();
         };
         return publishTo;
-    };
+    }
+    Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
     /**
      * Constructs server module network proxy.
      * @constructor
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
-    P.ServerModule = function(aModuleName) {
+    function ServerModule(aModuleName) {
         var client = ScriptedResourceClass.getPlatypusClient();
         if (client) {
             var request = new CreateRequestClass(IDGeneratorClass.genID(), aModuleName);
@@ -594,7 +592,9 @@
         } else {
             throw "This architecture does not support server modules."
         }
-    };
+    }
+    ;
+    Object.defineProperty(P, "ServerModule", {value: ServerModule});
     var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
     /**
      * @private
@@ -626,12 +626,7 @@
     function boxAsJs(aValue) {
         if (aValue) {
             if (aValue.getPublished) {
-                if (arguments.length > 1) {
-                    var elementClass = arguments[1];
-                    aValue = aValue.getPublished(new elementClass());
-                } else {
-                    aValue = aValue.getPublished();
-                }
+                aValue = aValue.getPublished();
             } else if (aValue instanceof JavaDateClass) {
                 aValue = new Date(aValue.time);
             } else if (aValue instanceof JavaArrayClass) {
@@ -1199,3 +1194,92 @@
         value: FontStyle
     });
 })();
+if (!P) {
+    /** 
+     * Platypus library namespace global variable.
+     * @namespace P
+     */
+    var P;
+    P.HTML5 = "";
+    P.J2SE = "";
+    P.agent = "";
+    P.require = function() {
+    };
+    P.extend = function() {
+    };
+    P.Modules;
+    P.loadModel = function() {
+    };
+    P.loadForm = function() {
+    };
+    P.loadTemplate = function() {
+    };
+    /**
+     * Constructs server module network proxy.
+     * @constructor
+     */
+    P.ServerModule = function() {
+    };
+    P.boxAsJava = function() {
+    };
+    P.boxAsJs = function() {
+    };
+    P.Resource = {};
+    P.logout = function() {
+    };
+    P.Icon = {};
+    P.ID = {generate: function(aValue) {
+            return "";
+        }};
+
+    /**
+     * Md5 hash generator
+     * @type type
+     */
+    P.MD5 = {
+        /**
+         * Generates MD5 hash for given value. 
+         * @param aValue Value the hash is generated for. Converted to string.
+         * @return Generated MD5 hash
+         */
+        generate: function(aValue) {
+            return "";
+        }
+    };
+    P.Logger = {};
+    P.VK_ALT = 0;
+    P.VK_BACKSPACE = 0;
+    P.VK_DELETE = 0;
+    P.VK_DOWN = 0;
+    P.VK_END = 0;
+    P.VK_ENTER = 0;
+    P.VK_ESCAPE = 0;
+    P.VK_HOME = 0;
+    P.VK_LEFT = 0;
+    P.VK_PAGEDOWN = 0;
+    P.VK_PAGEUP = 0;
+    P.VK_RIGHT = 0;
+    P.VK_SHIFT = 0;
+    P.VK_TAB = 0;
+    P.VK_UP = 0;
+    P.selectFile = function() {
+    };
+    P.selectDirectory = function() {
+    };
+    P.selectColor = function() {
+    };
+    P.readString = function() {
+    };
+    P.writeString = function() {
+    };
+    P.msgBox = function() {
+    };
+    P.warn = function() {
+    };
+    P.prompt = function() {
+    };
+    P.HorizontalPosition = {};
+    P.VerticalPosition = {};
+    P.Orientation = {};
+    P.FontStyle = {};
+}

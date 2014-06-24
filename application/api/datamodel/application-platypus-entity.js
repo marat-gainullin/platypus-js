@@ -8,8 +8,7 @@
      * Generated constructor.
      * @constructor ApplicationPlatypusEntity ApplicationPlatypusEntity
      */
-    P.ApplicationPlatypusEntity = function ApplicationPlatypusEntity() {
-
+    P.ApplicationPlatypusEntity = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,26 +19,24 @@
                 return delegate;
             }
         });
-        if(ApplicationPlatypusEntity.superclass)
-            ApplicationPlatypusEntity.superclass.constructor.apply(this, arguments);
-        /**
-         * Gets the row at cursor position.
-         * @return the row object or <code>null</code> if cursor is before first or after last position.
-         * @property cursor
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(P.ApplicationPlatypusEntity.superclass)
+            P.ApplicationPlatypusEntity.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The handler function for the event occured before the cursor position changed.
-         * @property willScroll
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * Gets the row at cursor position.
+             * @return the row object or <code>null</code> if cursor is before first or after last position.
+             * @property cursor
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.cursor = {};
+        }
         Object.defineProperty(this, "willScroll", {
             get: function() {
                 var value = delegate.willScroll;
@@ -49,12 +46,14 @@
                 delegate.willScroll = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured before an entity row has been inserted.
-         * @property willInsert
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured before the cursor position changed.
+             * @property willScroll
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.willScroll = {};
+        }
         Object.defineProperty(this, "willInsert", {
             get: function() {
                 var value = delegate.willInsert;
@@ -64,12 +63,14 @@
                 delegate.willInsert = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured after the entity's data have been required.
-         * @property onRequeried
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured before an entity row has been inserted.
+             * @property willInsert
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.willInsert = {};
+        }
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
@@ -79,12 +80,14 @@
                 delegate.onRequeried = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured after the entity data change.
-         * @property onChanged
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after the entity's data have been required.
+             * @property onRequeried
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onRequeried = {};
+        }
         Object.defineProperty(this, "onChanged", {
             get: function() {
                 var value = delegate.onChanged;
@@ -94,12 +97,14 @@
                 delegate.onChanged = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured after an entity row has been deleted.
-         * @property onDeleted
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after the entity data change.
+             * @property onChanged
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onChanged = {};
+        }
         Object.defineProperty(this, "onDeleted", {
             get: function() {
                 var value = delegate.onDeleted;
@@ -109,12 +114,14 @@
                 delegate.onDeleted = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured after the cursor position changed.
-         * @property onScrolled
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after an entity row has been deleted.
+             * @property onDeleted
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onDeleted = {};
+        }
         Object.defineProperty(this, "onScrolled", {
             get: function() {
                 var value = delegate.onScrolled;
@@ -124,12 +131,14 @@
                 delegate.onScrolled = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured after the entity's data have been filtered.
-         * @property onFiltered
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after the cursor position changed.
+             * @property onScrolled
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onScrolled = {};
+        }
         Object.defineProperty(this, "onFiltered", {
             get: function() {
                 var value = delegate.onFiltered;
@@ -139,13 +148,14 @@
                 delegate.onFiltered = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Returns cursor-substitute entity.
-         * Sunstitute's cursor is used when in original entity's cursor some field's value is null.
-         * @property substitute
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after the entity's data have been filtered.
+             * @property onFiltered
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onFiltered = {};
+        }
         Object.defineProperty(this, "substitute", {
             get: function() {
                 var value = delegate.substitute;
@@ -155,25 +165,30 @@
                 delegate.substitute = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Checks if the rowset is empty.
-         * @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.
-         * @property empty
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * Returns cursor-substitute entity.
+             * Sunstitute's cursor is used when in original entity's cursor some field's value is null.
+             * @property substitute
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.substitute = {};
+        }
         Object.defineProperty(this, "empty", {
             get: function() {
                 var value = delegate.empty;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The handler function for the event occured after an entity row has been inserted.
-         * @property onInserted
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * Checks if the rowset is empty.
+             * @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.
+             * @property empty
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.empty = true;
+        }
         Object.defineProperty(this, "onInserted", {
             get: function() {
                 var value = delegate.onInserted;
@@ -183,12 +198,14 @@
                 delegate.onInserted = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured before the entity data change.
-         * @property willChange
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after an entity row has been inserted.
+             * @property onInserted
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onInserted = {};
+        }
         Object.defineProperty(this, "willChange", {
             get: function() {
                 var value = delegate.willChange;
@@ -198,36 +215,42 @@
                 delegate.willChange = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The rowset size.
-         * @property size
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured before the entity data change.
+             * @property willChange
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.willChange = {};
+        }
         Object.defineProperty(this, "size", {
             get: function() {
                 var value = delegate.size;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Entity's active <code>Filter</code> object.
-         * @property activeFilter
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The rowset size.
+             * @property size
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.size = 0;
+        }
         Object.defineProperty(this, "activeFilter", {
             get: function() {
                 var value = delegate.activeFilter;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * Experimental. The constructor funciton for the entity's data array elements.
-         * @property elementClass
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * Entity's active <code>Filter</code> object.
+             * @property activeFilter
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.activeFilter = {};
+        }
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -237,12 +260,14 @@
                 delegate.elementClass = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the event occured before an entity row has been deleted.
-         * @property willDelete
-         * @memberOf ApplicationPlatypusEntity
-         */
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * Experimental. The constructor funciton for the entity's data array elements.
+             * @property elementClass
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.elementClass = {};
+        }
         Object.defineProperty(this, "willDelete", {
             get: function() {
                 var value = delegate.willDelete;
@@ -252,22 +277,38 @@
                 delegate.willDelete = P.boxAsJava(aValue);
             }
         });
-
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured before an entity row has been deleted.
+             * @property willDelete
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.willDelete = {};
+        }
+    };        Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "next", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.next();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Moves the rowset cursor to the next row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method next
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "next", {
-            get: function() {
-                return function() {
-                    var value = delegate.next();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.next = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "find", {
+        value: function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.find(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Finds rows using field -- field value pairs.
          * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
@@ -275,15 +316,16 @@
          * @method find
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "find", {
-            get: function() {
-                return function(pairs) {
-                    var value = delegate.find(P.boxAsJava(pairs));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.find = function(pairs){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "execute", {
+        value: function(onSuccessCallback, onFailureCallback) {
+            var delegate = this.unwrap();
+            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Refreshes rowset, only if any of its parameters has changed.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -291,45 +333,48 @@
          * @method execute
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "execute", {
-            get: function() {
-                return function(onSuccessCallback, onFailureCallback) {
-                    var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.execute = function(onSuccessCallback, onFailureCallback){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "prev", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.prev();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Moves the rowset cursor to the privious row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method prev
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "prev", {
-            get: function() {
-                return function() {
-                    var value = delegate.prev();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.prev = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "insert", {
+        value: function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.insert(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Inserts new row in the rowset and sets cursor on this row. @see push.
          * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).
          * @method insert
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "insert", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.insert(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.insert = function(arg0){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "pos", {
+        value: function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.pos(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Positions the rowset cursor on the specified row number. Row number is 1-based.
          * @param index the row index to check, starting form <code>1</code>.
@@ -337,105 +382,109 @@
          * @method pos
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "pos", {
-            get: function() {
-                return function(index) {
-                    var value = delegate.pos(P.boxAsJava(index));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.pos = function(index){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "first", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.first();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Moves the rowset cursor to the first row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method first
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "first", {
-            get: function() {
-                return function() {
-                    var value = delegate.first();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.first = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "eof", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.eof();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Checks if cursor in the position before the first row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method eof
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "eof", {
-            get: function() {
-                return function() {
-                    var value = delegate.eof();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.eof = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "last", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.last();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Moves the rowset cursor to the last row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method last
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "last", {
-            get: function() {
-                return function() {
-                    var value = delegate.last();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.last = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "beforeFirst", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.beforeFirst();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will b e deleted.
-         * @method deleteRow
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "deleteRow", {
-            get: function() {
-                return function(aCursorPosOrInstance) {
-                    var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.beforeFirst = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "afterLast", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.afterLast();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
-         * Gets the row at specified index.
-         * @param index the row index, starting form <code>1</code>.
-         * @return the row object or <code>null</code> if no row object have found at the specified index.
-         * @method getRow
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "getRow", {
-            get: function() {
-                return function(index) {
-                    var value = delegate.getRow(P.boxAsJava(index));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.afterLast = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "deleteAll", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.deleteAll();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Deletes all rows in the rowset.
          * @method deleteAll
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "deleteAll", {
-            get: function() {
-                return function() {
-                    var value = delegate.deleteAll();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.deleteAll = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "createFilter", {
+        value: function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.createFilter(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
          * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
@@ -443,43 +492,49 @@
          * @method createFilter
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "createFilter", {
-            get: function() {
-                return function(pairs) {
-                    var value = delegate.createFilter(P.boxAsJava(pairs));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.createFilter = function(pairs){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "getRow", {
+        value: function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.getRow(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
+         * Gets the row at specified index.
+         * @param index the row index, starting form <code>1</code>.
+         * @return the row object or <code>null</code> if no row object have found at the specified index.
+         * @method getRow
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "beforeFirst", {
-            get: function() {
-                return function() {
-                    var value = delegate.beforeFirst();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.getRow = function(index){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "deleteRow", {
+        value: function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will b e deleted.
+         * @method deleteRow
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "afterLast", {
-            get: function() {
-                return function() {
-                    var value = delegate.afterLast();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "findById", {
+        value: function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findById(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Finds row by its key. Key must a single property.
          * @param key the unique identifier of the row.
@@ -487,15 +542,16 @@
          * @method findById
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "findById", {
-            get: function() {
-                return function(key) {
-                    var value = delegate.findById(P.boxAsJava(key));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.findById = function(key){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "scrollTo", {
+        value: function(row) {
+            var delegate = this.unwrap();
+            var value = delegate.scrollTo(P.boxAsJava(row));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Sets the rowset cursor to the specified row.
          * @param row the row to position the entity cursor.
@@ -503,30 +559,32 @@
          * @method scrollTo
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "scrollTo", {
-            get: function() {
-                return function(row) {
-                    var value = delegate.scrollTo(P.boxAsJava(row));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "bof", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.bof();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Checks if cursor in the position before the first row.
          * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
          * @method bof
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "bof", {
-            get: function() {
-                return function() {
-                    var value = delegate.bof();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.bof = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "requery", {
+        value: function(onSuccessCallback, onFailureCallback) {
+            var delegate = this.unwrap();
+            var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -534,15 +592,16 @@
          * @method requery
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "requery", {
-            get: function() {
-                return function(onSuccessCallback, onFailureCallback) {
-                    var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.requery = function(onSuccessCallback, onFailureCallback){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "createSorting", {
+        value: function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.createSorting(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Creates an instance of comparator object using specified constraints objects.
          * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
@@ -550,44 +609,37 @@
          * @method createSorting
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "createSorting", {
-            get: function() {
-                return function(arg0) {
-                    var value = delegate.createSorting(P.boxAsJava(arg0));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.createSorting = function(arg0){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "beginUpdate", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.beginUpdate();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Disables automatic model update on parameters change, @see endUpdate method.
          * @method beginUpdate
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "beginUpdate", {
-            get: function() {
-                return function() {
-                    var value = delegate.beginUpdate();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.ApplicationPlatypusEntity.prototype.beginUpdate = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "endUpdate", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.endUpdate();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
         /**
          * Enables automatic model update on parameters change, @see beginUpdate method.
          * @method endUpdate
          * @memberOf ApplicationPlatypusEntity
          */
-        Object.defineProperty(this, "endUpdate", {
-            get: function() {
-                return function() {
-                    var value = delegate.endUpdate();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.ApplicationPlatypusEntity.prototype.endUpdate = function(){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

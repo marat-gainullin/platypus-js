@@ -8,8 +8,7 @@
      *
      * @constructor Cursor Cursor
      */
-    P.Cursor = function Cursor(aType) {
-
+    P.Cursor = function (aType) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -21,9 +20,8 @@
                 return delegate;
             }
         });
-        if(Cursor.superclass)
-            Cursor.superclass.constructor.apply(this, arguments);
-
+        if(P.Cursor.superclass)
+            P.Cursor.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    };    
 })();

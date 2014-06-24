@@ -6,7 +6,6 @@ package com.eas.script;
 
 import java.util.Date;
 import javax.script.ScriptException;
-import jdk.nashorn.internal.objects.NativeDate;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +53,7 @@ public class ScriptUtilsTest {
    }
     
     @Test
-    public void indentifiersCheckTest() {
+    public void identifiersCheckTest() {
         assertTrue(ScriptUtils.isValidJsIdentifier("testFunc"));
         assertFalse(ScriptUtils.isValidJsIdentifier(""));
         assertFalse(ScriptUtils.isValidJsIdentifier(null));

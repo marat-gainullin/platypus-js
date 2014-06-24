@@ -8,8 +8,7 @@
      * Generated constructor.
      * @constructor ActionEvent ActionEvent
      */
-    P.ActionEvent = function ActionEvent() {
-
+    P.ActionEvent = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,21 +19,22 @@
                 return delegate;
             }
         });
-        if(ActionEvent.superclass)
-            ActionEvent.superclass.constructor.apply(this, arguments);
-        /**
-         * The source component object of the event.
-         * @property source
-         * @memberOf ActionEvent
-         */
+        if(P.ActionEvent.superclass)
+            P.ActionEvent.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
                 return P.boxAsJs(value);
             }
         });
-
-
-        delegate.setPublished(this);
-    };
+        if(!P.ActionEvent){
+            /**
+             * The source component object of the event.
+             * @property source
+             * @memberOf ActionEvent
+             */
+            P.ActionEvent.prototype.source = {};
+        }
+    };    
 })();

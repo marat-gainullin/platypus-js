@@ -8,8 +8,7 @@
      * Generated constructor.
      * @constructor Form Form
      */
-    P.Form = function Form() {
-
+    P.Form = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,13 +19,9 @@
                 return delegate;
             }
         });
-        if(Form.superclass)
-            Form.superclass.constructor.apply(this, arguments);
-        /**
-         * The handler function for the form's <i>before open</i> event.
-         * @property onWindowOpened
-         * @memberOf Form
-         */
+        if(P.Form.superclass)
+            P.Form.superclass.constructor.apply(this, arguments);
+        delegate.setPublished(this);
         Object.defineProperty(this, "onWindowOpened", {
             get: function() {
                 var value = delegate.onWindowOpened;
@@ -36,24 +31,31 @@
                 delegate.onWindowOpened = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this window should always be above other windows.
-         * @property alwaysOnTop
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>before open</i> event.
+             * @property onWindowOpened
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowOpened = {};
+        }
         Object.defineProperty(this, "alwaysOnTop", {
             get: function() {
                 var value = delegate.alwaysOnTop;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.alwaysOnTop = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The form's icon.
-         * @property icon
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * Determines whether this window should always be above other windows.
+             * @property alwaysOnTop
+             * @memberOf Form
+             */
+            P.Form.prototype.alwaysOnTop = true;
+        }
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
@@ -63,12 +65,14 @@
                 delegate.icon = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The form's title text.
-         * @property title
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The form's icon.
+             * @property icon
+             * @memberOf Form
+             */
+            P.Form.prototype.icon = {};
+        }
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
@@ -78,24 +82,28 @@
                 delegate.title = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if this form is minimized.
-         * @property minimized
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The form's title text.
+             * @property title
+             * @memberOf Form
+             */
+            P.Form.prototype.title = '';
+        }
         Object.defineProperty(this, "minimized", {
             get: function() {
                 var value = delegate.minimized;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The handler function for the form's <i>after minimize</i> event.
-         * @property onWindowMinimized
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * <code>true</code> if this form is minimized.
+             * @property minimized
+             * @memberOf Form
+             */
+            P.Form.prototype.minimized = true;
+        }
         Object.defineProperty(this, "onWindowMinimized", {
             get: function() {
                 var value = delegate.onWindowMinimized;
@@ -105,12 +113,14 @@
                 delegate.onWindowMinimized = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The distance for this form to the parent container's top side.
-         * @property top
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after minimize</i> event.
+             * @property onWindowMinimized
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowMinimized = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -120,12 +130,14 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the form's <i>after deactivate</i> event.
-         * @property onWindowDeactivated
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The distance for this form to the parent container's top side.
+             * @property top
+             * @memberOf Form
+             */
+            P.Form.prototype.top = 0;
+        }
         Object.defineProperty(this, "onWindowDeactivated", {
             get: function() {
                 var value = delegate.onWindowDeactivated;
@@ -135,13 +147,14 @@
                 delegate.onWindowDeactivated = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Determines whether this form should appear at the default location
-         * for the native windowing system or at the current location.
-         * @property locationByPlatform
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after deactivate</i> event.
+             * @property onWindowDeactivated
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowDeactivated = {};
+        }
         Object.defineProperty(this, "locationByPlatform", {
             get: function() {
                 var value = delegate.locationByPlatform;
@@ -151,12 +164,15 @@
                 delegate.locationByPlatform = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if this form minimizable.
-         * @property minimizable
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * Determines whether this form should appear at the default location
+             * for the native windowing system or at the current location.
+             * @property locationByPlatform
+             * @memberOf Form
+             */
+            P.Form.prototype.locationByPlatform = true;
+        }
         Object.defineProperty(this, "minimizable", {
             get: function() {
                 var value = delegate.minimizable;
@@ -166,12 +182,14 @@
                 delegate.minimizable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the form's <i>after activate</i> event.
-         * @property onWindowActivated
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * <code>true</code> if this form minimizable.
+             * @property minimizable
+             * @memberOf Form
+             */
+            P.Form.prototype.minimizable = true;
+        }
         Object.defineProperty(this, "onWindowActivated", {
             get: function() {
                 var value = delegate.onWindowActivated;
@@ -181,12 +199,14 @@
                 delegate.onWindowActivated = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The form's height.
-         * @property height
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after activate</i> event.
+             * @property onWindowActivated
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowActivated = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -196,24 +216,28 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * Checks if this form is visible.
-         * @property visible
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The form's height.
+             * @property height
+             * @memberOf Form
+             */
+            P.Form.prototype.height = 0;
+        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The handler function for the form's <i>after maximize</i> event.
-         * @property onWindowMaximized
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * Checks if this form is visible.
+             * @property visible
+             * @memberOf Form
+             */
+            P.Form.prototype.visible = true;
+        }
         Object.defineProperty(this, "onWindowMaximized", {
             get: function() {
                 var value = delegate.onWindowMaximized;
@@ -223,12 +247,14 @@
                 delegate.onWindowMaximized = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if this form resizable.
-         * @property resizable
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after maximize</i> event.
+             * @property onWindowMaximized
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowMaximized = {};
+        }
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
@@ -238,12 +264,14 @@
                 delegate.resizable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-         * @property formKey
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * <code>true</code> if this form resizable.
+             * @property resizable
+             * @memberOf Form
+             */
+            P.Form.prototype.resizable = true;
+        }
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
@@ -253,12 +281,14 @@
                 delegate.formKey = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the form's <i>after restore</i> event.
-         * @property onWindowRestored
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+             * @property formKey
+             * @memberOf Form
+             */
+            P.Form.prototype.formKey = '';
+        }
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -268,24 +298,28 @@
                 delegate.onWindowRestored = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if this form is maximized.
-         * @property maximized
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after restore</i> event.
+             * @property onWindowRestored
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowRestored = {};
+        }
         Object.defineProperty(this, "maximized", {
             get: function() {
                 var value = delegate.maximized;
                 return P.boxAsJs(value);
             }
         });
-
-        /**
-         * The handler function for the form's <i>after close</i> event.
-         * @property onWindowClosed
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * <code>true</code> if this form is maximized.
+             * @property maximized
+             * @memberOf Form
+             */
+            P.Form.prototype.maximized = true;
+        }
         Object.defineProperty(this, "onWindowClosed", {
             get: function() {
                 var value = delegate.onWindowClosed;
@@ -295,12 +329,14 @@
                 delegate.onWindowClosed = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if this form maximizable.
-         * @property maximizable
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after close</i> event.
+             * @property onWindowClosed
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowClosed = {};
+        }
         Object.defineProperty(this, "maximizable", {
             get: function() {
                 var value = delegate.maximizable;
@@ -310,12 +346,14 @@
                 delegate.maximizable = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * <code>true</code> if no decoration to be enabled for this form.
-         * @property undecorated
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * <code>true</code> if this form maximizable.
+             * @property maximizable
+             * @memberOf Form
+             */
+            P.Form.prototype.maximizable = true;
+        }
         Object.defineProperty(this, "undecorated", {
             get: function() {
                 var value = delegate.undecorated;
@@ -325,12 +363,14 @@
                 delegate.undecorated = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The distance for this form to the parent container's left side.
-         * @property left
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * <code>true</code> if no decoration to be enabled for this form.
+             * @property undecorated
+             * @memberOf Form
+             */
+            P.Form.prototype.undecorated = true;
+        }
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -340,12 +380,14 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The form's width.
-         * @property width
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The distance for this form to the parent container's left side.
+             * @property left
+             * @memberOf Form
+             */
+            P.Form.prototype.left = 0;
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -355,12 +397,14 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The handler function for the form's <i>before close</i> event.
-         * @property onWindowClosing
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The form's width.
+             * @property width
+             * @memberOf Form
+             */
+            P.Form.prototype.width = 0;
+        }
         Object.defineProperty(this, "onWindowClosing", {
             get: function() {
                 var value = delegate.onWindowClosing;
@@ -370,12 +414,14 @@
                 delegate.onWindowClosing = P.boxAsJava(aValue);
             }
         });
-
-        /**
-         * The opacity of the form.
-         * @property opacity
-         * @memberOf Form
-         */
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>before close</i> event.
+             * @property onWindowClosing
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowClosing = {};
+        }
         Object.defineProperty(this, "opacity", {
             get: function() {
                 var value = delegate.opacity;
@@ -385,123 +431,136 @@
                 delegate.opacity = P.boxAsJava(aValue);
             }
         });
-
+        if(!P.Form){
+            /**
+             * The opacity of the form.
+             * @property opacity
+             * @memberOf Form
+             */
+            P.Form.prototype.opacity = 0;
+        }
+    };        Object.defineProperty(P.Form.prototype, "close", {
+        value: function(obj) {
+            var delegate = this.unwrap();
+            var value = delegate.close(P.boxAsJava(obj));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Closes this form.
          * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
          * @method close
          * @memberOf Form
          */
-        Object.defineProperty(this, "close", {
-            get: function() {
-                return function(obj) {
-                    var value = delegate.close(P.boxAsJava(obj));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.close = function(obj){};
+    }
+    Object.defineProperty(P.Form.prototype, "showModal", {
+        value: function(callback) {
+            var delegate = this.unwrap();
+            var value = delegate.showModal(P.boxAsJava(callback));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Shows the form as a dialog (modal window).
          * @param callback a callback handler function
          * @method showModal
          * @memberOf Form
          */
-        Object.defineProperty(this, "showModal", {
-            get: function() {
-                return function(callback) {
-                    var value = delegate.showModal(P.boxAsJava(callback));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.showModal = function(callback){};
+    }
+    Object.defineProperty(P.Form.prototype, "toFront", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.toFront();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Moves form to the front position.
          * @method toFront
          * @memberOf Form
          */
-        Object.defineProperty(this, "toFront", {
-            get: function() {
-                return function() {
-                    var value = delegate.toFront();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.toFront = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "show", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.show();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Shows the form as an ordinary window.
          * @method show
          * @memberOf Form
          */
-        Object.defineProperty(this, "show", {
-            get: function() {
-                return function() {
-                    var value = delegate.show();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.show = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "minimize", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.minimize();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Minimizes this form.
          * @method minimize
          * @memberOf Form
          */
-        Object.defineProperty(this, "minimize", {
-            get: function() {
-                return function() {
-                    var value = delegate.minimize();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.minimize = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "maximize", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.maximize();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Maximizes this form.
          * @method maximize
          * @memberOf Form
          */
-        Object.defineProperty(this, "maximize", {
-            get: function() {
-                return function() {
-                    var value = delegate.maximize();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.maximize = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "restore", {
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.restore();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Restores this form state.
          * @method restore
          * @memberOf Form
          */
-        Object.defineProperty(this, "restore", {
-            get: function() {
-                return function() {
-                    var value = delegate.restore();
-                    return P.boxAsJs(value);
-                };
-            }
-        });
-
+        P.Form.prototype.restore = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "showInternalFrame", {
+        value: function(desktop) {
+            var delegate = this.unwrap();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
         /**
          * Shows the form as an internal window in a desktop.
          * @param desktop the parent desktop object
          * @method showInternalFrame
          * @memberOf Form
          */
-        Object.defineProperty(this, "showInternalFrame", {
-            get: function() {
-                return function(desktop) {
-                    var value = delegate.showInternalFrame(P.boxAsJava(desktop));
-                    return P.boxAsJs(value);
-                };
-            }
-        });
+        P.Form.prototype.showInternalFrame = function(desktop){};
+    }
 
-
-        delegate.setPublished(this);
-    };
 })();

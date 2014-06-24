@@ -33,11 +33,11 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 
 	public ButtonGroup() {
 		super();
-		addSelectionHandler(new SelectionHandler<UIObject>(){
+		addSelectionHandler(new SelectionHandler<UIObject>() {
 
 			@Override
-            public void onSelection(SelectionEvent<UIObject> event) {
-				if(itemSelected != null){
+			public void onSelection(SelectionEvent<UIObject> event) {
+				if (itemSelected != null) {
 					try {
 						JavaScriptObject jso = published;
 						String n = name;
@@ -46,8 +46,8 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 						Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
 					}
 				}
-            }
-			
+			}
+
 		});
 	}
 

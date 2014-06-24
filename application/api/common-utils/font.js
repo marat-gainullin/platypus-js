@@ -11,8 +11,7 @@
      * @param size the size of the font
      * @constructor Font Font
      */
-    P.Font = function Font(family, style, size) {
-
+    P.Font = function (family, style, size) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -26,9 +25,8 @@
                 return delegate;
             }
         });
-        if(Font.superclass)
-            Font.superclass.constructor.apply(this, arguments);
-
+        if(P.Font.superclass)
+            P.Font.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    };    
 })();

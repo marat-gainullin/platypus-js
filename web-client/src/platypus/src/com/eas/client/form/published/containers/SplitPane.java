@@ -30,8 +30,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
-        HasRemoveHandlers {
+public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
+		HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
 
 	public static int HORIZONTAL_SPLIT = 1;
 	public static int VERTICAL_SPLIT = 0;
@@ -289,7 +289,8 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 			dividerSize = aValue;
 			for (int i = 0; i < getWidgetCount(); i++) {
 				Widget w = getWidget(i);
-				if (w.getStyleName().contains("gwt-SplitLayoutPanel-HDragger") || w.getStyleName().contains("gwt-SplitLayoutPanel-VDragger")) {
+				if (w.getStyleName().contains("gwt-SplitLayoutPanel-HDragger")
+						|| w.getStyleName().contains("gwt-SplitLayoutPanel-VDragger")) {
 					w.getElement().getStyle().setPropertyPx("width", dividerSize);
 				}
 			}
@@ -387,4 +388,17 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 			return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 		};
 	}-*/;
+
+	@Override
+	public int getTop(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getParentElement().getOffsetTop();
+	}
+
+	@Override
+	public int getLeft(Widget aWidget) {
+		assert aWidget.getParent() == this : "widget should be a child of this container";
+		return aWidget.getElement().getParentElement().getOffsetLeft();
+	}
+
 }

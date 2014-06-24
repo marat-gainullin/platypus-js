@@ -4,6 +4,9 @@
  */
 package com.eas.designer.application.module;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.ModelEditingListener;
@@ -26,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -48,49 +52,91 @@ import org.openide.util.Exceptions;
 @MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
 public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {
 
-    protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener {
+    protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener, CollectionListener<Fields, Field> {
 
         @Override
         public void entityAdded(ApplicationDbEntity e) {
-            setModelModified();
+            markModelModified();
             e.getChangeSupport().addPropertyChangeListener(this);
         }
 
         @Override
         public void entityRemoved(ApplicationDbEntity e) {
-            setModelModified();
+            markModelModified();
             e.getChangeSupport().removePropertyChangeListener(this);
         }
 
         @Override
         public void relationAdded(Relation<ApplicationDbEntity> rel) {
-            setModelModified();
+            markModelModified();
             rel.getChangeSupport().addPropertyChangeListener(this);
         }
 
         @Override
         public void relationRemoved(Relation<ApplicationDbEntity> rel) {
-            setModelModified();
+            markModelModified();
             rel.getChangeSupport().removePropertyChangeListener(this);
         }
 
         @Override
         public void entityIndexesChanged(ApplicationDbEntity e) {
-            setModelModified();
+            markModelModified();
         }
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            setModelModified();
+            markModelModified();
         }
 
-        private void setModelModified() {
+        private void markModelModified() {
             getLookup().lookup(PlatypusModuleSupport.class).setModelModified(true);
+            // Undoable edits will mark whole dataobject as modified.
+            // Only specific modified status is setted here.
+            // Model's modified staus is the case.
+        }
+
+        @Override
+        public void added(Fields c, Field v) {
+            markModelModified();
+            v.getChangeSupport().addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void added(Fields c, Collection<Field> clctn) {
+            markModelModified();
+            for (Field v : clctn) {
+                v.getChangeSupport().addPropertyChangeListener(this);
+            }
+        }
+
+        @Override
+        public void removed(Fields c, Field v) {
+            markModelModified();
+            v.getChangeSupport().removePropertyChangeListener(this);
+        }
+
+        @Override
+        public void removed(Fields c, Collection<Field> clctn) {
+            markModelModified();
+            for (Field v : clctn) {
+                v.getChangeSupport().removePropertyChangeListener(this);
+            }
+        }
+
+        @Override
+        public void reodered(Fields c) {
+            markModelModified();
+        }
+
+        @Override
+        public void cleared(Fields c) {
+            markModelModified();
         }
     }
 
     public final static Object DATAOBJECT_DOC_PROPERTY = "dataObject";
     protected transient Entry modelEntry;
+    protected transient ApplicationDbModelModifiedObserver modelChangesObserver = new ApplicationDbModelModifiedObserver();
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
     private transient boolean astIsValid;
@@ -175,6 +221,11 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     public void shrink() {
+        if (model != null) {
+            for (Field field : model.getParametersEntity().getFields().toCollection()) {
+                field.getChangeSupport().removePropertyChangeListener(modelChangesObserver);
+            }
+        }
         model = null;
         modelNode = null;
         astIsValid = false;
@@ -208,14 +259,17 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         if (model == null) {
             model = readModel();
             modelNode = createModelNode();
-            ApplicationDbModelModifiedObserver changesObserver = new ApplicationDbModelModifiedObserver();
-            model.addEditingListener(changesObserver);
-            model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
+            model.addEditingListener(modelChangesObserver);
+            model.getParametersEntity().getChangeSupport().addPropertyChangeListener(modelChangesObserver);
+            model.getParametersEntity().getFields().getCollectionSupport().addListener(modelChangesObserver);
+            for (Field field : model.getParametersEntity().getFields().toCollection()) {
+                field.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
+            }
             for (ApplicationDbEntity entity : model.getEntities().values()) {
-                entity.getChangeSupport().addPropertyChangeListener(changesObserver);
+                entity.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
             }
             for (Relation<ApplicationDbEntity> rel : model.getRelations()) {
-                rel.getChangeSupport().addPropertyChangeListener(changesObserver);
+                rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
             }
         }
     }
