@@ -445,7 +445,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC)
+    @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC, params = {"pairs"})
     public RowsComparator createSorting(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             List<SortingCriterion> criteria = new ArrayList<>();
