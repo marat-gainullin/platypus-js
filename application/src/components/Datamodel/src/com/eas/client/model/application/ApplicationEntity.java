@@ -610,7 +610,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = INSERT_JSDOC)
+    @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
     public void insert(Object... requiredFields) throws Exception {
         if (requiredFields != null) {
             for (int i = 0; i < requiredFields.length; i++) {
@@ -618,6 +618,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             }
         }
         rowset.insert(requiredFields);
+    }
+
+    private static final String INSERT_AT_JSDOC = ""
+            + "/**\n"
+            + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
+            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})
+    public void insertAt(int aIndex, Object... requiredFields) throws Exception {
+        if (requiredFields != null) {
+            for (int i = 0; i < requiredFields.length; i++) {
+                requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
+            }
+        }
+        rowset.insertAt(aIndex, requiredFields);
     }
 
     public boolean delete() throws Exception {
@@ -643,7 +659,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + " * Deletes the row by cursor position or by row itself.\n"
             + " * @param aCursorPosOrInstance row position in terms of cursor API (1-based)"
             + "| row instance itself. Note! If no cursor position or instance is passed,"
-            + "then row at current cursor position will b e deleted.\n"
+            + "then row at current cursor position will be deleted.\n"
             + " */";
 
     @ScriptFunction(jsDoc = DELETE_ROW_JSDOC, params = {"aCursorPosOrInstance"})

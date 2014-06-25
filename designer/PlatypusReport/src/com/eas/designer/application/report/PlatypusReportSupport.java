@@ -8,6 +8,7 @@ import com.eas.designer.application.module.PlatypusModuleDatamodelDescription;
 import com.eas.designer.application.module.PlatypusModuleSourceDescription;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import java.io.IOException;
+import java.util.MissingResourceException;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDisplayer;
@@ -55,28 +56,21 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
     }
 
     @Override
-    public void saveDocument() throws IOException {
+    public void save() throws IOException {
         try {
             PlatypusReportDataObject reportObject = (PlatypusReportDataObject) dataObject;
             if (reportObject.isTemplateValid()) {
                 // save js source and datamodel
-                super.saveDocument();
+                super.save();
             } else // We can't save document while report layout been edited.
             {     // In this case we have to warn the user about this situation.
                 NotifyDescriptor message = new NotifyDescriptor.Message(NbBundle.getMessage(PlatypusReportSupport.class, "Can_tSaveWhileEditingReportLayout"), NotifyDescriptor.Message.INFORMATION_MESSAGE);
                 DialogDisplayer.getDefault().notify(message);
             }
-        } catch (Exception ex) {
-            if (ex instanceof IOException) {
-                throw (IOException) ex;
-            } else {
-                throw new IOException(ex);
-            }
+        } catch (IOException ex) {
+            throw ex;
+        } catch (MissingResourceException ex) {
+            throw new IOException(ex);
         }
-    }
-
-    @Override
-    public boolean notifyModified() {
-        return super.notifyModified();
     }
 }

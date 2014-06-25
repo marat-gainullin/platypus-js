@@ -102,8 +102,8 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     /**
      * Icon for the form editor multiview window
      */
-    public static final String iconURL =
-            "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
+    public static final String iconURL
+            = "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;
 
@@ -152,8 +152,8 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         // set status text like "Opening form: ..."
         StatusDisplayer.getDefault().setStatusText(
                 FormUtils.getFormattedBundleString(
-                fmtMessage, // NOI18N
-                new Object[]{dataObject.getPrimaryFile().getName()}));
+                        fmtMessage, // NOI18N
+                        new Object[]{dataObject.getPrimaryFile().getName()}));
         javax.swing.RepaintManager.currentManager(mainWin).paintDirtyRegions();
     }
 
@@ -248,33 +248,18 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         return (formEditor != null) && formEditor.isFormLoaded();
     }
 
-    /**
-     * Save the document in this thread and start reparsing it.
-     *
-     * @exception IOException on I/O error
-     */
     @Override
-    public void saveDocument() throws IOException {
-        IOException ioEx = null;
+    public void save() throws IOException {
         try {
             if (formEditor != null) {
                 formEditor.saveFormData();
             }
-            super.saveDocument();
+            super.save();
         } catch (PersistenceException ex) {
-            Throwable t = ex.getOriginalException();
-            if (t instanceof IOException) {
-                ioEx = (IOException) t;
-            } else {
-                ioEx = new IOException("Cannot save the form"); // NOI18N
-                ErrorManager.getDefault().annotate(ioEx, t != null ? t : ex);
+            if (formEditor != null) {
+                formEditor.reportErrors(FormEditor.FormOperation.SAVING);
             }
-        }
-        if (formEditor != null) {
-            formEditor.reportErrors(FormEditor.FormOperation.SAVING);
-        }
-        if (ioEx != null) {
-            throw ioEx;
+            throw new IOException(ex);
         }
     }
 
@@ -394,10 +379,10 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     }
 
     /*
-    private String getMVTCToolTipText(PlatypusFormDataObject formDataObject) {
-        return DataEditorSupport.toolTip(formDataObject.getPrimaryFile(), formDataObject.isModified(), readOnly(formDataObject));
-    }
-*/
+     private String getMVTCToolTipText(PlatypusFormDataObject formDataObject) {
+     return DataEditorSupport.toolTip(formDataObject.getPrimaryFile(), formDataObject.isModified(), readOnly(formDataObject));
+     }
+     */
     /**
      * Updates tooltip of all multiviews for given form. Replans to even queue
      * thread if necessary.
@@ -515,7 +500,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
                 if (MV_FORM_ID.equals(prefId)) {
                     return FORM_ELEMENT_INDEX; // 1
                 }
-                if(PlatypusModuleDatamodelDescription.MODULE_DATAMODEL_VIEW_NAME.equals(prefId)){
+                if (PlatypusModuleDatamodelDescription.MODULE_DATAMODEL_VIEW_NAME.equals(prefId)) {
                     return MODEL_ELEMENT_INDEX; // 2
                 }
             }

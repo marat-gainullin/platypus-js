@@ -127,7 +127,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     public void openAt(Position pos) {
         openAt(createPositionRef(pos.getOffset(), Position.Bias.Forward));
     }
-    
+
     @Override
     protected void loadFromStreamToKit(StyledDocument doc, InputStream stream, EditorKit kit) throws IOException, BadLocationException {
         doc.putProperty(PlatypusModuleDataObject.DATAOBJECT_DOC_PROPERTY, dataObject);
@@ -138,7 +138,17 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
     @Override
     protected void saveFromKitToStream(StyledDocument doc, EditorKit kit, OutputStream stream) throws IOException, BadLocationException {
-        super.saveFromKitToStream(doc, kit, stream);  
+        if (sourceModified) {
+            super.saveFromKitToStream(doc, kit, stream);
+            sourceModified = false;
+        } else {
+            stream.write(getDataObject().getPrimaryFile().asBytes());
+            // NetBeans can't work properly if super.saveDocument() is called conditionally.
+            // So we have to call it in despite of sourceModified flag.
+            // If source is not modified, we should avoid file content overwriting.
+            // There is no way to do so in NetBeans.
+            // The only way is to provide original file content instead of document's content.
+        }
     }
 
     @Override
@@ -162,26 +172,14 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
     @Override
     public void save() throws IOException {
-        saveDocument();
-        notifyUnmodified();
+        saveDocument();// sourceModified flag is taken into account in saveFromKitToStream() because of netbeans crazy CloneableEditorSupport
+        saveModel();
     }
 
-    @Override
-    public void saveDocument() throws IOException {
-        try {
-            if (sourceModified) {
-                super.saveDocument();
-                sourceModified = false;
-            }
-            if (modelModified) {
-                // save model file            
-                dataObject.saveModel();
-                modelModified = false;
-            }
-            dataObject.setModified(false);
-            dataObject.notifyChanged();
-        } catch (Exception ex) {
-            throw new IOException(ex);
+    protected void saveModel() throws IOException {
+        if (modelModified) {
+            dataObject.saveModel();
+            modelModified = false;
         }
     }
 
