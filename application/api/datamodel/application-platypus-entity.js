@@ -358,9 +358,9 @@
     }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "insert", {
         enumerable: true,
-        value: function(arg0) {
+        value: function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.insert(P.boxAsJava(arg0));
+            var value = delegate.insert(P.boxAsJava(pairs));
             return P.boxAsJs(value);
         }
     });
@@ -371,58 +371,7 @@
          * @method insert
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.insert = function(arg0){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "eof", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.eof();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusEntity){
-        /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.eof = function(){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "first", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.first();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusEntity){
-        /**
-         * Moves the rowset cursor to the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method first
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.first = function(){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "last", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.last();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusEntity){
-        /**
-         * Moves the rowset cursor to the last row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method last
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.last = function(){};
+        P.ApplicationPlatypusEntity.prototype.insert = function(pairs){};
     }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "pos", {
         enumerable: true,
@@ -442,6 +391,74 @@
          */
         P.ApplicationPlatypusEntity.prototype.pos = function(index){};
     }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "first", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.first();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
+        /**
+         * Moves the rowset cursor to the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method first
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.first = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "eof", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.eof();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
+        /**
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.eof = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "last", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.last();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
+        /**
+         * Moves the rowset cursor to the last row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method last
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.last = function(){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "deleteRow", {
+        enumerable: true,
+        value: function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
+        /**
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
+         * @method deleteRow
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
+    }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "getRow", {
         enumerable: true,
         value: function(index) {
@@ -460,22 +477,38 @@
          */
         P.ApplicationPlatypusEntity.prototype.getRow = function(index){};
     }
-    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "deleteRow", {
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "insertAt", {
         enumerable: true,
-        value: function(aCursorPosOrInstance) {
+        value: function(index, pairs) {
             var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
             return P.boxAsJs(value);
         }
     });
     if(!P.ApplicationPlatypusEntity){
         /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will b e deleted.
-         * @method deleteRow
+         * Inserts new row in the rowset and sets cursor on this row. @see push.
+         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).
+         * @method insertAt
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
+        P.ApplicationPlatypusEntity.prototype.insertAt = function(index, pairs){};
+    }
+    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "deleteAll", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.deleteAll();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationPlatypusEntity){
+        /**
+         * Deletes all rows in the rowset.
+         * @method deleteAll
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.deleteAll = function(){};
     }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "createFilter", {
         enumerable: true,
@@ -526,22 +559,6 @@
          * @memberOf ApplicationPlatypusEntity
          */
         P.ApplicationPlatypusEntity.prototype.afterLast = function(){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "deleteAll", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.deleteAll();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusEntity){
-        /**
-         * Deletes all rows in the rowset.
-         * @method deleteAll
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.deleteAll = function(){};
     }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "findById", {
         enumerable: true,
@@ -616,9 +633,9 @@
     }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "createSorting", {
         enumerable: true,
-        value: function(arg0) {
+        value: function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(arg0));
+            var value = delegate.createSorting(P.boxAsJava(pairs));
             return P.boxAsJs(value);
         }
     });
@@ -630,7 +647,7 @@
          * @method createSorting
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.createSorting = function(arg0){};
+        P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs){};
     }
     Object.defineProperty(P.ApplicationPlatypusEntity.prototype, "beginUpdate", {
         enumerable: true,

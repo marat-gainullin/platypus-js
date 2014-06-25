@@ -307,6 +307,20 @@
              */
             P.ToolBar.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ToolBar){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ToolBar
+             */
+            P.ToolBar.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -323,20 +337,6 @@
              * @memberOf ToolBar
              */
             P.ToolBar.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -454,23 +454,6 @@
              */
             P.ToolBar.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -487,6 +470,23 @@
              * @memberOf ToolBar
              */
             P.ToolBar.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToolBar){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ToolBar
+             */
+            P.ToolBar.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

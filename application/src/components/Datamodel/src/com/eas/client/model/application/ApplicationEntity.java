@@ -115,8 +115,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     // Find and positioning interface
     private static final String FIND_JSDOC = ""
             + "/**\n"
-            + "* Finds rows using field -- field value pairs.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* Finds rows using field - value pairs.\n"
+            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
             + "* @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
             + "*/";
 
@@ -345,6 +345,21 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     public int getSize() throws Exception {
         return rowset.size();
     }
+    
+    private static final String CURSOR_POS_JSDOC = ""
+            + "/**\n"
+            + "* Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CURSOR_POS_JSDOC)
+    public int getCursorPos(){
+        return rowset.getCursorPos();
+    }
+    
+    @ScriptFunction()
+    public void setCursorPos(int aValue) throws InvalidCursorPositionException{
+        rowset.absolute(aValue);
+    }
 
     // Table-pattern API
     public Locator createLocator(Object... constraints) throws Exception {
@@ -391,11 +406,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String CREATE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instace of filter object to filter rowset data in-place using specified constraints objects.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @param fields the filter conditions fields in following form: entity.schema.propName.\n"
             + "* @return a comparator object.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CREATE_FILTER_JSDOC, params = {"pairs"})
+    @ScriptFunction(jsDoc = CREATE_FILTER_JSDOC, params = {"fields"})
     public Filter createFilter(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             Filter hf = rowset.createFilter();
@@ -441,7 +456,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String CREATE_SORTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instance of comparator object using specified constraints objects.\n"
-            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
             + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.\n"
             + "*/";
 
@@ -607,7 +622,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String INSERT_JSDOC = ""
             + "/**\n"
             + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
-            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).\n"
+            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
@@ -623,7 +638,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String INSERT_AT_JSDOC = ""
             + "/**\n"
             + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
-            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).\n"
+            + "* @index index the new row will be inserted at. 1 - based."
+            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})

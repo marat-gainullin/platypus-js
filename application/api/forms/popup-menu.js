@@ -306,6 +306,20 @@
              */
             P.PopupMenu.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -322,20 +336,6 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -453,23 +453,6 @@
              */
             P.PopupMenu.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -486,6 +469,23 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

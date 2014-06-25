@@ -761,7 +761,7 @@ public class Entity implements RowsetListener, HasPublished{
 				Object.defineProperty(published, "inserting",    { get : function(){ return published.isInserting()}});
 				Object.defineProperty(published, "size",         { get : function(){ return published.getSize()}});
 				Object.defineProperty(published, "length",       { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "rowIndex",     { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
+				Object.defineProperty(published, "cursorPos",     { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
 				Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
 				Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
 				Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.rowIndex-1];}});

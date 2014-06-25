@@ -325,6 +325,20 @@
              */
             P.TextField.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TextField){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf TextField
+             */
+            P.TextField.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -341,20 +355,6 @@
              * @memberOf TextField
              */
             P.TextField.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TextField){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf TextField
-             */
-            P.TextField.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -458,23 +458,6 @@
              */
             P.TextField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TextField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TextField
-             */
-            P.TextField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -491,6 +474,23 @@
              * @memberOf TextField
              */
             P.TextField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TextField
+             */
+            P.TextField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

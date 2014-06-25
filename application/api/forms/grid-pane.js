@@ -328,6 +328,20 @@
              */
             P.GridPane.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -344,20 +358,6 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -475,23 +475,6 @@
              */
             P.GridPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -508,6 +491,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
