@@ -457,22 +457,21 @@
          */
         P.Form.prototype.close = function(obj){};
     }
-    Object.defineProperty(P.Form.prototype, "showModal", {
+    Object.defineProperty(P.Form.prototype, "show", {
         enumerable: true,
-        value: function(callback) {
+        value: function() {
             var delegate = this.unwrap();
-            var value = delegate.showModal(P.boxAsJava(callback));
+            var value = delegate.show();
             return P.boxAsJs(value);
         }
     });
     if(!P.Form){
         /**
-         * Shows the form as a dialog (modal window).
-         * @param callback a callback handler function
-         * @method showModal
+         * Shows the form as an ordinary window.
+         * @method show
          * @memberOf Form
          */
-        P.Form.prototype.showModal = function(callback){};
+        P.Form.prototype.show = function(){};
     }
     Object.defineProperty(P.Form.prototype, "toFront", {
         enumerable: true,
@@ -490,37 +489,22 @@
          */
         P.Form.prototype.toFront = function(){};
     }
-    Object.defineProperty(P.Form.prototype, "show", {
+    Object.defineProperty(P.Form.prototype, "showModal", {
         enumerable: true,
-        value: function() {
+        value: function(callback) {
             var delegate = this.unwrap();
-            var value = delegate.show();
+            var value = delegate.showModal(P.boxAsJava(callback));
             return P.boxAsJs(value);
         }
     });
     if(!P.Form){
         /**
-         * Shows the form as an ordinary window.
-         * @method show
+         * Shows the form as a dialog (modal window).
+         * @param callback a callback handler function
+         * @method showModal
          * @memberOf Form
          */
-        P.Form.prototype.show = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "minimize", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.minimize();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
-        /**
-         * Minimizes this form.
-         * @method minimize
-         * @memberOf Form
-         */
-        P.Form.prototype.minimize = function(){};
+        P.Form.prototype.showModal = function(callback){};
     }
     Object.defineProperty(P.Form.prototype, "maximize", {
         enumerable: true,
@@ -537,6 +521,22 @@
          * @memberOf Form
          */
         P.Form.prototype.maximize = function(){};
+    }
+    Object.defineProperty(P.Form.prototype, "minimize", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.minimize();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.Form){
+        /**
+         * Minimizes this form.
+         * @method minimize
+         * @memberOf Form
+         */
+        P.Form.prototype.minimize = function(){};
     }
     Object.defineProperty(P.Form.prototype, "restore", {
         enumerable: true,

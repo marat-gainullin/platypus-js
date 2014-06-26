@@ -4,32 +4,40 @@
  */
 package com.bearsoft.rowset.filters;
 
-import com.bearsoft.rowset.ordering.HashOrderer;
-import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.RowWrap;
+import com.bearsoft.rowset.ordering.HashOrderer;
+import com.bearsoft.rowset.utils.KeySet;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Filter class. Performs multi column filtering of rowset.
  *
  * @author mg
  */
-public class Filter extends HashOrderer {
+public class Filter extends HashOrderer implements HasPublished {
 
     protected List<Row> originalRows;
     protected int originalPos;
     protected boolean filterApplied;
     protected KeySet keysetApplied;
+    protected Object published;
 
     /**
      * The filter's class constructor
+     *
+     * @param aRowset
      */
     public Filter(Rowset aRowset) {
         super(aRowset);
@@ -52,6 +60,9 @@ public class Filter extends HashOrderer {
      *
      * @return Whether this filter is applied to it's rowset.
      */
+    @ScriptFunction(jsDoc = "/**\n"
+            + " * Returns whether this filter is applied.\n"
+            + "*/")
     public boolean isApplied() {
         return filterApplied;
     }
@@ -229,6 +240,20 @@ public class Filter extends HashOrderer {
         }
     }
 
+    @ScriptFunction(jsDoc = "/**\n"
+            + " * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.\n"
+            + "*/")
+    public void apply(Object ... values) throws RowsetException {
+        filterRowset(values);
+    }
+
+    @ScriptFunction(jsDoc = "/**\n"
+            + " * Cancels applied filter.\n"
+            + " */")
+    public void cancel() throws RowsetException {
+        cancelFilter();
+    }
+
     /**
      * Cancels this filter from rowset.
      *
@@ -311,5 +336,31 @@ public class Filter extends HashOrderer {
     public void die() {
         super.die();
         originalRows = null;
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        Object oldValue = published;
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

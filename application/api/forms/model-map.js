@@ -331,20 +331,6 @@
              */
             P.ModelMap.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -361,6 +347,20 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -801,6 +801,27 @@
          */
         P.ModelMap.prototype.fit = function(area){};
     }
+    Object.defineProperty(P.ModelMap.prototype, "addLayer", {
+        enumerable: true,
+        value: function(layerTitle, rowset, geometryClass, styleAttributes) {
+            var delegate = this.unwrap();
+            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ModelMap){
+        /**
+         * Adds new layer to the map.
+         * @param layerTitle the layer's title.
+         * @param rowset the layer's data.
+         * @param geometryClass the geometry class.
+         * @param styleAttributes the layer's style attributes.
+         * @return <code>MapLayer</code> instance.
+         * @method addLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes){};
+    }
     Object.defineProperty(P.ModelMap.prototype, "removeLayer", {
         enumerable: true,
         value: function(arg0) {
@@ -942,27 +963,6 @@
          * @memberOf ModelMap
          */
         P.ModelMap.prototype.hitSelection = function(hitPoint){};
-    }
-    Object.defineProperty(P.ModelMap.prototype, "addLayer", {
-        enumerable: true,
-        value: function(layerTitle, rowset, geometryClass, styleAttributes) {
-            var delegate = this.unwrap();
-            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelMap){
-        /**
-         * Adds new layer to the map.
-         * @param layerTitle the layer's title.
-         * @param rowset the layer's data.
-         * @param geometryClass the geometry class.
-         * @param styleAttributes the layer's style attributes.
-         * @return <code>MapLayer</code> instance.
-         * @method addLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes){};
     }
     Object.defineProperty(P.ModelMap.prototype, "focus", {
         enumerable: true,

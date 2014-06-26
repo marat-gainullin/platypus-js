@@ -1076,6 +1076,11 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
         }
     }
 
+    /*
+    public Row insertAt(int insertAt, Object... initingValues) throws RowsetException {
+        return insertAt(insertAt, false, initingValues);
+    }
+*/
     /**
      * Simple insert method. Inserts a new <code>Row</code> in this rowset in
      * both original and current rows arrays. First, filter's values are used
@@ -1084,20 +1089,24 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * <code>showOriginal</code> flag is setted, than no action is performed.
      *
      * @param insertAt
+     * @param aAjusting
      * @param initingValues Values inserting row to be initialized with.
+     * @return
      * @throws RowsetException
      */
-    public void insertAt(int insertAt, Object... initingValues) throws RowsetException {
+    public Row insertAt(int insertAt, boolean aAjusting, Object... initingValues) throws RowsetException {
         if (!showOriginal) {
             try {
                 assert fields != null;
                 Row row = rowsClass.newInstance();
                 row.setFields(fields);
-                insertAt(row, false, insertAt, initingValues);
+                insertAt(row, aAjusting, insertAt, initingValues);
+                return row;
             } catch (InstantiationException | IllegalAccessException ex) {
                 throw new RowsetException(ex);
             }
         }
+        return null;
     }
 
     /**
@@ -1242,20 +1251,24 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             // user supplied fields, including values for primary keys
             if (values != null && values.length > 0 && Math.IEEEremainder(values.length, 2.0f) == 0.0f) {
                 for (int i = 0; i < values.length - 1; i += 2) {
-                    if (values[i] != null && (values[i] instanceof Integer || values[i] instanceof Double || values[i] instanceof Field)) {
+                    if (values[i] != null && (values[i] instanceof Integer || values[i] instanceof Double || values[i] instanceof Field || values[i] instanceof String)) {
                         int colIndex;
-                        if (values[i] instanceof Field) {
+                        if (values[i] instanceof String) {
+                            colIndex = fields.find((String) values[i]);
+                        } else if (values[i] instanceof Field) {
                             Field field = (Field) values[i];
                             colIndex = fields.find(field.getName());
                         } else {
                             colIndex = values[i] instanceof Integer ? (Integer) values[i] : (int) Math.round((Double) values[i]);
                         }
                         Field field = fields.get(colIndex);
-                        Object fieldValue = values[i + 1];
-                        if (converter != null) {
-                            fieldValue = converter.convert2RowsetCompatible(fieldValue, field.getTypeInfo());
+                        if (field != null) {
+                            Object fieldValue = values[i + 1];
+                            if (converter != null) {
+                                fieldValue = converter.convert2RowsetCompatible(fieldValue, field.getTypeInfo());
+                            }
+                            aRow.setColumnObject(colIndex, fieldValue);
                         }
-                        aRow.setColumnObject(colIndex, fieldValue);
                     }
                 }
             }

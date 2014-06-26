@@ -345,19 +345,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     public int getSize() throws Exception {
         return rowset.size();
     }
-    
+
     private static final String CURSOR_POS_JSDOC = ""
             + "/**\n"
             + "* Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CURSOR_POS_JSDOC)
-    public int getCursorPos(){
+    public int getCursorPos() {
         return rowset.getCursorPos();
     }
-    
+
     @ScriptFunction()
-    public void setCursorPos(int aValue) throws InvalidCursorPositionException{
+    public void setCursorPos(int aValue) throws InvalidCursorPositionException {
         rowset.absolute(aValue);
     }
 
@@ -456,7 +456,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String CREATE_SORTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instance of comparator object using specified constraints objects.\n"
-            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
+            + "* @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).\n"
             + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.\n"
             + "*/";
 
@@ -505,6 +505,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
         return null;
     }
+
+    private static final String SORT_JSDOC = ""
+            + "/**\n"
+            + "* Sorts data according to comparator object returned by createSorting() or by comparator function.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = SORT_JSDOC)
+    public void sort(RowsComparator aComparator) throws InvalidCursorPositionException {
+        rowset.sort(aComparator);
+    }
+
     private static final String ACTIVE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Entity's active <code>Filter</code> object.\n"
@@ -638,7 +649,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String INSERT_AT_JSDOC = ""
             + "/**\n"
             + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
-            + "* @index index the new row will be inserted at. 1 - based."
+            + "* @index index the new row will be inserted at. 1 - based.\n"
             + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
             + "*/";
 
@@ -649,7 +660,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
             }
         }
-        rowset.insertAt(aIndex, requiredFields);
+        rowset.insertAt(aIndex, false, requiredFields);
     }
 
     public boolean delete() throws Exception {

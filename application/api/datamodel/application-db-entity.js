@@ -139,6 +139,23 @@
              */
             P.ApplicationDbEntity.prototype.onScrolled = {};
         }
+        Object.defineProperty(this, "cursorPos", {
+            get: function() {
+                var value = delegate.cursorPos;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursorPos = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;
+             * @property cursorPos
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.cursorPos = 0;
+        }
         Object.defineProperty(this, "onFiltered", {
             get: function() {
                 var value = delegate.onFiltered;
@@ -313,8 +330,8 @@
     });
     if(!P.ApplicationDbEntity){
         /**
-         * Finds rows using field -- field value pairs.
-         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+         * Finds rows using field - value pairs.
+         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
          * @return the rows object's array accordind to the search condition or empty array if nothing is found.
          * @method find
          * @memberOf ApplicationDbEntity
@@ -367,11 +384,62 @@
     if(!P.ApplicationDbEntity){
         /**
          * Inserts new row in the rowset and sets cursor on this row. @see push.
-         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).
+         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).
          * @method insert
          * @memberOf ApplicationDbEntity
          */
         P.ApplicationDbEntity.prototype.insert = function(pairs){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "eof", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.eof();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.eof = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "first", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.first();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Moves the rowset cursor to the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method first
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.first = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "last", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.last();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Moves the rowset cursor to the last row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method last
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.last = function(){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "pos", {
         enumerable: true,
@@ -391,73 +459,39 @@
          */
         P.ApplicationDbEntity.prototype.pos = function(index){};
     }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "first", {
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "sort", {
         enumerable: true,
-        value: function() {
+        value: function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.first();
+            var value = delegate.sort(P.boxAsJava(arg0));
             return P.boxAsJs(value);
         }
     });
     if(!P.ApplicationDbEntity){
         /**
-         * Moves the rowset cursor to the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method first
+         * Sorts data according to comparator object returned by createSorting() or by comparator function.
+         * @method sort
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.first = function(){};
+        P.ApplicationDbEntity.prototype.sort = function(arg0){};
     }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "eof", {
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "insertAt", {
         enumerable: true,
-        value: function() {
+        value: function(index, pairs) {
             var delegate = this.unwrap();
-            var value = delegate.eof();
+            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
             return P.boxAsJs(value);
         }
     });
     if(!P.ApplicationDbEntity){
         /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
+         * Inserts new row in the rowset and sets cursor on this row. @see push.
+         * @index index the new row will be inserted at. 1 - based.
+         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).
+         * @method insertAt
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.eof = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "last", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.last();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Moves the rowset cursor to the last row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method last
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.last = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteRow", {
-        enumerable: true,
-        value: function(aCursorPosOrInstance) {
-            var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
-         * @method deleteRow
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
+        P.ApplicationDbEntity.prototype.insertAt = function(index, pairs){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "getRow", {
         enumerable: true,
@@ -477,56 +511,22 @@
          */
         P.ApplicationDbEntity.prototype.getRow = function(index){};
     }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "insertAt", {
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteRow", {
         enumerable: true,
-        value: function(index, pairs) {
+        value: function(aCursorPosOrInstance) {
             var delegate = this.unwrap();
-            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
             return P.boxAsJs(value);
         }
     });
     if(!P.ApplicationDbEntity){
         /**
-         * Inserts new row in the rowset and sets cursor on this row. @see push.
-         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).
-         * @method insertAt
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
+         * @method deleteRow
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.insertAt = function(index, pairs){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteAll", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.deleteAll();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Deletes all rows in the rowset.
-         * @method deleteAll
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.deleteAll = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbEntity.prototype, "createFilter", {
-        enumerable: true,
-        value: function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbEntity){
-        /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
-         * @return a comparator object.
-         * @method createFilter
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createFilter = function(pairs){};
+        P.ApplicationDbEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "beforeFirst", {
         enumerable: true,
@@ -559,6 +559,40 @@
          * @memberOf ApplicationDbEntity
          */
         P.ApplicationDbEntity.prototype.afterLast = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "deleteAll", {
+        enumerable: true,
+        value: function() {
+            var delegate = this.unwrap();
+            var value = delegate.deleteAll();
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Deletes all rows in the rowset.
+         * @method deleteAll
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.deleteAll = function(){};
+    }
+    Object.defineProperty(P.ApplicationDbEntity.prototype, "createFilter", {
+        enumerable: true,
+        value: function(fields) {
+            var delegate = this.unwrap();
+            var value = delegate.createFilter(P.boxAsJava(fields));
+            return P.boxAsJs(value);
+        }
+    });
+    if(!P.ApplicationDbEntity){
+        /**
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param fields the filter conditions fields in following form: entity.schema.propName.
+         * @return a comparator object.
+         * @method createFilter
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createFilter = function(fields){};
     }
     Object.defineProperty(P.ApplicationDbEntity.prototype, "findById", {
         enumerable: true,
@@ -642,7 +676,7 @@
     if(!P.ApplicationDbEntity){
         /**
          * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
          * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
          * @method createSorting
          * @memberOf ApplicationDbEntity

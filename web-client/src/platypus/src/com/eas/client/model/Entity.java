@@ -170,110 +170,110 @@ public class Entity implements RowsetListener, HasPublished{
 			var published = aEntity.@com.eas.client.model.Entity::getPublished()();
 			if(published == null){
 				published = {
-					// array mutator methods
-					pop : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
-							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-						}else{
-							return undefined;
-						}
-					},
-					shift : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
-							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
-							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-						}else{
-							return undefined;
-						}
-					},
-					push : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							for(var i=0;i<arguments.length;i++){
-								var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
-								var propsAsArray = propsToArray(arguments[i]);
-								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
-							}
-							return rowset.@com.bearsoft.rowset.Rowset::size()();
-						}else{
-							return 0;
-						}
-					},
-					unshift : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							for(var i=arguments.length-1;i>=0;i--)
-							{
-								var propsAsArray = propsToArray(arguments[i]);
-								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray);
-							}
-							return rowset.@com.bearsoft.rowset.Rowset::size()();
-						}else
-							return 0;
-					},
-					reverse : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							rowset.@com.bearsoft.rowset.Rowset::reverse()();
-						}
-					},
-					splice : function()
-					{
-						if(arguments.length > 0){
-							var rowset = getRowset();
-							if(rowset != null){
-								var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-								var startAt = arguments[0];
-								if(startAt < 0)
-									startAt = size+startAt;
-								if(startAt < 0)
-									throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
-								var howMany = arguments.length > 1 ? arguments[1] : size;
-								if(howMany < 0)
-									throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
-								var toAdd = [];
-								if(arguments.length > 2)
-								{
-									for(var ai=2; ai<arguments.length; ai++)
-										toAdd.push(arguments[ai]);
-								}
-								var removed = [];
-								while(startAt < size && removed.length < howMany)
-								{
-									var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
-									rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
-									var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-									removed.push(deletedFacade);
-									size = rowset.@com.bearsoft.rowset.Rowset::size()();
-								}
-								for(var l=arguments.length-1;l>=2;l--)
-								{						
-									var propsAsArray = propsToArray(arguments[l]);
-									aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
-								}
-								return removed;
-							}else
-								return [];
-						}else
-							throw "Bad arguments. There are must at least one argument";
-					},
-					sort : function(aComparator) {
-						if(aComparator){
-							aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
-						}else
-							throw "A comparing function or comparator object must be specified."; 
-					},
+                                    // array mutator methods
+                                    pop : function()
+                                    {
+                                            var rowset = getRowset();
+                                            if(rowset != null){
+                                                    var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                                                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
+                                                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
+                                                    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+                                            }else{
+                                                    return undefined;
+                                            }
+                                    },
+                                    shift : function()
+                                    {
+                                            var rowset = getRowset();
+                                            if(rowset != null){
+                                                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
+                                                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
+                                                    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+                                            }else{
+                                                    return undefined;
+                                            }
+                                    },
+                                    push : function()
+                                    {
+                                            var rowset = getRowset();
+                                            if(rowset != null){
+                                                    for(var i=0;i<arguments.length;i++){
+                                                            var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
+                                                            var propsAsArray = propsToArray(arguments[i]);
+                                                            aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
+                                                    }
+                                                    return rowset.@com.bearsoft.rowset.Rowset::size()();
+                                            }else{
+                                                    return 0;
+                                            }
+                                    },
+                                    unshift : function()
+                                    {
+                                            var rowset = getRowset();
+                                            if(rowset != null){
+                                                    for(var i=arguments.length-1;i>=0;i--)
+                                                    {
+                                                            var propsAsArray = propsToArray(arguments[i]);
+                                                            aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray);
+                                                    }
+                                                    return rowset.@com.bearsoft.rowset.Rowset::size()();
+                                            }else
+                                                    return 0;
+                                    },
+                                    reverse : function()
+                                    {
+                                            var rowset = getRowset();
+                                            if(rowset != null){
+                                                    rowset.@com.bearsoft.rowset.Rowset::reverse()();
+                                            }
+                                    },
+                                    splice : function()
+                                    {
+                                            if(arguments.length > 0){
+                                                    var rowset = getRowset();
+                                                    if(rowset != null){
+                                                            var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                                                            var startAt = arguments[0];
+                                                            if(startAt < 0)
+                                                                    startAt = size+startAt;
+                                                            if(startAt < 0)
+                                                                    throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
+                                                            var howMany = arguments.length > 1 ? arguments[1] : size;
+                                                            if(howMany < 0)
+                                                                    throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
+                                                            var toAdd = [];
+                                                            if(arguments.length > 2)
+                                                            {
+                                                                    for(var ai=2; ai<arguments.length; ai++)
+                                                                            toAdd.push(arguments[ai]);
+                                                            }
+                                                            var removed = [];
+                                                            while(startAt < size && removed.length < howMany)
+                                                            {
+                                                                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
+                                                                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
+                                                                    var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+                                                                    removed.push(deletedFacade);
+                                                                    size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                                                            }
+                                                            for(var l=arguments.length-1;l>=2;l--)
+                                                            {						
+                                                                    var propsAsArray = propsToArray(arguments[l]);
+                                                                    aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
+                                                            }
+                                                            return removed;
+                                                    }else
+                                                            return [];
+                                            }else
+                                                    throw "Bad arguments. There are must at least one argument";
+                                    },
+                                    sort : function(aComparator) {
+                                            if(aComparator){
+                                                    aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
+                                            }else
+                                                    throw "A comparing function or comparator object must be specified."; 
+                                    },
 				    // array accessor methods
 				    concat : function(){
 				    	var i;
@@ -284,7 +284,7 @@ public class Entity implements RowsetListener, HasPublished{
 							for(i=0;i<size;i++){
 								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
 								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-				    			concated.push(rowFacade);
+                                                                concated.push(rowFacade);
 							}
 					    	for(i=0;i<arguments.length;i++){
 					    		if(Array.isArray(arguments[i])){

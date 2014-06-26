@@ -28,6 +28,7 @@
     var LoggerClass = Java.type("java.util.logging.Logger");
     var RowClass = Java.type("com.bearsoft.rowset.Row");
     var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
+    var ParamsClass = Java.type("com.bearsoft.rowset.metadata.Parameters");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
     var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
@@ -150,9 +151,9 @@
     Object.defineProperty(P, "require", {value: require});
     function extend(Child, Parent) {
         var prevChildProto = {};
-        for(var m in Child.prototype){
+        for (var m in Child.prototype) {
             var member = Child.prototype[m];
-            if(typeof member === 'function'){
+            if (typeof member === 'function') {
                 prevChildProto[m] = member;
             }
         }
@@ -160,7 +161,7 @@
         };
         F.prototype = Parent.prototype;
         Child.prototype = new F();
-        for(var m in prevChildProto)
+        for (var m in prevChildProto)
             Child.prototype[m] = prevChildProto[m];
         Child.prototype.constructor = Child;
         Child.superclass = Parent.prototype;
@@ -195,6 +196,19 @@
         value: getModule
     });
 
+    function objectToInsertIniting(aObject) {
+        var jsIniting = [];
+        for (var pn in aObject) {
+            var pName = pn + '';
+            jsIniting[jsIniting.length] = pName;
+            jsIniting[jsIniting.length] = aObject[pName];
+        }
+        var initing = new JavaArrayClass(jsIniting.length);
+        for (var v = 0; v < jsIniting.length; v++)
+            initing[v] = boxAsJava(jsIniting[v]);
+        return initing;
+    }
+
     function BoundArray() {
         BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
@@ -205,9 +219,10 @@
             Array.prototype.splice.call(target, 0, target.length);
             var rows = rowset.current;
             var publishedRows = [];
-            rows.forEach(function(aRow) {
-                publishedRows.push(aRow.getPublished());
-            });
+            for each (var aRow in rows) {
+                publishedRows.push(EngineUtilsClass.unwrap(aRow.getPublished()));
+            }
+            ;
             Array.prototype.push.apply(target, publishedRows);
         };
         adapter.rowsetRequeried = function(event) {
@@ -251,7 +266,7 @@
             value: function() {
                 if (!rowset.empty) {
                     var res = rowset.getRow(rowset.size());
-                    rowset.deleteAt(rowset.size() - 1, true);
+                    rowset.deleteAt(rowset.size(), true);
                     Array.prototype.pop.call(target);
                     return res.getPublished();
                 }
@@ -261,14 +276,11 @@
             value: function() {
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
-                        if (arguments[a].unwrap)
-                            rowset.insertAt(rowset.size(), arguments[a].unwrap(), a < arguments.length - 1);
+                        rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
                     }
                 } else if (arguments.length === 1) {
-                    if (arguments[0].unwrap) {
-                        rowset.insertAt(rowset.size(), arguments[0].unwrap(), true);
-                        Array.prototype.push.call(target, arguments[0]);
-                    }
+                    var justInserted = rowset.insertAt(rowset.size() + 1, true, objectToInsertIniting(arguments[0]));
+                    Array.prototype.push.call(target, justInserted.getPublished());
                 }
                 return target.length;
             }
@@ -282,7 +294,7 @@
             value: function() {
                 if (!rowset.empty) {
                     var res = rowset.getRow(1);
-                    rowset.deleteAt(0);
+                    rowset.deleteAt(1, true);
                     Array.prototype.shift.call(target);
                     return res.getPublished();
                 }
@@ -320,14 +332,12 @@
                     while (!rowset.empty && deleted.length < howManyToDelete) {
                         var rowToDelete = rowset.getRow(beginToDeleteAt + 1);
                         deleted.push(rowToDelete);
-                        rowset.deleteAt(beginToDeleteAt, needToAdd);
+                        rowset.deleteAt(beginToDeleteAt + 1, needToAdd);
                     }
                     var insertAt = beginToDeleteAt;
                     for (var a = 2; a < arguments.length; a++) {
-                        if (arguments[a].unwrap) {
-                            rowset.insertAt(insertAt, arguments[a].unwrap(), a < arguments.length - 1);
-                            insertAt++;
-                        }
+                        rowset.insertAt(insertAt + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        insertAt++;
                     }
                     return deleted;
                 } else {
@@ -335,21 +345,49 @@
                 }
             }
         });
+
         Object.defineProperty(target, "unshift", {
             value: function() {
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
-                        if (arguments[a].unwrap) {
-                            rowset.insertAt(a, arguments[a].unwrap(), a < arguments.length - 1);
-                        }
+                        rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
                     }
                 } else if (arguments.length === 1) {
-                    if (arguments[0].unwrap) {
-                        rowset.insertAt(0, arguments[0].unwrap(), true);
-                        Array.prototype.unshift.call(target, arguments[0]);
-                    }
+                    var justInserted = rowset.insertAt(1, true, objectToInsertIniting(arguments[0]));
+                    Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
                 return target.length;
+            }
+        });
+
+        Object.defineProperty(target, "insert", {
+            value: function() {
+                var initing = new JavaArrayClass(arguments.length);
+                for (var v = 0; v < arguments.length; v++)
+                    initing[v] = boxAsJava(arguments[v]);
+                rowset.insert(initing);
+            }
+        });
+
+        Object.defineProperty(target, "insertAt", {
+            value: function() {
+                if (arguments.length > 0) {
+                    var index = arguments[0];
+                    var initing = new JavaArrayClass(arguments.length - 1);
+                    for (var v = 1; v < arguments.length; v++)
+                        initing[v - 1] = boxAsJava(arguments[v]);
+                    rowset.insertAt(index, false, initing);
+                }
+            }
+        });
+
+        Object.defineProperty(target, "createFilter", {
+            value: function() {
+                var nEntity = this.unwrap();
+                var initing = new JavaArrayClass(arguments.length);
+                for (var v = 0; v < arguments.length; v++)
+                    initing[v] = boxAsJava(arguments[v]);
+                return boxAsJs(nEntity.createFilter(initing));
             }
         });
     }
@@ -372,7 +410,7 @@
                         aDelegate.setColumnObject(colIndex, boxAsJava(aValue));
                     }
                 };
-                Object.defineProperty(target, nField.name, valueAccessorDesc);
+                Object.defineProperty(target, nField.name, {get: valueAccessorDesc.get, set: valueAccessorDesc.set, enumerable: true});
                 Object.defineProperty(target, n, valueAccessorDesc);
             })();
         }
@@ -384,6 +422,10 @@
             var def = EngineUtilsClass.unwrap(ormDefs.get(o));
             Object.defineProperty(target, o, def);
         }
+        Object.defineProperty(target, "unwrap", {
+            value: function() {
+                return aDelegate;
+            }});
         return target;
         // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
     });
@@ -393,7 +435,7 @@
         for (var n = 0; n < nFields.size(); n++) {
             (function() {
                 var nField = nFields[n];
-                var pField = nField.getPublished();
+                var pField = EngineUtilsClass.unwrap(nField.getPublished());
                 Object.defineProperty(target, nField.name, {
                     value: pField
                 });
@@ -437,6 +479,8 @@
         }
         function publishEntity(nEntity, aName) {
             var published = EngineUtilsClass.unwrap(nEntity.getPublished());
+            var paramsSubject = published instanceof P.ApplicationDbParametersEntity
+                    || published instanceof P.ApplicationPlatypusParametersEntity;
             var pSchema = {};
             Object.defineProperty(published, "schema", {
                 value: pSchema
@@ -445,9 +489,7 @@
             for (var n = 0; n < nFields.size(); n++) {
                 (function() {
                     var nField = nFields[n];
-                    // params shortcuts
-                    if (published instanceof P.ApplicationDbParametersEntity
-                            || published instanceof P.ApplicationPlatypusParametersEntity) {
+                    if (paramsSubject) {
                         var valueDesc = {
                             get: function() {
                                 return boxAsJs(nField.value);
@@ -467,14 +509,35 @@
                     Object.defineProperty(pSchema, n, schemaDesc);
                 })();
             }
-            // params shortcuts
-            if (published instanceof P.ApplicationDbParametersEntity
-                    || published instanceof P.ApplicationPlatypusParametersEntity) {
+            if (paramsSubject) {
                 Object.defineProperty(published, "length", {
                     get: function() {
                         return nFields.size();
                     }
                 });
+            } else {
+                // entity.params.p1 syntax
+                var nParameters = nEntity.getQuery().getParameters();
+                var ncParameters = nParameters.toCollection();
+                var pParams = {};
+                for (var p = 0; p < ncParameters.size(); p++) {
+                    var nParameter = ncParameters[p];
+                    var pDesc = {
+                        get: function() {
+                            return boxAsJs(nParameter.value);
+                        },
+                        set: function(aValue) {
+                            nParameter.value = boxAsJava(aValue);
+                        }
+                    };
+                    Object.defineProperty(pParams, nParameter.name, pDesc);
+                    Object.defineProperty(pParams, p, pDesc);
+                }
+                Object.defineProperty(pParams, "length", {value: ncParameters.size()});
+                Object.defineProperty(published, "params", {value: pParams});
+                // entity.params.schema.p1 syntax
+                var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
+                Object.defineProperty(pParams, "schema", {value: pParamsSchema});
             }
             Object.defineProperty(pSchema, "length", {
                 get: function() {
@@ -488,9 +551,10 @@
         var pEntity = model.getParametersEntity();
         publishEntity(pEntity, "params");
         var entities = model.entities();
-        for each (var entity in entities) {
-            if (entity.name) {
-                publishEntity(entity, entity.name);
+        for each (var enEntity in entities) {
+            enEntity.validateQuery();
+            if (enEntity.name) {
+                publishEntity(enEntity, enEntity.name);
             }
         }
         model.createORMDefinitions();
