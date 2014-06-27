@@ -65,5 +65,4 @@
             P.CellData.prototype.style = {};
         }
     };
-
 })();

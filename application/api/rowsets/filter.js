@@ -37,37 +37,26 @@
             P.Filter.prototype.applied = true;
         }
     };
-    Object.defineProperty(P.Filter.prototype, "apply", {
-        enumerable: true,
-        value: function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.apply(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Filter){
         /**
          * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.
          * @method apply
          * @memberOf Filter
          */
-        P.Filter.prototype.apply = function(arg0){};
-    }
-    Object.defineProperty(P.Filter.prototype, "cancel", {
-        enumerable: true,
-        value: function() {
+        P.Filter.prototype.apply = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.cancel();
+            var value = delegate.apply(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Filter){
+        };
+
         /**
          * Cancels applied filter.
          * @method cancel
          * @memberOf Filter
          */
-        P.Filter.prototype.cancel = function(){};
-    }
+        P.Filter.prototype.cancel = function() {
+            var delegate = this.unwrap();
+            var value = delegate.cancel();
+            return P.boxAsJs(value);
+        };
 
 })();

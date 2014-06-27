@@ -79,21 +79,15 @@
             P.Command.prototype.command = '';
         }
     };
-    Object.defineProperty(P.Command.prototype, "consume", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.consume();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Command){
         /**
          * Consumes the change, so other validators and database applier won't apply it.
          * @method consume
          * @memberOf Command
          */
-        P.Command.prototype.consume = function(){};
-    }
+        P.Command.prototype.consume = function() {
+            var delegate = this.unwrap();
+            var value = delegate.consume();
+            return P.boxAsJs(value);
+        };
 
 })();

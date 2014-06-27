@@ -51,5 +51,4 @@
             P.ContainerEvent.prototype.child = {};
         }
     };
-
 })();

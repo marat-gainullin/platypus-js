@@ -405,23 +405,6 @@
              */
             P.TimeSeriesChart.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TimeSeriesChart){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf TimeSeriesChart
-             */
-            P.TimeSeriesChart.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -438,6 +421,23 @@
              * @memberOf TimeSeriesChart
              */
             P.TimeSeriesChart.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TimeSeriesChart){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf TimeSeriesChart
+             */
+            P.TimeSeriesChart.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -655,21 +655,15 @@
             P.TimeSeriesChart.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.TimeSeriesChart.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.TimeSeriesChart){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf TimeSeriesChart
          */
-        P.TimeSeriesChart.prototype.focus = function(){};
-    }
+        P.TimeSeriesChart.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -51,6 +51,9 @@ public class Classes2Scripts {
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
     private static final String DEPS_FILE_NAME = "deps.js";//NOI18N
+    private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
+        "platypus.js", "internals.js", "http-context.js"
+    }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
     private static final int CONSTRUCTOR_IDENT_LEVEL = 1;
@@ -179,7 +182,7 @@ public class Classes2Scripts {
             throw new IllegalArgumentException("Only directory can be used as dest."); // NOI18N
         }
         for (File c : destDirectory.listFiles()) {
-            if (!"platypus.js".equals(c.getName()) && !"internals.js".equals(c.getName()) && !"http-script-context.js".equals(c.getName())) {
+            if (!preservedFilesNames.contains(c.getName())) {
                 FileUtils.delete(c);
             }
         }
@@ -494,12 +497,10 @@ public class Classes2Scripts {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
         int i = ident;
+        sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ++i)).append("\n");
         sb.append(getIndentStr(i));
-        sb.append("Object.defineProperty(P.").append(namespace).append(".prototype, \"").append(method.getName()).append("\", {\n");
-        sb.append(getIndentStr(++i));
-        sb.append("enumerable: true,\n");
-        sb.append(getIndentStr(i));
-        sb.append("value: function(");
+        sb.append("P.").append(namespace).append(".prototype.").append(method.getName()).append(" = ")
+                .append("function(");
         StringBuilder paramsInCall = new StringBuilder();
         StringBuilder formalParams = new StringBuilder();
         String delimiter = "";
@@ -533,13 +534,7 @@ public class Classes2Scripts {
         sb.append(getIndentStr(i));
         sb.append("return P.boxAsJs(value);\n");
         sb.append(getIndentStr(--i));
-        sb.append("}\n");
-        sb.append(getIndentStr(--i));
-        sb.append("});\n");
-        sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
-        sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ++i)).append("\n");
-        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(method.getName()).append(" = function(").append(formalParams).append("){};\n");
-        sb.append(getIndentStr(--i)).append("}");
+        sb.append("};\n");
         return sb.toString();
     }
 

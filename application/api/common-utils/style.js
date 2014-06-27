@@ -138,5 +138,4 @@
             P.Style.prototype.font = {};
         }
     };
-
 })();

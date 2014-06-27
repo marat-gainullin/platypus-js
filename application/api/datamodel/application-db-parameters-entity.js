@@ -303,32 +303,18 @@
             P.ApplicationDbParametersEntity.prototype.willDelete = {};
         }
     };
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "next", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.next();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
         /**
          * Moves the rowset cursor to the next row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method next
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.next = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "find", {
-        enumerable: true,
-        value: function(pairs) {
+        P.ApplicationDbParametersEntity.prototype.next = function() {
             var delegate = this.unwrap();
-            var value = delegate.find(P.boxAsJava(pairs));
+            var value = delegate.next();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Finds rows using field - value pairs.
          * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
@@ -336,17 +322,12 @@
          * @method find
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.find = function(pairs){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "execute", {
-        enumerable: true,
-        value: function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationDbParametersEntity.prototype.find = function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.find(P.boxAsJava(pairs));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Refreshes rowset, only if any of its parameters has changed.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -354,102 +335,72 @@
          * @method execute
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.execute = function(onSuccessCallback, onFailureCallback){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "prev", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.execute = function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
-            var value = delegate.prev();
+            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Moves the rowset cursor to the privious row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method prev
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.prev = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "insert", {
-        enumerable: true,
-        value: function(pairs) {
+        P.ApplicationDbParametersEntity.prototype.prev = function() {
             var delegate = this.unwrap();
-            var value = delegate.insert(P.boxAsJava(pairs));
+            var value = delegate.prev();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Inserts new row in the rowset and sets cursor on this row. @see push.
          * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).
          * @method insert
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.insert = function(pairs){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "eof", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.insert = function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.eof();
+            var value = delegate.insert(P.boxAsJava(pairs));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Checks if cursor in the position before the first row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method eof
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.eof = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "first", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.eof = function() {
             var delegate = this.unwrap();
-            var value = delegate.first();
+            var value = delegate.eof();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Moves the rowset cursor to the first row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method first
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.first = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "last", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.first = function() {
             var delegate = this.unwrap();
-            var value = delegate.last();
+            var value = delegate.first();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Moves the rowset cursor to the last row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method last
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.last = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "pos", {
-        enumerable: true,
-        value: function(index) {
+        P.ApplicationDbParametersEntity.prototype.last = function() {
             var delegate = this.unwrap();
-            var value = delegate.pos(P.boxAsJava(index));
+            var value = delegate.last();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Positions the rowset cursor on the specified row number. Row number is 1-based.
          * @param index the row index to check, starting form <code>1</code>.
@@ -457,33 +408,23 @@
          * @method pos
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.pos = function(index){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "sort", {
-        enumerable: true,
-        value: function(arg0) {
+        P.ApplicationDbParametersEntity.prototype.pos = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.sort(P.boxAsJava(arg0));
+            var value = delegate.pos(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Sorts data according to comparator object returned by createSorting() or by comparator function.
          * @method sort
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.sort = function(arg0){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "insertAt", {
-        enumerable: true,
-        value: function(index, pairs) {
+        P.ApplicationDbParametersEntity.prototype.sort = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
+            var value = delegate.sort(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Inserts new row in the rowset and sets cursor on this row. @see push.
          * @index index the new row will be inserted at. 1 - based.
@@ -491,17 +432,12 @@
          * @method insertAt
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.insertAt = function(index, pairs){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "getRow", {
-        enumerable: true,
-        value: function(index) {
+        P.ApplicationDbParametersEntity.prototype.insertAt = function(index, pairs) {
             var delegate = this.unwrap();
-            var value = delegate.getRow(P.boxAsJava(index));
+            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Gets the row at specified index.
          * @param index the row index, starting form <code>1</code>.
@@ -509,82 +445,57 @@
          * @method getRow
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.getRow = function(index){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "deleteRow", {
-        enumerable: true,
-        value: function(aCursorPosOrInstance) {
+        P.ApplicationDbParametersEntity.prototype.getRow = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            var value = delegate.getRow(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Deletes the row by cursor position or by row itself.
          * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
          * @method deleteRow
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.deleteRow = function(aCursorPosOrInstance){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "beforeFirst", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
             var delegate = this.unwrap();
-            var value = delegate.beforeFirst();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Moves the rowset cursor to the position before the first row.
          * @method beforeFirst
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.beforeFirst = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "afterLast", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.beforeFirst = function() {
             var delegate = this.unwrap();
-            var value = delegate.afterLast();
+            var value = delegate.beforeFirst();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Moves the rowset cursor to the position after the last row.
          * @method afterLast
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.afterLast = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "deleteAll", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.afterLast = function() {
             var delegate = this.unwrap();
-            var value = delegate.deleteAll();
+            var value = delegate.afterLast();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Deletes all rows in the rowset.
          * @method deleteAll
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.deleteAll = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "createFilter", {
-        enumerable: true,
-        value: function(fields) {
+        P.ApplicationDbParametersEntity.prototype.deleteAll = function() {
             var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(fields));
+            var value = delegate.deleteAll();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
          * @param fields the filter conditions fields in following form: entity.schema.propName.
@@ -592,17 +503,12 @@
          * @method createFilter
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.createFilter = function(fields){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "findById", {
-        enumerable: true,
-        value: function(key) {
+        P.ApplicationDbParametersEntity.prototype.createFilter = function(fields) {
             var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
+            var value = delegate.createFilter(P.boxAsJava(fields));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Finds row by its key. Key must a single property.
          * @param key the unique identifier of the row.
@@ -610,17 +516,12 @@
          * @method findById
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.findById = function(key){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "scrollTo", {
-        enumerable: true,
-        value: function(row) {
+        P.ApplicationDbParametersEntity.prototype.findById = function(key) {
             var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
+            var value = delegate.findById(P.boxAsJava(key));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Sets the rowset cursor to the specified row.
          * @param row the row to position the entity cursor.
@@ -628,34 +529,24 @@
          * @method scrollTo
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.scrollTo = function(row){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "bof", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.scrollTo = function(row) {
             var delegate = this.unwrap();
-            var value = delegate.bof();
+            var value = delegate.scrollTo(P.boxAsJava(row));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Checks if cursor in the position before the first row.
          * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
          * @method bof
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.bof = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "requery", {
-        enumerable: true,
-        value: function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationDbParametersEntity.prototype.bof = function() {
             var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.bof();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -663,17 +554,12 @@
          * @method requery
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.requery = function(onSuccessCallback, onFailureCallback){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "createSorting", {
-        enumerable: true,
-        value: function(pairs) {
+        P.ApplicationDbParametersEntity.prototype.requery = function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
+            var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Creates an instance of comparator object using specified constraints objects.
          * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
@@ -681,39 +567,32 @@
          * @method createSorting
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.createSorting = function(pairs){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "beginUpdate", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.beginUpdate();
+            var value = delegate.createSorting(P.boxAsJava(pairs));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Disables automatic model update on parameters change, @see endUpdate method.
          * @method beginUpdate
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.beginUpdate = function(){};
-    }
-    Object.defineProperty(P.ApplicationDbParametersEntity.prototype, "endUpdate", {
-        enumerable: true,
-        value: function() {
+        P.ApplicationDbParametersEntity.prototype.beginUpdate = function() {
             var delegate = this.unwrap();
-            var value = delegate.endUpdate();
+            var value = delegate.beginUpdate();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbParametersEntity){
+        };
+
         /**
          * Enables automatic model update on parameters change, @see beginUpdate method.
          * @method endUpdate
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.endUpdate = function(){};
-    }
+        P.ApplicationDbParametersEntity.prototype.endUpdate = function() {
+            var delegate = this.unwrap();
+            var value = delegate.endUpdate();
+            return P.boxAsJs(value);
+        };
 
 })();

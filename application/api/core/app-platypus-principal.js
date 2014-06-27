@@ -37,5 +37,4 @@
             P.AppPlatypusPrincipal.prototype.name = '';
         }
     };
-
 })();

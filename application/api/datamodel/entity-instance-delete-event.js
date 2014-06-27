@@ -51,5 +51,4 @@
             P.EntityInstanceDeleteEvent.prototype.source = {};
         }
     };
-
 })();

@@ -454,23 +454,6 @@
              */
             P.ButtonGroup.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -487,6 +470,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -742,47 +742,28 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.ButtonGroup.prototype, "add", {
-        enumerable: true,
-        value: function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ButtonGroup){
         /**
          * Appends the specified component to the end of this group.
          * @method add
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.add = function(arg0){};
-    }
-    Object.defineProperty(P.ButtonGroup.prototype, "remove", {
-        enumerable: true,
-        value: function(arg0) {
+        P.ButtonGroup.prototype.add = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(arg0));
+            var value = delegate.add(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ButtonGroup){
+        };
+
         /**
          * Removes the specified component from the group.
          * @method remove
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.remove = function(arg0){};
-    }
-    Object.defineProperty(P.ButtonGroup.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.ButtonGroup.prototype.remove = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.remove(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ButtonGroup){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -790,39 +771,32 @@
          * @method child
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.ButtonGroup.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.ButtonGroup.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ButtonGroup){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.ButtonGroup.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ButtonGroup.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ButtonGroup){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.focus = function(){};
-    }
+        P.ButtonGroup.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

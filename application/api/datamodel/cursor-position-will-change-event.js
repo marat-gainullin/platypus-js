@@ -65,5 +65,4 @@
             P.CursorPositionWillChangeEvent.prototype.newIndex = 0;
         }
     };
-
 })();

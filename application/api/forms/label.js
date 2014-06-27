@@ -462,23 +462,6 @@
              */
             P.Label.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Label
-             */
-            P.Label.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -495,6 +478,23 @@
              * @memberOf Label
              */
             P.Label.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Label
+             */
+            P.Label.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -780,21 +780,15 @@
             P.Label.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.Label.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Label){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Label
          */
-        P.Label.prototype.focus = function(){};
-    }
+        P.Label.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

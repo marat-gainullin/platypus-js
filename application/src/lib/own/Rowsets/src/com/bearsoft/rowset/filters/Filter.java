@@ -9,6 +9,8 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.RowWrap;
+import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.utils.KeySet;
 import com.eas.script.AlreadyPublishedException;
@@ -176,12 +178,18 @@ public class Filter extends HashOrderer implements HasPublished {
                 try {
                     if (values != null) {
                         if (rowset.getRowsetChangeSupport().fireWillFilterEvent()) {
-                            if (!caseSensitive) {
-                                for (int i = 0; i < values.size(); i++) {
-                                    Object keyValue = values.get(i);
-                                    if (keyValue != null && keyValue instanceof String) {
-                                        values.set(i, ((String) keyValue).toLowerCase());
+                            for (int i = 0; i < values.size(); i++) {
+                                Object keyValue = values.get(i);
+                                if (i < fieldsIndicies.size()) {
+                                    int keyFieldColIndex = fieldsIndicies.get(i);
+                                    Field keyField = rowset.getFields().get(keyFieldColIndex);
+                                    keyValue = rowset.getConverter().convert2RowsetCompatible(keyValue, keyField.getTypeInfo());
+                                    if (!caseSensitive && keyValue != null && keyValue instanceof String) {
+                                        keyValue = ((String) keyValue).toLowerCase();
                                     }
+                                    values.set(i, keyValue);
+                                } else {
+                                    throw new RowsetException("Filtering keys array is greater then rowset's fields array");
                                 }
                             }
                             if (filterApplied) {
@@ -243,7 +251,7 @@ public class Filter extends HashOrderer implements HasPublished {
     @ScriptFunction(jsDoc = "/**\n"
             + " * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.\n"
             + "*/")
-    public void apply(Object ... values) throws RowsetException {
+    public void apply(Object... values) throws RowsetException {
         filterRowset(values);
     }
 
@@ -320,8 +328,8 @@ public class Filter extends HashOrderer implements HasPublished {
             assert rowset != null;
             List<Row> rows = rowset.getOriginal();
             if (rows != null) {
-                for (int i = 0; i < rows.size(); i++) {
-                    add(rows.get(i));
+                for (Row row : rows) {
+                    add(row);
                 }
             }
         } else {

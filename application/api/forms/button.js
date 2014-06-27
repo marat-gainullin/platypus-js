@@ -464,23 +464,6 @@
              */
             P.Button.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Button){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Button
-             */
-            P.Button.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -497,6 +480,23 @@
              * @memberOf Button
              */
             P.Button.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Button
+             */
+            P.Button.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -748,21 +748,15 @@
             P.Button.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.Button.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Button){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Button
          */
-        P.Button.prototype.focus = function(){};
-    }
+        P.Button.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

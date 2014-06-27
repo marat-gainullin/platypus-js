@@ -405,23 +405,6 @@
              */
             P.PieChart.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -438,6 +421,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -655,21 +655,15 @@
             P.PieChart.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.PieChart.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.PieChart){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf PieChart
          */
-        P.PieChart.prototype.focus = function(){};
-    }
+        P.PieChart.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -328,21 +328,15 @@
             P.Parameter.prototype.value = {};
         }
     };
-    Object.defineProperty(P.Parameter.prototype, "assignFrom", {
-        enumerable: true,
-        value: function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.assignFrom(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Parameter){
         /**
          * Assigning method of field/parameter information using specified source.
          * @method assignFrom
          * @memberOf Parameter
          */
-        P.Parameter.prototype.assignFrom = function(arg0){};
-    }
+        P.Parameter.prototype.assignFrom = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.assignFrom(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
 
 })();

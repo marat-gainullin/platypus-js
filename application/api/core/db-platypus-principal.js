@@ -37,5 +37,4 @@
             P.DbPlatypusPrincipal.prototype.name = '';
         }
     };
-
 })();

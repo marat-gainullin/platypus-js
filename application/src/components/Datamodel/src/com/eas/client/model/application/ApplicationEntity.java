@@ -1619,13 +1619,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             try {
                 return ScriptUtils.toJava(aHandler.call(getPublished(), new Object[]{aEvent.getPublished()}));
             } catch (Exception ex) {
-                if (!(ex instanceof IllegalStateException) || ex.getMessage() == null || !ex.getMessage().equals("break")) {
-                    if (ex.getMessage() != null) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, " while executing \"" + aHandler + "\" event handler.", ex);
-                        if (model.getGuiCallback() != null) {
-                            model.getGuiCallback().showMessageDialog(ex.getMessage(), "Error", GuiCallback.ERROR_MESSAGE);
-                        }
-                    }
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                if (model.getGuiCallback() != null) {
+                    model.getGuiCallback().showMessageDialog(ex.getMessage(), "Error", GuiCallback.ERROR_MESSAGE);
                 }
             }
         }

@@ -23,15 +23,6 @@
             P.ApplicationPlatypusModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "save", {
-        enumerable: true,
-        value: function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.save(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusModel){
         /**
          * Saves model data changes. Calls aCallback when done.
          * If model can't apply the changed, than exception is thrown.
@@ -39,33 +30,23 @@
          * @method save
          * @memberOf ApplicationPlatypusModel
          * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().
-        P.ApplicationPlatypusModel.prototype.save = function(arg0){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "requery", {
-        enumerable: true,
-        value: function(onSuccess, onFailure) {
+        P.ApplicationPlatypusModel.prototype.save = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            var value = delegate.save(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusModel){
+        };
+
         /**
          * Requeries model data. Calls onSuccess callback when complete and onError callback if error occured.
          * @method requery
          * @memberOf ApplicationPlatypusModel
          */
-        P.ApplicationPlatypusModel.prototype.requery = function(onSuccess, onFailure){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "execute", {
-        enumerable: true,
-        value: function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationPlatypusModel.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusModel){
+        };
+
         /**
          * Refreshes the model, only if any of its parameters has changed.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -73,17 +54,12 @@
          * @method execute
          * @memberOf ApplicationPlatypusModel
          */
-        P.ApplicationPlatypusModel.prototype.execute = function(onSuccessCallback, onFailureCallback){};
-    }
-    Object.defineProperty(P.ApplicationPlatypusModel.prototype, "loadEntity", {
-        enumerable: true,
-        value: function(queryId) {
+        P.ApplicationPlatypusModel.prototype.execute = function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
-            var value = delegate.loadEntity(P.boxAsJava(queryId));
+            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationPlatypusModel){
+        };
+
         /**
          * Creates new entity of model, based on application query.
          * @param queryId the query application element ID.
@@ -91,7 +67,10 @@
          * @method loadEntity
          * @memberOf ApplicationPlatypusModel
          */
-        P.ApplicationPlatypusModel.prototype.loadEntity = function(queryId){};
-    }
+        P.ApplicationPlatypusModel.prototype.loadEntity = function(queryId) {
+            var delegate = this.unwrap();
+            var value = delegate.loadEntity(P.boxAsJava(queryId));
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -29,5 +29,4 @@
             P.Font.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-
 })();

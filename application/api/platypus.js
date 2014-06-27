@@ -119,6 +119,7 @@
         });
     };
     load("classpath:deps.js");
+    load("classpath:http-context.js");
 
     /**
      * @static
@@ -384,10 +385,35 @@
         Object.defineProperty(target, "createFilter", {
             value: function() {
                 var nEntity = this.unwrap();
-                var initing = new JavaArrayClass(arguments.length);
+                var varargs = new JavaArrayClass(arguments.length);
                 for (var v = 0; v < arguments.length; v++)
-                    initing[v] = boxAsJava(arguments[v]);
-                return boxAsJs(nEntity.createFilter(initing));
+                    varargs[v] = boxAsJava(arguments[v]);
+                return boxAsJs(nEntity.createFilter(varargs));
+            }
+        });
+
+        Object.defineProperty(target, "createSorting", {
+            value: function() {
+                var nEntity = this.unwrap();
+                var varargs = new JavaArrayClass(arguments.length);
+                for (var v = 0; v < arguments.length; v++)
+                    varargs[v] = boxAsJava(arguments[v]);
+                return boxAsJs(nEntity.createSorting(varargs));
+            }
+        });
+
+        Object.defineProperty(target, "find", {
+            value: function() {
+                var nEntity = this.unwrap();
+                var varargs = new JavaArrayClass(arguments.length);
+                for (var v = 0; v < arguments.length; v++)
+                    varargs[v] = boxAsJava(arguments[v]);
+                var found = nEntity.find(varargs);
+                var res = [];
+                for (var f = 0; f < found.size(); f++) {
+                    res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                }
+                return res;
             }
         });
     }
@@ -455,6 +481,14 @@
     extend(P.ApplicationPlatypusEntity, BoundArray);
     extend(P.ApplicationDbParametersEntity, BoundArray);
     extend(P.ApplicationPlatypusParametersEntity, BoundArray);
+
+    P.Filter.prototype.apply = function() {
+        var varargs = new JavaArrayClass(arguments.length);
+        for (var v = 0; v < arguments.length; v++)
+            varargs[v] = boxAsJava(arguments[v]);
+        var nFilter = this.unwrap();
+        nFilter.apply(varargs);
+    };
 
     /**
      * @static

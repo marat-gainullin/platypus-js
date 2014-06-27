@@ -260,5 +260,4 @@
             P.Field.prototype.pk = true;
         }
     };
-
 })();

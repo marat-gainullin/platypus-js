@@ -37,5 +37,4 @@
             P.PublishedSourcedEvent.prototype.source = {};
         }
     };
-
 })();

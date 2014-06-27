@@ -469,23 +469,6 @@
              */
             P.BoxPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -502,6 +485,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -740,65 +740,41 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.BoxPane.prototype, "add", {
-        enumerable: true,
-        value: function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.BoxPane){
         /**
          * Appends the specified component to the end of this container.
          * @param component the component to add
          * @method add
          * @memberOf BoxPane
          */
-        P.BoxPane.prototype.add = function(component){};
-    }
-    Object.defineProperty(P.BoxPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.BoxPane.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BoxPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf BoxPane
          */
-        P.BoxPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.BoxPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.BoxPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BoxPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf BoxPane
          */
-        P.BoxPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.BoxPane.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.BoxPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BoxPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -806,23 +782,21 @@
          * @method child
          * @memberOf BoxPane
          */
-        P.BoxPane.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.BoxPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.BoxPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BoxPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf BoxPane
          */
-        P.BoxPane.prototype.focus = function(){};
-    }
+        P.BoxPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -405,23 +405,6 @@
              */
             P.LineChart.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.LineChart){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf LineChart
-             */
-            P.LineChart.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -438,6 +421,23 @@
              * @memberOf LineChart
              */
             P.LineChart.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.LineChart){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf LineChart
+             */
+            P.LineChart.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -655,21 +655,15 @@
             P.LineChart.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.LineChart.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.LineChart){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf LineChart
          */
-        P.LineChart.prototype.focus = function(){};
-    }
+        P.LineChart.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();
