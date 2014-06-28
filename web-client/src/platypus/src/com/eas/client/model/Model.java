@@ -41,14 +41,14 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * @author mg
  */
-public class Model implements HasPublished{
+public class Model implements HasPublished {
 
 	public static final String SCRIPT_MODEL_NAME = "model";
 	public static final String PARAMETERS_SCRIPT_NAME = "params";
 	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
 	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
 	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-	
+
 	protected Set<String> savedRowIndexEntities = new HashSet<String>();
 	protected List<Entry<Entity, Integer>> savedEntitiesRowIndexes = new ArrayList<Entry<Entity, Integer>>();
 	protected AppClient client;
@@ -195,33 +195,33 @@ public class Model implements HasPublished{
 			}
 		}
 	}
-	
-	public void checkRelationsIntegrity() {
-        List<Relation> toDel = new ArrayList<Relation>();
-        for (Relation rel : relations) {
-            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
-                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
-                toDel.add(rel);
-            }
-        }
-        for (Relation rel : toDel) {
-            removeRelation(rel);
-        }
-        checkReferenceRelationsIntegrity();
-    }
 
-    protected void checkReferenceRelationsIntegrity() {
-        List<ReferenceRelation> toDel = new ArrayList<ReferenceRelation>();
-        for (ReferenceRelation rel : referenceRelations) {
-            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
-                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
-                toDel.add(rel);
-            }
-        }
-        for (ReferenceRelation rel : toDel) {
-        	referenceRelations.remove(rel);
-        }
-    }
+	public void checkRelationsIntegrity() {
+		List<Relation> toDel = new ArrayList<Relation>();
+		for (Relation rel : relations) {
+			if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null) || rel.getRightEntity() == null
+			        || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+				toDel.add(rel);
+			}
+		}
+		for (Relation rel : toDel) {
+			removeRelation(rel);
+		}
+		checkReferenceRelationsIntegrity();
+	}
+
+	protected void checkReferenceRelationsIntegrity() {
+		List<ReferenceRelation> toDel = new ArrayList<ReferenceRelation>();
+		for (ReferenceRelation rel : referenceRelations) {
+			if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null) || rel.getRightEntity() == null
+			        || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+				toDel.add(rel);
+			}
+		}
+		for (ReferenceRelation rel : toDel) {
+			referenceRelations.remove(rel);
+		}
+	}
 
 	/**
 	 * Base model constructor.
@@ -244,6 +244,7 @@ public class Model implements HasPublished{
 		this();
 		client = aClient;
 	}
+
 	public PropertyChangeSupport getChangeSupport() {
 		return changeSupport;
 	}
@@ -298,7 +299,7 @@ public class Model implements HasPublished{
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}
-	
+
 	@Override
 	public void setPublished(JavaScriptObject aValue) {
 		if (jsPublished != aValue) {
@@ -307,7 +308,7 @@ public class Model implements HasPublished{
 		}
 	}
 
-	private void publish(){
+	private void publish() {
 		try {
 			publishTopLevelFacade(jsPublished, this);
 			publishRowsets();
@@ -315,30 +316,19 @@ public class Model implements HasPublished{
 			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
- 
+
 	private void publishRowsets() throws Exception {
 		assert jsPublished != null : "JavaScript facade object has to be already installed while publishing rowsets facades.";
 		validateQueries();
 		for (Entity entity : entities.values()) {
+			JavaScriptObject publishedEntity = JsModel.publish(entity);
 			if (entity instanceof ParametersEntity) {
-				String oldName = entity.getName();
-				try {
-					if (!"params".equals(oldName)) {
-						entity.setName("params");
-						JavaScriptObject publishedEntity = JsModel.publish(entity);
-						Entity.publishRows(publishedEntity);
-						if(entity.getName() != null && !entity.getName().isEmpty()){
-							jsPublished.<JsObject>cast().inject(entity.getName(), publishedEntity);
-						}
-					}
-				} finally {
-					entity.setName(oldName);
-				}
-			} else {
-				JavaScriptObject publishedEntity = JsModel.publish(entity);
+				ParametersEntity.publishTopLevelFacade(publishedEntity);
+				jsPublished.<JsObject> cast().inject("params", publishedEntity);
+			}else{
 				Entity.publishRows(publishedEntity);
-				if(entity.getName() != null && !entity.getName().isEmpty()){
-					jsPublished.<JsObject>cast().inject(entity.getName(), publishedEntity);
+				if (entity.getName() != null && !entity.getName().isEmpty()) {
+					jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
 				}
 			}
 		}
@@ -420,44 +410,44 @@ public class Model implements HasPublished{
 
 	public native static void publishTopLevelFacade(JavaScriptObject aTarget, Model aModel) throws Exception/*-{
 		var publishedModel = aTarget;
-		Object.defineProperty(publishedModel, "createQuery", { 
-			get : function(){
+		Object.defineProperty(publishedModel, "createQuery", {
+			get : function() {
 				return function(aQueryId) {
 					$wnd.P.Logger.warning("createQuery deprecated call detected. Use loadEntity() instead.");
 					return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
 				}
 			}
 		});
-		Object.defineProperty(publishedModel, "loadEntity", { 
-			get : function(){
+		Object.defineProperty(publishedModel, "loadEntity", {
+			get : function() {
 				return function(aQueryId) {
 					return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
 				}
 			}
 		});
-		Object.defineProperty(publishedModel, "save", { 
-			get : function(){
+		Object.defineProperty(publishedModel, "save", {
+			get : function() {
 				return function(onScuccess, onFailure) {
 					aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onScuccess, onFailure);
 				}
 			}
 		});
-		Object.defineProperty(publishedModel, "revert", { 
-			get : function(){
+		Object.defineProperty(publishedModel, "revert", {
+			get : function() {
 				return function() {
 					aModel.@com.eas.client.model.Model::revert()();
 				}
 			}
 		});
-		Object.defineProperty(publishedModel, "requery", { 
-			get : function(){
-				return  function(onSuccess, onFailure) {
+		Object.defineProperty(publishedModel, "requery", {
+			get : function() {
+				return function(onSuccess, onFailure) {
 					aModel.@com.eas.client.model.Model::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 				}
 			}
 		});
-		Object.defineProperty(publishedModel, "unwrap", { 
-			get : function(){
+		Object.defineProperty(publishedModel, "unwrap", {
+			get : function() {
 				return function() {
 					return aModel;
 				}
@@ -646,18 +636,18 @@ public class Model implements HasPublished{
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-			
+
 			@Override
 			public void onFailure(String aReason) {
 				try {
-	                rolledback();
-	                if (onFailure != null)
-	                	Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
-                } catch (Exception ex) {
-                	Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-                }
+					rolledback();
+					if (onFailure != null)
+						Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+				} catch (Exception ex) {
+					Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+				}
 			}
-			
+
 		});
 	}
 
@@ -693,13 +683,13 @@ public class Model implements HasPublished{
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-			
+
 			@Override
 			public void onFailure(String reason) {
-				if (onFailure != null){
-					try{
+				if (onFailure != null) {
+					try {
 						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
-					}catch(Exception ex){
+					} catch (Exception ex) {
 						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -720,13 +710,13 @@ public class Model implements HasPublished{
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-			
+
 			@Override
 			public void onFailure(String reason) {
-				if (onFailure != null){
-					try{
+				if (onFailure != null) {
+					try {
 						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
-					}catch(Exception ex){
+					} catch (Exception ex) {
 						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}

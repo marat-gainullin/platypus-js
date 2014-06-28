@@ -13,6 +13,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * 
@@ -105,4 +106,28 @@ public class ParametersEntity extends Entity {
 	@Override
 	public void validateQuery() throws Exception {
 	}
+	
+	public static native void publishTopLevelFacade(JavaScriptObject published)/*-{
+		Object.defineProperty(published, "length", {
+			get : function(){
+				return published.schema.length; 
+			}
+		});
+		for(var i = 0; i < published.schema.length; i++){
+			(function(){
+				var pParameter = published.schema[i];
+				var _i = i;
+				var propDesc = {
+					get : function(){
+						return published.getObject(_i + 1);
+					},
+					set : function(aValue){
+						published.updateObject(_i + 1, aValue);
+					}
+				};
+				Object.defineProperty(published, pParameter.name, propDesc);
+				Object.defineProperty(published, _i, propDesc);
+			})();
+		}
+	}-*/;
 }

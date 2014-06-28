@@ -317,11 +317,11 @@ public class JsEvents {
 	}-*/;	
 	
 	public native static JavaScriptObject publishCursorPositionWillChangeEvent(JavaScriptObject aSource, int aOldIndex, int aNewIndex)/*-{
-		return new $wnd.P.CursorPositionWillChangeEvent(aSource, OldIndex, aNewIndex);
+		return new $wnd.P.CursorPositionWillChangeEvent(aSource, aOldIndex, aNewIndex);
 	}-*/;	
 	
 	public native static JavaScriptObject publishCursorPositionChangedEvent(JavaScriptObject aSource, int aOldIndex, int aNewIndex)/*-{
-		return new $wnd.P.CursorPositionChangedEvent(aSource, OldIndex, aNewIndex);
+		return new $wnd.P.CursorPositionChangedEvent(aSource, aOldIndex, aNewIndex);
 	}-*/;		
 	
 	public native static JavaScriptObject publishEntityInstanceChangeEvent(JavaScriptObject aSource, JavaScriptObject aField, Object aOldValue, Object aNewValue)/*-{

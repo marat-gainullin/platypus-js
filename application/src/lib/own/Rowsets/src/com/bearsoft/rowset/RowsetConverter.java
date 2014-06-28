@@ -221,7 +221,7 @@ public class RowsetConverter implements Converter {
                     if (aValue instanceof Number) {
                         return BigInteger.valueOf(((Number) aValue).longValue());
                     } else if (aValue instanceof String) {
-                        return new BigInteger((String) aValue);
+                        return (new BigDecimal((String) aValue)).toBigInteger();
                     } else if (aValue instanceof Boolean) {
                         return BigInteger.valueOf(((Boolean) aValue) ? 1 : 0);
                     } else if (aValue instanceof Date) {
@@ -233,7 +233,7 @@ public class RowsetConverter implements Converter {
                     if (aValue instanceof Number) {
                         return ((Number) aValue).shortValue();
                     } else if (aValue instanceof String) {
-                        return Integer.valueOf((String) aValue).shortValue();
+                        return Double.valueOf((String) aValue).shortValue();
                     } else if (aValue instanceof Boolean) {
                         return Integer.valueOf(((Boolean) aValue) ? 1 : 0).shortValue();
                     } else if (aValue instanceof Date) {
@@ -244,38 +244,38 @@ public class RowsetConverter implements Converter {
                 case Types.INTEGER:
                     // target type - Integer
                     if (aValue instanceof Number) {
-                        return Integer.valueOf(((Number) aValue).intValue());
+                        return ((Number) aValue).intValue();
                     } else if (aValue instanceof String) {
-                        return Integer.valueOf((String) aValue);
+                        return Double.valueOf((String) aValue).intValue();
                     } else if (aValue instanceof Boolean) {
-                        return Integer.valueOf(((Boolean) aValue) ? 1 : 0);
+                        return (Boolean) aValue ? 1 : 0;
                     } else if (aValue instanceof Date) {
-                        return Integer.valueOf((int) ((Date) aValue).getTime());
+                        return (int) ((Date) aValue).getTime();
                     }
                     break;
                 case Types.REAL:
                 case Types.FLOAT:
                     // target type - Float
                     if (aValue instanceof Number) {
-                        return Float.valueOf(((Number) aValue).floatValue());
+                        return ((Number) aValue).floatValue();
                     } else if (aValue instanceof String) {
-                        return Float.valueOf((String) aValue);
+                        return Double.valueOf((String) aValue).floatValue();
                     } else if (aValue instanceof Boolean) {
-                        return Float.valueOf(((Boolean) aValue) ? 1 : 0);
+                        return ((Boolean) aValue) ? 1 : 0;
                     } else if (aValue instanceof Date) {
-                        return Float.valueOf((float) ((Date) aValue).getTime());
+                        return (float) ((Date) aValue).getTime();
                     }
                     break;
                 case Types.DOUBLE:
                     // target type - Double
                     if (aValue instanceof Number) {
-                        return Double.valueOf(((Number) aValue).doubleValue());
+                        return ((Number) aValue).doubleValue();
                     } else if (aValue instanceof String) {
                         return Double.valueOf((String) aValue);
                     } else if (aValue instanceof Boolean) {
-                        return Double.valueOf(((Boolean) aValue) ? 1 : 0);
+                        return ((Boolean) aValue) ? 1 : 0;
                     } else if (aValue instanceof Date) {
-                        return Double.valueOf((double) ((Date) aValue).getTime());
+                        return (double) ((Date) aValue).getTime();
                     }
                     break;
                 // strings
@@ -335,19 +335,15 @@ public class RowsetConverter implements Converter {
                 case Types.TIMESTAMP:
                 case Types.TIME:
                     // target type - date
-                    Date lValue = null;
                     if (aValue instanceof Number) {
-                        lValue = new Date(((Number) aValue).longValue());
+                        return new Date(((Number) aValue).longValue());
                     } else if (aValue instanceof String) {
-                        lValue = new Date(Long.valueOf((String) aValue));
+                        return new Date(Long.valueOf((String) aValue));
                     } else if (aValue instanceof Boolean) {
-                        lValue = new Date(Long.valueOf(((Boolean) aValue) ? 1 : 0));
+                        return new Date(((Boolean) aValue) ? 1 : 0);
                     } else if (aValue instanceof Date) {
-                        lValue = ((Date) aValue);
-                    } else {
-                        return aValue;
+                        return ((Date) aValue);
                     }
-                    return lValue;
             }
         }
         return aValue;
@@ -462,7 +458,7 @@ public class RowsetConverter implements Converter {
                         if (aValue instanceof Number) {
                             castedShort = ((Number) aValue).shortValue();
                         } else if (aValue instanceof String) {
-                            castedShort = Integer.valueOf((String) aValue).shortValue();
+                            castedShort = Double.valueOf((String) aValue).shortValue();
                         } else if (aValue instanceof Boolean) {
                             castedShort = Integer.valueOf(((Boolean) aValue) ? 1 : 0).shortValue();
                         } else if (aValue instanceof Date) {
@@ -477,13 +473,13 @@ public class RowsetConverter implements Converter {
                         // target type - Integer
                         Integer castedInt = null;
                         if (aValue instanceof Number) {
-                            castedInt = Integer.valueOf(((Number) aValue).intValue());
+                            castedInt = ((Number) aValue).intValue();
                         } else if (aValue instanceof String) {
-                            castedInt = Integer.valueOf((String) aValue);
+                            castedInt = Double.valueOf((String) aValue).intValue();
                         } else if (aValue instanceof Boolean) {
-                            castedInt = Integer.valueOf(((Boolean) aValue) ? 1 : 0);
+                            castedInt = (Boolean) aValue ? 1 : 0;
                         } else if (aValue instanceof Date) {
-                            castedInt = Integer.valueOf((int) ((Date) aValue).getTime());
+                            castedInt = (int) ((Date) aValue).getTime();
                         }
                         if (castedInt == null) {
                             checkDataLoss(aValue);
@@ -494,13 +490,13 @@ public class RowsetConverter implements Converter {
                         // target type - Float
                         Float castedFloat = null;
                         if (aValue instanceof Number) {
-                            castedFloat = Float.valueOf(((Number) aValue).floatValue());
+                            castedFloat = ((Number) aValue).floatValue();
                         } else if (aValue instanceof String) {
                             castedFloat = Float.valueOf((String) aValue);
                         } else if (aValue instanceof Boolean) {
                             castedFloat = Float.valueOf(((Boolean) aValue) ? 1 : 0);
                         } else if (aValue instanceof Date) {
-                            castedFloat = Float.valueOf((float) ((Date) aValue).getTime());
+                            castedFloat = (float) ((Date) aValue).getTime();
                         }
                         if (castedFloat == null) {
                             checkDataLoss(aValue);
@@ -510,13 +506,13 @@ public class RowsetConverter implements Converter {
                         // target type - Double
                         Double castedDouble = null;
                         if (aValue instanceof Number) {
-                            castedDouble = Double.valueOf(((Number) aValue).doubleValue());
+                            castedDouble = ((Number) aValue).doubleValue();
                         } else if (aValue instanceof String) {
                             castedDouble = Double.valueOf((String) aValue);
                         } else if (aValue instanceof Boolean) {
                             castedDouble = Double.valueOf(((Boolean) aValue) ? 1 : 0);
                         } else if (aValue instanceof Date) {
-                            castedDouble = Double.valueOf((double) ((Date) aValue).getTime());
+                            castedDouble = (double) ((Date) aValue).getTime();
                         }
                         if (castedDouble == null) {
                             checkDataLoss(aValue);
@@ -681,64 +677,34 @@ public class RowsetConverter implements Converter {
                     case Types.NUMERIC:
                         // target type - BigDecimal
                         BigDecimal castedDecimal = (BigDecimal) aValue;
-                        if (castedDecimal != null) {
-                            aStmt.setBigDecimal(aParameterIndex, castedDecimal);
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setBigDecimal(aParameterIndex, castedDecimal);
                         break;
                     case Types.BIGINT:
                         // target type - BigInteger
                         BigInteger castedInteger = (BigInteger) aValue;
-                        if (castedInteger != null) {
-                            aStmt.setBigDecimal(aParameterIndex, new BigDecimal(castedInteger));
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setBigDecimal(aParameterIndex, new BigDecimal(castedInteger));
                         break;
                     case Types.SMALLINT:
                         // target type - Short
                         Short castedShort = (Short) aValue;
-                        if (castedShort != null) {
-                            aStmt.setShort(aParameterIndex, castedShort);
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setShort(aParameterIndex, castedShort);
                         break;
                     case Types.TINYINT:
                     case Types.INTEGER:
                         // target type - Integer
                         Integer castedInt = (Integer) aValue;
-                        if (castedInt != null) {
-                            aStmt.setInt(aParameterIndex, castedInt);
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setInt(aParameterIndex, castedInt);
                         break;
                     case Types.REAL:
                     case Types.FLOAT:
                         // target type - Float
                         Float castedFloat = (Float) aValue;
-                        if (castedFloat != null) {
-                            aStmt.setFloat(aParameterIndex, castedFloat);
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setFloat(aParameterIndex, castedFloat);
                         break;
                     case Types.DOUBLE:
                         // target type - Double
                         Double castedDouble = (Double) aValue;
-                        if (castedDouble != null) {
-                            aStmt.setDouble(aParameterIndex, castedDouble);
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setDouble(aParameterIndex, castedDouble);
                         break;
                     case Types.CHAR:
                     case Types.VARCHAR:
@@ -748,27 +714,17 @@ public class RowsetConverter implements Converter {
                     case Types.LONGNVARCHAR:
                         // target type - string
                         String castedString = (String) aValue;
-                        if (castedString != null) {
-                            if (aTypeInfo.getSqlType() == Types.NCHAR || aTypeInfo.getSqlType() == Types.NVARCHAR || aTypeInfo.getSqlType() == Types.LONGNVARCHAR) {
-                                aStmt.setNString(aParameterIndex, castedString);
-                            } else {
-                                aStmt.setString(aParameterIndex, castedString);
-                            }
+                        if (aTypeInfo.getSqlType() == Types.NCHAR || aTypeInfo.getSqlType() == Types.NVARCHAR || aTypeInfo.getSqlType() == Types.LONGNVARCHAR) {
+                            aStmt.setNString(aParameterIndex, castedString);
                         } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
+                            aStmt.setString(aParameterIndex, castedString);
                         }
                         break;
                     case Types.BOOLEAN:
                     case Types.BIT:
                         // target type - Boolean
                         Boolean castedBoolean = (Boolean) aValue;
-                        if (castedBoolean != null) {
-                            aStmt.setBoolean(aParameterIndex, castedBoolean);
-                        } else {
-                            aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
-                            checkDataLoss(aValue);
-                        }
+                        aStmt.setBoolean(aParameterIndex, castedBoolean);
                         break;
                     case Types.DATE:
                     case Types.TIMESTAMP:

@@ -139,9 +139,7 @@ public class Entity implements RowsetListener, HasPublished{
 
 	private static native JavaScriptObject publishEntityFacade(Entity aEntity)/*-{
 
-		function getRowset() {
-			return aEntity.@com.eas.client.model.Entity::getRowset()();
-		}
+		var rowset = aEntity.@com.eas.client.model.Entity::getRowset()();
 		
 		function propsToArray(aObj){
 			var linearProps = [];
@@ -157,20 +155,16 @@ public class Entity implements RowsetListener, HasPublished{
 		// array mutator methods
 		Object.defineProperty(published, "pop", { 
 			value : function(){
-                var rowset = getRowset();
                 if(rowset != null){
-                        var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-                        var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-                        rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
-                        return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-                }else{
-                        return undefined;
+                    var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
+                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
+                    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
                 }
 			}
         });
         Object.defineProperty(published, "shift", {
         	value : function(){
-                var rowset = getRowset();
                 if(rowset != null){
                     var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
                     rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
@@ -180,22 +174,20 @@ public class Entity implements RowsetListener, HasPublished{
         });
         Object.defineProperty(published, "push", {
         	value : function(){
-                var rowset = getRowset();
                 if(rowset != null){
-                        for(var i=0;i<arguments.length;i++){
-                                var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
-                                var propsAsArray = propsToArray(arguments[i]);
-                                aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
-                        }
-                        return rowset.@com.bearsoft.rowset.Rowset::size()();
+                    for(var i = 0; i < arguments.length; i++){
+                        var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
+                        var propsAsArray = propsToArray(arguments[i]);
+                        aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize + 1, propsAsArray);
+                    }
+                    return rowset.@com.bearsoft.rowset.Rowset::size()();
                 }else{
-                        return 0;
+                    return 0;
                 }
         	}
         });
         Object.defineProperty(published, "unshift", {
         	value : function(){
-                var rowset = getRowset();
                 if(rowset != null){
                     for(var i = arguments.length - 1; i >= 0; i--){
                         var propsAsArray = propsToArray(arguments[i]);
@@ -208,43 +200,36 @@ public class Entity implements RowsetListener, HasPublished{
         });
         Object.defineProperty(published, "reverse", {
         	value : function(){
-                var rowset = getRowset();
                 if(rowset != null){
-                        rowset.@com.bearsoft.rowset.Rowset::reverse()();
+                    rowset.@com.bearsoft.rowset.Rowset::reverse()();
                 }
         	}
         });
         Object.defineProperty(published, "splice", {
         	value : function(){
                 if(arguments.length > 0){
-                    var rowset = getRowset();
                     if(rowset != null){
                         var size = rowset.@com.bearsoft.rowset.Rowset::size()();
                         var startAt = arguments[0];
                         if(startAt < 0)
-                                startAt = size+startAt;
+                            startAt = size + startAt;
                         if(startAt < 0)
-                                throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
+                            throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
                         var howMany = arguments.length > 1 ? arguments[1] : size;
                         if(howMany < 0)
-                                throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
-                        var toAdd = [];
-                        if(arguments.length > 2)
-                        {
-                                for(var ai=2; ai<arguments.length; ai++)
-                                        toAdd.push(arguments[ai]);
-                        }
+                            throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
+                        var toAdd = arguments.length > 2 ? $wnd.Array.prototype.slice.call(arguments, 2) : [];
                         var removed = [];
                         while(startAt < size && removed.length < howMany){
-                            var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
-                            rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
+                            var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt + 1);
+                            rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt + 1);
                             var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
                             removed.push(deletedFacade);
                             size = rowset.@com.bearsoft.rowset.Rowset::size()();
                         }
                         for(var l = arguments.length - 1; l >= 2; l--){						
                             var propsAsArray = propsToArray(arguments[l]);
-                            aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
+                            aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt + 1, propsAsArray);
                         }
                         return removed;
                     }else
@@ -269,7 +254,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "isModified", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::isModified()();
 				else
@@ -278,7 +262,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "isEmpty", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::isEmpty()();
 				else
@@ -287,7 +270,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "isInserting", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::isInserting()();
 				else
@@ -296,7 +278,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "getSize", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::size()();
 				else
@@ -305,7 +286,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "getRowIndex", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::getCursorPos()();
 				else
@@ -314,7 +294,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "setRowIndex", {
 			value : function(aRowIndex) {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aRowIndex);
 			}
@@ -342,7 +321,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "beforeFirst", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::beforeFirst()();
 				else
@@ -351,7 +329,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "afterLast", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::afterLast()();
 				else
@@ -360,7 +337,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "bof", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::isBeforeFirst()();
 				else
@@ -369,7 +345,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "eof", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::isAfterLast()();
 				else
@@ -378,7 +353,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "first", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::first()();
 				else
@@ -387,7 +361,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "next", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::next()();
 				else
@@ -396,7 +369,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "prev", {
 			 value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::previous()();
 				else
@@ -405,7 +377,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "last", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::last()();
 				else
@@ -414,7 +385,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "pos", {
 			value : function(aIndex) {
-				var rowset = getRowset();
 				if(rowset != null)
 					return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aIndex);
 				else
@@ -423,7 +393,6 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "getRow", {
 			value : function(aIndex) {
-				var rowset = getRowset();
 				if(rowset != null)
 					return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aIndex), aEntity);
 				else
@@ -480,7 +449,7 @@ public class Entity implements RowsetListener, HasPublished{
 				}
 			}
 		});
-			// processing interface
+		// processing interface
 		Object.defineProperty(published, "createLocator", {
 			value : function() {
 				return aEntity.@com.eas.client.model.Entity::createLocator(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
@@ -491,6 +460,13 @@ public class Entity implements RowsetListener, HasPublished{
 				return aEntity.@com.eas.client.model.Entity::createFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
 			}
 		});
+		Object.defineProperty(published, "activeFilter", {
+			get : function() {
+				var nFilter = rowset.@com.bearsoft.rowset.Rowset::getActiveFilter()();
+				return @com.eas.client.model.Entity::publishFilterFacade(Lcom/bearsoft/rowset/filters/Filter;Lcom/eas/client/model/Entity;)(nFilter, aEntity);
+			}
+		});
+		
 		Object.defineProperty(published, "createSorting", {
 			value : function() {
 				return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
@@ -500,9 +476,8 @@ public class Entity implements RowsetListener, HasPublished{
 		Object.defineProperty(published, "getObject", {
 			value : function(aColIndex) {
 				var rValue = null;
-				var rowset = getRowset();
 				if(rowset != null){
-					rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.schema[aColIndex-1].name);
+					rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.schema[aColIndex - 1].name);
 				}
 				if(rValue == null){
 					rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
@@ -513,7 +488,6 @@ public class Entity implements RowsetListener, HasPublished{
 		// modify interface
 		Object.defineProperty(published, "updateObject", {
 			value : function(aColIndex, aValue) {
-				var rowset = getRowset();
 				if(rowset != null)
 					rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.P.boxAsJava(aValue));
 			}
@@ -523,16 +497,19 @@ public class Entity implements RowsetListener, HasPublished{
 				aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
 			}
 		});
+		Object.defineProperty(published, "insertAt", {
+			value : function() {
+				aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)($wnd.P.boxAsJava(arguments[0]), $wnd.Array.prototype.slice.call(arguments, 1));
+			}
+		});
 		Object.defineProperty(published, "deleteAll", {
 			value : function() {
-				var rowset = getRowset();
 				if(rowset != null)
 					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
 			}
 		});
 		Object.defineProperty(published, "deleteRow", {
 			value : function(aRow) {
-				var rowset = getRowset();
 				if(rowset != null){
 					if(aRow){
 						if(aRow.unwrap)
@@ -550,41 +527,31 @@ public class Entity implements RowsetListener, HasPublished{
 			}
 		});
 		// properties
-		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
 		Object.defineProperty(published, "queryId",      { get : function(){ return published.getQueryId()}});
 		Object.defineProperty(published, "manual",       { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
 		Object.defineProperty(published, "modified",     { get : function(){ return published.isModified()}});
 		Object.defineProperty(published, "empty",        { get : function(){ return published.isEmpty()}});
 		Object.defineProperty(published, "inserting",    { get : function(){ return published.isInserting()}});
-		Object.defineProperty(published, "size",         { get : function(){ return nativeQuery != null ? published.getSize() : published.schema.length; }});
-		Object.defineProperty(published, "length",       { get : function(){ return nativeQuery != null ? published.getSize() : published.schema.length; }});
+		Object.defineProperty(published, "size",         { get : function(){ return published.getSize(); }});
 		Object.defineProperty(published, "cursorPos",    { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
 		Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
 		Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
-		Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.cursorPos - 1];}});
+		Object.defineProperty(published, "cursor",       {
+			get : function(){
+				var nRow = rowset.@com.bearsoft.rowset.Rowset::getCurrentRow()();
+			    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(nRow, aEntity);
+			}
+		});
 		    
 		Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
-		// deprecated
-		Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
-		//
-		// cursor-row dynamic properties interface
-		for(var i = 0; i < published.schema.length; i++){
-			(function(){
-				var _i = i;
-				Object.defineProperty(published, published.schema[_i].name,
-				{
-					 get : function(){ return published.getObject(_i+1); },
-					 set : function(aValue){ published.updateObject(_i+1, aValue); }
-				});
-			})();
-		}
-		// params
+		// entity.params
+		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
 		if(nativeQuery != null){// Parameters entity has no query
 			var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
 			var publishedParams = {};  
 			Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
 			Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
-			for(var i=0;i<publishedParams.schema.length;i++){
+			for(var i = 0; i < publishedParams.schema.length; i++){
 				(function(){
 					var _i = i;
 					var propDesc = {
@@ -592,7 +559,7 @@ public class Entity implements RowsetListener, HasPublished{
 						 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
 					};
 					Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
-					Object.defineProperty(publishedParams, (_i+""), propDesc);
+					Object.defineProperty(publishedParams, _i, propDesc);
 				})();
 			}			
 			Object.defineProperty(published, "params", {
@@ -685,16 +652,20 @@ public class Entity implements RowsetListener, HasPublished{
 	}-*/;
 
 	public static native void publishRows(JavaScriptObject aPublished) throws Exception/*-{
-		for (var j = 0; j < aPublished.length; j++) {
-			aPublished[(j + "")] = aPublished.getRow(j + 1);
+		var nEntity = aPublished.unwrap();
+		var rowset = nEntity.@com.eas.client.model.Entity::getRowset()();
+		var rowsCount = rowset.@com.bearsoft.rowset.Rowset::size()(); 
+        $wnd.Array.prototype.splice.call(aPublished, 0, aPublished.length);
+		for (var j = 1; j <= rowsCount; j++) {
+			var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(j);
+			$wnd.Array.prototype.push.call(aPublished, @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(nRow, nEntity));
 		}
 	}-*/;
 
 	public static native JavaScriptObject publishRowFacade(Row aRow, Entity aEntity) throws Exception/*-{
 		if(aRow != null){
 			var published = aRow.@com.bearsoft.rowset.Row::getPublished()();
-			if(published == null)
-			{
+			if(published == null){
 				var elClass = aEntity.@com.eas.client.model.Entity::getElementClass()();
 				if(elClass != null && typeof elClass == "function")
 					published = new elClass();
@@ -2281,12 +2252,11 @@ public class Entity implements RowsetListener, HasPublished{
 		JsArrayMixed fieldsValues = aValues.<JsArrayMixed> cast();
 		Object[] initingValues = new Object[fieldsValues.length()];
 		for (int i = 0; i < initingValues.length; i += 2) {
-			JavaScriptObject fieldValue = fieldsValues.getObject(i);
 			// field
 			try {
-				initingValues[i] = RowsetUtils.unwrapField(fieldValue);
+				initingValues[i] = RowsetUtils.unwrapField(fieldsValues.getObject(i));
 			} catch (Exception ex) {
-				initingValues[i] = fieldsValues.getNumber(i);
+				initingValues[i] = RowsetUtils.extractValueFromJsArray(fieldsValues, i);
 			}
 			// value
 			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
@@ -2313,19 +2283,19 @@ public class Entity implements RowsetListener, HasPublished{
 	 */
 	public void insertAt(int aIndex, JavaScriptObject aValues) throws Exception {
 		JsArrayMixed fieldsValues = aValues.<JsArrayMixed> cast();
-		List<Object> initingValues = new ArrayList<Object>();
-		for (int i = 0; i < fieldsValues.length(); i += 2) {
+		Object[] initingValues = new Object[fieldsValues.length()];
+		for (int i = 0; i < initingValues.length; i += 2) {
 			// field
-			String fieldName = fieldsValues.getString(i);
-			Field field = getFields().get(fieldName);
-			if (field != null) {
-				initingValues.add(field);
-				// value
-				initingValues.add(RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1));
+			try {
+				initingValues[i] = RowsetUtils.unwrapField(fieldsValues.getObject(i));
+			} catch (Exception ex) {
+				initingValues[i] = RowsetUtils.extractValueFromJsArray(fieldsValues, i);
 			}
+			// value
+			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
 		}
 		if (checkRowset())
-			getRowset().insertAt(aIndex, initingValues.toArray());
+			getRowset().insertAt(aIndex, initingValues);
 	}
 
 	public void setPublished(JavaScriptObject aPublished) {

@@ -1181,10 +1181,13 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			// user supplied fields, including values for primary keys
 			if (values != null && values.length > 0 && values.length % 2 == 0) {
 				for (int i = 0; i < values.length - 1; i += 2) {
-					if (values[i] != null && (values[i] instanceof Integer || values[i] instanceof Double || values[i] instanceof Field)) {
+					if (values[i] != null && (values[i] instanceof Integer || values[i] instanceof Double || values[i] instanceof String || values[i] instanceof Field)) {
 						Field field = null;
 						int colIndex = 0;
-						if (values[i] instanceof Field) {
+						if (values[i] instanceof String) {
+							colIndex = fields.find((String)values[i]);
+							field = fields.get(colIndex);
+						} else if (values[i] instanceof Field) {
 							field = (Field) values[i];
 							colIndex = fields.find(field.getName());
 						} else {

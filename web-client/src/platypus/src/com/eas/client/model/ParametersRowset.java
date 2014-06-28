@@ -68,8 +68,8 @@ public class ParametersRowset extends Rowset {
 		}
 	}
 
-	protected Parameters params = null;
-	protected Row paramRow = null;
+	protected Parameters params;
+	protected Row paramRow;
 
 	public ParametersRowset(Parameters aParams) {
 		super(aParams);
