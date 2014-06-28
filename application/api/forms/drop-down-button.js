@@ -765,21 +765,15 @@
             P.DropDownButton.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.DropDownButton.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.DropDownButton){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf DropDownButton
          */
-        P.DropDownButton.prototype.focus = function(){};
-    }
+        P.DropDownButton.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

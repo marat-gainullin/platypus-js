@@ -65,21 +65,15 @@
             P.Insert.prototype.type = '';
         }
     };
-    Object.defineProperty(P.Insert.prototype, "consume", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.consume();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Insert){
         /**
          * Consumes the change, so other validators and database applier won't apply it.
          * @method consume
          * @memberOf Insert
          */
-        P.Insert.prototype.consume = function(){};
-    }
+        P.Insert.prototype.consume = function() {
+            var delegate = this.unwrap();
+            var value = delegate.consume();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -61,17 +61,20 @@ public class ModuleCompletionProvider implements CompletionProvider {
         }
     }
 
-    protected static CompletionContext getCompletionContext(CompletionContext initialContext, List<CompletionPoint.CompletionToken> completionTokens, int caretOffset) throws Exception {
+    protected static CompletionContext getCompletionContext(CompletionContext initialContext, List<CompletionPoint.CompletionToken> completionTokens, int initialOffset) throws Exception {
         if (initialContext != null) {
             CompletionContext completionContext = initialContext;
+            int caretOffset = initialOffset;
             if (completionTokens != null) {
                 Iterator<CompletionToken> i = completionTokens.iterator();
                 while (i.hasNext()) {
                     completionContext = completionContext.getChildContext(i.next(), caretOffset);
                     if (completionContext == null) {
-                        break;
+                        completionContext = initialContext;
+                        caretOffset = initialOffset;
+                    } else {
+                        caretOffset = 0;
                     }
-                    caretOffset = 0;
                 }
             }
             return completionContext;

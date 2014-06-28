@@ -657,21 +657,15 @@
             P.MenuSeparator.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.MenuSeparator.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuSeparator){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf MenuSeparator
          */
-        P.MenuSeparator.prototype.focus = function(){};
-    }
+        P.MenuSeparator.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

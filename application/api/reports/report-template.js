@@ -23,21 +23,15 @@
             P.ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-    Object.defineProperty(P.ReportTemplate.prototype, "generateReport", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.generateReport();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ReportTemplate){
         /**
          * Generate report from template.
          * @method generateReport
          * @memberOf ReportTemplate
          */
-        P.ReportTemplate.prototype.generateReport = function(){};
-    }
+        P.ReportTemplate.prototype.generateReport = function() {
+            var delegate = this.unwrap();
+            var value = delegate.generateReport();
+            return P.boxAsJs(value);
+        };
 
 })();

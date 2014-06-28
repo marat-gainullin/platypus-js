@@ -746,21 +746,15 @@
             P.Slider.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.Slider.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Slider){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Slider
          */
-        P.Slider.prototype.focus = function(){};
-    }
+        P.Slider.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

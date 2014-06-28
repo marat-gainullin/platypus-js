@@ -24,5 +24,4 @@
             P.Cursor.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-
 })();

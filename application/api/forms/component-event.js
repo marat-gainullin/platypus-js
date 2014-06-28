@@ -37,5 +37,4 @@
             P.ComponentEvent.prototype.source = {};
         }
     };
-
 })();

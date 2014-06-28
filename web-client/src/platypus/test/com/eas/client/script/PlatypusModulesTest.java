@@ -2,7 +2,6 @@ package com.eas.client.script;
 
 import java.util.Collections;
 
-import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.RunnableAdapter;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Application;
@@ -13,6 +12,7 @@ import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.ModelBaseTest;
+import com.eas.client.model.js.JsModel;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
@@ -38,6 +38,7 @@ public abstract class PlatypusModulesTest extends GWTTestCase {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
 		final AppClient client = ModelBaseTest.initDevelopTestClient(getModuleName());
+		JsModel.init();
 		JsWidgets.init();
 		JsMenus.init();
 		JsContainers.init();

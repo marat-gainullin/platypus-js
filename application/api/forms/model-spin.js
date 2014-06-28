@@ -839,37 +839,26 @@
             P.ModelSpin.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ModelSpin.prototype, "redraw", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelSpin){
         /**
          * Redraw the component.
          * @method redraw
          * @memberOf ModelSpin
          */
-        P.ModelSpin.prototype.redraw = function(){};
-    }
-    Object.defineProperty(P.ModelSpin.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ModelSpin.prototype.redraw = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelSpin){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelSpin
          */
-        P.ModelSpin.prototype.focus = function(){};
-    }
+        P.ModelSpin.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

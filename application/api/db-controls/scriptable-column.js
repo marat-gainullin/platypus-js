@@ -173,5 +173,4 @@
             P.ScriptableColumn.prototype.onSelect = {};
         }
     };
-
 })();

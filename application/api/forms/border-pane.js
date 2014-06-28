@@ -815,15 +815,6 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.BorderPane.prototype, "add", {
-        enumerable: true,
-        value: function(component, place, size) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(place), P.boxAsJava(size));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.BorderPane){
         /**
          * Appends the specified component to this container on the specified placement.
          * @param component the component to add.
@@ -832,17 +823,12 @@
          * @method add
          * @memberOf BorderPane
          */
-        P.BorderPane.prototype.add = function(component, place, size){};
-    }
-    Object.defineProperty(P.BorderPane.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.BorderPane.prototype.add = function(component, place, size) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(place), P.boxAsJava(size));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BorderPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -850,56 +836,44 @@
          * @method child
          * @memberOf BorderPane
          */
-        P.BorderPane.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.BorderPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.BorderPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BorderPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf BorderPane
          */
-        P.BorderPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.BorderPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.BorderPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BorderPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf BorderPane
          */
-        P.BorderPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.BorderPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.BorderPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.BorderPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf BorderPane
          */
-        P.BorderPane.prototype.focus = function(){};
-    }
+        P.BorderPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

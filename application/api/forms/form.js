@@ -440,136 +440,95 @@
             P.Form.prototype.opacity = 0;
         }
     };
-    Object.defineProperty(P.Form.prototype, "close", {
-        enumerable: true,
-        value: function(obj) {
-            var delegate = this.unwrap();
-            var value = delegate.close(P.boxAsJava(obj));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
         /**
          * Closes this form.
          * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
          * @method close
          * @memberOf Form
          */
-        P.Form.prototype.close = function(obj){};
-    }
-    Object.defineProperty(P.Form.prototype, "show", {
-        enumerable: true,
-        value: function() {
+        P.Form.prototype.close = function(obj) {
             var delegate = this.unwrap();
-            var value = delegate.show();
+            var value = delegate.close(P.boxAsJava(obj));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Shows the form as an ordinary window.
          * @method show
          * @memberOf Form
          */
-        P.Form.prototype.show = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "toFront", {
-        enumerable: true,
-        value: function() {
+        P.Form.prototype.show = function() {
             var delegate = this.unwrap();
-            var value = delegate.toFront();
+            var value = delegate.show();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Moves form to the front position.
          * @method toFront
          * @memberOf Form
          */
-        P.Form.prototype.toFront = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "showModal", {
-        enumerable: true,
-        value: function(callback) {
+        P.Form.prototype.toFront = function() {
             var delegate = this.unwrap();
-            var value = delegate.showModal(P.boxAsJava(callback));
+            var value = delegate.toFront();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Shows the form as a dialog (modal window).
          * @param callback a callback handler function
          * @method showModal
          * @memberOf Form
          */
-        P.Form.prototype.showModal = function(callback){};
-    }
-    Object.defineProperty(P.Form.prototype, "maximize", {
-        enumerable: true,
-        value: function() {
+        P.Form.prototype.showModal = function(callback) {
             var delegate = this.unwrap();
-            var value = delegate.maximize();
+            var value = delegate.showModal(P.boxAsJava(callback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Maximizes this form.
          * @method maximize
          * @memberOf Form
          */
-        P.Form.prototype.maximize = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "minimize", {
-        enumerable: true,
-        value: function() {
+        P.Form.prototype.maximize = function() {
             var delegate = this.unwrap();
-            var value = delegate.minimize();
+            var value = delegate.maximize();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Minimizes this form.
          * @method minimize
          * @memberOf Form
          */
-        P.Form.prototype.minimize = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "restore", {
-        enumerable: true,
-        value: function() {
+        P.Form.prototype.minimize = function() {
             var delegate = this.unwrap();
-            var value = delegate.restore();
+            var value = delegate.minimize();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Restores this form state.
          * @method restore
          * @memberOf Form
          */
-        P.Form.prototype.restore = function(){};
-    }
-    Object.defineProperty(P.Form.prototype, "showInternalFrame", {
-        enumerable: true,
-        value: function(desktop) {
+        P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+            var value = delegate.restore();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.Form){
+        };
+
         /**
          * Shows the form as an internal window in a desktop.
          * @param desktop the parent desktop object
          * @method showInternalFrame
          * @memberOf Form
          */
-        P.Form.prototype.showInternalFrame = function(desktop){};
-    }
+        P.Form.prototype.showInternalFrame = function(desktop) {
+            var delegate = this.unwrap();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -693,21 +693,15 @@
             P.CheckBox.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.CheckBox.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.CheckBox){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf CheckBox
          */
-        P.CheckBox.prototype.focus = function(){};
-    }
+        P.CheckBox.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

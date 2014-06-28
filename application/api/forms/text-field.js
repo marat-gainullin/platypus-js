@@ -708,21 +708,15 @@
             P.TextField.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.TextField.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.TextField){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf TextField
          */
-        P.TextField.prototype.focus = function(){};
-    }
+        P.TextField.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

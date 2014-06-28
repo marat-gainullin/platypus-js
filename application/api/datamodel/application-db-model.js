@@ -23,15 +23,6 @@
             P.ApplicationDbModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-    Object.defineProperty(P.ApplicationDbModel.prototype, "save", {
-        enumerable: true,
-        value: function(callback) {
-            var delegate = this.unwrap();
-            var value = delegate.save(P.boxAsJava(callback));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbModel){
         /**
          * Saves model data changes.
          * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.
@@ -40,17 +31,12 @@
          * @method save
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.save = function(callback){};
-    }
-    Object.defineProperty(P.ApplicationDbModel.prototype, "requery", {
-        enumerable: true,
-        value: function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationDbModel.prototype.save = function(callback) {
             var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.save(P.boxAsJava(callback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbModel){
+        };
+
         /**
          * Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -58,17 +44,12 @@
          * @method requery
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.requery = function(onSuccessCallback, onFailureCallback){};
-    }
-    Object.defineProperty(P.ApplicationDbModel.prototype, "createEntity", {
-        enumerable: true,
-        value: function(sqlText, datasourceName) {
+        P.ApplicationDbModel.prototype.requery = function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
-            var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+            var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbModel){
+        };
+
         /**
          * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
          * @param sqlText SQL text for the new entity.
@@ -77,17 +58,12 @@
          * @method createEntity
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName){};
-    }
-    Object.defineProperty(P.ApplicationDbModel.prototype, "executeSql", {
-        enumerable: true,
-        value: function(sqlText, datasourceName) {
+        P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
             var delegate = this.unwrap();
-            var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+            var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbModel){
+        };
+
         /**
          * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
          * @param sqlText SQL text for the new entity.
@@ -96,17 +72,12 @@
          * @method executeSql
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName){};
-    }
-    Object.defineProperty(P.ApplicationDbModel.prototype, "execute", {
-        enumerable: true,
-        value: function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName) {
             var delegate = this.unwrap();
-            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbModel){
+        };
+
         /**
          * Refreshes the model, only if any of its parameters has changed.
          * @param onSuccessCallback the handler function for refresh data on success event (optional).
@@ -114,17 +85,12 @@
          * @method execute
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.execute = function(onSuccessCallback, onFailureCallback){};
-    }
-    Object.defineProperty(P.ApplicationDbModel.prototype, "loadEntity", {
-        enumerable: true,
-        value: function(queryId) {
+        P.ApplicationDbModel.prototype.execute = function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
-            var value = delegate.loadEntity(P.boxAsJava(queryId));
+            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ApplicationDbModel){
+        };
+
         /**
          * Creates new entity of model, based on application query.
          * @param queryId the query application element ID.
@@ -132,7 +98,10 @@
          * @method loadEntity
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.loadEntity = function(queryId){};
-    }
+        P.ApplicationDbModel.prototype.loadEntity = function(queryId) {
+            var delegate = this.unwrap();
+            var value = delegate.loadEntity(P.boxAsJava(queryId));
+            return P.boxAsJs(value);
+        };
 
 })();

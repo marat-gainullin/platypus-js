@@ -212,5 +212,4 @@
             P.Color.prototype.ORANGE = {};
         }
     };
-
 })();

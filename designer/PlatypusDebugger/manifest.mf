@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: com.eas.designer.debugger
-OpenIDE-Module-Implementation-Version: 311
-OpenIDE-Module-Layer: com/eas/designer/debugger/layer.xml
-OpenIDE-Module-Localizing-Bundle: com/eas/designer/debugger/Bundle.properties
-

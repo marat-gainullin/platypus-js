@@ -37,5 +37,4 @@
             P.SystemPlatypusPrincipal.prototype.name = '';
         }
     };
-
 })();

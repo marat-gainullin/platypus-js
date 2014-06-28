@@ -20,6 +20,7 @@ import com.eas.client.application.Loader;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
+import com.eas.client.model.js.JsModel;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
@@ -110,6 +111,7 @@ public class RelationsTest extends ModelBaseTest {
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
+		JsModel.init();
 		JsWidgets.init();
 		JsContainers.init();
 		JsModelWidgets.init();

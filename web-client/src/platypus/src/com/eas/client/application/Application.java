@@ -29,6 +29,7 @@ import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
+import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
@@ -225,6 +226,27 @@ public class Application {
 				return aValue;
 		}
 		
+	    function extend(Child, Parent) {
+	        var prevChildProto = {};
+	        for (var m in Child.prototype) {
+	            var member = Child.prototype[m];
+	            if (typeof member === 'function') {
+	                prevChildProto[m] = member;
+	            }
+	        }
+	        var F = function() {
+	        };
+	        F.prototype = Parent.prototype;
+	        Child.prototype = new F();
+	        for (var m in prevChildProto)
+	            Child.prototype[m] = prevChildProto[m];
+	        Child.prototype.constructor = Child;
+	        Child.superclass = Parent.prototype;
+	    }
+	    Object.defineProperty($wnd.P, "extend", {value: extend});
+	    
+	    extend($wnd.P.Entity, $wnd.Array);
+    
         var hexcase = 0;   
         var b64pad  = "";  
 
@@ -557,7 +579,7 @@ public class Application {
 				aTarget = {};
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
-			@com.eas.client.model.Model::publishTopLevelFacade(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/model/Model;)(aTarget, nativeModel);
+			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			return aTarget;
 		};
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
@@ -954,6 +976,7 @@ public class Application {
 				h.setFormatter(f);
 			}
 		}
+		JsModel.init();
 		JsWidgets.init();
 		JsMenus.init();
 		JsContainers.init();

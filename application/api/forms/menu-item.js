@@ -729,21 +729,15 @@
             P.MenuItem.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.MenuItem.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuItem){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf MenuItem
          */
-        P.MenuItem.prototype.focus = function(){};
-    }
+        P.MenuItem.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

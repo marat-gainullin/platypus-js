@@ -65,21 +65,15 @@
             P.Delete.prototype.type = '';
         }
     };
-    Object.defineProperty(P.Delete.prototype, "consume", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.consume();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Delete){
         /**
          * Consumes the change, so other validators and database applier won't apply it.
          * @method consume
          * @memberOf Delete
          */
-        P.Delete.prototype.consume = function(){};
-    }
+        P.Delete.prototype.consume = function() {
+            var delegate = this.unwrap();
+            var value = delegate.consume();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -748,21 +748,15 @@
             P.Button.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.Button.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Button){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Button
          */
-        P.Button.prototype.focus = function(){};
-    }
+        P.Button.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

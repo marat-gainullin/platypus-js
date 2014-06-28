@@ -708,21 +708,15 @@
             P.TextArea.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.TextArea.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.TextArea){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf TextArea
          */
-        P.TextArea.prototype.focus = function(){};
-    }
+        P.TextArea.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

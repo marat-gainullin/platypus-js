@@ -740,49 +740,30 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.ScrollPane.prototype, "add", {
-        enumerable: true,
-        value: function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ScrollPane){
         /**
          * Sets the specified component as the scroll's view, replacing old view component.
          * @param component the component to add
          * @method add
          * @memberOf ScrollPane
          */
-        P.ScrollPane.prototype.add = function(component){};
-    }
-    Object.defineProperty(P.ScrollPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.ScrollPane.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ScrollPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf ScrollPane
          */
-        P.ScrollPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.ScrollPane.prototype, "child", {
-        enumerable: true,
-        value: function(arg0) {
+        P.ScrollPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(arg0));
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ScrollPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -790,39 +771,32 @@
          * @method child
          * @memberOf ScrollPane
          */
-        P.ScrollPane.prototype.child = function(arg0){};
-    }
-    Object.defineProperty(P.ScrollPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.ScrollPane.prototype.child = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.child(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ScrollPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf ScrollPane
          */
-        P.ScrollPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.ScrollPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ScrollPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ScrollPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ScrollPane
          */
-        P.ScrollPane.prototype.focus = function(){};
-    }
+        P.ScrollPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

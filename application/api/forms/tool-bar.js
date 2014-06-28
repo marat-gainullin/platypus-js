@@ -725,32 +725,18 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.ToolBar.prototype, "add", {
-        enumerable: true,
-        value: function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ToolBar){
         /**
          * Appends the specified component to the end of this container.
          * @param component the component to add.
          * @method add
          * @memberOf ToolBar
          */
-        P.ToolBar.prototype.add = function(component){};
-    }
-    Object.defineProperty(P.ToolBar.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.ToolBar.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ToolBar){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -758,56 +744,44 @@
          * @method child
          * @memberOf ToolBar
          */
-        P.ToolBar.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.ToolBar.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.ToolBar.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ToolBar){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf ToolBar
          */
-        P.ToolBar.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.ToolBar.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.ToolBar.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ToolBar){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf ToolBar
          */
-        P.ToolBar.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.ToolBar.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ToolBar.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ToolBar){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ToolBar
          */
-        P.ToolBar.prototype.focus = function(){};
-    }
+        P.ToolBar.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

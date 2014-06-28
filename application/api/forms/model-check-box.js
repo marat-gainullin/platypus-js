@@ -771,37 +771,26 @@
             P.ModelCheckBox.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ModelCheckBox.prototype, "redraw", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelCheckBox){
         /**
          * Redraw the component.
          * @method redraw
          * @memberOf ModelCheckBox
          */
-        P.ModelCheckBox.prototype.redraw = function(){};
-    }
-    Object.defineProperty(P.ModelCheckBox.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ModelCheckBox.prototype.redraw = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelCheckBox){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelCheckBox
          */
-        P.ModelCheckBox.prototype.focus = function(){};
-    }
+        P.ModelCheckBox.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

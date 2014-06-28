@@ -93,5 +93,4 @@
             P.CellRenderEvent.prototype.object = {};
         }
     };
-
 })();

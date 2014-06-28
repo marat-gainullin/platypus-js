@@ -129,6 +129,7 @@ try {
     load('classpath:rowsets/command.js');
     load('classpath:rowsets/delete.js');
     load('classpath:rowsets/field.js');
+    load('classpath:rowsets/filter.js');
     load('classpath:rowsets/insert.js');
     load('classpath:rowsets/parameter.js');
     load('classpath:rowsets/update.js');

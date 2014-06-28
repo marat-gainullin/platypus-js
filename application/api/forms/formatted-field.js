@@ -725,21 +725,15 @@
             P.FormattedField.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.FormattedField.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.FormattedField){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf FormattedField
          */
-        P.FormattedField.prototype.focus = function(){};
-    }
+        P.FormattedField.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

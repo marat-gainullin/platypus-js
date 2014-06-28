@@ -655,21 +655,15 @@
             P.TimeSeriesChart.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.TimeSeriesChart.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.TimeSeriesChart){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf TimeSeriesChart
          */
-        P.TimeSeriesChart.prototype.focus = function(){};
-    }
+        P.TimeSeriesChart.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

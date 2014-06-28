@@ -805,37 +805,26 @@
             P.ModelFormattedField.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ModelFormattedField.prototype, "redraw", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelFormattedField){
         /**
          * Redraw the component.
          * @method redraw
          * @memberOf ModelFormattedField
          */
-        P.ModelFormattedField.prototype.redraw = function(){};
-    }
-    Object.defineProperty(P.ModelFormattedField.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ModelFormattedField.prototype.redraw = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelFormattedField){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelFormattedField
          */
-        P.ModelFormattedField.prototype.focus = function(){};
-    }
+        P.ModelFormattedField.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

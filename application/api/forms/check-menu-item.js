@@ -689,21 +689,15 @@
             P.CheckMenuItem.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.CheckMenuItem.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.CheckMenuItem){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf CheckMenuItem
          */
-        P.CheckMenuItem.prototype.focus = function(){};
-    }
+        P.CheckMenuItem.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

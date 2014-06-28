@@ -37,5 +37,4 @@
             P.WindowEvent.prototype.source = {};
         }
     };
-
 })();

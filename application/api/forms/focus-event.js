@@ -37,5 +37,4 @@
             P.FocusEvent.prototype.source = {};
         }
     };
-
 })();

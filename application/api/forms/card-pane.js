@@ -745,15 +745,6 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.CardPane.prototype, "add", {
-        enumerable: true,
-        value: function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.CardPane){
         /**
          * Appends the component to this container with the specified name.
          * @param component the component to add.
@@ -761,34 +752,24 @@
          * @method add
          * @memberOf CardPane
          */
-        P.CardPane.prototype.add = function(arg0, arg1){};
-    }
-    Object.defineProperty(P.CardPane.prototype, "show", {
-        enumerable: true,
-        value: function(name) {
+        P.CardPane.prototype.add = function(arg0, arg1) {
             var delegate = this.unwrap();
-            var value = delegate.show(P.boxAsJava(name));
+            var value = delegate.add(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.CardPane){
+        };
+
         /**
          * Flips to the component that was added to this layout with the specified name.
          * @param name the card name
          * @method show
          * @memberOf CardPane
          */
-        P.CardPane.prototype.show = function(name){};
-    }
-    Object.defineProperty(P.CardPane.prototype, "child", {
-        enumerable: true,
-        value: function(name) {
+        P.CardPane.prototype.show = function(name) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(name));
+            var value = delegate.show(P.boxAsJava(name));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.CardPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -796,56 +777,44 @@
          * @method child
          * @memberOf CardPane
          */
-        P.CardPane.prototype.child = function(name){};
-    }
-    Object.defineProperty(P.CardPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.CardPane.prototype.child = function(name) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(name));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.CardPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf CardPane
          */
-        P.CardPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.CardPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.CardPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.CardPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf CardPane
          */
-        P.CardPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.CardPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.CardPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.CardPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf CardPane
          */
-        P.CardPane.prototype.focus = function(){};
-    }
+        P.CardPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

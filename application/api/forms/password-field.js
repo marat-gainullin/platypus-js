@@ -708,21 +708,15 @@
             P.PasswordField.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.PasswordField.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.PasswordField){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf PasswordField
          */
-        P.PasswordField.prototype.focus = function(){};
-    }
+        P.PasswordField.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -150,5 +150,4 @@
             P.MouseEvent.prototype.source = {};
         }
     };
-
 })();

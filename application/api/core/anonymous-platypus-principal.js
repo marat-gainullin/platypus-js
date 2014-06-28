@@ -37,5 +37,4 @@
             P.AnonymousPlatypusPrincipal.prototype.name = '';
         }
     };
-
 })();

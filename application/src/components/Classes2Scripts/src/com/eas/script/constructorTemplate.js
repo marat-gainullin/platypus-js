@@ -20,5 +20,4 @@ ${JsDoc}
             P.${Name}.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
 ${Props}${Body}    };
-${Methods}
-})();
+${Methods}})();

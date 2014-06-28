@@ -811,32 +811,18 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.SplitPane.prototype, "add", {
-        enumerable: true,
-        value: function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.SplitPane){
         /**
          * Appends the specified component to the end of this container.
          * @param component the component to add.
          * @method add
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.add = function(component){};
-    }
-    Object.defineProperty(P.SplitPane.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.SplitPane.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.SplitPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -844,56 +830,44 @@
          * @method child
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.SplitPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.SplitPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.SplitPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.SplitPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.SplitPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.SplitPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.SplitPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.SplitPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.SplitPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.focus = function(){};
-    }
+        P.SplitPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

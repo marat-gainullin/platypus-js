@@ -724,15 +724,6 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.AnchorsPane.prototype, "add", {
-        enumerable: true,
-        value: function(component, anchors) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
         /**
          * Appends the specified component to the container with specified placement.
          * @param component the component to add.
@@ -740,17 +731,12 @@
          * @method add
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.add = function(component, anchors){};
-    }
-    Object.defineProperty(P.AnchorsPane.prototype, "toBack", {
-        enumerable: true,
-        value: function(arg0, arg1) {
+        P.AnchorsPane.prototype.add = function(component, anchors) {
             var delegate = this.unwrap();
-            var value = delegate.toBack(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
+        };
+
         /**
          * Brings the specified component to back on this panel.
          * @param component the component.
@@ -758,17 +744,12 @@
          * @method toBack
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.toBack = function(arg0, arg1){};
-    }
-    Object.defineProperty(P.AnchorsPane.prototype, "toFront", {
-        enumerable: true,
-        value: function(component, count) {
+        P.AnchorsPane.prototype.toBack = function(arg0, arg1) {
             var delegate = this.unwrap();
-            var value = delegate.toFront(P.boxAsJava(component), P.boxAsJava(count));
+            var value = delegate.toBack(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
+        };
+
         /**
          * Brings the specified component to front on this panel.
          * @param component the component.
@@ -776,17 +757,12 @@
          * @method toFront
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.toFront = function(component, count){};
-    }
-    Object.defineProperty(P.AnchorsPane.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.AnchorsPane.prototype.toFront = function(component, count) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.toFront(P.boxAsJava(component), P.boxAsJava(count));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -794,56 +770,44 @@
          * @method child
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.AnchorsPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.AnchorsPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.AnchorsPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.AnchorsPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.AnchorsPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.AnchorsPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.AnchorsPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf AnchorsPane
          */
-        P.AnchorsPane.prototype.focus = function(){};
-    }
+        P.AnchorsPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

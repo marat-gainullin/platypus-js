@@ -107,5 +107,4 @@
             P.KeyEvent.prototype.key = 0;
         }
     };
-
 })();

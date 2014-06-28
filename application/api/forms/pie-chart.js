@@ -655,21 +655,15 @@
             P.PieChart.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.PieChart.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.PieChart){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf PieChart
          */
-        P.PieChart.prototype.focus = function(){};
-    }
+        P.PieChart.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

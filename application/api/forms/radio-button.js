@@ -729,21 +729,15 @@
             P.RadioButton.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.RadioButton.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.RadioButton){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf RadioButton
          */
-        P.RadioButton.prototype.focus = function(){};
-    }
+        P.RadioButton.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

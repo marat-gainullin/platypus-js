@@ -655,21 +655,15 @@
             P.LineChart.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.LineChart.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.LineChart){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf LineChart
          */
-        P.LineChart.prototype.focus = function(){};
-    }
+        P.LineChart.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

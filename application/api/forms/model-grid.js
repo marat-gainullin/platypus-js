@@ -884,63 +884,39 @@
             P.ModelGrid.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ModelGrid.prototype, "find", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.find();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
         /**
          * Shows find dialog.
          * @method find
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.find = function(){};
-    }
-    Object.defineProperty(P.ModelGrid.prototype, "select", {
-        enumerable: true,
-        value: function(arg0) {
+        P.ModelGrid.prototype.find = function() {
             var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(arg0));
+            var value = delegate.find();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
+        };
+
         /**
          *  Gets the array of selected rows.
          * @method select
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.select = function(arg0){};
-    }
-    Object.defineProperty(P.ModelGrid.prototype, "clearSelection", {
-        enumerable: true,
-        value: function() {
+        P.ModelGrid.prototype.select = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.clearSelection();
+            var value = delegate.select(P.boxAsJava(arg0));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
+        };
+
         /**
          * Clears current selection.
          * @method clearSelection
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.clearSelection = function(){};
-    }
-    Object.defineProperty(P.ModelGrid.prototype, "makeVisible", {
-        enumerable: true,
-        value: function(arg0, arg1) {
+        P.ModelGrid.prototype.clearSelection = function() {
             var delegate = this.unwrap();
-            var value = delegate.makeVisible(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.clearSelection();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
+        };
+
         /**
          * Makes specified row visible.
          * @param row the row to make visible.
@@ -948,57 +924,45 @@
          * @method makeVisible
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.makeVisible = function(arg0, arg1){};
-    }
-    Object.defineProperty(P.ModelGrid.prototype, "unselect", {
-        enumerable: true,
-        value: function(row) {
+        P.ModelGrid.prototype.makeVisible = function(arg0, arg1) {
             var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(row));
+            var value = delegate.makeVisible(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
+        };
+
         /**
          * Unselects the specified row.
          * @param row the row to be unselected
          * @method unselect
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.unselect = function(row){};
-    }
-    Object.defineProperty(P.ModelGrid.prototype, "findSomething", {
-        enumerable: true,
-        value: function() {
+        P.ModelGrid.prototype.unselect = function(row) {
             var delegate = this.unwrap();
-            var value = delegate.findSomething();
+            var value = delegate.unselect(P.boxAsJava(row));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
+        };
+
         /**
          * Shows find dialog.
          * @deprecated Use find() instead.
          * @method findSomething
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.findSomething = function(){};
-    }
-    Object.defineProperty(P.ModelGrid.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ModelGrid.prototype.findSomething = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.findSomething();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelGrid){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.focus = function(){};
-    }
+        P.ModelGrid.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

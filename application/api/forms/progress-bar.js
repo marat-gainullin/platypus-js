@@ -727,21 +727,15 @@
             P.ProgressBar.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ProgressBar.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ProgressBar){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ProgressBar
          */
-        P.ProgressBar.prototype.focus = function(){};
-    }
+        P.ProgressBar.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

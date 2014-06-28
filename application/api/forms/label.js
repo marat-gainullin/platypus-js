@@ -780,21 +780,15 @@
             P.Label.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.Label.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.Label){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf Label
          */
-        P.Label.prototype.focus = function(){};
-    }
+        P.Label.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

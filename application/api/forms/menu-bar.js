@@ -724,32 +724,18 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.MenuBar.prototype, "add", {
-        enumerable: true,
-        value: function(menu) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(menu));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuBar){
         /**
          * Adds the item to the menu.
          * @param menu the menu component to add
          * @method add
          * @memberOf MenuBar
          */
-        P.MenuBar.prototype.add = function(menu){};
-    }
-    Object.defineProperty(P.MenuBar.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.MenuBar.prototype.add = function(menu) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(menu));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuBar){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -757,56 +743,44 @@
          * @method child
          * @memberOf MenuBar
          */
-        P.MenuBar.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.MenuBar.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.MenuBar.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuBar){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf MenuBar
          */
-        P.MenuBar.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.MenuBar.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.MenuBar.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuBar){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf MenuBar
          */
-        P.MenuBar.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.MenuBar.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.MenuBar.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.MenuBar){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf MenuBar
          */
-        P.MenuBar.prototype.focus = function(){};
-    }
+        P.MenuBar.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

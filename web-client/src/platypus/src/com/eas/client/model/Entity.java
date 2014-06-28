@@ -137,19 +137,6 @@ public class Entity implements RowsetListener, HasPublished{
         return Collections.unmodifiableMap(ormDefinitions);
     }
 
-    /*
-	private static native void publish(JavaScriptObject aTarget, Entity aEntity) throws Exception/*-{
-		var dsName = aEntity.@com.eas.client.model.Entity::getName()();
-		if (dsName) {
-			var publishedRowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-			Object.defineProperty(aTarget, dsName, {
-				get : function() {
-					return publishedRowsetFacade;
-				}
-			});
-		}
-	}-*/;
-
 	private static native JavaScriptObject publishEntityFacade(Entity aEntity)/*-{
 
 		function getRowset() {
@@ -166,755 +153,535 @@ public class Entity implements RowsetListener, HasPublished{
 			}
 			return linearProps;
 		}
-		if(aEntity != null){
-			var published = aEntity.@com.eas.client.model.Entity::getPublished()();
-			if(published == null){
-				published = {
-					// array mutator methods
-					pop : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
-							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-						}else{
-							return undefined;
-						}
-					},
-					shift : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
-							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
-							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-						}else{
-							return undefined;
-						}
-					},
-					push : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							for(var i=0;i<arguments.length;i++){
-								var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
-								var propsAsArray = propsToArray(arguments[i]);
-								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
-							}
-							return rowset.@com.bearsoft.rowset.Rowset::size()();
-						}else{
-							return 0;
-						}
-					},
-					unshift : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							for(var i=arguments.length-1;i>=0;i--)
-							{
-								var propsAsArray = propsToArray(arguments[i]);
-								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray);
-							}
-							return rowset.@com.bearsoft.rowset.Rowset::size()();
-						}else
-							return 0;
-					},
-					reverse : function()
-					{
-						var rowset = getRowset();
-						if(rowset != null){
-							rowset.@com.bearsoft.rowset.Rowset::reverse()();
-						}
-					},
-					splice : function()
-					{
-						if(arguments.length > 0){
-							var rowset = getRowset();
-							if(rowset != null){
-								var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-								var startAt = arguments[0];
-								if(startAt < 0)
-									startAt = size+startAt;
-								if(startAt < 0)
-									throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
-								var howMany = arguments.length > 1 ? arguments[1] : size;
-								if(howMany < 0)
-									throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
-								var toAdd = [];
-								if(arguments.length > 2)
-								{
-									for(var ai=2; ai<arguments.length; ai++)
-										toAdd.push(arguments[ai]);
-								}
-								var removed = [];
-								while(startAt < size && removed.length < howMany)
-								{
-									var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
-									rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
-									var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-									removed.push(deletedFacade);
-									size = rowset.@com.bearsoft.rowset.Rowset::size()();
-								}
-								for(var l=arguments.length-1;l>=2;l--)
-								{						
-									var propsAsArray = propsToArray(arguments[l]);
-									aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
-								}
-								return removed;
-							}else
-								return [];
-						}else
-							throw "Bad arguments. There are must at least one argument";
-					},
-					sort : function(aComparator) {
-						if(aComparator){
-							aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
-						}else
-							throw "A comparing function or comparator object must be specified."; 
-					},
-				    // array accessor methods
-				    concat : function(){
-				    	var i;
-				    	var concated = [];
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(i=0;i<size;i++){
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-				    			concated.push(rowFacade);
-							}
-					    	for(i=0;i<arguments.length;i++){
-					    		if(Array.isArray(arguments[i])){
-					    			for(var l=0;l<arguments[i].length;l++){
-					    				concated.push(arguments[i][l]);
-					    			}
-					    		}else{ 
-					    			concated.push(arguments[i]);
-					    		}
-					    	}
-						}
-					    return concated;
-				    },
-				    join : function(aSeparator){
-				    	var joined = [];
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(var i=0;i<size;i++){
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								var sElement = "{";
-								for(var l=0;l<rowFacade.length;l++){
-									if(l > 0)
-										sElement += ", ";
-									sElement += rowFacade.schema[l].name + ":" + rowFacade[l];
-								} 
-								sElement += "}";
-				    			joined.push(sElement);
-							}
-							return joined.join(aSeparator);
-						}else
-							return "";
-				    },
-				    slice : function(startAt, endAt)
-				    {
-				    	var sliced = [];
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							if(startAt < 0)
-								startAt = size+startAt;
-							if(startAt < 0)
-								throw "Bad first argument 'begin'. It should be less than or equal array's length by absolute value";
-						 	if(endAt == undefined)
-						 		endAt = size-1; 
-							if(endAt < 0)
-								endAt = size+endAt;
-							if(endAt < 0)
-								throw "Bad second argument 'end'. It should be less than or equal array's length by absolute value";
-						 		
-							for(var i=startAt;i<=endAt;i++)
-							{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								sliced.push(rowFacade);
-							}
-						}
-						return sliced;
-				    },
-				    toString : function()
-				    {
-				    	var joined = [];
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(var i=0;i<size;i++)
-							{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								var sElement = "{";
-								for(var l=0;l<rowFacade.length;l++)
-								{
-									if(l > 0)
-										sElement += ", ";
-									sElement += rowFacade.schema[l].name + ":" + rowFacade[l];
-								} 
-								sElement += "}";
-				    			joined.push(sElement);
-							}
-							return "["+joined.join(",\n")+"]";
-						}else
-							return "";
-				    },
-				    indexOf : function(aObj)
-				    {
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-					    	for(var i=0;i<size;i++)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-					    		if(rowFacade == aObj)
-					    			return i; 
-					    	}
-						}
-				    	return -1;
-				    },
-				    lastIndexOf : function(aObj)
-				    {
-						var rowset = getRowset();
-						if(rowset != null){
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-					    	for(var i=size-1;i>=0;i--)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-					    		if(rowFacade == aObj)
-					    			return i; 
-					    	}
-						}
-				    	return -1;
-				    },
-				    // array iteration methods
-				    filter : function(callback, thisObj){
-				    	var filtered = [];
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-					    	for(var i=0;i<size;i++)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								if(callback.call(thisObj, rowFacade, i, rowsetFacade))
-									filtered.push(rowFacade);
-					    	}
-						}
-				    	return filtered;
-				    },
-				    forEach : function(callback, thisObj){
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-					    	for(var i=0;i<size;i++)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								callback.call(thisObj, rowFacade, i, rowsetFacade);
-					    	}
-						}
-				    },
-				    every : function(callback, thisObj){
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowsetFacade.length;
-					    	for(var i=0;i<size;i++)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								if(!callback.call(thisObj, rowFacade, i, rowsetFacade))
-									return false;
-					    	}
-						}
-			    		return true;
-				    },
-				    map : function(callback, thisObj){
-				    	var mapped = [];
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-					    	for(var i=0;i<size;i++)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								mapped.push(callback.call(thisObj, rowFacade, i, rowsetFacade));
-					    	}
-						}
-				    	return mapped;
-				    },
-				    some : function(callback, thisObj){
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-					    	for(var i=0;i<size;i++)
-					    	{
-								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-								if(callback.call(thisObj, rowFacade, i, rowsetFacade))
-									return true;
-					    	}
-						}
-				    	return false;
-				    },
-				    reduce : function(callback, initialValue){
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							var startAt;
-							var previousValue;
-							if(initialValue == undefined)
-							{
-								startAt = 1;
-								var _row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
-								previousValue = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(_row, aEntity);
-								
-							}else
-							{
-								startAt = 0;
-								previousValue = initialValue;
-							}
-					    	for(var i=startAt;i<size;i++)
-					    	{
-								var row1 = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade1 = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row1, aEntity);
-								previousValue = callback.call(null, previousValue, rowFacade1, i, rowsetFacade);
-					    	}
-					    	return previousValue;
-						}else
-							return initialValue;
-				    },
-				    reduceRight : function(callback, initialValue){
-						var rowset = getRowset();
-						if(rowset != null){
-							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							var startAt;
-							var previousValue;
-							if(initialValue == undefined)
-							{
-								startAt = size-2;
-								var _row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-								previousValue = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(_row, aEntity);
-								
-							}else
-							{
-								startAt = size-1;
-								previousValue = initialValue;
-							}
-					    	for(var i=startAt;i>=0;i--)
-					    	{
-								var row1 = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-								var rowFacade1 = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row1, aEntity);
-								previousValue = callback.call(null, previousValue, rowFacade1, i, rowsetFacade);
-					    	}
-					    	return previousValue;
-						}else
-							return initialValue;
-				    },
-					// properties
-					getQueryId : function() {
-						return aEntity.@com.eas.client.model.Entity::getQueryId()();
-					},
-					isModified : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::isModified()();
-						else
-							return false;
-					},
-					isEmpty : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::isEmpty()();
-						else
-							return true;
-					},
-					isInserting : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::isInserting()();
-						else
-							return false;
-					},
-					getSize : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::size()();
-						else
-							return 0;
-					},
-					getRowIndex : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::getCursorPos()();
-						else
-							return -1;
-					},
-					setRowIndex : function(aRowIndex) {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aRowIndex);
-					},
-					getSubstitute : function() {
-						var sEntity = aEntity.@com.eas.client.model.Entity::getSubstitute()();
-						if(sEntity != null)
-							return sEntity.@com.eas.client.model.Entity::getPublished()();
-						else
-							return null;
-					},
-					setSubstitute : function(aSubstitute) {
-						aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/eas/client/model/Entity;)(aSubstitute != null ? aSubstitute.unwrap() : null);
-					},
-					// cursor interface 
-					scrollTo : function(aRow) {
-						return aEntity.@com.eas.client.model.Entity::scrollTo(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
-					},
-					beforeFirst : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::beforeFirst()();
-						else
-							return false;
-					},
-					afterLast : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::afterLast()();
-						else
-							return false;
-					},
-					bof : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::isBeforeFirst()();
-						else
-							return false;
-					},
-					eof : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::isAfterLast()();
-						else
-							return false;
-					},
-					first : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::first()();
-						else
-							return false;
-					},
-					next : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::next()();
-						else
-							return false;
-					},
-					prev : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::previous()();
-						else
-							return false;
-					},
-					last : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::last()();
-						else
-							return false;
-					},
-					pos : function(aIndex) {
-						var rowset = getRowset();
-						if(rowset != null)
-							return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aIndex);
-						else
-							return false;
-					},
-					getRow : function(aIndex) {
-						var rowset = getRowset();
-						if(rowset != null)
-							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aIndex), aEntity);
-						else
-							return null;
-					},
-					// find interface
-					find : function() {
-						return aEntity.@com.eas.client.model.Entity::find(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					findById : function(aValue) {
-						return aEntity.@com.eas.client.model.Entity::findById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
-					},
-					// relations interface
-					beginUpdate : function() {
-						aEntity.@com.eas.client.model.Entity::beginUpdate()();
-					},
-					endUpdate : function() {
-						aEntity.@com.eas.client.model.Entity::endUpdate()();
-					},
-					//
-					enqueueUpdate : function() {
-						aEntity.@com.eas.client.model.Entity::enqueueUpdate()();
-					}, 
-					execute : function(onSuccess, onFailure) {
-						var oldManual = published.manual;
-						try{
-							published.manual = false;
-							aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-						}finally{
-							published.manual = oldManual;
-						}
-					},
-//					executeChildrenOnly : function() {
-//						aEntity.@com.eas.client.model.Entity::executeChildren()();
-//					},
-					requery : function(onSuccess, onFailure) {
-						var oldManual = published.manual;
-						try{
-							published.manual = false;
-							aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-						}finally{
-							published.manual = oldManual;
-						}
-					},
-//					requeryChildrenOnly : function() {
-//						aEntity.@com.eas.client.model.Entity::refreshChildren()();
-//					},
-					// processing interface
-					createLocator : function() {
-						return aEntity.@com.eas.client.model.Entity::createLocator(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					createFilter : function() {
-						return aEntity.@com.eas.client.model.Entity::createFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					createSorting : function() {
-						return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					// data at cursor interface
-					getObject : function(aColIndex) {
-						var rValue = null;
-						var rowset = getRowset();
-						if(rowset != null){
-							rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.schema[aColIndex-1].name);
-						}
-						if(rValue == null){
-							rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
-						}
-						return $wnd.P.boxAsJs(rValue);
-					},
-					// modify interface
-					updateObject : function(aColIndex, aValue) {
-						var rowset = getRowset();
-						if(rowset != null)
-							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.P.boxAsJava(aValue));
-					},
-					insert : function() {
-						aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					deleteAll : function() {
-						var rowset = getRowset();
-						if(rowset != null)
-							rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
-					},
-					deleteRow : function(aRow) {
-						var rowset = getRowset();
-						if(rowset != null)
-						{
-							if(aRow){
-								if(aRow.unwrap)
-									rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
-								else
-									rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
-							}else
-								rowset.@com.bearsoft.rowset.Rowset::delete()();
-						}
-					},
-					unwrap : function() {
-						return aEntity;
-					}
-				};			
-				// properties
-				Object.defineProperty(published, "queryId",      { get : function(){ return published.getQueryId()}});
-				Object.defineProperty(published, "manual",       { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
-				Object.defineProperty(published, "modified",     { get : function(){ return published.isModified()}});
-				Object.defineProperty(published, "empty",        { get : function(){ return published.isEmpty()}});
-				Object.defineProperty(published, "inserting",    { get : function(){ return published.isInserting()}});
-				Object.defineProperty(published, "size",         { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "length",       { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "rowIndex",     { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
-				Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
-				Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
-				Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.rowIndex-1];}});
-				    
-				Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
-				// deprecated
-				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
-				//
-				// cursor-row dynamic properties interface
-				for(var i=0;i<published.schema.length;i++)
-				{
-					(function(){
-						var _i = i;
-						Object.defineProperty(published, published.schema[_i].name,
-						{
-							 get : function(){ return published.getObject(_i+1); },
-							 set : function(aValue){ published.updateObject(_i+1, aValue); }
-						});
-					})();
-				}
-				// params
-				var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
-				if(nativeQuery != null)// Parameters entity has no query
-				{
-					var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
-					var publishedParams = {};  
-					Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-					Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
-					for(var i=0;i<publishedParams.schema.length;i++)
-					{
-						(function(){
-							var _i = i;
-							var propDesc = {
-								 get : function(){ return publishedParams.schema[_i].value; },
-								 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
-							};
-							Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
-							Object.defineProperty(publishedParams, (_i+""), propDesc);
-						})();
-					}
-					
-					Object.defineProperty(published, "params", {
-						get : function(){
-							return publishedParams;
-						}
-					});
-				}
-				// events
-				Object.defineProperty(published, "willChange", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnBeforeChange()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnBeforeChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "willDelete", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnBeforeDelete()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnBeforeDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "willInsert", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnBeforeInsert()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnBeforeInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "willScroll", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnBeforeScroll()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnBeforeScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "onChanged", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnAfterChange()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnAfterChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "onDeleted", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnAfterDelete()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnAfterDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "onFiltered", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnFiltered()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnFiltered(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "onInserted", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnAfterInsert()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnAfterInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "onRequeried", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnRequeried()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnRequeried(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				Object.defineProperty(published, "onScrolled", {
-					get : function()
-					{
-						return aEntity.@com.eas.client.model.Entity::getOnAfterScroll()();
-					},
-					set : function(aValue)
-					{
-						aEntity.@com.eas.client.model.Entity::setOnAfterScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-					}
-				});
-				aEntity.@com.eas.client.model.Entity::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		var published = aEntity.@com.eas.client.model.Entity::getPublished()();
+		// array mutator methods
+		Object.defineProperty(published, "pop", { 
+			value : function(){
+                var rowset = getRowset();
+                if(rowset != null){
+                        var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                        var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
+                        rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
+                        return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+                }else{
+                        return undefined;
+                }
 			}
-			return published;
-		}else
-			return null;
+        });
+        Object.defineProperty(published, "shift", {
+        	value : function(){
+                var rowset = getRowset();
+                if(rowset != null){
+                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
+                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
+                    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+                }
+        	}
+        });
+        Object.defineProperty(published, "push", {
+        	value : function(){
+                var rowset = getRowset();
+                if(rowset != null){
+                        for(var i=0;i<arguments.length;i++){
+                                var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
+                                var propsAsArray = propsToArray(arguments[i]);
+                                aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
+                        }
+                        return rowset.@com.bearsoft.rowset.Rowset::size()();
+                }else{
+                        return 0;
+                }
+        	}
+        });
+        Object.defineProperty(published, "unshift", {
+        	value : function(){
+                var rowset = getRowset();
+                if(rowset != null){
+                    for(var i = arguments.length - 1; i >= 0; i--){
+                        var propsAsArray = propsToArray(arguments[i]);
+                        aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray);
+                    }
+                    return rowset.@com.bearsoft.rowset.Rowset::size()();
+                }else
+                    return 0;
+        	}
+        });
+        Object.defineProperty(published, "reverse", {
+        	value : function(){
+                var rowset = getRowset();
+                if(rowset != null){
+                        rowset.@com.bearsoft.rowset.Rowset::reverse()();
+                }
+        	}
+        });
+        Object.defineProperty(published, "splice", {
+        	value : function(){
+                if(arguments.length > 0){
+                    var rowset = getRowset();
+                    if(rowset != null){
+                        var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                        var startAt = arguments[0];
+                        if(startAt < 0)
+                                startAt = size+startAt;
+                        if(startAt < 0)
+                                throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
+                        var howMany = arguments.length > 1 ? arguments[1] : size;
+                        if(howMany < 0)
+                                throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
+                        var toAdd = [];
+                        if(arguments.length > 2)
+                        {
+                                for(var ai=2; ai<arguments.length; ai++)
+                                        toAdd.push(arguments[ai]);
+                        }
+                        var removed = [];
+                        while(startAt < size && removed.length < howMany){
+                            var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
+                            rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
+                            var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+                            removed.push(deletedFacade);
+                            size = rowset.@com.bearsoft.rowset.Rowset::size()();
+                        }
+                        for(var l = arguments.length - 1; l >= 2; l--){						
+                            var propsAsArray = propsToArray(arguments[l]);
+                            aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
+                        }
+                        return removed;
+                    }else
+                        return [];
+                }else
+                    throw "Bad arguments. There are must at least one argument";
+        	}
+        });
+        Object.defineProperty(published, "sort", {
+        	value : function(aComparator) {
+                if(aComparator){
+                    aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
+                }else
+                    throw "A comparing function or comparator object must be specified."; 
+        	}
+        });
+		// properties
+		Object.defineProperty(published, "getQueryId", {
+			value : function() {
+				return aEntity.@com.eas.client.model.Entity::getQueryId()();
+			}
+		});
+		Object.defineProperty(published, "isModified", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::isModified()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "isEmpty", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::isEmpty()();
+				else
+					return true;
+			}
+		});
+		Object.defineProperty(published, "isInserting", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::isInserting()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "getSize", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::size()();
+				else
+					return 0;
+			}
+		});
+		Object.defineProperty(published, "getRowIndex", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::getCursorPos()();
+				else
+					return -1;
+			}
+		});
+		Object.defineProperty(published, "setRowIndex", {
+			value : function(aRowIndex) {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aRowIndex);
+			}
+			
+		});
+		Object.defineProperty(published, "getSubstitute", {
+			value : function() {
+				var sEntity = aEntity.@com.eas.client.model.Entity::getSubstitute()();
+				if(sEntity != null)
+					return sEntity.@com.eas.client.model.Entity::getPublished()();
+				else
+					return null;
+			}
+		});
+		Object.defineProperty(published, "setSubstitute", {
+			value : function(aSubstitute) {
+				aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/eas/client/model/Entity;)(aSubstitute != null ? aSubstitute.unwrap() : null);
+			}
+		});
+		// cursor interface 
+		Object.defineProperty(published, "scrollTo", {
+			value : function(aRow) {
+				return aEntity.@com.eas.client.model.Entity::scrollTo(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+			}
+		});
+		Object.defineProperty(published, "beforeFirst", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::beforeFirst()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "afterLast", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::afterLast()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "bof", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::isBeforeFirst()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "eof", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::isAfterLast()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "first", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::first()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "next", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::next()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "prev", {
+			 value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::previous()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "last", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::last()();
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "pos", {
+			value : function(aIndex) {
+				var rowset = getRowset();
+				if(rowset != null)
+					return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aIndex);
+				else
+					return false;
+			}
+		});
+		Object.defineProperty(published, "getRow", {
+			value : function(aIndex) {
+				var rowset = getRowset();
+				if(rowset != null)
+					return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aIndex), aEntity);
+				else
+					return null;
+			}
+		});
+		// find interface
+		Object.defineProperty(published, "find", {
+			value : function() {
+				return aEntity.@com.eas.client.model.Entity::find(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
+			}
+		});
+		Object.defineProperty(published, "findById", {
+			value : function(aValue) {
+				return aEntity.@com.eas.client.model.Entity::findById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+			}
+		});
+		// relations interface
+		Object.defineProperty(published, "beginUpdate", {
+			value : function() {
+				aEntity.@com.eas.client.model.Entity::beginUpdate()();
+			}
+		});
+		Object.defineProperty(published, "endUpdate", {
+			value : function() {
+				aEntity.@com.eas.client.model.Entity::endUpdate()();
+			}
+		});
+		//
+		Object.defineProperty(published, "enqueueUpdate", {
+			value : function() {
+				aEntity.@com.eas.client.model.Entity::enqueueUpdate()();
+			}
+		});
+		Object.defineProperty(published, "execute", {
+			value : function(onSuccess, onFailure) {
+				var oldManual = published.manual;
+				try{
+					published.manual = false;
+					aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+				}finally{
+					published.manual = oldManual;
+				}
+			}
+		});
+		Object.defineProperty(published, "requery", {
+			value : function(onSuccess, onFailure) {
+				var oldManual = published.manual;
+				try{
+					published.manual = false;
+					aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+				}finally{
+					published.manual = oldManual;
+				}
+			}
+		});
+			// processing interface
+		Object.defineProperty(published, "createLocator", {
+			value : function() {
+				return aEntity.@com.eas.client.model.Entity::createLocator(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
+			}
+		});
+		Object.defineProperty(published, "createFilter", {
+			value : function() {
+				return aEntity.@com.eas.client.model.Entity::createFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
+			}
+		});
+		Object.defineProperty(published, "createSorting", {
+			value : function() {
+				return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
+			}
+		});
+		// data at cursor interface
+		Object.defineProperty(published, "getObject", {
+			value : function(aColIndex) {
+				var rValue = null;
+				var rowset = getRowset();
+				if(rowset != null){
+					rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.schema[aColIndex-1].name);
+				}
+				if(rValue == null){
+					rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
+				}
+				return $wnd.P.boxAsJs(rValue);
+			}
+		});
+		// modify interface
+		Object.defineProperty(published, "updateObject", {
+			value : function(aColIndex, aValue) {
+				var rowset = getRowset();
+				if(rowset != null)
+					rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.P.boxAsJava(aValue));
+			}
+		});
+		Object.defineProperty(published, "insert", {
+			value : function() {
+				aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
+			}
+		});
+		Object.defineProperty(published, "deleteAll", {
+			value : function() {
+				var rowset = getRowset();
+				if(rowset != null)
+					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
+			}
+		});
+		Object.defineProperty(published, "deleteRow", {
+			value : function(aRow) {
+				var rowset = getRowset();
+				if(rowset != null){
+					if(aRow){
+						if(aRow.unwrap)
+							rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+						else
+							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
+					}else
+						rowset.@com.bearsoft.rowset.Rowset::delete()();
+				}
+			}
+		});
+		Object.defineProperty(published, "unwrap", {
+			value : function() {
+				return aEntity;
+			}
+		});
+		// properties
+		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
+		Object.defineProperty(published, "queryId",      { get : function(){ return published.getQueryId()}});
+		Object.defineProperty(published, "manual",       { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
+		Object.defineProperty(published, "modified",     { get : function(){ return published.isModified()}});
+		Object.defineProperty(published, "empty",        { get : function(){ return published.isEmpty()}});
+		Object.defineProperty(published, "inserting",    { get : function(){ return published.isInserting()}});
+		Object.defineProperty(published, "size",         { get : function(){ return nativeQuery != null ? published.getSize() : published.schema.length; }});
+		Object.defineProperty(published, "length",       { get : function(){ return nativeQuery != null ? published.getSize() : published.schema.length; }});
+		Object.defineProperty(published, "cursorPos",    { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
+		Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
+		Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
+		Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.cursorPos - 1];}});
+		    
+		Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
+		// deprecated
+		Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
+		//
+		// cursor-row dynamic properties interface
+		for(var i = 0; i < published.schema.length; i++){
+			(function(){
+				var _i = i;
+				Object.defineProperty(published, published.schema[_i].name,
+				{
+					 get : function(){ return published.getObject(_i+1); },
+					 set : function(aValue){ published.updateObject(_i+1, aValue); }
+				});
+			})();
+		}
+		// params
+		if(nativeQuery != null){// Parameters entity has no query
+			var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
+			var publishedParams = {};  
+			Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
+			Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
+			for(var i=0;i<publishedParams.schema.length;i++){
+				(function(){
+					var _i = i;
+					var propDesc = {
+						 get : function(){ return publishedParams.schema[_i].value; },
+						 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
+					};
+					Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
+					Object.defineProperty(publishedParams, (_i+""), propDesc);
+				})();
+			}			
+			Object.defineProperty(published, "params", {
+				get : function(){
+					return publishedParams;
+				}
+			});
+		}
+		// events
+		Object.defineProperty(published, "willChange", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnBeforeChange()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnBeforeChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "willDelete", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnBeforeDelete()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnBeforeDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "willInsert", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnBeforeInsert()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnBeforeInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "willScroll", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnBeforeScroll()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnBeforeScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onChanged", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnAfterChange()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnAfterChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onDeleted", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnAfterDelete()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnAfterDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onFiltered", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnFiltered()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnFiltered(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onInserted", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnAfterInsert()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnAfterInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onRequeried", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnRequeried()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnRequeried(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onScrolled", {
+			get : function(){
+				return aEntity.@com.eas.client.model.Entity::getOnAfterScroll()();
+			},
+			set : function(aValue){
+				aEntity.@com.eas.client.model.Entity::setOnAfterScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
 	}-*/;
 
 	public static native void publishRows(JavaScriptObject aPublished) throws Exception/*-{

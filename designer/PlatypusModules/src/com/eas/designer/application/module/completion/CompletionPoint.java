@@ -62,7 +62,6 @@ public class CompletionPoint {
         if (caretOffset > 0) {
             char caretPositionChar = doc.getChars(caretOffset, 1)[0];
             char preCaretPositionChar = doc.getChars(caretOffset - 1, 1)[0];
-            boolean inBetweenSentence = false;
             if (Character.isJavaIdentifierPart(preCaretPositionChar) || preCaretPositionChar == DOT_CHARACTER) {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
@@ -72,12 +71,11 @@ public class CompletionPoint {
                         ? sanitizeDot(docStr, caretOffset - 1) : docStr);
                 List<CompletionToken> ctxTokens = getContextTokens(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
                 List<CompletionToken> offsetTokens = getOffsetTokens(ctxTokens, caretOffset);
-                inBetweenSentence = ctxTokens.size() > offsetTokens.size() + 1;
                 cp.completionTokens = offsetTokens;
             }
             cp.caretBeginWordOffset = getStartWordOffset(doc, caretOffset);
             cp.caretEndWordOffset = getEndWordOffset(doc, caretOffset);
-            if (caretOffset - cp.caretBeginWordOffset > 0 && !inBetweenSentence) {
+            if (caretOffset - cp.caretBeginWordOffset > 0) {
                 cp.filter = doc.getText(cp.caretBeginWordOffset, caretOffset - cp.caretBeginWordOffset);
             }
         }

@@ -728,32 +728,18 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.FlowPane.prototype, "add", {
-        enumerable: true,
-        value: function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.FlowPane){
         /**
          * Appends the specified component to the end of this container.
          * @param component the component to add
          * @method add
          * @memberOf FlowPane
          */
-        P.FlowPane.prototype.add = function(component){};
-    }
-    Object.defineProperty(P.FlowPane.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.FlowPane.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.FlowPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -761,56 +747,44 @@
          * @method child
          * @memberOf FlowPane
          */
-        P.FlowPane.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.FlowPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.FlowPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.FlowPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf FlowPane
          */
-        P.FlowPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.FlowPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.FlowPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.FlowPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf FlowPane
          */
-        P.FlowPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.FlowPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.FlowPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.FlowPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf FlowPane
          */
-        P.FlowPane.prototype.focus = function(){};
-    }
+        P.FlowPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

@@ -655,21 +655,15 @@
             P.ModelScheme.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ModelScheme.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelScheme){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelScheme
          */
-        P.ModelScheme.prototype.focus = function(){};
-    }
+        P.ModelScheme.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

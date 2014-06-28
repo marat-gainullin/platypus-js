@@ -776,15 +776,6 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.TabbedPane.prototype, "add", {
-        enumerable: true,
-        value: function(component, text) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.TabbedPane){
         /**
          * Appends the component whith specified text to the end of this container.
          * @param component the component to add.
@@ -793,17 +784,12 @@
          * @method add
          * @memberOf TabbedPane
          */
-        P.TabbedPane.prototype.add = function(component, text){};
-    }
-    Object.defineProperty(P.TabbedPane.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.TabbedPane.prototype.add = function(component, text) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.TabbedPane){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -811,56 +797,44 @@
          * @method child
          * @memberOf TabbedPane
          */
-        P.TabbedPane.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.TabbedPane.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.TabbedPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.TabbedPane){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf TabbedPane
          */
-        P.TabbedPane.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.TabbedPane.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.TabbedPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.TabbedPane){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf TabbedPane
          */
-        P.TabbedPane.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.TabbedPane.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.TabbedPane.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.TabbedPane){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf TabbedPane
          */
-        P.TabbedPane.prototype.focus = function(){};
-    }
+        P.TabbedPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

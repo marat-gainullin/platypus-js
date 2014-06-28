@@ -7,10 +7,17 @@ public class JsModel {
 
 	public native static void init()/*-{
 		
-		$wnd.P.Entity = function(aModel){
-			var delegate = arguments.length > 1 ? arguments[1] : @com.eas.client.model.Entity::new(Lcom/eas/client/model/Model;)(aModel.unwrap());
-			delegate.@com.eas.client.model.Entity::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(this);
-		};
+		(function(){		
+			function Entity(aModel){
+				var delegate = arguments.length > 1 ? arguments[1] : @com.eas.client.model.Entity::new(Lcom/eas/client/model/Model;)(aModel.unwrap());
+				delegate.@com.eas.client.model.Entity::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(this);
+			}
+			
+			Object.defineProperty($wnd.P, "Entity", {
+				value : Entity 
+			}); 
+			
+		})();
 		
 	}-*/;
 	

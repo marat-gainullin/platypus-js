@@ -708,21 +708,15 @@
             P.HtmlArea.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.HtmlArea.prototype, "focus", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.HtmlArea){
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf HtmlArea
          */
-        P.HtmlArea.prototype.focus = function(){};
-    }
+        P.HtmlArea.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

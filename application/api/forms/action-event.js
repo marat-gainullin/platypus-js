@@ -37,5 +37,4 @@
             P.ActionEvent.prototype.source = {};
         }
     };
-
 })();

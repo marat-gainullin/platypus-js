@@ -788,37 +788,26 @@
             P.ModelTextArea.prototype.onKeyPressed = {};
         }
     };
-    Object.defineProperty(P.ModelTextArea.prototype, "redraw", {
-        enumerable: true,
-        value: function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelTextArea){
         /**
          * Redraw the component.
          * @method redraw
          * @memberOf ModelTextArea
          */
-        P.ModelTextArea.prototype.redraw = function(){};
-    }
-    Object.defineProperty(P.ModelTextArea.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.ModelTextArea.prototype.redraw = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.ModelTextArea){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelTextArea
          */
-        P.ModelTextArea.prototype.focus = function(){};
-    }
+        P.ModelTextArea.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

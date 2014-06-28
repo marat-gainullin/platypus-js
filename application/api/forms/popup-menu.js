@@ -724,32 +724,18 @@
             invalidatable = null;
         });
     };
-    Object.defineProperty(P.PopupMenu.prototype, "add", {
-        enumerable: true,
-        value: function(menu) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(menu));
-            return P.boxAsJs(value);
-        }
-    });
-    if(!P.PopupMenu){
         /**
          * Adds the item to the menu.
          * @param menu the menu component to add.
          * @method add
          * @memberOf PopupMenu
          */
-        P.PopupMenu.prototype.add = function(menu){};
-    }
-    Object.defineProperty(P.PopupMenu.prototype, "child", {
-        enumerable: true,
-        value: function(index) {
+        P.PopupMenu.prototype.add = function(menu) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(menu));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.PopupMenu){
+        };
+
         /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
@@ -757,56 +743,44 @@
          * @method child
          * @memberOf PopupMenu
          */
-        P.PopupMenu.prototype.child = function(index){};
-    }
-    Object.defineProperty(P.PopupMenu.prototype, "remove", {
-        enumerable: true,
-        value: function(component) {
+        P.PopupMenu.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.PopupMenu){
+        };
+
         /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
          * @memberOf PopupMenu
          */
-        P.PopupMenu.prototype.remove = function(component){};
-    }
-    Object.defineProperty(P.PopupMenu.prototype, "clear", {
-        enumerable: true,
-        value: function() {
+        P.PopupMenu.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.clear();
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.PopupMenu){
+        };
+
         /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf PopupMenu
          */
-        P.PopupMenu.prototype.clear = function(){};
-    }
-    Object.defineProperty(P.PopupMenu.prototype, "focus", {
-        enumerable: true,
-        value: function() {
+        P.PopupMenu.prototype.clear = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clear();
             return P.boxAsJs(value);
-        }
-    });
-    if(!P.PopupMenu){
+        };
+
         /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf PopupMenu
          */
-        P.PopupMenu.prototype.focus = function(){};
-    }
+        P.PopupMenu.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
 
 })();

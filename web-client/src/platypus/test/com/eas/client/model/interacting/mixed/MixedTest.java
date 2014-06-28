@@ -20,6 +20,7 @@ import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelBaseTest;
+import com.eas.client.model.js.JsModel;
 import com.google.gwt.user.client.Timer;
 
 /**
@@ -146,6 +147,7 @@ public abstract class MixedTest extends ModelBaseTest {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
 		AppClient client = initDevelopTestClient();
+		JsModel.init();
 		JsWidgets.init();
 		JsMenus.init();
 		JsContainers.init();
