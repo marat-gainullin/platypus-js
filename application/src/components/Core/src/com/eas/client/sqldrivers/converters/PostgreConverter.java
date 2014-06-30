@@ -23,12 +23,11 @@ import org.postgis.PGgeometry;
  */
 public class PostgreConverter extends PlatypusConverter {
 
-    private static class PostGISJTSGeometryConverter {
+    private static class JTSGeometryConverter {
 
-        private static final WKTReader wktGeometryReader = new WKTReader();
-
-        public static com.vividsolutions.jts.geom.Geometry postGISToJTS(PGgeometry aPostGISGeometry) {
+        public static com.vividsolutions.jts.geom.Geometry fromPostGIS(PGgeometry aPostGISGeometry) {
             if (aPostGISGeometry != null) {
+                WKTReader wktGeometryReader = new WKTReader();
                 org.postgis.Geometry geom = aPostGISGeometry.getGeometry();
                 try {
                     return wktGeometryReader.read(geom.getTypeString() + geom.getValue());
@@ -39,7 +38,7 @@ public class PostgreConverter extends PlatypusConverter {
             return null;
         }
 
-        public static PGgeometry jtsToPostGIS(com.vividsolutions.jts.geom.Geometry aJTSGeometry) {
+        public static PGgeometry toPostGIS(com.vividsolutions.jts.geom.Geometry aJTSGeometry) {
             if (aJTSGeometry != null) {
                 try {
                     return  new PGgeometry(org.postgis.PGgeometry.geomFromString(aJTSGeometry.toText()));
@@ -65,7 +64,7 @@ public class PostgreConverter extends PlatypusConverter {
         try {
             if (isGeometry(aTypeInfo)) {
                 if (aValue instanceof Geometry) {
-                    PGgeometry geometry = PostGISJTSGeometryConverter.jtsToPostGIS((Geometry)aValue);
+                    PGgeometry geometry = JTSGeometryConverter.toPostGIS((Geometry)aValue);
                     aStmt.setObject(aParameterIndex, geometry);
                 } else {
                     aStmt.setObject(aParameterIndex, aValue);
@@ -132,7 +131,7 @@ public class PostgreConverter extends PlatypusConverter {
                 if (value != null) {
                     try {
                         if (value instanceof PGgeometry) {
-                            return PostGISJTSGeometryConverter.postGISToJTS((PGgeometry) value);
+                            return JTSGeometryConverter.fromPostGIS((PGgeometry) value);
                         } else {
                             return value;
                         }

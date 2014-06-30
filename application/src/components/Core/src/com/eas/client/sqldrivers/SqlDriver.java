@@ -527,6 +527,7 @@ public abstract class SqlDriver {
 
     public static void applyScript(String scriptText, Connection aConnection) throws Exception {
         String[] commandsTexts = scriptText.split(EAS_SQL_SCRIPT_DELIMITER);
+        aConnection.setAutoCommit(false);
         if (commandsTexts != null) {
             try (Statement stmt = aConnection.createStatement()) {
                 for (int i = 0; i < commandsTexts.length; i++) {
