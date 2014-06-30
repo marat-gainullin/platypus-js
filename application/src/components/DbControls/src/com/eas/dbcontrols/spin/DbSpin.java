@@ -407,9 +407,8 @@ public class DbSpin extends DbControlPanel implements DbControl {
         public void stateChanged(ChangeEvent e) {
             if (!DbSpin.this.isUpdating()) {
                 if (standalone) {
-                    if (editable && rsEntity != null) {
+                    if (editable) {
                         try {
-                            assert (spinModel != null && rsEntity != null && colIndex > 0);
                             setValue(spinModel.getValue());
                         } catch (Exception ex) {
                             Logger.getLogger(DbSpin.class.getName()).log(Level.SEVERE, null, ex);

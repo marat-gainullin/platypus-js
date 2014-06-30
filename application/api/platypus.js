@@ -23,6 +23,7 @@
     var Lock = Java.type("java.util.concurrent.locks.ReentrantLock");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
+    var JavaCollectionClass = Java.type("java.util.Collection");
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
@@ -739,11 +740,13 @@
             } else if (aValue instanceof JavaArrayClass) {
                 var converted = [];
                 for (var i = 0; i < aValue.length; i++) {
-                    if (arguments.length > 1) {
-                        converted[converted.length] = boxAsJs(aValue[i], arguments[1]);
-                    } else {
-                        converted[converted.length] = boxAsJs(aValue[i]);
-                    }
+                     converted[converted.length] = boxAsJs(aValue[i]);
+                }
+                return converted;
+            }else if(aValue instanceof JavaCollectionClass){
+                var converted = [];
+                for each (var v in aValue) {
+                     converted[converted.length] = boxAsJs(v);
                 }
                 return converted;
             }
@@ -751,7 +754,7 @@
         }
         return aValue;
     }
-    ;
+    
     Object.defineProperty(P, "boxAsJs", {
         value: boxAsJs
     });

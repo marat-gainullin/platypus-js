@@ -7,6 +7,7 @@ package com.eas.client.forms.api.components.model;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.forms.api.Component;
 import com.eas.client.model.ModelElementRef;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.DbControlPanel;
@@ -34,7 +35,7 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
     @Override
     protected void setDelegate(D aDelegate) {
         super.setDelegate(aDelegate);
-        if(delegate != null){
+        if (delegate != null) {
             try {
                 delegate.configure();
             } catch (Exception ex) {
@@ -142,9 +143,28 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
+    public static ApplicationEntity<?, ?, ?> resolveEntityByField(Field aField, ApplicationModel<?, ?, ?, ?> aModel) {
+        ApplicationEntity<?, ?, ?> found = null;
+        if (aField != null) {
+            if (aModel.getParametersEntity().getFields().get(aField.getName()) == aField) {
+                found = aModel.getParametersEntity();
+            }
+            if (found == null) {
+                for (ApplicationEntity<?, ?, ?> entity : aModel.getEntities().values()) {
+                    if (entity.getFields().get(aField.getName()) == aField) {
+                        found = entity;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
     protected ModelElementRef fieldToModelRef(Field aField) throws Exception {
         if (aField != null) {
-            return new ModelElementRef(aField, true, null);
+            ApplicationEntity<?, ?, ?> found = resolveEntityByField(aField, delegate.getModel());
+            return new ModelElementRef(aField, true, found != null ? found.getEntityId() : null);
         }
         return null;
     }

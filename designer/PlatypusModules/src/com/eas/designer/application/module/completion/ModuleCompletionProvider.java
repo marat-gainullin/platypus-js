@@ -68,10 +68,14 @@ public class ModuleCompletionProvider implements CompletionProvider {
             if (completionTokens != null) {
                 Iterator<CompletionToken> i = completionTokens.iterator();
                 while (i.hasNext()) {
-                    completionContext = completionContext.getChildContext(i.next(), caretOffset);
+                    CompletionToken token = i.next();
+                    completionContext = completionContext.getChildContext(token, caretOffset);
                     if (completionContext == null) {
-                        completionContext = initialContext;
                         caretOffset = initialOffset;
+                        completionContext = initialContext.getChildContext(token, caretOffset);
+                        if(completionContext == null){
+                            completionContext = initialContext;
+                        }
                     } else {
                         caretOffset = 0;
                     }

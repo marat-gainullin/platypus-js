@@ -143,7 +143,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         public void focusLost(FocusEvent e) {
             try {
                 if (standalone) {
-                    if (!setValue2Rowset(editingValue)) {
+                    if (rsEntity != null && rsEntity.getRowset() != null && colIndex != 0
+                            && !setValue2Rowset(editingValue)) {
                         // if the value has been rejected by rowset we must
                         // reflect rowset's value in the control.
                         setEditingValue(getValueFromRowset());
@@ -758,14 +759,14 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public void removeActionListener(ActionListener l) {
         actionListeners.add(l);
     }
-    
-    protected void fireActionPerformed(ActionEvent e){
+
+    protected void fireActionPerformed(ActionEvent e) {
         e.setSource(this);
         actionListeners.stream().forEach((l) -> {
             l.actionPerformed(e);
         });
     }
-    
+
     // datamodel interacting
     protected ModelElementRef datamodelElement;
     protected ApplicationModel<?, ?, ?, ?> model;
@@ -831,7 +832,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     public void setValue(Object aValue) throws Exception {
         if (standalone) {
-            if (rsEntity == null || rsEntity.getRowset() == null) {
+            if (rsEntity == null || rsEntity.getRowset() == null || colIndex == 0) {
                 setEditingValue(aValue);
             } else if (!setValue2Rowset(aValue)) {
                 // if the value has been rejected by rowset we must
@@ -973,6 +974,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void createFieldExtraEditingControls() throws Exception {
+        boolean nullable = true;
         extraTools.removeAll();
         if (rsEntity != null) {
             Fields fields = rsEntity.getFields();
@@ -985,14 +987,15 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                     btnSelectingField.setFocusable(false);
                     extraTools.add(btnSelectingField);
                 }
-                if (field.isNullable()) {
-                    JButton btnNullingField = new JButton();
-                    btnNullingField.setAction(new FieldNullerAction());
-                    btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
-                    btnNullingField.setFocusable(false);
-                    extraTools.add(btnNullingField);
-                }
+                nullable = field.isNullable();
             }
+        }
+        if (nullable) {
+            JButton btnNullingField = new JButton();
+            btnNullingField.setAction(new FieldNullerAction());
+            btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
+            btnNullingField.setFocusable(false);
+            extraTools.add(btnNullingField);
         }
     }
 
@@ -1062,7 +1065,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
         @Override
         protected void applyValue(Object aObject) throws Exception {
-            setValue2Rowset(null);
+            setValue(null);
         }
     }
 
