@@ -13,6 +13,8 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -36,6 +38,19 @@ public class ModelGrid extends Component<DbGrid> {
         super();
         setDelegate(aDelegate);
     }
+
+    @Override
+    protected void setDelegate(DbGrid aDelegate) {
+        super.setDelegate(aDelegate);
+        if(delegate != null){
+            try {
+                delegate.configure();
+            } catch (Exception ex) {
+                Logger.getLogger(ScalarModelComponent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
     private static final String SHOW_HORIZONTAL_LINES_JSDOC = ""
             + "/**\n"
             + "* Determines if grid shows horizontal lines.\n"

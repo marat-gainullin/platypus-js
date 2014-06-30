@@ -17,7 +17,6 @@ import com.eas.gui.CascadedStyle;
 import com.eas.script.ScriptUtils;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
@@ -144,7 +143,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         public void focusLost(FocusEvent e) {
             try {
                 if (standalone) {
-                    if (!setValue2Rowset(editingValue)) {
+                    if (rsEntity != null && rsEntity.getRowset() != null && colIndex != 0
+                            && !setValue2Rowset(editingValue)) {
                         // if the value has been rejected by rowset we must
                         // reflect rowset's value in the control.
                         setEditingValue(getValueFromRowset());
@@ -759,14 +759,14 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public void removeActionListener(ActionListener l) {
         actionListeners.add(l);
     }
-    
-    protected void fireActionPerformed(ActionEvent e){
+
+    protected void fireActionPerformed(ActionEvent e) {
         e.setSource(this);
         actionListeners.stream().forEach((l) -> {
             l.actionPerformed(e);
         });
     }
-    
+
     // datamodel interacting
     protected ModelElementRef datamodelElement;
     protected ApplicationModel<?, ?, ?, ?> model;
@@ -789,8 +789,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                     }
                     rowsetListener = new DbControlRowsetListener(this);
                     rowset.addRowsetListener(rowsetListener);
-                } else {
-                    entity.getChangeSupport().addPropertyChangeListener(this);
                 }
             }
         }
@@ -834,7 +832,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     public void setValue(Object aValue) throws Exception {
         if (standalone) {
-            if (rsEntity == null || rsEntity.getRowset() == null) {
+            if (rsEntity == null || rsEntity.getRowset() == null || colIndex == 0) {
                 setEditingValue(aValue);
             } else if (!setValue2Rowset(aValue)) {
                 // if the value has been rejected by rowset we must
@@ -925,12 +923,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         if (model != aModel) {
             if (model != null) {
                 unbind();
-                model.getChangeSupport().removePropertyChangeListener(this);
             }
             model = aModel;
-            if (model != null) {
-                model.getChangeSupport().addPropertyChangeListener(this);
-            }
             firePropertyChange("datamodel", oldValue, model);
         }
     }
@@ -980,6 +974,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void createFieldExtraEditingControls() throws Exception {
+        boolean nullable = true;
         extraTools.removeAll();
         if (rsEntity != null) {
             Fields fields = rsEntity.getFields();
@@ -992,14 +987,15 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                     btnSelectingField.setFocusable(false);
                     extraTools.add(btnSelectingField);
                 }
-                if (field.isNullable()) {
-                    JButton btnNullingField = new JButton();
-                    btnNullingField.setAction(new FieldNullerAction());
-                    btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
-                    btnNullingField.setFocusable(false);
-                    extraTools.add(btnNullingField);
-                }
+                nullable = field.isNullable();
             }
+        }
+        if (nullable) {
+            JButton btnNullingField = new JButton();
+            btnNullingField.setAction(new FieldNullerAction());
+            btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
+            btnNullingField.setFocusable(false);
+            extraTools.add(btnNullingField);
         }
     }
 
@@ -1069,7 +1065,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
         @Override
         protected void applyValue(Object aObject) throws Exception {
-            setValue2Rowset(null);
+            setValue(null);
         }
     }
 
@@ -1147,49 +1143,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     @Override
     public void setOnRender(JSObject aHandler) {
         onRender = aHandler;
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        try {
-            if (evt != null) {
-                ApplicationEntity<?, ?, ?> entity = datamodelElement != null && model != null ? model.getEntityById(datamodelElement.getEntityId()) : null;
-                if (evt.getSource() == model
-                        && "runtime".equals(evt.getPropertyName())) {
-                    if (Boolean.FALSE.equals(evt.getOldValue())
-                            && Boolean.TRUE.equals(evt.getNewValue())) {
-                        if (entity != null && entity.getRowset() != null) {
-                            configure();
-                            beginUpdate();
-                            try {
-                                setEditingValue(getValueFromRowset());
-                            } finally {
-                                endUpdate();
-                            }
-                        } else {
-                            bind();
-                        }
-                    } else if (Boolean.TRUE.equals(evt.getOldValue())
-                            && Boolean.FALSE.equals(evt.getNewValue())) {
-                        cleanup();
-                    }
-                } else if (evt.getSource() == entity
-                        && "rowset".equals(evt.getPropertyName())
-                        && evt.getNewValue() != null && evt.getOldValue() == null) {
-                    entity.getChangeSupport().removePropertyChangeListener(this);
-                    assert entity.getRowset() != null;
-                    configure();
-                    beginUpdate();
-                    try {
-                        setEditingValue(getValueFromRowset());
-                    } finally {
-                        endUpdate();
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     @Override

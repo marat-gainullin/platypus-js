@@ -115,22 +115,22 @@ public class NullableSpinnerNumberModel extends SpinnerNumberModel {
             if (aValue instanceof BigDecimal) {
                 newValue = new BigDecimal(v);
             } else if (aValue instanceof Double) {
-                newValue = new Double(v);
+                newValue = v;
             } else {
-                newValue = new Float(v);
+                newValue = (float) v;
             }
             lnewValue = new BigDecimal(v);
         } else {
             long v = aValue.longValue() + (step.longValue() * (long) dir);
 
             if (aValue instanceof Long) {
-                newValue = new Long(v);
+                newValue = v;
             } else if (aValue instanceof Integer) {
-                newValue = new Integer((int) v);
+                newValue = (int) v;
             } else if (aValue instanceof Short) {
-                newValue = new Short((short) v);
+                newValue = (short) v;
             } else {
-                newValue = new Byte((byte) v);
+                newValue = (byte) v;
             }
             lnewValue = new BigDecimal(v);
         }

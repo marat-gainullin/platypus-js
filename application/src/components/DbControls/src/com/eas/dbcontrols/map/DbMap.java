@@ -201,13 +201,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
 
     @Override
     public void setModel(ApplicationModel<?, ?, ?, ?> aValue) {
-        if (model != null) {
-            model.getChangeSupport().removePropertyChangeListener(this);
-        }
         model = aValue;
-        if (model != null) {
-            model.getChangeSupport().addPropertyChangeListener(this);
-        }
     }
 
     @Override
@@ -483,23 +477,6 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     @Override
     public Object createPropertyObjectInstance(String aSimpleClassName) {
         return DbControlsUtils.createDesignInfoBySimpleClassName(aSimpleClassName);
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        try {
-            if (evt != null && evt.getSource() == model
-                    && "runtime".equals(evt.getPropertyName())) {
-                if (Boolean.FALSE.equals(evt.getOldValue())
-                        && Boolean.TRUE.equals(evt.getNewValue())) {
-                    configure();
-                } else if (Boolean.FALSE.equals(evt.getNewValue())) {
-                    cleanup();
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbMap.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     public String getBackingUrl() {
