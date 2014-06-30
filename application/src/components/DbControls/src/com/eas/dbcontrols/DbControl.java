@@ -20,7 +20,7 @@ import java.beans.PropertyChangeListener;
  * Multiple rowsets controls views and edits multiple rowsets at the same time. Example of such control is DbMap.
  * @author mg
  */
-public interface DbControl extends PropertyChangeListener {
+public interface DbControl {
 
     public static final int EXTRA_BUTTON_WIDTH = 18;
 

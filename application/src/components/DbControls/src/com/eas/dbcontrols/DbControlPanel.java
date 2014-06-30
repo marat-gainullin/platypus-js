@@ -17,7 +17,6 @@ import com.eas.gui.CascadedStyle;
 import com.eas.script.ScriptUtils;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
@@ -789,8 +788,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                     }
                     rowsetListener = new DbControlRowsetListener(this);
                     rowset.addRowsetListener(rowsetListener);
-                } else {
-                    entity.getChangeSupport().addPropertyChangeListener(this);
                 }
             }
         }
@@ -925,12 +922,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         if (model != aModel) {
             if (model != null) {
                 unbind();
-                model.getChangeSupport().removePropertyChangeListener(this);
             }
             model = aModel;
-            if (model != null) {
-                model.getChangeSupport().addPropertyChangeListener(this);
-            }
             firePropertyChange("datamodel", oldValue, model);
         }
     }
@@ -1147,49 +1140,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     @Override
     public void setOnRender(JSObject aHandler) {
         onRender = aHandler;
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        try {
-            if (evt != null) {
-                ApplicationEntity<?, ?, ?> entity = datamodelElement != null && model != null ? model.getEntityById(datamodelElement.getEntityId()) : null;
-                if (evt.getSource() == model
-                        && "runtime".equals(evt.getPropertyName())) {
-                    if (Boolean.FALSE.equals(evt.getOldValue())
-                            && Boolean.TRUE.equals(evt.getNewValue())) {
-                        if (entity != null && entity.getRowset() != null) {
-                            configure();
-                            beginUpdate();
-                            try {
-                                setEditingValue(getValueFromRowset());
-                            } finally {
-                                endUpdate();
-                            }
-                        } else {
-                            bind();
-                        }
-                    } else if (Boolean.TRUE.equals(evt.getOldValue())
-                            && Boolean.FALSE.equals(evt.getNewValue())) {
-                        cleanup();
-                    }
-                } else if (evt.getSource() == entity
-                        && "rowset".equals(evt.getPropertyName())
-                        && evt.getNewValue() != null && evt.getOldValue() == null) {
-                    entity.getChangeSupport().removePropertyChangeListener(this);
-                    assert entity.getRowset() != null;
-                    configure();
-                    beginUpdate();
-                    try {
-                        setEditingValue(getValueFromRowset());
-                    } finally {
-                        endUpdate();
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     @Override

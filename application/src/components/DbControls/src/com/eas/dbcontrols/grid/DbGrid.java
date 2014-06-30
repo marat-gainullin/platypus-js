@@ -104,23 +104,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     public void endUpdate() {
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        try {
-            if (evt != null && evt.getSource() == model
-                    && "runtime".equals(evt.getPropertyName())) {
-                if (Boolean.FALSE.equals(evt.getOldValue())
-                        && Boolean.TRUE.equals(evt.getNewValue())) {
-                    configure();
-                } else {
-                    cleanup();
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     protected void applyComponentPopupMenu() {
         if (tlTable != null) {
             tlTable.setComponentPopupMenu(getComponentPopupMenu());
@@ -1133,7 +1116,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
 
         @Override
         public void stateChanged(ChangeEvent e) {
-            if (!working) {
+            if (!working && fixedColumns > 0) {
                 working = true;
                 try {
                     Point contentPos = content.getViewPosition();
@@ -1327,15 +1310,13 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 rheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, fixedColumns, columnModel.getColumnCount() - 1));
                 rcolumnsSources.putAll(filterColumnsSources(columnModel, fixedColumns, columnModel.getColumnCount() - 1));
                 rheader.setRowSorter(rowSorter);
-                // TODO: replace this by hashing scriptablecolumns by ColGroup and then
-                // iteration through left and right colGroups heirarchy.
-                for (ScriptableColumn sCol : scriptableColumns) {
+                scriptableColumns.stream().forEach((sCol) -> {
                     if (rheader.getColumnsParents().containsKey(sCol.getViewColumn())) {
                         sCol.setHeader(rheader);
                     } else if (lheader.getColumnsParents().containsKey(sCol.getViewColumn())) {
                         sCol.setHeader(lheader);
                     }
-                }
+                });
                 // Tables are enclosed in panels to avoid table's stupid efforts
                 // to configure it's parent scroll pane.
                 JPanel tlPanel = new JPanel(new BorderLayout());
@@ -1349,8 +1330,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 JPanel brPanel = new GridTableScrollablePanel(brTable);
                 //brPanel.add(brTable, BorderLayout.CENTER);
 
-                boolean needOutlineCols = (fixedColumns > 0 && rowsHeaderType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE)
-                        || fixedColumns > 1;
+                boolean needOutlineCols = fixedColumns > 0;
                 tlPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
                 trPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, 0, FIXED_COLOR));
                 blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
@@ -2563,13 +2543,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
 
     @Override
     public void setModel(ApplicationModel<?, ?, ?, ?> aValue) {
-        if (model != null) {
-            model.getChangeSupport().removePropertyChangeListener(this);
-        }
         model = aValue;
-        if (model != null) {
-            model.getChangeSupport().addPropertyChangeListener(this);
-        }
     }
 
     public void fillByRowset(ApplicationEntity<?, ?, ?> aEntity) throws Exception {
