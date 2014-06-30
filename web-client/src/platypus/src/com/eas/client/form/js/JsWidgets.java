@@ -579,7 +579,7 @@ public class JsWidgets {
         });
         Object.defineProperty(aPublished, "layout", {
         	value : function() {
-    			@com.eas.client.form.ControlsUtils::callOnResize(Lcom/google/gwt/user/client/ui/UIObject;)(aPublished.unwrap());
+    			@com.eas.client.form.ControlsUtils::callOnResize(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
         	}
         });
         comp.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);

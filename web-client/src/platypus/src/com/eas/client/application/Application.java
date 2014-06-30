@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
+import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.GroupingHandlerRegistration;
@@ -31,12 +32,20 @@ import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
+import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * 
@@ -85,7 +94,7 @@ public class Application {
 	protected static class ExecuteApplicationCallback extends RunnableAdapter {
 
 		protected Collection<String> executedAppElements;
-		protected Set<Element> indicators; 
+		protected Set<Element> indicators;
 
 		public ExecuteApplicationCallback(Collection<String> appElementsToExecute, Set<Element> aIndicators) {
 			super();
@@ -95,8 +104,8 @@ public class Application {
 
 		@Override
 		protected void doWork() throws Exception {
-			for(Element el : indicators){
-				el.<XElement>cast().unmask();
+			for (Element el : indicators) {
+				el.<XElement> cast().unmask();
 			}
 			loaderHandlerRegistration.removeHandler();
 			for (String appElementName : executedAppElements) {
@@ -165,6 +174,16 @@ public class Application {
 		
 		$wnd.P.selectFile = function(aCallback) {
 			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+		}
+		
+		$wnd.P.selectColor = function(aCallback) {
+//			var temp = document.createElement('input');
+//			aCallback();
+//			temp.type = 'color';
+//			temp.addEventListener('');
+//			temp.click();
+//			console.log("hello1");
+			@com.eas.client.application.Application::callColor()();
 		}
 		
 		$wnd.P.Resource = {};
@@ -996,7 +1015,7 @@ public class Application {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
 		String platypusIndicatorClass = "platypus-indicator";
-		if (xBody.getClassName() != null && xBody.hasClassName(platypusIndicatorClass)){
+		if (xBody.getClassName() != null && xBody.hasClassName(platypusIndicatorClass)) {
 			platypusIndicators.add(xBody);
 		}
 
@@ -1026,9 +1045,9 @@ public class Application {
 		String url = Document.get().getURL();
 		if (url != null) {
 			int pos = url.indexOf('#');
-			if (pos > -1){
+			if (pos > -1) {
 				String moduleName = url.substring(pos + 1);
-				if(!moduleName.isEmpty()){
+				if (!moduleName.isEmpty()) {
 					platypusModules.put(moduleName, null);
 				}
 			}
@@ -1041,7 +1060,8 @@ public class Application {
 			$wnd.P.ready();
 	}-*/;
 
-	protected static void startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators) throws Exception {
+	protected static void startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators)
+			throws Exception {
 		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
 			client.getStartElement(new CallbackAdapter<String, Void>() {
 
@@ -1058,7 +1078,7 @@ public class Application {
 						onReady();
 					}
 				}
-				
+
 				@Override
 				public void onFailure(Void reason) {
 				}
@@ -1113,12 +1133,14 @@ public class Application {
 								if (aOnSuccess != null)
 									Utils.invokeJsFunction(aOnSuccess);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING,
+											"Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
 							} else {
 								if (aOnFailure != null)
 									Utils.invokeJsFunction(aOnFailure);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING,
+											"Require failed and callback is missing. Required modules are: " + aDeps.toString());
 							}
 						} finally {
 							if (!requireProcesses.isEmpty()) {
@@ -1135,5 +1157,23 @@ public class Application {
 		} else {
 			requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
 		}
+	}
+
+	public static void callColor() {
+		final TextBox tmpField = new TextBox();
+		tmpField.getElement().setAttribute("type", "color");
+//		tmpField.getElement().getStyle().setDisplay(Display.NONE);
+		tmpField.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+		RootPanel.get().add(tmpField);
+//		Document doc = Document.get();
+//		doc.appendChild(tmpField.getElement());
+//		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+//			@Override
+//			public void execute() {
+//			DomEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false), tmpField);	
+//			
+//			}
+//		});
+		DomEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false), tmpField);
 	}
 }
