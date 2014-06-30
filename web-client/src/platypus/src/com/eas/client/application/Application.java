@@ -39,13 +39,19 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.logging.client.LogConfiguration;
+import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.event.dom.client.KeyCodes;
 
 /**
  * 
@@ -1163,17 +1169,27 @@ public class Application {
 		final TextBox tmpField = new TextBox();
 		tmpField.getElement().setAttribute("type", "color");
 //		tmpField.getElement().getStyle().setDisplay(Display.NONE);
-		tmpField.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+//		tmpField.getElement().getStyle().setVisibility(Visibility.HIDDEN);
 		RootPanel.get().add(tmpField);
 //		Document doc = Document.get();
 //		doc.appendChild(tmpField.getElement());
-//		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-//			@Override
-//			public void execute() {
-//			DomEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false), tmpField);	
-//			
-//			}
-//		});
-		DomEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false), tmpField);
+		tmpField.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {
+				
+//				RootPanel.get().remove(tmpField);
+			}
+		});
+
+		
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			@Override
+			public void execute() {
+				//NativeEvent click = Document.get().createClickEvent();
+				NativeEvent click = Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false);
+				DomEvent.fireNativeEvent(click, tmpField);	
+			}
+		});
 	}
 }
