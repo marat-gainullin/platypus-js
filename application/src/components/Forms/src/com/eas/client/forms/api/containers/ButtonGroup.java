@@ -87,10 +87,11 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     private boolean settingButtonGroup;
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this group.\n"
+            + " * Appends the specified component to the end of this group.\n"
+            + " * @param component Component to add to the group.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = ADD_JSDOC)
+    @ScriptFunction(jsDoc = ADD_JSDOC, params={"component"})
     public void add(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {
             JComponent itemDelegate = unwrap(aComp);
@@ -109,10 +110,11 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
 
     private static final String GROUP_REMOVE_JSDOC = ""
             + "/**\n"
-            + "* Removes the specified component from the group.\n"
+            + " * Removes the specified component from the group.\n"
+            + " * @param component Component to remove from the group.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = GROUP_REMOVE_JSDOC)
+    @ScriptFunction(jsDoc = GROUP_REMOVE_JSDOC, params={"component"})
     @Override
     public void remove(Component<?> aComp) {
         if (!settingButtonGroup && aComp != null) {

@@ -123,7 +123,7 @@ public class AbsolutePane extends Container<JPanel> {
             + "* @param count steps to move the component (optional)\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = TO_BACK_JSDOC)
+    @ScriptFunction(jsDoc = TO_BACK_JSDOC, params = {"component", "count"})
     public void toBack(Component aComp, int aCount) {
         Ordering.toBack(delegate, aComp, aCount);
     }

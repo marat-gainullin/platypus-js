@@ -160,7 +160,11 @@ public class Parameter extends Field {
      * @param aSourceField Source of assigning.
      */
     @Override
-    @ScriptFunction(jsDoc = "Assigning method of field/parameter information using specified source.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Assigning method of field/parameter information using specified source.\n"
+            + " * @params sourceField \n"
+            + " */", params = {"sourceField"})
     public void assignFrom(Field aSourceField) {
         super.assignFrom(aSourceField);
         if (aSourceField instanceof Parameter) {

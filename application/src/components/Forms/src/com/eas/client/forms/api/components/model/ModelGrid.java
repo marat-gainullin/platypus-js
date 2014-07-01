@@ -204,20 +204,21 @@ public class ModelGrid extends Component<DbGrid> {
     }
     private static final String SELECT_JSDOC = ""
             + "/**\n"
-            + "*  Gets the array of selected rows.\n"
-            + "*/";
+            + " *  Gets the array of selected rows.\n"
+            + " * @param instance Entity's instance to be selected.\n"
+            + " */";
 
-    @ScriptFunction(jsDoc = SELECT_JSDOC)
+    @ScriptFunction(jsDoc = SELECT_JSDOC, params={"instance"})
     public void select(Row aRow) throws Exception {
         delegate.select(aRow);
     }
     private static final String UNSELECT_JSDOC = ""
             + "/**\n"
-            + "* Unselects the specified row.\n"
-            + "* @param row the row to be unselected\n"
-            + "*/";
+            + " * Unselects the specified instance.\n"
+            + " * @param instance Entity's instance to be unselected\n"
+            + " */";
 
-    @ScriptFunction(jsDoc = UNSELECT_JSDOC, params = {"row"})
+    @ScriptFunction(jsDoc = UNSELECT_JSDOC, params = {"instance"})
     public void unselect(Row aRow) throws Exception {
         delegate.unselect(aRow);
     }
@@ -252,12 +253,12 @@ public class ModelGrid extends Component<DbGrid> {
 
     private static final String MAKE_VISIBLE_JSDOC = ""
             + "/**\n"
-            + "* Makes specified row visible.\n"
-            + "* @param row the row to make visible.\n"
-            + "* @param need2select true to select the row (optional).\n"
+            + "* Makes specified instance visible.\n"
+            + "* @param instance Entity's instance to make visible.\n"
+            + "* @param need2select true to select the instance (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC)
+    @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC, params={"instance", "need2select"})
     public boolean makeVisible(Row aRow, Boolean need2Select) throws Exception {
         return delegate.makeVisible(aRow, need2Select != null ? need2Select : false);
     }

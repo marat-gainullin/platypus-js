@@ -97,7 +97,7 @@ public class CardPane extends Container<JPanel> {
             + "* @param cardName the name of the card.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = ADD_JSDOC)
+    @ScriptFunction(jsDoc = ADD_JSDOC, params={"component", "cardName"})
     public void add(Component<?> aComp, String aCardName) {
         if (aComp != null) {
             delegate.add(unwrap(aComp), aCardName);
@@ -106,7 +106,12 @@ public class CardPane extends Container<JPanel> {
         }
     }
 
-    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"name"})
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Gets child component, associated with the specified card.\n"
+            + " * @param cardName Name of the card.\n"
+            + " * @return the child component.\n"
+            + "*/", params = {"cardName"})
     public Component<?> child(String aCardName) {
         PlatypusCardLayout layout = (PlatypusCardLayout) delegate.getLayout();
         return getComponentWrapper(layout.getComponent(aCardName));

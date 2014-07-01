@@ -188,7 +188,7 @@ public class ModelMap extends Component<DbMap> {
             + "* @return <code>MapLayer</code> instance.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = REMOVE_LAYER_JSDOC)
+    @ScriptFunction(jsDoc = REMOVE_LAYER_JSDOC, params={"layerTitle"})
     public Layer removeLayer(String aLayerTitle) throws Exception {
         return delegate.removeLayer(aLayerTitle);
     }

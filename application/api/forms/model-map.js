@@ -6,6 +6,7 @@
     
     /**
      * A model component that shows a map.
+     * Unsupported in HTML5 client.
      * @constructor ModelMap ModelMap
      */
     P.ModelMap = function () {

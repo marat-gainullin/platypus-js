@@ -509,9 +509,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String SORT_JSDOC = ""
             + "/**\n"
             + "* Sorts data according to comparator object returned by createSorting() or by comparator function.\n"
+            + "* @param comparator A comparator function or object returned from createSorting() method.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = SORT_JSDOC)
+    @ScriptFunction(jsDoc = SORT_JSDOC, params = {"comparator"})
     public void sort(RowsComparator aComparator) throws InvalidCursorPositionException {
         rowset.sort(aComparator);
     }
@@ -649,8 +650,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     private static final String INSERT_AT_JSDOC = ""
             + "/**\n"
             + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
-            + "* @index index the new row will be inserted at. 1 - based.\n"
-            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
+            + "* @param index The new row will be inserted at. 1 - based.\n"
+            + "* @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})

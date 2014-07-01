@@ -84,18 +84,16 @@ public class ScrollPane extends Container<JScrollPane> {
         invalidatePublishedCollection();
     }
 
-    private static final String COUNT_JSDOC = ""
-            + "/**\n"
-            + "* Gets the number of components in this panel.\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = COUNT_JSDOC)
     @Override
     public int getCount() {
         return getView() != null ? 1 : 0;// to avoid swing's viewports to be included in results
     }
 
-    @ScriptFunction(jsDoc = CHILD_JSDOC)
+    @ScriptFunction(jsDoc = "/**\n"
+            + " * Returns child component by index. For the ScrollPane allways returns view component\n"
+            + " * @param index Index of compoentnt to return. Ignored."
+            + " */", params = {"index"})
     @Override
     public Component<?> child(int aIndex) {
         return getView();// to avoid swing's viewports to be included in results
