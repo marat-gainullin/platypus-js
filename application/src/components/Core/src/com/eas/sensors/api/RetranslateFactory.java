@@ -10,7 +10,9 @@ package com.eas.sensors.api;
  *
  * @author Andrew
  */
-public interface Packet {
+public interface RetranslateFactory {
     
-    public abstract String getID();
+    public void send(Packet aPacket, String aURL);
+    
+    public void send(Object aPacket, String aURL);
 }
