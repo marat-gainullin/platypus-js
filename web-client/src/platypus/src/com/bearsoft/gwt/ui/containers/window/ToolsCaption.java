@@ -93,6 +93,7 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		for (Widget w : new Widget[] { btnMinimize, btnMaximize, btnRestore, btnClose }) {
 			w.getElement().getStyle().setMargin(0, Style.Unit.PX);
 			w.getElement().getStyle().setPadding(0, Style.Unit.PX);
+			w.getElement().removeClassName("gwt-Button");
 		}
 
 		label.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -197,7 +198,7 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 	private void updateToolsVisibility() {
 		btnMinimize.setVisible(window.isMinimizable() && !window.isMinimized());
-		btnMaximize.setVisible(window.isMaximizable() && !window.isMaximized());
+		btnMaximize.setVisible(window.isMaximizable() && !window.isMaximized() && !window.isMinimized());
 		btnRestore.setVisible(window.isMinimized() || window.isMaximized());
 		btnClose.setVisible(window.isClosable());
 	}
