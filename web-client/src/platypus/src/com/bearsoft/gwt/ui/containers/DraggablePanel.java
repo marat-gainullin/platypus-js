@@ -192,7 +192,7 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
         }
     };
 
-    private final SimplePanel content = new SimplePanel();
+    protected final SimplePanel content = new SimplePanel();
 
     protected boolean undecorated;
     protected boolean resizable = true;
@@ -290,7 +290,6 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 
     protected void decorate() {
         content.getElement().addClassName(styles.contentDecor());
-        content.getElement().addClassName("content-decor");
 
         Element topElement = getElement();
         // Physical attach
@@ -333,7 +332,6 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
         sw.getElement().removeFromParent();
         se.getElement().removeFromParent();
         content.getElement().removeClassName(styles.contentDecor());
-        content.getElement().removeClassName("content-decor");
     }
 
     @Override

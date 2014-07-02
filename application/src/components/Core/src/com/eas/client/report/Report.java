@@ -33,9 +33,16 @@ public class Report implements HasPublished {
     protected JSObject scriptData;
     private final String format;
     private final String name;
-    protected Object published;
+    protected Object published; 
 
-    @ScriptFunction(params = {"aReport", "aFormat", "aName"})
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Creates report, generated with template.\n"
+            + " * @param body The report binary body (array of byte).\n"
+            + " * @param format Format of the report (xls, xlsx).\n"
+            + " * @param name Name of the report. May be used as output file name.\n"
+            + " */"
+            + "", params = {"body", "format", "name"})
     public Report(byte[] aReport, String aFormat, String aName) {
         super();
         report = aReport;

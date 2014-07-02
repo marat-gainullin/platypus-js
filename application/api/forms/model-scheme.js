@@ -6,6 +6,7 @@
     
     /**
      * Generated constructor.
+     * Unsupported in HTML5 client.
      * @constructor ModelScheme ModelScheme
      */
     P.ModelScheme = function () {

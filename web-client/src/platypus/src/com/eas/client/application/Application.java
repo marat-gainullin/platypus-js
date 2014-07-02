@@ -17,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.GroupingHandlerRegistration;
