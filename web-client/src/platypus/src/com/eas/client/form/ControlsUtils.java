@@ -24,13 +24,18 @@ import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -41,6 +46,7 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.MenuItemSeparator;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -98,7 +104,8 @@ public class ControlsUtils {
 			return element.files;
 		}-*/;
 	}
-
+	
+	static HandlerRegistration focusHandler;
 	public static void jsSelectFile(final JavaScriptObject aCallback) {
 		if (aCallback != null) {
 			selectFile(new Callback<JavaScriptObject, String>() {
@@ -149,6 +156,63 @@ public class ControlsUtils {
 		 */
 	}
 
+	public static void jsSelectColor(final JavaScriptObject aCallback) {
+		if (aCallback != null) {
+			selectColor(new Callback<String, String>() {
+
+				@Override
+				public void onSuccess(String result) {
+					try {
+						Utils.executeScriptEventVoid(aCallback, aCallback, result);
+					} catch (Exception ex) {
+						Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+				@Override
+				public void onFailure(String reason) {
+				}
+
+			});
+		}
+	}
+	
+	public static void selectColor(final Callback<String, String> aCallback) {
+		final TextBox tmpField = new TextBox();
+		tmpField.getElement().setAttribute("type", "color");
+		tmpField.getElement().setAttribute("positon", "absolute");
+		tmpField.setWidth("0px");
+		tmpField.setHeight("0px");
+		RootPanel.get().add(tmpField,-100,-100);
+		
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			@Override
+			public void execute() {
+				tmpField.setFocus(true);
+				 focusHandler= tmpField.addFocusHandler(new FocusHandler() {
+					@Override
+					public void onFocus(FocusEvent event) {
+						if(aCallback!=null){
+							try {
+								aCallback.onSuccess(tmpField.getValue());
+							} catch (Exception ex) {
+								Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+						tmpField.removeFromParent();
+						focusHandler.removeHandler();
+					}
+				});
+				click(tmpField.getElement());
+				
+			}
+		});
+		
+	}
+	public native static void click(Element element)/*-{
+		element.click();
+	}-*/;
+	
+	
 	protected static RegExp rgbPattern = RegExp.compile("rgb *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *\\)");
 	protected static RegExp rgbaPattern = RegExp.compile("rgba *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]*\\.?[0-9]+) *\\)");
 
