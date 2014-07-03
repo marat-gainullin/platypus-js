@@ -188,7 +188,7 @@ public class ControlsUtils {
 			@Override
 			public void execute() {
 				tmpField.setFocus(true);
-				 focusHandler= tmpField.addFocusHandler(new FocusHandler() {
+				 tmpField.addFocusHandler(new FocusHandler() {
 					@Override
 					public void onFocus(FocusEvent event) {
 						if(aCallback!=null){
@@ -199,7 +199,7 @@ public class ControlsUtils {
 							}
 						}
 						tmpField.removeFromParent();
-						focusHandler.removeHandler();
+//						focusHandler.removeHandler();
 					}
 				});
 				click(tmpField.getElement());
