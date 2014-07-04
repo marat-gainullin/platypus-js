@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.objects.NativeArray;
+import jdk.nashorn.internal.runtime.ScriptRuntime;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.*;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -40,7 +42,6 @@ public class ExelTemplate {
 
     public static final String FIXED_SIZE_COLLECTION_FLAG_NAME = "fixed";
     public static final String REPORT_DYNA_CLASS_PREFIX = "PlatypusReportClass_";
-    protected ApplicationModel<?, ?, ?, ?> model;
     protected JSObject scriptData;
     protected CompactBlob template;
     protected String templatePath;
@@ -59,9 +60,8 @@ public class ExelTemplate {
         format = aFormat;
     }
 
-    public ExelTemplate(ApplicationModel<?, ?, ?, ?> aModel, JSObject aScriptData, String aFormat) {
+    public ExelTemplate(JSObject aScriptData, String aFormat) {
         super();
-        model = aModel;
         format = aFormat;
         scriptData = aScriptData;
     }
@@ -84,7 +84,7 @@ public class ExelTemplate {
             templatePath = null;
         }
     }
-    
+
     public byte[] create() throws Exception {
         Workbook workbook = executeReport();
         ByteArrayOutputStream st = new ByteArrayOutputStream();
@@ -117,12 +117,15 @@ public class ExelTemplate {
             return ScriptUtils.toJava(aSubject);
         } else if (aSubject instanceof JSObject) {
             JSObject jsSubject = (JSObject) aSubject;
-            if (jsSubject.isArray()) {
+            if (ScriptUtils.isArrayDeep(jsSubject)) {
                 return wrapScriptArray(jsSubject);
             } else {
                 List<DynaProperty> props = new ArrayList<>();
-                jsSubject.keySet().stream().map((subjectKey) -> new DynaProperty(subjectKey)).forEach((dp) -> {
-                    props.add(dp);
+                jsSubject.keySet().forEach((String key) -> {
+                    Object oMember = jsSubject.getMember(key);
+                    if (!(oMember instanceof JSObject) || !((JSObject) oMember).isFunction()) {
+                        props.add(new DynaProperty(key));
+                    }
                 });
                 DynaClass subjectClass = new BasicDynaClass(REPORT_DYNA_CLASS_PREFIX + String.valueOf(IDGenerator.genID()), null, props.toArray(new DynaProperty[]{}));
                 BasicDynaBean bean = new BasicDynaBean(subjectClass);
@@ -146,7 +149,7 @@ public class ExelTemplate {
         return wrappedList;
     }
 
-    private void generateDataNamedMap(XLSTransformer aTransformer) throws Exception {
+    protected void generateDataNamedMap(XLSTransformer aTransformer) throws Exception {
         generated = new HashMap<>();
         if (scriptData != null) {
             scriptData.keySet().stream().forEach((sid) -> {
@@ -163,36 +166,13 @@ public class ExelTemplate {
                             aTransformer.markAsFixedSizeCollection((String) sid);
                         }
                     } else {
-                        Object wrapped = wrapScriptableObject(jsSubject);
-                        generated.put((String) sid, wrapped);
-                    }
-                }
-            });
-        }
-        if (model != null) {
-            for (ApplicationEntity<?, ?, ?> entity : model.getAllEntities().values()) {
-                if (entity != null) {
-                    String ldsName = entity.getName();
-                    if (entity instanceof ApplicationParametersEntity) {
-                        ldsName = ApplicationModel.PARAMETERS_SCRIPT_NAME;
-                    }
-                    if (ldsName != null && !ldsName.isEmpty()) {
-                        Rowset rowset = entity.getRowset();
-                        if (rowset != null) {
-                            try {
-                                rowset.beforeFirst();
-                                RowSetDynaClass cls = new RowSetDynaClass(new ResultSetImpl(rowset, rowset.getConverter()), false);
-                                generated.put(ldsName, cls.getRows());
-                                if (!rowset.isEmpty()) {
-                                    rowset.first();
-                                }
-                            } catch (InvalidCursorPositionException | SQLException ex) {
-                                Logger.getLogger(ExelTemplate.class.getName()).severe(ex.getMessage());
-                            }
+                        if (!jsSubject.isFunction()) {
+                            Object wrapped = wrapScriptableObject(jsSubject);
+                            generated.put((String) sid, wrapped);
                         }
                     }
                 }
-            }
+            });
         }
     }
 }

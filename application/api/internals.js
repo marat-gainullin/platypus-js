@@ -108,4 +108,7 @@
                     }
                 };
             });
+    ScriptUtils.setIsArrayFunc(function(aInstance){
+        return aInstance instanceof Array; 
+    });        
 })();

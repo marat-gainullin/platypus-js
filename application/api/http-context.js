@@ -3,11 +3,12 @@
      * Http context of current http request.
      * @constructor
      */
-    P.HttpContext = function () {
+    P.HttpContext = function() {
         var ServerCore = Java.type("com.eas.server.PlatypusServerCore");
         var BinaryUtils = Java.type("com.eas.util.BinaryUtils");
         var JavaString = Java.type("java.lang.String");
         var HttpCookie = Java.type("javax.servlet.http.Cookie");
+        var CharsetClass = Java.type("java.nio.charset.Charset");
         var ByteArray = Java.type("byte[]");
         var instance = ServerCore.getInstance();
 
@@ -59,7 +60,7 @@
                     P.Logger.warning("Missing character encoding. Falling back to utf-8.");
                     encoding = "utf-8";
                 }
-                if (Charset.isSupported(encoding)) {
+                if (CharsetClass.isSupported(encoding)) {
                     var is = aHttpRequest.getInputStream();
                     try {
                         return new JavaString(BinaryUtils.readStream(is, -1), encoding);
@@ -241,12 +242,13 @@
             var self = this;
             var httpCookies = aHttpRequest.getCookies();
             if (httpCookies) {
-                httpCookies.forEach(function(aCookie) {
+                for (var i = 0; i < httpCookies.length; i++) {
+                    var aCookie = httpCookies[i];
                     var cookie = new Cookie(aCookie);
                     Object.defineProperty(self, aCookie.getName(), {
                         value: cookie
                     });
-                });
+                }
             }
         }
 
@@ -347,28 +349,34 @@
         function Params(aHttpRequest) {
             var self = this;
             var paramNames = aHttpRequest.getParameterMap().keySet();
-            paramNames.forEach(function(aParamName) {
-                var paramValues = aHttpRequest.getParameterValues(aParamName);
-                if (paramValues.length == 1) {
-                    Object.defineProperty(self, aParamName, {
-                        value: aHttpRequest.getParameter(aParamName)
-                    });
-                } else {
-                    Object.defineProperty(self, aParamName, {
-                        value: P.boxAsJs(paramValues)
-                    });
+            if (paramNames) {
+                for (var i = 0; i < paramNames.length; i++) {
+                    var aParamName = paramNames[i];
+                    var paramValues = aHttpRequest.getParameterValues(aParamName);
+                    if (paramValues.length == 1) {
+                        Object.defineProperty(self, aParamName, {
+                            value: aHttpRequest.getParameter(aParamName)
+                        });
+                    } else {
+                        Object.defineProperty(self, aParamName, {
+                            value: P.boxAsJs(paramValues)
+                        });
+                    }
                 }
-            });
+            }
         }
 
         function RequestHeaders(aHttpRequest) {
             var self = this;
             var headerNames = aHttpRequest.getHeaderNames();
-            headerNames.forEach(function(aHeaderName) {
-                Object.defineProperty(self, aHeaderName, {
-                    value: aHttpRequest.getHeader(aHeaderName)
-                });
-            });
+            if (headerNames) {
+                for (var i = 0; i < headerNames.length; i++) {
+                    var aHeaderName = headerNames[i];
+                    Object.defineProperty(self, aHeaderName, {
+                        value: aHttpRequest.getHeader(aHeaderName)
+                    });
+                }
+            }
         }
 
         function Response(aHttpResponse) {
@@ -390,12 +398,21 @@
              * The content type used for the MIME body sent in this response.
              * Content type must be set prior to body or bodyBuffer.
              */
-            Object.defineProperty(this, "status", {
+            Object.defineProperty(this, "contentType", {
                 get: function() {
                     return aHttpResponse.getContentType();
                 },
                 set: function(aValue) {
                     aHttpResponse.setContentType(aValue);
+                }
+            });
+
+            Object.defineProperty(this, "characterEncoding", {
+                get: function() {
+                    return aHttpResponse.getCharacterEncoding();
+                },
+                set: function(aValue) {
+                    aHttpResponse.setCharacterEncoding(aValue);
                 }
             });
 
@@ -421,9 +438,9 @@
                         P.Logger.warning("Missing character encoding. Falling back to utf-8.");
                         encoding = "utf-8";
                     }
-                    if (Charset.isSupported(encoding)) {
+                    if (CharsetClass.isSupported(encoding)) {
                         aHttpResponse.setCharacterEncoding(encoding);
-                        self.setBodyBuffer(aValue.getBytes(encoding));
+                        self.bodyBuffer = aValue.getBytes(encoding);
                     } else {
                         throw "Character encoding " + encoding + " is not supported.";
                     }
@@ -441,11 +458,12 @@
                 set: function(aValue) {
                     if (aValue instanceof ByteArray) {
                         bodyBuffer = aValue;
+                        aHttpResponse.setContentLength(bodyBuffer.length);
                         aHttpResponse.resetBuffer();
-                        if (aValue) {
+                        if (bodyBuffer) {
                             var os = aHttpResponse.getOutputStream();
                             try {
-                                os.write(aValue);
+                                os.write(bodyBuffer);
                                 os.flush();
                             } finally {
                                 os.close();
@@ -456,7 +474,7 @@
                     }
                 }
             });
-
+            
             /**
              * The response headers object.
              * A header data is avaliable as a JavaScript property of this object.
@@ -544,5 +562,5 @@
                 aHttpResponse.addHeader(aName, aDefaultValue);
             };
         }
-    }
+    };
 })();

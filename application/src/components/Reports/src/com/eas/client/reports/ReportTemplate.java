@@ -23,19 +23,18 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ReportTemplate implements HasPublished{
 
     protected byte[] template;
-    protected ApplicationModel<?, ?, ?, ?> model;
     protected JSObject scriptData;
     protected String format;
     protected String name;
     private static JSObject publisher;
     protected Object published;
     
-    public ReportTemplate(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aFormat, String aName) {
+    public ReportTemplate(byte[] aTemplate, JSObject aData, String aFormat, String aName) {
         super();
         template = aTemplate;
-        model = aModel;
         format = aFormat;
         name = aName;
+        scriptData = aData;
     }
 
     public JSObject getScriptData() {
@@ -54,7 +53,7 @@ public class ReportTemplate implements HasPublished{
     @ScriptFunction(jsDoc = GENERATEREPORT_JSDOC)
     public Report generateReport() throws Exception {
         if (template != null) {
-            ExelTemplate reportTemplate = new ExelTemplate(model, scriptData, format);
+            ExelTemplate reportTemplate = new ExelTemplate(scriptData, format);
             reportTemplate.setTemplate(new CompactBlob(template));
             byte[] data = reportTemplate.create();
             return new Report(data, format, name);
