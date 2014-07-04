@@ -9,7 +9,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.RowWrap;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.utils.KeySet;
@@ -248,9 +247,11 @@ public class Filter extends HashOrderer implements HasPublished {
         }
     }
 
-    @ScriptFunction(jsDoc = "/**\n"
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
             + " * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.\n"
-            + "*/")
+            + " * @param values Values for keys in createFilter() call."
+            + " */", params = "values")
     public void apply(Object... values) throws RowsetException {
         filterRowset(values);
     }

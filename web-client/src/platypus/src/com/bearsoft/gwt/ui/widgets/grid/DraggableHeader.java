@@ -139,7 +139,7 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 			headerStyles.ensureInjected();// ondragenter=\"event.preventDefault();\"
 			                              // ondragover=\"event.preventDefault();\"
 			                              // ondrop=\"event.preventDefault();\"
-			sb.append(SafeHtmlUtils.fromTrustedString("<div style=\"position:relative;\">"))
+			sb.append(SafeHtmlUtils.fromTrustedString("<div class=\"grid-column-header-content\"; style=\"position:relative;\">"))
 			        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderMover() + " grid-header-mover\"></span>"))
 			        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderResizer() + " grid-header-resizer\"></span>"))
 			        .append(value.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(value.substring(6)) : SafeHtmlUtils.fromString(value)).append(SafeHtmlUtils.fromTrustedString("</div>"));

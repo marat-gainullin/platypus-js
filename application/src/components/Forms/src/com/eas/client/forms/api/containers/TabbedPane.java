@@ -79,6 +79,12 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
+    public void add(Component<?> aComp, String aText) {
+        delegate.addTab(aText, unwrap(aComp));
+        delegate.revalidate();
+        delegate.repaint();
+    }
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + " * Appends the component whith specified text to the end of this container.\n"
@@ -88,12 +94,6 @@ public class TabbedPane extends Container<JTabbedPane> {
             + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "text", "icon"})
-    public void add(Component<?> aComp, String aText) {
-        delegate.addTab(aText, unwrap(aComp));
-        delegate.revalidate();
-        delegate.repaint();
-    }
-
     public void add(Component<?> aComp, String aText, Icon aIcon) {
         if (aComp != null) {
             delegate.addTab(aText, aIcon, unwrap(aComp));

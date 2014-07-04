@@ -24,7 +24,7 @@ public class ToolBar extends Container<JToolBar> {
             + "* @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"floatable"})
     public ToolBar(boolean floatable) {
         super();
         setDelegate(new JToolBar());

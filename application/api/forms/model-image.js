@@ -6,6 +6,7 @@
     
     /**
      * A model component that shows an image.
+     * Unsupported in HTML5 client.
      * @constructor ModelImage ModelImage
      */
     P.ModelImage = function () {

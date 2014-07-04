@@ -45,7 +45,11 @@ public class Cursor implements HasPublished{
         delegate = aDelegate;
     }
 
-    @ScriptFunction(params = {"aType"})
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Constructs new cursor object.\n"
+            + " * @param type Type of new cursor.\n"
+            + " */", params = {"type"})
     public Cursor(int aCursorType) {
         super();
         delegate = new java.awt.Cursor(aCursorType);
