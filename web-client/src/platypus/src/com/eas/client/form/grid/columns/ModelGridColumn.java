@@ -121,10 +121,12 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			}
 			grid = aValue;
 			if (grid != null) {
-				if (isSortable()) {
-					grid.getSortHandler().setComparator(this, comparator);
-				} else {
-					grid.getSortHandler().setComparator(this, null);
+				if (grid.getSortHandler() != null) {
+					if (isSortable()) {
+						grid.getSortHandler().setComparator(this, comparator);
+					} else {
+						grid.getSortHandler().setComparator(this, null);
+					}
 				}
 				grid.setColumnWidth(this, getWidth(), Style.Unit.PX);
 				if (visible)
@@ -239,12 +241,12 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		}
 	}
 
-	public void updateVisible(boolean aValue){
+	public void updateVisible(boolean aValue) {
 		if (visible != aValue) {
 			visible = aValue;
 		}
 	}
-	
+
 	public double getDesignedWidth() {
 		return designedWidth;
 	}

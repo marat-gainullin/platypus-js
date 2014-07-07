@@ -87,7 +87,6 @@ public class ExplicitValueBox<T> extends ValueBox<T> {
 
 	@Override
 	public void setText(String text) {
-		String oldText = getText();
 		try {
 			T newValue;
 			if ("".equals(text)) {

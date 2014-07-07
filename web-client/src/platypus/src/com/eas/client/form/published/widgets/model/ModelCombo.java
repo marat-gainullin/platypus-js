@@ -47,11 +47,11 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 		@Override
 		public void onSuccess(RowsetEvent result) {
-			if (displayElement != null && valueElement != null) {
-				RowsetEvent event = (RowsetEvent) result;
+			if (displayElement != null && displayElement.isCorrect() && valueElement != null && valueElement.isCorrect()) {
 				Rowset displayRowset = displayElement.entity != null ? displayElement.entity.getRowset() : null;
 				Rowset valueRowset = valueElement.entity != null ? valueElement.entity.getRowset() : null;
-				if (event.getRowset() == displayRowset || event.getRowset() == valueRowset) {
+				RowsetEvent event = (RowsetEvent) result;
+				if (event != null && (event.getRowset() == displayRowset || event.getRowset() == valueRowset)) {
 					if (event instanceof RowChangeEvent) {
 						RowChangeEvent change = (RowChangeEvent) event;
 						if (change.getOldRowCount() == change.getNewRowCount()) {

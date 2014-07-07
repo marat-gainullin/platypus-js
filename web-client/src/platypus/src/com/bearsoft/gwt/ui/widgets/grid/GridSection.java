@@ -139,7 +139,7 @@ public class GridSection<T> extends CellTable<T> {
 	public boolean hideColumn(Column<T, ?> aColumn) {
 		if (!isColumnHidden(aColumn)) {
 			hiddenColumns.put(aColumn, getColumnWidth(aColumn));
-			clearColumnWidth(aColumn);
+			setColumnWidth(aColumn, "0px");
 			return true;
 		} else {
 			return false;

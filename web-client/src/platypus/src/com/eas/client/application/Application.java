@@ -31,7 +31,6 @@ import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
-import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
@@ -39,18 +38,12 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.logging.client.LogConfiguration;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.event.dom.client.KeyCodes;
 
 /**
  * 
@@ -150,6 +143,19 @@ public class Application {
 	 * @throws Exception
 	 */
 	public native static void publish(AppClient aClient) throws Exception /*-{
+	
+		// Fix Function#name on browsers that do not support it (IE):
+		if (!(function f() {}).name) {
+		    Object.defineProperty($wnd.Function.prototype, 'name', {
+		        get: function() {
+		            var name = this.toString().match(/function\s*(\S*)\s*\(/)[1];
+		            // For better performance only parse once, and then cache the
+		            // result through a new accessor for repeated access.
+		            Object.defineProperty(this, 'name', { value: name });
+		            return name;
+		        }
+		    });
+		}
 	
 		$wnd.Function.prototype.invokeLater = function() {
 			var _func = this;

@@ -85,7 +85,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		        + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};" + "}")
 		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
 
-		@Template(".{0}{" + "position: relative;" + "height: {1}px;" /*+ "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" */+ "}")
+		@Template(".{0}{" + "position: relative;" + "padding-left: 2px; padding-right: 2px;" + "height: {1}px;" /*+ "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" */+ "}")
 		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
 	}
 

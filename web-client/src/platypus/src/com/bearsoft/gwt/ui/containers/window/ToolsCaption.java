@@ -8,6 +8,8 @@ package com.bearsoft.gwt.ui.containers.window;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -111,6 +113,18 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		tools.add(btnMaximize);
 		tools.add(btnRestore);
 		tools.add(btnClose);
+		addDomHandler(new DoubleClickHandler(){
+
+			@Override
+            public void onDoubleClick(DoubleClickEvent event) {
+				if(window.isMaximized()){
+					window.restore();
+				}else{
+					window.maximize();
+				}
+            }
+			
+		}, DoubleClickEvent.getType());
 	}
 
 	public ToolsCaption() {

@@ -17,7 +17,8 @@ public class ModelImage extends ScalarModelComponent<DbImage> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + " * A model component that shows an image.\n"
+            + " * Experimental. A model component that shows an image.\n"
+            + " * Unsupported in HTML5 client.\n"
             + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
