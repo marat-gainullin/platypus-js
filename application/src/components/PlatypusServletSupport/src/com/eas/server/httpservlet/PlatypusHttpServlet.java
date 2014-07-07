@@ -30,6 +30,7 @@ import com.eas.util.StringUtils;
 import java.io.*;
 import java.net.URI;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -456,6 +457,9 @@ public class PlatypusHttpServlet extends HttpServlet {
                     if (scriptPath.startsWith(docsRoot)) {
                         String newScriptUri = scriptPath.substring(docsRoot.length());
                         String redirectLocation = aHttpResponse.encodeRedirectURL(newScriptUri.replace(File.separator, "/"));
+                        if (!"/".equals(aHttpRequest.getContextPath())) {
+                            redirectLocation = aHttpRequest.getContextPath() + redirectLocation;
+                        }
                         redirectLocation = new URI(null, null, redirectLocation, null).toASCIIString();
                         aHttpResponse.sendRedirect(redirectLocation);
                     }

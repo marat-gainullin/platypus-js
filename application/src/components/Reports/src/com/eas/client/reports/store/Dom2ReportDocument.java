@@ -14,6 +14,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.reports.ReportTemplate;
 import javax.xml.parsers.ParserConfigurationException;
+import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,22 +31,22 @@ public class Dom2ReportDocument {
         super();
     }
 
-    public static ReportTemplate load(Client aClient, String aAppElementName, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public static ReportTemplate load(Client aClient, String aAppElementName, JSObject aData) throws Exception {
         ApplicationElement appElement = aClient.getAppCache().get(aAppElementName);
         if (appElement.getType() == ClientConstants.ET_RESOURCE) {
             String format = aAppElementName.substring(aAppElementName.lastIndexOf('.') + 1, aAppElementName.length());
-            return new ReportTemplate(appElement.getBinaryContent(), aModel, format, aAppElementName);
+            return new ReportTemplate(appElement.getBinaryContent(), aData, format, aAppElementName);
         } else {
-            return transform(appElement.getContent(), aModel);
+            return transform(appElement.getContent(), aData);
         }
     }
 
-    public static ReportTemplate transform(Document aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public static ReportTemplate transform(Document aDocument, JSObject aData) throws Exception {
         Dom2ReportDocument dom2doc = new Dom2ReportDocument();
-        return dom2doc.parseDom(aDocument, aModel);
+        return dom2doc.parseDom(aDocument, aData);
     }
 
-    protected ReportTemplate parseDom(Document aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    protected ReportTemplate parseDom(Document aDocument, JSObject aData) throws Exception {
         byte[] template = null;
         String format = null;
         Element root = aDocument.getDocumentElement();
@@ -61,6 +62,6 @@ public class Dom2ReportDocument {
                 }
             }
         }
-        return new ReportTemplate(template, aModel, format, "");
+        return new ReportTemplate(template, aData, format, "");
     }
 }

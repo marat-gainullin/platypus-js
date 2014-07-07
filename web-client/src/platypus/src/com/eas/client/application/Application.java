@@ -33,17 +33,10 @@ import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * 
@@ -74,7 +67,8 @@ public class Application {
 	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
 	protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
-
+	
+	
 	public static Query getAppQuery(String aQueryId) {
 		Query query = appQueries.get(aQueryId);
 		if (query != null) {
@@ -188,13 +182,7 @@ public class Application {
 		}
 		
 		$wnd.P.selectColor = function(aCallback) {
-//			var temp = document.createElement('input');
-//			aCallback();
-//			temp.type = 'color';
-//			temp.addEventListener('');
-//			temp.click();
-//			console.log("hello1");
-			@com.eas.client.application.Application::callColor()();
+			@com.eas.client.form.ControlsUtils::jsSelectColor(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
 		$wnd.P.Resource = {};
@@ -1168,33 +1156,5 @@ public class Application {
 		} else {
 			requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
 		}
-	}
-
-	public static void callColor() {
-		final TextBox tmpField = new TextBox();
-		tmpField.getElement().setAttribute("type", "color");
-//		tmpField.getElement().getStyle().setDisplay(Display.NONE);
-//		tmpField.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-		RootPanel.get().add(tmpField);
-//		Document doc = Document.get();
-//		doc.appendChild(tmpField.getElement());
-		tmpField.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				
-//				RootPanel.get().remove(tmpField);
-			}
-		});
-
-		
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			@Override
-			public void execute() {
-				//NativeEvent click = Document.get().createClickEvent();
-				NativeEvent click = Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false);
-				DomEvent.fireNativeEvent(click, tmpField);	
-			}
-		});
 	}
 }

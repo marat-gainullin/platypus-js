@@ -50,13 +50,18 @@
     var FileChooserClass = Java.type("javax.swing.JFileChooser");
     var ColorChooserClass = Java.type("javax.swing.JColorChooser");
     var OptionPaneClass = Java.type("javax.swing.JOptionPane");
-    var ColorClass = Java.type("com.eas.gui.ScriptColor");
-    var FormClass = Java.type("com.eas.client.forms.Form");
-    var FormLoaderClass = Java.type('com.eas.client.forms.store.Dom2FormDocument');
-    var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
-    var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
-    var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
-    var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
+    try {
+        var ColorClass = Java.type("com.eas.gui.ScriptColor");
+        var FormClass = Java.type("com.eas.client.forms.Form");
+        var FormLoaderClass = Java.type('com.eas.client.forms.store.Dom2FormDocument');
+        var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
+        var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
+        var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
+        var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
+    } catch (e) {
+        //GUI API could not load in server
+    }
+
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
     Object.defineProperty(P, "J2SE", {value: "Java SE client/server environment"});
@@ -224,7 +229,6 @@
             for each (var aRow in rows) {
                 publishedRows.push(EngineUtilsClass.unwrap(aRow.getPublished()));
             }
-            ;
             Array.prototype.push.apply(target, publishedRows);
         };
         adapter.rowsetRequeried = function(event) {
@@ -580,7 +584,8 @@
                 }
             });
             Object.defineProperty(aTarget, aName, {
-                value: published
+                value: published,
+                enumerable: true
             });
         }
         var pEntity = model.getParametersEntity();
@@ -633,13 +638,13 @@
     /**
      * @static
      * @param {type} aName
-     * @param {type} aModel
+     * @param {type} aObject data
      * @param {type} aTarget
      * @returns {P.loadTemplate.publishTo}
      */
-    function loadTemplate(aName, aModel, aTarget) {
+    function loadTemplate(aName, aData, aTarget) {
         var publishTo = aTarget ? aTarget : {};
-        var template = TemplateLoaderClass.load(ScriptedResourceClass.getClient(), aName, aModel.unwrap());
+        var template = TemplateLoaderClass.load(ScriptedResourceClass.getClient(), aName, aData);
         // publish
         publishTo.generateReport = function() {
             return template.generateReport();
@@ -740,13 +745,13 @@
             } else if (aValue instanceof JavaArrayClass) {
                 var converted = [];
                 for (var i = 0; i < aValue.length; i++) {
-                     converted[converted.length] = boxAsJs(aValue[i]);
+                    converted[converted.length] = boxAsJs(aValue[i]);
                 }
                 return converted;
-            }else if(aValue instanceof JavaCollectionClass){
+            } else if (aValue instanceof JavaCollectionClass) {
                 var converted = [];
                 for each (var v in aValue) {
-                     converted[converted.length] = boxAsJs(v);
+                    converted[converted.length] = boxAsJs(v);
                 }
                 return converted;
             }
@@ -754,7 +759,7 @@
         }
         return aValue;
     }
-    
+
     Object.defineProperty(P, "boxAsJs", {
         value: boxAsJs
     });
@@ -1103,31 +1108,35 @@
         value: writeString
     });
 
-    Object.defineProperty(P.Form, "shown", {
-        get: function() {
-            var nativeArray = FormClass.getShownForms();
-            var res = [];
-            for (var i = 0; i < nativeArray.length; i++)
-                res[res.length] = nativeArray[i].getPublished();
-            return res;
-        }
-    });
+    try {
+        Object.defineProperty(P.Form, "shown", {
+            get: function() {
+                var nativeArray = FormClass.getShownForms();
+                var res = [];
+                for (var i = 0; i < nativeArray.length; i++)
+                    res[res.length] = nativeArray[i].getPublished();
+                return res;
+            }
+        });
 
-    Object.defineProperty(P.Form, "getShownForm", {
-        value: function(aName) {
-            var shownForm = FormClass.getShownForm(aName);
-            return shownForm !== null ? shownForm.getPublished() : null;
-        }
-    });
+        Object.defineProperty(P.Form, "getShownForm", {
+            value: function(aName) {
+                var shownForm = FormClass.getShownForm(aName);
+                return shownForm !== null ? shownForm.getPublished() : null;
+            }
+        });
 
-    Object.defineProperty(P.Form, "onChange", {
-        get: function() {
-            return FormClass.getOnChange();
-        },
-        set: function(aValue) {
-            FormClass.setOnChange(aValue);
-        }
-    });
+        Object.defineProperty(P.Form, "onChange", {
+            get: function() {
+                return FormClass.getOnChange();
+            },
+            set: function(aValue) {
+                FormClass.setOnChange(aValue);
+            }
+        });
+    } catch (e) {
+        //GUI API could not load in server
+    }
 
     /**
      * Shows a message box
@@ -1248,43 +1257,47 @@
     });
 
     var HorizontalPosition = {};
-    Object.defineProperty(HorizontalPosition, "LEFT", {
-        value: HorizontalPositionClass.LEFT
-    });
-    Object.defineProperty(HorizontalPosition, "CENTER", {
-        value: HorizontalPositionClass.CENTER
-    });
-    Object.defineProperty(HorizontalPosition, "RIGHT", {
-        value: HorizontalPositionClass.RIGHT
-    });
-    Object.defineProperty(P, "HorizontalPosition", {
-        value: HorizontalPosition
-    });
+    try {
+        Object.defineProperty(HorizontalPosition, "LEFT", {
+            value: HorizontalPositionClass.LEFT
+        });
+        Object.defineProperty(HorizontalPosition, "CENTER", {
+            value: HorizontalPositionClass.CENTER
+        });
+        Object.defineProperty(HorizontalPosition, "RIGHT", {
+            value: HorizontalPositionClass.RIGHT
+        });
+        Object.defineProperty(P, "HorizontalPosition", {
+            value: HorizontalPosition
+        });
 //
-    var VerticalPosition = {};
-    Object.defineProperty(VerticalPosition, "TOP", {
-        value: VerticalPositionClass.TOP
-    });
-    Object.defineProperty(VerticalPosition, "CENTER", {
-        value: VerticalPositionClass.CENTER
-    });
-    Object.defineProperty(VerticalPosition, "BOTTOM", {
-        value: VerticalPositionClass.BOTTOM
-    });
-    Object.defineProperty(P, "VerticalPosition", {
-        value: VerticalPosition
-    });
+        var VerticalPosition = {};
+        Object.defineProperty(VerticalPosition, "TOP", {
+            value: VerticalPositionClass.TOP
+        });
+        Object.defineProperty(VerticalPosition, "CENTER", {
+            value: VerticalPositionClass.CENTER
+        });
+        Object.defineProperty(VerticalPosition, "BOTTOM", {
+            value: VerticalPositionClass.BOTTOM
+        });
+        Object.defineProperty(P, "VerticalPosition", {
+            value: VerticalPosition
+        });
 //
-    var Orientation = {};
-    Object.defineProperty(Orientation, "HORIZONTAL", {
-        value: OrientationClass.HORIZONTAL
-    });
-    Object.defineProperty(Orientation, "VERTICAL", {
-        value: OrientationClass.VERTICAL
-    });
-    Object.defineProperty(P, "Orientation", {
-        value: Orientation
-    });
+        var Orientation = {};
+        Object.defineProperty(Orientation, "HORIZONTAL", {
+            value: OrientationClass.HORIZONTAL
+        });
+        Object.defineProperty(Orientation, "VERTICAL", {
+            value: OrientationClass.VERTICAL
+        });
+        Object.defineProperty(P, "Orientation", {
+            value: Orientation
+        });
+    } catch (e) {
+        //GUI API could not load in server
+    }
     //
     var FontStyleClass = Java.type("com.eas.gui.FontStyle");
     var FontStyle = {};

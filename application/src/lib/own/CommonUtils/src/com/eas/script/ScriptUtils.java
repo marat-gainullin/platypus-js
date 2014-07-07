@@ -51,6 +51,7 @@ public class ScriptUtils {
     protected static JSObject extendFunc;
     protected static JSObject scalarDefFunc;
     protected static JSObject collectionDefFunc;
+    protected static JSObject isArrayFunc;
     protected static ScriptEngine engine;
 
     public static void init() {
@@ -154,6 +155,11 @@ public class ScriptUtils {
     public static void setCollectionDefFunc(JSObject aValue) {
         assert collectionDefFunc == null;
         collectionDefFunc = aValue;
+    }
+    
+    public static void setIsArrayFunc(JSObject aValue) {
+        assert isArrayFunc == null;
+        isArrayFunc = aValue;
     }
 
     public static Object toJava(Object aValue) {
@@ -300,6 +306,12 @@ public class ScriptUtils {
     public static JSObject collectionPropertyDefinition(JSObject sourceEntity, String targetFieldName, String sourceFieldName) {
         assert collectionDefFunc != null : SCRIPT_NOT_INITIALIZED;
         return (JSObject) collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName});
+    }
+    
+    public static boolean isArrayDeep(JSObject aInstance){
+        assert isArrayFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = isArrayFunc.call(null, new Object[]{aInstance});
+        return Boolean.TRUE.equals(oResult);
     }
     
     public static JSObject createModule(String aModuleName) {
