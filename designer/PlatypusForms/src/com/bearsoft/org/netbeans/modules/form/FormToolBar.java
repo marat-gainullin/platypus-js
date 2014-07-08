@@ -89,7 +89,7 @@ class FormToolBar extends ToolbarWithOverflow {
         // selection button
         selectionButton = new JToggleButton(
                 new ImageIcon(getClass().getResource(
-                "/com/bearsoft/org/netbeans/modules/form/resources/selection_mode.png")), // NOI18N
+                                "/com/bearsoft/org/netbeans/modules/form/resources/selection_mode.png")), // NOI18N
                 false);
         selectionButton.addActionListener(listener);
         selectionButton.addMouseListener(listener);
@@ -113,11 +113,10 @@ class FormToolBar extends ToolbarWithOverflow {
          initButton(connectionButton);
          * 
          */
-
         // palette button
         paletteButton = new JToggleButton(
                 new ImageIcon(getClass().getResource(
-                "/com/bearsoft/org/netbeans/modules/form/resources/beansButton.gif")), // NOI18N
+                                "/com/bearsoft/org/netbeans/modules/form/resources/beansButton.gif")), // NOI18N
                 false);
         paletteButton.addActionListener(listener);
         paletteButton.addMouseListener(listener);
@@ -163,16 +162,16 @@ class FormToolBar extends ToolbarWithOverflow {
         //add(connectionButton);
         add(paletteButton);
         add(Box.createHorizontalStrut(6));
-        add(testButton);        
+        add(testButton);
         add(Box.createHorizontalStrut(4));
         add(separator2);
         add(Box.createHorizontalStrut(4));
         installAlignActions();
-        add(Box.createHorizontalStrut(4));        
+        add(Box.createHorizontalStrut(4));
         add(separator3);
         add(Box.createHorizontalStrut(4));
         installAnchorActions();
-        add(Box.createHorizontalStrut(4));        
+        add(Box.createHorizontalStrut(4));
         add(separator4);
         add(Box.createHorizontalStrut(4));
         installResizabilityActions();
@@ -209,8 +208,7 @@ class FormToolBar extends ToolbarWithOverflow {
         formDesigner.setResizabilityButtons(resButtons);
     }
 
-    void installAnchorActions()
-    {
+    void installAnchorActions() {
         Collection<Action> actions = formDesigner.getAnchorActions();
         assert actions.size() == 4;
         JToggleButton[] resButtons = new JToggleButton[4];
@@ -225,7 +223,9 @@ class FormToolBar extends ToolbarWithOverflow {
         }
         formDesigner.setAnchorButtons(resButtons);
     }
+
     // --------
+
     private void initButton(AbstractButton button) {
         if (!("Windows".equals(UIManager.getLookAndFeel().getID()) // NOI18N
                 && (button instanceof JToggleButton))) {
@@ -234,6 +234,7 @@ class FormToolBar extends ToolbarWithOverflow {
         button.setOpaque(false);
         button.setFocusPainted(false);
         button.setMargin(new Insets(0, 0, 0, 0));
+        button.setFocusable(false);
     }
 
     void updateDesignerMode(int mode) {

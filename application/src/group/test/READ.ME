@@ -99,6 +99,7 @@ platypus.xml:
 server.xml update for Tomcat SSL:
 
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+               URIEncoding="UTF-8"
                SSLEnabled="true"
                maxThreads="150" scheme="https" secure="true"
                keystoreFile="${user.home}/.keystore"
