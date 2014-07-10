@@ -2,9 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client;
+package com.eas.client.application;
 
-import static com.eas.client.PlatypusClientSecurityTest.*;
+import com.eas.client.AppCache;
+import com.eas.client.AppClient;
+import com.eas.client.ClientConstants;
+import static com.eas.client.application.PlatypusClientSecurityTest.*;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.threetier.PlatypusNativeClient;
 import java.io.File;
@@ -118,7 +121,7 @@ public class PlatypusClientResourcesSecurityTest {
         appClient.login(USER3_NAME, USER_PASSWORD.toCharArray());
         assertHasPermissionGetAppElement(appClient, UNSECURE_MODULE_ID, true);
         assertHasPermissionGetAppElement(appClient, SECURE_MODULE_ID, false);
-        assertHasPermissionGetAppElement(appClient, SECURE_FUNCTION_MODULE_ID, false);
+        assertHasPermissionGetAppElement(appClient, SECURE_FUNCTION_MODULE_ID, true);
         assertHasPermissionGetAppElement(appClient, UNSECURE_FORM_ID, true);
         assertHasPermissionGetAppElement(appClient, SECURE_FORM_ID, false);
         assertHasPermissionGetAppElement(appClient, UNSECURE_REPORT_ID, true);

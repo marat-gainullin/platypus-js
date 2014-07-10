@@ -7,6 +7,7 @@ package com.eas.client.forms.api.components.model;
 import com.eas.client.forms.api.Component;
 import com.eas.dbcontrols.scheme.DbScheme;
 import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -20,6 +21,13 @@ public class ModelScheme extends Component<DbScheme> {
         setDelegate(aDelegate);
     }
 
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * Experimental. A model component that shows and edits vector drawing.\n"
+            + " * Unsupported in HTML5 client.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelScheme() {
         super();
         setDelegate(new DbScheme());

@@ -23,7 +23,6 @@ import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -89,17 +88,17 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		return readonly;
 	}
 
-	public void setReadonly(CellHasReadonly readonly) {
-		this.readonly = readonly;
+	public void setReadonly(CellHasReadonly aValue) {
+		readonly = aValue;
 	}
 
 	@Override
 	public void render(final Context context, final T value, SafeHtmlBuilder sb) {
 		CellsResources.INSTANCE.tablecell().ensureInjected();
+		String viewDataId = "";
 		if (isEditing(context, null, value)) {
 			final ViewData<T> viewData = getViewData(context.getKey());
-			sb.append(PaddedCell.INSTANCE.generate(viewData.id, CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(),
-			        SafeHtmlUtils.fromTrustedString("&nbsp;")));
+			viewDataId = viewData.id;
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
 				@Override
@@ -125,13 +124,11 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 				}
 
 			});
-		} else {
-			if (renderer == null || !renderer.render(context, value, sb)) {
-				SafeHtmlBuilder content = new SafeHtmlBuilder();
-				renderCell(context, value, content);
-				sb.append(PaddedCell.INSTANCE.generate("", CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(),
-				        content.toSafeHtml()));
-			}
+		}
+		if (renderer == null || !renderer.render(context, value, sb)) {
+			SafeHtmlBuilder content = new SafeHtmlBuilder();
+			renderCell(context, value, content);
+			sb.append(PaddedCell.INSTANCE.generate(viewDataId, CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
 		}
 	}
 

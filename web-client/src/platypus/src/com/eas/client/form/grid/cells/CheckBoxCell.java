@@ -6,22 +6,19 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
-public class RadioButtonCell extends CheckboxCell {
+public class CheckBoxCell extends CheckboxCell {
 	
-	protected interface RadioTemplate extends SafeHtmlTemplates{
-		@Template("<input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle;\" tabindex=\"-1\" checked/>")
-		public SafeHtml checked(String aGroupName);
-		@Template("<input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle;\" tabindex=\"-1\"/>")
-		public SafeHtml unchecked(String aGroupName);
+	protected interface CheckBoxTemplate extends SafeHtmlTemplates{
+		@Template("<input type=\"checkbox\" style=\"vertical-align: middle;\" tabindex=\"-1\" checked/>")
+		public SafeHtml checked();
+		@Template("<input type=\"checkbox\" style=\"vertical-align: middle;\" tabindex=\"-1\"/>")
+		public SafeHtml unchecked();
 	}
 	
-	private static final RadioTemplate template = GWT.create(RadioTemplate.class);
+	private static final CheckBoxTemplate template = GWT.create(CheckBoxTemplate.class);
 	
-	protected String groupName = "";
-	
-	public RadioButtonCell(String aGroupName) {
+	public CheckBoxCell() {
 		super(true, false);
-		groupName = aGroupName;
 	}
 
 	@Override
@@ -35,9 +32,9 @@ public class RadioButtonCell extends CheckboxCell {
 		}
 
 		if (value != null && (viewData != null ? viewData : value)) {
-			sb.append(template.checked(groupName));
+			sb.append(template.checked());
 		} else {
-			sb.append(template.unchecked(groupName));
+			sb.append(template.unchecked());
 		}
 	}
 }

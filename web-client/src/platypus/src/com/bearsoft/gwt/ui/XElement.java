@@ -180,7 +180,7 @@ public class XElement extends Element {
 	}
 	
 	public final void disabledMask(){
-		mask("p-mask-loading-start");
+		mask("p-mask-disabled");
 	}
 	
 	public final void mask(String aClassName){

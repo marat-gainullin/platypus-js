@@ -1,31 +1,33 @@
 package com.eas.client.form.published.widgets.model;
 
+import com.bearsoft.gwt.ui.widgets.NullableTextArea;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.ui.TextBox;
 
 public class ModelTextArea extends PublishedDecoratorBox<String> implements HasEmptyText {
 
 	protected String emptyText;
-	
+
 	public ModelTextArea() {
-		super(new TextBox());
+		super(new NullableTextArea());
+		((NullableTextArea)decorated).getElement().getStyle().setProperty("wordWrap", "normal");
+		((NullableTextArea)decorated).getElement().getStyle().setProperty("resize", "none");
 	}
 
 	@Override
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {
@@ -48,23 +50,28 @@ public class ModelTextArea extends PublishedDecoratorBox<String> implements HasE
 			},
 			set : function(aValue) {
 				if (aValue != null)
-					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(''+aValue);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)('' + aValue);
 				else
 					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(null);
 			}
 		});
 		Object.defineProperty(aPublished, "text", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::getValue()();
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::getText()();
 			},
 			set : function(aValue) {
 				if (aValue != null)
-					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(''+aValue);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)('' + aValue);
 				else
 					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(null);
 			}
 		});
 	}-*/;
+
+	public String getText() {
+		String v = getValue();
+		return v == null ? "" : v;
+	}
 
 	@Override
 	public String getValue() {
@@ -77,7 +84,7 @@ public class ModelTextArea extends PublishedDecoratorBox<String> implements HasE
 	}
 
 	@Override
-    public void setBinding(Field aField) throws Exception {
+	public void setBinding(Field aField) throws Exception {
 		super.setBinding(aField, new StringRowValueConverter());
-    }
+	}
 }

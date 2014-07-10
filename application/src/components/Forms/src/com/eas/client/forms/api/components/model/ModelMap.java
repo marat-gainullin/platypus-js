@@ -28,7 +28,8 @@ public class ModelMap extends Component<DbMap> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + " * A model component that shows a map.\n"
+            + " * Experimental. A model component that shows a map.\n"
+            + " * Unsupported in HTML5 client.\n"
             + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)

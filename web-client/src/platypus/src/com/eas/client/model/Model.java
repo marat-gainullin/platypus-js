@@ -384,13 +384,7 @@ public class Model implements HasPublished {
 						if (res && res.length > 0) {
 							return res;
 						} else {
-							var emptyCollectionPropName = '-x-empty-collection-' + sourceFieldName;
-							var emptyCollection = this[emptyCollectionPropName];
-							if (!emptyCollection) {
-								emptyCollection = [];
-								this[emptyCollectionPropName] = emptyCollection;
-							}
-							return emptyCollection;
+							return [];
 						}
 					};
 				}

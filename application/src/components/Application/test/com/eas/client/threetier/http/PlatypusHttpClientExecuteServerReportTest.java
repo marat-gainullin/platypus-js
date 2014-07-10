@@ -4,8 +4,9 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.PlatypusClientSecurityTest;
+import com.eas.client.application.PlatypusClientSecurityTest;
+import com.eas.client.threetier.http.PlatypusHttpClient;
+import com.eas.client.threetier.http.PlatypusHttpTestConstants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;

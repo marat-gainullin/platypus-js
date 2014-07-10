@@ -56,7 +56,7 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 			Element modelElementTag = Utils.scanForElementByTagName(aTag, "datamodelElement");
 			if ("DbLabelDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				String formatPattern = aTag.getAttribute("format");
-				int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.MASK);
+				int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.TEXT);
 				final ModelWidgetBounder<Object> modelElement = modelElementTag != null ? new ModelWidgetBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
 				ModelFormattedField mText = new ModelFormattedField();
 				mText.setFormatType(formatType, formatPattern);

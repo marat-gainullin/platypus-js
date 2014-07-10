@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets.model;
 
+import com.bearsoft.gwt.ui.widgets.NullableCheckBox;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.BooleanRowValueConverter;
 import com.eas.client.form.events.ActionEvent;
@@ -14,7 +15,8 @@ import com.google.gwt.user.client.ui.CheckBox;
 public class ModelCheck extends PublishedDecoratorBox<Boolean> implements HasActionHandlers {
 
 	public ModelCheck() {
-		super(new CheckBox());
+		super(new NullableCheckBox());
+		container.getElement().removeClassName("decorator");
 	}
 
 	protected int actionHandlers;

@@ -20,7 +20,41 @@ public class ObjectFormat {
 			super(aPattern, CurrencyList.get().getDefault(), true);
 		}
 	}
-	
+
+	protected static class RegExpFormat {
+		protected String regexpPattern;
+
+		public RegExpFormat(String aPattern) {
+			super();
+			regexpPattern = aPattern;
+		}
+
+		public String format(String aValue) {
+			return aValue;
+		}
+
+		public String parse(String aText) throws ParseException {
+			if (!aText.matches(regexpPattern))
+				throw new ParseException("A text doesn't satisfy a regexp pattern: " + regexpPattern, 0);
+			return aText;
+		}
+	}
+
+	protected static class BypassFormat {
+
+		public BypassFormat() {
+			super();
+		}
+
+		public String format(String aValue) {
+			return aValue;
+		}
+
+		public String parse(String aText) {
+			return aText;
+		}
+	}
+
 	public static final String DEFAULT_NUMBER_PATTERN = "#,##0.###";
 	public static final String DEFAULT_DATE_PATTERN = "dd.MM.yyyy";
 	public static final String DEFAULT_TIME_PATTERN = "H:mm:ss";
@@ -52,24 +86,34 @@ public class ObjectFormat {
 	 * Mask format (type).
 	 */
 	public static final int MASK = 5;
+	/**
+	 * Regexp format (type).
+	 */
+	public static final int REGEXP = 6;
+	/**
+	 * Bypass format (type).
+	 */
+	public static final int TEXT = 7;
 
-	protected int type = MASK;
+	protected int type = TEXT;
 	protected String pattern;
 
 	protected NumberFormat numberFormat;
 	protected DateTimeFormat dateFormat;
 	protected MaskFormat maskFormat;
+	protected RegExpFormat regExpFormat;
+	protected BypassFormat bypassFormat;
 
-	public ObjectFormat(){
+	public ObjectFormat() {
 		super();
 	}
-	
+
 	public ObjectFormat(int aType, String aPattern) throws ParseException {
 		super();
 		setFormatType(aType, aPattern);
 	}
-	
-	public void setFormatType(int aType, String aPattern) throws ParseException{ 
+
+	public void setFormatType(int aType, String aPattern) throws ParseException {
 		type = aType;
 		pattern = aPattern;
 		constructFormat();
@@ -79,11 +123,10 @@ public class ObjectFormat {
 		super();
 		setFormatTypeByValue(aValue);
 	}
-	
-	public void setFormatTypeByValue(Object aValue) throws ParseException{
+
+	public void setFormatTypeByValue(Object aValue) throws ParseException {
 		if (aValue instanceof String) {
-			type = MASK;
-			pattern = DEFAULT_MASK_PATTERN;
+			type = TEXT;
 		} else if (aValue instanceof Date) {
 			type = DATE;
 			pattern = DEFAULT_DATE_PATTERN;
@@ -98,6 +141,8 @@ public class ObjectFormat {
 		numberFormat = null;
 		dateFormat = null;
 		maskFormat = null;
+		regExpFormat = null;
+		bypassFormat = null;
 		if (pattern != null && !pattern.isEmpty()) {
 			if (type == MASK) {
 				maskFormat = new MaskFormat(pattern);
@@ -109,16 +154,21 @@ public class ObjectFormat {
 				numberFormat = new PercentFormat(pattern);
 			} else if (type == CURRENCY) {
 				numberFormat = new CurrencyFormat(pattern);
+			} else if (type == REGEXP) {
+				regExpFormat = new RegExpFormat(pattern);
+			} else if (type == TEXT) {
+				bypassFormat = new BypassFormat();
 			} else {
 				assert false;
 			}
-		}
+	} else if (type == TEXT) {
+		bypassFormat = new BypassFormat();
+	}
+	}
+	public boolean isEmpty() {
+		return numberFormat == null && dateFormat == null && maskFormat == null && regExpFormat == null && bypassFormat == null;
 	}
 
-	public boolean isEmpty(){
-		return numberFormat == null && dateFormat == null && maskFormat == null;
-
-	}
 	public String getPattern() {
 		return pattern;
 	}
@@ -140,6 +190,10 @@ public class ObjectFormat {
 				return dateFormat.parse(aView);
 			else if (maskFormat != null)
 				return maskFormat.parse(aView);
+			else if (regExpFormat != null)
+				return regExpFormat.parse(aView);
+			else if (bypassFormat != null)
+				return bypassFormat.parse(aView);
 			else
 				return aView;
 		} catch (Exception ex) {
@@ -148,20 +202,31 @@ public class ObjectFormat {
 	}
 
 	public String format(Object aValue) throws ParseException {
-		if (numberFormat != null)
+		if (numberFormat != null) {
 			if (aValue instanceof Number)
 				return numberFormat.format((Number) aValue);
 			else
 				return null;
-		else if (dateFormat != null)
+		} else if (dateFormat != null) {
 			if (aValue instanceof Date)
 				return dateFormat.format((Date) aValue);
 			else
 				return null;
-		else if (maskFormat != null)
+		} else if (maskFormat != null) {
 			return maskFormat.format(aValue);
-		else
+		} else if (regExpFormat != null) {
+			if (aValue instanceof String)
+				return regExpFormat.format((String) aValue);
+			else
+				return null;
+		} else if (bypassFormat != null) {
+			if (aValue instanceof String)
+				return bypassFormat.format((String) aValue);
+			else
+				return null;
+		} else {
 			return aValue != null ? aValue.toString() : null;
+		}
 	}
 
 }

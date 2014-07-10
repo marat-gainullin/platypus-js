@@ -99,18 +99,18 @@ public class DatamodelDataStoreTest extends GeoBaseTest {
         //TODO test for SRS.
         final SimpleFeatureType schema = myDS.getSchema("COLA_MARKETS");
         final String[] names = new String[]{
-            "MKT_ID", "NAME", "SHAPE", DatamodelDataStore.ROW_ATTR_NAME
+            "mkt_id", "name", "shape", DatamodelDataStore.ROW_ATTR_NAME
         };
         assertEquals(names.length, schema.getAttributeCount());
-        AttributeDescriptor descriptor = schema.getDescriptor("MKT_ID");
+        AttributeDescriptor descriptor = schema.getDescriptor("mkt_id");
         assertEquals(BigDecimal.class, descriptor.getType().getBinding());
-        assertEquals("MKT_ID", descriptor.getLocalName());
-        descriptor = schema.getDescriptor("NAME");
+        assertEquals("mkt_id", descriptor.getLocalName());
+        descriptor = schema.getDescriptor("name");
         assertEquals(String.class, descriptor.getType().getBinding());
-        assertEquals("NAME", descriptor.getLocalName());
-        descriptor = schema.getDescriptor("SHAPE");
+        assertEquals("name", descriptor.getLocalName());
+        descriptor = schema.getDescriptor("shape");
         assertEquals(Polygon.class, descriptor.getType().getBinding());
-        assertEquals("SHAPE", descriptor.getLocalName());
+        assertEquals("shape", descriptor.getLocalName());
         descriptor = schema.getDescriptor(DatamodelDataStore.ROW_ATTR_NAME);
         assertEquals(Row.class, descriptor.getType().getBinding());
         assertEquals(DatamodelDataStore.ROW_ATTR_NAME, descriptor.getLocalName());

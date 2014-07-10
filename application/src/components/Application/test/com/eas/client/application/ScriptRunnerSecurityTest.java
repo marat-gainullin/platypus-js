@@ -6,6 +6,7 @@ package com.eas.client.application;
 
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.script.ScriptUtils;
@@ -28,7 +29,7 @@ public class ScriptRunnerSecurityTest {
     public static final String SECURE_FUNCTION_FORM_ID = "ScureFunctionForm";
     public static final String UNSECURE_REPORT_ID = "UnsecureReport";
     public static final String SECURE_REPORT_ID = "SecureReport";
-    public static final String SECURE_REPORT_FORM_ID = "SecureFunctionReport";
+    public static final String SECURE_FUNCTION_REPORT_ID = "SecureFunctionReport";
     public static final String DEFAULT_USER_NAME = "test";
     /**
      * This user has no roles
@@ -67,6 +68,7 @@ public class ScriptRunnerSecurityTest {
         if (nativeClient == null) {
             nativeClient = new PlatypusNativeClient("platypus://localhost:8500/");
             httpClient = new PlatypusHttpClient("http://localhost:8080/application/");
+            ScriptUtils.init();
         }
     }
 
@@ -165,6 +167,20 @@ public class ScriptRunnerSecurityTest {
     private void setupModules(int moduleType, AppClient client) throws Exception {
         client.login(USER1_NAME, USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
         try {
+            PlatypusScriptedResource.initForTests(client, client);
+            for (String moduleName : new String[]{
+                UNSECURE_MODULE_ID,
+                SECURE_MODULE_ID,
+                SECURE_FUNCTION_MODULE_ID,
+                UNSECURE_FORM_ID,
+                SECURE_FORM_ID,
+                SECURE_FUNCTION_FORM_ID,
+                UNSECURE_REPORT_ID,
+                SECURE_REPORT_ID,
+                SECURE_FUNCTION_REPORT_ID
+            }) {
+                PlatypusScriptedResource.executeScriptResource(moduleName);
+            }
             unsecureScriptRunner = getModule(moduleType, SecurityTestType.UNSECURE, client);
             assertNotNull(unsecureScriptRunner);
             secureScriptRunner = getModule(moduleType, SecurityTestType.SECURE, client);
@@ -180,13 +196,13 @@ public class ScriptRunnerSecurityTest {
         switch (moduleType) {
             case ClientConstants.ET_COMPONENT:
                 return ScriptUtils.createModule(getComponentAppElementId(testType));
-                //return new ScriptRunner(getComponentAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
+            //return new ScriptRunner(getComponentAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
             case ClientConstants.ET_FORM:
                 return ScriptUtils.createModule(getFormAppElementId(testType));
-                //return new FormRunner(getFormAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
+            //return new FormRunner(getFormAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
             case ClientConstants.ET_REPORT:
                 return ScriptUtils.createModule(getReportAppElementId(testType));
-                //return new ReportRunner(getReportAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
+            //return new ReportRunner(getReportAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
         }
         throw new IllegalArgumentException(UNKNOWN_MODULE_TYPE_MESSAGE);//NOI18N
     }
@@ -222,7 +238,7 @@ public class ScriptRunnerSecurityTest {
             case SECURE:
                 return SECURE_REPORT_ID;
             case SECURE_FUNCTION:
-                return SECURE_REPORT_FORM_ID;
+                return SECURE_FUNCTION_REPORT_ID;
         }
         throw new IllegalArgumentException(UNKNOWN_TEST_TYPE_MESSAGE);
     }

@@ -11,6 +11,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.Request;
+import com.eas.client.threetier.requests.CreateServerModuleResponse;
 import java.util.List;
 import javax.security.auth.login.LoginException;
 
@@ -101,7 +102,7 @@ public interface AppClient extends Client, PrincipalHost {
      * methods.
      * @throws Exception
      */
-    public String createServerModule(String moduleName) throws Exception;
+    public CreateServerModuleResponse createServerModule(String moduleName) throws Exception;
 
     /**
      * Requests the application server to destroy session bean.

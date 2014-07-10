@@ -2,17 +2,20 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client;
+package com.eas.client.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.AppClient;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.client.threetier.http.PlatypusHttpTestConstants;
+import com.eas.client.threetier.requests.CreateServerModuleResponse;
+import com.eas.script.ScriptUtils;
 import java.security.AccessControlException;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -27,6 +30,7 @@ public class PlatypusClientSecurityTest {
     public static final String UNSECURE_NONPUBLIC_MODULE_ID = "UnsecureNonPublicModule";
     public static final String SECURE_MODULE_ID = "SecureModule";
     public static final String SECURE_FUNCTION_MODULE_ID = "SecureFunctionModule";
+    private static final String TEST_METHOD_NAME = "test";
     public static final String UNSECURE_QUERY_ID = "133189616153303";
     public static final String SECURE_QUERY_ID = "133189623152950";
     public static final String SECURE_READ_QUERY_ID = "133189634694079";
@@ -64,6 +68,7 @@ public class PlatypusClientSecurityTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+        ScriptUtils.init();
         appClient = new PlatypusNativeClient("platypus://localhost:8500/");
         httpClient = new PlatypusHttpClient(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
         removeTempData(); // if any
@@ -171,6 +176,31 @@ public class PlatypusClientSecurityTest {
         testExecuteQueryInsert(httpClient);
     }
 
+    @Test
+    public void testExecuteMethodOfNonPublicModuleHttpClient() throws Exception {
+        testExecuteMethodOfNonPublicModule(httpClient);
+    }
+
+    @Test
+    public void testExecuteMethodOfNonPublicModuleNativeClient() throws Exception {
+        testExecuteMethodOfNonPublicModule(appClient);
+    }
+
+    private void testExecuteMethodOfNonPublicModule(AppClient client) throws Exception {
+        client.login(USER0_NAME, USER_PASSWORD.toCharArray());
+        try {
+            try {
+                client.createServerModule(UNSECURE_NONPUBLIC_MODULE_ID);
+                client.executeServerModuleMethod(UNSECURE_NONPUBLIC_MODULE_ID, TEST_METHOD_NAME);
+                fail("Public access permission assertion failed");
+            } catch (AccessControlException ex) {
+                // Fine! Exception must be here, due to module has no @public annotation
+            }
+        } finally {
+            client.logout();
+        }
+    }
+
     /**
      * Test of secured execute method for users with various assigned roles
      *
@@ -180,12 +210,6 @@ public class PlatypusClientSecurityTest {
         System.out.println("secureExecuteMethod");
         client.login(USER0_NAME, USER_PASSWORD.toCharArray());
         try {
-            try {
-                client.createServerModule(UNSECURE_NONPUBLIC_MODULE_ID);
-                fail("Public access permission assertion failed");
-            } catch (AccessControlException ex) {
-                // Fine! Exception must be here, due to module has no @public annotation
-            }
             assertHasPermissionExecuteMethod(client, UNSECURE_MODULE_ID, true);
             assertHasPermissionExecuteMethod(client, SECURE_MODULE_ID, false);
             assertHasPermissionExecuteMethod(client, SECURE_FUNCTION_MODULE_ID, false);
@@ -403,15 +427,22 @@ public class PlatypusClientSecurityTest {
     }
 
     private void assertHasPermissionExecuteMethod(AppClient client, String moduleId, boolean hasPermission) throws Exception {
-        client.createServerModule(moduleId);
+        CreateServerModuleResponse resp = client.createServerModule(moduleId);
         if (hasPermission) {
-            //client.createServerModule(moduleId);
-            Object result = client.executeServerModuleMethod(moduleId, "test");
+            if (!resp.isPermitted()) {
+                throw new AccessControlException(moduleId + " is not permitted");
+            }
+            Object result = client.executeServerModuleMethod(moduleId, TEST_METHOD_NAME);
             assertNotNull(result);
             assertEquals(result, "test");
         } else {
             try {
-                client.executeServerModuleMethod(moduleId, "test");
+                // first chance for exception to throw
+                if (!resp.isPermitted()) {
+                    throw new AccessControlException(moduleId + " is not permitted");
+                }
+                // second chance for exception to throw
+                client.executeServerModuleMethod(moduleId, TEST_METHOD_NAME);
                 fail("Access permission assertion failed");
             } catch (AccessControlException ex) {
                 // Fine! Exception must be here, due to user has no the permission

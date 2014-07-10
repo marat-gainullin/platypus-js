@@ -120,12 +120,12 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public String createServerModule(String aModuleName) throws Exception {
+    public CreateServerModuleResponse createServerModule(String aModuleName) throws Exception {
         Request req = new CreateServerModuleRequest(IDGenerator.genID(), aModuleName);
         executeRequest(req);
         Response resp = req.getResponse();
         assert resp instanceof CreateServerModuleResponse;
-        return ((CreateServerModuleResponse) resp).getModuleName();
+        return (CreateServerModuleResponse) resp;
     }
 
     @Override
