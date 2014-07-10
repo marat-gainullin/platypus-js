@@ -40,12 +40,13 @@
 
     var parseDates = function(aObject) {
         if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
-            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test('' + aObject)){
-                return new Date('' + aObject);
+            var strValue = '' + aObject;
+            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(strValue)){
+                return new Date(strValue);
             } else {
-                return aObject;
+                return strValue;
             }
-        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+        } else if (typeof aObject === 'object') {
             for (var prop in aObject) {
                 aObject[prop] = parseDates(aObject[prop]);
             }
