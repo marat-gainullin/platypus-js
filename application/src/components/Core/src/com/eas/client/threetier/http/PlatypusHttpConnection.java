@@ -92,14 +92,13 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     @Override
     public void connect() throws Exception {
-        if (conn == null) {
-            URL rqUrl = new URL(assembleUrl());
-            conn = (HttpURLConnection) rqUrl.openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.CONTENT_TYPE);
-            conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
-        }
+        assert conn == null : "Already connected";
+        URL rqUrl = new URL(assembleUrl());
+        conn = (HttpURLConnection) rqUrl.openConnection();
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        conn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.CONTENT_TYPE);
+        conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
         addCookies();
         if (login != null && password != null) {
             addBasicAuthentication(login, password);

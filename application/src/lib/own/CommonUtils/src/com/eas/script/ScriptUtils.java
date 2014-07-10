@@ -95,7 +95,7 @@ public class ScriptUtils {
     }
 
     public static JSObject getToPrimitiveFunc() {
-        assert toPrimitiveFunc != null;
+        assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
         return toPrimitiveFunc;
     }
     public static void setToPrimitiveFunc(JSObject aValue) {
@@ -280,9 +280,10 @@ public class ScriptUtils {
         return parseDatesFunc.call(null, new Object[]{aObject});
     }
 
-    protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script function are not initialized.";
+    protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
 
     public static String toJson(Object aObj) {
+        assert writeJsonFunc != null : SCRIPT_NOT_INITIALIZED;
         if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
             aObj = null;
         }
@@ -315,7 +316,7 @@ public class ScriptUtils {
     }
     
     public static JSObject createModule(String aModuleName) {
-        assert lookupInGlobalFunc != null;
+        assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});
         if (oConstructor instanceof JSObject && ((JSObject) oConstructor).isFunction()) {
             JSObject jsConstructor = (JSObject) oConstructor;
@@ -326,17 +327,17 @@ public class ScriptUtils {
     }
 
     public static JSObject lookupInGlobal(String aName) {
-        assert lookupInGlobalFunc != null;
+        assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         return (JSObject) lookupInGlobalFunc.call(null, new Object[]{aName});
     }
 
     public static void putInGlobal(String aName, JSObject aValue) {
-        assert putInGlobalFunc != null;
+        assert putInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         putInGlobalFunc.call(null, new Object[]{aName, aValue});
     }
 
     public static JSObject getCachedModule(String aModuleName) {
-        assert getModuleFunc != null;
+        assert getModuleFunc != null : SCRIPT_NOT_INITIALIZED;
         return (JSObject) getModuleFunc.call(null, new Object[]{aModuleName});
     }
 

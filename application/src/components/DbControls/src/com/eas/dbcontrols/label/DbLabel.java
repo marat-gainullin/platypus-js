@@ -35,7 +35,6 @@ public class DbLabel extends DbControlPanel implements DbControl {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            assert e.getSource() == singlelineText;
             if (standalone) {
                 try {
                     singlelineText.commitEdit();

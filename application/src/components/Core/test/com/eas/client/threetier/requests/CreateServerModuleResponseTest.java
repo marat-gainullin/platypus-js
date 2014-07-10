@@ -22,38 +22,32 @@ import static org.junit.Assert.assertEquals;
  *
  * @author pk
  */
-public class CreateServerModuleResponseTest
-{
-    public CreateServerModuleResponseTest()
-    {
+public class CreateServerModuleResponseTest {
+
+    public CreateServerModuleResponseTest() {
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception
-    {
+    public static void setUpClass() throws Exception {
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception
-    {
+    public static void tearDownClass() throws Exception {
     }
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
     }
 
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
     }
 
     /**
      * Test of getModuleID method, of class CreateServerModuleResponse.
      */
     @Test
-    public void testGetModuleID()
-    {
+    public void testGetModuleID() {
         System.out.println("getModuleID");
         Set<String> funcs = Collections.emptySet();
         CreateServerModuleResponse instance = new CreateServerModuleResponse(IDGenerator.genID(), "Test module ID", funcs, true);
@@ -64,11 +58,11 @@ public class CreateServerModuleResponseTest
 
     /**
      * Test of writeData method, of class CreateServerModuleResponse.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
-    public void testWriteData() throws Exception
-    {
+    public void testWriteData() throws Exception {
         System.out.println("writeData");
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         Set<String> funcs = Collections.emptySet();
@@ -78,16 +72,18 @@ public class CreateServerModuleResponseTest
         ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
         assertEquals(RequestsTags.TAG_MODULE_ID, reader.getNextTag());
         assertEquals("Test module ID", reader.getString());
+        assertEquals(RequestsTags.TAG_MODULE_PERMITTED, reader.getNextTag());
+        assertEquals(1, reader.getByte());        
         assertEquals(CoreTags.TAG_EOF, reader.getNextTag());
     }
 
     /**
      * Test of readData method, of class CreateServerModuleResponse.
+     *
      * @throws Exception
      */
     @Test
-    public void testReadData() throws Exception
-    {
+    public void testReadData() throws Exception {
         System.out.println("readData");
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         ProtoWriter writer = new ProtoWriter(outStream);

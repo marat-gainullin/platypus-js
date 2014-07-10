@@ -13,8 +13,7 @@ import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.*;
-import com.eas.proto.ProtoReaderException;
-import java.io.IOException;
+import com.eas.script.ScriptUtils;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -82,6 +81,7 @@ public class PlatypusHttpClientTest {
     public void beforeTest() throws Exception {
         if (client == null) {
             client = new PlatypusHttpClient(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
+            ScriptUtils.init();
         }
         client.login(PlatypusClientTest.TEST_LOGIN, PlatypusClientTest.TEST_PASSWD.toCharArray());
     }
@@ -150,7 +150,7 @@ public class PlatypusHttpClientTest {
     }
 
     @Test
-    public void testExecuteQueryRequest() throws IOException, ProtoReaderException, Exception {
+    public void testExecuteQueryRequest() throws Exception {
         ExecuteQueryRequest rq = new ExecuteQueryRequest(IDGenerator.genID(), PlatypusClientTest.TEST_QUERY_ID, new Parameters(), client.getAppQuery(PlatypusClientTest.TEST_QUERY_ID).getFields());
         client.executeRequest(rq);
         assertTrue(rq.getResponse() instanceof RowsetResponse);

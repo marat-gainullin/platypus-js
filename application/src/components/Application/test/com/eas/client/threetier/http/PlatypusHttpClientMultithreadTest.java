@@ -4,6 +4,7 @@
  */
 package com.eas.client.threetier.http;
 
+import com.eas.client.threetier.http.PlatypusHttpConnectionTest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
