@@ -428,7 +428,7 @@
 
     RowClass.setPublisher(function(aDelegate) {
         var nnFields = aDelegate.getFields();
-        var instanceCTor = nnFields.getInstanceConstructor();
+        var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
         var target = !!instanceCTor ? new instanceCTor() : {};
         var nFields = nnFields.toCollection();
         // plain mutable properties
