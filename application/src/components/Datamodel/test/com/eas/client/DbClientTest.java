@@ -119,7 +119,8 @@ public class DbClientTest {
                         });
                         rowset.getFields().get("ID").setPk(true);
                         assertNotNull(rowset.getFlowProvider());
-                        assertTrue(rowset.getFlowProvider() instanceof DatabaseFlowProvider);
+                        assertTrue(rowset.getFlowProvider() instanceof DelegatingFlowProvider);
+                        assertTrue(((DelegatingFlowProvider)rowset.getFlowProvider()).getDelegate() instanceof DatabaseFlowProvider);
                         rowset.getFields().get(1).setPk(true);
                         assertTrue(rowset.size() > 0);
                         rowset.beforeFirst();
@@ -153,17 +154,14 @@ public class DbClientTest {
                 Thread thread = new Thread(clientRunnable);
                 threads.add(thread);
             }
-            // start the set of threads as in server's thread pool
-
-            for (int i = 0; i < threads.size(); i++) {
-                threads.get(i).start();
-            }
+            threads.stream().forEach((thread) -> {
+                thread.start();
+            });
             Thread.sleep(1000 * 120);// 2 minutes
             int deadlessThreads = 0;
-            for (int i = 0; i < threads.size(); i++) {
-                Thread thread = threads.get(i);
+            threads.stream().forEach((thread) -> {
                 thread.interrupt();
-            }
+            });
             for (int i = 0; i < threads.size(); i++) {
                 Thread thread = threads.get(i);
                 thread.join(1000 * 20);
