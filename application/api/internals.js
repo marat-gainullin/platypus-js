@@ -85,7 +85,7 @@
                 _self.configurable = false;
                 _self.get = function() {
                     var found = targetPublishedEntity.find(targetPublishedEntity.schema[targetFieldName], this[sourceFieldName]);
-                    return found.length === 0 ? null : (found.length === 1 ? found[0] : found);
+                    return found === null || found.length === 0 ? null : (found.length === 1 ? found[0] : found);
                 };
                 _self.set = function(aValue) {
                     this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
@@ -97,18 +97,7 @@
                 _self.enumerable = true;
                 _self.configurable = false;
                 _self.get = function() {
-                    var res = sourcePublishedEntity.find(sourcePublishedEntity.schema[sourceFieldName], this[targetFieldName]);
-                    if (res && res.length > 0) {
-                        return res;
-                    } else {
-                        var emptyCollectionPropName = '-x-empty-collection-' + sourceFieldName;
-                        var emptyCollection = this[emptyCollectionPropName];
-                        if (!emptyCollection) {
-                            emptyCollection = [];
-                            this[emptyCollectionPropName] = emptyCollection;
-                        }
-                        return emptyCollection;
-                    }
+                    return sourcePublishedEntity.find(sourcePublishedEntity.schema[sourceFieldName], this[targetFieldName]);
                 };
             });
     ScriptUtils.setIsArrayFunc(function(aInstance){

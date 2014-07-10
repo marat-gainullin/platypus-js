@@ -414,11 +414,14 @@
                 for (var v = 0; v < arguments.length; v++)
                     varargs[v] = boxAsJava(arguments[v]);
                 var found = nEntity.find(varargs);
-                var res = [];
-                for (var f = 0; f < found.size(); f++) {
-                    res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                if (!found.tag) {
+                    var res = [];
+                    for (var f = 0; f < found.size(); f++) {
+                        res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                    }
+                    found.tag = res;
                 }
-                return res;
+                return found.tag;
             }
         });
     }
