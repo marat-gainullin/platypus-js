@@ -26,19 +26,19 @@ public class ServerModulesTest {
         ScriptRunnerSecurityTest.initClients();
     }
 
-    @Test
+   // @Test
     public void statelessSessionModule() throws Exception {
         statelessSessionModule(ScriptRunnerSecurityTest.nativeClient);
         statelessSessionModule(ScriptRunnerSecurityTest.httpClient);
     }
 
-    @Test
+   // @Test
     public void statefullSessionModule() throws Exception {
         statefullSessionModule(ScriptRunnerSecurityTest.nativeClient);
         statefullSessionModule(ScriptRunnerSecurityTest.httpClient);
     }
 
-    @Test
+   // @Test
     public void statefullTaskModule() throws Exception {
         statefullTaskModule(ScriptRunnerSecurityTest.nativeClient, 0);
         statefullTaskModule(ScriptRunnerSecurityTest.nativeClient, 20);

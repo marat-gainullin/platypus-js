@@ -11,11 +11,13 @@ import com.eas.client.scripts.store.Dom2ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
 import com.eas.script.JsDoc;
+import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
 import com.eas.server.mina.platypus.RequestDecoder;
 import com.eas.server.mina.platypus.ResponseEncoder;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,6 +52,7 @@ public class PlatypusServer extends PlatypusServerCore {
     public final static int DEFAULT_EXECUTOR_POOL_SIZE = 16;
     private final ExecutorService bgTasksExecutor;
     private final SensorsFactory acceptorsFactory;
+    private final RetranslateFactory retranslateFactory;
     private final InetSocketAddress[] listenAddresses;
     private final Map<Integer, String> portsProtocols;
     private final Map<Integer, Integer> portsSessionIdleTimeouts;
@@ -71,7 +74,8 @@ public class PlatypusServer extends PlatypusServerCore {
         portsSessionIdleCheckIntervals = aPortsSessionIdleCheckInterval;
         portsNumWorkerThreads = aPortsNumWorkerThreads;
         sslContext = aSslContext;
-        acceptorsFactory = getAcceptorsFactory();
+        acceptorsFactory = obtainAcceptorsFactory();
+        retranslateFactory = obtainRetranslateFactory();
     }
 
     public void start() throws Exception {
@@ -164,7 +168,7 @@ public class PlatypusServer extends PlatypusServerCore {
                     sessionIdleCheckInterval = 360;
                 }
 
-                IoAcceptor sensorAcceptor = acceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId, numWorkerThreads));
+                IoAcceptor sensorAcceptor = acceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId, retranslateFactory));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
                     logger.info(String.format("Listening on %s; protocol: %s", s.toString(), protocol));
@@ -234,18 +238,37 @@ public class PlatypusServer extends PlatypusServerCore {
         logger.info(sb.toString());
     }
     
-    private SensorsFactory getAcceptorsFactory() {
-        SensorsFactory factory = null;
+    private SensorsFactory obtainAcceptorsFactory() {
+        SensorsFactory recieveFactory = null;
         try {
             Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.positioning.AcceptorsFactory");
-            factory = acceptorsFactoryClass.newInstance();
+            recieveFactory = acceptorsFactoryClass.newInstance();
         } catch (ClassNotFoundException e) {
-            //no op            
-        } catch (InstantiationException ex) {
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");           
+        } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
+        }
+        return recieveFactory;
+    }
+    
+    private RetranslateFactory obtainRetranslateFactory() {
+        RetranslateFactory factory = null;
+        try {
+            Class<RetranslateFactory> retranslateFactoryClass = (Class<RetranslateFactory>) Class.forName("com.eas.sensors.retranslate.RetranslatePacketFactory");
+            factory = retranslateFactoryClass.getConstructor(new Class<?>[]{Map.class}).newInstance(portsNumWorkerThreads);
+        } catch (ClassNotFoundException e) {
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");             
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return factory;
     }
+
+    public SensorsFactory getAcceptorsFactory() {
+        return acceptorsFactory;
+    }
+
+    public RetranslateFactory getRetranslateFactory() {
+        return retranslateFactory;
+    }    
 }

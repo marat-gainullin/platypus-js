@@ -7,7 +7,9 @@ package com.eas.server;
 import com.eas.client.DatabaseAppCache;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.settings.DbConnectionSettings;
+import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.PacketReciever;
 import com.eas.sensors.positioning.PositioningPacket;
 import java.io.IOException;
@@ -32,7 +34,7 @@ import static org.junit.Assert.*;
 public class PlatypusServerRecivedPacketTest {
 
     private static PlatypusServer server;
-    private static int TEST_PORT = 60000;
+    private static final int TEST_PORT = 60000;
 
     public PlatypusServerRecivedPacketTest() {
     }
@@ -82,8 +84,10 @@ public class PlatypusServerRecivedPacketTest {
     }
 
     @Test
-    public void testSimpleConnecting() throws UnknownHostException, IOException {
-        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "Asc6Acceptor", 10);
+    public void testSimpleConnecting() throws UnknownHostException, IOException, Exception {
+        ScriptUtils.init();
+        PlatypusScriptedResource.init(server.getDatabasesClient(), server);
+        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "Asc6Acceptor", null);
         try {
             Calendar cl = Calendar.getInstance();
             cl.set(2012, 7, 5, 10, 20, 30);

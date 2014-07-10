@@ -11,6 +11,8 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.script.ScriptUtils;
+import com.eas.sensors.api.RetranslateFactory;
+import com.eas.sensors.api.SensorsFactory;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -199,7 +201,7 @@ public class ServerMain {
         Set<String> tasks = new HashSet<>();
         parseArgs(args, tasks);
         if (url == null || url.isEmpty()) {
-            throw new IllegalArgumentException("Application url ( -url parameter) is required.");
+            throw new IllegalArgumentException("Application url (-url parameter) is required.");
         }
         SSLContext ctx = createSSLContext();
         AppCache appCache = ClientFactory.obtainTwoTierAppCache(url, new ServerTasksScanner(tasks));
@@ -209,6 +211,9 @@ public class ServerMain {
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
         PlatypusScriptedResource.init(appDbClient, server);
+        SensorsFactory.init(server.getAcceptorsFactory());
+        RetranslateFactory.init(server.getRetranslateFactory());
+        
         //
         server.start();
     }

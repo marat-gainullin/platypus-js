@@ -12,5 +12,5 @@ package com.eas.sensors.api;
  */
 public interface Packet {
     
-    public abstract String getID();
+    String getID();
 }
