@@ -112,6 +112,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
         browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
         tasks = aTasks;
+        instance = this;
     }
 
     public boolean isAnonymousEnabled() {

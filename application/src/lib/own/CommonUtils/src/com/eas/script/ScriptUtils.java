@@ -29,6 +29,7 @@ import jdk.nashorn.internal.runtime.ErrorManager;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptEnvironment;
 import jdk.nashorn.internal.runtime.ScriptObject;
+import jdk.nashorn.internal.runtime.ScriptRuntime;
 import jdk.nashorn.internal.runtime.Source;
 import jdk.nashorn.internal.runtime.Undefined;
 import jdk.nashorn.internal.runtime.options.Options;
@@ -98,6 +99,7 @@ public class ScriptUtils {
         assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
         return toPrimitiveFunc;
     }
+
     public static void setToPrimitiveFunc(JSObject aValue) {
         assert toPrimitiveFunc == null;
         toPrimitiveFunc = aValue;
@@ -122,6 +124,7 @@ public class ScriptUtils {
         assert toDateFunc != null;
         return toDateFunc;
     }
+
     public static void setToDateFunc(JSObject aValue) {
         assert toDateFunc == null;
         toDateFunc = aValue;
@@ -156,7 +159,7 @@ public class ScriptUtils {
         assert collectionDefFunc == null;
         collectionDefFunc = aValue;
     }
-    
+
     public static void setIsArrayFunc(JSObject aValue) {
         assert isArrayFunc == null;
         isArrayFunc = aValue;
@@ -166,6 +169,8 @@ public class ScriptUtils {
         if (aValue instanceof JSObject) {
             assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
             aValue = toPrimitiveFunc.call(null, new Object[]{aValue});
+        } else if (aValue == ScriptRuntime.UNDEFINED) {
+            return null;
         }
         return aValue;
     }
@@ -243,6 +248,7 @@ public class ScriptUtils {
 
     /**
      * Searches for all <code>this</code> aliases in a constructor.
+     *
      * @param moduleConstructor a constructor to search in
      * @return a set of aliases including <code>this</code> itself
      */
@@ -287,13 +293,14 @@ public class ScriptUtils {
         if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
             aObj = null;
         }
-        if (aObj instanceof JSObject || aObj instanceof String 
+        if (aObj instanceof JSObject || aObj instanceof String
                 || aObj instanceof Number || aObj instanceof Boolean || aObj instanceof ScriptObject || aObj == null) {
             return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
         } else {
             throw new IllegalArgumentException("Could not convert to JSON Java object!");
-        }    
+        }
     }
+
     public static void extend(JSObject aChild, JSObject aParent) {
         assert extendFunc != null : SCRIPT_NOT_INITIALIZED;
         extendFunc.call(null, new Object[]{aChild, aParent});
@@ -308,13 +315,13 @@ public class ScriptUtils {
         assert collectionDefFunc != null : SCRIPT_NOT_INITIALIZED;
         return (JSObject) collectionDefFunc.newObject(new Object[]{sourceEntity, targetFieldName, sourceFieldName});
     }
-    
-    public static boolean isArrayDeep(JSObject aInstance){
+
+    public static boolean isArrayDeep(JSObject aInstance) {
         assert isArrayFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = isArrayFunc.call(null, new Object[]{aInstance});
         return Boolean.TRUE.equals(oResult);
     }
-    
+
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});

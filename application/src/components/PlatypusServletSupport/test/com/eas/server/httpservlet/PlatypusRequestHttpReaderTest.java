@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -32,11 +32,6 @@ public class PlatypusRequestHttpReaderTest {
 
     protected static final String WRITTEN_CHANGES = "[{\"kind\":\"insert\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"1346067735514\"}},{\"kind\":\"update\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"2012-08-27T15:42:15.514Z\"}, \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"delete\", \"entity\":\"testEntity\", \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"command\", \"entity\":\"testEntity\", \"parameters\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}}]";
 
-    @BeforeClass
-    public static void setup() throws Exception{
-        ScriptUtils.init();
-    }
-    
     @Test
     public void timeStampReadTest() throws ParseException {
         System.out.println("timeStampRedTest with millis");
@@ -46,7 +41,8 @@ public class PlatypusRequestHttpReaderTest {
 
     @Test
     public void changesJsonReadTest() throws Exception {
-        System.out.println("changesJsonReadTest");        
+        System.out.println("changesJsonReadTest");
+        ScriptUtils.init();
         List<Change> changes = ChangeJsonReader.parse(WRITTEN_CHANGES, new EntitiesHost() {
             @Override
             public Field resolveField(String aEntityId, String aFieldName) throws Exception {
@@ -103,7 +99,6 @@ public class PlatypusRequestHttpReaderTest {
         ChangeValue data4 = new ChangeValue("data4", false, DataTypeInfo.BIT);
         ChangeValue data5 = new ChangeValue("data5", date, DataTypeInfo.TIMESTAMP);
         ChangeValue[] data = new ChangeValue[]{data1, data2, data3, data4, data5};
-
 
         assertNotNull(changes);
         assertEquals(4, changes.size());

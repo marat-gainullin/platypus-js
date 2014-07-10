@@ -84,6 +84,7 @@ public class ServerModulesTest {
     protected void statefullTaskModule(AppClient aClient, int aDelta) throws Exception {
         aClient.login(ScriptRunnerSecurityTest.USER1_NAME, ScriptRunnerSecurityTest.USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
         try {
+            aClient.createServerModule(TASK_STATEFULL_MODULE_NAME);
             Object res = aClient.executeServerModuleMethod(TASK_STATEFULL_MODULE_NAME, TEST_METHOD_NAME, 10);
             Object res1 = aClient.executeServerModuleMethod(TASK_STATEFULL_MODULE_NAME, TEST_METHOD_NAME, 10);
             assertEquals(10 + aDelta, res);
