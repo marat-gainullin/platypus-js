@@ -610,7 +610,7 @@
      */
     function loadForm(aName, aModel, aTarget) {
         var designInfo = FormLoaderClass.load(ScriptedResourceClass.getClient(), aName);
-        var form = new FormClass(aName, designInfo, aModel.unwrap());
+        var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null);
         if (aTarget) {
             P.Form.call(aTarget, form);
         } else {
