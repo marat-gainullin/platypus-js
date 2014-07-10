@@ -121,7 +121,7 @@ public class PlatypusClientResourcesSecurityTest {
         appClient.login(USER3_NAME, USER_PASSWORD.toCharArray());
         assertHasPermissionGetAppElement(appClient, UNSECURE_MODULE_ID, true);
         assertHasPermissionGetAppElement(appClient, SECURE_MODULE_ID, false);
-        assertHasPermissionGetAppElement(appClient, SECURE_FUNCTION_MODULE_ID, false);
+        assertHasPermissionGetAppElement(appClient, SECURE_FUNCTION_MODULE_ID, true);
         assertHasPermissionGetAppElement(appClient, UNSECURE_FORM_ID, true);
         assertHasPermissionGetAppElement(appClient, SECURE_FORM_ID, false);
         assertHasPermissionGetAppElement(appClient, UNSECURE_REPORT_ID, true);
