@@ -23,12 +23,14 @@ public class DependenciesWalkerTest {
 
     @Test
     public void testParseDependencies2() {
+        String SOME_MODULE_ONE = "SOME_MODULE_ONE";
         String SOME_MODULE_TWO = "SOME_MODULE_TWO";
-        String va1 = "var moduleName = 'SOME_MODULE_NAME'; P.Modules.get(\"" + SOME_MODULE_TWO + "\");";
+        String va1 = "var moduleName = 'SOME_MODULE_NAME'; P.Modules.get(\"" + SOME_MODULE_ONE + "\"); P.Modules.create(\"" + SOME_MODULE_TWO + "\");";
         DependenciesWalker walker = new DependenciesWalker(va1);
         walker.walk();
         Set<String> dependencies = walker.getDependencies();
-        assertEquals(1, dependencies.size());
+        assertEquals(2, dependencies.size());
+        assertTrue(dependencies.contains(SOME_MODULE_ONE));
         assertTrue(dependencies.contains(SOME_MODULE_TWO));
     }
 

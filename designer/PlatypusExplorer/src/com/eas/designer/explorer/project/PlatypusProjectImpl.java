@@ -10,7 +10,11 @@ import com.eas.client.DbMetadataCache;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.login.PrincipalHost;
+import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.Deployer;
 import com.eas.designer.application.PlatypusUtils;
@@ -23,6 +27,7 @@ import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.project.ui.PlatypusProjectCustomizerProvider;
+import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
@@ -38,6 +43,8 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -154,6 +161,23 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 getSearchInfoDescription());
         client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false);
         deployer = new Deployer(FileUtil.toFile(projectDir), client);
+        PlatypusScriptedResource.init(client, new PrincipalHost() {
+
+            protected PlatypusPrincipal principal = new SystemPlatypusPrincipal();
+
+            @Override
+            public PlatypusPrincipal getPrincipal() {
+                return principal;
+            }
+
+        });
+        ScriptUtils.initEngine((ScriptEngine aEngine) -> {
+            try {
+                aEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js');");
+            } catch (ScriptException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        });
     }
 
     @Override
@@ -583,7 +607,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 }
                 if (resources == null) {
                     resources = new ArrayList<>();
-                    resources.add(new PathResourceImpl(new URL[] {getSrcRoot().toURL()}));
+                    resources.add(new PathResourceImpl(new URL[]{getSrcRoot().toURL()}));
                 }
                 return resources;
             } catch (Exception ex) {

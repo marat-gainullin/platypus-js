@@ -41,6 +41,7 @@ public class DependenciesWalker {
     public static final String REQUIRE_FUNCTION_NAME = "require";
     public static final String MODULES = "Modules";
     public static final String GET = "get";
+    public static final String CREATE = "create";    
     public static final String MODEL = "model";
     public static final String LOAD_ENTITY = "loadEntity";
     public static final String MODULE = "Module";
@@ -118,18 +119,21 @@ public class DependenciesWalker {
                                     putServerDependence(value);
                                     break;
                                 case GET:
+                                case CREATE:
                                     AccessNode baseAccess = (AccessNode) lastAccess.getBase();
                                     if (baseAccess.getProperty() instanceof IdentNode) {
                                         String baseName = ((IdentNode) baseAccess.getProperty()).getName();
-                                        if (MODULES.equals(baseName) && GET.equals(funcName)) {
+                                        if (MODULES.equals(baseName) && (GET.equals(funcName) || CREATE.equals(funcName))) {
                                             putDependence(value);
                                         }
                                     }
                                     break;
                                 case LOAD_ENTITY:
-                                    String baseName = ((IdentNode) lastAccess.getBase()).getName();
-                                    if (MODEL.equals(baseName) && LOAD_ENTITY.equals(funcName)) {
-                                        putQueryDependence(value);
+                                    if (lastAccess.getBase() instanceof IdentNode) {
+                                        String baseName = ((IdentNode) lastAccess.getBase()).getName();
+                                        if (MODEL.equals(baseName) && LOAD_ENTITY.equals(funcName)) {
+                                            putQueryDependence(value);
+                                        }
                                     }
                                     break;
                             }

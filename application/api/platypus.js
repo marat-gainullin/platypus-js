@@ -193,7 +193,20 @@
         }
         return cached[aName];
     }
-    ;
+    function createModule(aName) {
+        var c = global[aName];
+        if (c) {
+            return new c();
+        } else {
+            ScriptedResourceClass.executeScriptResource(aName);
+            c = global[aName];
+            if (c) {
+                return new c();
+            } else {
+                throw 'No function: ' + aName + ' found while Modules.create(...).';
+            }
+        }
+    }
     ScriptUtilsClass.setGetModuleFunc(getModule);
     var PModules = {};
     Object.defineProperty(P, "Modules", {
@@ -201,6 +214,9 @@
     });
     Object.defineProperty(PModules, "get", {
         value: getModule
+    });
+    Object.defineProperty(PModules, "create", {
+        value: createModule
     });
 
     function objectToInsertIniting(aObject) {
@@ -519,7 +535,7 @@
         } else {
             aTarget = new modelCTor(model);
         }
-        function publishEntity(nEntity, aName) {
+        function publishEntity(nEntity) {
             var published = EngineUtilsClass.unwrap(nEntity.getPublished());
             var paramsSubject = published instanceof P.ApplicationDbParametersEntity
                     || published instanceof P.ApplicationPlatypusParametersEntity;
@@ -586,21 +602,38 @@
                     return nFields.size();
                 }
             });
-            Object.defineProperty(aTarget, aName, {
-                value: published,
+            return published;
+        }
+        (function() {
+            var pEntity = model.getParametersEntity();
+            var ppEntity = publishEntity(pEntity);
+            Object.defineProperty(aTarget, "params", {
+                value: ppEntity,
                 enumerable: true
             });
-        }
-        var pEntity = model.getParametersEntity();
-        publishEntity(pEntity, "params");
+        })();
         var entities = model.entities();
         for each (var enEntity in entities) {
             enEntity.validateQuery();
             if (enEntity.name) {
-                publishEntity(enEntity, enEntity.name);
+                (function() {
+                    var ppEntity = publishEntity(enEntity);
+                    Object.defineProperty(aTarget, enEntity.name, {
+                        value: ppEntity,
+                        enumerable: true
+                    });
+                })();
             }
         }
         model.createORMDefinitions();
+        aTarget.loadEntity = function(queryId) {
+            var lnEntity = model.loadEntity(P.boxAsJava(queryId));
+            return publishEntity(lnEntity);
+        };
+        aTarget.createEntity = function(sqlText, datasourceName) {
+            var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+            return publishEntity(lnEntity);
+        };
         return aTarget;
     }
     Object.defineProperty(P, "loadModel", {value: loadModel});

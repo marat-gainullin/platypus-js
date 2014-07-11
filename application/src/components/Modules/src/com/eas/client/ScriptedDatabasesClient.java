@@ -15,6 +15,7 @@ import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.queries.PlatypusScriptedFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.store.Dom2ModelDocument;
 import com.eas.script.ScriptUtils;
 import java.util.Collection;
@@ -136,6 +137,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                         return true;
                     }
                 };
+                PlatypusScriptedResource.executeScriptResource(aQueryId);
                 JSObject schemaContainer = ScriptUtils.createModule(aQueryId);
                 if (schemaContainer != null) {
                     Fields fields = new Fields();

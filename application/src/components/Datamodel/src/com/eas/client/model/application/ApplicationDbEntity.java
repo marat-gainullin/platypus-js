@@ -51,7 +51,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     @Override
     protected List<Change> getChangeLog() throws Exception {
         validateQuery();
-        String dbId = tableName != null ? tableDbId : query != null ? query.getDbId() : null;
+        String dbId = tableName != null && !tableName.isEmpty() ? tableDbId : query != null ? query.getDbId() : null;
         return model.getChangeLog(dbId);
     }
 

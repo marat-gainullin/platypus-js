@@ -626,21 +626,20 @@ public class Application {
 				}
 				return pModule;
 			}
+			this.create = function(aModuleId) {
+				var mc = $wnd[aModuleId];
+				if (mc) {
+					return new mc();
+				} else
+					throw 'No module constructor for module: ' + aModuleId;
+			}
 		}
 		$wnd.P.Modules = new _Modules();
-		$wnd.P.Module = function(aModuleId){
-			var mc = $wnd[aModuleId];
-			if (mc){
-				mc.call(this);
-			} else
-				throw 'No module constructor to module: ' + aModuleId;
-		};
-		$wnd.P.Form = $wnd.P.Module;
+		$wnd.P.Form = {};
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		};
-		(function(){
-			
+		(function(){			
 			function parseDates(aObject) {
 		        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
 		            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(aObject)){
