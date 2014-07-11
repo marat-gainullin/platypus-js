@@ -1079,6 +1079,9 @@ public class Application {
 
 				@Override
 				public void onFailure(Void reason) {
+					for (Element el : aIndicators) {
+						el.<XElement> cast().unmask();
+					}
 				}
 			});
 		} else {

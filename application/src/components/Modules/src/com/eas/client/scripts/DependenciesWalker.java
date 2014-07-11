@@ -1,18 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 package com.eas.client.scripts;
 
 import com.eas.client.AppCache;
@@ -147,7 +132,7 @@ public class DependenciesWalker {
             public boolean enterIdentNode(IdentNode identNode) {
                 String name = identNode.getName();
                 if (cache != null) {
-                    try {
+                    try {                        
                         ApplicationElement appElement = cache.get(name);
                         if (appElement != null) {
                             if (appElement.getType() == ClientConstants.ET_COMPONENT || appElement.getType() == ClientConstants.ET_FORM) {
@@ -157,7 +142,7 @@ public class DependenciesWalker {
                             }
                         }// ordinary script class
                     } catch (Exception ex) {
-                        Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }
                 }
                 return super.enterIdentNode(identNode);

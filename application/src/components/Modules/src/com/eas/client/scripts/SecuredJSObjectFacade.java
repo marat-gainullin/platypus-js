@@ -44,7 +44,7 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
     private final Pattern roleTemplate = Pattern.compile("(\\$\\d+)");// WARNING!!! Don't make this member static!
     protected String appElementId;
     protected ScriptDocument config;
-    
+
     /**
      * Current principal provider
      */
@@ -153,13 +153,12 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
                 } else {
                     filteredRoles = filterRoles(declaredRoles, aArgs);
                 }
-                if (principal != null && principal.hasAnyRole(filteredRoles)) {
-                    return;
+                if (principal == null || !principal.hasAnyRole(filteredRoles)) {
+                    throw new AccessControlException(String.format("Access denied to %s function in %s module for '%s'.",//NOI18N
+                            aName,
+                            appElementId,
+                            principal != null ? principal.getName() : null));
                 }
-                throw new AccessControlException(String.format("Access denied to %s function in %s module for '%s'.",//NOI18N
-                        aName,
-                        appElementId,
-                        principal != null ? principal.getName() : null));
             } else {
                 checkModulePermissions();
             }

@@ -314,8 +314,8 @@ public class PlatypusScriptedResource {
     public static void executeScriptResource(final String aResourceId, SecuredJSConstructor aPrevConstrVersion) throws Exception {
         final String resourceId = PlatypusScriptedResource.normalizeResourcePath(aResourceId);
         if (!executedScriptResources.contains(resourceId) || aPrevConstrVersion != null) {
-            executedScriptResources.add(resourceId);
             String sourcePath = PlatypusScriptedResource.translateScriptPath(resourceId);
+            executedScriptResources.add(resourceId);
             if (sourcePath != null) {
                 URL sourceUrl;
                 File test = new File(sourcePath);
