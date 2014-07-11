@@ -63,7 +63,7 @@ public class ApplicationScriptsTest {
             throw new Exception("Module " + aModuleId + " is not found in Platypus server.");
         }
         nativeClient.logout();
-        httpClient = new PlatypusHttpClient("http://localhost:8080/application/application/");
+        httpClient = new PlatypusHttpClient("http://localhost:8080/application/");
         PlatypusScriptedResource.initForTests(httpClient, httpClient);
         httpClient.login("testuser1", "test".toCharArray());
         PlatypusScriptedResource.executeScriptResource(aModuleId);

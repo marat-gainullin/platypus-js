@@ -120,9 +120,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             + "* @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
             + "*/";
 
+    protected List<Row> emptyFoundResults = new TaggedList<>();
+
     @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
     public List<Row> find(Object... values) throws Exception {
-        List<Row> found = new ArrayList<>();
         if (values != null && values.length > 0 && values.length % 2 == 0) {
             Fields fields = rowset.getFields();
             Converter converter = rowset.getConverter();
@@ -155,15 +156,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 Locator loc = checkUserLocator(constraints);
                 if (loc.find(keyValues.toArray())) {
                     TaggedList<RowWrap> subSet = loc.getSubSet();
-                    subSet.stream().forEach((rw) -> {
-                        found.add(rw.getRow());
-                    });
+                    if (subSet.tag == null) {
+                        List<Row> found = new TaggedList<>();
+                        subSet.stream().forEach((rw) -> {
+                            found.add(rw.getRow());
+                        });
+                        subSet.tag = found;
+                    }
+                    return (TaggedList<Row>) subSet.tag;
+                } else {
+                    return emptyFoundResults;
                 }
             }
         } else {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
         }
-        return found;
+        return null;
     }
 
     private static final String FIND_BY_ID_JSDOC = ""

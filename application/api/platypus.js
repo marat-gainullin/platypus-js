@@ -414,18 +414,21 @@
                 for (var v = 0; v < arguments.length; v++)
                     varargs[v] = boxAsJava(arguments[v]);
                 var found = nEntity.find(varargs);
-                var res = [];
-                for (var f = 0; f < found.size(); f++) {
-                    res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                if (!found.tag) {
+                    var res = [];
+                    for (var f = 0; f < found.size(); f++) {
+                        res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                    }
+                    found.tag = res;
                 }
-                return res;
+                return found.tag;
             }
         });
     }
 
     RowClass.setPublisher(function(aDelegate) {
         var nnFields = aDelegate.getFields();
-        var instanceCTor = nnFields.getInstanceConstructor();
+        var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
         var target = !!instanceCTor ? new instanceCTor() : {};
         var nFields = nnFields.toCollection();
         // plain mutable properties
@@ -610,7 +613,7 @@
      */
     function loadForm(aName, aModel, aTarget) {
         var designInfo = FormLoaderClass.load(ScriptedResourceClass.getClient(), aName);
-        var form = new FormClass(aName, designInfo, aModel.unwrap());
+        var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null);
         if (aTarget) {
             P.Form.call(aTarget, form);
         } else {

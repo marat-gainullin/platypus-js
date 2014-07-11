@@ -63,7 +63,7 @@ public class PlatypusHttpClientTest {
         }
     }
 
-    private Object executeServerModuleMethod(String moduleName, String methodName, String aTestParamOne, Long aTestParamTwo) throws Exception {
+    private Object executeServerModuleMethod(String moduleName, String methodName, String aTestParamOne, Integer aTestParamTwo) throws Exception {
         ExecuteServerModuleMethodRequest execModuleMethodRq = new ExecuteServerModuleMethodRequest(IDGenerator.genID(), moduleName, methodName, new Object[]{aTestParamOne, aTestParamTwo});
         client.executeRequest(execModuleMethodRq);
         assertTrue(execModuleMethodRq.getResponse() instanceof ExecuteServerModuleMethodRequest.Response);
@@ -120,16 +120,16 @@ public class PlatypusHttpClientTest {
             assertEquals(moduleName, String.valueOf(serverModuleName));
 
             String aTestParamOne = "testParamOneValue";
-            Long aTestParamTwo = 10L;
+            Integer aTestParamTwo = 10;
             String methodName = "testMethod";
             Object result = null;
             for (int i = 0; i < EXECUTE_SERVER_MODULE_METHOD_COUNT; i++) {
                 result = executeServerModuleMethod(moduleName, methodName, aTestParamOne, aTestParamTwo);
                 assertEquals(aTestParamTwo + 10, result);
-                assertTrue(result instanceof Long);
-                aTestParamTwo = (Long) result;
+                assertTrue(result instanceof Integer);
+                aTestParamTwo = (Integer)result;
             }
-            assertEquals(10L + 10L * EXECUTE_SERVER_MODULE_METHOD_COUNT, result);
+            assertEquals(10 + 10 * EXECUTE_SERVER_MODULE_METHOD_COUNT, result);
         } finally {
             disposeServerModule(moduleName);
         }

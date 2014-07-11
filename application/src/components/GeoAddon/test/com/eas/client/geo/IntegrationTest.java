@@ -8,14 +8,8 @@ import com.bearsoft.rowset.Rowset;
 import com.eas.client.geo.datastore.DatamodelDataStore;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.geotools.data.FeatureSource;
@@ -26,29 +20,16 @@ import org.geotools.map.Layer;
 import org.geotools.map.MapContent;
 import org.geotools.map.event.MapLayerListEvent;
 import org.geotools.map.event.MapLayerListListener;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
-import org.geotools.referencing.cs.DefaultCartesianCS;
-import org.geotools.referencing.operation.DefiningConversion;
-import org.geotools.renderer.RenderListener;
-import org.geotools.renderer.lite.StreamingRenderer;
-import org.geotools.styling.SLD;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.*;
 import static org.junit.Assert.*;
 import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.FeatureType;
-import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.IdentifiedObject;
 import org.opengis.referencing.crs.CRSFactory;
-import org.opengis.referencing.crs.GeographicCRS;
-import org.opengis.referencing.crs.ProjectedCRS;
 import org.opengis.referencing.operation.MathTransformFactory;
-import org.opengis.referencing.operation.TransformException;
 
 /**
  * This TestCase contains integration and functional tests which are more
@@ -159,83 +140,9 @@ public class IntegrationTest extends GeoBaseTest {
         assertFalse(layerBounds.contains(0, 0));
     }
 
+
     /**
-     * Tests that projected map of Delaware has valid bounds.
-     *
-     * @throws IOException
-     * @throws TransformException
-     * @throws FactoryException
-     */
-    @Ignore
-    @Test
-    public void testProjectionTransformation() throws IOException, FactoryException, TransformException {
-        System.out.println("Testing map rendering with custom projection.");
-        // Create datasource and populate it with features.
-        DatamodelDataStore myDS = new DatamodelDataStore();
-        myDS.setFeatureDescriptors(map);
-        // Create map context and populate it with data.
-        final MapContent mapContent = new MapContent();
-        for (String typeName : DELAWARE_MAP_TABLES) {
-            mapContent.addLayer(new FeatureLayer(myDS.getFeatureSource(typeName), SLD.createSimpleStyle(myDS, typeName, Color.red)));
-        }
-        // Create geographic CRS which defines coordinates, stored in DB (for Delaware map).
-        GeographicCRS geoCRS = (GeographicCRS) CRS.parseWKT(DELAWARE_MAP_CRS_WKT);
-        assertFalse("Map bounds is empty.", mapContent.getViewport().getBounds().isEmpty()); //NOI18N
-        // Create north-pole stereographic projection.
-        final ParameterValueGroup parameters = mtFactory.getDefaultParameters(PROJECTION_QUALIFIED_NAME);
-        // Maybe, tune parameters, but usually, default values are ok.
-        final DefiningConversion conversion = new DefiningConversion(PROJECTION_HUMAN_NAME, parameters);
-        final ProjectedCRS projectedCRS = crsFactory.createProjectedCRS(Collections.singletonMap(IdentifiedObject.NAME_KEY, PROJECTION_HUMAN_NAME), geoCRS, conversion, DefaultCartesianCS.GENERIC_2D);
-        mapContent.getViewport().setCoordinateReferenceSystem(projectedCRS);
-        // Check that no layer bounds are empty.
-        for (int i = 0; i < mapContent.layers().size(); i++) {
-            final Layer layer = mapContent.layers().get(i);
-            final FeatureSource<? extends FeatureType, ? extends Feature> featureSource = layer.getFeatureSource();
-            final String featureTypeName = featureSource.getSchema().getName().getLocalPart();
-            final ReferencedEnvelope layerBounds = layer.getBounds();
-            System.out.printf("Layer %d (%s) bounds %s, CRS %s\n", i, featureTypeName, String.valueOf(layerBounds), String.valueOf(layerBounds.getCoordinateReferenceSystem())); //NOI18N
-            assertNotNull(String.format("Layer %d (%s) bounds CRS is empty", i, featureTypeName, String.valueOf(layerBounds)), layerBounds.getCoordinateReferenceSystem()); //NOI18N
-            assertFalse(String.format("Layer %d (%s) bounds is empty", i, featureTypeName), layerBounds.isEmpty()); //NOI18N
-        }
-        System.out.println(mapContent.getViewport().getBounds());
-        assertFalse("Projected map bounds is empty.", mapContent.getViewport().getBounds().isEmpty()); //NOI18N
-        final BufferedImage image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
-        final StreamingRenderer renderer = new StreamingRenderer();
-        renderer.setMapContent(mapContent);
-        final Graphics2D graphics = image.createGraphics();
-        // Unable to use jMock here, because it causes heap memory exhaustion.
-        renderer.addRenderListener(new RenderListener() {
-            @Override
-            public void featureRenderer(SimpleFeature sf) {
-                featuresRendered++;
-            }
-
-            @Override
-            public void errorOccurred(Exception ex) {
-                System.out.println("Error occured: " + ex);
-                fail("Error occured: " + ex); //NOI18N
-            }
-        });
-        featuresRendered = 0;
-        final int totalFeatures = getMapContextTotalFeatures(mapContent);
-        final AffineTransform transform = new AffineTransform();
-        transform.scale(8e-4, 8e-4);
-        transform.translate(0, 0);
-        renderer.paint(graphics, new Rectangle(800, 600), mapContent.getViewport().getBounds(), transform);
-        System.out.println(String.format("Features rendered: %d", featuresRendered)); //NOI18N
-        assertEquals("Not all features rendered.", totalFeatures, featuresRendered);
-    }
-
-    private int getMapContextTotalFeatures(final MapContent mapContext) throws IOException, IndexOutOfBoundsException {
-        int totalFeatures = 0;
-        for (int i = 0; i < mapContext.layers().size(); i++) {
-            totalFeatures += mapContext.layers().get(i).getFeatureSource().getFeatures().size();
-        }
-        return totalFeatures;
-    }
-
-
-    /* Tests that refreshing datamodel, or individual entities results in MapContext
+     * Tests that refreshing datamodel, or individual entities results in MapContext
      * change eventss.
      *
      * <p>Uses Delaware map for this.</p>

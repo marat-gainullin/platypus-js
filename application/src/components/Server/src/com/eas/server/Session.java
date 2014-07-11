@@ -137,7 +137,7 @@ public class Session implements PrincipalHost {
         if ((principal != null && aPrincipal != null && !principal.getName().equals(aPrincipal.getName())) || principal == null || aPrincipal == null) {
             userContext = null;
             String userName = "";
-            if (serverCore.getDatabasesClient() != null) {
+            if (serverCore != null && serverCore.getDatabasesClient() != null) {
                 try {
                     if (aPrincipal != null) {
                         userName = aPrincipal.getName();
