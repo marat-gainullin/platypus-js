@@ -37,13 +37,15 @@ public class Dom2ReportDocument {
             String format = aAppElementName.substring(aAppElementName.lastIndexOf('.') + 1, aAppElementName.length());
             return new ReportTemplate(appElement.getBinaryContent(), aData, format, aAppElementName);
         } else {
-            return transform(appElement.getContent(), aData);
+            return transform(appElement.getContent(), aData, aAppElementName);
         }
     }
 
-    public static ReportTemplate transform(Document aDocument, JSObject aData) throws Exception {
+    public static ReportTemplate transform(Document aDocument, JSObject aData, String aName) throws Exception {
         Dom2ReportDocument dom2doc = new Dom2ReportDocument();
-        return dom2doc.parseDom(aDocument, aData);
+        ReportTemplate temmplate = dom2doc.parseDom(aDocument, aData);
+        temmplate.setName(aName);
+        return temmplate;
     }
 
     protected ReportTemplate parseDom(Document aDocument, JSObject aData) throws Exception {

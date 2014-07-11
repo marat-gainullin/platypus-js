@@ -8,6 +8,7 @@ import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.Query;
+import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.HelloRequest;
@@ -274,15 +275,6 @@ public class PlatypusHttpServlet extends HttpServlet {
         writeResponse(aResponse, aHttpResponse, RowsetJsonConstants.JSON_CONTENTTYPE);
     }
 
-    private void writeExcelResponse(byte[] aResponse, String aFormat, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
-        aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-        aHttpResponse.setContentType(aFormat != null && aFormat.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION) ? EXCEL_CONTENT_TYPE : EXCELX_CONTENT_TYPE);
-        aHttpResponse.addHeader("Content-Disposition", "attachment; filename=\"report." + (aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) + "\"");
-        aHttpResponse.setContentLength(aResponse.length);
-        aHttpResponse.getOutputStream().write(aResponse);
-        aHttpResponse.getOutputStream().flush();
-    }
-
     private void writeResponse(byte[] aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
         if (aContentType != null) {
             aHttpResponse.setContentType(aContentType);
@@ -439,6 +431,26 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                 } else if (result instanceof JSObject) {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
+                } else if (result instanceof Report) {
+                    Report report = (Report) result;
+                    String docsRoot = aHttpRequest.getServletContext().getRealPath("/");
+                    String userHome = "/reports/" + getPrincipal(aHttpRequest).getName() + "/";
+                    File userDir = new File(docsRoot + userHome);
+                    if (!userDir.exists()) {
+                        userDir.mkdirs();
+                    }
+                    String reportName = report.getName() + IDGenerator.genID() + "." + report.getFormat();
+                    File rep = new File(docsRoot + userHome + reportName);
+                    try (FileOutputStream out = new FileOutputStream(rep)) {
+                        out.write(report.getReport());
+                        out.flush();
+                    }
+                    String redirectLocation = userHome + reportName;
+                    if (!"/".equals(aHttpRequest.getContextPath())) {
+                        redirectLocation = aHttpRequest.getContextPath() + redirectLocation;
+                    }
+                    redirectLocation = new URI(null, null, redirectLocation, null).toASCIIString();
+                    aHttpResponse.sendRedirect(redirectLocation);
                 } else {// including null result
                     writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), aHttpResponse);
                 }

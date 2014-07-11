@@ -83,5 +83,9 @@ public class ReportTemplate implements HasPublished{
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
+
+    public void setName(String aName) {
+        name = aName;
+    }
     
 }
