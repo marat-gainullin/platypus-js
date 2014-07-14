@@ -84,12 +84,12 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 			public void insert(Widget child, Widget tab, int beforeIndex) {
 				child.getElement().getStyle().clearWidth();
 				child.getElement().getStyle().clearHeight();
-				if (child instanceof FocusWidget) {
+				//if (child instanceof FocusWidget) {
 					child.getElement().getStyle().clearRight();
 					child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 					com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
 					child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-				}
+				//}
 				super.insert(child, tab, beforeIndex);
 			}
 

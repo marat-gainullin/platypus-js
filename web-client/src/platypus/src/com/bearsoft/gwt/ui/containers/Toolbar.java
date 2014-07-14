@@ -162,12 +162,12 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
                                 iw.getElement().getStyle().setRight(0, Style.Unit.PX);
                                 iw.getElement().getStyle().clearWidth();
                                 iw.getElement().getStyle().clearMarginLeft();
-                                if (iw instanceof FocusWidget) {
+                                //if (iw instanceof FocusWidget) {
                                     iw.getElement().getStyle().clearRight();
                                     iw.getElement().getStyle().setWidth(100, Style.Unit.PCT);
                                     com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
                                     iw.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-                                }
+                                //}
                                 if (iw instanceof RequiresResize) {
                                     ((RequiresResize) iw).onResize();
                                 }

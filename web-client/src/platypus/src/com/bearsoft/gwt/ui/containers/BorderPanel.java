@@ -48,14 +48,14 @@ public class BorderPanel extends DockLayoutPanel {
     protected void insert(Widget child, Direction direction, double size, Widget before) {
         super.insert(child, direction, size, before);
         recalcMargins();
-        if (child instanceof FocusWidget) {
+        //if (child instanceof FocusWidget) {
             child.getElement().getStyle().clearRight();
             child.getElement().getStyle().clearBottom();
             child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
             child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
             com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
             child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-        }
+        //}
     }
 
     @Override

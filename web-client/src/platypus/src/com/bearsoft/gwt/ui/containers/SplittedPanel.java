@@ -19,12 +19,12 @@ public class SplittedPanel extends SplitLayoutPanel {
     @Override
     public void insert(Widget child, Direction direction, double size, Widget before) {
         super.insert(child, direction, size, before);
-        if (child instanceof FocusWidget) {
+        //if (child instanceof FocusWidget) {
             child.getElement().getStyle().clearRight();
             child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
             com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
             child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-        }
+        //}
     }
 
     @Override

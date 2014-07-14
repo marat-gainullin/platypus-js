@@ -24,14 +24,14 @@ public class AnchorsPanel extends LayoutPanel {
     @Override
     public void insert(Widget widget, int beforeIndex) {
         super.insert(widget, beforeIndex);
-        if(widget instanceof FocusWidget){
+        //if(widget instanceof FocusWidget){
             widget.getElement().getStyle().clearRight();
             widget.getElement().getStyle().clearBottom();
             widget.getElement().getStyle().setWidth(100, Style.Unit.PCT);
             widget.getElement().getStyle().setHeight(100, Style.Unit.PCT);
             CommonResources.INSTANCE.commons().ensureInjected();
             widget.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-        } 
+        //} 
     }
 
     @Override

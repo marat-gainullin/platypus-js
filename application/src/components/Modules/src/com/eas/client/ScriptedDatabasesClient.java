@@ -137,8 +137,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                         return true;
                     }
                 };
-                PlatypusScriptedResource.executeScriptResource(aQueryId);
-                JSObject schemaContainer = ScriptUtils.createModule(aQueryId);
+                JSObject schemaContainer = createModule(aQueryId);
                 if (schemaContainer != null) {
                     Fields fields = new Fields();
                     query.setFields(fields);
@@ -154,7 +153,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             readScriptFields(aQueryId, (JSObject) oParams, params);
                         } else {
                             ApplicationElement moduleQuery = getAppCache().get(aQueryId);
-                            ApplicationModel<?,?, ?, ?> model = Dom2ModelDocument.transform(ScriptedDatabasesClient.this, moduleQuery.getContent());
+                            ApplicationModel<?, ?, ?, ?> model = Dom2ModelDocument.transform(ScriptedDatabasesClient.this, moduleQuery.getContent());
                             params = model != null ? model.getParameters() : new Parameters();
                         }
                         params.toCollection().stream().forEach((p) -> {
@@ -172,6 +171,11 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             }
         }
     };
+
+    protected JSObject createModule(String aModuleId) throws Exception {
+        PlatypusScriptedResource.executeScriptResource(aModuleId);
+        return ScriptUtils.createModule(aModuleId);
+    }
 
     /**
      * @inheritDoc
@@ -229,7 +233,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     @Override
     public FlowProvider createFlowProvider(String aDbId, final String aEntityId, String aSqlClause, final Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         if (JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
-            JSObject dataFeeder = ScriptUtils.createModule(aEntityId);
+            JSObject dataFeeder = createModule(aEntityId);
             if (dataFeeder != null) {
                 return new PlatypusScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
             } else {
@@ -266,7 +270,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         if (aDatasourceId != null) {
             ApplicationElement appElement = getAppCache().get(aDatasourceId);
             if (appElement != null && appElement.getType() == ClientConstants.ET_COMPONENT) {
-                JSObject dataSourceApplier = ScriptUtils.createModule(aDatasourceId);
+                JSObject dataSourceApplier = createModule(aDatasourceId);
                 if (dataSourceApplier != null) {
                     Object oApply = dataSourceApplier.getMember("apply");
                     if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {

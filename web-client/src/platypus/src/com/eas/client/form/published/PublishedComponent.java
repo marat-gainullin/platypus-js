@@ -71,4 +71,11 @@ public class PublishedComponent extends JavaScriptObject {
 		this.error = aValue;
 	}-*/;
 
+	public final native void setWidth(double aValue)/*-{
+		this.width = aValue;
+	}-*/;
+
+	public final native void setHeight(double aValue)/*-{
+		this.height = aValue;
+	}-*/;
 }

@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
@@ -57,23 +56,12 @@ public class ScriptUtils {
     protected static ScriptEngine engine;
 
     public static void init() {
-        initEngine((ScriptEngine aEngine) -> {
-            try {
-                aEngine.eval("load('classpath:platypus.js');");
-            } catch (ScriptException ex) {
-                Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-    }
-
-    /**
-     * @param onComplete
-     */
-    public static void initEngine(Consumer<ScriptEngine> onComplete) {
         if (engine == null) {
             engine = new ScriptEngineManager().getEngineByName("nashorn");
-            if (onComplete != null) {
-                onComplete.accept(engine);
+            try {
+                engine.eval("load('classpath:platypus.js');");
+            } catch (ScriptException ex) {
+                Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

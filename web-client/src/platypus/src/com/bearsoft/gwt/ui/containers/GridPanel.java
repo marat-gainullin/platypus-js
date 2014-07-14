@@ -131,14 +131,14 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		if (child != null) {
 			Element we = child.getElement();
 			Element wpe = we.getParentElement();
-			if (child instanceof FocusWidget) {
+			//if (child instanceof FocusWidget) {
 				we.getStyle().clearRight();
 				we.getStyle().clearBottom();
 				we.getStyle().setWidth(wpe.getClientWidth() - hgap, Style.Unit.PX);
 				we.getStyle().setHeight(wpe.getClientHeight() - vgap, Style.Unit.PX);
 				com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
 				child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-			}
+			//}
 		}
 	}
 
