@@ -11,7 +11,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -23,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, ProvidesResize, HasDirection {
 
-	protected int hgap = 5;
+	protected int hgap = 0;
 	protected Direction direction = Direction.LTR;
 
 	public HorizontalBoxPanel() {
@@ -42,6 +41,7 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 			Widget w = getWidget(i);
 			w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
 		}
+		ajustWidth();
 	}
 
 	@Override

@@ -84,16 +84,24 @@ public class JsContainers {
 			}
 		};
 		
-		// ***************************************************
-		$wnd.P.BoxPane = function(aOrientation) {
+		// ****************************************************
+		$wnd.P.BoxPane = function(aOrientation, aHGap, aVGap) {
 			if (!(this instanceof $wnd.P.BoxPane)) {
 				throw  ' use  "new P.BoxPane()" !';
 			}
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
+			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			if(!aComponent){
-				if(!aOrientation)
+				if(arguments.length < 3)
+					aVGap = 0;
+				if(arguments.length < 2)
+					aHGap = 0;
+				if(arguments.length < 1)
 					aOrientation = $wnd.P.Orientation.HORIZONTAL;
-				aComponent = aOrientation == $wnd.P.Orientation.VERTICAL ? @com.eas.client.form.published.containers.VBoxPane::new()() : @com.eas.client.form.published.containers.HBoxPane::new()();
+				if(aOrientation == $wnd.P.Orientation.VERTICAL){
+					aComponent = @com.eas.client.form.published.containers.VBoxPane::new(I)(aVGap);
+				} else {
+					aComponent = @com.eas.client.form.published.containers.HBoxPane::new(I)(aHGap);
+				}
 			}
 
 			var published = this;
@@ -122,6 +130,36 @@ public class JsContainers {
 			Object.defineProperty(published, "orientation", {
 				get : function(){
 					return aOrientation;
+				}
+			});
+			var _hgap = 0;
+			Object.defineProperty(published, "hgap", {
+				get : function(){
+					if(published.orientation == $wnd.P.Orientation.HORIZONTAL)
+						return aComponent.@com.eas.client.form.published.containers.HBoxPane::getHgap()();
+					else
+						return _hgap;
+				},
+				set : function(aValue){
+					if(published.orientation == $wnd.P.Orientation.HORIZONTAL)
+						aComponent.@com.eas.client.form.published.containers.HBoxPane::setHgap(I)(aValue * 1);
+					else
+						_hgap = aValue * 1;
+				}
+			});
+			var _vgap = 0;
+			Object.defineProperty(published, "vgap", {
+				get : function(){
+					if(published.orientation == $wnd.P.Orientation.VERTICAL)
+						return aComponent.@com.eas.client.form.published.containers.VBoxPane::getVgap()();
+					else
+						return _vgap;
+				},
+				set : function(aValue){
+					if(published.orientation == $wnd.P.Orientation.VERTICAL)
+						aComponent.@com.eas.client.form.published.containers.VBoxPane::setVgap(I)(aValue * 1);
+					else
+						_vgap = aValue * 1;
 				}
 			});
 		};		

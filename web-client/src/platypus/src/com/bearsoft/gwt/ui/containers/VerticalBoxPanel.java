@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, ProvidesResize {
 
-	protected int vgap = 5;
+	protected int vgap = 0;
 
 	public VerticalBoxPanel() {
 		super();
@@ -39,6 +39,7 @@ public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, Pr
 			Widget w = getWidget(i);
 			w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
 		}
+		ajustHeight();
 	}
 
 	@Override

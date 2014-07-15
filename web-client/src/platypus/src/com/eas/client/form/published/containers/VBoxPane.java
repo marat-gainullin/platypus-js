@@ -194,7 +194,7 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 		}
 	}
 
-	private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{
+	private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{		
 	}-*/;
 
 	@Override
