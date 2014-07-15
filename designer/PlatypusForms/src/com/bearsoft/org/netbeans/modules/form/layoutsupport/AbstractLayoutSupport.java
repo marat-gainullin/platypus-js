@@ -864,6 +864,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * (e.g. like content pane of JFrame)
      * @return new instance of layout manager representing the layout (with all
      * properties set)
+     * @throws java.lang.Exception
      */
     protected LayoutManager cloneLayoutInstance(Container container,
             Container containerDelegate)

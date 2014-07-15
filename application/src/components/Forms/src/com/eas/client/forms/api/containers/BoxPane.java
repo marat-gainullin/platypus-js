@@ -7,7 +7,7 @@ package com.eas.client.forms.api.containers;
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.Orientation;
-import com.eas.controls.visitors.SwingFactory;
+import com.eas.controls.layouts.box.BoxLayout;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Dimension;
@@ -17,7 +17,6 @@ import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -35,10 +34,20 @@ public class BoxPane extends Container<JPanel> {
             + "/**\n"
             + " * A container with Box Layout. By default uses horisontal orientation.\n"
             + " * @param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional).\n"
+            + " * @param hgap the horizontal gap (optional).\n"
+            + " * @param vgap the vertical gap (optional).\n"
             + " */";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
+    public BoxPane() {
+        this(Orientation.HORIZONTAL);
+    }
+
     public BoxPane(int aOrientaion) {
+        this(aOrientaion, 0, 0);
+    }
+    
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation", "hgap", "vgap"})
+    public BoxPane(int aOrientaion, int aHgap, int aVgap) {
         super();
         int axis = BoxLayout.X_AXIS;
         if (aOrientaion == Orientation.HORIZONTAL) {
@@ -47,14 +56,10 @@ public class BoxPane extends Container<JPanel> {
             axis = BoxLayout.Y_AXIS;
         }
         setDelegate(new JPanel());
-        BoxLayout layout = new BoxLayout(delegate, axis);
+        BoxLayout layout = new BoxLayout(delegate, axis, aHgap, aVgap);
         delegate.setLayout(layout);
         delegate.addContainerListener(resizer);
         delegate.addHierarchyBoundsListener(resizer);
-    }
-
-    public BoxPane() {
-        this(Orientation.HORIZONTAL);
     }
 
     protected BoxPane(JPanel aDelegate) {
@@ -64,13 +69,15 @@ public class BoxPane extends Container<JPanel> {
         setDelegate(aDelegate);
         delegate.addContainerListener(resizer);
         delegate.addHierarchyBoundsListener(resizer);
-        int axis = ((BoxLayout) delegate.getLayout()).getAxis();
+        //int axis = ((BoxLayout) delegate.getLayout()).getAxis();
         for (java.awt.Component comp : delegate.getComponents()) {
+            /*
             if (comp instanceof JComponent) {
                 ((JComponent) comp).setAlignmentX(1.0f);
                 ((JComponent) comp).setAlignmentY(1.0f);
             }
             SwingFactory.prefToMaxForBox(axis, comp);
+            */
             comp.addPropertyChangeListener(resizer);
         }
         delegate.revalidate();
@@ -91,6 +98,40 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
+    private static final String HGAP_JSDOC = ""
+            + "/**\n"
+            + "* Box horizontal gap between components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = HGAP_JSDOC)
+    public int getHgap(){
+        return ((BoxLayout) delegate.getLayout()).getHgap();
+    }
+    
+    @ScriptFunction
+    public void setHgap(int aValue){
+        ((BoxLayout) delegate.getLayout()).setHgap(aValue);
+        delegate.revalidate();
+        delegate.repaint();
+    }
+    
+    private static final String VGAP_JSDOC = ""
+            + "/**\n"
+            + "* Box vertical gap between components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VGAP_JSDOC)
+    public int getVgap(){
+        return ((BoxLayout) delegate.getLayout()).getVgap();
+    }
+    
+    @ScriptFunction
+    public void setVgap(int aValue){
+        ((BoxLayout) delegate.getLayout()).setVgap(aValue);
+        delegate.revalidate();
+        delegate.repaint();
+    }
+    
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
@@ -101,10 +142,10 @@ public class BoxPane extends Container<JPanel> {
     public void add(Component<?> aComp) {
         if (aComp != null) {
             JComponent comp = unwrap(aComp);
-            int axis = ((BoxLayout) delegate.getLayout()).getAxis();
-            SwingFactory.prefToMaxForBox(axis, comp);
-            comp.setAlignmentX(1.0f);
-            comp.setAlignmentY(1.0f);
+            //int axis = ((BoxLayout) delegate.getLayout()).getAxis();
+            //SwingFactory.prefToMaxForBox(axis, comp);
+            //comp.setAlignmentX(1.0f);
+            //comp.setAlignmentY(1.0f);
             comp.addPropertyChangeListener(resizer);
             delegate.add(comp);
             delegate.revalidate();
@@ -205,8 +246,8 @@ public class BoxPane extends Container<JPanel> {
             if ("preferredSize".equals(evt.getPropertyName())) {
                 java.awt.Component sourceComp = (java.awt.Component) evt.getSource();
                 if (sourceComp.getParent() == delegate) {
-                    int axis = ((BoxLayout) delegate.getLayout()).getAxis();
-                    SwingFactory.prefToMaxForBox(axis, sourceComp);
+                    //int axis = ((BoxLayout) delegate.getLayout()).getAxis();
+                    //SwingFactory.prefToMaxForBox(axis, sourceComp);
                     ajustSize();
                 }
             }

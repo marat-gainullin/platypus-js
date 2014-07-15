@@ -227,6 +227,7 @@
                 <package>com.eas.controls.borders</package>
                 <package>com.eas.controls.containers</package>
                 <package>com.eas.controls.layouts</package>
+                <package>com.eas.controls.layouts.box</package>
                 <package>com.eas.controls.layouts.constraints</package>
                 <package>com.eas.controls.layouts.margin</package>
                 <package>com.eas.controls.menus</package>

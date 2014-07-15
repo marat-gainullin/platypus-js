@@ -416,19 +416,20 @@
 
         /**
          * Sorts data according to comparator object returned by createSorting() or by comparator function.
+         * @param comparator A comparator function or object returned from createSorting() method.
          * @method sort
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.sort = function(arg0) {
+        P.ApplicationPlatypusEntity.prototype.sort = function(comparator) {
             var delegate = this.unwrap();
-            var value = delegate.sort(P.boxAsJava(arg0));
+            var value = delegate.sort(P.boxAsJava(comparator));
             return P.boxAsJs(value);
         };
 
         /**
          * Inserts new row in the rowset and sets cursor on this row. @see push.
-         * @index index the new row will be inserted at. 1 - based.
-         * @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).
+         * @param index The new row will be inserted at. 1 - based.
+         * @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
          * @method insertAt
          * @memberOf ApplicationPlatypusEntity
          */
@@ -464,28 +465,6 @@
         };
 
         /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.beforeFirst = function() {
-            var delegate = this.unwrap();
-            var value = delegate.beforeFirst();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.afterLast = function() {
-            var delegate = this.unwrap();
-            var value = delegate.afterLast();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Deletes all rows in the rowset.
          * @method deleteAll
          * @memberOf ApplicationPlatypusEntity
@@ -506,6 +485,28 @@
         P.ApplicationPlatypusEntity.prototype.createFilter = function(fields) {
             var delegate = this.unwrap();
             var value = delegate.createFilter(P.boxAsJava(fields));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.beforeFirst = function() {
+            var delegate = this.unwrap();
+            var value = delegate.beforeFirst();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.afterLast = function() {
+            var delegate = this.unwrap();
+            var value = delegate.afterLast();
             return P.boxAsJs(value);
         };
 

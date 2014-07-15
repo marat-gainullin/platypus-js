@@ -5,6 +5,7 @@
 package com.eas.controls.visitors;
 
 import com.eas.controls.layouts.*;
+import com.eas.controls.layouts.box.BoxLayout;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.controls.wrappers.PlatypusCardLayout;
 import java.awt.BorderLayout;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
@@ -81,7 +81,7 @@ public class LayoutFactory implements LayoutDesignInfoVisitor {
 
     @Override
     public void visit(BoxLayoutDesignInfo aInfo) {
-        result = new BoxLayout(targetContainer, aInfo.getAxis());
+        result = new BoxLayout(targetContainer, aInfo.getAxis(), aInfo.getHgap(), aInfo.getVgap());
     }
 
     @Override

@@ -6,7 +6,6 @@ package com.bearsoft.org.netbeans.modules.form.translate;
 
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.ComponentReference;
-import com.bearsoft.org.netbeans.modules.form.Event;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
@@ -23,6 +22,7 @@ import com.eas.controls.FormDesignInfo;
 import com.eas.controls.borders.*;
 import com.eas.controls.containers.*;
 import com.eas.controls.layouts.*;
+import com.eas.controls.layouts.box.BoxLayout;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.controls.menus.*;
 import com.eas.controls.plain.*;
@@ -48,14 +48,41 @@ import com.eas.dbcontrols.text.DbText;
 import com.eas.dbcontrols.text.DbTextDesignInfo;
 import com.eas.gui.JDropDownButton;
 import com.eas.store.Object2Dom;
-import com.eas.util.StringUtils;
 import java.awt.*;
 import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.*;
+import javax.swing.ButtonGroup;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDesktopPane;
+import javax.swing.JEditorPane;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.RootPaneContainer;
 import javax.swing.border.*;
 import org.netbeans.lib.awtextra.AbsoluteLayout;
 
@@ -67,11 +94,9 @@ public class DesignInfoFactory {
 
     public static DesignInfo create(Class<?> aBeanClass) {
         DesignInfo designInfo = null;
-        // top-level containers
-        if (RootPaneContainer.class.isAssignableFrom(aBeanClass)) {
+        if (RootPaneContainer.class.isAssignableFrom(aBeanClass)) { // top level container
             designInfo = new FormDesignInfo();
-        } else // db controls
-        if (DbCheck.class.isAssignableFrom(aBeanClass)) {
+        } else if (DbCheck.class.isAssignableFrom(aBeanClass)) { // db controls ...
             designInfo = new DbCheckDesignInfo();
         } else if (DbCombo.class.isAssignableFrom(aBeanClass)) {
             designInfo = new DbComboDesignInfo();
@@ -91,11 +116,9 @@ public class DesignInfoFactory {
             designInfo = new DbGridDesignInfo();
         } else if (DbMap.class.isAssignableFrom(aBeanClass)) {
             designInfo = new DbMapDesignInfo();
-            // non-visual components
-        } else if (ButtonGroup.class.isAssignableFrom(aBeanClass)) {
+        } else if (ButtonGroup.class.isAssignableFrom(aBeanClass)) { // non-visual components ...
             designInfo = new ButtonGroupDesignInfo();
-            // plain visual controls
-        } else if (JLabel.class.isAssignableFrom(aBeanClass)) {
+        } else if (JLabel.class.isAssignableFrom(aBeanClass)) { // plain visual controls ...
             designInfo = new LabelDesignInfo();
         } else if (JTextPane.class.isAssignableFrom(aBeanClass)) {
             designInfo = new TextPaneDesignInfo();
@@ -121,8 +144,7 @@ public class DesignInfoFactory {
             designInfo = new ButtonDesignInfo();
         } else if (JSlider.class.isAssignableFrom(aBeanClass)) {
             designInfo = new SliderDesignInfo();
-            // containers
-        } else if (JDesktopPane.class.isAssignableFrom(aBeanClass)) {
+        } else if (JDesktopPane.class.isAssignableFrom(aBeanClass)) { // containers ...
             designInfo = new DesktopDesignInfo();
         } else if (JLayeredPane.class.isAssignableFrom(aBeanClass)) {
             designInfo = new LayersDesignInfo();
@@ -136,8 +158,7 @@ public class DesignInfoFactory {
             designInfo = new TabsDesignInfo();
         } else if (JToolBar.class.isAssignableFrom(aBeanClass)) {
             designInfo = new ToolbarDesignInfo();
-            // menus
-        } else if (JMenu.class.isAssignableFrom(aBeanClass)) {
+        } else if (JMenu.class.isAssignableFrom(aBeanClass)) { // menus ...
             designInfo = new MenuDesignInfo();
         } else if (JCheckBoxMenuItem.class.isAssignableFrom(aBeanClass)) {
             designInfo = new MenuCheckItemDesignInfo();
@@ -151,8 +172,7 @@ public class DesignInfoFactory {
             designInfo = new MenubarDesignInfo();
         } else if (JPopupMenu.class.isAssignableFrom(aBeanClass)) {
             designInfo = new PopupDesignInfo();
-            // layouts
-        } else if (BorderLayout.class.isAssignableFrom(aBeanClass)) {
+        } else if (BorderLayout.class.isAssignableFrom(aBeanClass)) { // layouts ...
             designInfo = new BorderLayoutDesignInfo();
         } else if (BoxLayout.class.isAssignableFrom(aBeanClass)) {
             designInfo = new BoxLayoutDesignInfo();

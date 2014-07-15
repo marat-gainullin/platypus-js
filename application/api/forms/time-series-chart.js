@@ -405,23 +405,6 @@
              */
             P.TimeSeriesChart.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TimeSeriesChart){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TimeSeriesChart
-             */
-            P.TimeSeriesChart.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -438,6 +421,23 @@
              * @memberOf TimeSeriesChart
              */
             P.TimeSeriesChart.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TimeSeriesChart){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TimeSeriesChart
+             */
+            P.TimeSeriesChart.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

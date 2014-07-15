@@ -330,12 +330,13 @@
     };
         /**
          * Assigning method of field/parameter information using specified source.
+         * @params sourceField
          * @method assignFrom
          * @memberOf Parameter
          */
-        P.Parameter.prototype.assignFrom = function(arg0) {
+        P.Parameter.prototype.assignFrom = function(sourceField) {
             var delegate = this.unwrap();
-            var value = delegate.assignFrom(P.boxAsJava(arg0));
+            var value = delegate.assignFrom(P.boxAsJava(sourceField));
             return P.boxAsJs(value);
         };
 

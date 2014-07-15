@@ -471,23 +471,6 @@
              */
             P.TabbedPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -504,6 +487,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -784,9 +784,9 @@
          * @method add
          * @memberOf TabbedPane
          */
-        P.TabbedPane.prototype.add = function(component, text) {
+        P.TabbedPane.prototype.add = function(component, text, icon) {
             var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text));
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text), P.boxAsJava(icon));
             return P.boxAsJs(value);
         };
 

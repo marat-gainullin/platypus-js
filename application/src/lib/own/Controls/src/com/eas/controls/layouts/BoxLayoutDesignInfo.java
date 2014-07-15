@@ -5,8 +5,8 @@
 package com.eas.controls.layouts;
 
 import com.eas.controls.DesignInfo;
+import com.eas.controls.layouts.box.BoxLayout;
 import com.eas.store.Serial;
-import javax.swing.BoxLayout;
 
 /**
  *
@@ -15,9 +15,10 @@ import javax.swing.BoxLayout;
 public class BoxLayoutDesignInfo extends LayoutDesignInfo {
 
     protected int axis = BoxLayout.LINE_AXIS;
+    protected int hgap;
+    protected int vgap;
 
-    public BoxLayoutDesignInfo()
-    {
+    public BoxLayoutDesignInfo() {
         super();
     }
 
@@ -31,6 +32,30 @@ public class BoxLayoutDesignInfo extends LayoutDesignInfo {
         int oldValue = axis;
         axis = aValue;
         firePropertyChange("axis", oldValue, axis);
+    }
+
+    @Serial
+    public int getHgap() {
+        return hgap;
+    }
+
+    @Serial
+    public void setHgap(int aValue) {
+        int oldValue = hgap;
+        hgap = aValue;
+        firePropertyChange("hgap", oldValue, hgap);
+    }
+
+    @Serial
+    public int getVgap() {
+        return vgap;
+    }
+
+    @Serial
+    public void setVgap(int aValue) {
+        int oldValue = vgap;
+        vgap = aValue;
+        firePropertyChange("vgap", oldValue, vgap);
     }
 
     @Override

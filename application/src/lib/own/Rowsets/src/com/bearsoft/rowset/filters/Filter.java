@@ -250,7 +250,7 @@ public class Filter extends HashOrderer implements HasPublished {
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.\n"
-            + " * @param values Values for keys in createFilter() call."
+            + " * @param values Values for keys in createFilter() call.\n"
             + " */", params = "values")
     public void apply(Object... values) throws RowsetException {
         filterRowset(values);

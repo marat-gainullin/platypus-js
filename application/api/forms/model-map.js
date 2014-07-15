@@ -5,7 +5,7 @@
     });
     
     /**
-     * A model component that shows a map.
+     * Experimental. A model component that shows a map.
      * Unsupported in HTML5 client.
      * @constructor ModelMap ModelMap
      */
@@ -465,23 +465,6 @@
              */
             P.ModelMap.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -498,6 +481,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -771,15 +771,43 @@
         };
 
         /**
+         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
+         * @param area the <code>Geometry</code> of the specified area (optional)
+         * @method fit
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.fit = function(area) {
+            var delegate = this.unwrap();
+            var value = delegate.fit(P.boxAsJava(area));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Adds new layer to the map.
+         * @param layerTitle the layer's title.
+         * @param rowset the layer's data.
+         * @param geometryClass the geometry class.
+         * @param styleAttributes the layer's style attributes.
+         * @return <code>MapLayer</code> instance.
+         * @method addLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes) {
+            var delegate = this.unwrap();
+            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Removes layer by the specified title.
          * @param layerTitle the layer's title.
          * @return <code>MapLayer</code> instance.
          * @method removeLayer
          * @memberOf ModelMap
          */
-        P.ModelMap.prototype.removeLayer = function(arg0) {
+        P.ModelMap.prototype.removeLayer = function(layerTitle) {
             var delegate = this.unwrap();
-            var value = delegate.removeLayer(P.boxAsJava(arg0));
+            var value = delegate.removeLayer(P.boxAsJava(layerTitle));
             return P.boxAsJs(value);
         };
 
@@ -869,34 +897,6 @@
         P.ModelMap.prototype.hitSelection = function(hitPoint) {
             var delegate = this.unwrap();
             var value = delegate.hitSelection(P.boxAsJava(hitPoint));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
-         * @param area the <code>Geometry</code> of the specified area (optional)
-         * @method fit
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.fit = function(area) {
-            var delegate = this.unwrap();
-            var value = delegate.fit(P.boxAsJava(area));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Adds new layer to the map.
-         * @param layerTitle the layer's title.
-         * @param rowset the layer's data.
-         * @param geometryClass the geometry class.
-         * @param styleAttributes the layer's style attributes.
-         * @return <code>MapLayer</code> instance.
-         * @method addLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes) {
-            var delegate = this.unwrap();
-            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
             return P.boxAsJs(value);
         };
 

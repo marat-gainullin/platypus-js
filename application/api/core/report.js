@@ -5,16 +5,19 @@
     });
     
     /**
-     *
+     * Creates report, generated with template.
+     * @param body The report binary body (array of byte).
+     * @param format Format of the report (xls, xlsx).
+     * @param name Name of the report. May be used as output file name.
      * @constructor Report Report
      */
-    P.Report = function (aReport, aFormat, aName) {
+    P.Report = function (body, format, name) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(aReport), P.boxAsJava(aFormat), P.boxAsJava(aName))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(aReport), P.boxAsJava(aFormat))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(aReport))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(body), P.boxAsJava(format), P.boxAsJava(name))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(body), P.boxAsJava(format))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(body))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

@@ -1,7 +1,7 @@
 (function() {
     var javaClass = Java.type("com.eas.client.forms.api.components.ToggleButton");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.ToggleButton(null, null, null, null, aDelegate);
+        return new P.ToggleButton(null, null, null, null, null, aDelegate);
     });
     
     /**
@@ -13,12 +13,13 @@
      * @param actionPerformed the function for the action performed handler (optional)
      * @constructor ToggleButton ToggleButton
      */
-    P.ToggleButton = function (text, icon, iconTextGap, actionPerformed) {
-        var maxArgs = 4;
+    P.ToggleButton = function (text, icon, selected, iconTextGap, actionPerformed) {
+        var maxArgs = 5;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 4 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(iconTextGap), P.boxAsJava(actionPerformed))
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(iconTextGap))
+            : arguments.length === 5 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(selected), P.boxAsJava(iconTextGap), P.boxAsJava(actionPerformed))
+            : arguments.length === 4 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(selected), P.boxAsJava(iconTextGap))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon), P.boxAsJava(selected))
             : arguments.length === 2 ? new javaClass(P.boxAsJava(text), P.boxAsJava(icon))
             : arguments.length === 1 ? new javaClass(P.boxAsJava(text))
             : new javaClass();
@@ -499,23 +500,6 @@
              */
             P.ToggleButton.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -532,6 +516,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
