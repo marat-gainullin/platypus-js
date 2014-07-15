@@ -904,17 +904,17 @@ public class WidgetsFactory {
 						ToolBar container = (ToolBar) parentComp;
 						container.add((Widget) aComponent);
 					} else if (parentComp instanceof HBoxPane) {
+						HBoxPane container = (HBoxPane) parentComp;
+						container.add((Widget) aComponent);
 						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
 							((HasPublished)aComponent).getPublished().<PublishedComponent>cast().setWidth(prefSize.getX());
-						HBoxPane container = (HBoxPane) parentComp;
-						container.add((Widget) aComponent);
 					} else if (parentComp instanceof VBoxPane) {
+						VBoxPane container = (VBoxPane) parentComp;
+						container.add((Widget) aComponent);
 						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
 							((HasPublished)aComponent).getPublished().<PublishedComponent>cast().setHeight(prefSize.getY());
-						VBoxPane container = (VBoxPane) parentComp;
-						container.add((Widget) aComponent);
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
 						container.add(aComponent);

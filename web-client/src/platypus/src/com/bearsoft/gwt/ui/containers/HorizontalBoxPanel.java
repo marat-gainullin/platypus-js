@@ -36,14 +36,16 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 	}
 
 	public void setHgap(int aValue) {
-		hgap = aValue;
-		for (int i = 1; i < getWidgetCount(); i++) {
-			Widget w = getWidget(i);
-			w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
+		if (aValue >= 0) {
+			hgap = aValue;
+			for (int i = 1; i < getWidgetCount(); i++) {
+				Widget w = getWidget(i);
+				w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
+			}
+			ajustWidth();
 		}
-		ajustWidth();
 	}
-
+	
 	@Override
 	public void add(Widget child) {
 		child.getElement().getStyle().clearTop();
@@ -99,48 +101,36 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 			if (parentClientHeight > 0) {
 				setHeight(parentClientHeight + "px");
 			}
-			double width = 0;
-			// int containerContentHeight =
-			// getElement().<XElement>cast().getContentHeight();
-			for (Widget child : getChildren()) {
-				/*
-				 * if (!(child instanceof FocusWidget)) {
-				 * child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-				 * int widgetContentHeight =
-				 * child.getElement().<XElement>cast().getContentHeight(); int
-				 * widgetOffsetHeight = child.getElement().getOffsetHeight();
-				 * int widgetDecorsHeight = widgetOffsetHeight -
-				 * widgetContentHeight;
-				 * child.getElement().getStyle().setHeight(containerContentHeight
-				 * - widgetDecorsHeight, Style.Unit.PX); }
-				 */
-				child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-				//
-				if (child instanceof RequiresResize) {
-					((RequiresResize) child).onResize();
-				}
-				int subPixelDelta;
-				double computedWidth = child.getElement().<XElement> cast().getSubPixelComputedWidth();
-				if (computedWidth != -1) {
-					double fraction = computedWidth - Math.floor(computedWidth);
-					if (fraction > 0 && fraction < 0.5) {
-						subPixelDelta = 1;
+			if (getWidgetCount() > 0) {
+				double width = 0;
+				for (Widget child : getChildren()) {
+					child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+					//
+					if (child instanceof RequiresResize) {
+						((RequiresResize) child).onResize();
+					}
+					int subPixelDelta;
+					double computedWidth = child.getElement().<XElement> cast().getSubPixelComputedWidth();
+					if (computedWidth != -1) {
+						double fraction = computedWidth - Math.floor(computedWidth);
+						if (fraction > 0 && fraction < 0.5) {
+							subPixelDelta = 1;
+						} else {
+							subPixelDelta = 0;
+						}
 					} else {
 						subPixelDelta = 0;
 					}
-				} else {
-					subPixelDelta = 0;
+					String ssChildWidth = child.getElement().getStyle().getWidth();
+					double sChildWidth = ssChildWidth.isEmpty() ? 0 : Double.valueOf(ssChildWidth.substring(0, ssChildWidth.length() - 2));
+					width += sChildWidth + subPixelDelta;
 				}
-				String ssChildWidth = child.getElement().getStyle().getWidth();
-				double sChildWidth = Double.valueOf(ssChildWidth.substring(0, ssChildWidth.length() - 2));
-				width += sChildWidth + subPixelDelta;
-				// width += child.getElement().getOffsetWidth() + subPixelDelta;
-			}
-			if (getWidgetCount() > 0) {
 				width += hgap * (getWidgetCount() - 1);
+				setAjustedWidth(width);
+				return true;
+			} else {
+				return false;
 			}
-			setAjustedWidth(width);
-			return true;
 		} else {
 			return false;
 		}
@@ -154,14 +144,14 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 		}
 	}
 
-	protected void setAjustedWidth(double aValue){
+	protected void setAjustedWidth(double aValue) {
 		setWidth(aValue + "px");
 		if (getParent() instanceof HorizontalBoxPanel) {
 			HorizontalBoxPanel parentBox = (HorizontalBoxPanel) getParent();
 			parentBox.ajustWidth();
 		}
 	}
-	
+
 	@Override
 	public void setDirection(Direction aValue) {
 		direction = aValue;

@@ -5,7 +5,6 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.CommonResources;
-import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -34,12 +33,14 @@ public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, Pr
 	}
 
 	public void setVgap(int aValue) {
-		vgap = aValue;
-		for (int i = 1; i < getWidgetCount(); i++) {
-			Widget w = getWidget(i);
-			w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
+		if (aValue >= 0) {
+			vgap = aValue;
+			for (int i = 1; i < getWidgetCount(); i++) {
+				Widget w = getWidget(i);
+				w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
+			}
+			ajustHeight();
 		}
-		ajustHeight();
 	}
 
 	@Override
@@ -91,26 +92,20 @@ public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, Pr
 
 	protected boolean ajustHeight() {
 		if (isAttached() && (getParent() instanceof ScrollPanel || getParent() instanceof VerticalBoxPanel)) {
-			int height = 0;
-			for (int i = 0; i < getWidgetCount(); i++) {
-				Widget w = getWidget(i);
-				String ssChildHeight = w.getElement().getStyle().getHeight();
-				double sChildHeight = Double.valueOf(ssChildHeight.substring(0, ssChildHeight.length() - 2));
-				height += sChildHeight;
-			}
 			if (getWidgetCount() > 0) {
+				int height = 0;
+				for (int i = 0; i < getWidgetCount(); i++) {
+					Widget w = getWidget(i);
+					String ssChildHeight = w.getElement().getStyle().getHeight();
+					double sChildHeight = ssChildHeight.isEmpty() ? 0 : Double.valueOf(ssChildHeight.substring(0, ssChildHeight.length() - 2));
+					height += sChildHeight;
+				}
 				height += (getWidgetCount() - 1) * vgap;
+				setAjustedHeight(height);
+				return true;
+			} else {
+				return false;
 			}
-			setAjustedHeight(height);
-			/*
-			 * int parentClientWidth =
-			 * getParent().getElement().getClientWidth();
-			 * setWidth(parentClientWidth + "px"); int clientWidth =
-			 * getElement().getClientWidth(); int scrollWidth =
-			 * getElement().getScrollWidth(); int widthDelta = scrollWidth -
-			 * clientWidth; setWidth((parentClientWidth - widthDelta) + "px");
-			 */
-			return true;
 		} else {
 			return false;
 		}
@@ -123,8 +118,8 @@ public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, Pr
 			ajustHeight();
 		}
 	}
-	
-	protected void setAjustedHeight(double aValue){
+
+	protected void setAjustedHeight(double aValue) {
 		setHeight(aValue + "px");
 		if (getParent() instanceof VerticalBoxPanel) {
 			VerticalBoxPanel parentBox = (VerticalBoxPanel) getParent();
