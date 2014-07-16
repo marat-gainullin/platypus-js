@@ -15,6 +15,7 @@
  */
 package com.bearsoft.gwt.ui.widgets.progress;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -293,6 +294,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         getElement().appendChild(knobElement);
 
         sinkEvents(Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     /**

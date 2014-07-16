@@ -5,6 +5,7 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.CommonResources;
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -20,12 +21,13 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, ProvidesResize {
 
-	protected int vgap = 0;
+	protected int vgap;
 
 	public VerticalBoxPanel() {
 		super();
 		setElement(Document.get().createDivElement());
 		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public int getVgap() {
@@ -83,7 +85,12 @@ public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, Pr
 
 	@Override
 	public void onResize() {
+		if(getParent() instanceof ScrollPanel){
+			getElement().getStyle().setWidth(100, Style.Unit.PCT);
+		}
 		for (Widget child : getChildren()) {
+			child.getElement().getStyle().clearRight();
+			child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 			if (child instanceof RequiresResize) {
 				((RequiresResize) child).onResize();
 			}

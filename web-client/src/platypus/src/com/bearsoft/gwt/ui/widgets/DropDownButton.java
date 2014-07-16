@@ -108,6 +108,7 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 				DropDownButton.this.fireEvent(event);
 			}
 		});
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	protected void showMenu() {

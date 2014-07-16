@@ -1,6 +1,7 @@
 package com.bearsoft.gwt.ui.widgets;
 
 import com.bearsoft.gwt.ui.HasImageResource;
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -82,6 +83,7 @@ public abstract class ImageParagraph extends FocusWidget implements HasText, Has
         content.getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
         container.insertFirst(content);
         setElement(container);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     @Override

@@ -42,6 +42,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 
 	public PlatypusProgressBar() {
 		super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override

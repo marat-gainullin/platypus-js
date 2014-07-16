@@ -21,7 +21,9 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -77,6 +79,11 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 
 	public ScrollPane() {
 		super();
+		Element sollableElem = getElement().getFirstChild().cast();
+		sollableElem.getStyle().setPosition(Position.ABSOLUTE);
+		sollableElem.getStyle().setProperty("boxSizing", "border-box");
+		sollableElem.getStyle().setWidth(100, Style.Unit.PCT);
+		sollableElem.getStyle().setHeight(100, Style.Unit.PCT);
 	}
 
 	@Override

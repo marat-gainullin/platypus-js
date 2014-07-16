@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.HasHideHandlers;
@@ -34,6 +35,7 @@ public class PlatypusHtmlEditor extends RichTextArea implements HasJsFacade, Has
 
 	public PlatypusHtmlEditor(){
 		super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 	
 	@Override

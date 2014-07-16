@@ -451,7 +451,11 @@ public class ControlsUtils {
 		for (int i = 0; i < nodes.getLength(); i++) {
 			nodes.getItem(i).setAttribute("placeholder", aValue);
 		}
-		if ("input".equalsIgnoreCase(aElement.getTagName())) {
+		NodeList<Element> nodes1 = aElement.getElementsByTagName("textarea");
+		for (int i = 0; i < nodes1.getLength(); i++) {
+			nodes1.getItem(i).setAttribute("placeholder", aValue);
+		}
+		if ("input".equalsIgnoreCase(aElement.getTagName()) || "textarea".equalsIgnoreCase(aElement.getTagName())) {
 			aElement.setAttribute("placeholder", aValue);
 		}
 	}
@@ -460,5 +464,5 @@ public class ControlsUtils {
         if (aWidget instanceof RequiresResize) {
             ((RequiresResize) aWidget).onResize();
         }
-	}
+	}	
 }

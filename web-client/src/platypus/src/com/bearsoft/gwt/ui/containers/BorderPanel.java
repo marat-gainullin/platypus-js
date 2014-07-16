@@ -7,6 +7,7 @@ package com.bearsoft.gwt.ui.containers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -24,6 +25,7 @@ public class BorderPanel extends DockLayoutPanel {
 
     public BorderPanel() {
         super(Style.Unit.PX);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     public int getHgap() {

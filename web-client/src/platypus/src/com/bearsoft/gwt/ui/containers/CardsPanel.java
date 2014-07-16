@@ -4,6 +4,7 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -33,6 +34,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
      */
     public CardsPanel() {
         setElement(Document.get().createDivElement());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     public int getHgap() {

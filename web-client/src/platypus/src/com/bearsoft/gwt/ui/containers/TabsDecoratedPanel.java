@@ -1,6 +1,7 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.HasImageResource;
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.bearsoft.gwt.ui.widgets.ImageLabel;
 import com.google.gwt.core.client.GWT;
@@ -231,6 +232,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		chevron.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		assert tabBarContainer != null;
 		tabBarContainer.getWidgetContainerElement(tabBar).appendChild(chevron.getElement());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public boolean isTabsOnTop() {

@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.bearsoft.gwt.ui.containers.window.events.MaximizeEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MaximizeHandler;
 import com.bearsoft.gwt.ui.containers.window.events.MinimizeEvent;
@@ -47,7 +46,7 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 	protected HTML label = new HTML();
 	protected ImageResource icon;
-	protected Panel anchor = new SimplePanel();
+	protected Button anchor = new Button();
 	protected Panel tools = new FlowPanel();
 	protected Button btnMinimize = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
 
@@ -85,9 +84,10 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 	public ToolsCaption(WindowUI aWindow) {
 		super();
+		anchor.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 		setStyleName("window-caption");
 		setWindow(aWindow);
-		anchor.getElement().addClassName(WINDOW_TOOL_CLASS_NAME);
+		anchor.getElement().addClassName(WINDOW_TOOL_CLASS_NAME);		
 		btnMinimize.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-minimize");
 		btnMaximize.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-maximize");
 		btnRestore.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-restore");
@@ -102,6 +102,10 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		label.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		anchor.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		anchor.getElement().getStyle().setWidth(0, Style.Unit.PX);
+		anchor.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		anchor.getElement().getStyle().setMargin(0, Style.Unit.PX);
+		anchor.getElement().getStyle().setProperty("boxSizing", "content-box");
+		
 		tools.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		tools.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		tools.getElement().getStyle().setRight(0, Style.Unit.PX);

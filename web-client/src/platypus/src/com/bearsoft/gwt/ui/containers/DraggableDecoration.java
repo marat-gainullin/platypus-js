@@ -70,6 +70,7 @@ public abstract class DraggableDecoration extends Widget {
                 DOM.releaseCapture(getElement());
                 event.preventDefault();
                 event.stopPropagation();
+                mouseReleased();
             }
         }, MouseUpEvent.getType());
         addDomHandler(new MouseMoveHandler() {
@@ -98,6 +99,8 @@ public abstract class DraggableDecoration extends Widget {
     }
 
     protected abstract void mousePressed();
+    
+    protected abstract void mouseReleased();
     
     protected abstract Widget getMovableTarget();
 

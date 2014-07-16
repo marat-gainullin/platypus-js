@@ -101,6 +101,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 				popup.showRelativeTo(right);
 			}
 		}, ClickEvent.getType());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override

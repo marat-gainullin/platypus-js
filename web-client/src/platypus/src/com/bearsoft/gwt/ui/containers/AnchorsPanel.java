@@ -6,6 +6,7 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.CommonResources;
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
@@ -19,6 +20,7 @@ public class AnchorsPanel extends LayoutPanel {
 
     public AnchorsPanel() {
         super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     @Override

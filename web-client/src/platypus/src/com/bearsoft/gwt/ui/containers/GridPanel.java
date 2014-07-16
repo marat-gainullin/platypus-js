@@ -8,6 +8,7 @@ package com.bearsoft.gwt.ui.containers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -31,12 +32,14 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		super();
 		setCellPadding(0);
 		setCellSpacing(0);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public GridPanel(int aRows, int aCols) {
 		super(aRows, aCols);
 		setCellPadding(0);
 		setCellSpacing(0);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public int getHgap() {

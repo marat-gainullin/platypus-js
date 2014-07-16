@@ -22,13 +22,14 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, ProvidesResize, HasDirection {
 
-	protected int hgap = 0;
+	protected int hgap;
 	protected Direction direction = Direction.LTR;
 
 	public HorizontalBoxPanel() {
 		super();
 		setElement(Document.get().createDivElement());
 		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public int getHgap() {
@@ -88,7 +89,11 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 
 	@Override
 	public void onResize() {
+		if(getParent() instanceof ScrollPanel){
+			getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		}
 		for (Widget child : getChildren()) {
+			child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 			if (child instanceof RequiresResize) {
 				((RequiresResize) child).onResize();
 			}
@@ -97,18 +102,9 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 
 	protected boolean ajustWidth() {
 		if (isAttached() && (getParent() instanceof ScrollPanel || getParent() instanceof HorizontalBoxPanel)) {
-			int parentClientHeight = getParent().getElement().getClientHeight();
-			if (parentClientHeight > 0) {
-				setHeight(parentClientHeight + "px");
-			}
 			if (getWidgetCount() > 0) {
 				double width = 0;
 				for (Widget child : getChildren()) {
-					child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-					//
-					if (child instanceof RequiresResize) {
-						((RequiresResize) child).onResize();
-					}
 					int subPixelDelta;
 					double computedWidth = child.getElement().<XElement> cast().getSubPixelComputedWidth();
 					if (computedWidth != -1) {

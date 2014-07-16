@@ -90,6 +90,7 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
                 increment();
             }
         }, ClickEvent.getType());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     protected abstract void increment();

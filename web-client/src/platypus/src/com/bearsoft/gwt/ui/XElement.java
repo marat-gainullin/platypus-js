@@ -8,11 +8,13 @@ package com.bearsoft.gwt.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.dom.client.Node;
 
 /**
@@ -121,10 +123,10 @@ public class XElement extends Element {
 		iterate(this, new Observer() {
 			@Override
 			public void observe(Element anElement) {
-				if ("*".equals(aClassName)){
+				if ("*".equals(aClassName)) {
 					result.add(anElement);
 				} else {
-					if(anElement.getClassName() != null && anElement.hasClassName(aClassName))
+					if (anElement.getClassName() != null && anElement.hasClassName(aClassName))
 						result.add(anElement);
 				}
 			}
@@ -175,15 +177,15 @@ public class XElement extends Element {
 		mask("p-mask-loading-error");
 	}
 
-	public final void loadMask(){
+	public final void loadMask() {
 		mask("p-mask-loading-start");
 	}
-	
-	public final void disabledMask(){
+
+	public final void disabledMask() {
 		mask("p-mask-disabled");
 	}
-	
-	public final void mask(String aClassName){
+
+	public final void mask(String aClassName) {
 		Element mask = Document.get().createDivElement();
 		mask.getStyle().setLeft(0, Style.Unit.PX);
 		mask.getStyle().setTop(0, Style.Unit.PX);
@@ -203,15 +205,16 @@ public class XElement extends Element {
 		mask.appendChild(maskInner);
 		appendChild(mask);
 	}
+
 	/**
 	 * Removes a mask over this element to disable user interaction.
 	 * 
 	 */
 	public final void unmask() {
 		NodeList<Node> nl = getChildNodes();
-		for(int i = nl.getLength() - 1; i >= 0; i--){
+		for (int i = nl.getLength() - 1; i >= 0; i--) {
 			Node n = nl.getItem(i);
-			if(Element.is(n) && Element.as(n).getClassName() != null && Element.as(n).hasClassName("p-mask")){
+			if (Element.is(n) && Element.as(n).getClassName() != null && Element.as(n).hasClassName("p-mask")) {
 				n.removeFromParent();
 			}
 		}
@@ -241,4 +244,20 @@ public class XElement extends Element {
 		}
 	}-*/;
 
+	public final native JavaScriptObject addResizingTransitionEnd(RequiresResize aTarget)/*-{
+		var handler = function(aEvent) {
+			if (aEvent.propertyName == "width" || aEvent.propertyName == "height" || aEvent.propertyName == "left" || aEvent.propertyName == "top" || aEvent.propertyName == "right" || aEvent.propertyName == "bottom") {
+				aEvent.stopPropagation();
+				aTarget.@com.google.gwt.user.client.ui.RequiresResize::onResize()();
+			}
+		};
+		this.addEventListener("transitionend", handler, false);
+		this.addEventListener("webkitTransitionEnd", handler, false);
+		return handler;
+	}-*/;
+
+	public final native void removeTransitionEndListener(JavaScriptObject aListener)/*-{
+		this.removeEventListener("transitionend", aListener, false);
+		this.removeEventListener("webkitTransitionEnd", aListener, false);
+	}-*/;
 }

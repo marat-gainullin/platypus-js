@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.dnd.XDataTransfer;
 import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
 import com.bearsoft.gwt.ui.widgets.grid.builders.NullHeaderOrFooterBuilder;
@@ -603,6 +604,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		gridColor = PublishedColor.create(211, 211, 211, 255);
 		regenerateDynamicTDStyles();
 		regenerateDynamicOddRowsStyles();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override

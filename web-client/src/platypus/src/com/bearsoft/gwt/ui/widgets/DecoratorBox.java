@@ -51,13 +51,15 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		selectButton.getElement().getStyle().setBottom(0, Style.Unit.PX);
-		// selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		selectButton.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.TOP);
+	    selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		selectButton.getElement().setInnerHTML("&nbsp;");
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		clearButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		clearButton.getElement().getStyle().setBottom(0, Style.Unit.PX);
-		// clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		clearButton.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.TOP);
+		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		clearButton.getElement().setInnerHTML("&nbsp;");
 		container.add(selectButton);
 		container.add(clearButton);
@@ -75,6 +77,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 				clearValue();
 			}
 		}, ClickEvent.getType());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
