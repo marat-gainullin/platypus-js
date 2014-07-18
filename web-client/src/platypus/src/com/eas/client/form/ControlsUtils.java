@@ -104,8 +104,9 @@ public class ControlsUtils {
 			return element.files;
 		}-*/;
 	}
-	
+
 	static HandlerRegistration focusHandler;
+
 	public static void jsSelectFile(final JavaScriptObject aCallback) {
 		if (aCallback != null) {
 			selectFile(new Callback<JavaScriptObject, String>() {
@@ -118,7 +119,7 @@ public class ControlsUtils {
 						Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
-				
+
 				@Override
 				public void onFailure(String reason) {
 				}
@@ -168,6 +169,7 @@ public class ControlsUtils {
 						Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
+
 				@Override
 				public void onFailure(String reason) {
 				}
@@ -175,23 +177,23 @@ public class ControlsUtils {
 			});
 		}
 	}
-	
+
 	public static void selectColor(final Callback<String, String> aCallback) {
 		final TextBox tmpField = new TextBox();
 		tmpField.getElement().setAttribute("type", "color");
 		tmpField.getElement().setAttribute("positon", "absolute");
 		tmpField.setWidth("0px");
 		tmpField.setHeight("0px");
-		RootPanel.get().add(tmpField,-100,-100);
-		
+		RootPanel.get().add(tmpField, -100, -100);
+
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
 			public void execute() {
 				tmpField.setFocus(true);
-				 tmpField.addFocusHandler(new FocusHandler() {
+				tmpField.addFocusHandler(new FocusHandler() {
 					@Override
 					public void onFocus(FocusEvent event) {
-						if(aCallback!=null){
+						if (aCallback != null) {
 							try {
 								aCallback.onSuccess(tmpField.getValue());
 							} catch (Exception ex) {
@@ -199,20 +201,20 @@ public class ControlsUtils {
 							}
 						}
 						tmpField.removeFromParent();
-//						focusHandler.removeHandler();
+						// focusHandler.removeHandler();
 					}
 				});
 				click(tmpField.getElement());
-				
+
 			}
 		});
-		
+
 	}
+
 	public native static void click(Element element)/*-{
 		element.click();
 	}-*/;
-	
-	
+
 	protected static RegExp rgbPattern = RegExp.compile("rgb *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *\\)");
 	protected static RegExp rgbaPattern = RegExp.compile("rgba *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]*\\.?[0-9]+) *\\)");
 
@@ -422,27 +424,29 @@ public class ControlsUtils {
 	}
 
 	public static void addWidgetTo(Widget aWidet, Element aElement) {
-		addWidgetTo(aWidet, new WrappingPanel(aElement));
+		addWidgetTo(aWidet, new StandaloneRootPanel(aElement));
 	}
 
 	public static void addWidgetTo(Widget aWidet, HasWidgets aContainer) {
-		aWidet.setVisible(true);
-		aContainer.clear();
-		if (aContainer instanceof BorderPane) {
-			((BorderPane) aContainer).add(aWidet);
-		} else if (aContainer instanceof MarginsPane) {
-			MarginConstraints mc = new MarginConstraints();
-			mc.setTop(new Margin(0, Style.Unit.PX));
-			mc.setBottom(new Margin(0, Style.Unit.PX));
-			mc.setLeft(new Margin(0, Style.Unit.PX));
-			mc.setRight(new Margin(0, Style.Unit.PX));
-			((MarginsPane) aContainer).add(aWidet, mc);
-		} else if (aContainer instanceof SplitPane) {
-			((SplitPane) aContainer).setFirstWidget(aWidet);
-		} else if (aContainer instanceof RootPanel) {
-			aContainer.add(aWidet);
-		} else {
-			aContainer.add(aWidet);
+		if (aContainer != null) {
+			aWidet.setVisible(true);
+			aContainer.clear();
+			if (aContainer instanceof BorderPane) {
+				((BorderPane) aContainer).add(aWidet);
+			} else if (aContainer instanceof MarginsPane) {
+				MarginConstraints mc = new MarginConstraints();
+				mc.setTop(new Margin(0, Style.Unit.PX));
+				mc.setBottom(new Margin(0, Style.Unit.PX));
+				mc.setLeft(new Margin(0, Style.Unit.PX));
+				mc.setRight(new Margin(0, Style.Unit.PX));
+				((MarginsPane) aContainer).add(aWidet, mc);
+			} else if (aContainer instanceof SplitPane) {
+				((SplitPane) aContainer).setFirstWidget(aWidet);
+			} else if (aContainer instanceof RootPanel) {
+				aContainer.add(aWidet);
+			} else {
+				aContainer.add(aWidet);
+			}
 		}
 	}
 
@@ -460,9 +464,9 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void callOnResize(Widget aWidget){
-        if (aWidget instanceof RequiresResize) {
-            ((RequiresResize) aWidget).onResize();
-        }
-	}	
+	public static void callOnResize(Widget aWidget) {
+		if (aWidget instanceof RequiresResize) {
+			((RequiresResize) aWidget).onResize();
+		}
+	}
 }

@@ -245,17 +245,15 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 
 	public static void ajustWidth(Widget aChild, int aValue) {
 		if (aChild != null) {
-			XElement xwe = aChild.getElement().<XElement> cast();
-			int hDelta = xwe.getOffsetWidth() - xwe.getContentWidth();
-			xwe.getStyle().setWidth(aValue - hDelta, Style.Unit.PX);
+			Element we = aChild.getElement();
+			we.getStyle().setWidth(aValue, Style.Unit.PX);
 		}
 	}
 
 	public static void ajustHeight(Widget aChild, int aValue) {
 		if (aChild != null) {
-			XElement xwe = aChild.getElement().<XElement> cast();
-			int hDelta = xwe.getOffsetHeight() - xwe.getContentHeight();
-			xwe.getStyle().setHeight(aValue - hDelta, Style.Unit.PX);
+			Element we = aChild.getElement();
+			we.getStyle().setHeight(aValue, Style.Unit.PX);
 		}
 	}
 

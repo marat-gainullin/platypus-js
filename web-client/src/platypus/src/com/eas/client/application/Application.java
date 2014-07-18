@@ -5,7 +5,6 @@
 package com.eas.client.application;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +21,6 @@ import com.bearsoft.rowset.Utils;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
 import com.eas.client.RunnableAdapter;
-import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
@@ -33,10 +30,8 @@ import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.logging.client.LogConfiguration;
-import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * 
@@ -67,8 +62,7 @@ public class Application {
 	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
 	protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
-	
-	
+
 	public static Query getAppQuery(String aQueryId) {
 		Query query = appQueries.get(aQueryId);
 		if (query != null) {
@@ -85,12 +79,12 @@ public class Application {
 
 	protected static class ExecuteApplicationCallback extends RunnableAdapter {
 
-		protected Collection<String> executedAppElements;
+		protected String startForm;
 		protected Set<Element> indicators;
 
-		public ExecuteApplicationCallback(Collection<String> appElementsToExecute, Set<Element> aIndicators) {
+		public ExecuteApplicationCallback(String aStartForm, Set<Element> aIndicators) {
 			super();
-			executedAppElements = appElementsToExecute;
+			startForm = aStartForm;
 			indicators = aIndicators;
 		}
 
@@ -100,36 +94,17 @@ public class Application {
 				el.<XElement> cast().unmask();
 			}
 			loaderHandlerRegistration.removeHandler();
-			for (String appElementName : executedAppElements) {
-				PlatypusWindow f = getStartForm(appElementName);
-				RootPanel target = RootPanel.get(appElementName);
-				if (target != null) {
-					if (f != null) {
-						ControlsUtils.addWidgetTo(f.getView(), target);
-					} else {
-						target.getElement().setInnerHTML(loader.getAppElementError(appElementName));
-					}
-				} else {
-					if (f != null) {
-						f.show(false, null, null);
-					} else {
-						JavaScriptObject module = getModule(appElementName);
-					}
-				}
-			}
 			onReady();
+			showForm(startForm);
 		}
+		
+		protected native void showForm(String aModuleId)/*-{
+			var m = $wnd.P.Modules.get(aModuleId);
+			if(m.show){
+				m.show();
+			}
+		}-*/;
 	}
-
-	protected native static JavaScriptObject getModule(String appElement)/*-{
-		return $wnd.P.Modules.get(appElement);
-	}-*/;
-
-	public native static PlatypusWindow getStartForm(String appElement)/*-{
-		var existingModule = $wnd.P.Modules.get(appElement);
-		return existingModule["x-Form"];
-	}-*/;
-
 	/**
 	 * This method is publicONLY because of tests!
 	 * 
@@ -176,6 +151,22 @@ public class Application {
 				}
 			});
 		}
+		
+	     // this === global;
+	    var global = $wnd;
+	    if(!global.P){
+	        var oldP = global.P;
+	        global.P = {};
+	        global.P.restore = function() {
+	            var ns = global.P;
+	            global.P = oldP;
+	            return ns;
+	        };
+	         //global.P = this; // global scope of api - for legacy applications
+	         //global.P.restore = function() {
+	         //throw 'Legacy API can not restore the global namespace.';
+	         //};
+	    }
 		
 		$wnd.P.selectFile = function(aCallback) {
 			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
@@ -262,9 +253,7 @@ public class Application {
 	        Child.superclass = Parent.prototype;
 	    }
 	    Object.defineProperty($wnd.P, "extend", {value: extend});
-	    
-	    extend($wnd.P.Entity, $wnd.Array);
-    
+	        
         var hexcase = 0;   
         var b64pad  = "";  
 
@@ -981,10 +970,6 @@ public class Application {
 	}
 
 	public static void run(AppClient client) throws Exception {
-		run(client, extractPlatypusModules());
-	}
-
-	public static void run(AppClient client, Map<String, Element> aMarkupStart) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
 			platypusApplicationLogger = Logger.getLogger("platypusApplication");
 			Formatter f = new PlatypusLogFormatter(true);
@@ -993,20 +978,20 @@ public class Application {
 				h.setFormatter(f);
 			}
 		}
+		publish(client);
 		JsModel.init();
 		JsWidgets.init();
 		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
 		JsEvents.init();
-		publish(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
 		for (Element el : indicators) {
 			el.<XElement> cast().loadMask();
 		}
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
-		startAppElements(client, aMarkupStart, indicators);
+		startAppElements(client, indicators);
 	}
 
 	private static Set<Element> extractPlatypusProgressIndicators() {
@@ -1027,67 +1012,35 @@ public class Application {
 		return platypusIndicators;
 	}
 
-	private static Map<String, Element> extractPlatypusModules() {
-		Map<String, Element> platypusModules = new HashMap<String, Element>();
-		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass = "platypus-module";
-		List<Element> divs = xBody.select(platypusModuleClass);
-		if (divs != null) {
-			for (int i = 0; i < divs.size(); i++) {
-				Element div = divs.get(i);
-				if (div.getId() != null && !div.getId().isEmpty()) {
-					platypusModules.put(div.getId(), div);
-				}
-			}
-		}
-		String url = Document.get().getURL();
-		if (url != null) {
-			int pos = url.indexOf('#');
-			if (pos > -1) {
-				String module = url.substring(pos + 1);
-				if (!module.isEmpty()) {
-					platypusModules.put(module, null);
-				}
-			}	
-		}
-		return platypusModules;
-	}
-
 	protected static native void onReady()/*-{
 		if ($wnd.P.ready)
 			$wnd.P.ready();
 	}-*/;
 
-	protected static void startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators)
-			throws Exception {
-		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
-			client.getStartElement(new CallbackAdapter<String, Void>() {
+	protected static void startAppElements(AppClient client, final Set<Element> aIndicators) throws Exception {
+		client.getStartElement(new CallbackAdapter<String, Void>() {
 
-				@Override
-				protected void doWork(String aResult) throws Exception {
-					if (aResult != null && !aResult.isEmpty()) {
-						Collection<String> results = new ArrayList<String>();
-						results.add(aResult);
-						loader.load(results, new ExecuteApplicationCallback(results, aIndicators));
-					} else {
-						for (Element el : aIndicators) {
-							el.<XElement> cast().unmask();
-						}
-						onReady();
-					}
-				}
-
-				@Override
-				public void onFailure(Void reason) {
+			@Override
+			protected void doWork(String aResult) throws Exception {
+				if (aResult != null && !aResult.isEmpty()) {
+					List<String> toLoad= new ArrayList<>();
+					toLoad.add(aResult);
+					loader.load(toLoad, new ExecuteApplicationCallback(aResult, aIndicators));
+				} else {
 					for (Element el : aIndicators) {
 						el.<XElement> cast().unmask();
 					}
+					onReady();
 				}
-			});
-		} else {
-			Set<String> modulesIds = aMarkupStart.keySet();
-			loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds, aIndicators));
-		}
+			}
+
+			@Override
+			public void onFailure(Void reason) {
+				for (Element el : aIndicators) {
+					el.<XElement> cast().unmask();
+				}
+			}
+		});
 	}
 
 	/**
@@ -1134,14 +1087,12 @@ public class Application {
 								if (aOnSuccess != null)
 									Utils.invokeJsFunction(aOnSuccess);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING,
-											"Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
 							} else {
 								if (aOnFailure != null)
 									Utils.invokeJsFunction(aOnFailure);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING,
-											"Require failed and callback is missing. Required modules are: " + aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 							}
 						} finally {
 							if (!requireProcesses.isEmpty()) {

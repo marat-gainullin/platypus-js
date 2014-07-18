@@ -18,6 +18,7 @@ public class JsModel {
 				value : Entity 
 			}); 
 			
+	    	$wnd.P.extend($wnd.P.Entity, $wnd.Array);
 		})();
 		
 	}-*/;

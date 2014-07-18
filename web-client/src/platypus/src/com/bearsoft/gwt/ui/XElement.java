@@ -32,20 +32,24 @@ public class XElement extends Element {
 		super();
 	}
 
-	public final native double getSubPixelComputedWidth() /*-{
-		if ($wnd.P.getComputedStyle)
-			return parseFloat($wnd.P.getComputedStyle(this).width);
-		else
-			return -1;
+	public final native Style getComputedStyle()/*-{
+		if (typeof this.currentStyle != 'undefined'){
+			return this.currentStyle; 
+	    } else {
+	    	return document.defaultView.getComputedStyle(this, null); 
+	    }			
 	}-*/;
-
-	public final native double getSubPixelComputedHeight() /*-{
-		if ($wnd.P.getComputedStyle)
-			return parseFloat($wnd.P.getComputedStyle(this).height);
-		else
-			return -1;
-	}-*/;
-
+	
+	public final double getComputedWidth(){
+		String swidth = getComputedStyle().getWidth();
+		return swidth.endsWith("px") ? Double.valueOf(swidth.substring(0, swidth.length() - 2)) : -1;
+	}
+	
+	public final double getComputedHeight(){
+		String sheight = getComputedStyle().getHeight();
+		return sheight.endsWith("px") ? Double.valueOf(sheight.substring(0, sheight.length() - 2)) : -1;
+	}
+	
 	public final int getContentWidth() {
 		Element ruler = DOM.createDiv();
 		ruler.getStyle().setMargin(0, Style.Unit.PX);
@@ -55,7 +59,8 @@ public class XElement extends Element {
 		ruler.getStyle().setWidth(100, Style.Unit.PCT);
 		insertFirst(ruler);
 		try {
-			double computedWidth = ruler.<XElement> cast().getSubPixelComputedWidth();
+			String swidth = ruler.<XElement> cast().getComputedStyle().getWidth();
+			double computedWidth = swidth.endsWith("px") ? Double.valueOf(swidth.substring(0, swidth.length() - 2)) : -1;
 			if (computedWidth != -1) {
 				return (int) Math.floor(computedWidth);
 			} else
@@ -74,7 +79,8 @@ public class XElement extends Element {
 		ruler.getStyle().setHeight(100, Style.Unit.PCT);
 		insertFirst(ruler);
 		try {
-			double computedHeight = ruler.<XElement> cast().getSubPixelComputedHeight();
+			String sheight = ruler.<XElement> cast().getComputedStyle().getHeight();
+			double computedHeight = sheight.endsWith("px") ? Double.valueOf(sheight.substring(0, sheight.length() - 2)) : -1;
 			if (computedHeight != -1) {
 				return (int) Math.floor(computedHeight);
 			} else

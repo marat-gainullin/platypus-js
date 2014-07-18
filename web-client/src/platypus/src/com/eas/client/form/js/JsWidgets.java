@@ -6,24 +6,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class JsWidgets {
 
 	public native static void init()/*-{
-		(function() {
-		    // this === global;
-		    var global = $wnd;
-		    if(!global.P){
-			    var oldP = global.P;
-			    global.P = {};
-			    global.P.restore = function() {
-			        var ns = global.P;
-			        global.P = oldP;
-			        return ns;
-			    };
-			     //global.P = this; // global scope of api - for legacy applications
-			     //global.P.restore = function() {
-			     //throw "Legacy api can't restore the global namespace.";
-			     //};
-		    }
-		})();
-				
 		$wnd.P.Orientation = {HORIZONTAL: 0, VERTICAL: 1};
 		$wnd.P.VerticalPosition = {CENTER: 0, TOP: 1, BOTTOM: 3};
 		$wnd.P.HorizontalPosition = {CENTER: 0, LEFT: 2, RIGHT: 4};
@@ -584,6 +566,15 @@ public class JsWidgets {
         Object.defineProperty(aPublished, "layout", {
         	value : function() {
     			@com.eas.client.form.ControlsUtils::callOnResize(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+        	}
+        });
+        Object.defineProperty(aPublished, "showOn", {
+        	value : function(aElement) {
+        		if(typeof aElement == "string")
+        			aElement = $doc.getElementById(aElement);
+        		if(aElement){
+   					@com.eas.client.form.ControlsUtils::addWidgetTo(Lcom/google/gwt/user/client/ui/Widget;Lcom/google/gwt/dom/client/Element;)(aPublished.unwrap(), aElement);
+        		}
         	}
         });
         comp.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);

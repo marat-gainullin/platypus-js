@@ -38,6 +38,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 
 	protected FlowPanel container = new FlowPanel();
+	protected SimplePanel fieldWrapper = new SimplePanel();
 	protected DateBox field;
 	protected SimplePanel right = new SimplePanel();
 	//
@@ -70,19 +71,32 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 				});
 			}
 		});
+		fieldWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		fieldWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		fieldWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
+		fieldWrapper.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		fieldWrapper.getElement().getStyle().setLeft(0, Style.Unit.PX);
+		fieldWrapper.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
+		fieldWrapper.getElement().getStyle().setMargin(0, Style.Unit.PX);
+		fieldWrapper.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		
 		field.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		// field.getElement().getStyle().setTop(0, Style.Unit.PX);
-		// field.getElement().getStyle().setBottom(0, Style.Unit.PX);
+		field.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		field.getElement().getStyle().setTop(0, Style.Unit.PX);
 		field.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		field.getElement().getStyle().setLeft(0, Style.Unit.PX);
+		field.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 		field.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 		field.getElement().getStyle().setMargin(0, Style.Unit.PX);
 		field.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		fieldWrapper.setWidget(field);
 
 		right.getElement().addClassName("date-time-select");
 		right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		right.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		right.getElement().getStyle().setTop(0, Style.Unit.PX);
-		right.getElement().getStyle().setBottom(0, Style.Unit.PX);
-		// right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		right.getElement().getStyle().setRight(0, Style.Unit.PX);
 		right.getElement().setInnerHTML("&nbsp;");
 
 		CommonResources.INSTANCE.commons().ensureInjected();
@@ -91,7 +105,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		popup.setStyleName("dateBoxPopup");
 		popup.setAutoHideEnabled(true);
 		popup.addAutoHidePartner(field.getElement());
-		container.add(field);
+		container.add(fieldWrapper);
 		container.add(right);
 		right.addDomHandler(new ClickHandler() {
 
@@ -101,7 +115,12 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 				popup.showRelativeTo(right);
 			}
 		}, ClickEvent.getType());
+		organizeFieldWrapperRight();
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
+	}
+	
+	protected void organizeFieldWrapperRight(){
+		fieldWrapper.getElement().getStyle().setRight(right.getElement().getOffsetWidth(), Style.Unit.PX);
 	}
 
 	@Override
@@ -157,23 +176,13 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	@Override
 	public void onResize() {
-		int containerContentWidth = container.getElement().<XElement> cast().getContentWidth();
-		int fieldWidth = field.getElement().getOffsetWidth();
-		int rightWidth = right.getElement().getOffsetWidth();
-		if (containerContentWidth - fieldWidth - rightWidth != 0) {
-			int targetFieldWidth = containerContentWidth - rightWidth;
-			field.getElement().getStyle().setWidth(targetFieldWidth, Style.Unit.PX);
-			int newContentWidth = field.getElement().getOffsetWidth();
-			int delta = newContentWidth - targetFieldWidth;
-			if (delta != 0) {
-				field.getElement().getStyle().setWidth(targetFieldWidth - delta, Style.Unit.PX);
-			}
-		}
+		organizeFieldWrapperRight();
 	}
 
 	@Override
 	protected void onAttach() {
 		super.onAttach();
+		organizeFieldWrapperRight();
 	}
 
 	@Override

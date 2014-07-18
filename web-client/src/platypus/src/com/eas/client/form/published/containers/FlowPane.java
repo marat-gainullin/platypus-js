@@ -23,6 +23,7 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -177,17 +178,15 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 
 	public static void ajustWidth(Widget aChild, int aValue) {
 		if (aChild != null) {
-			XElement xwe = aChild.getElement().<XElement> cast();
-			int hDelta = xwe.getOffsetWidth() - xwe.getContentWidth();
-			xwe.getStyle().setWidth(aValue - hDelta, Style.Unit.PX);
+			Element we = aChild.getElement();
+			we.getStyle().setWidth(aValue, Style.Unit.PX);
 		}
 	}
 
 	public static void ajustHeight(Widget aChild, int aValue) {
 		if (aChild != null) {
-			XElement xwe = aChild.getElement().<XElement> cast();
-			int hDelta = xwe.getOffsetHeight() - xwe.getContentHeight();
-			xwe.getStyle().setHeight(aValue - hDelta, Style.Unit.PX);
+			Element we = aChild.getElement();
+			we.getStyle().setHeight(aValue, Style.Unit.PX);
 		}
 	}
 

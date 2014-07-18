@@ -105,21 +105,9 @@ public class HorizontalBoxPanel extends ComplexPanel implements RequiresResize, 
 			if (getWidgetCount() > 0) {
 				double width = 0;
 				for (Widget child : getChildren()) {
-					int subPixelDelta;
-					double computedWidth = child.getElement().<XElement> cast().getSubPixelComputedWidth();
-					if (computedWidth != -1) {
-						double fraction = computedWidth - Math.floor(computedWidth);
-						if (fraction > 0 && fraction < 0.5) {
-							subPixelDelta = 1;
-						} else {
-							subPixelDelta = 0;
-						}
-					} else {
-						subPixelDelta = 0;
-					}
 					String ssChildWidth = child.getElement().getStyle().getWidth();
 					double sChildWidth = ssChildWidth.isEmpty() ? 0 : Double.valueOf(ssChildWidth.substring(0, ssChildWidth.length() - 2));
-					width += sChildWidth + subPixelDelta;
+					width += sChildWidth;
 				}
 				width += hgap * (getWidgetCount() - 1);
 				setAjustedWidth(width);
