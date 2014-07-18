@@ -59,6 +59,10 @@
     <copy todir="${destdir}">
       <fileset dir="war" includes="pwc/**"/>
     </copy>
+    <!-- pwc-external resources to pwc -->
+    <copy todir="${destdir}/pwc">
+      <fileset dir="../pwc-external" includes="./**"/>
+    </copy>
   </target>
 
 </project>
