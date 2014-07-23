@@ -97,7 +97,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public static final int FIELD_2_PARAMETER_TREE_KIND = 2;
 	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
 
-	public static final int SERVICE_COLUMN_WIDTH = 20;
+	public static final int SERVICE_COLUMN_WIDTH = 22;
 	
 	protected class RowMarkerRerenderer extends RowsetAdapter {
 
@@ -729,6 +729,55 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				return false;
 		};
 			
+		Object.defineProperty(aPublished, "rowsHeight", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getRowsHeight()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setRowsHeight(I)(aValue * 1);
+			}
+		});
+		Object.defineProperty(aPublished, "showHorizontalLines", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::isShowHorizontalLines()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setShowHorizontalLines(Z)(!!aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "showVerticalLines", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::isShowVerticalLines()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setShowVerticalLines(Z)(!!aValue);
+			}
+		});		
+		Object.defineProperty(aPublished, "showOddRowsInOtherColor", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::isShowOddRowsInOtherColor()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setShowOddRowsInOtherColor(Z)(!!aValue);
+			}
+		});		
+		Object.defineProperty(aPublished, "gridColor", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getGridColor()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setGridColor(Lcom/eas/client/form/published/PublishedColor;)(aValue);
+			}
+		});		
+		Object.defineProperty(aPublished, "oddRowsColor", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getOddRowsColor()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setOddRowsColor(Lcom/eas/client/form/published/PublishedColor;)(aValue);
+			}
+		});
+		
 		Object.defineProperty(aPublished, "onRender", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getOnRender()();

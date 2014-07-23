@@ -33,7 +33,7 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 
 	public interface Template extends SafeHtmlTemplates {
 
-		@SafeHtmlTemplates.Template("<div class='{0}' style='{1}'><div>{2}</div></div>")
+		@SafeHtmlTemplates.Template("<div class='{0}' style='{1}'><div style='height:100%'>{2}</div></div>")
 		SafeHtml outerDiv(String aClasses, SafeStyles aStyle, SafeHtml cellContents);
 	}
 
@@ -75,6 +75,7 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 				.trustedNameAndValue("background-position", indent * deepness, Style.Unit.PX)
 				.paddingLeft(outerDivPadding, Style.Unit.PX)
 				.position(Style.Position.RELATIVE)
+				.height(100, Style.Unit.PCT)
 				.toSafeStyles();
 			sb.append(template.outerDiv(outerDivClasses(context), styles, cellBuilder.toSafeHtml()));
 		} else {

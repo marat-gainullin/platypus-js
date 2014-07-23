@@ -21,6 +21,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -33,7 +34,7 @@ import java.util.Date;
  * 
  * @author mg
  */
-public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>> {
+public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>>, Focusable {
 
 	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 
@@ -51,6 +52,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	public DateTimeBox(DatePicker picker, Date date, DateBox.Format format) {
 		initWidget(container);
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().addClassName("date-time-field");
 		field = new DecoratedDateBox(picker, date, format);
 		field.setFireNullValues(true);
@@ -79,7 +81,9 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		fieldWrapper.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 		fieldWrapper.getElement().getStyle().setMargin(0, Style.Unit.PX);
 		fieldWrapper.getElement().getStyle().setPadding(0, Style.Unit.PX);
-		
+		CommonResources.INSTANCE.commons().ensureInjected();
+		fieldWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+
 		field.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		field.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		field.getElement().getStyle().setTop(0, Style.Unit.PX);
@@ -97,7 +101,6 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		right.getElement().getStyle().setTop(0, Style.Unit.PX);
 		right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		right.getElement().getStyle().setRight(0, Style.Unit.PX);
-		right.getElement().setInnerHTML("&nbsp;");
 
 		CommonResources.INSTANCE.commons().ensureInjected();
 		right.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
@@ -116,11 +119,31 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 			}
 		}, ClickEvent.getType());
 		organizeFieldWrapperRight();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
-	
-	protected void organizeFieldWrapperRight(){
+
+	protected void organizeFieldWrapperRight() {
 		fieldWrapper.getElement().getStyle().setRight(right.getElement().getOffsetWidth(), Style.Unit.PX);
+	}
+
+	@Override
+	public void setFocus(boolean focused) {
+		field.setFocus(focused);
+	}
+
+	@Override
+	public void setAccessKey(char key) {
+		field.setAccessKey(key);
+	}
+
+	@Override
+	public int getTabIndex() {
+		return field.getTabIndex();
+	}
+
+	@Override
+	public void setTabIndex(int index) {
+		field.setTabIndex(index);
 	}
 
 	@Override

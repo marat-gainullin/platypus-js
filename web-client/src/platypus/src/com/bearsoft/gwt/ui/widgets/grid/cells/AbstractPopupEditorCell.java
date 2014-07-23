@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -95,6 +96,9 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
 		final PopupPanel pp = new PopupPanel(true);
 		pp.getElement().setClassName("grid-cell-editor-popup");
+		pp.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+		pp.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+		pp.getElement().getStyle().setFontSize(0, Style.Unit.PT);
 		pp.setAnimationEnabled(true);
 		valueHost.setValue(value);
 		pp.setWidget(editor);
@@ -104,7 +108,7 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 		}
 		pp.setWidth(cellElement.getClientWidth() + "px");
 		pp.setHeight(cellElement.getClientHeight() + "px");
-		pp.setPopupPosition(cellElement.getAbsoluteLeft(), cellElement.getAbsoluteTop());
+		pp.setPopupPosition(cellElement.getAbsoluteLeft() - Grid.LEFT_RIGHT_CELL_PADDING, cellElement.getAbsoluteTop());
 		final HandlerRegistration editorKeyDown = editor.addDomHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {

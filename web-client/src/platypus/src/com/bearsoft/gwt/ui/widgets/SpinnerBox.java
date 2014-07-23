@@ -18,6 +18,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -28,7 +29,7 @@ import com.google.gwt.user.client.ui.ValueBox;
  * @author mg
  * @param <T>
  */
-public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>> {
+public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable {
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel left = new SimplePanel();
@@ -39,6 +40,7 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 	public SpinnerBox(ValueBox<T> aField) {
 		initWidget(container);
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().addClassName("spin-field");
 		field = aField;
 		field.addValueChangeHandler(new ValueChangeHandler<T>() {
@@ -54,7 +56,6 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		left.getElement().getStyle().setTop(0, Style.Unit.PX);
 		left.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		left.getElement().getStyle().setLeft(0, Style.Unit.PX);
-		left.getElement().setInnerHTML("&nbsp;");
 
 		fieldWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		fieldWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
@@ -63,6 +64,8 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		fieldWrapper.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 		fieldWrapper.getElement().getStyle().setMargin(0, Style.Unit.PX);
 		fieldWrapper.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		CommonResources.INSTANCE.commons().ensureInjected();
+		fieldWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 
 		field.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		field.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
@@ -81,7 +84,6 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		right.getElement().getStyle().setTop(0, Style.Unit.PX);
 		right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		right.getElement().getStyle().setRight(0, Style.Unit.PX);
-		right.getElement().setInnerHTML("&nbsp;");
 
 		CommonResources.INSTANCE.commons().ensureInjected();
 		left.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
@@ -116,6 +118,26 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 	protected abstract void increment();
 
 	protected abstract void decrement();
+
+	@Override
+	public void setFocus(boolean focused) {
+		field.setFocus(focused);
+	}
+
+	@Override
+	public void setAccessKey(char key) {
+		field.setAccessKey(key);
+	}
+
+	@Override
+	public int getTabIndex() {
+		return field.getTabIndex();
+	}
+
+	@Override
+	public void setTabIndex(int index) {
+		field.setTabIndex(index);
+	}
 
 	@Override
 	public T getValue() {

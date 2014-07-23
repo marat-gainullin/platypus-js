@@ -87,7 +87,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		super.setWidget(verticalPanel);
 		setCaptionWidget(new Caption(""));
 		setUndecorated(false);
-		getMovableTarget().getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getMovableTarget().getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -209,13 +209,13 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	@Override
 	public void setWidget(Widget w) {
 		if (verticalPanelContent != null) {
-			verticalPanelContent.getElement().<XElement>cast().removeTransitionEndListener(transitionOnResizer);
+			verticalPanelContent.getElement().<XElement> cast().removeTransitionEndListener(transitionOnResizer);
 			verticalPanelContent.getElement().removeClassName("window-content");
 			verticalPanelContent.removeFromParent();
 		}
 		verticalPanelContent = w;
 		if (verticalPanelContent != null) {
-			transitionOnResizer = verticalPanelContent.getElement().<XElement>cast().addResizingTransitionEnd(this);
+			transitionOnResizer = verticalPanelContent.getElement().<XElement> cast().addResizingTransitionEnd(this);
 			verticalPanel.add(verticalPanelContent);
 			verticalPanelContent.getElement().addClassName("window-content");
 		}
@@ -326,6 +326,18 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			onResize();
 			MaximizeEvent.<WindowUI> fire(this, this);
 		}
+	}
+
+	@Override
+	public void setPosition(double aLeft, double aTop) {
+		super.setPosition(aLeft, aTop);
+		MoveEvent.fire(this, this, aLeft, aTop);
+	}
+
+	@Override
+	public void setSize(double aWidth, double aHeight) {
+		super.setSize(aWidth, aHeight);
+		ResizeEvent.<WindowPanel>fire(this, (int)aWidth, (int)aHeight);
 	}
 
 	private void snapshotMetrics() throws NumberFormatException {
@@ -528,10 +540,10 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 
 	@Override
 	public void setAnimationEnabled(boolean aValue) {
-		if(animationEnabled != aValue){
+		if (animationEnabled != aValue) {
 			animationEnabled = aValue;
 			verticalPanelContent.getElement().getStyle().clearProperty("transition");
-			if(!animationEnabled){
+			if (!animationEnabled) {
 				verticalPanelContent.getElement().getStyle().setProperty("transition", "none");
 			}
 		}
@@ -560,7 +572,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			getMovableTarget().getElement().getStyle().clearProperty("transition");
 		}
 	}
-	
+
 	protected void updateCaptionCursor() {
 		if (captionWidget != null) {
 			if (movable) {

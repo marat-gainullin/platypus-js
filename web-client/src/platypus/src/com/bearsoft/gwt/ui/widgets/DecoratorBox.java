@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.widgets;
 
+import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -46,6 +47,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		super();
 		initWidget(container);
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().addClassName("decorator");
 		contentWrapper.getElement().addClassName("decorator-content");
 		contentWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -53,18 +55,18 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		contentWrapper.getElement().getStyle().setLeft(0, Style.Unit.PX);
 		contentWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
 		contentWrapper.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		contentWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+		
 		selectButton.getElement().addClassName("decorator-select");
 		selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		selectButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 	    selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		selectButton.getElement().setInnerHTML("&nbsp;");
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		clearButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		clearButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		clearButton.getElement().setInnerHTML("&nbsp;");
 		container.add(contentWrapper);
 		container.add(selectButton);
 		container.add(clearButton);
@@ -153,13 +155,14 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 					}
 				});
 				if (decorated instanceof Widget) {
+					CommonResources.INSTANCE.commons().ensureInjected();
+					((Widget) decorated).getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 					Style style = ((Widget) decorated).getElement().getStyle();
 					style.setBorderWidth(0, Style.Unit.PX);
 					style.setPadding(0, Style.Unit.PX);
 					style.setMargin(0, Style.Unit.PX);
 					style.setPosition(Style.Position.ABSOLUTE);
 					style.setDisplay(Style.Display.INLINE_BLOCK);
-					style.setProperty("boxSizing", "border-box");
 					style.setLeft(0, Style.Unit.PX);
 					style.setTop(0, Style.Unit.PX);
 					style.setHeight(100, Style.Unit.PCT);

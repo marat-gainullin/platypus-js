@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
+import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;

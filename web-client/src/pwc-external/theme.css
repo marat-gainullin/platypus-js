@@ -327,6 +327,10 @@
     background-position-x: 0px;
 }
 
+.grid-cell-editor-popup{
+    background-color: white;
+}
+
 .grid-cell{
     overflow: hidden;
 }

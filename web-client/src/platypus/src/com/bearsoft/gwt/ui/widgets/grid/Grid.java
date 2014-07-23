@@ -78,6 +78,8 @@ import com.google.gwt.view.client.SelectionModel;
  */
 public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize, HasSortList {
 
+	public static final int LEFT_RIGHT_CELL_PADDING = 2;
+	
 	protected interface DynamicCellStyles extends SafeHtmlTemplates {
 
 		public static DynamicCellStyles INSTANCE = GWT.create(DynamicCellStyles.class);
@@ -86,14 +88,14 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		        + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};" + "}")
 		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
 
-		@Template(".{0}{" + "position: relative;" + "padding-left: 2px; padding-right: 2px;" + "height: {1}px;" /*+ "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" */+ "}")
+		@Template(".{0}{" + "position: relative;" + "padding-left: "+LEFT_RIGHT_CELL_PADDING+"px; padding-right: "+LEFT_RIGHT_CELL_PADDING+"px;" + "height: {1}px;" /*+ "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" */+ "}")
 		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
 	}
 
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
 	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevron";
-	private static final int MINIMUM_COLUMN_WIDTH = 20;
+	private static final int MINIMUM_COLUMN_WIDTH = 22;
 	//
 	protected FlexTable hive;
 	protected SimplePanel headerLeftContainer;
@@ -524,6 +526,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 				fillColumns(columnsMenu, headerLeft);
 				fillColumns(columnsMenu, headerRight);
 				pp.setWidget(columnsMenu);
+				pp.setPopupPosition(columnsChevron.getAbsoluteLeft(), columnsChevron.getAbsoluteTop());
 				pp.showRelativeTo(columnsChevron);
 			}
 

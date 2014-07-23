@@ -8,10 +8,10 @@ package com.bearsoft.gwt.ui.containers.window.events;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
- * Represents a close event.
+ * Represents a move event.
  * 
  * @param <T>
- *            the type being activated
+ *            the type being moved
  * @author mg
  */
 public class MoveEvent<T> extends GwtEvent<MoveHandler<T>> {
@@ -22,7 +22,7 @@ public class MoveEvent<T> extends GwtEvent<MoveHandler<T>> {
 	private static Type<MoveHandler<?>> TYPE;
 
 	/**
-	 * Fires a close event on all registered handlers in the handler manager. If
+	 * Fires a move event on all registered handlers in the handler manager. If
 	 * no such handlers exist, this method will do nothing.
 	 * 
 	 * @param <T>
@@ -32,9 +32,9 @@ public class MoveEvent<T> extends GwtEvent<MoveHandler<T>> {
 	 * @param target
 	 *            the target
 	 */
-	public static <T> void fire(HasMoveHandlers<T> source, T target) {
+	public static <T> void fire(HasMoveHandlers<T> source, T aTarget, double aX, double aY) {
 		if (TYPE != null) {
-			MoveEvent<T> event = new MoveEvent<>(target);
+			MoveEvent<T> event = new MoveEvent<>(aTarget, aX, aY);
 			source.fireEvent(event);
 		}
 	}
@@ -49,17 +49,20 @@ public class MoveEvent<T> extends GwtEvent<MoveHandler<T>> {
 	}
 
 	private final T target;
-	private int x;
-	private int y;
+	private double x;
+	private double y;
 
 	/**
 	 * Creates a new move event.
 	 * 
-	 * @param target
+	 * @param aTarget
 	 *            the target
 	 */
-	protected MoveEvent(T target) {
-		this.target = target;
+	protected MoveEvent(T aTarget, double aX, double aY) {
+		super();
+		target = aTarget;
+		x = aX;
+		y = aY;
 	}
 
 	// The instance knows its of type T, but the TYPE
@@ -79,11 +82,11 @@ public class MoveEvent<T> extends GwtEvent<MoveHandler<T>> {
 		return target;
 	}
 
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 
