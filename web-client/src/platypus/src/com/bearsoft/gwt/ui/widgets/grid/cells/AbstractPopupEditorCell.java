@@ -5,8 +5,6 @@
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.google.gwt.cell.client.AbstractEditableCell;
@@ -21,6 +19,8 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasValue;
@@ -93,75 +93,100 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 
 	public void startEditing(final Cell.Context context, final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
 		Widget oldParent = editor.getParent();
-		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
-		final PopupPanel pp = new PopupPanel(true);
-		pp.getElement().setClassName("grid-cell-editor-popup");
-		pp.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
-		pp.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
-		pp.getElement().getStyle().setFontSize(0, Style.Unit.PT);
-		pp.setAnimationEnabled(true);
-		valueHost.setValue(value);
-		pp.setWidget(editor);
-		final Element cellElement = parent;
-		if (oldParent instanceof PopupPanel) {
-			((PopupPanel) oldParent).hide(true);
-		}
-		pp.setWidth(cellElement.getClientWidth() + "px");
-		pp.setHeight(cellElement.getClientHeight() + "px");
-		pp.setPopupPosition(cellElement.getAbsoluteLeft() - Grid.LEFT_RIGHT_CELL_PADDING, cellElement.getAbsoluteTop());
-		final HandlerRegistration editorKeyDown = editor.addDomHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				boolean enter = event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER;
-				boolean escape = event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE;
-				if (enter || escape) {
-					if (escape) {
+		if (oldParent == null) {
+			final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
+			final PopupPanel pp = new PopupPanel(true) {
+
+				protected void autoHide() {
+					super.hide(true);
+				}
+
+				@Override
+				public void hide(boolean autoClosed) {
+					if (autoClosed) {
+						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+							@Override
+							public void execute() {
+								autoHide();
+							}
+						});
+					} else {
+						super.hide(autoClosed);
+					}
+				}
+
+			};
+			pp.getElement().setClassName("grid-cell-editor-popup");
+			pp.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+			pp.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+			pp.getElement().getStyle().setFontSize(0, Style.Unit.PT);
+			//pp.setAnimationEnabled(true);
+			valueHost.setValue(value);
+			pp.setWidget(editor);
+			final HandlerRegistration valueChangeReg = valueHost.addValueChangeHandler(new ValueChangeHandler<C>() {
+
+				@Override
+				public void onValueChange(ValueChangeEvent<C> event) {
+					if (updaterRef.valueUpdater != null) {
+						updaterRef.valueUpdater.update(valueHost.getValue());
+					}
+				}
+
+			});
+			final Element cellElement = parent;
+			pp.setWidth(cellElement.getClientWidth() + "px");
+			pp.setHeight(cellElement.getClientHeight() + "px");
+			pp.setPopupPosition(cellElement.getAbsoluteLeft() - Grid.LEFT_RIGHT_CELL_PADDING, cellElement.getAbsoluteTop());
+			final HandlerRegistration editorKeyDownReg = editor.addDomHandler(new KeyDownHandler() {
+				@Override
+				public void onKeyDown(KeyDownEvent event) {
+					if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
 						updaterRef.valueUpdater = null;
-					}
-					pp.hide();
-				}
-			}
-		}, KeyDownEvent.getType());
-		pp.addCloseHandler(new CloseHandler<PopupPanel>() {
-			@Override
-			public void onClose(CloseEvent<PopupPanel> event) {
-				if (editor.getParent() == pp) {
-					try {
-						if (updaterRef.valueUpdater != null) {
-							updaterRef.valueUpdater.update(valueHost.getValue());
-						}
-					} catch (Exception ex) {
-						Logger.getLogger(AbstractPopupEditorCell.class.getName()).log(Level.SEVERE, null, ex);
-					} finally {
-						editorKeyDown.removeHandler();
-						pp.setWidget(null);
-						editor.removeFromParent();
-						setViewData(context.getKey(), null);
-						if (updaterRef.valueUpdater == null) {
-							setValue(context, parent, value);
-						}
-						if (onEditorClose != null)
-							onEditorClose.run();
+						valueHost.setValue(null);
+						pp.hide();
+					} else if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+							@Override
+							public void execute() {
+								updaterRef.valueUpdater = null;
+								valueHost.setValue(null);
+								pp.hide();
+							}
+						});
 					}
 				}
-			}
-		});
-		pp.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-			@Override
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				if (editor instanceof RequiresResize)
-					((RequiresResize) editor).onResize();
-				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-					@Override
-					public void execute() {
-						if (editor.isAttached() && focusHost != null) {
-							focusHost.setFocus(true);
-						}
+			}, KeyDownEvent.getType());
+			pp.addCloseHandler(new CloseHandler<PopupPanel>() {
+				@Override
+				public void onClose(CloseEvent<PopupPanel> event) {
+					valueChangeReg.removeHandler();
+					editorKeyDownReg.removeHandler();
+					pp.setWidget(null);
+					editor.removeFromParent();
+					setViewData(context.getKey(), null);
+					if (onEditorClose != null)
+						onEditorClose.run();
+				}
+			});
+			pp.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+				@Override
+				public void setPosition(int offsetWidth, int offsetHeight) {
+					if (editor instanceof RequiresResize) {
+						((RequiresResize) editor).onResize();
 					}
+					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-				});
-			}
-		});
+						@Override
+						public void execute() {
+							if (editor.isAttached() && focusHost != null) {
+								focusHost.setFocus(true);
+							}
+						}
+
+					});
+				}
+			});
+		}
 	}
 }
