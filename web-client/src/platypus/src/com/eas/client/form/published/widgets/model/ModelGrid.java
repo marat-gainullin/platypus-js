@@ -38,6 +38,7 @@ import com.eas.client.form.grid.columns.CheckServiceColumn;
 import com.eas.client.form.grid.columns.ModelGridColumn;
 import com.eas.client.form.grid.columns.ModelGridColumnFacade;
 import com.eas.client.form.grid.columns.RadioServiceColumn;
+import com.eas.client.form.grid.columns.UsualServiceColumn;
 import com.eas.client.form.grid.rows.RowChildrenFetcher;
 import com.eas.client.form.grid.rows.RowsetDataProvider;
 import com.eas.client.form.grid.rows.RowsetTree;
@@ -73,7 +74,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
@@ -103,7 +103,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 
 		@Override
 		public void rowsetScrolled(RowsetScrollEvent event) {
-			if (getDataColumnCount() > 0 && getDataColumn(0) instanceof IdentityColumn) {
+			if (getDataColumnCount() > 0 && getDataColumn(0) instanceof UsualServiceColumn) {
 				if (frozenColumns > 0) {
 					frozenLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
 					scrollableLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
@@ -377,7 +377,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource != null ? rowsSource.getRowset() : null));
+				UsualServiceColumn col = new UsualServiceColumn(new RowMarkerCell(rowsSource != null ? rowsSource.getRowset() : null));
 				super.addColumn(true, 0, col, SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else {
@@ -517,7 +517,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		if (aColumn instanceof ModelGridColumnFacade) {
 			ModelGridColumn<?> colFacade = (ModelGridColumn<?>) aColumn;
 			colFacade.updateVisible(true);
-		}else if(aColumn instanceof IdentityColumn<?> || aColumn instanceof CheckServiceColumn  || aColumn instanceof RadioServiceColumn){
+		}else if(aColumn instanceof UsualServiceColumn || aColumn instanceof CheckServiceColumn  || aColumn instanceof RadioServiceColumn){
 			super.setColumnWidth(aColumn, SERVICE_COLUMN_WIDTH, Style.Unit.PX);
 		}
 	}
