@@ -63,7 +63,7 @@
     </copy>
     <!-- pwc-external resources to pwc -->
     <copy todir="${destdir}/pwc">
-      <fileset dir="../pwc-external" includes="./**"/>
+		<fileset dir="../pwc-external" includes="**"/>
     </copy>
   </target>
 

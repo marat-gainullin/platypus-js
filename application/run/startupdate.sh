@@ -2,8 +2,8 @@
 JRE_PATH=java
 PLATYPUS_HOME=$(cd `dirname $0` && pwd)/../
 UPDATER_PATH=$PLATYPUS_HOME/lib/own/Updater.jar
-URL_CONFIG=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/update.xml
-URL_UPDATE=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/application.zip
+URL_CONFIG=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/update.xml
+URL_UPDATE=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/application.zip
 CONFIG_NAME=$PLATYPUS_HOME/run/update.xml
 TMP_UPDATE_NAME=$PLATYPUS_HOME/app.zip
 RUN_COMMAND=$PLATYPUS_HOME/run/Platypus.sh
