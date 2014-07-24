@@ -120,7 +120,7 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 			pp.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
 			pp.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
 			pp.getElement().getStyle().setFontSize(0, Style.Unit.PT);
-			//pp.setAnimationEnabled(true);
+			pp.setAnimationEnabled(true);
 			valueHost.setValue(value);
 			pp.setWidget(editor);
 			final HandlerRegistration valueChangeReg = valueHost.addValueChangeHandler(new ValueChangeHandler<C>() {

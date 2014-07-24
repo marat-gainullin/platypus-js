@@ -5,9 +5,6 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -68,7 +65,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	protected EditorCloser onEditorClose;
 
 	public RenderedPopupEditorCell(Widget aEditor) {
-		super(aEditor, /*BrowserEvents.CLICK, */BrowserEvents.DBLCLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
+		super(aEditor, BrowserEvents.CLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
 	}
 
 	public EditorCloser getOnEditorClose() {
@@ -148,9 +145,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 				String type = event.getType();
 				int keyCode = event.getKeyCode();
 				boolean editToggleKeys = BrowserEvents.KEYDOWN.equals(type) && (keyCode == KeyCodes.KEY_ENTER || keyCode == KeyCodes.KEY_F2);
-				if (BrowserEvents.DBLCLICK.equals(type) || editToggleKeys) {
-					if(BrowserEvents.DBLCLICK.equals(type))
-						Logger.getLogger(this.getClass().getName()).log(Level.INFO, "DBLCLICK");
+				if (BrowserEvents.CLICK.equals(type) || editToggleKeys) {
 					// Switch to edit mode.
 					ViewData<T> viewData = new ViewData<>(Document.get().createUniqueId(), valueUpdater);
 					setViewData(context.getKey(), viewData);
