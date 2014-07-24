@@ -5,6 +5,9 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -65,7 +68,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	protected EditorCloser onEditorClose;
 
 	public RenderedPopupEditorCell(Widget aEditor) {
-		super(aEditor, BrowserEvents.CLICK, /* BrowserEvents.DBLCLICK, */BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
+		super(aEditor, /*BrowserEvents.CLICK, */BrowserEvents.DBLCLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
 	}
 
 	public EditorCloser getOnEditorClose() {
@@ -103,23 +106,27 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 
 				@Override
 				public void execute() {
-					final Element parent = Document.get().getElementById(viewData.id);
-					parent.blur();
-					Element table = parent;
-					while (table != null && !"table".equalsIgnoreCase(table.getTagName())) {
-						table = table.getParentElement();
-					}
-					final Element table1 = table;
-					if (parent != null && parent.getOwnerDocument() == Document.get()) {
-						startEditing(context, parent, value, viewData.updater, new Runnable() {
-
-							public void run() {
-								if (onEditorClose != null && table1 != null) {
-									onEditorClose.closed(table1);
-								}
+					if (isEditing(context, null, value)) {
+						Element parent = Document.get().getElementById(viewData.id);
+						if (parent != null) {
+							parent.blur();
+							Element table = parent;
+							while (table != null && !"table".equalsIgnoreCase(table.getTagName())) {
+								table = table.getParentElement();
 							}
+							final Element table1 = table;
+							if (parent.getOwnerDocument() == Document.get()) {
+								startEditing(context, parent, value, viewData.updater, new Runnable() {
 
-						});
+									public void run() {
+										if (onEditorClose != null && table1 != null) {
+											onEditorClose.closed(table1);
+										}
+									}
+
+								});
+							}
+						}
 					}
 				}
 
@@ -128,7 +135,8 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		if (renderer == null || !renderer.render(context, value, sb)) {
 			SafeHtmlBuilder content = new SafeHtmlBuilder();
 			renderCell(context, value, content);
-			sb.append(PaddedCell.INSTANCE.generate(viewDataId, CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
+			sb.append(PaddedCell.INSTANCE.generate(viewDataId, CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(),
+			        content.toSafeHtml()));
 		}
 	}
 
@@ -136,16 +144,16 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 
 	public void onBrowserEvent(Cell.Context context, Element parent, T value, NativeEvent event, ValueUpdater<T> valueUpdater) {
 		if (readonly == null || !readonly.isReadonly()) {
-			Object key = context.getKey();
-			ViewData<T> viewData = getViewData(key);
-			if (viewData == null) {
+			if (!isEditing(context, parent, value)) {
 				String type = event.getType();
 				int keyCode = event.getKeyCode();
 				boolean editToggleKeys = BrowserEvents.KEYDOWN.equals(type) && (keyCode == KeyCodes.KEY_ENTER || keyCode == KeyCodes.KEY_F2);
-				if (BrowserEvents.CLICK.equals(type) || editToggleKeys) {
+				if (BrowserEvents.DBLCLICK.equals(type) || editToggleKeys) {
+					if(BrowserEvents.DBLCLICK.equals(type))
+						Logger.getLogger(this.getClass().getName()).log(Level.INFO, "DBLCLICK");
 					// Switch to edit mode.
-					viewData = new ViewData<>(Document.get().createUniqueId(), valueUpdater);
-					setViewData(key, viewData);
+					ViewData<T> viewData = new ViewData<>(Document.get().createUniqueId(), valueUpdater);
+					setViewData(context.getKey(), viewData);
 					setValue(context, parent, value);
 				}
 			}

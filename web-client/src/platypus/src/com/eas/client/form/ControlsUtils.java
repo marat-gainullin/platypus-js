@@ -1,5 +1,6 @@
 package com.eas.client.form;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,8 +35,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -104,8 +103,6 @@ public class ControlsUtils {
 			return element.files;
 		}-*/;
 	}
-
-	static HandlerRegistration focusHandler;
 
 	public static void jsSelectFile(final JavaScriptObject aCallback) {
 		if (aCallback != null) {
@@ -467,6 +464,17 @@ public class ControlsUtils {
 	public static void callOnResize(Widget aWidget) {
 		if (aWidget instanceof RequiresResize) {
 			((RequiresResize) aWidget).onResize();
+		}
+	}
+
+	public static void walk(Widget aWidget, Callback<Widget, Widget> aObserver) {
+		aObserver.onSuccess(aWidget);
+		if (aWidget instanceof HasWidgets) {
+			HasWidgets widgets = (HasWidgets) aWidget;
+			Iterator<Widget> wIt = widgets.iterator();
+			while (wIt.hasNext()) {
+				walk(wIt.next(), aObserver);
+			}
 		}
 	}
 }
