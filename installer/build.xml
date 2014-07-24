@@ -61,7 +61,7 @@
             classpath="${custom.tasks.cls}" 
             classname="org.netbeans.installer.infra.build.ant.registries.CreateBundle"/>
         
-	<set property="tomcat.version"      value="7.0.52"/>
+	<set property="tomcat.version"      value="8.0.9"/>
 	<set property="tomcat.full.version" value="${tomcat.version}.0.0"/>
 	
         <delete file="${temp.file}"/>
