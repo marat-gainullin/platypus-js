@@ -17,6 +17,7 @@ com.google.gdt.eclipse.core.prefs
 *\private/
 *\build/
 *\dist/
+*\.settings/
 !/installer/ext/infra/build
 /application/lib/own/README.TXT
 /application/src/group/build.num
