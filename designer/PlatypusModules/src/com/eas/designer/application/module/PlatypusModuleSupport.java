@@ -76,7 +76,6 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
             public synchronized boolean addEdit(UndoableEdit anEdit) {
                 try {
                     if (anEdit.isSignificant()) {
-                        getDataObject().setModified(true);
                         notifyModified();
                     }
                     return super.addEdit(anEdit);
@@ -89,7 +88,6 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
             @Override
             public synchronized void undo() throws CannotUndoException {
                 super.undo();
-                getDataObject().setModified(true);
                 notifyModified();
             }
 
@@ -171,9 +169,15 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     }
 
     @Override
-    public void save() throws IOException {
-        saveDocument();// sourceModified flag is taken into account in saveFromKitToStream() because of netbeans crazy CloneableEditorSupport
+    public void saveDocument() throws IOException {
+        super.saveDocument();// sourceModified flag is taken into account in saveFromKitToStream() because of netbeans crazy CloneableEditorSupport
         saveModel();
+        notifyUnmodified();
+    }
+
+    @Override
+    public void save() throws IOException {
+        saveDocument();
     }
 
     protected void saveModel() throws IOException {

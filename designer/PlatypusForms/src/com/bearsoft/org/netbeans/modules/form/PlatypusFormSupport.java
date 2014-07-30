@@ -64,7 +64,6 @@ import javax.swing.JPanel;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
-import org.netbeans.api.editor.guards.GuardedSectionManager;
 import org.netbeans.core.api.multiview.MultiViewHandler;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.core.spi.multiview.*;
@@ -81,9 +80,7 @@ import org.openide.cookies.PrintCookie;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.text.*;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
-import org.openide.util.UserQuestionException;
 import org.openide.windows.*;
 
 /**
@@ -249,12 +246,12 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     }
 
     @Override
-    public void save() throws IOException {
+    public void saveDocument() throws IOException {
         try {
             if (formEditor != null) {
                 formEditor.saveFormData();
             }
-            super.save();
+            super.saveDocument();
         } catch (PersistenceException ex) {
             if (formEditor != null) {
                 formEditor.reportErrors(FormEditor.FormOperation.SAVING);
@@ -263,12 +260,9 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         }
     }
 
-    void saveSourceOnly() throws IOException {
-        super.saveDocument();
-    }
-
     // ------------
     // other interface methods
+
     /**
      * @return data object representing the form
      */
