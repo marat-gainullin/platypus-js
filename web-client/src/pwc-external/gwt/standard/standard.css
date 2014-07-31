@@ -1020,7 +1020,7 @@ a, a:visited, a:hover {
 }
 
 .gwt-DatePicker {
-  border: 1px solid #A2BBDD;
+/*  border: 1px solid #A2BBDD;*/
   cursor: default;
 }
 .gwt-DatePicker td,
