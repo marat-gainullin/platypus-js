@@ -9,6 +9,7 @@ import com.bearsoft.rowset.Row;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.PlatypusFormattedObjectEditorCell;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
@@ -46,6 +47,9 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 						styleToRender = column.getGrid().complementPublishedStyle(styleToRender);
 						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
+							if(context instanceof RenderedCellContext){
+								((RenderedCellContext)context).setStyle(styleToRender);
+							}
 							FormattedObjectModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
 							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
 								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();

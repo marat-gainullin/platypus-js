@@ -72,4 +72,14 @@ public final class PublishedStyle extends JavaScriptObject {
 		styleString += "text-align:" + getStyledAlign() + ";";
 		return styleString;
 	}
+	
+	public String toStyledWOBackground() {
+		String styleString = "";
+		if (getForeground() != null)
+			styleString += "color: " + getForeground().toStyled() + ";";
+		if (getFont() != null)
+			styleString += getFont().toStyled();
+		styleString += "text-align:" + getStyledAlign() + ";";
+		return styleString;
+	}
 }

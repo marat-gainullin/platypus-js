@@ -6,6 +6,7 @@ import com.bearsoft.rowset.Row;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.PlatypusTextEditorCell;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
@@ -43,6 +44,9 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 						styleToRender = grid.complementPublishedStyle(styleToRender);
 						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
+							if(context instanceof RenderedCellContext){
+								((RenderedCellContext)context).setStyle(styleToRender);
+							}
 							TextAreaModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
 							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
 								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();

@@ -11,6 +11,7 @@ import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.combo.ValueLookup;
+import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.PlatypusLookupEditorCell;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
@@ -61,6 +62,9 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 						styleToRender = grid.complementPublishedStyle(styleToRender);
 						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
+							if(context instanceof RenderedCellContext){
+								((RenderedCellContext)context).setStyle(styleToRender);
+							}
 							LookupModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);
 							if (cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource) {
 								PlatypusImageResource pImage = (PlatypusImageResource) cellToRender.getStyle().getIcon();

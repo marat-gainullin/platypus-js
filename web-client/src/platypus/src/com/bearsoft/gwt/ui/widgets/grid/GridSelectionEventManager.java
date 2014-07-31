@@ -75,8 +75,11 @@ public class GridSelectionEventManager<T> extends DefaultSelectionEventManager<T
 				}
 				int idxToSelect = event.getIndex() - 1;
 				if (idxToSelect >= 0 && idxToSelect < event.getDisplay().getRowCount()) {
-					T itemToSelect = event.getDisplay().getVisibleItem(idxToSelect - event.getDisplay().getVisibleRange().getStart());
-					doMultiSelection(selectionModel, event.getDisplay(), idxToSelect, itemToSelect, action, shift, clearOthers);
+					int visibleIdxToSelect = idxToSelect - event.getDisplay().getVisibleRange().getStart();
+					if(visibleIdxToSelect >=0 && visibleIdxToSelect < event.getDisplay().getVisibleRange().getLength()){
+						T itemToSelect = event.getDisplay().getVisibleItem(visibleIdxToSelect);
+						doMultiSelection(selectionModel, event.getDisplay(), idxToSelect, itemToSelect, action, shift, clearOthers);
+					}
 				}
 			} else if (keyCode == KeyCodes.KEY_DOWN) {
 				/*
@@ -88,8 +91,11 @@ public class GridSelectionEventManager<T> extends DefaultSelectionEventManager<T
 				}
 				int idxToSelect = event.getIndex() + 1;
 				if (idxToSelect >= 0 && idxToSelect < event.getDisplay().getRowCount()) {
-					T itemToSelect = event.getDisplay().getVisibleItem(idxToSelect - event.getDisplay().getVisibleRange().getStart());
-					doMultiSelection(selectionModel, event.getDisplay(), idxToSelect, itemToSelect, action, shift, clearOthers);
+					int visibleIdxToSelect = idxToSelect - event.getDisplay().getVisibleRange().getStart();
+					if(visibleIdxToSelect >= 0 && visibleIdxToSelect < event.getDisplay().getVisibleRange().getLength()){
+						T itemToSelect = event.getDisplay().getVisibleItem(visibleIdxToSelect);
+						doMultiSelection(selectionModel, event.getDisplay(), idxToSelect, itemToSelect, action, shift, clearOthers);
+					}
 				}
 			}
 		}

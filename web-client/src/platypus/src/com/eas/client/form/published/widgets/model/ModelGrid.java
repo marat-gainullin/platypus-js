@@ -7,7 +7,9 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
+import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.GridSelectionEventManager;
+import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
@@ -33,6 +35,7 @@ import com.eas.client.form.events.HideHandler;
 import com.eas.client.form.events.ShowEvent;
 import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.grid.FindWindow;
+import com.eas.client.form.grid.RenderedTableCellBuilder;
 import com.eas.client.form.grid.RowsetPositionSelectionHandler;
 import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
 import com.eas.client.form.grid.columns.CheckServiceColumn;
@@ -186,6 +189,13 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				}
 			}
 		}, KeyDownEvent.getType());
+	}
+
+	protected void installCellBuilders() {
+		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+			GridSection<Row> gSection = (GridSection<Row>) section;
+			gSection.setTableBuilder(new RenderedTableCellBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
+		}
 	}
 
 	public ModelElementRef getUnaryLinkField() {

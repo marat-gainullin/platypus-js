@@ -17,7 +17,7 @@ public class StyleIconDecorator {
 	public static String decorate(SafeHtml toDecorate, PublishedStyle aStyle, VerticalAlignmentConstant valign, SafeHtmlBuilder sb) {
 		SafeStylesBuilder stb = new SafeStylesBuilder();
 			stb
-			.append(SafeStylesUtils.fromTrustedString(aStyle.toStyled()))
+			.append(SafeStylesUtils.fromTrustedString(aStyle.toStyledWOBackground()))
 			.padding(RenderedPopupEditorCell.CELL_PADDING, Style.Unit.PX);
 		if(aStyle.getIcon() != null){
 			ImageResource icon = aStyle.getIcon();
