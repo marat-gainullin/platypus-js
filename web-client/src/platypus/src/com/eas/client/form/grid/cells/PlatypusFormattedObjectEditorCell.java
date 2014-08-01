@@ -8,7 +8,7 @@ package com.eas.client.form.grid.cells;
 import java.text.ParseException;
 
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
-import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class PlatypusFormattedObjectEditorCell extends RenderedPopupEditorCell<Object> {
+public class PlatypusFormattedObjectEditorCell extends RenderedEditorCell<Object> {
 
 	protected ObjectFormat format;
 

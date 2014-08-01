@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  * @param <C>
  */
-public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C, AbstractPopupEditorCell.ViewData<C>> {
+public abstract class WidgetEditorCell<C> extends AbstractEditableCell<C, WidgetEditorCell.ViewData<C>> {
 
 	protected static class ViewData<T> {
 		String id;
@@ -48,12 +48,12 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 	protected HasValue<C> valueHost;
 	protected Focusable focusHost;
 
-	public AbstractPopupEditorCell(Widget aEditor, String... consumedEvents) {
+	public WidgetEditorCell(Widget aEditor, String... consumedEvents) {
 		super(consumedEvents);
 		setEditor(aEditor);
 	}
 
-	public AbstractPopupEditorCell(Widget aEditor, Set<String> consumedEvents) {
+	public WidgetEditorCell(Widget aEditor, Set<String> consumedEvents) {
 		super(consumedEvents);
 		setEditor(aEditor);
 	}

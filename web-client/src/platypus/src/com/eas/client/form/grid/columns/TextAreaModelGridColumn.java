@@ -12,6 +12,7 @@ import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelTextArea;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -23,7 +24,7 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 		setEditor(new ModelTextArea());
 		((PlatypusTextEditorCell) getTargetCell()).setRenderer(new CellRenderer<String>() {
 			@Override
-			public boolean render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
+			public boolean render(Cell.Context context, String aId, String value, SafeHtmlBuilder sb) {
 				TextAreaModelGridColumn column = TextAreaModelGridColumn.this;
 				JavaScriptObject onRender = column.getOnRender() != null ? column.getOnRender() : column.getGrid().getOnRender();
 				if (onRender != null) {
@@ -42,12 +43,12 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, aId,  styleToRender, sb);
 						if (cellToRender != null) {
 							if(context instanceof RenderedCellContext){
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
-							TextAreaModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							TextAreaModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
 							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
 								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
 								TextAreaModelGridColumn.this.bindIconCallback(decorId, pImage);

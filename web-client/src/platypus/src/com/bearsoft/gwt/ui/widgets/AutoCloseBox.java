@@ -30,7 +30,6 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 
 	public AutoCloseBox() {
 		super();
-		getElement().getStyle().setZIndex(Integer.MAX_VALUE);
 	}
 
 	public AutoCloseBox(Widget aContent) {
@@ -53,7 +52,7 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 		RootPanel.get().add(this);
 		// Phisycal re-attach
 		getElement().removeFromParent();
-		aParentElement.insertFirst(getElement());
+		aParentElement.insertAfter(getElement(), aParentElement.getFirstChild());
 		if (getWidget() instanceof RequiresResize) {
 			((RequiresResize) getWidget()).onResize();
 		}

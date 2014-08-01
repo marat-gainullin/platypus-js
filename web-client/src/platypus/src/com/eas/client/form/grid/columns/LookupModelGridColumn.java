@@ -40,7 +40,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 		((PlatypusLookupEditorCell) getTargetCell()).setRenderer(new CellRenderer<Row>() {
 
 			@Override
-			public boolean render(Context context, Row value, SafeHtmlBuilder sb) {
+			public boolean render(Context context, String aId, Row value, SafeHtmlBuilder sb) {
 				LookupModelGridColumn column = LookupModelGridColumn.this;
 				JavaScriptObject onRender = column.getOnRender() != null ? column.getOnRender() : column.getGrid().getOnRender();
 				if (onRender != null) {
@@ -60,12 +60,12 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, aId,  styleToRender, sb);
 						if (cellToRender != null) {
 							if(context instanceof RenderedCellContext){
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
-							LookupModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);
+							LookupModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);
 							if (cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource) {
 								PlatypusImageResource pImage = (PlatypusImageResource) cellToRender.getStyle().getIcon();
 								LookupModelGridColumn.this.bindIconCallback(decorId, pImage);
