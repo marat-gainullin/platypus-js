@@ -403,6 +403,18 @@
         };
 
         /**
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
+         * @method deleteRow
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Checks if cursor in the position before the first row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method eof
@@ -499,14 +511,15 @@
         };
 
         /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
-         * @method deleteRow
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
+        P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            var value = delegate.createSorting(P.boxAsJava(pairs));
             return P.boxAsJs(value);
         };
 
@@ -558,19 +571,6 @@
         P.ApplicationDbEntity.prototype.requery = function(onSuccessCallback, onFailureCallback) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
-         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
             return P.boxAsJs(value);
         };
 

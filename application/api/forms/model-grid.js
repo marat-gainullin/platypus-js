@@ -896,6 +896,17 @@
         };
 
         /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
          *  Gets the array of selected rows.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -908,13 +919,14 @@
         };
 
         /**
-         * Clears current selection.
-         * @method clearSelection
+         * Unselects the specified instance.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.clearSelection = function() {
+        P.ModelGrid.prototype.unselect = function(instance) {
             var delegate = this.unwrap();
-            var value = delegate.clearSelection();
+            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -940,18 +952,6 @@
         P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
             var delegate = this.unwrap();
             var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Unselects the specified instance.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
