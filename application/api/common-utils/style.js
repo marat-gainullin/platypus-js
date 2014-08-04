@@ -28,6 +28,9 @@
             get: function() {
                 var value = delegate.background;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -42,6 +45,9 @@
             get: function() {
                 var value = delegate.icon;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.icon = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -56,6 +62,9 @@
             get: function() {
                 var value = delegate.folderIcon;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.folderIcon = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -70,6 +79,9 @@
             get: function() {
                 var value = delegate.foreground;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.foreground = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -84,6 +96,9 @@
             get: function() {
                 var value = delegate.openFolderIcon;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.openFolderIcon = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -98,6 +113,9 @@
             get: function() {
                 var value = delegate.align;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.align = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -113,6 +131,9 @@
             get: function() {
                 var value = delegate.leafIcon;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.leafIcon = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){
@@ -127,6 +148,9 @@
             get: function() {
                 var value = delegate.font;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
             }
         });
         if(!P.Style){

@@ -170,6 +170,20 @@
              */
             P.ModelGrid.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -186,20 +200,6 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -919,6 +919,18 @@
         };
 
         /**
+         * Shows find dialog.
+         * @deprecated Use find() instead.
+         * @method findSomething
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.findSomething = function() {
+            var delegate = this.unwrap();
+            var value = delegate.findSomething();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Makes specified instance visible.
          * @param instance Entity's instance to make visible.
          * @param need2select true to select the instance (optional).
@@ -940,18 +952,6 @@
         P.ModelGrid.prototype.unselect = function(instance) {
             var delegate = this.unwrap();
             var value = delegate.unselect(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows find dialog.
-         * @deprecated Use find() instead.
-         * @method findSomething
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.findSomething = function() {
-            var delegate = this.unwrap();
-            var value = delegate.findSomething();
             return P.boxAsJs(value);
         };
 

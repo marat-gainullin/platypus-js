@@ -669,7 +669,7 @@ public class Form implements HasPublished {
     public void minimize() {
         if (surface != null) {
             if (surface instanceof JFrame) {
-                ((JFrame) surface).setState(JFrame.ICONIFIED);
+                ((JFrame) surface).setExtendedState(JFrame.ICONIFIED);
             } else if (surface instanceof JInternalFrame) {
                 JInternalFrame aFrame = (JInternalFrame) surface;
                 try {
@@ -694,7 +694,7 @@ public class Form implements HasPublished {
     public void maximize() {
         if (surface != null) {
             if (surface instanceof JFrame) {
-                ((JFrame) surface).setState(JFrame.MAXIMIZED_BOTH);
+                ((JFrame) surface).setExtendedState(JFrame.MAXIMIZED_BOTH);
             } else if (surface instanceof JInternalFrame) {
                 JInternalFrame aFrame = (JInternalFrame) surface;
                 try {

@@ -366,38 +366,14 @@
         };
 
         /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
+         * Sorts data according to comparator object returned by createSorting() or by comparator function.
+         * @param comparator A comparator function or object returned from createSorting() method.
+         * @method sort
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.eof = function() {
+        P.ApplicationDbParametersEntity.prototype.sort = function(comparator) {
             var delegate = this.unwrap();
-            var value = delegate.eof();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Moves the rowset cursor to the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method first
-         * @memberOf ApplicationDbParametersEntity
-         */
-        P.ApplicationDbParametersEntity.prototype.first = function() {
-            var delegate = this.unwrap();
-            var value = delegate.first();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Moves the rowset cursor to the last row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method last
-         * @memberOf ApplicationDbParametersEntity
-         */
-        P.ApplicationDbParametersEntity.prototype.last = function() {
-            var delegate = this.unwrap();
-            var value = delegate.last();
+            var value = delegate.sort(P.boxAsJava(comparator));
             return P.boxAsJs(value);
         };
 
@@ -415,27 +391,38 @@
         };
 
         /**
-         * Sorts data according to comparator object returned by createSorting() or by comparator function.
-         * @param comparator A comparator function or object returned from createSorting() method.
-         * @method sort
+         * Moves the rowset cursor to the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method first
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.sort = function(comparator) {
+        P.ApplicationDbParametersEntity.prototype.first = function() {
             var delegate = this.unwrap();
-            var value = delegate.sort(P.boxAsJava(comparator));
+            var value = delegate.first();
             return P.boxAsJs(value);
         };
 
         /**
-         * Inserts new row in the rowset and sets cursor on this row. @see push.
-         * @param index The new row will be inserted at. 1 - based.
-         * @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
-         * @method insertAt
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.insertAt = function(index, pairs) {
+        P.ApplicationDbParametersEntity.prototype.eof = function() {
             var delegate = this.unwrap();
-            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
+            var value = delegate.eof();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Moves the rowset cursor to the last row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method last
+         * @memberOf ApplicationDbParametersEntity
+         */
+        P.ApplicationDbParametersEntity.prototype.last = function() {
+            var delegate = this.unwrap();
+            var value = delegate.last();
             return P.boxAsJs(value);
         };
 
@@ -453,14 +440,15 @@
         };
 
         /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
-         * @method deleteRow
+         * Inserts new row in the rowset and sets cursor on this row. @see push.
+         * @param index The new row will be inserted at. 1 - based.
+         * @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
+         * @method insertAt
          * @memberOf ApplicationDbParametersEntity
          */
-        P.ApplicationDbParametersEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
+        P.ApplicationDbParametersEntity.prototype.insertAt = function(index, pairs) {
             var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
             return P.boxAsJs(value);
         };
 
@@ -507,6 +495,18 @@
         P.ApplicationDbParametersEntity.prototype.afterLast = function() {
             var delegate = this.unwrap();
             var value = delegate.afterLast();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
+         * @method deleteRow
+         * @memberOf ApplicationDbParametersEntity
+         */
+        P.ApplicationDbParametersEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
             return P.boxAsJs(value);
         };
 

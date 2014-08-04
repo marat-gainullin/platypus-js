@@ -409,14 +409,12 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 					for (int i = 0; i < rowIds.length; i++)
 						rowIds[i] = Utils.toJs(rowIds[i]);
 				}
-				Boolean res = Utils.executeScriptEventBoolean(
+				Utils.executeScriptEventVoid(
 				        aThis,
 				        aOnRender,
 				        JsEvents.publishOnRenderEvent(aThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
 				                Entity.publishRowFacade(renderedRow, aRowsEntity), cell));
-				if (res != null && res) {
-					return cell;
-				}
+				return cell;
 			}
 		}
 		return null;

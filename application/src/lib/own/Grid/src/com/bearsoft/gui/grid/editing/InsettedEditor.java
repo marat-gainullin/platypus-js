@@ -14,9 +14,11 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
 
 /**
- * Editor with capability of transparently adding some artifacts to the left or to the right of the main editor.
- * This editor delegates all significant work to the delegate. It renders inset components by itself.
- * @author Gala
+ * Editor with capability of transparently adding some artifacts to the left or
+ * to the right of the main editor. This editor delegates all significant work
+ * to the delegate. It renders inset components by itself.
+ *
+ * @author mg
  */
 public class InsettedEditor extends JPanel implements TableCellEditor {
 
@@ -26,7 +28,9 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Creates a new instance of InsettedEditor.
-     * @param aDelegate TableCellEditor instance we have delegate all significant work to.
+     *
+     * @param aDelegate TableCellEditor instance we have delegate all
+     * significant work to.
      * @see TableCellEditor
      */
     public InsettedEditor(TableCellEditor aDelegate) {
@@ -36,8 +40,11 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Creates a new instance of InsettedEditor.
-     * @param aDelegate TableCellEditor instance we have delegate all significant work to.
-     * @param aLeadingComponent Component that will be rendered on the left side of the table cell.
+     *
+     * @param aDelegate TableCellEditor instance we have delegate all
+     * significant work to.
+     * @param aLeadingComponent Component that will be rendered on the left side
+     * of the table cell.
      * @see TableCellEditor
      */
     public InsettedEditor(TableCellEditor aDelegate, Component aLeadingComponent) {
@@ -48,9 +55,13 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Creates a new instance of InsettedEditor.
-     * @param aDelegate TableCellEditor instance we have delegate all significant work to.
-     * @param aLeadingComponent Component that will be rendered on the left side of table cell.
-     * @param aTrailingComponent  Component that will be rendered on the right side of table cell.
+     *
+     * @param aDelegate TableCellEditor instance we have delegate all
+     * significant work to.
+     * @param aLeadingComponent Component that will be rendered on the left side
+     * of table cell.
+     * @param aTrailingComponent Component that will be rendered on the right
+     * side of table cell.
      * @see TableCellEditor
      */
     public InsettedEditor(TableCellEditor aDelegate, Component aLeadingComponent, Component aTrailingComponent) {
@@ -62,6 +73,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Returns the component rendered on the left side of the table cell.
+     *
      * @return Component rendered on the left side of the table cell.
      */
     public Component getLeadingComponent() {
@@ -70,7 +82,9 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Sets the component rendered on the left side of the table cell.
-     * @param aLeadingComponent Component that will be rendered on the left side of the table cell.
+     *
+     * @param aLeadingComponent Component that will be rendered on the left side
+     * of the table cell.
      */
     public void setLeadingComponent(Component aLeadingComponent) {
         leadingComponent = aLeadingComponent;
@@ -79,6 +93,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Returns the component rendered on the right side of the table cell.
+     *
      * @return Component rendered on the right side of the table cell.
      */
     public Component getTrailingComponent() {
@@ -87,7 +102,9 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
 
     /**
      * Sets the component rendered on the right side of the table cell.
-     * @param aTrailingComponent Component that will be rendered on the right side of the table cell.
+     *
+     * @param aTrailingComponent Component that will be rendered on the right
+     * side of the table cell.
      */
     public void setTrailingComponent(Component aTrailingComponent) {
         trailingComponent = aTrailingComponent;
@@ -182,5 +199,9 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     @Override
     public void removeCellEditorListener(CellEditorListener l) {
         delegate.removeCellEditorListener(l);
+    }
+
+    public TableCellEditor unwrap() {
+        return delegate;
     }
 }
