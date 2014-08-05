@@ -22,7 +22,7 @@ public class Updater {
     public static final ResourceBundle res = ResourceBundle.getBundle(Updater.class.getPackage().getName() + ".updatermessages");
     public static UpdProgress upd = null;
     private static String cFUrl = "http://olympic.altsoft.biz/platypus/client/updates/update.xml";
-    private static String cFName = "update.xml";
+    private static String cFName = "version.xml";
     private static String dsUrl = "http://olympic.altsoft.biz/platypus/client/updates/application.zip";
     private static String tmpFile = "updpl.zip";
     private static String curPath = "../../../../";
