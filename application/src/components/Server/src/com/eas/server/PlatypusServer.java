@@ -241,7 +241,7 @@ public class PlatypusServer extends PlatypusServerCore {
     private SensorsFactory obtainAcceptorsFactory() {
         SensorsFactory recieveFactory = null;
         try {
-            Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.positioning.AcceptorsFactory");
+            Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.AcceptorsFactory");
             recieveFactory = acceptorsFactoryClass.newInstance();
         } catch (ClassNotFoundException e) {
             Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");           
@@ -254,7 +254,7 @@ public class PlatypusServer extends PlatypusServerCore {
     private RetranslateFactory obtainRetranslateFactory() {
         RetranslateFactory factory = null;
         try {
-            Class<RetranslateFactory> retranslateFactoryClass = (Class<RetranslateFactory>) Class.forName("com.eas.sensors.retranslate.RetranslatePacketFactory");
+            Class<RetranslateFactory> retranslateFactoryClass = (Class<RetranslateFactory>) Class.forName("com.eas.sensors.ConnectorsFactory");
             factory = retranslateFactoryClass.getConstructor(new Class<?>[]{Map.class}).newInstance(portsNumWorkerThreads);
         } catch (ClassNotFoundException e) {
             Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");             
