@@ -30,26 +30,4 @@ public class ImageLabel extends ImageParagraph {
         this(aTitle, asHtml, null);
     }
 
-    @Override
-    protected void organizeVerticalAlignment(Style contentStyle) {
-        switch (verticalAlignment) {
-            case TOP:
-                contentStyle.setTop(0, Style.Unit.PX);
-                contentStyle.clearBottom();
-                break;
-            case BOTTOM: {
-                contentStyle.setBottom(0, Style.Unit.PX);
-                contentStyle.clearTop();
-                break;
-            }
-            case CENTER: {
-                int widgetHeight = getElement().getClientHeight();
-                int pHeight = content.getOffsetHeight();
-                int topValue = (widgetHeight - pHeight) / 2;
-                contentStyle.setTop(topValue, Style.Unit.PX);
-                break;
-            }
-        }
-    }
-
 }

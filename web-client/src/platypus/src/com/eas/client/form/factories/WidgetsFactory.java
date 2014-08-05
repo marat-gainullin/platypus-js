@@ -1,6 +1,3 @@
-/*
- * and open the template in the editor.
- */
 package com.eas.client.form.factories;
 
 import java.util.ArrayList;
@@ -198,7 +195,7 @@ public class WidgetsFactory {
 			assert (nodeName.equalsIgnoreCase(LAYOUT_TAG) && isRoot) || nodeName.equalsIgnoreCase(WIDGET_TAG) || nodeName.equalsIgnoreCase(NONVISUAL_TAG) : "Form structure is broken. Form must be constructed of widget and nonvisual tags";
 			UIObject component = createWidget(aTag);
 			if (component != null)// There are might be toggle groups, that are
-								  // non
+			                      // non
 			                      // visuals and so, not components
 			{
 				components.put(((HasJsName) component).getJsName(), component);
@@ -712,12 +709,13 @@ public class WidgetsFactory {
 			// value
 		}
 		boolean opaque = Utils.getBooleanAttribute(aTag, "opaque", aDefaultOpaque);
-		if (!opaque) // opaque == true is the default value, so we avoid to set
-		             // it, because of speed
+		if (opaque != aDefaultOpaque) // opaque == aDefaultOpaque is the default
+									  // value, so we avoid to set
+			// it, because of speed
 			aPublished.setOpaque(opaque);
 		if (!isRoot) {
 			Element fontTag = Utils.getElementByTagName(aTag, "easFont");
-			PublishedFont font =  parseFont(fontTag);
+			PublishedFont font = parseFont(fontTag);
 			if (font != null) {
 				aPublished.setFont(font);
 			}
@@ -727,26 +725,26 @@ public class WidgetsFactory {
 		}
 	}
 
-	public static PublishedFont parseFont(Element fontTag) throws Exception{
-		if(fontTag != null){
-		String fontFamily = null;
-		if (fontTag.hasAttribute("name")) {
-			fontFamily = fontTag.getAttribute("name");
-		}
-		int fontSize = 0;
-		if (fontTag.hasAttribute("size")) {
-			fontSize = Utils.getIntegerAttribute(fontTag, "size", 10);
-		}
-		int fontStyle = 0;
-		if (fontTag.hasAttribute("style")) {
-			fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
-		}
-		return PublishedFont.create(fontFamily, fontStyle, fontSize);
-		}else{
+	public static PublishedFont parseFont(Element fontTag) throws Exception {
+		if (fontTag != null) {
+			String fontFamily = null;
+			if (fontTag.hasAttribute("name")) {
+				fontFamily = fontTag.getAttribute("name");
+			}
+			int fontSize = 0;
+			if (fontTag.hasAttribute("size")) {
+				fontSize = Utils.getIntegerAttribute(fontTag, "size", 10);
+			}
+			int fontStyle = 0;
+			if (fontTag.hasAttribute("style")) {
+				fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
+			}
+			return PublishedFont.create(fontFamily, fontStyle, fontSize);
+		} else {
 			return null;
 		}
 	}
-	
+
 	protected static String convertCursor(int aValue) {
 		switch (aValue) {
 		case 1/* CROSSHAIR */:
@@ -874,6 +872,7 @@ public class WidgetsFactory {
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
 							String contraintsTypeName = aConstraintsTag.getAttribute(TYPE_ATTRIBUTE);
 							if ("TabsConstraintsDesignInfo".equalsIgnoreCase(contraintsTypeName)) {
+								String tabTooltipText = null;
 								String textOrHtml = "";
 								boolean html = false;
 								PlatypusImageResource imRes = null;
@@ -886,14 +885,11 @@ public class WidgetsFactory {
 										html = false;
 									}
 								}
-								/*
-								 * if
-								 * (aConstraintsTag.hasAttribute("tabTooltipText"
-								 * )) tabTooltipText =
-								 * aTag.getAttribute("tabTooltipText");
-								 */
-								if (aConstraintsTag.hasAttribute("icon")) {
-									imRes = AppClient.getInstance().getImageResource(aConstraintsTag.getAttribute("icon"));
+								if (aConstraintsTag.hasAttribute("tabTooltipText")){
+									tabTooltipText = aConstraintsTag.getAttribute("tabTooltipText");
+								}
+								if (aConstraintsTag.hasAttribute("tabIcon")) {
+									imRes = AppClient.getInstance().getImageResource(aConstraintsTag.getAttribute("tabIcon"));
 								}
 								container.add((Widget) aComponent, textOrHtml, html, imRes);
 							} else
@@ -908,13 +904,13 @@ public class WidgetsFactory {
 						container.add((Widget) aComponent);
 						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
-							((HasPublished)aComponent).getPublished().<PublishedComponent>cast().setWidth(prefSize.getX());
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setWidth(prefSize.getX());
 					} else if (parentComp instanceof VBoxPane) {
 						VBoxPane container = (VBoxPane) parentComp;
 						container.add((Widget) aComponent);
 						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
-							((HasPublished)aComponent).getPublished().<PublishedComponent>cast().setHeight(prefSize.getY());
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setHeight(prefSize.getY());
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
 						container.add(aComponent);

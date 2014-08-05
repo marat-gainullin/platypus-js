@@ -4,8 +4,11 @@
  */
 package com.bearsoft.org.netbeans.modules.form.translate;
 
+import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
+import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.*;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.AbsoluteLayoutSupport.AbsoluteLayoutConstraints;
@@ -22,6 +25,8 @@ import com.eas.controls.layouts.constraints.*;
 import com.eas.controls.layouts.margin.MarginConstraints;
 import java.awt.Dimension;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JSplitPane;
 
 /**
@@ -65,7 +70,7 @@ public class LayoutConstraintsProcessor {
         // Complex constraints, involving inter-component refernces
         if (radConstraints instanceof TabLayoutConstraints) {
             TabLayoutConstraints tc = (TabLayoutConstraints) radConstraints;
-            TabsConstraintsDesignInfo tcdi = null;
+            TabsConstraintsDesignInfo tcdi;
             if (controlDi.getConstraints() instanceof TabsConstraintsDesignInfo) {
                 tcdi = (TabsConstraintsDesignInfo) controlDi.getConstraints();
             } else {
@@ -74,8 +79,9 @@ public class LayoutConstraintsProcessor {
             }
             tcdi.setTabTitle(tc.getTitle());
             tcdi.setTabTooltipText(tc.getToolTip());
-            // TODO: Solve problem with icons
-            // Simple ordinary constraints of real layouts
+            if (tc.getIcon() != null) {
+                tcdi.setTabIcon(tc.getIcon().getName());
+            }
         } else if (radConstraints instanceof LayeredLayoutConstraints) {
             LayeredLayoutConstraints lc = (LayeredLayoutConstraints) radConstraints;
             LayersLayoutConstraintsDesignInfo llcdi = new LayersLayoutConstraintsDesignInfo();
@@ -145,9 +151,9 @@ public class LayoutConstraintsProcessor {
         }
     }
 
-    public static LayoutConstraints<?> processFromDesignInfo(ControlDesignInfo controlDi) {
+    public static LayoutConstraints<?> processFromDesignInfo(ControlDesignInfo controlDi, PlatypusFormDataObject aDataObject) {
         if (controlDi != null && controlDi.getConstraints() != null) {
-            ConstraintsDesignInfoProcessor processor = new ConstraintsDesignInfoProcessor();
+            ConstraintsDesignInfoProcessor processor = new ConstraintsDesignInfoProcessor(aDataObject);
             controlDi.getConstraints().accept(processor);
             return processor.getResult();
         }
@@ -162,6 +168,12 @@ public class LayoutConstraintsProcessor {
     protected static class ConstraintsDesignInfoProcessor implements ConstraintsDesignInfoVisitor {
 
         protected LayoutConstraints<?> result;
+        protected PlatypusFormDataObject formDataObject;
+
+        public ConstraintsDesignInfoProcessor(PlatypusFormDataObject aDataObject) {
+            super();
+            formDataObject = aDataObject;
+        }
 
         public LayoutConstraints<?> getResult() {
             return result;
@@ -183,8 +195,15 @@ public class LayoutConstraintsProcessor {
 
         @Override
         public void visit(TabsConstraintsDesignInfo di) {
-            result = new TabLayoutConstraints(di.getTabTitle(), null/*di.getTabIcon()*/, di.getTabTooltipText());
-            // TODO: solve problem with icons
+            NbImageIcon icon = null;
+            if (di.getTabIcon() != null) {
+                try {
+                    icon = IconEditor.iconFromResourceName(formDataObject, di.getTabIcon());
+                } catch (Exception ex) {
+                    Logger.getLogger(ConstraintsDesignInfoProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            result = new TabLayoutConstraints(di.getTabTitle(), icon, di.getTabTooltipText());
         }
 
         @Override

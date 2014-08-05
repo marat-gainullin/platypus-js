@@ -1,5 +1,6 @@
 package com.eas.client.form.published.containers;
 
+import com.bearsoft.gwt.ui.HasImageResource;
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.TabsDecoratedPanel;
 import com.bearsoft.gwt.ui.widgets.ImageLabel;
@@ -25,17 +26,83 @@ import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.VerticalAlign;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.HasHTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
-		HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
+public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
+        HasRemoveHandlers, HasChildrenPosition {
+
+	protected class TabLabel extends FlowPanel implements HasHTML, HasImageResource {
+
+		protected ImageLabel label;
+		protected SimplePanel closer = new SimplePanel();
+		protected Widget subject;
+
+		public TabLabel(final Widget subject, String aText, boolean asHtml, PlatypusImageResource aImage) {
+			label = new ImageLabel(aText, asHtml, aImage);
+			closer.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+			closer.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.TOP);
+			closer.getElement().addClassName("tab-close-tool");
+			closer.addDomHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					tabs.remove(subject);
+				}
+
+			}, ClickEvent.getType());
+			add(label);
+			add(closer);
+			if (aImage != null) {
+				aImage.addCallback(new ImageResourceCallback() {
+
+					@Override
+					public void run(PlatypusImageResource aResource) {
+						label.setImage(aResource);
+					}
+				});
+			}
+		}
+
+		@Override
+		public String getText() {
+			return label.getText();
+		}
+
+		@Override
+		public void setText(String text) {
+			label.setText(text);
+		}
+
+		@Override
+		public String getHTML() {
+			return label.getHTML();
+		}
+
+		@Override
+		public void setHTML(String html) {
+			label.setHTML(html);
+		}
+
+		@Override
+        public ImageResource getImageResource() {
+	        return label.getImageResource();
+        }
+
+	}
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -157,18 +224,8 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasEn
 		name = aValue;
 	}
 
-	public void add(Widget child, String text, boolean asHtml, PlatypusImageResource aImage) {
-		final ImageLabel tabsLabel = new ImageLabel(text, asHtml, aImage);
-		tabs.insert(child, tabsLabel, tabs.getWidgetCount());
-		if (aImage != null) {
-			aImage.addCallback(new ImageResourceCallback() {
-
-				@Override
-				public void run(PlatypusImageResource aResource) {
-					tabsLabel.setImage(aResource);
-				}
-			});
-		}
+	public void add(final Widget child, String text, boolean asHtml, PlatypusImageResource aImage) {
+		tabs.insert(child, new TabLabel(child, text, asHtml, aImage), tabs.getWidgetCount());
 		AddEvent.fire(this, child);
 	}
 
