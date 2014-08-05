@@ -148,8 +148,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         setLogging(arguments, project.getSettings().getServerLogLevel());
 
         PlatypusProjectSettings pps = project.getSettings();
+
         arguments.add(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
-        arguments.add(ProjectRunner.getExtendedClasspath(getExecutablePath(binDir)));
+        String classPath = ProjectRunner.getExtendedClasspath(ProjectRunner.getApiClasspath(getExecutablePath(binDir)));
+        arguments.add("\"" + classPath + "\"");
         arguments.add(ServerMain.class.getName());
 
         // Iterate through all datasources, registered in the designer.

@@ -8,6 +8,7 @@ package com.bearsoft.gwt.ui.containers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -31,12 +32,14 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		super();
 		setCellPadding(0);
 		setCellSpacing(0);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public GridPanel(int aRows, int aCols) {
 		super(aRows, aCols);
 		setCellPadding(0);
 		setCellSpacing(0);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public int getHgap() {
@@ -131,14 +134,14 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		if (child != null) {
 			Element we = child.getElement();
 			Element wpe = we.getParentElement();
-			if (child instanceof FocusWidget) {
+			//if (child instanceof FocusWidget) {
 				we.getStyle().clearRight();
 				we.getStyle().clearBottom();
 				we.getStyle().setWidth(wpe.getClientWidth() - hgap, Style.Unit.PX);
 				we.getStyle().setHeight(wpe.getClientHeight() - vgap, Style.Unit.PX);
 				com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
 				child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-			}
+			//}
 		}
 	}
 

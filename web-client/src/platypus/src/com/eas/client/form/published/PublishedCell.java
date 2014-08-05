@@ -43,4 +43,28 @@ public final class PublishedCell extends JavaScriptObject {
 			}
 		}
 	}
+	
+	public final void styleToElementBackgroundToTd(Element aElement) {
+		if (aElement != null && getStyle() != null) {
+			Style eStyle = aElement.getStyle();
+			PublishedStyle pStyle = getStyle();
+			if (pStyle.getBackground() != null){
+				Element td = aElement;
+				while(td != null && !"td".equalsIgnoreCase(td.getTagName())){
+					td = td.getParentElement();
+				}
+				if(td != null){
+					td.getStyle().setBackgroundColor(pStyle.getBackground().toStyled());
+				}
+			}
+			if (pStyle.getForeground() != null) {
+				eStyle.setColor(pStyle.getForeground().toStyled());
+			}
+			if (pStyle.getFont() != null) {
+				eStyle.setFontSize(pStyle.getFont().getSize(), Unit.PT);
+				eStyle.setFontStyle(pStyle.getFont().isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
+				eStyle.setFontWeight(pStyle.getFont().isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
+			}
+		}
+	}
 }

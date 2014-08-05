@@ -1,18 +1,22 @@
 (function() {
     var javaClass = Java.type("com.eas.client.forms.api.containers.BoxPane");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.BoxPane(null, aDelegate);
+        return new P.BoxPane(null, null, null, aDelegate);
     });
     
     /**
      * A container with Box Layout. By default uses horisontal orientation.
      * @param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional).
+     * @param hgap the horizontal gap (optional).
+     * @param vgap the vertical gap (optional).
      * @constructor BoxPane BoxPane
      */
-    P.BoxPane = function (orientation) {
-        var maxArgs = 1;
+    P.BoxPane = function (orientation, hgap, vgap) {
+        var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(hgap), P.boxAsJava(vgap))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(hgap))
             : arguments.length === 1 ? new javaClass(P.boxAsJava(orientation))
             : new javaClass();
 
@@ -274,6 +278,23 @@
              */
             P.BoxPane.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "vgap", {
+            get: function() {
+                var value = delegate.vgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.vgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Box vertical gap between components.
+             * @property vgap
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.vgap = 0;
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -290,6 +311,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onMouseEntered = {};
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Box horizontal gap between components.
+             * @property hgap
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -308,6 +346,20 @@
              */
             P.BoxPane.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -324,20 +376,6 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -469,23 +507,6 @@
              */
             P.BoxPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -502,6 +523,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

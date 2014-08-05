@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class StringEditorCell extends RenderedPopupEditorCell<String> {
+public class StringEditorCell extends RenderedEditorCell<String> {
 
 	protected MaskFormat format;
 

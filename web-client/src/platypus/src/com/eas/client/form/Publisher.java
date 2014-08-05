@@ -198,11 +198,11 @@ public class Publisher {
 	}-*/;
 
 	public native static PublishedComponent publish(VBoxPane aComponent)/*-{
-		return new $wnd.P.BoxPane($wnd.P.Orientation.VERTICAL, aComponent);
+		return new $wnd.P.BoxPane($wnd.P.Orientation.VERTICAL, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(HBoxPane aComponent)/*-{
-		return new $wnd.P.BoxPane($wnd.P.Orientation.HORIZONTAL, aComponent);
+		return new $wnd.P.BoxPane($wnd.P.Orientation.HORIZONTAL, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(CardPane aComponent)/*-{

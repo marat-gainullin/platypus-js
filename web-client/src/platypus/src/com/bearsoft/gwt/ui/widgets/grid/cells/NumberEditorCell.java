@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  * @param <T>
  */
-public class NumberEditorCell<T extends Number> extends RenderedPopupEditorCell<T> {
+public class NumberEditorCell<T extends Number> extends RenderedEditorCell<T> {
 
 	protected NumberFormat format = NumberFormat.getDecimalFormat();
 

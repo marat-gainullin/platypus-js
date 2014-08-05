@@ -181,9 +181,6 @@ public class ProjectRunner {
                         if (serverInstance.start(project, binDir, debug)) {
                             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
                             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
-                            ServerSupport ss = new ServerSupport(serverInstance);
-                            ss.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
-                            PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(ServerState.RUNNING);
                             DebuggerEngine[] startedEngines = DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create(AttachingDICookie.ID, new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, project.getSettings().getDebugServerPort())}));
                             DebuggerEngine justStartedEngine = startedEngines[0];
                             DebuggerManager.getDebuggerManager().addDebuggerListener(new DebuggerManagerAdapter() {
@@ -198,6 +195,9 @@ public class ProjectRunner {
 
                             });
                             project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
+                            ServerSupport ss = new ServerSupport(serverInstance);
+                            ss.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
+                            PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(ServerState.RUNNING);
                         } else {
                             throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Server"));
                         }
@@ -305,8 +305,14 @@ public class ProjectRunner {
                         arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.ANONYMOUS_ON_CMD_SWITCH);
                     }
                 } else {
-                    if (pps.isNotStartServer()) {
-                        appUrl = pps.getClientUrl();
+                    if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
+                        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
+                        PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
+                        if (webManager != null) {
+                            appUrl = webManager.run(appElementId, debug);
+                        } else {
+                            throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
+                        }
                     } else if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
                         appUrl = getDevPlatypusServerUrl(pps);
                     }

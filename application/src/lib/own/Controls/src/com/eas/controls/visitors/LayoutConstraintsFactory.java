@@ -21,14 +21,17 @@ public class LayoutConstraintsFactory implements ConstraintsDesignInfoVisitor{
         return result;
     }
 
+    @Override
     public void visit(BorderLayoutConstraintsDesignInfo aInfo) {
         result = aInfo.getPlace();
     }
 
+    @Override
     public void visit(CardLayoutConstraintsDesignInfo aInfo) {
         result = aInfo.getCardName();
     }
 
+    @Override
     public void visit(GridBagLayoutConstraintsDesignInfo aInfo) {
         result = new GridBagConstraints(
                 aInfo.getGridx(), aInfo.getGridy(),
@@ -40,13 +43,16 @@ public class LayoutConstraintsFactory implements ConstraintsDesignInfoVisitor{
                 aInfo.getIpadx(), aInfo.getIpady());
     }
 
+    @Override
     public void visit(TabsConstraintsDesignInfo aInfo) {
     }
 
+    @Override
     public void visit(AbsoluteConstraintsDesignInfo aInfo) {
         result = null;
     }
 
+    @Override
     public void visit(LayersLayoutConstraintsDesignInfo aInfo) {
         result = aInfo.getLayer();
     }

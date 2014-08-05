@@ -307,6 +307,20 @@
              */
             P.ButtonGroup.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -323,20 +337,6 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -454,23 +454,6 @@
              */
             P.ButtonGroup.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -487,6 +470,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -744,23 +744,25 @@
     };
         /**
          * Appends the specified component to the end of this group.
+         * @param component Component to add to the group.
          * @method add
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.add = function(arg0) {
+        P.ButtonGroup.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(arg0));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
         };
 
         /**
          * Removes the specified component from the group.
+         * @param component Component to remove from the group.
          * @method remove
          * @memberOf ButtonGroup
          */
-        P.ButtonGroup.prototype.remove = function(arg0) {
+        P.ButtonGroup.prototype.remove = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(arg0));
+            var value = delegate.remove(P.boxAsJava(component));
             return P.boxAsJs(value);
         };
 

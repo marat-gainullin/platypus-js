@@ -5,7 +5,7 @@
     });
     
     /**
-     * Generated constructor.
+     * Experimental. A model component that shows and edits vector drawing.
      * Unsupported in HTML5 client.
      * @constructor ModelScheme ModelScheme
      */
@@ -273,6 +273,20 @@
              */
             P.ModelScheme.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -289,20 +303,6 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -406,23 +406,6 @@
              */
             P.ModelScheme.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -439,6 +422,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

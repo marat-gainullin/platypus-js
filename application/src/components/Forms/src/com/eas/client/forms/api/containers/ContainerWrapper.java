@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Container;
+import com.eas.controls.layouts.box.BoxLayout;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.controls.wrappers.ButtonGroupWrapper;
 import java.awt.BorderLayout;
@@ -12,7 +13,6 @@ import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;

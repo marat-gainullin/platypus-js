@@ -4,17 +4,24 @@
  */
 package com.eas.client.forms.api.components.model;
 
+import com.bearsoft.gui.grid.editing.InsettedEditor;
 import com.bearsoft.rowset.Row;
 import com.eas.client.forms.api.Component;
+import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.dbcontrols.CellRenderEvent;
+import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.dbcontrols.grid.rt.columns.ScriptableColumn;
 import com.eas.script.EventMethod;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComponent;
+import javax.swing.table.TableCellEditor;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -42,7 +49,7 @@ public class ModelGrid extends Component<DbGrid> {
     @Override
     protected void setDelegate(DbGrid aDelegate) {
         super.setDelegate(aDelegate);
-        if(delegate != null){
+        if (delegate != null) {
             try {
                 delegate.configure();
             } catch (Exception ex) {
@@ -50,7 +57,7 @@ public class ModelGrid extends Component<DbGrid> {
             }
         }
     }
-    
+
     private static final String SHOW_HORIZONTAL_LINES_JSDOC = ""
             + "/**\n"
             + "* Determines if grid shows horizontal lines.\n"
@@ -208,7 +215,7 @@ public class ModelGrid extends Component<DbGrid> {
             + " * @param instance Entity's instance to be selected.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = SELECT_JSDOC, params={"instance"})
+    @ScriptFunction(jsDoc = SELECT_JSDOC, params = {"instance"})
     public void select(Row aRow) throws Exception {
         delegate.select(aRow);
     }
@@ -258,7 +265,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "* @param need2select true to select the instance (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC, params={"instance", "need2select"})
+    @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC, params = {"instance", "need2select"})
     public boolean makeVisible(Row aRow, Boolean need2Select) throws Exception {
         return delegate.makeVisible(aRow, need2Select != null ? need2Select : false);
     }
@@ -289,7 +296,12 @@ public class ModelGrid extends Component<DbGrid> {
 
     @ScriptFunction(jsDoc = COLUMNS_CELLS_JSDOC)
     public List<Object> getColumns() throws Exception {
-        return delegate.getColumns();
+        List<Object> columns = new ArrayList<>();
+        // we have to preserve order of columns
+        delegate.getScriptableColumns().forEach((scrCol) -> {
+            columns.add(scrCol.getPublished());
+        });
+        return columns;
     }
 
     @Override
@@ -299,6 +311,23 @@ public class ModelGrid extends Component<DbGrid> {
                 throw new NoPublisherException();
             }
             published = publisher.call(null, new Object[]{this});
+            JSObject jsPublished = (JSObject) published;
+            delegate.getScriptableColumns().stream().forEach((ScriptableColumn aColumn) -> {
+                if (aColumn.getDesignColumn() != null && aColumn.getDesignColumn().getControlInfo() != null) {
+                    TableCellEditor cellEditor = aColumn.getViewColumn().getCellEditor();
+                    if(cellEditor instanceof InsettedEditor){
+                        cellEditor = ((InsettedEditor)cellEditor).unwrap();
+                    }
+                    if (cellEditor instanceof ScalarDbControl
+                            && cellEditor instanceof JComponent) {
+                        ControlsWrapper apiWrapper = new ControlsWrapper((JComponent)cellEditor);
+                        aColumn.getDesignColumn().getControlInfo().accept(apiWrapper);
+                        ScalarDbControl editorControl = (ScalarDbControl) cellEditor;
+                        editorControl.injectPublished(apiWrapper.getResult().getPublished());
+                    }
+                }
+                jsPublished.setMember(aColumn.getName(), aColumn.getPublished());
+            });
         }
         return published;
     }

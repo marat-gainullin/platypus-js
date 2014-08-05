@@ -15,6 +15,7 @@
  */
 package com.bearsoft.gwt.ui.widgets.progress;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -177,6 +178,7 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
         textElement.setClassName("gwt-ProgressBar-text");
         // Set the current progress
         setValue(aValue);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     /**

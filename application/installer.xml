@@ -50,7 +50,6 @@
 		<exclude name="thirdparty/geotools/*.jar"/>
 		<exclude name="thirdparty/mina/*.jar"/>
 		<exclude name="own/OpcDa.jar"/>
-		<exclude name="own/Sensors.jar"/>
 	  </fileset>        
 	  
 	  <fileset dir="lib" targetdir="$INSTALL_PATH/lib">
@@ -129,7 +128,6 @@
       	  </fileset>
 	  <fileset dir="lib/own" targetdir="$INSTALL_PATH/lib/own">
 		<include name="OpcDa.jar"/> 
-		<include name="Sensors.jar"/>
 	  </fileset>
     </pack>
 	

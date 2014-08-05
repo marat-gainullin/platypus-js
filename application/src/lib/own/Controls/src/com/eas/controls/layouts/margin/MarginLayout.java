@@ -44,7 +44,7 @@ public class MarginLayout implements LayoutManager2 {
 
     @Override
     public void layoutContainer(Container aContainer) {
-        for (Entry<Component, MarginConstraints> entry : layouted.entrySet()) {
+        layouted.entrySet().stream().forEach((entry) -> {
             Component comp = entry.getKey();
             if (comp.isVisible()) {
                 Dimension containerSize = aContainer.getSize();
@@ -52,7 +52,7 @@ public class MarginLayout implements LayoutManager2 {
                 Rectangle bounds = constraints.toRectangle(containerSize.width, containerSize.height);
                 comp.setBounds(bounds);
             }
-        }
+        });
     }
 
     @Override

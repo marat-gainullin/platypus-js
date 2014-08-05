@@ -5,7 +5,7 @@
     });
     
     /**
-     * A model component that shows a map.
+     * Experimental. A model component that shows a map.
      * Unsupported in HTML5 client.
      * @constructor ModelMap ModelMap
      */
@@ -332,6 +332,20 @@
              */
             P.ModelMap.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -348,20 +362,6 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -465,23 +465,6 @@
              */
             P.ModelMap.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -498,6 +481,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -733,6 +733,19 @@
         }
     };
         /**
+         * Gets map's layer by the title.
+         * @param layerTitle the layer's title.
+         * @return an <code>MapLayer</code> instance.
+         * @method getLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.getLayer = function(layerTitle) {
+            var delegate = this.unwrap();
+            var value = delegate.getLayer(P.boxAsJava(layerTitle));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Hits to the specified point.
          * @param hitObject the object to hit, can be either a Point or a Polygon instance.
          * @return an array of <code>SelectionEntry</code> elements
@@ -758,28 +771,15 @@
         };
 
         /**
-         * Gets map's layer by the title.
-         * @param layerTitle the layer's title.
-         * @return an <code>MapLayer</code> instance.
-         * @method getLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.getLayer = function(layerTitle) {
-            var delegate = this.unwrap();
-            var value = delegate.getLayer(P.boxAsJava(layerTitle));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes layer by the specified title.
          * @param layerTitle the layer's title.
          * @return <code>MapLayer</code> instance.
          * @method removeLayer
          * @memberOf ModelMap
          */
-        P.ModelMap.prototype.removeLayer = function(arg0) {
+        P.ModelMap.prototype.removeLayer = function(layerTitle) {
             var delegate = this.unwrap();
-            var value = delegate.removeLayer(P.boxAsJava(arg0));
+            var value = delegate.removeLayer(P.boxAsJava(layerTitle));
             return P.boxAsJs(value);
         };
 

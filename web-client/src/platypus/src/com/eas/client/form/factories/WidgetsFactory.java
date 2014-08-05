@@ -22,6 +22,7 @@ import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasJsName;
+import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedFont;
 import com.eas.client.form.published.containers.AbsolutePane;
@@ -426,8 +427,8 @@ public class WidgetsFactory {
 	private PlatypusSlider createSlider(Element aTag) throws Exception {
 		PlatypusSlider component = new PlatypusSlider();
 		Publisher.publish(component);
-		component.setMaxValue(Utils.getIntegerAttribute(aTag, "maximum", -Integer.MAX_VALUE));
-		component.setMinValue(Utils.getIntegerAttribute(aTag, "minimum", Integer.MAX_VALUE));
+		component.setMaxValue(Utils.getIntegerAttribute(aTag, "maximum", 100));
+		component.setMinValue(Utils.getIntegerAttribute(aTag, "minimum", 0));
 		component.setValue((double) Utils.getIntegerAttribute(aTag, "value", (int) component.getMinValue()));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
@@ -903,17 +904,17 @@ public class WidgetsFactory {
 						ToolBar container = (ToolBar) parentComp;
 						container.add((Widget) aComponent);
 					} else if (parentComp instanceof HBoxPane) {
-						Point prefSize = componentsPreferredSize.get(aComponent);
-						if (prefSize != null)
-							aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
 						HBoxPane container = (HBoxPane) parentComp;
 						container.add((Widget) aComponent);
-					} else if (parentComp instanceof VBoxPane) {
 						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
-							aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
+							((HasPublished)aComponent).getPublished().<PublishedComponent>cast().setWidth(prefSize.getX());
+					} else if (parentComp instanceof VBoxPane) {
 						VBoxPane container = (VBoxPane) parentComp;
 						container.add((Widget) aComponent);
+						Point prefSize = componentsPreferredSize.get(aComponent);
+						if (prefSize != null)
+							((HasPublished)aComponent).getPublished().<PublishedComponent>cast().setHeight(prefSize.getY());
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
 						container.add(aComponent);
@@ -972,14 +973,16 @@ public class WidgetsFactory {
 	}
 
 	private VBoxPane createVBox(Element aTag, Element aLayoutTag) throws Exception {
-		VBoxPane vbox = new VBoxPane();
+		int vgap = Utils.getIntegerAttribute(aLayoutTag, "vgap", 0);
+		VBoxPane vbox = new VBoxPane(vgap);
 		Publisher.publish(vbox);
 		processGeneralProperties(vbox, aTag, vbox.getPublished().<PublishedComponent> cast());
 		return vbox;
 	}
 
 	private HBoxPane createHBox(Element aTag, Element aLayoutTag) throws Exception {
-		HBoxPane hbox = new HBoxPane();
+		int hgap = Utils.getIntegerAttribute(aLayoutTag, "hgap", 0);
+		HBoxPane hbox = new HBoxPane(hgap);
 		Publisher.publish(hbox);
 		processGeneralProperties(hbox, aTag, hbox.getPublished().<PublishedComponent> cast());
 		return hbox;

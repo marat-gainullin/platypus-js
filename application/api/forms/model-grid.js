@@ -170,6 +170,20 @@
              */
             P.ModelGrid.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -186,20 +200,6 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -252,23 +252,6 @@
              */
             P.ModelGrid.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -285,6 +268,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -896,17 +896,6 @@
         };
 
         /**
-         *  Gets the array of selected rows.
-         * @method select
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.select = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Clears current selection.
          * @method clearSelection
          * @memberOf ModelGrid
@@ -918,27 +907,26 @@
         };
 
         /**
-         * Makes specified row visible.
-         * @param row the row to make visible.
-         * @param need2select true to select the row (optional).
-         * @method makeVisible
+         *  Gets the array of selected rows.
+         * @param instance Entity's instance to be selected.
+         * @method select
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.makeVisible = function(arg0, arg1) {
+        P.ModelGrid.prototype.select = function(instance) {
             var delegate = this.unwrap();
-            var value = delegate.makeVisible(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.select(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
         /**
-         * Unselects the specified row.
-         * @param row the row to be unselected
+         * Unselects the specified instance.
+         * @param instance Entity's instance to be unselected
          * @method unselect
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.unselect = function(row) {
+        P.ModelGrid.prototype.unselect = function(instance) {
             var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(row));
+            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -951,6 +939,19 @@
         P.ModelGrid.prototype.findSomething = function() {
             var delegate = this.unwrap();
             var value = delegate.findSomething();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Makes specified instance visible.
+         * @param instance Entity's instance to make visible.
+         * @param need2select true to select the instance (optional).
+         * @method makeVisible
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
+            var delegate = this.unwrap();
+            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
             return P.boxAsJs(value);
         };
 

@@ -12,6 +12,7 @@ import com.eas.client.cache.FilesAppCache;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.deploy.Deployer;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
@@ -30,7 +31,10 @@ import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
@@ -38,11 +42,15 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.URLReader;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.DatabaseException;
@@ -71,6 +79,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
+import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -94,6 +103,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected ProjectState state;
     protected final FileObject projectDir;
     protected ScriptedDatabasesClient client;
+    protected ScriptEngine jsEngine;
     protected RequestProcessor.Task connecting2Db;
     protected PlatypusProjectInformation info;
     protected PlatypusProjectSettingsImpl settings;
@@ -109,31 +119,23 @@ public class PlatypusProjectImpl implements PlatypusProject {
         state = aState;
         projectDir = aProjectDir;
         settings = new PlatypusProjectSettingsImpl(aProjectDir);
-        settings.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(final PropertyChangeEvent evt) {
-                if (evt.getNewValue() == null ? evt.getOldValue() != null : !evt.getNewValue().equals(evt.getOldValue())) {
-                    state.markModified();
-                    if (PlatypusProjectSettingsImpl.DEFAULT_DATA_SOURCE_ELEMENT_KEY.equals(evt.getPropertyName())) {
-                        EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    if (evt.getNewValue() != null) {
-                                        client.setDefaultDatasourceName((String) evt.getNewValue(), false);
-                                        startConnecting2db(null);
-                                    } else {
-                                        client.setDefaultDatasourceName((String) evt.getNewValue());
-                                        fireClientDefaultDatasourceChanged((String) evt.getOldValue(), (String) evt.getNewValue());
-                                    }
-                                } catch (Exception ex) {
-                                    Exceptions.printStackTrace(ex);
-                                }
+        settings.getChangeSupport().addPropertyChangeListener((final PropertyChangeEvent evt) -> {
+            if (evt.getNewValue() == null ? evt.getOldValue() != null : !evt.getNewValue().equals(evt.getOldValue())) {
+                state.markModified();
+                if (PlatypusProjectSettingsImpl.DEFAULT_DATA_SOURCE_ELEMENT_KEY.equals(evt.getPropertyName())) {
+                    EventQueue.invokeLater(() -> {
+                        try {
+                            if (evt.getNewValue() != null) {
+                                client.setDefaultDatasourceName((String) evt.getNewValue(), false);
+                                startConnecting2db(null);
+                            } else {
+                                client.setDefaultDatasourceName((String) evt.getNewValue());
+                                fireClientDefaultDatasourceChanged((String) evt.getOldValue(), (String) evt.getNewValue());
                             }
-
-                        });
-                    }
+                        } catch (Exception ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    });
                 }
             }
         });
@@ -152,8 +154,34 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false);
+        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false) {
+
+            @Override
+            protected JSObject createModule(String aModuleId) throws Exception {
+                String sourcePath = client.getAppCache().translateScriptPath(aModuleId);
+                if (sourcePath != null) {
+                    URL sourceUrl;
+                    File test = new File(sourcePath);
+                    if (test.exists()) {
+                        sourceUrl = Utilities.toURI(test).toURL();
+                    } else {
+                        try {
+                            sourceUrl = new URL(sourcePath);
+                        } catch (MalformedURLException ex) {
+                            throw new FileNotFoundException(sourcePath);
+                        }
+                    }
+                    URLReader reader = new URLReader(sourceUrl, SettingsConstants.COMMON_ENCODING);
+                    jsEngine.eval(reader);
+                    return (JSObject) jsEngine.eval("new " + aModuleId + "()");
+                } else {
+                    return null;
+                }
+            }
+        };
         deployer = new Deployer(FileUtil.toFile(projectDir), client);
+        jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
+        jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
     }
 
     @Override
@@ -583,7 +611,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 }
                 if (resources == null) {
                     resources = new ArrayList<>();
-                    resources.add(new PathResourceImpl(new URL[] {getSrcRoot().toURL()}));
+                    resources.add(new PathResourceImpl(new URL[]{getSrcRoot().toURL()}));
                 }
                 return resources;
             } catch (Exception ex) {

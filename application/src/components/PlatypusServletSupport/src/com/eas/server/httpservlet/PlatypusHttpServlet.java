@@ -3,7 +3,6 @@ package com.eas.server.httpservlet;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;

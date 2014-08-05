@@ -15,13 +15,13 @@ import jdk.nashorn.api.scripting.JSObject;
  * Class, aggregating row data, style information and substituting information,
  * that should be displayed instead of real data.
  *
- * @author Gala
+ * @author mg
  */
 public class CellData implements Comparable<Object>, HasPublished  {
 
-    public CascadedStyle style = null;
-    public Object data = null;
-    public Object display = null;
+    public CascadedStyle style;
+    public Object data;
+    public Object display;
 
     private static JSObject publisher;
     protected Object published;
@@ -55,6 +55,11 @@ public class CellData implements Comparable<Object>, HasPublished  {
         return style;
     }
 
+    @ScriptFunction
+    public void setStyle(CascadedStyle aValue) {
+        style = aValue;
+    }
+
     /**
      * Returns real data from subject area.
      *
@@ -79,6 +84,11 @@ public class CellData implements Comparable<Object>, HasPublished  {
             + " */")
     public Object getDisplay() {
         return display;
+    }
+
+    @ScriptFunction
+    public void setDisplay(Object aValue) {
+        display = aValue;
     }
 
     @Override

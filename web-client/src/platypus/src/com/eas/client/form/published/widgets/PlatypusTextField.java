@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.ActionEvent;
@@ -39,6 +40,7 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 
 	public PlatypusTextField() {
 		super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override

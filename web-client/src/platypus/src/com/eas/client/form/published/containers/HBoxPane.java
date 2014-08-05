@@ -19,9 +19,9 @@ import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -31,8 +31,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
-		HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
+public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
+        HasRemoveHandlers, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -174,13 +174,9 @@ public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnab
 		return res;
 	}
 
-	public void ajustWidth(Widget aChild, int aValue) {
-		if (aChild != null) {
-			XElement xwe = aChild.getElement().<XElement> cast();
-			int hDelta = xwe.getOffsetWidth() - xwe.getContentWidth();
-			xwe.getStyle().setWidth(aValue - hDelta, Style.Unit.PX);
-			onResize();
-		}
+	@Override
+	protected void setAjustedWidth(double aValue) {
+		published.<PublishedComponent>cast().setWidth(aValue);
 	}
 
 	@Override

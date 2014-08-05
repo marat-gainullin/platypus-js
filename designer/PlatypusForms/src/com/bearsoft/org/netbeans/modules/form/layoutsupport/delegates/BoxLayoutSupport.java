@@ -45,11 +45,10 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.eas.controls.visitors.SwingFactory;
+import com.eas.controls.layouts.box.BoxLayout;
 import java.awt.*;
 import java.beans.*;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
+import java.lang.reflect.InvocationTargetException;
 import javax.swing.JPanel;
 
 /**
@@ -62,7 +61,9 @@ import javax.swing.JPanel;
 // Expects ltr orientation of the designer
 public class BoxLayoutSupport extends AbstractLayoutSupport {
 
-    private int axis = BoxLayout.LINE_AXIS;
+    private int axis = BoxLayout.X_AXIS;
+    private int hgap;
+    private int vgap;
     private FormProperty<?>[] properties;
 
     /**
@@ -82,11 +83,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
      * reverted.
      *
      * @param ev PropertyChangeEvent object describing the change
+     * @throws java.beans.PropertyVetoException
      */
     @Override
     public void acceptContainerLayoutChange(PropertyChangeEvent ev)
             throws PropertyVetoException {   // accept any change, just need to update the BoxLayout instance;
-        // since it has no properties, it must be create again
+        // since it has no properties, it must be created again
         updateLayoutInstance();
         super.acceptContainerLayoutChange(ev);
     }
@@ -154,7 +156,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
     @Override
     public Object[] getAssistantParams() {
-        return new Object[]{Integer.valueOf(assistantParams + 1)};
+        return new Object[]{assistantParams + 1};
     }
 
     /**
@@ -182,6 +184,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             int newIndex,
             Graphics g) {
         if (containerDelegate.getLayout() instanceof BoxLayout) {
+            Dimension containerSize = containerDelegate.getSize();
 
             Component[] components = containerDelegate.getComponents();
             Rectangle rect;
@@ -189,14 +192,10 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             if ((components.length == 0) || ((components.length == 1) && (components[0] == component))) {
                 Insets ins = containerDelegate.getInsets();
                 rect = (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS)
-                        ? new Rectangle(ins.left,
-                        ins.top + (containerDelegate.getHeight()
-                        - ins.top - ins.bottom - 20) / 2,
-                        30, 20)
-                        : new Rectangle(ins.left + (containerDelegate.getWidth()
-                        - ins.left - ins.right - 30) / 2,
-                        ins.top,
-                        30, 20);
+                        ? new Rectangle(ins.left, ins.top,
+                                30, containerSize.height)
+                        : new Rectangle(ins.left, ins.top,
+                                containerSize.width, 20);
             } else if (newIndex < 0 || newIndex >= components.length) {
                 Component comp = components[components.length - 1];
                 if (comp == component) {
@@ -204,12 +203,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                 }
                 Rectangle b = comp.getBounds();
                 rect = (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS)
-                        ? new Rectangle(b.x + b.width - 10, b.y, 20, b.height)
+                        ? new Rectangle(b.x + b.width - 10, b.y, 30, b.height)
                         : new Rectangle(b.x, b.y + b.height - 10, b.width, 20);
             } else {
                 Rectangle b = components[newIndex].getBounds();
                 rect = (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS)
-                        ? new Rectangle(b.x - 10, b.y, 20, b.height)
+                        ? new Rectangle(b.x - 10, b.y, 30, b.height)
                         : new Rectangle(b.x, b.y - 10, b.width, 20);
             }
 
@@ -246,15 +245,17 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             int index) {
         // Issue 63955 and JDK bug 4294758
         ((LayoutManager2) containerDelegate.getLayout()).invalidateLayout(containerDelegate);
-        int axis = ((BoxLayout) containerDelegate.getLayout()).getAxis();
-        for(Component comp : components)
-        {
-            if (comp instanceof JComponent) {
-                ((JComponent) comp).setAlignmentX(1.0f);
-                ((JComponent) comp).setAlignmentY(1.0f);
-            }
-            SwingFactory.prefToMaxForBox(axis, comp);
-        }
+        /*
+         int axis = ((BoxLayout) containerDelegate.getLayout()).getAxis();
+         for (Component comp : components) {
+         if (comp instanceof JComponent) {
+         comp.setPreferredSize(comp.getSize());
+         ((JComponent) comp).setAlignmentX(1.0f);
+         ((JComponent) comp).setAlignmentY(1.0f);
+         SwingFactory.prefToMaxForBox(axis, comp);
+         }
+         }
+         */
         super.addComponentsToContainer(container, containerDelegate, components, index);
     }
 
@@ -284,7 +285,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     @Override
     protected LayoutManager cloneLayoutInstance(Container container,
             Container containerDelegate) {
-        return new BoxLayout(containerDelegate, axis);
+        return new BoxLayout(containerDelegate, axis, hgap, vgap);
     }
 
     /**
@@ -336,55 +337,112 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
         if (properties == null) {
             // we cannot use RADProperty because "axis" is not a real
             // bean property - we must create a special FormProperty
-            properties = new FormProperty<?>[1];
+            properties = new FormProperty<?>[]{
+                new FormProperty<Integer>(
+                "axis", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_axis"), // NOI18N
+                getBundle().getString("HINT_axis")) // NOI18N
+                {
+                    protected BoxAxisEditor editor;
 
-            properties[0] = new FormProperty<Integer>(
-                    "axis", // NOI18N
-                    Integer.TYPE,
-                    getBundle().getString("PROP_axis"), // NOI18N
-                    getBundle().getString("HINT_axis")) // NOI18N
-            {
-                protected BoxAxisEditor editor;
-
-                @Override
-                public PropertyEditor getPropertyEditor() {
-                    if (editor == null) {
-                        editor = new BoxAxisEditor();
+                    @Override
+                    public PropertyEditor getPropertyEditor() {
+                        if (editor == null) {
+                            editor = new BoxAxisEditor();
+                        }
+                        return editor;
                     }
-                    return editor;
-                }
 
-                @Override
-                public Integer getValue() {
-                    return axis;
-                }
+                    @Override
+                    public Integer getValue() {
+                        return axis;
+                    }
 
-                @Override
-                public void setValue(Integer value) {
-                    Integer oldValue = getValue();
-                    int ax = value.intValue();
-                    if (ax == BoxLayout.X_AXIS || ax == BoxLayout.Y_AXIS
-                            || ax == BoxLayout.LINE_AXIS || ax == BoxLayout.PAGE_AXIS) {
-                        if (axis != ax) {
-                            axis = ax;
-                            setChanged(axis != BoxLayout.LINE_AXIS);
-                            propertyValueChanged(oldValue, value);
+                    @Override
+                    public void setValue(Integer value) {
+                        Integer oldValue = getValue();
+                        int ax = value;
+                        if (ax == BoxLayout.X_AXIS || ax == BoxLayout.Y_AXIS
+                                || ax == BoxLayout.LINE_AXIS || ax == BoxLayout.PAGE_AXIS) {
+                            if (axis != ax) {
+                                axis = ax;
+                                setChanged(axis != BoxLayout.X_AXIS);
+                                propertyValueChanged(oldValue, value);
+                            }
                         }
                     }
-                }
 
-                @Override
-                public boolean supportsDefaultValue() {
-                    return true;
-                }
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
 
-                @Override
-                public Integer getDefaultValue() {
-                    return new Integer(BoxLayout.LINE_AXIS);
-                }
+                    @Override
+                    public Integer getDefaultValue() {
+                        return BoxLayout.X_AXIS;
+                    }
+                },
+                new FormProperty<Integer>(
+                "hgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_hgap"), // NOI18N
+                getBundle().getString("HINT_hgap")) {
+
+                    @Override
+                    public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                        return hgap;
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                        int oldValue = hgap;
+                        hgap = aValue != null ? aValue : 0;
+                        setChanged(hgap != 0);
+                        propertyValueChanged(oldValue, hgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                }, // NOI18N
+                new FormProperty<Integer>(
+                "vgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_vgap"), // NOI18N
+                getBundle().getString("HINT_vgap")) {
+
+                    @Override
+                    public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                        return vgap;
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                        int oldValue = vgap;
+                        vgap = aValue != null ? aValue : 0;
+                        setChanged(vgap != 0);
+                        propertyValueChanged(oldValue, vgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                } // NOI18N
             };
         }
-
         return properties;
     }
 
@@ -393,6 +451,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
      * AbstractLayoutSupport because alternative properties are used for
      * BoxLayout (see getProperties method)
      *
+     * @param propName
      * @return layout property of given name
      */
     @Override
@@ -426,16 +485,16 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             getBundle().getString("VALUE_axis_y") // NOI18N
         };
         private final Integer[] values = {
-            new Integer(BoxLayout.LINE_AXIS),
-            new Integer(BoxLayout.PAGE_AXIS),
-            new Integer(BoxLayout.X_AXIS),
-            new Integer(BoxLayout.Y_AXIS)
+            BoxLayout.LINE_AXIS,
+            BoxLayout.PAGE_AXIS,
+            BoxLayout.X_AXIS,
+            BoxLayout.Y_AXIS
         };
         private final String[] javaInitStrings = {
-            "javax.swing.BoxLayout.LINE_AXIS", // NOI18N
-            "javax.swing.BoxLayout.PAGE_AXIS", // NOI18N
-            "javax.swing.BoxLayout.X_AXIS", // NOI18N
-            "javax.swing.BoxLayout.Y_AXIS" // NOI18N
+            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".LINE_AXIS", // NOI18N
+            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".PAGE_AXIS", // NOI18N
+            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".X_AXIS", // NOI18N
+            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".Y_AXIS" // NOI18N
         };
 
         @Override

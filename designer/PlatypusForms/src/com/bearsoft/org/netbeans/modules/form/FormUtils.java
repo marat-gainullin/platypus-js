@@ -746,7 +746,7 @@ public class FormUtils {
     private static void initLayoutClasses2PlatypusContainerClasses() {
         layoutClasses2PlatypusContainerClasses.put(com.eas.controls.layouts.margin.MarginLayout.class, AnchorsPane.class);
         layoutClasses2PlatypusContainerClasses.put(java.awt.BorderLayout.class, BorderPane.class);
-        layoutClasses2PlatypusContainerClasses.put(javax.swing.BoxLayout.class, BoxPane.class);
+        layoutClasses2PlatypusContainerClasses.put(com.eas.controls.layouts.box.BoxLayout.class, BoxPane.class);
         layoutClasses2PlatypusContainerClasses.put(org.netbeans.lib.awtextra.AbsoluteLayout.class, AbsolutePane.class); 
         layoutClasses2PlatypusContainerClasses.put(java.awt.FlowLayout.class, FlowPane.class);
         layoutClasses2PlatypusContainerClasses.put(java.awt.CardLayout.class, CardPane.class);

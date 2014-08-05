@@ -5,6 +5,11 @@ import java.util.List;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.window.WindowUI;
+import com.bearsoft.gwt.ui.containers.window.events.ActivateEvent;
+import com.bearsoft.gwt.ui.containers.window.events.ActivateHandler;
+import com.bearsoft.gwt.ui.containers.window.events.ClosedEvent;
+import com.bearsoft.gwt.ui.containers.window.events.ClosedHandler;
+import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.HasHideHandlers;
 import com.eas.client.form.events.HasShowHandlers;
@@ -21,6 +26,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -36,22 +43,24 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
+        HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled = true;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
 
-	public static final int DEFAULT_WINDOWS_SPACING_X = 15;
-	public static final int DEFAULT_WINDOWS_SPACING_Y = 10;
+	public static final int DEFAULT_WINDOWS_SPACING_X = 25;
+	public static final int DEFAULT_WINDOWS_SPACING_Y = 20;
 	protected List<WindowUI> managed = new ArrayList<>();
 	protected Point consideredPosition = new Point(DEFAULT_WINDOWS_SPACING_X, DEFAULT_WINDOWS_SPACING_Y);
 
 	public DesktopPane() {
 		super();
 		getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -93,9 +102,9 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -107,7 +116,7 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -129,10 +138,10 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -152,9 +161,11 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 
 	public List<HasPublished> getPublishedManaged() {
 		List<HasPublished> res = new ArrayList<>();
-		for(WindowUI wui : managed)
-			if(wui instanceof HasPublished)
-				res.add((HasPublished)wui);
+		for (WindowUI wui : managed) {
+			if (wui instanceof HasPublished) {
+				res.add((HasPublished) wui);
+			}
+		}
 		return res;
 	}
 
@@ -177,7 +188,7 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	}
 
 	public void closeAll() {
-		for (WindowUI wd : managed) {
+		for (WindowUI wd : managed.toArray(new WindowUI[] {})) {
 			wd.close();
 		}
 		managed.clear();
@@ -191,25 +202,56 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	public void add(Widget child) {
 		super.add(child);
 		if (child instanceof WindowUI) {
+			WindowUI w = (WindowUI) child;
 			child.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+			managed.add(w);
 			refreshConsideredPosition();
+			final GroupingHandlerRegistration activateClosedReg = new GroupingHandlerRegistration();
+			activateClosedReg.add(w.addActivateHandler(new ActivateHandler<WindowUI>() {
+
+				@Override
+				public void onActivate(ActivateEvent<WindowUI> anEvent) {
+					for (WindowUI wd : managed) {
+						if (wd != anEvent.getTarget()) {
+							wd.setActive(false);
+						}
+					}
+				}
+
+			}));
+			activateClosedReg.add(w.addClosedHandler(new ClosedHandler<WindowUI>(){
+
+				@Override
+                public void onClosed(ClosedEvent<WindowUI> event) {
+					activateClosedReg.removeHandler();
+                }
+				
+			}));
 		}
+	}
+
+	@Override
+	public boolean remove(Widget w) {
+		if (w instanceof WindowUI) {
+			managed.remove((WindowUI) w);
+		}
+		return super.remove(w);
 	}
 
 	@Override
 	public void onResize() {
 		refreshConsideredPosition();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
 
 	private void refreshConsideredPosition() {
 		if (consideredPosition.getX() > getElement().getClientWidth() / 2) {
-			consideredPosition = consideredPosition.plus(new Point(-consideredPosition.getX(), 0));// setX(0)
+			consideredPosition = new Point(0, consideredPosition.getY());// setX(0)
 		}
 		if (consideredPosition.getY() > getElement().getClientHeight() / 2) {
-			consideredPosition = consideredPosition.plus(new Point(0, -consideredPosition.getY()));// setY(0)
+			consideredPosition = new Point(consideredPosition.getX(), 0);// setY(0)
 		}
 		consideredPosition = consideredPosition.plus(new Point(DEFAULT_WINDOWS_SPACING_X, DEFAULT_WINDOWS_SPACING_Y));
 	}
@@ -231,27 +273,27 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "forms", {
-			get : function(){
+			get : function() {
 				var managed = aWidget.@com.eas.client.form.published.widgets.DesktopPane::getPublishedManaged()();
 				var res = [];
-				for(var i = 0; i < managed.@java.util.List::size()(); i++){
+				for ( var i = 0; i < managed.@java.util.List::size()(); i++) {
 					var m = managed.@java.util.List::get(I)(i);
 					res[res.length] = m.@com.eas.client.form.published.HasPublished::getPublished()();
 				}
 				return res;
-			} 
+			}
 		});
-		published.closeAll = function(){
-			aWidget.@com.eas.client.form.published.widgets.DesktopPane::closeAll()();				
+		published.closeAll = function() {
+			aWidget.@com.eas.client.form.published.widgets.DesktopPane::closeAll()();
 		}
-		published.minimizeAll = function(){
-			aWidget.@com.eas.client.form.published.widgets.DesktopPane::minimizeAll()();				
+		published.minimizeAll = function() {
+			aWidget.@com.eas.client.form.published.widgets.DesktopPane::minimizeAll()();
 		}
-		published.maximizeAll = function(){
-			aWidget.@com.eas.client.form.published.widgets.DesktopPane::maximizeAll()();				
+		published.maximizeAll = function() {
+			aWidget.@com.eas.client.form.published.widgets.DesktopPane::maximizeAll()();
 		}
-		published.restoreAll = function(){
-			aWidget.@com.eas.client.form.published.widgets.DesktopPane::restoreAll()();				
+		published.restoreAll = function() {
+			aWidget.@com.eas.client.form.published.widgets.DesktopPane::restoreAll()();
 		}
 	}-*/;
 }

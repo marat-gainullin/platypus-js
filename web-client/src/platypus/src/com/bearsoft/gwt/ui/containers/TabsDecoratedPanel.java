@@ -1,6 +1,7 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.HasImageResource;
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.bearsoft.gwt.ui.widgets.ImageLabel;
 import com.google.gwt.core.client.GWT;
@@ -21,7 +22,6 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
@@ -76,20 +76,16 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				tabBarContainer = (LayoutPanel) w;
 			}
 
-			private void checkIndex(int index) {
-				assert (index >= 0) && (index < getWidgetCount()) : "Index out of bounds";
-			}
-
 			@Override
 			public void insert(Widget child, Widget tab, int beforeIndex) {
 				child.getElement().getStyle().clearWidth();
 				child.getElement().getStyle().clearHeight();
-				if (child instanceof FocusWidget) {
+				//if (child instanceof FocusWidget) {
 					child.getElement().getStyle().clearRight();
 					child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 					com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
 					child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-				}
+				//}
 				super.insert(child, tab, beforeIndex);
 			}
 
@@ -203,14 +199,17 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 					}
 					if (w instanceof HasHTML) {
 						HasHTML h = (HasHTML) w;
-						menu.addItem(new MenuItemImageText(h.getHTML(), true, imageUri, tabSelector));
+						String textAsHtml = h.getHTML();
+						menu.addItem(new MenuItemImageText(textAsHtml != null ? textAsHtml : h.getText(), true, imageUri, tabSelector));
 					} else if (w instanceof HasText) {
 						HasText l = (HasText) w;
 						menu.addItem(new MenuItemImageText(l.getText(), false, imageUri, tabSelector));
 					}
 				}
 				pp.setWidget(menu);
-				pp.showRelativeTo(chevron);
+				Widget lastWidget = chevron.getWidget(chevron.getWidgetCount() - 1);
+				pp.setPopupPosition(lastWidget.getAbsoluteLeft(), lastWidget.getAbsoluteTop() + lastWidget.getElement().getOffsetHeight());
+				pp.showRelativeTo(lastWidget);
 			}
 		});
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
@@ -231,6 +230,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		chevron.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		assert tabBarContainer != null;
 		tabBarContainer.getWidgetContainerElement(tabBar).appendChild(chevron.getElement());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public boolean isTabsOnTop() {

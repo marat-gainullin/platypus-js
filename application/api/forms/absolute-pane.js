@@ -306,6 +306,20 @@
              */
             P.AbsolutePane.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AbsolutePane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf AbsolutePane
+             */
+            P.AbsolutePane.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -322,20 +336,6 @@
              * @memberOf AbsolutePane
              */
             P.AbsolutePane.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.AbsolutePane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf AbsolutePane
-             */
-            P.AbsolutePane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -453,23 +453,6 @@
              */
             P.AbsolutePane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.AbsolutePane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf AbsolutePane
-             */
-            P.AbsolutePane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -486,6 +469,23 @@
              * @memberOf AbsolutePane
              */
             P.AbsolutePane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.AbsolutePane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf AbsolutePane
+             */
+            P.AbsolutePane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -744,9 +744,9 @@
          * @method toBack
          * @memberOf AbsolutePane
          */
-        P.AbsolutePane.prototype.toBack = function(arg0, arg1) {
+        P.AbsolutePane.prototype.toBack = function(component, count) {
             var delegate = this.unwrap();
-            var value = delegate.toBack(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.toBack(P.boxAsJava(component), P.boxAsJava(count));
             return P.boxAsJs(value);
         };
 

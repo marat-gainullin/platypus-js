@@ -9,11 +9,13 @@ import com.bearsoft.rowset.Row;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.PlatypusFormattedObjectEditorCell;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelFormattedField;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -25,7 +27,7 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 		setEditor(new ModelFormattedField());
 		((PlatypusFormattedObjectEditorCell) getTargetCell()).setRenderer(new CellRenderer<Object>() {
 			@Override
-			public boolean render(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
+			public boolean render(Cell.Context context, String aId, Object value, SafeHtmlBuilder sb) {
 				FormattedObjectModelGridColumn column = FormattedObjectModelGridColumn.this;
 				JavaScriptObject onRender = column.getOnRender() != null ? column.getOnRender() : column.getGrid().getOnRender();
 				if (onRender != null) {
@@ -44,9 +46,12 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = column.getGrid().complementPublishedStyle(styleToRender);
-						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, aId,  styleToRender, sb);
 						if (cellToRender != null) {
-							FormattedObjectModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(context instanceof RenderedCellContext){
+								((RenderedCellContext)context).setStyle(styleToRender);
+							}
+							FormattedObjectModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
 							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
 								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
 								FormattedObjectModelGridColumn.this.bindIconCallback(decorId, pImage);

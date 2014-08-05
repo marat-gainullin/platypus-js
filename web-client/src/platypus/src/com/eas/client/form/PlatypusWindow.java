@@ -114,7 +114,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	protected Runnable handlersResolver;
 
-	protected String formKey;
+	protected String formKey = "window-" + Document.get().createUniqueId();
 
 	public PlatypusWindow(Widget aView) {
 		super();
@@ -125,7 +125,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 			@Override
 			public void onMove(MoveEvent<WindowUI> event) {
-				location = new Point(event.getX(), event.getY());
+				Point p = new Point(event.getX(), event.getY());
+				location = p;
 			}
 		});
 		addResizeHandler(new ResizeHandler() {
@@ -215,12 +216,13 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, fd, aDoneCallback == null ? null : new Callback<XMLHttpRequest, XMLHttpRequest>() {
 			@Override
 			public void onSuccess(XMLHttpRequest aRequest) {
-				try{
+				try {
 					Utils.executeScriptEventVoid(aDoneCallback, aDoneCallback, aRequest);
-				}catch(Exception ex){
+				} catch (Exception ex) {
 					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
+
 			@Override
 			public void onFailure(XMLHttpRequest aRequest) {
 			}
@@ -245,9 +247,13 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	@Override
 	protected Widget getMovableTarget() {
-	    return popup != null ? popup : super.getMovableTarget();
+		if (getParent() instanceof DesktopPane) {
+			return this;
+		} else {
+			return popup != null ? popup : super.getMovableTarget();
+		}
 	}
-	
+
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
 		popup = new WindowPopupPanel(this, false, aModal);
 		popup.setWidget(view);
@@ -255,29 +261,33 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		double actualWidth = wasSize ? viewSize.getX() : viewPreferredWidth;
 		double actualHeight = wasSize ? viewSize.getY() : viewPreferredHeight;
 		popup.setSize(actualWidth, actualHeight);
-		popup.show();
 		if (locationByPlatform) {
 			if (aDesktop != null) {
-				popup.setPosition(aDesktop.getConsideredPosition().getX(), aDesktop.getConsideredPosition().getY());
+				aDesktop.add(this);
+				setPosition(aDesktop.getConsideredPosition().getX(), aDesktop.getConsideredPosition().getY());
 			} else {
-				int left = (Document.get().getClientWidth() - popup.getOffsetWidth()) / 2;
-				int top = (Document.get().getClientHeight() - popup.getOffsetHeight()) / 2;
-				popup.setPosition(left, top);
+				int left = (Document.get().getClientWidth() - (int) actualWidth) / 2;
+				int top = (Document.get().getClientHeight() - (int) actualHeight) / 2;
+				setPosition(left, top);
 			}
 		} else {
 			if (location != null) {
-				popup.setPosition(location.getX(), location.getY());
+				setPosition(location.getX(), location.getY());
 			} else {
 				if (aDesktop != null) {
-					int left = (aDesktop.getElement().getClientWidth() - popup.getOffsetWidth()) / 2;
-					int top = (aDesktop.getElement().getClientHeight() - popup.getOffsetHeight()) / 2;
-					popup.setPosition(left, top);
+					int left = (aDesktop.getElement().getClientWidth() - (int) actualWidth) / 2;
+					int top = (aDesktop.getElement().getClientHeight() - (int) actualHeight) / 2;
+					aDesktop.add(this);
+					setPosition(left, top);
 				} else {
-					int left = (Document.get().getClientWidth() - popup.getOffsetWidth()) / 2;
-					int top = (Document.get().getClientHeight() - popup.getOffsetHeight()) / 2;
-					popup.setPosition(left, top);
+					int left = (Document.get().getClientWidth() - (int) actualWidth) / 2;
+					int top = (Document.get().getClientHeight() - (int) actualHeight) / 2;
+					setPosition(left, top);
 				}
 			}
+		}
+		if (aDesktop == null) {
+			popup.show();
 		}
 	}
 
@@ -302,6 +312,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 			@Override
 			public void onActivate(ActivateEvent<WindowUI> event) {
+				for(WindowUI w : showingForms.values()){
+					if(w != event.getTarget() && w instanceof PlatypusWindow){
+						PlatypusWindow pw = (PlatypusWindow)w;
+						if(!(pw.getParent() instanceof DesktopPane)){
+							w.setActive(false);
+						}
+					}
+				}
 				if (windowActivated != null) {
 					try {
 						Utils.executeScriptEventVoid(published, windowActivated, JsEvents.publishWindowEvent(event, published));
@@ -430,7 +448,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		while (wIt.hasNext()) {
 			Widget w = wIt.next();
 			if (w instanceof HasJsName && w instanceof HasPublished) {
-				aTarget.<Utils.JsObject>cast().inject(((HasJsName)w).getJsName(), ((HasPublished) w).getPublished());
+				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
 			}
 			if (w instanceof HasWidgets)
 				publishComponentsFacades(aTarget, (HasWidgets) w);
@@ -451,7 +469,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setFormKey(Ljava/lang/String;)(''+aValue);
 	        } 
         });
-        aPublished.formKey = aPublished.applicationElementId; 
         Object.defineProperty(aPublished, "defaultCloseOperation", {
         	get : function(){
         		return aForm.@com.eas.client.form.PlatypusWindow::getDefaultCloseOperation()();
@@ -767,20 +784,23 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		caption.setText(aValue);
 	}
 
+	@Override
+	public void setPosition(double aLeft, double aTop) {
+		super.setPosition(aLeft, aTop);
+		if (popup != null)
+			popup.setPosition(aLeft, aTop);
+	}
+
 	public double getLeft() {
 		return location != null ? location.getX() : 0;
 	}
 
 	public void setLeft(double aValue) {
 		locationByPlatform = false;
-		if (popup != null)
-			popup.setPosition(aValue, getTop());
-		else {
-			setPosition(aValue, getTop());
-		}
+		setPosition(aValue, getTop());
 		if (location == null)
 			location = new Point(0, 0);
-		location = location.plus(new Point(aValue - location.getX(), 0));// setX
+		location = new Point(aValue, location.getY());// setX
 	}
 
 	public double getTop() {
@@ -789,14 +809,10 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setTop(double aValue) {
 		locationByPlatform = false;
-		if (popup != null) {
-			popup.setPosition(getLeft(), aValue);
-		} else {
-			setPosition(getLeft(), aValue);
-		}
+		setPosition(getLeft(), aValue);
 		if (location == null)
 			location = new Point(0, 0);
-		location = location.plus(new Point(0, aValue - location.getY()));// setY
+		location = new Point(location.getX(), aValue);// setY
 	}
 
 	public double getWidth() {

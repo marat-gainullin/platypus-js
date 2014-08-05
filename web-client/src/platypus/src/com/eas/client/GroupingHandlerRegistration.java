@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class GroupingHandlerRegistration {
+public class GroupingHandlerRegistration implements HandlerRegistration{
 
 	protected Set<HandlerRegistration> registrations = new HashSet<>();
 
@@ -17,6 +17,7 @@ public class GroupingHandlerRegistration {
 		registrations.add(aRegistration);
 	}
 
+	@Override
 	public void removeHandler() {
 		for (HandlerRegistration r : registrations) {
 			r.removeHandler();

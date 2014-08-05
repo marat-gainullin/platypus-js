@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.widgets;
 
+import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,8 +33,8 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	protected FlowPanel container = new FlowPanel();
 	protected HasValue<T> decorated;
 	protected boolean enabled = true;
-	protected boolean resized;
-	private HandlerRegistration changeValueHandler;
+	protected HandlerRegistration changeValueHandler;
+	protected SimplePanel contentWrapper = new SimplePanel();
 	protected SimplePanel selectButton = new SimplePanel();
 	protected SimplePanel clearButton = new SimplePanel();
 
@@ -46,19 +47,27 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		super();
 		initWidget(container);
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().addClassName("decorator");
+		contentWrapper.getElement().addClassName("decorator-content");
+		contentWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		contentWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		contentWrapper.getElement().getStyle().setLeft(0, Style.Unit.PX);
+		contentWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
+		contentWrapper.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		contentWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+		
 		selectButton.getElement().addClassName("decorator-select");
 		selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		selectButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
-		selectButton.getElement().getStyle().setBottom(0, Style.Unit.PX);
-		// selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		selectButton.getElement().setInnerHTML("&nbsp;");
+	    selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		clearButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		clearButton.getElement().getStyle().setTop(0, Style.Unit.PX);
-		clearButton.getElement().getStyle().setBottom(0, Style.Unit.PX);
-		// clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		clearButton.getElement().setInnerHTML("&nbsp;");
+		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		container.add(contentWrapper);
 		container.add(selectButton);
 		container.add(clearButton);
 		selectButton.addDomHandler(new ClickHandler() {
@@ -75,6 +84,8 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 				clearValue();
 			}
 		}, ClickEvent.getType());
+		organizeButtonsContent();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -144,16 +155,19 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 					}
 				});
 				if (decorated instanceof Widget) {
+					CommonResources.INSTANCE.commons().ensureInjected();
+					((Widget) decorated).getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 					Style style = ((Widget) decorated).getElement().getStyle();
 					style.setBorderWidth(0, Style.Unit.PX);
 					style.setPadding(0, Style.Unit.PX);
 					style.setMargin(0, Style.Unit.PX);
-					style.setPosition(Style.Position.RELATIVE);
+					style.setPosition(Style.Position.ABSOLUTE);
 					style.setDisplay(Style.Display.INLINE_BLOCK);
+					style.setLeft(0, Style.Unit.PX);
 					style.setTop(0, Style.Unit.PX);
-					style.setBottom(0, Style.Unit.PX);
 					style.setHeight(100, Style.Unit.PCT);
-					container.insert((Widget) decorated, 0);
+					style.setWidth(100, Style.Unit.PCT);
+					contentWrapper.setWidget((Widget) decorated);
 				}
 			}
 		}
@@ -163,6 +177,19 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}
 
+	protected void organizeButtonsContent(){
+		int right = 0;
+		if(isClearButtonVisible()){
+			clearButton.getElement().getStyle().setRight(right, Style.Unit.PX);
+			right += clearButton.getElement().getOffsetWidth();
+		}
+		if(isSelectButtonVisible()){
+			selectButton.getElement().getStyle().setRight(right, Style.Unit.PX);
+			right += selectButton.getElement().getOffsetWidth();
+		}
+		contentWrapper.getElement().getStyle().setRight(right, Style.Unit.PX);
+	}
+	
 	public boolean isSelectButtonVisible() {
 		return !Style.Display.NONE.getCssName().equalsIgnoreCase(selectButton.getElement().getStyle().getDisplay());
 	}
@@ -174,9 +201,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			} else {
 				selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 			}
-			if (resized) {
-				onResize();
-			}
+			organizeButtonsContent();
 		}
 	}
 
@@ -191,9 +216,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			} else {
 				clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 			}
-			if (resized) {
-				onResize();
-			}
+			organizeButtonsContent();
 		}
 	}
 
@@ -219,32 +242,14 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 	@Override
 	public void onResize() {
-		resized = true;
-		int containerContentWidth = container.getElement().<XElement> cast().getContentWidth();
-		int leftWidth = selectButton.getElement().getOffsetWidth();
-		int decoratedWidth = decorated instanceof Widget ? ((Widget) decorated).getElement().getOffsetWidth() : 0;
-		int rightWidth = clearButton.getElement().getOffsetWidth();
-		if (containerContentWidth - leftWidth - decoratedWidth - rightWidth != 0) {
-			int targetDecoratedWidth = containerContentWidth - leftWidth - rightWidth;
-			if (decorated instanceof Widget) {
-				Widget wDecorated = (Widget) decorated;
-				wDecorated.getElement().getStyle().setWidth(targetDecoratedWidth, Style.Unit.PX);
-				int newContentWidth = wDecorated.getElement().getOffsetWidth();
-				int delta = newContentWidth - targetDecoratedWidth;
-				if (delta != 0) {
-					wDecorated.getElement().getStyle().setWidth(targetDecoratedWidth - delta, Style.Unit.PX);
-				}
-			}
-		}
 		if (decorated instanceof RequiresResize) {
 			((RequiresResize) decorated).onResize();
 		}
 	}
-
+	
 	@Override
-	protected void onDetach() {
-		super.onDetach();
-		resized = false;
+	protected void onAttach() {
+	    super.onAttach();
+		organizeButtonsContent();
 	}
-
 }

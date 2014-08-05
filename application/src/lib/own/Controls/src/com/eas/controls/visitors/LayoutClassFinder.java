@@ -5,10 +5,10 @@
 package com.eas.controls.visitors;
 
 import com.eas.controls.layouts.*;
+import com.eas.controls.layouts.box.BoxLayout;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.controls.wrappers.PlatypusCardLayout;
 import java.awt.*;
-import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 
 /**

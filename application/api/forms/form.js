@@ -453,13 +453,14 @@
         };
 
         /**
-         * Shows the form as an ordinary window.
-         * @method show
+         * Shows the form as a dialog (modal window).
+         * @param callback a callback handler function
+         * @method showModal
          * @memberOf Form
          */
-        P.Form.prototype.show = function() {
+        P.Form.prototype.showModal = function(callback) {
             var delegate = this.unwrap();
-            var value = delegate.show();
+            var value = delegate.showModal(P.boxAsJava(callback));
             return P.boxAsJs(value);
         };
 
@@ -475,25 +476,25 @@
         };
 
         /**
-         * Shows the form as a dialog (modal window).
-         * @param callback a callback handler function
-         * @method showModal
+         * Shows the form as an ordinary window.
+         * @method show
          * @memberOf Form
          */
-        P.Form.prototype.showModal = function(callback) {
+        P.Form.prototype.show = function() {
             var delegate = this.unwrap();
-            var value = delegate.showModal(P.boxAsJava(callback));
+            var value = delegate.show();
             return P.boxAsJs(value);
         };
 
         /**
-         * Maximizes this form.
-         * @method maximize
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
          * @memberOf Form
          */
-        P.Form.prototype.maximize = function() {
+        P.Form.prototype.showInternalFrame = function(desktop) {
             var delegate = this.unwrap();
-            var value = delegate.maximize();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 
@@ -509,6 +510,17 @@
         };
 
         /**
+         * Maximizes this form.
+         * @method maximize
+         * @memberOf Form
+         */
+        P.Form.prototype.maximize = function() {
+            var delegate = this.unwrap();
+            var value = delegate.maximize();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Restores this form state.
          * @method restore
          * @memberOf Form
@@ -516,18 +528,6 @@
         P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        P.Form.prototype.showInternalFrame = function(desktop) {
-            var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 

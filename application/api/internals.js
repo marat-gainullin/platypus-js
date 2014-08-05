@@ -43,8 +43,6 @@
             var strValue = '' + aObject;
             if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(strValue)){
                 return new Date(strValue);
-            } else {
-                return strValue;
             }
         } else if (typeof aObject === 'object') {
             for (var prop in aObject) {

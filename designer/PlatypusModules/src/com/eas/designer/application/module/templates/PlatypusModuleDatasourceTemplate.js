@@ -39,9 +39,17 @@ function ${appElementName}(){
      */
     this.apply = function(aLog) {
         P.Logger.info("${appElementName}. aLog.length: " + aLog.length + ";");
-        aLog.forEach(function(aChange) {
-            aChange.consume();
-        });
+        for(var i = 0; i < aLog.length; i++) {
+            var change = aLog[i];
+            change.consume();
+            /**
+             * Common API of changes:
+             *   var data = change.data;
+             *   var keys = change.keys;
+             *   var type = change.type; // 'Update', 'Delete', 'Insert'
+             *   ...
+             */
+        };
     };
 
 }

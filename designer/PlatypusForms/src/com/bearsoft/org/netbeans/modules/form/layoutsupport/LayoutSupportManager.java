@@ -71,7 +71,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     //private boolean initializeFromCode;
     private Node.PropertySet[] propertySets;
     private LayoutListener layoutListener;
-    private RADVisualContainer<?> radContainer;
+    private final RADVisualContainer<?> radContainer;
     private Container primaryContainer; // bean instance from radContainer
     private Container primaryContainerDelegate; // container delegate for it
 
@@ -355,11 +355,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             }
             propertySets = layoutDelegate.getPropertySets();
 
-            for (int i = 0; i < propertySets.length; i++) {
-                FormProperty<?>[] props = (FormProperty<?>[]) propertySets[i].getProperties();
-                for (int j = 0; j < props.length; j++) {
-                    props[j].addVetoableChangeListener(getLayoutListener());
-                    props[j].addPropertyChangeListener(getLayoutListener());
+            for (Node.PropertySet propertySet : propertySets) {
+                FormProperty<?>[] props = (FormProperty<?>[]) propertySet.getProperties();
+                for (FormProperty<?> prop : props) {
+                    prop.addVetoableChangeListener(getLayoutListener());
+                    prop.addPropertyChangeListener(getLayoutListener());
                 }
             }
         }
@@ -775,9 +775,14 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         @Override
         public void propertyChange(PropertyChangeEvent ev) {
             Object source = ev.getSource();
-            if (source instanceof FormProperty<?>) {
+            String eventName = ev.getPropertyName();
+            if (source instanceof FormProperty<?>
+                    && FormProperty.PROP_VALUE.equals(eventName)) {
                 ev = new PropertyChangeEvent(layoutDelegate,
-                        null, null, null);
+                        ((FormProperty<?>) source).getName(),
+                        ev.getOldValue(),
+                        ev.getNewValue());
+
                 try {
                     containerLayoutChanged(ev);
                 } catch (PropertyVetoException ex) {

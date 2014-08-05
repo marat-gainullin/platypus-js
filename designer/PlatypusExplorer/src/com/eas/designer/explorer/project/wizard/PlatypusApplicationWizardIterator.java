@@ -33,7 +33,12 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         super();
     }
     
-    @TemplateRegistration(folder = "Project/Platypus", position = 100, content = "/com/eas/designer/explorer/PlatypusApplicationProject", displayName = "com.eas.designer.explorer.Bundle#Templates/Project/Platypus/PlatypusApplicationProject", description = "PlatypusApplicationDescription.html")
+    @TemplateRegistration(folder = "Project/Platypus",
+            position = 100,
+            content = "/com/eas/designer/explorer/PlatypusApplicationProject",
+            displayName = "com.eas.designer.explorer.Bundle#Templates/Project/Platypus/PlatypusApplicationProject",
+            description = "PlatypusApplicationDescription.html",
+            iconBase = "com/eas/designer/explorer/project/pencil-ruler.png")
     public static PlatypusApplicationWizardIterator createIterator() {
         return new PlatypusApplicationWizardIterator();
     }

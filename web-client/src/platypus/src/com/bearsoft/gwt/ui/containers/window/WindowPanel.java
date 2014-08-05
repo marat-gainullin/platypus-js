@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.containers.window;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -25,6 +26,7 @@ import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.DraggablePanel;
 import com.bearsoft.gwt.ui.containers.window.events.ActivateEvent;
 import com.bearsoft.gwt.ui.containers.window.events.ActivateHandler;
@@ -61,6 +63,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 
 	protected Widget captionWidget;
 	protected VerticalPanel verticalPanel;
+	protected JavaScriptObject transitionOnResizer;
 	protected Widget verticalPanelContent;
 	protected boolean animationEnabled = true;
 	protected boolean movable = true;
@@ -84,6 +87,9 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		super.setWidget(verticalPanel);
 		setCaptionWidget(new Caption(""));
 		setUndecorated(false);
+		getElement().addClassName("window-panel");
+		getElement().<XElement> cast().addResizingTransitionEnd(this);		
+		getMovableTarget().getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -140,6 +146,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 							targetScrollLeft = Integer.parseInt(tLeft.substring(0, tLeft.length() - 2));
 							String tTop = getMovableTarget().getElement().getStyle().getTop();
 							targetScrollTop = Integer.parseInt(tTop.substring(0, tTop.length() - 2));
+							beginMoving();
 						}
 					}
 
@@ -152,6 +159,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 						event.stopPropagation();
 						if (movable && !maximized) {
 							DOM.releaseCapture(captionWidget.getElement());
+							endMoving();
 						}
 					}
 
@@ -203,11 +211,15 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	@Override
 	public void setWidget(Widget w) {
 		if (verticalPanelContent != null) {
+			verticalPanelContent.getElement().<XElement> cast().removeTransitionEndListener(transitionOnResizer);
+			verticalPanelContent.getElement().removeClassName("window-content");
 			verticalPanelContent.removeFromParent();
 		}
 		verticalPanelContent = w;
 		if (verticalPanelContent != null) {
+			transitionOnResizer = verticalPanelContent.getElement().<XElement> cast().addResizingTransitionEnd(this);
 			verticalPanel.add(verticalPanelContent);
+			verticalPanelContent.getElement().addClassName("window-content");
 		}
 		if (isAttached()) {
 			onResize();
@@ -299,9 +311,9 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			int parentScrollWidth = parentElement.getScrollWidth();
 			int parentScrollHeight;
 			if (parentElement == Document.get().getBody())// Some browsers
-														  // return incorrect
-														  // height for body
-														  // element
+			                                              // return incorrect
+			                                              // height for body
+			                                              // element
 			{
 				parentScrollHeight = Document.get().getClientHeight();
 			} else {
@@ -316,6 +328,18 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			onResize();
 			MaximizeEvent.<WindowUI> fire(this, this);
 		}
+	}
+
+	@Override
+	public void setPosition(double aLeft, double aTop) {
+		super.setPosition(aLeft, aTop);
+		MoveEvent.fire(this, this, aLeft, aTop);
+	}
+
+	@Override
+	public void setSize(double aWidth, double aHeight) {
+		super.setSize(aWidth, aHeight);
+		ResizeEvent.<WindowPanel>fire(this, (int)aWidth, (int)aHeight);
 	}
 
 	private void snapshotMetrics() throws NumberFormatException {
@@ -424,7 +448,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			captionWidget.removeStyleName("window-caption");
 			captionWidget.addStyleName("window-caption-active");
 		}
-		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content};
+		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
 		for (Widget _w : widgets) {
 			String sClasses = _w.getElement().getClassName();
 			String[] classes = sClasses.split(" ");
@@ -443,7 +467,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			captionWidget.removeStyleName("window-caption-active");
 			captionWidget.addStyleName("window-caption");
 		}
-		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw };
+		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
 		for (Widget _w : widgets) {
 			String sClasses = _w.getElement().getClassName();
 			String[] classes = sClasses.split(" ");
@@ -517,8 +541,38 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	}
 
 	@Override
-	public void setAnimationEnabled(boolean enable) {
-		animationEnabled = enable;
+	public void setAnimationEnabled(boolean aValue) {
+		if (animationEnabled != aValue) {
+			animationEnabled = aValue;
+			verticalPanelContent.getElement().getStyle().clearProperty("transition");
+			if (!animationEnabled) {
+				verticalPanelContent.getElement().getStyle().setProperty("transition", "none");
+			}
+		}
+	}
+
+	@Override
+	protected void beginResizing() {
+		verticalPanelContent.getElement().getStyle().setProperty("transition", "none");
+		getMovableTarget().getElement().getStyle().setProperty("transition", "none");
+	}
+
+	@Override
+	protected void endResizing() {
+		if (animationEnabled) {
+			verticalPanelContent.getElement().getStyle().clearProperty("transition");
+			getMovableTarget().getElement().getStyle().clearProperty("transition");
+		}
+	}
+
+	protected void beginMoving() {
+		getMovableTarget().getElement().getStyle().setProperty("transition", "none");
+	}
+
+	protected void endMoving() {
+		if (animationEnabled) {
+			getMovableTarget().getElement().getStyle().clearProperty("transition");
+		}
 	}
 
 	protected void updateCaptionCursor() {

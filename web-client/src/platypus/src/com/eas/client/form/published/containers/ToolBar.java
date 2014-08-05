@@ -21,6 +21,7 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -153,6 +154,14 @@ public class ToolBar extends Toolbar implements HasJsFacade, HasEnabled, HasComp
 		name = aValue;
 	}
 
+	public void ajustWidth(Widget aChild, int aValue) {
+		if (aChild != null) {
+			XElement xwe = aChild.getElement().<XElement> cast();
+			xwe.getStyle().setWidth(aValue, Style.Unit.PX);
+			onResize();
+		}
+	}
+
 	@Override
 	public void add(Widget w) {
 		super.add(w);
@@ -188,7 +197,9 @@ public class ToolBar extends Toolbar implements HasJsFacade, HasEnabled, HasComp
 			if(toAdd && toAdd.unwrap){
 				if(toAdd.parent == published)
 					throw 'A widget already added to this container';
+				var widgetWidth = toAdd.width;
 				aWidget.@com.eas.client.form.published.containers.ToolBar::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+				aWidget.@com.eas.client.form.published.containers.ToolBar::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetWidth);
 			}
 		};		
 	}-*/;

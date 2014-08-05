@@ -3,5 +3,6 @@ package com.bearsoft.gwt.ui.widgets.grid.cells;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public interface CellRenderer<V> {
-	public boolean render(com.google.gwt.cell.client.Cell.Context context, V value, SafeHtmlBuilder sb);
+
+	public boolean render(com.google.gwt.cell.client.Cell.Context context, String aId, V value, SafeHtmlBuilder sb);
 }

@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
@@ -40,6 +41,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	public PlatypusFormattedTextField() {
 		super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override

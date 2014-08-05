@@ -392,7 +392,7 @@ public class LayoutSupportRegistry {
                     "java.awt.FlowLayout", // NOI18N
                     "com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.FlowLayoutSupport"); // NOI18N
             layoutToLayoutDelegate.put(
-                    "javax.swing.BoxLayout", // NOI18N
+                    "com.eas.controls.layouts.box.BoxLayout", // NOI18N
                     "com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.BoxLayoutSupport"); // NOI18N
             layoutToLayoutDelegate.put(
                     "java.awt.GridBagLayout", // NOI18N

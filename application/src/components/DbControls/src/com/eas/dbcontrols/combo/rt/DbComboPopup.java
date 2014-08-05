@@ -58,6 +58,7 @@ import javax.swing.plaf.basic.ComboPopup;
 /**
  *
  * @author mg
+ * @param <T>
  */
 public class DbComboPopup<T> extends JPopupMenu implements ComboPopup {
     // An empty ListMode, this is used when the UI changes to allow
@@ -84,7 +85,7 @@ public class DbComboPopup<T> extends JPopupMenu implements ComboPopup {
         }
     };
     final ListModel<T> emptyListModel = new EmptyListModelClass<>();
-    private static Border LIST_BORDER = new LineBorder(Color.BLACK, 1);
+    private static final Border LIST_BORDER = new LineBorder(Color.BLACK, 1);
     protected DbComboBox<T> comboBox;
     /**
      * This protected field is implementation specific. Do not access directly
@@ -236,8 +237,8 @@ public class DbComboPopup<T> extends JPopupMenu implements ComboPopup {
     public void hide() {
         MenuSelectionManager manager = MenuSelectionManager.defaultManager();
         MenuElement[] selection = manager.getSelectedPath();
-        for (int i = 0; i < selection.length; i++) {
-            if (selection[i] == this) {
+        for (MenuElement selection1 : selection) {
+            if (selection1 == this) {
                 manager.clearSelectedPath();
                 break;
             }
@@ -249,6 +250,7 @@ public class DbComboPopup<T> extends JPopupMenu implements ComboPopup {
 
     /**
      * Implementation of ComboPopup.getList().
+     * @return  
      */
     @Override
     public JList<T> getList() {

@@ -61,7 +61,7 @@
             classpath="${custom.tasks.cls}" 
             classname="org.netbeans.installer.infra.build.ant.registries.CreateBundle"/>
         
-	<set property="tomcat.version"      value="7.0.52"/>
+	<set property="tomcat.version"      value="8.0.9"/>
 	<set property="tomcat.full.version" value="${tomcat.version}.0.0"/>
 	
         <delete file="${temp.file}"/>
@@ -232,7 +232,7 @@ jarsigner.enabled=${jarsigner.enabled}
                        target="${bundles.release.dir}/${bundle.files.prefix}-${platform}.${bundle.extention}">
                 <component uid="${main.product.uid}" version="0.3.0.0.0"/>
 		<component uid="platypus-runtime" version="0.3.0.0.0"/>
-		<component uid="tomcat" version="7.0.52.0.0"/>
+		<component uid="tomcat" version="8.0.9.0.0"/>
             </create-bundle>
             <if property="bundle.extention" value="zip">
                 <antcall target="zip-to-tgz">

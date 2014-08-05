@@ -305,26 +305,26 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 		if (anchors.getWidth() != null) {
 			anchors.getWidth().setPlainValue(aValue, containerWidth);
 		} else if (anchors.getLeft() != null && anchors.getRight() != null) {
-			anchors.getRight().setPlainValue(containerWidth - layouted.getElement().getOffsetLeft() - aValue, containerWidth);
+			anchors.getRight().setPlainValue(containerWidth - layouted.getElement().getParentElement().getOffsetLeft() - aValue, containerWidth);
 		}
 		applyConstraints(layouted, anchors);
 	}
 
 	public void ajustHeight(Widget layouted, int aValue) {
 		MarginConstraints anchors = constraints.get(layouted);
-		int containerHeight = layouted.getParent().getOffsetHeight();
+		int containerHeight = layouted.getParent().getElement().getOffsetHeight();
 		if (anchors.getHeight() != null) {
 			anchors.getHeight().setPlainValue(aValue, containerHeight);
 		} else if (anchors.getTop() != null && anchors.getBottom() != null) {
-			anchors.getBottom().setPlainValue(containerHeight - layouted.getElement().getOffsetTop() - aValue, containerHeight);
+			anchors.getBottom().setPlainValue(containerHeight - layouted.getElement().getParentElement().getOffsetTop() - aValue, containerHeight);
 		}
 		applyConstraints(layouted, anchors);
 	}
 
 	public void ajustLeft(Widget layouted, int aValue) {
 		MarginConstraints anchors = constraints.get(layouted);
-		int containerWidth = layouted.getParent().getOffsetWidth();
-		int childWidth = layouted.getParent().getOffsetWidth();
+		int containerWidth = layouted.getParent().getElement().getOffsetWidth();
+		int childWidth = layouted.getElement().getParentElement().getOffsetWidth();
 		if (anchors.getLeft() != null && anchors.getWidth() != null) {
 			anchors.getLeft().setPlainValue(aValue, containerWidth);
 		} else if (anchors.getWidth() != null && anchors.getRight() != null) {
@@ -338,8 +338,8 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 
 	public void ajustTop(Widget layouted, int aValue) {
 		MarginConstraints anchors = constraints.get(layouted);
-		int containerHeight = layouted.getParent().getOffsetHeight();
-		int childHeight = layouted.getOffsetHeight();
+		int containerHeight = layouted.getParent().getElement().getOffsetHeight();
+		int childHeight = layouted.getElement().getParentElement().getOffsetHeight();
 		if (anchors.getTop() != null && anchors.getHeight() != null) {
 			anchors.getTop().setPlainValue(aValue, containerHeight);
 		} else if (anchors.getHeight() != null && anchors.getBottom() != null) {

@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
@@ -40,6 +41,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 
 	public PlatypusRadioButton() {
 		super("");
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	@Override

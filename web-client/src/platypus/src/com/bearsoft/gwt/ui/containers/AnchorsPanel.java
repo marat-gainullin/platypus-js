@@ -6,6 +6,7 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.CommonResources;
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
@@ -19,19 +20,20 @@ public class AnchorsPanel extends LayoutPanel {
 
     public AnchorsPanel() {
         super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     @Override
     public void insert(Widget widget, int beforeIndex) {
         super.insert(widget, beforeIndex);
-        if(widget instanceof FocusWidget){
+        //if(widget instanceof FocusWidget){
             widget.getElement().getStyle().clearRight();
             widget.getElement().getStyle().clearBottom();
             widget.getElement().getStyle().setWidth(100, Style.Unit.PCT);
             widget.getElement().getStyle().setHeight(100, Style.Unit.PCT);
             CommonResources.INSTANCE.commons().ensureInjected();
             widget.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-        } 
+        //} 
     }
 
     @Override

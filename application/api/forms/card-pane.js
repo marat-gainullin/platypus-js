@@ -310,6 +310,20 @@
              */
             P.CardPane.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -326,20 +340,6 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -457,23 +457,6 @@
              */
             P.CardPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -490,6 +473,23 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -752,9 +752,9 @@
          * @method add
          * @memberOf CardPane
          */
-        P.CardPane.prototype.add = function(arg0, arg1) {
+        P.CardPane.prototype.add = function(component, cardName) {
             var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(cardName));
             return P.boxAsJs(value);
         };
 
@@ -771,15 +771,15 @@
         };
 
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
+         * Gets child component, associated with the specified card.
+         * @param cardName Name of the card.
+         * @return the child component.
          * @method child
          * @memberOf CardPane
          */
-        P.CardPane.prototype.child = function(name) {
+        P.CardPane.prototype.child = function(cardName) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(name));
+            var value = delegate.child(P.boxAsJava(cardName));
             return P.boxAsJs(value);
         };
 

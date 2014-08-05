@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -21,6 +22,7 @@ public class FlowGapPanel extends FlowPanel implements RequiresResize {
 
 	public FlowGapPanel() {
 		super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public int getHgap() {

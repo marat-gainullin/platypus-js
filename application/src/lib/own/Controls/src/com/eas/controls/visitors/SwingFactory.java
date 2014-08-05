@@ -60,7 +60,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
@@ -121,20 +120,17 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     }
 
     public void applyAbsoluteConstraints(final Component comp, final AbsoluteConstraintsDesignInfo absolute) {
-        postprocessing.add(new Runnable() {
-            @Override
-            public void run() {
-                comp.setLocation(absolute.getLocation());
-                Dimension size = new Dimension(absolute.getSize());
-                Dimension preferredSize = comp.getPreferredSize();
-                if (size.width < 0) {
-                    size.width = preferredSize.width;
-                }
-                if (size.height < 0) {
-                    size.height = preferredSize.height;
-                }
-                comp.setSize(size);
+        postprocessing.add((Runnable) () -> {
+            comp.setLocation(absolute.getLocation());
+            Dimension size = new Dimension(absolute.getSize());
+            Dimension preferredSize = comp.getPreferredSize();
+            if (size.width < 0) {
+                size.width = preferredSize.width;
             }
+            if (size.height < 0) {
+                size.height = preferredSize.height;
+            }
+            comp.setSize(size);
         });
     }
 
@@ -193,6 +189,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
                 comp.setPreferredSize(aInfo.getPreferredSize());
             } else if (aInfo.getDesignedPreferredSize() != null) {
                 comp.setPreferredSize(aInfo.getDesignedPreferredSize());
+                comp.setSize(aInfo.getDesignedPreferredSize());
             }
             if (aInfo.getMaximumSize() != null) {
                 comp.setMaximumSize(aInfo.getMaximumSize());
@@ -246,7 +243,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         List<DesignInfo> generalList = new ArrayList<>();
         generalList.addAll(aInfo.getNonvisuals());
         generalList.addAll(aInfo.getChildren());
-        for (DesignInfo di : generalList) {
+        generalList.stream().forEach((DesignInfo di) -> {
             if (di instanceof ControlDesignInfo) {
                 ControlDesignInfo control = (ControlDesignInfo) di;
                 Class cls = findClassByDesignInfo(control);
@@ -268,17 +265,17 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
                     }
                 }
             }// parentless grid columns and map layers must be ignored
-        }
-        for (DesignInfo di : generalList) {
+        });
+        generalList.stream().forEach((DesignInfo di) -> {
             if (di instanceof ControlDesignInfo) {
                 ControlDesignInfo control = (ControlDesignInfo) di;
                 comp = resolveComponent(control.getName());
                 control.accept(this);
             }// parentless grid columns and map layers must be ignored
-        }
-        for (Runnable runnable : postprocessing) {
+        });
+        postprocessing.stream().forEach((runnable) -> {
             runnable.run();
-        }
+        });
     }
 
     @Override
@@ -756,7 +753,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
             }
         }
     }
-
+/*
     public static void prefToMaxForBox(int axis, java.awt.Component comp) {
         if (axis == BoxLayout.LINE_AXIS || axis == BoxLayout.X_AXIS) {
             comp.setMaximumSize(new Dimension(comp.getPreferredSize().width, Integer.MAX_VALUE));
@@ -764,7 +761,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
             comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
         }
     }
-
+*/
     public Icon resolveIcon(String aIconName) {
         return IconCache.getIcon(aIconName);
     }

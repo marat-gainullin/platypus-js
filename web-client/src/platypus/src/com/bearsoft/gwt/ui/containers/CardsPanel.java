@@ -4,6 +4,7 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -33,6 +34,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
      */
     public CardsPanel() {
         setElement(Document.get().createDivElement());
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     public int getHgap() {
@@ -160,14 +162,14 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
         if (visibleWidget != null) {
             Element we = visibleWidget.getElement();
             Element wpe = we.getParentElement();
-            if (visibleWidget instanceof FocusWidget) {
+            //if (visibleWidget instanceof FocusWidget) {
                 we.getStyle().clearRight();
                 we.getStyle().clearBottom();
                 we.getStyle().setWidth(wpe.getClientWidth() - hgap * 2, Style.Unit.PX);
                 we.getStyle().setHeight(wpe.getClientHeight() - vgap * 2, Style.Unit.PX);
                 com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
                 visibleWidget.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-            }
+            //}
         }
     }
 

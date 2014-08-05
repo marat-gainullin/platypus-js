@@ -6,7 +6,7 @@
 package com.eas.client.form.grid.cells;
 
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
-import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.form.published.widgets.model.ModelCombo;
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class PlatypusLookupEditorCell extends RenderedPopupEditorCell<Row> {
+public class PlatypusLookupEditorCell extends RenderedEditorCell<Row> {
 
 	public PlatypusLookupEditorCell() {
 		super(new StyledListBox<Row>());

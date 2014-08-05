@@ -4,6 +4,7 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.IndexedPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -26,10 +27,12 @@ public class ScrollBoxPanel extends ScrollPanel implements IndexedPanel {
 
     public ScrollBoxPanel() {
         super();
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     public ScrollBoxPanel(Widget child) {
         super(child);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     public ScrollPolicy getHorizontalScrollPolicy() {

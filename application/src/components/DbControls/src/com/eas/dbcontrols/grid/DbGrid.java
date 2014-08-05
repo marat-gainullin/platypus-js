@@ -1926,14 +1926,10 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return selectedCells;
     }
 
-    public List<Object> getColumns() {
-        List<Object> columns = new ArrayList<>();
-        scriptableColumns.stream().forEach((scrCol) -> {
-            columns.add(scrCol.getPublished());
-        });
-        return columns;
+    public List<ScriptableColumn> getScriptableColumns() {
+        return scriptableColumns;
     }
-
+    
     private String[][] getGridView(boolean selectedOnly, boolean isData) {
         TableModel cellsModel = getDeepModel();
         if (cellsModel != null) {
