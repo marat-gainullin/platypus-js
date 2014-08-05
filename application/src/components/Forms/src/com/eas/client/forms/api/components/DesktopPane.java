@@ -1,10 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.Form;
@@ -12,6 +5,7 @@ import com.eas.client.forms.PlatypusInternalFrame;
 import com.eas.client.forms.api.Component;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDesktopPane;
@@ -47,9 +41,11 @@ public class DesktopPane extends Component<JDesktopPane> {
             + "*/";
 
     @ScriptFunction(jsDoc = MINIMIZE_ALL_JSDOC)
-    public void minimizeAll() {
+    public void minimizeAll() throws PropertyVetoException {
         for (JInternalFrame f : delegate.getAllFrames()) {
-            delegate.getDesktopManager().iconifyFrame(f);
+            if (f.isIconifiable() && !f.isIcon()) {
+                f.setIcon(true);
+            }
         }
     }
 
@@ -59,9 +55,14 @@ public class DesktopPane extends Component<JDesktopPane> {
             + "*/";
 
     @ScriptFunction(jsDoc = RESTORE_ALL_JSDOC)
-    public void restoreAll() {
+    public void restoreAll() throws PropertyVetoException {
         for (JInternalFrame f : delegate.getAllFrames()) {
-            delegate.getDesktopManager().deiconifyFrame(f);
+            if (f.isIcon()) {
+                f.setIcon(false);
+            }
+            if (f.isMaximum()) {
+                f.setMaximum(false);
+            }
         }
     }
 
@@ -71,9 +72,14 @@ public class DesktopPane extends Component<JDesktopPane> {
             + "*/";
 
     @ScriptFunction(jsDoc = MAXIMIZE_ALL_JSDOC)
-    public void maximizeAll() {
+    public void maximizeAll() throws PropertyVetoException {
         for (JInternalFrame f : delegate.getAllFrames()) {
-            delegate.getDesktopManager().maximizeFrame(f);
+            if (f.isIcon()) {
+                f.setIcon(false);
+            }
+            if (f.isMaximizable()) {
+                f.setMaximum(true);
+            }
         }
     }
 

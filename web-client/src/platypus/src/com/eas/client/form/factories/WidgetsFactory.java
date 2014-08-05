@@ -427,8 +427,8 @@ public class WidgetsFactory {
 	private PlatypusSlider createSlider(Element aTag) throws Exception {
 		PlatypusSlider component = new PlatypusSlider();
 		Publisher.publish(component);
-		component.setMaxValue(Utils.getIntegerAttribute(aTag, "maximum", -Integer.MAX_VALUE));
-		component.setMinValue(Utils.getIntegerAttribute(aTag, "minimum", Integer.MAX_VALUE));
+		component.setMaxValue(Utils.getIntegerAttribute(aTag, "maximum", 100));
+		component.setMinValue(Utils.getIntegerAttribute(aTag, "minimum", 0));
 		component.setValue((double) Utils.getIntegerAttribute(aTag, "value", (int) component.getMinValue()));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);

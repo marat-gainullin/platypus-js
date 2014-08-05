@@ -14,6 +14,7 @@ import com.eas.store.SerialColor;
 import com.eas.store.SerialFont;
 import java.awt.Color;
 import java.beans.PropertyChangeSupport;
+import java.util.Objects;
 import javax.swing.Icon;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -33,15 +34,15 @@ public class CascadedStyle implements HasPublished {
     protected Color foreground = defaultForeground();
     protected Font font = defaultFont();
     protected Integer align = defaultAlign();
-    protected Icon icon = null;
-    protected Icon folderIcon = null;
-    protected Icon openFolderIcon = null;
-    protected Icon leafIcon = null;
-    protected String iconName = null;
-    protected String folderIconName = null;
-    protected String openFolderIconName = null;
-    protected String leafIconName = null;
-    protected CascadedStyle parent = null;
+    protected Icon icon;
+    protected Icon folderIcon;
+    protected Icon openFolderIcon;
+    protected Icon leafIcon;
+    protected String iconName;
+    protected String folderIconName;
+    protected String openFolderIconName;
+    protected String leafIconName;
+    protected CascadedStyle parent;
     protected Object published;
 
     public CascadedStyle() {
@@ -56,14 +57,6 @@ public class CascadedStyle implements HasPublished {
     public CascadedStyle(CascadedStyle aParent) {
         this();
         parent = aParent;
-        background = null;
-        foreground = null;
-        font = null;
-        align = null;
-        icon = null;
-        folderIcon = null;
-        openFolderIcon = null;
-        leafIcon = null;
     }
 
     private static final String ICON_JS_DOC = "/**\n"
@@ -74,6 +67,7 @@ public class CascadedStyle implements HasPublished {
         return icon != null ? icon : (parent != null ? parent.getIcon() : null);
     }
     
+    @ScriptFunction
     public void setIcon(Icon aValue) {
         Icon oldValue = icon;
         icon = aValue;
@@ -88,6 +82,7 @@ public class CascadedStyle implements HasPublished {
         return folderIcon != null ? folderIcon : (parent != null ? parent.getFolderIcon() : null);
     }
 
+    @ScriptFunction
     public void setFolderIcon(Icon aValue) {
         Icon oldValue = folderIcon;
         folderIcon = aValue;
@@ -102,6 +97,13 @@ public class CascadedStyle implements HasPublished {
         return openFolderIcon != null ? openFolderIcon : (parent != null ? parent.getOpenFolderIcon() : null);
     }
 
+    @ScriptFunction
+    public void setOpenFolderIcon(Icon aValue) {
+        Icon oldValue = openFolderIcon;
+        openFolderIcon = aValue;
+        changeSupport.firePropertyChange("openFolderIcon", oldValue, openFolderIcon);
+    }
+
     public void setOpenFolderIconName(String aValue) {
         setNativeOpenFolderIconName(aValue);
     }
@@ -114,6 +116,7 @@ public class CascadedStyle implements HasPublished {
         return leafIcon != null ? leafIcon : (parent != null ? parent.getLeafIcon() : null);
     }
 
+    @ScriptFunction
     public void setLeafIcon(Icon aValue) {
         Icon oldValue = leafIcon;
         leafIcon = aValue;
@@ -128,6 +131,7 @@ public class CascadedStyle implements HasPublished {
         return font != null ? font : (parent != null ? parent.getFont() : defaultFont());
     }
     
+    @ScriptFunction
     public void setFont(Font aValue) {
         Font oldValue = font;
         font = aValue;
@@ -142,12 +146,12 @@ public class CascadedStyle implements HasPublished {
         return foreground != null ? foreground : (parent != null ? parent.getForeground() : defaultForeground());
     }
     
+    @ScriptFunction
     public void setForeground(Color aValue) {
         Color oldValue = foreground;
         foreground = aValue;
         changeSupport.firePropertyChange("foreground", oldValue, foreground);
     }
-    
     
     private static final String BACKGROUND_JS_DOC = "/**\n"
             + "* A background color associated with this style.\n"
@@ -157,6 +161,7 @@ public class CascadedStyle implements HasPublished {
         return background != null ? background : (parent != null ? parent.getBackground() : defaultBackground());
     }
     
+    @ScriptFunction
     public void setBackground(Color aValue) {
         Color oldValue = background;
         background = aValue;
@@ -173,6 +178,7 @@ public class CascadedStyle implements HasPublished {
         return align != null ? align : (parent != null ? parent.getAlign() : defaultAlign());
     }
     
+    @ScriptFunction
     public void setAlign(Integer aValue) {
         Integer oldValue = align;
         align = aValue;
@@ -243,7 +249,7 @@ public class CascadedStyle implements HasPublished {
         if (this.font != other.font && (this.font == null || !this.font.isEqual(other.font))) {
             return false;
         }
-        if (this.align != other.align) {
+        if (!Objects.equals(this.align, other.align)) {
             return false;
         }
         if (this.iconName != other.iconName && (this.iconName == null || !this.iconName.equals(other.iconName))) {
@@ -476,12 +482,6 @@ public class CascadedStyle implements HasPublished {
 
     public void setLeafIconName(String aValue) {
         setNativeLeafIconName(aValue);
-    }
-
-    public void setOpenFolderIcon(Icon aValue) {
-        Icon oldValue = openFolderIcon;
-        openFolderIcon = aValue;
-        changeSupport.firePropertyChange("openFolderIcon", oldValue, openFolderIcon);
     }
 
     public CascadedStyle copy() {

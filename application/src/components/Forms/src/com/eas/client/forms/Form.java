@@ -199,10 +199,10 @@ public class Form implements HasPublished {
         published = aValue;
     }
 
-    public void injectPublished(JSObject aValue){
+    public void injectPublished(JSObject aValue) {
         published = aValue;
     }
-    
+
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
@@ -669,11 +669,16 @@ public class Form implements HasPublished {
     public void minimize() {
         if (surface != null) {
             if (surface instanceof JFrame) {
-                ((JFrame) surface).setState(JFrame.ICONIFIED);
+                ((JFrame) surface).setExtendedState(JFrame.ICONIFIED);
             } else if (surface instanceof JInternalFrame) {
                 JInternalFrame aFrame = (JInternalFrame) surface;
                 try {
-                    aFrame.setIcon(true);
+                    if (aFrame.isMaximum()) {
+                        aFrame.setMaximum(false);
+                    }
+                    if (!aFrame.isIcon() && aFrame.isIconifiable()) {
+                        aFrame.setIcon(true);
+                    }
                 } catch (Exception e) {
                 }
             }
@@ -689,12 +694,17 @@ public class Form implements HasPublished {
     public void maximize() {
         if (surface != null) {
             if (surface instanceof JFrame) {
-                ((JFrame) surface).setState(JFrame.MAXIMIZED_BOTH);
+                ((JFrame) surface).setExtendedState(JFrame.MAXIMIZED_BOTH);
             } else if (surface instanceof JInternalFrame) {
                 JInternalFrame aFrame = (JInternalFrame) surface;
                 try {
-                    aFrame.setMaximum(true);
-                    aFrame.toFront();
+                    if (aFrame.isIcon()) {
+                        aFrame.setIcon(false);
+                    }
+                    if (!aFrame.isMaximum() && aFrame.isMaximizable()) {
+                        aFrame.setMaximum(true);
+                        aFrame.toFront();
+                    }
                 } catch (Exception e) {
                 }
             }
@@ -711,8 +721,12 @@ public class Form implements HasPublished {
             if (surface instanceof JInternalFrame) {
                 JInternalFrame aFrame = (JInternalFrame) surface;
                 try {
-                    aFrame.setMaximum(false);
-                    aFrame.setIcon(false);
+                    if (aFrame.isMaximum()) {
+                        aFrame.setMaximum(false);
+                    }
+                    if (aFrame.isIcon()) {
+                        aFrame.setIcon(false);
+                    }
                 } catch (Exception e) {
                 }
                 aFrame.toFront();

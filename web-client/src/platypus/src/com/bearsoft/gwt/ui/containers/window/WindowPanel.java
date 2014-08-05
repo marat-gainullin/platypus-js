@@ -87,6 +87,8 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		super.setWidget(verticalPanel);
 		setCaptionWidget(new Caption(""));
 		setUndecorated(false);
+		getElement().addClassName("window-panel");
+		getElement().<XElement> cast().addResizingTransitionEnd(this);		
 		getMovableTarget().getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
@@ -465,7 +467,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 			captionWidget.removeStyleName("window-caption-active");
 			captionWidget.addStyleName("window-caption");
 		}
-		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw };
+		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
 		for (Widget _w : widgets) {
 			String sClasses = _w.getElement().getClassName();
 			String[] classes = sClasses.split(" ");

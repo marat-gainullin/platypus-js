@@ -79,16 +79,23 @@ import com.google.gwt.view.client.SelectionModel;
 public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize, HasSortList {
 
 	public static final int LEFT_RIGHT_CELL_PADDING = 2;
-	
+
 	protected interface DynamicCellStyles extends SafeHtmlTemplates {
 
 		public static DynamicCellStyles INSTANCE = GWT.create(DynamicCellStyles.class);
 
-		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;"
-		        + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};" + "}")
+		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;" + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};"
+		        + "}")
 		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
 
-		@Template(".{0}{" + "position: relative;" + "padding-left: "+LEFT_RIGHT_CELL_PADDING+"px; padding-right: "+LEFT_RIGHT_CELL_PADDING+"px;" + "height: {1}px;" /*+ "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" */+ "}")
+		@Template(".{0}{" + "position: relative;" + "padding-left: " + LEFT_RIGHT_CELL_PADDING + "px; padding-right: " + LEFT_RIGHT_CELL_PADDING + "px;" + "height: {1}px;" /*
+																																											 * +
+																																											 * "text-overflow: ellipsis;"
+																																											 * +
+																																											 * "overflow: hidden;"
+																																											 * +
+																																											 * "white-space: nowrap;"
+																																											 */+ "}")
 		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
 	}
 
@@ -125,7 +132,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	protected PublishedColor gridColor;
 	protected PublishedColor oddRowsColor;
 
-	protected String dynamicTDClassName = "grid-td-" + Document.get().createUniqueId();	
+	protected String dynamicTDClassName = "grid-td-" + Document.get().createUniqueId();
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();
 	protected String dynamicOddRowsClassName = "grid-odd-row-" + Document.get().createUniqueId();
 	protected String dynamicEvenRowsClassName = "grid-even-row-" + Document.get().createUniqueId();
@@ -319,10 +326,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			section.setAutoFooterRefreshDisabled(true);
 		}
 		// cells
-		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
-			GridSection<T> gSection = (GridSection<T>) section;
-			gSection.setTableBuilder(new ThemedCellTableBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
-		}
+		installCellBuilders();
 
 		scrollableRightContainer.addScrollHandler(new ScrollHandler() {
 
@@ -607,7 +611,14 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		gridColor = PublishedColor.create(211, 211, 211, 255);
 		regenerateDynamicTDStyles();
 		regenerateDynamicOddRowsStyles();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
+	}
+
+	protected void installCellBuilders() {
+		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+			GridSection<T> gSection = (GridSection<T>) section;
+			gSection.setTableBuilder(new ThemedCellTableBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
+		}
 	}
 
 	@Override
@@ -736,14 +747,13 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	protected void regenerateDynamicTDStyles() {
-		tdsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.td(dynamicTDClassName, showHorizontalLines ? 1 : 0, showVerticalLines ? 1 : 0, gridColor != null ? gridColor.toStyled()
-		        : ""));
+		tdsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.td(dynamicTDClassName, showHorizontalLines ? 1 : 0, showVerticalLines ? 1 : 0, gridColor != null ? gridColor.toStyled() : ""));
 	}
 
 	protected void regenerateDynamicOddRowsStyles() {
 		if (showOddRowsInOtherColor && oddRowsColor != null) {
 			oddRowsStyleElement.setInnerHTML("." + dynamicOddRowsClassName + "{background-color: " + oddRowsColor.toStyled() + "}");
-		}else{
+		} else {
 			oddRowsStyleElement.setInnerHTML("");
 		}
 	}
@@ -1106,7 +1116,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 		});
 	}
-	
+
 	public void setColumnWidthFromHeaderDrag(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {
 		setColumnWidth(aColumn, aWidth, aUnit);
 	}
@@ -1175,39 +1185,39 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	public TableCellElement getViewCell(int aRow, int aCol) {
 		GridSection<T> targetSection;
-		if(aRow < frozenRows){
-			if(aCol < frozenColumns){
+		if (aRow < frozenRows) {
+			if (aCol < frozenColumns) {
 				targetSection = frozenLeft;
-			}else{
+			} else {
 				aCol -= frozenColumns;
 				targetSection = frozenRight;
 			}
-		}else{
+		} else {
 			aRow -= frozenRows;
-			if(aCol < frozenColumns){
+			if (aCol < frozenColumns) {
 				targetSection = scrollableLeft;
-			}else{
+			} else {
 				aCol -= frozenColumns;
 				targetSection = scrollableRight;
 			}
 		}
 		return targetSection.getCell(aRow, aCol);
 	}
-	
+
 	public void focusViewCell(int aRow, int aCol) {
 		GridSection<T> targetSection;
-		if(aRow < frozenRows){
-			if(aCol < frozenColumns){
+		if (aRow < frozenRows) {
+			if (aCol < frozenColumns) {
 				targetSection = frozenLeft;
-			}else{
+			} else {
 				aCol -= frozenColumns;
 				targetSection = frozenRight;
 			}
-		}else{
+		} else {
 			aRow -= frozenRows;
-			if(aCol < frozenColumns){
+			if (aCol < frozenColumns) {
 				targetSection = scrollableLeft;
-			}else{
+			} else {
 				aCol -= frozenColumns;
 				targetSection = scrollableRight;
 			}

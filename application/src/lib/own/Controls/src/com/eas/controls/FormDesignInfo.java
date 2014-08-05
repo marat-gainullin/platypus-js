@@ -23,6 +23,8 @@ public class FormDesignInfo extends ContainerDesignInfo implements PropertiesSim
     protected String iconImage;
     protected boolean alwaysOnTop;
     protected boolean resizable = true;
+    protected boolean minimizable = true;
+    protected boolean maximizable = true;
     protected boolean undecorated;
     protected float opacity = 1.0f;
     protected boolean locationByPlatform;
@@ -100,6 +102,30 @@ public class FormDesignInfo extends ContainerDesignInfo implements PropertiesSim
         boolean oldValue = resizable;
         resizable = aValue;
         firePropertyChange("resizable", oldValue, resizable);
+    }
+
+    @Serial
+    public boolean isMaximizable() {
+        return maximizable;
+    }
+
+    @Serial
+    public void setMaximizable(boolean aValue) {
+        boolean oldValue = maximizable;
+        maximizable = aValue;
+        firePropertyChange("maximizable", oldValue, maximizable);
+    }
+
+    @Serial
+    public boolean isMinimizable() {
+        return minimizable;
+    }
+
+    @Serial
+    public void setMinimizable(boolean aValue) {
+        boolean oldValue = minimizable;
+        minimizable = aValue;
+        firePropertyChange("minimizable", oldValue, minimizable);
     }
 
     @Serial

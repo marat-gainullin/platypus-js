@@ -40,6 +40,9 @@
             get: function() {
                 var value = delegate.display;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.display = P.boxAsJava(aValue);
             }
         });
         if(!P.CellData){
@@ -54,6 +57,9 @@
             get: function() {
                 var value = delegate.style;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.style = P.boxAsJava(aValue);
             }
         });
         if(!P.CellData){

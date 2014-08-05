@@ -1,7 +1,8 @@
 package com.eas.client.form;
 
-import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.eas.client.form.published.PublishedStyle;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
@@ -12,22 +13,24 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConst
 
 public class StyleIconDecorator {
 
-	protected static int decorated = -Integer.MAX_VALUE;
-	
-	public static String decorate(SafeHtml toDecorate, PublishedStyle aStyle, VerticalAlignmentConstant valign, SafeHtmlBuilder sb) {
+	public static String decorate(SafeHtml toDecorate, String aId, PublishedStyle aStyle, VerticalAlignmentConstant valign, SafeHtmlBuilder sb) {
 		SafeStylesBuilder stb = new SafeStylesBuilder();
-			stb
-			.append(SafeStylesUtils.fromTrustedString(aStyle.toStyled()))
-			.padding(RenderedPopupEditorCell.CELL_PADDING, Style.Unit.PX);
-		if(aStyle.getIcon() != null){
-			ImageResource icon = aStyle.getIcon();
-			stb
-				.paddingLeft(icon.getWidth() + RenderedPopupEditorCell.CELL_PADDING, Style.Unit.PX)
-				.backgroundImage(icon.getSafeUri());
+		stb.padding(RenderedEditorCell.CELL_PADDING, Style.Unit.PX);
+		if (aStyle != null) {
+			stb.append(SafeStylesUtils.fromTrustedString(aStyle.toStyledWOBackground()));
+			if (aStyle.getIcon() != null) {
+				ImageResource icon = aStyle.getIcon();
+				stb.paddingLeft(icon.getWidth() + RenderedEditorCell.CELL_PADDING, Style.Unit.PX).backgroundImage(icon.getSafeUri()).trustedNameAndValue("background-position-y", "center");
+			}
 		}
-		RenderedPopupEditorCell.CellsResources.INSTANCE.tablecell().ensureInjected();
-		String decorId = "decor-" + (++decorated);
-		sb.append(RenderedPopupEditorCell.PaddedCell.INSTANCE.generate(decorId, RenderedPopupEditorCell.CellsResources.INSTANCE.tablecell().padded(), stb.toSafeStyles(), toDecorate));
+		RenderedEditorCell.CellsResources.INSTANCE.tablecell().ensureInjected();
+		String decorId;
+		if (aId != null && !aId.isEmpty()) {
+			decorId = aId;
+		} else {
+			decorId = Document.get().createUniqueId();
+		}
+		sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate(decorId, RenderedEditorCell.CellsResources.INSTANCE.tablecell().padded(), stb.toSafeStyles(), toDecorate));
 		return decorId;
 	}
 }

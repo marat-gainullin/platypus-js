@@ -75,16 +75,34 @@ public class PlatypusPersistenceManager extends PersistenceManager {
 
     public static class PlatypusFrame extends JFrame {
 
-        public PlatypusFrame(){
+        protected boolean minimizable = true;
+        protected boolean maximizable = true;
+
+        public PlatypusFrame() {
             super();
         }
-        
+
         @Override
         @Designable(displayName = "icon", description = "Window's icon")
         public Image getIconImage() {
             return super.getIconImage();
         }
-         
+
+        public boolean isMinimizable() {
+            return minimizable;
+        }
+
+        public void setMinimizable(boolean aValue) {
+            minimizable = aValue;
+        }
+
+        public boolean isMaximizable() {
+            return maximizable;
+        }
+
+        public void setMaximizable(boolean aValue) {
+            maximizable = aValue;
+        }
     }
 
     @Override

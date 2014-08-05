@@ -86,11 +86,9 @@ public class ScriptableColumn implements HasPublished {
     public void setVisible(boolean aValue) {
         if (visible != aValue) {
             visible = aValue;
-            if (visible)// true, was false
-            {
+            if (visible) {
                 showColumn();
-            } else // false, was true
-            {
+            } else {
                 hideColumn();
             }
         }
@@ -121,6 +119,10 @@ public class ScriptableColumn implements HasPublished {
 
     public TableColumn getViewColumn() {
         return viewColumn;
+    }
+
+    public DbGridColumn getDesignColumn() {
+        return designColumn;
     }
 
     @ScriptFunction(jsDoc = "Width of the column.")
@@ -242,9 +244,6 @@ public class ScriptableColumn implements HasPublished {
         }
         published = jsColumn;
         if (viewColumn != null) {
-            if (viewColumn.getCellEditor() instanceof ScalarDbControl) {
-                ((ScalarDbControl) viewColumn.getCellEditor()).injectPublished(published);
-            }
             if (viewColumn.getCellRenderer() instanceof ScalarDbControl) {
                 ((ScalarDbControl) viewColumn.getCellRenderer()).injectPublished(published);
             }
@@ -253,7 +252,7 @@ public class ScriptableColumn implements HasPublished {
             modelColumn.setPublished(published);
         }
     }
-    
+
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }

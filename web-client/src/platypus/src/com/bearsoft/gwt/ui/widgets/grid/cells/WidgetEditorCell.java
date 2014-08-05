@@ -6,6 +6,7 @@ package com.bearsoft.gwt.ui.widgets.grid.cells;
 
 import java.util.Set;
 
+import com.bearsoft.gwt.ui.widgets.AutoCloseBox;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.Cell;
@@ -24,8 +25,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -33,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  * @param <C>
  */
-public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C, AbstractPopupEditorCell.ViewData<C>> {
+public abstract class WidgetEditorCell<C> extends AbstractEditableCell<C, WidgetEditorCell.ViewData<C>> {
 
 	protected static class ViewData<T> {
 		String id;
@@ -49,12 +48,12 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 	protected HasValue<C> valueHost;
 	protected Focusable focusHost;
 
-	public AbstractPopupEditorCell(Widget aEditor, String... consumedEvents) {
+	public WidgetEditorCell(Widget aEditor, String... consumedEvents) {
 		super(consumedEvents);
 		setEditor(aEditor);
 	}
 
-	public AbstractPopupEditorCell(Widget aEditor, Set<String> consumedEvents) {
+	public WidgetEditorCell(Widget aEditor, Set<String> consumedEvents) {
 		super(consumedEvents);
 		setEditor(aEditor);
 	}
@@ -91,38 +90,30 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 		return viewId != null;
 	}
 
-	public void startEditing(final Cell.Context context, final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
+	public void startEditing(final Cell.Context context, final Element aBoxPositionTemplate, final Element aBoxParent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
 		Widget oldParent = editor.getParent();
 		if (oldParent == null) {
 			final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
-			final PopupPanel pp = new PopupPanel(true) {
+			final AutoCloseBox editorBox = new AutoCloseBox() {
 
-				protected void autoHide() {
-					super.hide(true);
+				protected void superClose() {
+					super.close();
 				}
 
 				@Override
-				public void hide(boolean autoClosed) {
-					if (autoClosed) {
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-							@Override
-							public void execute() {
-								autoHide();
-							}
-						});
-					} else {
-						super.hide(autoClosed);
-					}
+				public void close() {
+					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+						@Override
+						public void execute() {
+							superClose();
+						}
+					});
 				}
 
 			};
-			pp.getElement().setClassName("grid-cell-editor-popup");
-			pp.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
-			pp.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
-			pp.getElement().getStyle().setFontSize(0, Style.Unit.PT);
-			//pp.setAnimationEnabled(true);
 			valueHost.setValue(value);
-			pp.setWidget(editor);
+			editorBox.setWidget(editor);
 			final HandlerRegistration valueChangeReg = valueHost.addValueChangeHandler(new ValueChangeHandler<C>() {
 
 				@Override
@@ -133,17 +124,23 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 				}
 
 			});
-			final Element cellElement = parent;
-			pp.setWidth(cellElement.getClientWidth() + "px");
-			pp.setHeight(cellElement.getClientHeight() + "px");
-			pp.setPopupPosition(cellElement.getAbsoluteLeft() - Grid.LEFT_RIGHT_CELL_PADDING, cellElement.getAbsoluteTop());
+			editorBox.getElement().setClassName("grid-cell-editor-popup");
+			editorBox.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+			editorBox.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+			editorBox.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+			editorBox.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+			editorBox.getElement().getStyle().setFontSize(0, Style.Unit.PT);
+			editorBox.getElement().getStyle().setWidth(aBoxPositionTemplate.getClientWidth(), Style.Unit.PX);
+			editorBox.getElement().getStyle().setHeight(aBoxPositionTemplate.getClientHeight(), Style.Unit.PX);
+			editorBox.getElement().getStyle().setLeft(aBoxPositionTemplate.getAbsoluteLeft() - aBoxParent.getAbsoluteLeft() - Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+			editorBox.getElement().getStyle().setTop(aBoxPositionTemplate.getAbsoluteTop() - aBoxParent.getAbsoluteTop(), Style.Unit.PX);
 			final HandlerRegistration editorKeyDownReg = editor.addDomHandler(new KeyDownHandler() {
 				@Override
 				public void onKeyDown(KeyDownEvent event) {
 					if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
 						updaterRef.valueUpdater = null;
 						valueHost.setValue(null);
-						pp.hide();
+						editorBox.close();
 					} else if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
 						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -151,41 +148,34 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractEditableCell<C,
 							public void execute() {
 								updaterRef.valueUpdater = null;
 								valueHost.setValue(null);
-								pp.hide();
+								editorBox.close();
 							}
 						});
 					}
 				}
 			}, KeyDownEvent.getType());
-			pp.addCloseHandler(new CloseHandler<PopupPanel>() {
+			editorBox.addCloseHandler(new CloseHandler<AutoCloseBox>() {
 				@Override
-				public void onClose(CloseEvent<PopupPanel> event) {
+				public void onClose(CloseEvent<AutoCloseBox> event) {
 					valueChangeReg.removeHandler();
 					editorKeyDownReg.removeHandler();
-					pp.setWidget(null);
+					editorBox.setWidget(null);
 					editor.removeFromParent();
 					setViewData(context.getKey(), null);
 					if (onEditorClose != null)
 						onEditorClose.run();
 				}
 			});
-			pp.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+			editorBox.show(aBoxParent);
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
 				@Override
-				public void setPosition(int offsetWidth, int offsetHeight) {
-					if (editor instanceof RequiresResize) {
-						((RequiresResize) editor).onResize();
+				public void execute() {
+					if (editor.isAttached() && focusHost != null) {
+						focusHost.setFocus(true);
 					}
-					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-						@Override
-						public void execute() {
-							if (editor.isAttached() && focusHost != null) {
-								focusHost.setFocus(true);
-							}
-						}
-
-					});
 				}
+
 			});
 		}
 	}

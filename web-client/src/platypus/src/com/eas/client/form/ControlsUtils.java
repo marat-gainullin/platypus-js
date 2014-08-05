@@ -252,13 +252,8 @@ public class ControlsUtils {
 		return c != null ? parseColor(c) : null;
 	}
 
-	public static String renderDecorated(SafeHtmlBuilder rendered, PublishedStyle aStyle, SafeHtmlBuilder sb) {
-		if (aStyle != null) {
-			return StyleIconDecorator.decorate(rendered.toSafeHtml(), aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
-		} else {
-			sb.append(rendered.toSafeHtml());
-			return "";
-		}
+	public static String renderDecorated(SafeHtmlBuilder rendered, String aId, PublishedStyle aStyle, SafeHtmlBuilder sb) {
+		return StyleIconDecorator.decorate(rendered.toSafeHtml(), aId, aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
 	}
 
 	public static Runnable createScriptSelector(final JavaScriptObject aThis, final JavaScriptObject selectFunction, final JavaScriptObject aPublishedField) {

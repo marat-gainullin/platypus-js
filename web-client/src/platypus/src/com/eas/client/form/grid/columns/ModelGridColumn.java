@@ -7,7 +7,7 @@ import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
-import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.rowset.Row;
@@ -61,8 +61,8 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public ModelGridColumn(Cell<T> aCell, String aName, Entity aRowsEntity, ModelElementRef aColumnModelRef, RowValueConverter<T> aConverter) {
 		super(aCell);
-		if (getTargetCell() instanceof RenderedPopupEditorCell<?>) {
-			((RenderedPopupEditorCell<T>) getTargetCell()).setReadonly(new CellHasReadonly() {
+		if (getTargetCell() instanceof RenderedEditorCell<?>) {
+			((RenderedEditorCell<T>) getTargetCell()).setReadonly(new CellHasReadonly() {
 
 				@Override
 				public boolean isReadonly() {
@@ -70,7 +70,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				}
 
 			});
-			((RenderedPopupEditorCell<T>) getTargetCell()).setOnEditorClose(new RenderedPopupEditorCell.EditorCloser() {
+			((RenderedEditorCell<T>) getTargetCell()).setOnEditorClose(new RenderedEditorCell.EditorCloser() {
 				@Override
 				public void closed(Element aTable) {
 					final GridSection<?> toFocus = GridSection.getInstance(aTable);
@@ -409,14 +409,12 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 					for (int i = 0; i < rowIds.length; i++)
 						rowIds[i] = Utils.toJs(rowIds[i]);
 				}
-				Boolean res = Utils.executeScriptEventBoolean(
+				Utils.executeScriptEventVoid(
 				        aThis,
 				        aOnRender,
 				        JsEvents.publishOnRenderEvent(aThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
 				                Entity.publishRowFacade(renderedRow, aRowsEntity), cell));
-				if (res != null && res) {
-					return cell;
-				}
+				return cell;
 			}
 		}
 		return null;
@@ -428,14 +426,14 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		return renderedRow;
 	}
 
-	protected void bindDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
+	protected void bindGridDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
 		aCell.setDisplayCallback(new Runnable() {
 			@Override
 			public void run() {
 				Element padded = Document.get().getElementById(aTargetElementId);
 				if (padded != null) {
-					aCell.styleToElement(padded);
-					int paddingLeft = RenderedPopupEditorCell.CELL_PADDING;
+					aCell.styleToElementBackgroundToTd(padded);
+					int paddingLeft = RenderedEditorCell.CELL_PADDING;
 					ImageResource icon = aCell.getStyle().getIcon();
 					if (icon != null) {
 						paddingLeft += icon.getWidth();
@@ -458,7 +456,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				public void run(PlatypusImageResource aResource) {
 					Element padded = Document.get().getElementById(aTargetElementId);
 					if (padded != null) {
-						int paddingLeft = RenderedPopupEditorCell.CELL_PADDING + aIcon.getWidth();
+						int paddingLeft = RenderedEditorCell.CELL_PADDING + aIcon.getWidth();
 						padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
 					}
 				}

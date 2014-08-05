@@ -5,9 +5,7 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.eas.client.form.grid.RenderedCellContext;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -32,7 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell<T> {
+public abstract class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 
 	public interface CellsResources extends ClientBundle {
 
@@ -67,8 +65,8 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	protected CellHasReadonly readonly;
 	protected EditorCloser onEditorClose;
 
-	public RenderedPopupEditorCell(Widget aEditor) {
-		super(aEditor, /*BrowserEvents.CLICK, */BrowserEvents.DBLCLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
+	public RenderedEditorCell(Widget aEditor) {
+		super(aEditor, BrowserEvents.DBLCLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
 	}
 
 	public EditorCloser getOnEditorClose() {
@@ -116,7 +114,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 							}
 							final Element table1 = table;
 							if (parent.getOwnerDocument() == Document.get()) {
-								startEditing(context, parent, value, viewData.updater, new Runnable() {
+								startEditing(context, parent, table1.getParentElement(), value, viewData.updater, new Runnable() {
 
 									public void run() {
 										if (onEditorClose != null && table1 != null) {
@@ -132,7 +130,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 
 			});
 		}
-		if (renderer == null || !renderer.render(context, value, sb)) {
+		if (renderer == null || !renderer.render(context, viewDataId, value, sb)) {
 			SafeHtmlBuilder content = new SafeHtmlBuilder();
 			renderCell(context, value, content);
 			sb.append(PaddedCell.INSTANCE.generate(viewDataId, CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(),
@@ -149,12 +147,10 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 				int keyCode = event.getKeyCode();
 				boolean editToggleKeys = BrowserEvents.KEYDOWN.equals(type) && (keyCode == KeyCodes.KEY_ENTER || keyCode == KeyCodes.KEY_F2);
 				if (BrowserEvents.DBLCLICK.equals(type) || editToggleKeys) {
-					if(BrowserEvents.DBLCLICK.equals(type))
-						Logger.getLogger(this.getClass().getName()).log(Level.INFO, "DBLCLICK");
 					// Switch to edit mode.
 					ViewData<T> viewData = new ViewData<>(Document.get().createUniqueId(), valueUpdater);
 					setViewData(context.getKey(), viewData);
-					setValue(context, parent, value);
+					setValue(new RenderedCellContext(context.getIndex(), context.getColumn(), context.getKey()), parent, value);
 				}
 			}
 		}

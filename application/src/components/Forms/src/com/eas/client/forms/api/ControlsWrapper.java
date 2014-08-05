@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.api;
 
-import static com.eas.client.forms.api.Component.checkEventsProxy;
 import com.eas.client.forms.api.components.ComponentWrapper;
 import com.eas.client.forms.api.components.model.ModelComponentWrapper;
 import com.eas.client.forms.api.containers.ContainerWrapper;

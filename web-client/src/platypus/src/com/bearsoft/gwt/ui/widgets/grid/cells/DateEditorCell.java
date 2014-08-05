@@ -18,7 +18,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
  * 
  * @author mg
  */
-public class DateEditorCell extends RenderedPopupEditorCell<Date> {
+public class DateEditorCell extends RenderedEditorCell<Date> {
 
 	protected DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
 

@@ -8,6 +8,8 @@ package com.bearsoft.gwt.ui.widgets.grid.builders;
 import com.bearsoft.gwt.ui.widgets.grid.ThemedGridResources;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.DivBuilder;
+import com.google.gwt.dom.builder.shared.HtmlBuilderFactory;
+import com.google.gwt.dom.builder.shared.HtmlElementBuilderBase;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -108,7 +110,7 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
             }
 
             // Add class names specific to the cell.
-            Cell.Context context = new Cell.Context(absRowIndex, curColumn, cellTable.getValueKey(rowValue));
+            Cell.Context context = createCellContext(absRowIndex, curColumn, cellTable.getValueKey(rowValue));
             String cellStyles = column.getCellStyleNames(context, rowValue);
             if (cellStyles != null) {
                 tdClasses.append(" ").append(cellStyles);
@@ -125,7 +127,7 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
                 td.vAlign(vAlign.getVerticalAlignString());
             }
             // Add the inner div.
-            DivBuilder div = td.startDiv();
+            DivBuilder div = HtmlBuilderFactory.get().createDivBuilder(); // td.startDiv();
             div.className(dynamicCellClassName);
 
             // Render the cell into the div.
@@ -133,10 +135,20 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
             // End the cell.
             div.endDiv();
+            
+            tdGenerated(td, context);
+            td.html(((HtmlElementBuilderBase)div).asSafeHtml());
             td.endTD();
         }
 
         // End the row.
         tr.endTR();
     }
+    
+    protected Cell.Context createCellContext(int aIndex, int aColumn, Object aKey){
+    	return new Cell.Context(aIndex, aColumn, aKey);
+    }
+    
+    protected void tdGenerated(TableCellBuilder aTd, Cell.Context aContext){    	
+    } 
 }

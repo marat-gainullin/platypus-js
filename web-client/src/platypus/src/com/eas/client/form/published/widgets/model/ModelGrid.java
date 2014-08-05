@@ -7,6 +7,9 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
+import com.bearsoft.gwt.ui.widgets.grid.GridSection;
+import com.bearsoft.gwt.ui.widgets.grid.GridSelectionEventManager;
+import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
@@ -32,6 +35,7 @@ import com.eas.client.form.events.HideHandler;
 import com.eas.client.form.events.ShowEvent;
 import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.grid.FindWindow;
+import com.eas.client.form.grid.RenderedTableCellBuilder;
 import com.eas.client.form.grid.RowsetPositionSelectionHandler;
 import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
 import com.eas.client.form.grid.columns.CheckServiceColumn;
@@ -98,7 +102,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
 
 	public static final int SERVICE_COLUMN_WIDTH = 22;
-	
+
 	protected class RowMarkerRerenderer extends RowsetAdapter {
 
 		@Override
@@ -187,6 +191,13 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		}, KeyDownEvent.getType());
 	}
 
+	protected void installCellBuilders() {
+		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+			GridSection<Row> gSection = (GridSection<Row>) section;
+			gSection.setTableBuilder(new RenderedTableCellBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
+		}
+	}
+
 	public ModelElementRef getUnaryLinkField() {
 		return unaryLinkField;
 	}
@@ -270,10 +281,10 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -367,18 +378,18 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
 				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				super.addColumn(true, 0, new CheckServiceColumn(sm), SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
+				super.addColumn(true, 0, new CheckServiceColumn(sm), SERVICE_COLUMN_WIDTH + "px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
 				sm = new SingleRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				super.addColumn(true, 0, new RadioServiceColumn(groupName, sm), SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
+				super.addColumn(true, 0, new RadioServiceColumn(groupName, sm), SERVICE_COLUMN_WIDTH + "px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
 				UsualServiceColumn col = new UsualServiceColumn(new RowMarkerCell(rowsSource != null ? rowsSource.getRowset() : null));
-				super.addColumn(true, 0, col, SERVICE_COLUMN_WIDTH+"px", colHeader, null, false);
+				super.addColumn(true, 0, col, SERVICE_COLUMN_WIDTH + "px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else {
 				sm = new MultiRowSelectionModel(this);
@@ -517,7 +528,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		if (aColumn instanceof ModelGridColumnFacade) {
 			ModelGridColumn<?> colFacade = (ModelGridColumn<?>) aColumn;
 			colFacade.updateVisible(true);
-		}else if(aColumn instanceof UsualServiceColumn || aColumn instanceof CheckServiceColumn  || aColumn instanceof RadioServiceColumn){
+		} else if (aColumn instanceof UsualServiceColumn || aColumn instanceof CheckServiceColumn || aColumn instanceof RadioServiceColumn) {
 			super.setColumnWidth(aColumn, SERVICE_COLUMN_WIDTH, Style.Unit.PX);
 		}
 	}
@@ -565,20 +576,16 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		}
 	}
 
+	protected DefaultSelectionEventManager<Row> createSelectionEventManager(){
+		return rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX ? GridSelectionEventManager.<Row>create(new CheckBoxesEventTranslator<>(getDataColumn(0)))
+		        : GridSelectionEventManager.<Row>create();
+	}
+	
 	protected void applyRowsHeaderTypeToSelectionModel() {
-		if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
-			CheckBoxesEventTranslator<Row> translator = new CheckBoxesEventTranslator<>(getDataColumn(0));
-			DefaultSelectionEventManager<Row> selectionEventManager = DefaultSelectionEventManager.createCustomManager(translator);
-			frozenLeft.setSelectionModel(frozenLeft.getSelectionModel(), selectionEventManager);
-			frozenRight.setSelectionModel(frozenRight.getSelectionModel(), selectionEventManager);
-			scrollableLeft.setSelectionModel(scrollableLeft.getSelectionModel(), selectionEventManager);
-			scrollableRight.setSelectionModel(scrollableRight.getSelectionModel(), selectionEventManager);
-		} else {
-			frozenLeft.setSelectionModel(frozenLeft.getSelectionModel());
-			frozenRight.setSelectionModel(frozenRight.getSelectionModel());
-			scrollableLeft.setSelectionModel(scrollableLeft.getSelectionModel());
-			scrollableRight.setSelectionModel(scrollableRight.getSelectionModel());
-		}
+		frozenLeft.setSelectionModel(frozenLeft.getSelectionModel(), createSelectionEventManager());
+		frozenRight.setSelectionModel(frozenRight.getSelectionModel(), createSelectionEventManager());
+		scrollableLeft.setSelectionModel(scrollableLeft.getSelectionModel(), createSelectionEventManager());
+		scrollableRight.setSelectionModel(scrollableRight.getSelectionModel(), createSelectionEventManager());
 	}
 
 	protected void applyColorsFontCursor() {
@@ -638,7 +645,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 					@Override
 					public void onSuccess(Void result) {
 					}
-					
+
 					@Override
 					public void onFailure(String reason) {
 						ModelGrid.this.getElement().<XElement> cast().unmask();
@@ -894,7 +901,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	@Override
 	protected void onDetach() {
 		super.onDetach();
-		if(finder != null){
+		if (finder != null) {
 			finder.close();
 		}
 	}

@@ -9,6 +9,7 @@ import com.bearsoft.rowset.Row;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelDate;
@@ -27,7 +28,7 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 		((DateEditorCell) getTargetCell()).setRenderer(new CellRenderer<Date>() {
 
 			@Override
-			public boolean render(Context context, Date value, SafeHtmlBuilder sb) {
+			public boolean render(Context context, String aId, Date value, SafeHtmlBuilder sb) {
 				DateModelGridColumn column = DateModelGridColumn.this;
 				JavaScriptObject onRender = column.getOnRender() != null ? column.getOnRender() : column.getGrid().getOnRender();
 				if (onRender != null) {
@@ -47,9 +48,12 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, aId,  styleToRender, sb);
 						if (cellToRender != null) {
-							DateModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(context instanceof RenderedCellContext){
+								((RenderedCellContext)context).setStyle(styleToRender);
+							}
+							DateModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
 							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
 								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
 								DateModelGridColumn.this.bindIconCallback(decorId, pImage);

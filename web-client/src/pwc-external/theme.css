@@ -97,6 +97,25 @@
 
 .gwt-PopupPanel{
     transition: left 0.5s, top 0.5s;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+}
+
+.gwt-MenuBarPopup{
+    transition: height 0.5s;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+}
+
+.gwt-MenuBar-horizontal{
+    border-radius: 2px;
+}
+.window-panel{
+    transition: left 0.5s, top 0.5s;
 }
 
 .toggle-button-selected{
@@ -105,7 +124,7 @@
     background-image: none !important;
 }
 
-.gwt-Button, .gwt-Button:active, .dropdown-button, .dropdown-button:active{
+.gwt-Button, .gwt-Button:active, .gwt-Button:hover, .dropdown-button, .dropdown-button:active{
     color: white;
     margin: 0;
     padding: 3px 5px;
@@ -137,6 +156,11 @@
     background-image:-moz-linear-gradient(top, #75bd35,#a0d44d);
     background-image:-o-linear-gradient(top, #75bd35,#a0d44d);
     background-image:linear-gradient(to bottom, #75bd35,#a0d44d);
+}
+
+.gwt-DatePicker {
+  border: 1px solid #ccc;
+  border-radius: 2px;
 }
 
 .dropdown-button:active{
@@ -184,13 +208,38 @@
 }
 
 .gwt-MenuItem{
-    padding-top: 0px !important;
-    padding-bottom: 0px !important;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
-.gwt-TabLayoutPanelContent{
-    padding: 0px !important;
-    margin: 0px !important;
+.gwt-MenuItem:hover, .gwt-MenuItem:focus, .gwt-MenuItem-selected:hover, .gwt-MenuItem-selected:focus{
+    text-shadow: 0 1px rgba(0,0,0,0.4);
+    background: #3e91ee;
+    background-image: linear-gradient(to bottom, #5ea8fc, #2e86e7);
+    box-shadow: inset 0 1px rgba(255,255,255,0.2),0 1px #1e6abe,0 0 0 1px #277edd;
+    color: white;
+    border-radius: 1px;
+}
+
+.gwt-MenuItem-selected{
+    background: white;
+}
+
+.subMenuIcon{
+    padding: 0px;
+    position: absolute;
+    width: 0px;
+    background: transparent;
+}
+
+.subMenuIcon img{
+    position: relative;
+    right: 5px;
+    top: 4px;
+}
+
+.subMenuIcon-selected{
+    background: transparent;
 }
 
 .gwt-ListBox{
@@ -267,25 +316,29 @@
 }
 
 .menu-left-mark{
-    border-right-color: gray;
+    border-right-color: #e5e5e5;
     border-right-width: 1px;
     border-right-style: solid;
     padding-right: 2px;
     padding-top: 4px;
     padding-bottom: 4px;
+    background-position: center;
 }
 
 .menu-field{
+    /*
     border-left-color: lightgray;
     border-left-width: 1px;
     border-left-style: solid;
+    */
     padding-left: 2px;
     padding-top: 4px;
     padding-bottom: 4px;
+    padding-right: 4px;
 }
 
 .tabs-chevron{
-    background-color: lightgray;
+    background-color: white;
     right: 0px;
     top: 0px;
     bottom: 0px;
@@ -296,7 +349,8 @@
     height: 12px;
     background-image: url(tabs-chevron-left.png);
     background-repeat: no-repeat;
-    background-position-x: 0px;
+    background-position-x: -2px;
+    background-position-y: -1px;
 }
 
 .tabs-chevron-right{
@@ -305,6 +359,7 @@
     background-image: url(tabs-chevron-right.png);
     background-repeat: no-repeat;
     background-position-x: 0px;
+    background-position-y: -1px;
 }
 
 .tabs-chevron-list{
@@ -312,7 +367,44 @@
     height: 12px;
     background-image: url(tabs-chevron-list.png);
     background-repeat: no-repeat;
-    background-position-x: 0px;
+    background-position-x: -1px;
+    background-position-y: -1px;
+}
+
+.gwt-TabLayoutPanelTab{
+    margin-left: -1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-width: 1px;
+    border-bottom-width: 0px;
+    border-style: solid;
+    border-color: #cfcfcf #ccc #c6c6c6;
+    background-image: linear-gradient(to bottom, #fcfcfc, #dfdfdf);
+}
+
+.gwt-TabLayoutPanelTab:hover{
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-top-color: #fc911d;
+    border-top-width: 2px;
+}
+
+.gwt-TabLayoutPanelTab-selected{
+    background-image: linear-gradient(to bottom, #49a4fc, #208be7);
+    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+.gwt-TabLayoutPanelTab p{
+    cursor: pointer;
+}
+
+.gwt-TabLayoutPanelTab p:focus, .gwt-TabLayoutPanelTab .gwt-Label:focus{
+    outline: none;
+}
+
+.gwt-TabLayoutPanelContentContainer{
+    border: 1px solid #ccc;
 }
 
 .treegrid-expanded-cell{
@@ -335,16 +427,17 @@
     overflow: hidden;
 }
 
-.grid-focused-cell{
-    background-color: gray;
+.grid-focused-cell {
+    outline: black solid 2px;
+    outline-offset: -2px;
 }
 
-.grid-focused-row{
-    background-color: lightgray;
+.grid-selected-row{
+    background-color: #e5e5e5;
 }
 
 .grid-hovered-row{
-    background-color: #c4e1fc;
+    background-color: #e0f0ff;
 }
 
 .grid-column-footer{
@@ -495,6 +588,7 @@
 
 .window-content{
     transition: width 0.5s, height 0.5s;
+    background-color: white;
 }
 
 .content-decor{

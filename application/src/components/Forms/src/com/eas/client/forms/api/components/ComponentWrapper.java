@@ -24,75 +24,61 @@ import javax.swing.JToggleButton;
  * @author mg
  */
 public class ComponentWrapper {
-    
-    public static CheckBox wrap(JCheckBox aDelegate)
-    {
+
+    public static CheckBox wrap(JCheckBox aDelegate) {
         return new CheckBox(aDelegate);
     }
-    
-    public static Button wrap(JButton aDelegate)
-    {
+
+    public static Button wrap(JButton aDelegate) {
         return new Button(aDelegate);
     }
-    
-    public static DropDownButton wrap(JDropDownButton aDelegate)
-    {
+
+    public static DropDownButton wrap(JDropDownButton aDelegate) {
         return new DropDownButton(aDelegate);
     }
-    
-    public static ToggleButton wrap(JToggleButton aDelegate)
-    {
+
+    public static ToggleButton wrap(JToggleButton aDelegate) {
         return new ToggleButton(aDelegate);
     }
-    
-    public static Label wrap(JLabel aDelegate)
-    {
+
+    public static Label wrap(JLabel aDelegate) {
         return new Label(aDelegate);
     }
-    
-    public static PasswordField wrap(JPasswordField aDelegate)
-    {
+
+    public static PasswordField wrap(JPasswordField aDelegate) {
         return new PasswordField(aDelegate);
     }
-    
-    public static FormattedField wrap(JFormattedTextField aDelegate)
-    {
+
+    public static FormattedField wrap(JFormattedTextField aDelegate) {
         return new FormattedField(aDelegate);
     }
-    
-    public static ProgressBar wrap(JProgressBar aDelegate)
-    {
+
+    public static ProgressBar wrap(JProgressBar aDelegate) {
         return new ProgressBar(aDelegate);
     }
-    
-    public static RadioButton wrap(JRadioButton aDelegate)
-    {
+
+    public static RadioButton wrap(JRadioButton aDelegate) {
         return new RadioButton(aDelegate);
     }
-    
-    public static Slider wrap(JSlider aDelegate)
-    {
+
+    public static Slider wrap(JSlider aDelegate) {
         return new Slider(aDelegate);
     }
-    
-    public static TextArea wrap(JTextPane aDelegate)
-    {
+
+    public static TextArea wrap(JTextPane aDelegate) {
         return new TextArea(aDelegate);
     }
-    
-    public static HtmlArea wrap(JEditorPane aDelegate)
-    {
+
+    public static HtmlArea wrap(JEditorPane aDelegate) {
         return new HtmlArea(aDelegate);
     }
-    
-    public static TextField wrap(JTextField aDelegate)
-    {
+
+    public static TextField wrap(JTextField aDelegate) {
         return new TextField(aDelegate);
     }
-    
-    public static DesktopPane wrap(JDesktopPane aDelegate)
-    {
+
+    public static DesktopPane wrap(JDesktopPane aDelegate) {
         return new DesktopPane(aDelegate);
     }
-    
+
 }
