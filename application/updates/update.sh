@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 JRE_PATH=java
 PLATYPUS_HOME=$(cd `dirname $0` && pwd)/../
 UPDATER_PATH=$PLATYPUS_HOME/lib/own/Updater.jar
@@ -9,7 +9,7 @@ configFile="update.ini"
 urlConfigRegEx="URLConfig\s*=\s*(.*)"
 urlUpdateRegEx="URLUpdate\s*=\s*(.*)"
 configNameRegEx="ConfigFileName\s*=\s*(.*)"
-URL_CONFIG_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/update.xml
+URL_CONFIG_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/version.xml
 URL_CONFIG=$URL_CONFIG_DEFAULT
 URL_UPDATE_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/application.zip
 URL_UPDATE=$URL_UPDATE_DEFAULT
