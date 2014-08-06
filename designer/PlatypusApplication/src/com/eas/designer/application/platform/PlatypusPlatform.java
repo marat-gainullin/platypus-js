@@ -79,7 +79,7 @@ public class PlatypusPlatform {
             String command;
             String updaterPath = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
             if (Utilities.isWindows()) {
-                command = "cmd.exe /C " + "\"" + updaterPath + "\"" + " -update";
+                command = "cmd.exe /C " + "\"" + updaterPath + "\"";
             } else {
                 command = updaterPath;
             }
