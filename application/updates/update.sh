@@ -4,7 +4,7 @@ PLATYPUS_HOME=$(cd `dirname $0` && pwd)/../
 UPDATER_PATH=$PLATYPUS_HOME/lib/own/Updater.jar
 TMP_UPDATE_NAME=$PLATYPUS_HOME/app.zip
 MAIN_CLASS=com.eas.client.updater.Updater
-LAF_CLASS=de.muntjak.tinylookandfeel.TinyLookAndFeel
+LAF_CLASS=com.jtattoo.plaf.fast.FastLookAndFeel
 configFile="update.ini"
 urlConfigRegEx="URLConfig\s*=\s*([\S]+)"
 urlUpdateRegEx="URLUpdate\s*=\s*([\S]+)"
@@ -14,8 +14,9 @@ URL_CONFIG=$URL_CONFIG_DEFAULT
 URL_UPDATE_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/application.zip
 URL_UPDATE=$URL_UPDATE_DEFAULT
 CONFIG_NAME_DEFAULT=version.xml
-#CONFIG_NAME=$PLATYPUS_HOME/updates/version.xml
+CONFIG_NAME_PATH=$PLATYPUS_HOME/updates/
 CONFIG_NAME=$CONFIG_NAME_DEFAULT
+EXT_CLASSES=$PLATYPUS_HOME/ext/*
 
 if [ -f $configFile ]; then
 	while read line
@@ -32,10 +33,10 @@ if [ -f $configFile ]; then
 		fi
 	done < $configFile
 fi
-
-$JRE_PATH -cp $UPDATER_PATH $MAIN_CLASS newversion -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname $CONFIG_NAME -uname $TMP_UPDATE_NAME -path $PLATYPUS_HOME 
+CONFIG_NAME="${CONFIG_NAME_PATH}${CONFIG_NAME}"
+$JRE_PATH -cp $UPDATER_PATH:$EXT_CLASSES $MAIN_CLASS newversion -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname $CONFIG_NAME -uname $TMP_UPDATE_NAME -path $PLATYPUS_HOME 
 if [ $? -eq 10 ]; then 
- $JRE_PATH -cp $UPDATER_PATH $MAIN_CLASS update -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname $CONFIG_NAME -uname $TMP_UPDATE_NAME -path $PLATYPUS_HOME
+ $JRE_PATH -cp $UPDATER_PATH:$EXT_CLASSES $MAIN_CLASS update -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname $CONFIG_NAME -uname $TMP_UPDATE_NAME -path $PLATYPUS_HOME
  if [ -f $PLATYPUS_HOME/lib/own/Updater-new.jar ]; then
   rm $PLATYPUS_HOME/lib/own/Updater.jar 
   mv -f $PLATYPUS_HOME/lib/own/Updater-new.jar $PLATYPUS_HOME/lib/own/Updater.jar;

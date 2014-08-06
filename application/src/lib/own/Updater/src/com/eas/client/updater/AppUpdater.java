@@ -146,7 +146,7 @@ public class AppUpdater {
                         return UpdaterConstants.ERROR;
                     }
                 } else {
-                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotFound"), configUrl));
+                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotFound"), fNameConfig));
                     return UpdaterConstants.ERROR;
                 }
             } catch (HeadlessException e) {

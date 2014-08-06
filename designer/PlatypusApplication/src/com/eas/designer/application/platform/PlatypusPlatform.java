@@ -76,11 +76,10 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-//            ExternalProcessBuilder processBuilder;
             String command;
-            String updaterPath = "\"" + platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName + "\"";
+            String updaterPath = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
             if (Utilities.isWindows()) {
-                command = "cmd.exe /C " + updaterPath + " -update";
+                command = "cmd.exe /C " + "\"" + updaterPath + "\"" + " -update";
             } else {
                 command = updaterPath;
             }
