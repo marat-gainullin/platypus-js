@@ -76,17 +76,17 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            
-            ExternalProcessBuilder processBuilder;
-
+//            ExternalProcessBuilder processBuilder;
+            String command;
+            String updaterPath = "\"" + platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName + "\"";
             if (Utilities.isWindows()) {
-                processBuilder = new ExternalProcessBuilder("cmd.exe /C " + platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName + " -update");
-            } else{
-                processBuilder = new ExternalProcessBuilder(platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName);
+                command = "cmd.exe /C " + updaterPath + " -update";
+            } else {
+                command = updaterPath;
             }
-            
+
             try {
-                processBuilder.call();
+                Runtime.getRuntime().exec(command);
             } catch (IOException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName())
                         .log(Level.SEVERE, null, ex); // NOI18N
