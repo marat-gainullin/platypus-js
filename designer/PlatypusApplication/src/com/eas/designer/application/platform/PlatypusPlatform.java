@@ -54,8 +54,8 @@ public class PlatypusPlatform {
     public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
     public static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
     private static final String PLATFORM_ERROR_MSG = "Platform executables home does not exist or not a directory.";
-    private static final String LINUX_UPDATE_EXECUTABLE = "lookup.sh";
-    private static final String MAC_UPDATE_EXECUTABLE = "lookup-mac.sh";
+    private static final String LINUX_UPDATE_EXECUTABLE = "update.sh";
+    private static final String MAC_UPDATE_EXECUTABLE = "update-mac.sh";
     private static final String WINDOWS_UPDATE_EXECUTABLE = "lookup.exe";
 
     private static final Map<String, File> jarsCache = new HashMap<>();
