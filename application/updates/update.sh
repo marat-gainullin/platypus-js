@@ -6,9 +6,9 @@ TMP_UPDATE_NAME=$PLATYPUS_HOME/app.zip
 MAIN_CLASS=com.eas.client.updater.Updater
 LAF_CLASS=de.muntjak.tinylookandfeel.TinyLookAndFeel
 configFile="update.ini"
-urlConfigRegEx="URLConfig\s*=\s*(.*)"
-urlUpdateRegEx="URLUpdate\s*=\s*(.*)"
-configNameRegEx="ConfigFileName\s*=\s*(.*)"
+urlConfigRegEx="URLConfig\s*=\s*([\S]+)"
+urlUpdateRegEx="URLUpdate\s*=\s*([\S]+)"
+configNameRegEx="ConfigFileName\s*=\s*([\S]+)"
 URL_CONFIG_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/version.xml
 URL_CONFIG=$URL_CONFIG_DEFAULT
 URL_UPDATE_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/application.zip
@@ -28,7 +28,7 @@ if [ -f $configFile ]; then
 			URL_UPDATE="${BASH_REMATCH[1]}"
 		fi
 		if [[ $line =~ $configNameRegEx ]]; then
-			CONFIG_NAME="${BASH_REMATCH[1]}"
+			CONFIG_NAME=${BASH_REMATCH[1]}
 		fi
 	done < $configFile
 fi

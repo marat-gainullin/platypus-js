@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
+import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.ErrorManager;
@@ -75,11 +76,15 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            String executeString = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
-            ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(executeString);
+            
+            ExternalProcessBuilder processBuilder;
+
             if (Utilities.isWindows()) {
-                processBuilder.addArgument("-update");
+                processBuilder = new ExternalProcessBuilder("cmd.exe /C " + platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName + " -update");
+            } else{
+                processBuilder = new ExternalProcessBuilder(platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName);
             }
+            
             try {
                 processBuilder.call();
             } catch (IOException ex) {
