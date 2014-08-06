@@ -212,7 +212,7 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                 ControlDesignInfo cInfo = fiComponents.get(comp.getName());
                 // constraints
                 if (comp instanceof RADVisualComponent<?>) {
-                    LayoutConstraints<?> lc = LayoutConstraintsProcessor.processFromDesignInfo(cInfo);
+                    LayoutConstraints<?> lc = LayoutConstraintsProcessor.processFromDesignInfo(cInfo, formObject);
                     if (lc != null) {
                         ((RADVisualComponent<?>) comp).setLayoutConstraints(LayoutConstraintsProcessor.resolveDelegateClass(lc), lc);
                     }

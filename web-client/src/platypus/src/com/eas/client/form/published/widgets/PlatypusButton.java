@@ -260,9 +260,11 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 			get : function() {
 				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalAlignment()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT     :	return $wnd.P.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEADING  :	return $wnd.P.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT    :	return $wnd.P.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TRAILING :	return $wnd.P.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER   :	return $wnd.P.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
@@ -284,9 +286,11 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 			get : function() {
 				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusButton::getVerticalAlignment()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP      :	return $wnd.P.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEADING  :	return $wnd.P.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM   :	return $wnd.P.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TRAILING :	return $wnd.P.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER   :	return $wnd.P.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
