@@ -2,6 +2,7 @@ package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.ScrollBoxPanel;
+import com.bearsoft.gwt.ui.widgets.DecoratorBox;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;
@@ -31,6 +32,8 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.RichTextArea;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
@@ -260,6 +263,13 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 	@Override
 	public void setWidget(Widget w) {
 		super.setWidget(w);
+		if(w instanceof TextArea || w instanceof RichTextArea ||
+				(w instanceof DecoratorBox<?> && ((DecoratorBox<?>)w).getWidget() instanceof TextArea) ||
+				(w instanceof DecoratorBox<?> && ((DecoratorBox<?>)w).getWidget() instanceof RichTextArea)
+				){
+			setHorizontalScrollPolicy(ScrollPane.ScrollPolicy.NEVER);
+			setVerticalScrollPolicy(ScrollPane.ScrollPolicy.NEVER);
+		}
 		AddEvent.fire(this, w);
 	}
 

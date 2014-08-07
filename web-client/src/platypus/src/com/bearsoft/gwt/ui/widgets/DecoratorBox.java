@@ -88,6 +88,10 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
+	public Widget getWidget(){
+		return decorated instanceof Widget ? (Widget)decorated : null;
+	}
+	
 	@Override
 	public boolean isEnabled() {
 		return enabled;
