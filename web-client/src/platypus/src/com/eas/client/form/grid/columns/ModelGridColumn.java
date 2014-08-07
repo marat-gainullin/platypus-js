@@ -303,7 +303,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	public void setMoveable(boolean aValue) {
 		moveable = aValue;
 		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
-			((DraggableHeader<T>) headerNode.getHeader()).setResizable(moveable && !fixed);
+			((DraggableHeader<T>) headerNode.getHeader()).setMoveable(moveable && !fixed);
 	}
 
 	@Override
