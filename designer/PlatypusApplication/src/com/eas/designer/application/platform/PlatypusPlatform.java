@@ -76,12 +76,12 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            String command;
+            String[] command = new String[1];
             String updaterPath = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
             if (Utilities.isWindows()) {
-                command = "\"" + updaterPath + "\"";
+                command[0] = ("\"" + updaterPath + "\"");
             } else {
-                command = updaterPath.replace(" ", "\\ ");
+                command[0] = updaterPath;
             }
 
             try {
