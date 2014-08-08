@@ -181,19 +181,21 @@ public class ProjectRunner {
                         if (serverInstance.start(project, binDir, debug)) {
                             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
                             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
-                            DebuggerEngine[] startedEngines = DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create(AttachingDICookie.ID, new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, project.getSettings().getDebugServerPort())}));
-                            DebuggerEngine justStartedEngine = startedEngines[0];
-                            DebuggerManager.getDebuggerManager().addDebuggerListener(new DebuggerManagerAdapter() {
+                            if (debug) {
+                                DebuggerEngine[] startedEngines = DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create(AttachingDICookie.ID, new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, project.getSettings().getDebugServerPort())}));
+                                DebuggerEngine justStartedEngine = startedEngines[0];
+                                DebuggerManager.getDebuggerManager().addDebuggerListener(new DebuggerManagerAdapter() {
 
-                                @Override
-                                public void engineRemoved(DebuggerEngine engine) {
-                                    if (engine == justStartedEngine) {
-                                        serverInstance.stop();
-                                        DebuggerManager.getDebuggerManager().removeDebuggerListener(this);
+                                    @Override
+                                    public void engineRemoved(DebuggerEngine engine) {
+                                        if (engine == justStartedEngine) {
+                                            serverInstance.stop();
+                                            DebuggerManager.getDebuggerManager().removeDebuggerListener(this);
+                                        }
                                     }
-                                }
 
-                            });
+                                });
+                            }
                             project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                             ServerSupport ss = new ServerSupport(serverInstance);
                             ss.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());

@@ -11,7 +11,7 @@ function ${appElementName}(){
         /*
         {name: "property1Name", entity: "optionalEntityName", description: "Some property1 description", type: String, key: true},
         {name: "property2Name", entity: "optionalEntityName", description: "Some property2 description", type: String, ref: {property: "referencedPropertyName", entity: "referencedEntityName"}},
-        {name: "property3Name", entity: "optionalEntityName", description: "Some property3 description", type: Number, required: true},
+        {name: "property3Name", entity: "optionalEntityName", description: "Some property3 description", type: Number, required: true}
         */
     ];
 

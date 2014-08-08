@@ -374,6 +374,7 @@
 .tabs-tab-close{
     background-image: url(tab-close.png);
     background-repeat: no-repeat;
+    background-position: center;
     margin-left: 7px;
     width: 10px;
     height: 10px;

@@ -39,6 +39,7 @@ import com.eas.dbcontrols.spin.DbSpinDesignInfo;
 import com.eas.dbcontrols.text.DbTextDesignInfo;
 import com.eas.dbcontrols.visitors.DbControlClassFinder;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,7 +65,7 @@ public class RadComponentFactory implements DbControlsDesignInfoVisitor {
     }
     protected FormModel model;
     protected RADComponent<?> result;
-    protected List<Throwable> errors;
+    protected List<Throwable> errors = new ArrayList<>();
 
     public RadComponentFactory(FormModel aModel) {
         super();
