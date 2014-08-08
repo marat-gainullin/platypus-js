@@ -56,7 +56,8 @@ public class PlatypusPlatform {
     private static final String PLATFORM_ERROR_MSG = "Platform executables home does not exist or not a directory.";
     private static final String LINUX_UPDATE_EXECUTABLE = "update.sh";
     private static final String MAC_UPDATE_EXECUTABLE = "update-mac.sh";
-    private static final String WINDOWS_UPDATE_EXECUTABLE = "lookup.exe";
+    private static final String WINDOWS_UPDATE_EXECUTABLE = "lookup-x86.exe";
+    private static final String WINDOWS_UPDATE_EXECUTABLE_x64 = "lookup-x64.exe";
 
     private static final Map<String, File> jarsCache = new HashMap<>();
 
@@ -69,7 +70,11 @@ public class PlatypusPlatform {
             String executableName;
 
             if (Utilities.isWindows()) {
-                executableName = WINDOWS_UPDATE_EXECUTABLE;
+                if (System.getProperty("os.arch").equals("x86")) {
+                    executableName = WINDOWS_UPDATE_EXECUTABLE;
+                } else {
+                    executableName = WINDOWS_UPDATE_EXECUTABLE_x64;
+                }
             } else if (Utilities.isMac()) {
                 executableName = MAC_UPDATE_EXECUTABLE;
             } else {
