@@ -137,7 +137,7 @@ public class PlatypusWebModuleManager {
             }
             setupWebApplication(webModule);
             webAppRunUrl = Deployment.getDefault().deploy(webModule,
-                    Deployment.Mode.RUN,
+                    isDebug ? Deployment.Mode.DEBUG : Deployment.Mode.RUN,
                     webModule.getUrl(),
                     ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? PLATYPUS_SERVLET_URL : START_PAGE_FILE_NAME,
                     false);

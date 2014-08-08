@@ -1409,6 +1409,9 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public void initializeDesign() {
+        if (!header.isEmpty() && header.get(0) instanceof FixedDbGridColumn) {
+            header.remove(0);
+        }
         removeAll();
         setLayout(new BorderLayout());
         JLabel label = new JLabel(this.getClass().getSimpleName().replace("Db", "Model"), IconCache.getIcon("16x16/grid.png"), SwingConstants.LEADING);
@@ -1427,12 +1430,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 columnModel = new DefaultTableColumnModel() {
                     @Override
                     public int getTotalColumnWidth() {
-                            // super implementation caches the result and invalidates it
-                        // when width of any column is changed/
+                        // super implementation caches the result and invalidates it
+                        // when width of any column is changed.
                         // We need to set width silently, because of extra event
                         // been fired by swing. We need to avoid it. 
                         // We avoid it, but it leads to break of width cache invalidation.
-                        // So we need to calculate width unconditionally and allways.
+                        // So we need to calculate width allways and unconditionally.
                         int width = 0;
                         Enumeration<TableColumn> cols = getColumns();
                         while (cols.hasMoreElements()) {
@@ -1457,11 +1460,37 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
                     }
                 };
+
                 Map<TableColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header, true);
+                if (rowsHeaderType != DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE) {
+                    int fixedWidth = 18;
+                    if (rowsHeaderType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX
+                            || rowsHeaderType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON) {
+                        fixedWidth += 5;
+                    }
+                    // View column setup
+                    TableColumn tCol = new RowHeaderTableColumn(fixedWidth);
+                    tCol.setCellRenderer(new RowHeaderCellRenderer(rowsHeaderType));
+                    tCol.setCellEditor(new RowHeaderCellEditor(rowsHeaderType));
+                    tCol.setMinWidth(fixedWidth);
+                    tCol.setPreferredWidth(fixedWidth);
+                    tCol.setMaxWidth(fixedWidth);
+                    tCol.setHeaderValue("\\");
+                    GridColumnsGroup group = new GridColumnsGroup();
+                    group.setTableColumn(tCol);
+                    group.setMoveable(false);
+                    group.setResizeable(false);
+                    group.setSortable(false);
+                    cols2groups.put(tCol, group);
+                    columnModel.addColumn(tCol);
+                    columnModel.moveColumn(columnModel.getColumnCount() - 1, 0);
+                }
                 for (int i = 0; i < columnModel.getColumnCount(); i++) {
                     TableColumn tc = columnModel.getColumn(i);
                     tc.setCellEditor(null);
-                    tc.setCellRenderer(new DefaultTableCellRenderer());
+                    if (!(tc instanceof RowHeaderTableColumn)) {
+                        tc.setCellRenderer(new DefaultTableCellRenderer());
+                    }
                 }
                 columnModel.setSelectionModel(selectionModel);
                 columnModel.setColumnSelectionAllowed(true);
@@ -1929,7 +1958,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     public List<ScriptableColumn> getScriptableColumns() {
         return scriptableColumns;
     }
-    
+
     private String[][] getGridView(boolean selectedOnly, boolean isData) {
         TableModel cellsModel = getDeepModel();
         if (cellsModel != null) {
