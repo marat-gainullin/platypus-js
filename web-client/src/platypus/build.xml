@@ -60,7 +60,7 @@
 
 	<target name="copy-pwc" description="Copy pwc files to destination directory">
 		<!-- Platypus web client -->
-		<copy todir="${destdir}">
+		<copy todir="${destdir}/pwc">
 			<fileset dir="war/pwc" includes="**" />
 		</copy>
 	</target>
