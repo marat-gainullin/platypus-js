@@ -176,7 +176,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                     arguments.add(connection.getSchema());
                 }
             } else {
-                io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Invalid_Database", connection.getDisplayName()));
+                io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Invalid_Database", connection.getDisplayName()));
             }
         }
 
