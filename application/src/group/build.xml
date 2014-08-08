@@ -297,29 +297,13 @@
                                 /-->
 	<target description="Create update file" name="setversion">
 	    <buildnumber file="build.num"/>
-            <property name="curver" value="3.0."/> 
+            <property name="curver" value="4.0."/> 
             <property name="fullcurversion" value="${curver}${build.number}"/>
 	
-            <replaceregexp file="../../updates/update.xml"
+            <replaceregexp file="../../updates/version.xml"
                    match="&lt;Version version=&quot;\d+\.\d+\.\d+&quot;/&gt;"
                    replace="&lt;Version version=&quot;${fullcurversion}&quot;/&gt;"
                    byline="true"/> 
-            <replaceregexp file="../../run/update.xml"
-                   match="&lt;Version version=&quot;\d+\.\d+\.\d+&quot;/&gt;"
-                   replace="&lt;Version version=&quot;${fullcurversion}&quot;/&gt;"
-                   byline="true"/>        
-            <replaceregexp file="../../installer.xml"
-                   match="&gt;\d+\.\d+\.\d+&lt;"
-                   replace="&gt;${fullcurversion}&lt;"
-                   byline="true"/> 
-            <replaceregexp file="../../macClientInstaller.xml"
-                   match="&lt;property name=&quot;version&quot; value=&quot;\d+\.\d+\.\d+&quot;/&gt;"
-                   replace="&lt;property name=&quot;version&quot; value=&quot;${fullcurversion}&quot;/&gt;"
-                   byline="true"/> 
-            <replaceregexp file="../../macClientInstaller.xml"
-                   match="&lt;property name=&quot;buildnumber&quot; value=&quot;\d+&quot;/&gt;"
-                   replace="&lt;property name=&quot;buildnumber&quot; value=&quot;${build.number}&quot;/&gt;"
-                   byline="true"/>        
 	</target>
 	                            <!--
                                     Copy Updater.jar if need.

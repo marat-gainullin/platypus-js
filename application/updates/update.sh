@@ -10,9 +10,9 @@ configFile="update.ini"
 urlConfigRegEx="URLConfig\s*=\s*([\S]+)"
 urlUpdateRegEx="URLUpdate\s*=\s*([\S]+)"
 configNameRegEx="ConfigFileName\s*=\s*([\S]+)"
-URL_CONFIG_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/version.xml
+URL_CONFIG_DEFAULT=http://research.office.altsoft.biz/platypus/updates/4.0/client/NightlyBuild/version.xml
 URL_CONFIG=$URL_CONFIG_DEFAULT
-URL_UPDATE_DEFAULT=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuildNewUi/application.zip
+URL_UPDATE_DEFAULT=http://research.office.altsoft.biz/platypus/updates/4.0/client/NightlyBuild/application.zip
 URL_UPDATE=$URL_UPDATE_DEFAULT
 CONFIG_NAME_DEFAULT=version.xml
 CONFIG_NAME_PATH=${PLATYPUS_HOME}/updates/
