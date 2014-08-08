@@ -135,7 +135,9 @@ public class DependenciesWalker {
                     try {                        
                         ApplicationElement appElement = cache.get(name);
                         if (appElement != null) {
-                            if (appElement.getType() == ClientConstants.ET_COMPONENT || appElement.getType() == ClientConstants.ET_FORM) {
+                            if (appElement.getType() == ClientConstants.ET_COMPONENT
+                                    || appElement.getType() == ClientConstants.ET_FORM
+                                    || appElement.getType() == ClientConstants.ET_REPORT) {
                                 putDependence(name);
                             } else {
                                 Logger.getLogger(DependenciesWalker.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript indentifier {0} found that is the same with non-module application element).", appElement.getName());

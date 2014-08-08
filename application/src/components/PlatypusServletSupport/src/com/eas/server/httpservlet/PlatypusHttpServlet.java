@@ -70,6 +70,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String EXCELX_CONTENT_TYPE = "application/xlsx";
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
+    public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
     public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
     private PlatypusServerCore serverCore;
@@ -444,12 +445,12 @@ public class PlatypusHttpServlet extends HttpServlet {
                         out.write(report.getReport());
                         out.flush();
                     }
-                    String redirectLocation = userHome + reportName;
+                    String reportLocation = userHome + reportName;
                     if (!"/".equals(aHttpRequest.getContextPath())) {
-                        redirectLocation = aHttpRequest.getContextPath() + redirectLocation;
+                        reportLocation = aHttpRequest.getContextPath() + reportLocation;
                     }
-                    redirectLocation = new URI(null, null, redirectLocation, null).toASCIIString();
-                    aHttpResponse.sendRedirect(redirectLocation);
+                    reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
+                    writeResponse(reportLocation, aHttpResponse, REPORT_LOCATION_CONTENT_TYPE);
                 } else {// including null result
                     writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), aHttpResponse);
                 }

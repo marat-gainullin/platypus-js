@@ -76,6 +76,10 @@ public class Application {
 	public static Query putAppQuery(Query aQuery) {
 		return appQueries.put(aQuery.getEntityId(), aQuery);
 	}
+	
+	public static native JavaScriptObject createReport(String reportLocation)/*-{
+		return new $wnd.P.Report(reportLocation);
+	}-*/;
 
 	protected static class ExecuteApplicationCallback extends RunnableAdapter {
 
@@ -628,66 +632,92 @@ public class Application {
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		};
-		(function(){			
-			function parseDates(aObject) {
-		        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
-		            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(aObject)){
-		                return new Date(aObject);
-		            }
-		        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
-		            for (var prop in aObject) {
-		                aObject[prop] = parseDates(aObject[prop]);
-		            }
-		        }
-		        return aObject;
-		    }
-			
-			function generateFunction(aModuleName, aFunctionName) {
-				return function() {
-					var onSuccess = null;
-					var onFailure = null;
-					var argsLength = arguments.length;
-					if(arguments.length > 1 && typeof arguments[arguments.length - 1] == "function" && typeof arguments[arguments.length - 2] == "function"){
-						onSuccess = arguments[arguments.length - 2];
-						onFailure = arguments[arguments.length - 1];
-						argsLength -= 2;
-					}else if(arguments.length > 0 && typeof arguments[arguments.length - 1] == "function"){
-						onSuccess = arguments[arguments.length - 1];
-						argsLength -= 1;
-					}
-					var params = [];
-					for (var j = 0; j < argsLength; j++) {
-						params[j] = JSON.stringify(arguments[j]);
-					}
-					var nativeClient = @com.eas.client.application.AppClient::getInstance()();
-					if(onSuccess) {
-						nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
-							function(aResult){
-								onSuccess(parseDates(JSON.parse(aResult)));
-							}, onFailure);
-					} else {
-						return parseDates(JSON.parse(nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)));
-					}
-				};
+		function Report(reportLocation){
+			function download(aName){
+				var a = $doc.createElement('a');
+				a.download = "";
+				if(aName)
+					a.download = aName;
+				a.style.display = 'none';
+				a.style.visibility = 'hidden';
+				a.href = reportLocation;
+				$doc.body.appendChild(a);
+				a.click();
+				$doc.body.removeChild(a);
 			}
-					
-			$wnd.P.ServerModule = function(aModuleName){
-				if(!(this instanceof $wnd.P.ServerModule))
-					throw 'use P.ServerModule(...) please.';
-				if(!$wnd.P.serverModules)
-					throw 'No server modules proxies.';
-				var moduleData = $wnd.P.serverModules[aModuleName];
-				if(!moduleData)
-					throw 'No server module proxy for module: ' + aModuleName;
-				if(!moduleData.isPermitted)
-					throw 'AccessControlException';
-				var self = this;
-				for (var i = 0; i < moduleData.functions.length; i++) {
-					var funcName = moduleData.functions[i];
-					self[funcName] = generateFunction(aModuleName, funcName);
+			this.show = function(){
+				download();
+			};
+			this.print = function(){
+				download();
+			};
+			this.save = function(aName){
+				download(aName);
+			};
+		}
+		$wnd.P.Report = Report;
+		function parseDates(aObject) {
+	        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
+	            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(aObject)){
+	                return new Date(aObject);
+	            }
+	        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
+	            for (var prop in aObject) {
+	                aObject[prop] = parseDates(aObject[prop]);
+	            }
+	        }
+	        return aObject;
+	    }
+		
+		function generateFunction(aModuleName, aFunctionName) {
+			return function() {
+				var onSuccess = null;
+				var onFailure = null;
+				var argsLength = arguments.length;
+				if(arguments.length > 1 && typeof arguments[arguments.length - 1] == "function" && typeof arguments[arguments.length - 2] == "function"){
+					onSuccess = arguments[arguments.length - 2];
+					onFailure = arguments[arguments.length - 1];
+					argsLength -= 2;
+				}else if(arguments.length > 0 && typeof arguments[arguments.length - 1] == "function"){
+					onSuccess = arguments[arguments.length - 1];
+					argsLength -= 1;
+				}
+				var params = [];
+				for (var j = 0; j < argsLength; j++) {
+					params[j] = JSON.stringify(arguments[j]);
+				}
+				var nativeClient = @com.eas.client.application.AppClient::getInstance()();
+				if(onSuccess) {
+					nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
+						function(aResult){
+							if(typeof aResult === 'object' && aResult instanceof Report)
+								onSuccess(aResult);
+							else
+								onSuccess(parseDates(JSON.parse(aResult)));
+						}, onFailure);
+				} else {
+					var result = nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
+					return typeof result === 'object' && result instanceof Report ? result : parseDates(JSON.parse(result)); 
 				}
 			};
-		})();
+		}
+				
+		$wnd.P.ServerModule = function(aModuleName){
+			if(!(this instanceof $wnd.P.ServerModule))
+				throw 'use P.ServerModule(...) please.';
+			if(!$wnd.P.serverModules)
+				throw 'No server modules proxies.';
+			var moduleData = $wnd.P.serverModules[aModuleName];
+			if(!moduleData)
+				throw 'No server module proxy for module: ' + aModuleName;
+			if(!moduleData.isPermitted)
+				throw 'AccessControlException';
+			var self = this;
+			for (var i = 0; i < moduleData.functions.length; i++) {
+				var funcName = moduleData.functions[i];
+				self[funcName] = generateFunction(aModuleName, funcName);
+			}
+		};
 		Object.defineProperty($wnd.P.Form, "shown", {
 			get : function() {
 				return @com.eas.client.form.PlatypusWindow::getShownForms()();

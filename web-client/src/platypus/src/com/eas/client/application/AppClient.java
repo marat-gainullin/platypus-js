@@ -72,6 +72,7 @@ public class AppClient {
 	public static final String APPLICATION_URI = "/application";
 	public static final String RESOURCES_URI = "/resources";
 	public static final String API_URI = "/api";
+    public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	
 	protected static Set<String> attachedCss = new HashSet<String>();
 	//
@@ -743,6 +744,8 @@ public class AppClient {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
+						} else if(responseType.contains(REPORT_LOCATION_CONTENT_TYPE)){
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Application.createReport(aResponse.getResponseText()));
 						} else {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						}
@@ -773,6 +776,8 @@ public class AppClient {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
 							return Utils.toJs(executed.getResponseText());
+						} else if(responseType.contains(REPORT_LOCATION_CONTENT_TYPE)){
+							return Application.createReport(executed.getResponseText());
 						} else {
 							return Utils.toJs(executed.getResponseText());
 						}
