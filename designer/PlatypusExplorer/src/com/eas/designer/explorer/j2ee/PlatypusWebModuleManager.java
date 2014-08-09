@@ -287,7 +287,7 @@ public class PlatypusWebModuleManager {
     protected void setupWebApplication(J2eeModuleProvider aJmp) throws Exception {
         WebAppManager webAppConfigurator = WebAppManagerFactory.getInstance().createWebAppManager(project, aJmp);
         if (webAppConfigurator != null) {
-            webAppConfigurator.deployJdbcDrivers();
+            //webAppConfigurator.deployJdbcDrivers(); // since jdbc drivers are in bundled version of tomcat there is no need to deploy them right now
             webAppConfigurator.configure();
         } else {
             String errorMessage = String.format(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Config_Not_Supported"), aJmp.getServerID());//NOI18N
