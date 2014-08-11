@@ -56,6 +56,7 @@ import org.netbeans.installer.utils.FileUtils;
 import org.netbeans.installer.utils.LogManager;
 import org.netbeans.installer.utils.StringUtils;
 import org.netbeans.installer.utils.SystemUtils;
+import org.netbeans.installer.utils.ResourceUtils;
 import org.netbeans.installer.utils.applications.JavaUtils;
 import org.netbeans.installer.utils.exceptions.InitializationException;
 import org.netbeans.installer.utils.exceptions.InstallationException;
@@ -191,6 +192,26 @@ private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLoc
     }
 
     @Override
+    public String getExecutable() {
+        if (SystemUtils.isWindows()) {
+            return EXECUTABLE_WINDOWS;
+        } else {
+            return EXECUTABLE_UNIX;
+        }
+    }
+
+    @Override
+    public String getIcon() {
+        if (SystemUtils.isWindows()) {
+            return ICON_WINDOWS;
+        } else if (SystemUtils.isMacOS()) {
+            return ICON_MACOSX;
+        } else {
+            return ICON_UNIX;
+        }
+    }
+
+    @Override
     public boolean registerInSystem() {
         return true;
     }
@@ -198,6 +219,16 @@ private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLoc
     @Override
     public boolean requireLegalArtifactSaving() {
         return false;
+    }
+
+    @Override
+    public boolean requireDotAppForMacOs() {
+        return true;
+    }
+
+    @Override
+    public boolean wrapForMacOs() {
+        return true;
     }
 
     public static final String WIZARD_COMPONENTS_URI =
@@ -208,4 +239,26 @@ private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLoc
             "all.users"; // NOI18N
     private static final String CURRENT_USER_PROPERTY_VALUE =
             "current.user"; // NOI18N
+     public static final String BIN_SUBDIR =
+            "bin/";
+     public static final String EXECUTABLE_WINDOWS =
+            BIN_SUBDIR
+            + ResourceUtils.getString(ConfigurationLogic.class, "CL.app.name"); // NOI18N
+    public static final String EXECUTABLE_UNIX =
+            BIN_SUBDIR
+            + ResourceUtils.getString(ConfigurationLogic.class, "CL.app.name"); // NOI18N
+    public static final String ICON_WINDOWS =
+            EXECUTABLE_WINDOWS;
+    public static final String ICON_UNIX =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.unix.icon.name"); // NOI18N
+    public static final String ICON_UNIX_RESOURCE =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.unix.icon.resource"); // NOI18N
+    public static final String ICON_MACOSX =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.mac.icon.name"); // NOI18N
+    public static final String ICON_MACOSX_RESOURCE =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.mac.icon.resource"); // NOI18N
 }
