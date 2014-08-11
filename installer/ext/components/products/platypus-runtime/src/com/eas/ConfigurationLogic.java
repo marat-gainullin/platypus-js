@@ -191,11 +191,6 @@ private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLoc
     }
 
     @Override
-    public String getIcon() {
-            return null;
-    }
-
-    @Override
     public boolean registerInSystem() {
         return true;
     }
@@ -203,16 +198,6 @@ private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLoc
     @Override
     public boolean requireLegalArtifactSaving() {
         return false;
-    }
-
-    @Override
-    public boolean requireDotAppForMacOs() {
-        return true;
-    }
-
-    @Override
-    public boolean wrapForMacOs() {
-        return true;
     }
 
     public static final String WIZARD_COMPONENTS_URI =
