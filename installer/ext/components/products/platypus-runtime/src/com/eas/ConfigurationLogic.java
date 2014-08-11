@@ -191,11 +191,6 @@ private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLoc
     }
 
     @Override
-    public String getExecutable() {
-        return null;
-    }
-
-    @Override
     public String getIcon() {
             return null;
     }
