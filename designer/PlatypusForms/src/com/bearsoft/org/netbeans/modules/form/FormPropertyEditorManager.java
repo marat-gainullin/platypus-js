@@ -118,9 +118,9 @@ final public class FormPropertyEditorManager {
         }
     }
 
-    private static List<Class<PropertyEditor>> getRegisteredEditorClasses(Class<?> propertyType) {
+    private static List<Class<? extends PropertyEditor>> getRegisteredEditorClasses(Class<?> propertyType) {
         List<Class<? extends PropertyEditor>> classList = expliciteEditors != null ? expliciteEditors.get(propertyType) : null;
-        return classList != null ? classList : Collections.EMPTY_LIST;
+        return classList != null ? classList : Collections.<Class<? extends PropertyEditor>>emptyList();
     }
 
     // -------
@@ -141,7 +141,7 @@ final public class FormPropertyEditorManager {
             return editorList;
         }
         // 2nd - add editors registered using registerEditor(...)
-        for (Class<PropertyEditor> cls : getRegisteredEditorClasses(type)) {
+        for (Class<? extends PropertyEditor> cls : getRegisteredEditorClasses(type)) {
             createEditorInstance(cls, editorList);
             if (!all) {
                 return editorList;
@@ -221,7 +221,7 @@ final public class FormPropertyEditorManager {
                 && !Number.class.isAssignableFrom(type);
     }
 
-    private static boolean createEditorInstance(Class<PropertyEditor> cls, List<PropertyEditor> list) {
+    private static boolean createEditorInstance(Class<? extends PropertyEditor> cls, List<PropertyEditor> list) {
         try {
             list.add(cls.newInstance());
             return true;

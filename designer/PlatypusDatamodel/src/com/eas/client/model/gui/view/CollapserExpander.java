@@ -57,7 +57,7 @@ public class CollapserExpander {
                         Point llocation = lEntityComponent.getLocation();
                         Point lnewlocation = new Point(llocation.x, llocation.y + dy);
                         assert lEntityComponent instanceof EntityView<?>;
-                        MoveEntityEdit<?> ledit = new MoveEntityEdit<>(lEntityComponent.getEntity(), llocation, lnewlocation);
+                        MoveEntityEdit<E> ledit = new MoveEntityEdit<>(lEntityComponent.getEntity(), llocation, lnewlocation);
                         ledit.redo();
                         aUndoSupport.postEdit(ledit);
                     }
