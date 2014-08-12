@@ -46,7 +46,7 @@
   core properties. For more details on the values of these properties see
   the build.properties file.
 -->
-<project name="platypus-runtime-product" default="usage" basedir=".">
+<project name="platypus-designer-product" default="usage" basedir=".">
     <!-- import the properties that are specific to this environment -->
     <property file="${environment.properties}"/>
     

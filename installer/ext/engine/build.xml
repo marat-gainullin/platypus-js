@@ -38,7 +38,7 @@
   holder.
 -->
 
-<project name="Hello_World_Installer" default="default" basedir=".">
+<project name="platypus-designer_Installer" default="default" basedir=".">
     <import file="nbproject/build-impl.xml"/>
     
     <property file="build.properties"/>

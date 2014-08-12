@@ -51,6 +51,7 @@ import org.netbeans.installer.utils.FileUtils;
 import org.netbeans.installer.utils.LogManager;
 import org.netbeans.installer.utils.StringUtils;
 import org.netbeans.installer.utils.SystemUtils;
+import org.netbeans.installer.utils.ResourceUtils;
 import org.netbeans.installer.utils.applications.JavaUtils;
 import org.netbeans.installer.utils.exceptions.InitializationException;
 import org.netbeans.installer.utils.exceptions.InstallationException;
@@ -274,14 +275,33 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
     }
 
     @Override
-    public String getIcon() {
+    public String getExecutable() {
         if (SystemUtils.isWindows()) {
-            return "bin/tomcat7.exe";
+            return EXECUTABLE_WINDOWS;
         } else {
-            return null;
+            return EXECUTABLE_UNIX;
         }
     }
 
+    @Override
+    public String getIcon() {
+        if (SystemUtils.isMacOS()) {
+            return ICON_MACOSX;
+        } else {
+            return ICON_UNIX;
+        }
+    }
+
+    @Override
+    public boolean requireDotAppForMacOs() {
+        return true;
+    }
+
+    @Override
+    public boolean wrapForMacOs() {
+        return true;
+    }    
+    
     public boolean requireLegalArtifactSaving() {     
        return false;                                   
     }    
@@ -298,4 +318,24 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
             "org/netbeans/installer/products/tomcat/wizard.xml"; // NOI18N
     public static final String PRODUCT_ID =
             "TOMCAT"; // NOI18N
+     public static final String BIN_SUBDIR =
+            "bin/";
+     public static final String EXECUTABLE_WINDOWS =
+            BIN_SUBDIR
+            + ResourceUtils.getString(ConfigurationLogic.class, "CL.app.name") + ".bat"; // NOI18N
+    public static final String EXECUTABLE_UNIX =
+            BIN_SUBDIR
+            + ResourceUtils.getString(ConfigurationLogic.class, "CL.app.name") + ".sh"; // NOI18N
+    public static final String ICON_UNIX =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.unix.icon.name"); // NOI18N
+    public static final String ICON_UNIX_RESOURCE =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.unix.icon.resource"); // NOI18N
+    public static final String ICON_MACOSX =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.mac.icon.name"); // NOI18N
+    public static final String ICON_MACOSX_RESOURCE =
+            ResourceUtils.getString(ConfigurationLogic.class,
+            "CL.mac.icon.resource"); // NOI18N
 }

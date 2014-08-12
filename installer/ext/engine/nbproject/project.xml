@@ -41,7 +41,7 @@
     <type>org.netbeans.modules.java.j2seproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
-            <name>HelloWorld Engine</name>
+            <name>platypus-designer Engine</name>
             <minimum-ant-version>1.6.5</minimum-ant-version>
             <source-roots>
                 <root id="src.dir"/>
@@ -53,6 +53,14 @@
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">
             <reference>
                 <foreign-project>NBI_Engine</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar</id>
+            </reference>
+            <reference>
+                <foreign-project>NBI_Engine-1</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>
