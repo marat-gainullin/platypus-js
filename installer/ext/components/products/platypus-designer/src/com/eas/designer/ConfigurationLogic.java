@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
-import com.eas.designer.wizard.panels.HelloWorldPanel;
+import com.eas.designer.wizard.panels.PlatypusDesignerPanel;
 import com.eas.installer.utils.applications.NetBeansRCPUtils;
 import org.netbeans.installer.product.components.ProductConfigurationLogic;
 import org.netbeans.installer.product.components.Product;
@@ -116,7 +116,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
 
 
 
-        if (Boolean.parseBoolean(getProperty(HelloWorldPanel.CREATE_DESKTOP_SHORTCUT_PROPERTY))) {
+        if (Boolean.parseBoolean(getProperty(PlatypusDesignerPanel.CREATE_DESKTOP_SHORTCUT_PROPERTY))) {
             LogManager.logIndent(
                     "creating the desktop shortcut for the application"); // NOI18N
             if (!SystemUtils.isMacOS()) {
@@ -166,7 +166,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
 
         /////////////////////////////////////////////
         // create start menu shortcut
-        if (Boolean.parseBoolean(getProperty(HelloWorldPanel.CREATE_START_MENU_SHORTCUT_PROPERTY))) {
+        if (Boolean.parseBoolean(getProperty(PlatypusDesignerPanel.CREATE_START_MENU_SHORTCUT_PROPERTY))) {
             LogManager.logIndent(
                     "creating the start menu shortcut for the application"); // NOI18N
             try {
@@ -216,7 +216,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
 
         //NetBeansUtils.warnNetbeansRunning(installLocation);
         /////////////////////////////////////////////////////////////////////////////
-        if (Boolean.parseBoolean(getProperty(HelloWorldPanel.CREATE_START_MENU_SHORTCUT_PROPERTY))) {
+        if (Boolean.parseBoolean(getProperty(PlatypusDesignerPanel.CREATE_START_MENU_SHORTCUT_PROPERTY))) {
             try {
                 progress.setDetail(getString("CL.uninstall.start.menu")); // NOI18N
 
@@ -243,7 +243,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         }
 
         /////////////////////////////////////////////////////////////////////////////
-        if (Boolean.parseBoolean(getProperty(HelloWorldPanel.CREATE_DESKTOP_SHORTCUT_PROPERTY))) {
+        if (Boolean.parseBoolean(getProperty(PlatypusDesignerPanel.CREATE_DESKTOP_SHORTCUT_PROPERTY))) {
             if (!SystemUtils.isMacOS()) {
                 try {
                     progress.setDetail(getString("CL.uninstall.desktop")); // NOI18N

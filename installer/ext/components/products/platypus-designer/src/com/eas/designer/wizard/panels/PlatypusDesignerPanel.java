@@ -62,9 +62,9 @@ import org.netbeans.installer.wizard.ui.WizardUi;
  *
  * @author Dmitry Lipin
  */
-public class HelloWorldPanel extends DestinationPanel {
+public class PlatypusDesignerPanel extends DestinationPanel {
 
-    public HelloWorldPanel() {
+    public PlatypusDesignerPanel() {
         setProperty(TITLE_PROPERTY,
                 DEFAULT_TITLE);
         setProperty(DESCRIPTION_PROPERTY,
@@ -82,7 +82,7 @@ public class HelloWorldPanel extends DestinationPanel {
     @Override
     public WizardUi getWizardUi() {
         if (wizardUi == null) {
-            wizardUi = new HelloWorldPanelUi(this);
+            wizardUi = new PlatypusDesignerPanelUi(this);
         }
 
         return wizardUi;
@@ -100,11 +100,11 @@ public class HelloWorldPanel extends DestinationPanel {
     }
 
 
-    public static class HelloWorldPanelUi extends DestinationPanelUi {
+    public static class PlatypusDesignerPanelUi extends DestinationPanelUi {
 
-        protected HelloWorldPanel panel;
+        protected PlatypusDesignerPanel panel;
 
-        public HelloWorldPanelUi(HelloWorldPanel panel) {
+        public PlatypusDesignerPanelUi(PlatypusDesignerPanel panel) {
             super(panel);
 
 
@@ -114,21 +114,21 @@ public class HelloWorldPanel extends DestinationPanel {
         @Override
         public SwingUi getSwingUi(SwingContainer container) {
             if (swingUi == null) {
-                swingUi = new HelloWorldPanelSwingUi(panel, container);
+                swingUi = new PlatypusDesignerSwingUi(panel, container);
             }
 
             return super.getSwingUi(container);
         }
     }
 
-    public static class HelloWorldPanelSwingUi extends DestinationPanelSwingUi {
+    public static class PlatypusDesignerSwingUi extends DestinationPanelSwingUi {
 
-        protected HelloWorldPanel panel;
+        protected PlatypusDesignerPanel panel;
         private NbiCheckBox desktopShortcutComboBox;
         private NbiCheckBox startMenuShortcutComboBox;
 
-        public HelloWorldPanelSwingUi(
-                final HelloWorldPanel panel,
+        public PlatypusDesignerSwingUi(
+                final PlatypusDesignerPanel panel,
                 final SwingContainer container) {
             super(panel, container);
 
@@ -222,30 +222,30 @@ public class HelloWorldPanel extends DestinationPanel {
             "error.contains.non.ascii.chars"; // NOI18N
     
     public static final String DEFAULT_TITLE =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.title"); // NOI18N
     public static final String DEFAULT_DESCRIPTION =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.description"); // NOI18N
     public static final String DEFAULT_DESTINATION_LABEL_TEXT =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.destination.label.text"); // NOI18N
     public static final String DEFAULT_DESTINATION_BUTTON_TEXT =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.destination.button.text"); // NOI18N
     public static final String CREATE_DESKTOP_SHORTCUT_NAME =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.create.desktop.shortcut"); // NOI18N
     public static final String CREATE_START_MENU_SHORTCUT_NAME_WINDOWS =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.create.start.menu.shortcut.windows"); // NOI18N
     public static final String CREATE_START_MENU_SHORTCUT_NAME_UNIX =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.create.start.menu.shortcut.unix"); // NOI18N
     public static final String CREATE_START_MENU_SHORTCUT_NAME_MAC =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.create.start.menu.shortcut.macosx"); // NOI18N
     public static final String DEFAULT_ERROR_CONTAINS_NON_ASCII_CHARS =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusDesignerPanel.class,
             "P.error.contains.non.ascii.chars"); // NOI18N   
 }

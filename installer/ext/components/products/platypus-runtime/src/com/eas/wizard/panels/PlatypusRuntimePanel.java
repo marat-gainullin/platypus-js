@@ -62,9 +62,9 @@ import org.netbeans.installer.wizard.ui.WizardUi;
  *
  * @author Dmitry Lipin
  */
-public class HelloWorldPanel extends DestinationPanel {
+public class PlatypusRuntimePanel extends DestinationPanel {
 
-    public HelloWorldPanel() {
+    public PlatypusRuntimePanel() {
         setProperty(TITLE_PROPERTY,
                 DEFAULT_TITLE);
         setProperty(DESCRIPTION_PROPERTY,
@@ -76,7 +76,7 @@ public class HelloWorldPanel extends DestinationPanel {
     @Override
     public WizardUi getWizardUi() {
         if (wizardUi == null) {
-            wizardUi = new HelloWorldPanelUi(this);
+            wizardUi = new PlatypusRuntimePanelUi(this);
         }
 
         return wizardUi;
@@ -88,11 +88,11 @@ public class HelloWorldPanel extends DestinationPanel {
     }
 
 
-    public static class HelloWorldPanelUi extends DestinationPanelUi {
+    public static class PlatypusRuntimePanelUi extends DestinationPanelUi {
 
-        protected HelloWorldPanel panel;
+        protected PlatypusRuntimePanel panel;
 
-        public HelloWorldPanelUi(HelloWorldPanel panel) {
+        public PlatypusRuntimePanelUi(PlatypusRuntimePanel panel) {
             super(panel);
 
 
@@ -102,19 +102,19 @@ public class HelloWorldPanel extends DestinationPanel {
         @Override
         public SwingUi getSwingUi(SwingContainer container) {
             if (swingUi == null) {
-                swingUi = new HelloWorldPanelSwingUi(panel, container);
+                swingUi = new PlatypusRuntimeSwingUi(panel, container);
             }
 
             return super.getSwingUi(container);
         }
     }
 
-    public static class HelloWorldPanelSwingUi extends DestinationPanelSwingUi {
+    public static class PlatypusRuntimeSwingUi extends DestinationPanelSwingUi {
 
-        protected HelloWorldPanel panel;
+        protected PlatypusRuntimePanel panel;
 
-        public HelloWorldPanelSwingUi(
-                final HelloWorldPanel panel,
+        public PlatypusRuntimeSwingUi(
+                final PlatypusRuntimePanel panel,
                 final SwingContainer container) {
             super(panel, container);
 
@@ -156,12 +156,12 @@ public class HelloWorldPanel extends DestinationPanel {
             "error.contains.non.ascii.chars"; // NOI18N
     
     public static final String DEFAULT_TITLE =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusRuntimePanel.class,
             "P.title"); // NOI18N
     public static final String DEFAULT_DESCRIPTION =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusRuntimePanel.class,
             "P.description"); // NOI18N
     public static final String DEFAULT_ERROR_CONTAINS_NON_ASCII_CHARS =
-            ResourceUtils.getString(HelloWorldPanel.class,
+            ResourceUtils.getString(PlatypusRuntimePanel.class,
             "P.error.contains.non.ascii.chars"); // NOI18N   
 }
