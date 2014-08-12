@@ -99,7 +99,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     // view
     protected Map<Long, EntityView<E>> entityViews = new HashMap<>();
     // model's parameters entity view
-    protected EntityView modelParametersEntityView;
+    protected EntityView<?> modelParametersEntityView;
     // processing
     protected ModelViewMouseHandler mouseHandler;
     protected FindFrame<E, P, M> finder;
@@ -127,9 +127,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected void refreshView() {
         entitiesIndex = new com.bearsoft.routing.QuadTree<>();
         connectorsIndex = new com.bearsoft.routing.QuadTree<>();
-        for (EntityView<E> view : entityViews.values()) {
+        entityViews.values().stream().forEach((view) -> {
             entitiesIndex.insert(view.getBounds(), view);
-        }
+        });
         preparePaths();
         rerouteConnectors();
         checkActions();

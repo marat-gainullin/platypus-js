@@ -393,8 +393,8 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
         Set<Relation> toProcessRels = new HashSet<>();
-        Set<Relation> rels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
-        for (Relation rel : rels) {
+        Set<Relation> rels = FieldsEntity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
+        rels.stream().forEach((rel) -> {
             Field lfield = rel.getLeftField();
             Field rfield = rel.getRightField();
             if (lfield == field) {
@@ -413,7 +413,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             } else if (!SQLUtils.isSimpleTypesCompatible(lfield.getTypeInfo().getSqlType(), rfield.getTypeInfo().getSqlType())) {
                 toProcessRels.add(rel);
             }
-        }
+        });
         return toProcessRels;
     }
 

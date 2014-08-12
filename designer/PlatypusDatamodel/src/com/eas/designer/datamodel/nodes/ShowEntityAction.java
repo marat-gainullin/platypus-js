@@ -16,7 +16,7 @@ import org.openide.util.actions.CallbackSystemAction;
  * @author mg
  */
 @ActionID(id = "com.eas.designer.explorer.model.nodes.ShowEntityAction", category = "Edit")
-@ActionRegistration(displayName = "#CTL_ShowEntityAction")
+@ActionRegistration(displayName = "#CTL_ShowEntityAction", lazy = true)
 public class ShowEntityAction extends CallbackSystemAction {
 
     @Override

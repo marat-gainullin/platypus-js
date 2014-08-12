@@ -58,7 +58,7 @@ public class TableFieldNode extends FieldNode {
             Field oldContent = new Field(field);
             Field newContent = new Field(field);
             newContent.setName(val);
-            Set<Relation> toProcessRels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
+            Set<Relation<FieldsEntity>> toProcessRels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity)getEntity(), field);
             Logger.getLogger(TableFieldNode.class.getName()).fine(String.format("Changing field from %s to %s\n", oldVal, val)); //NOI18N        
             try {
                 // we have to recreate foreign keys in order to them to be compatible with new field names
@@ -136,7 +136,7 @@ public class TableFieldNode extends FieldNode {
             driver.getTypesResolver().resolve2RDBMS(newContent);
 
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            Set<Relation> rels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
+            Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity)getEntity(), field);
             int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
             String msg = null;
             String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N

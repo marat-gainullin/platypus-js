@@ -256,6 +256,7 @@
                 <package>com.eas.dbcontrols.combo</package>
                 <package>com.eas.dbcontrols.date</package>
                 <package>com.eas.dbcontrols.grid</package>
+                <package>com.eas.dbcontrols.grid.rt</package>
                 <package>com.eas.dbcontrols.grid.rt.columns</package>
                 <package>com.eas.dbcontrols.image</package>
                 <package>com.eas.dbcontrols.label</package>
@@ -307,6 +308,7 @@
                 <package>com.mysql.jdbc.profiler</package>
                 <package>com.mysql.jdbc.util</package>
                 <package>com.vividsolutions.jts.geom</package>
+                <package>com.vividsolutions.jts.index</package>
                 <package>com.vividsolutions.jts.index.quadtree</package>
                 <package>javax.media.jai</package>
                 <package>net.sf.jsqlparser</package>
