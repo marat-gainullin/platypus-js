@@ -37,7 +37,7 @@
  * copyright holder.
  */
 
-package com.eas.designer.installer.utils.applications;
+package com.eas.installer.utils.applications;
 
 import java.io.File;
 import java.io.FilenameFilter;

@@ -52,7 +52,7 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
 import com.eas.designer.wizard.panels.HelloWorldPanel;
-import com.eas.designer.installer.utils.applications.NetBeansRCPUtils;
+import com.eas.installer.utils.applications.NetBeansRCPUtils;
 import org.netbeans.installer.product.components.ProductConfigurationLogic;
 import org.netbeans.installer.product.components.Product;
 import org.netbeans.installer.utils.FileUtils;

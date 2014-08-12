@@ -39,7 +39,7 @@
  * copyright holder.
  */
 
-package com.eas.designer.installer.wizard.components.actions;
+package com.eas.installer.wizard.components.actions;
 
 import org.netbeans.installer.product.Registry;
 import org.netbeans.installer.utils.StringUtils;

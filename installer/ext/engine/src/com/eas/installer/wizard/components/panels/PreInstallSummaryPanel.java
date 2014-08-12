@@ -36,7 +36,7 @@
  * the option applies only if the new code is made subject to such option by the
  * copyright holder.
  */
-package com.eas.designer.installer.wizard.components.panels;
+package com.eas.installer.wizard.components.panels;
 
 import java.awt.ComponentOrientation;
 import java.awt.GridBagConstraints;
@@ -60,7 +60,7 @@ import org.netbeans.installer.utils.LogManager;
 import org.netbeans.installer.utils.ResourceUtils;
 import org.netbeans.installer.utils.StringUtils;
 import org.netbeans.installer.utils.SystemUtils;
-import com.eas.designer.installer.utils.applications.NetBeansRCPUtils;
+import com.eas.installer.utils.applications.NetBeansRCPUtils;
 import org.netbeans.installer.utils.exceptions.NativeException;
 import org.netbeans.installer.utils.helper.swing.NbiCheckBox;
 import org.netbeans.installer.utils.helper.swing.NbiLabel;

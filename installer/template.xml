@@ -178,7 +178,7 @@
 		<copy file="${nbi.license.file}" tofile="${installer.build.dir}/ext/components/products/platypus-designer/src/com/eas/designer/license.txt" overwrite="true"/>
     </target>
     <target name="-prepare-icon" if="icon.defined">
-		<copy file="${nbi.icon.file}" tofile="${installer.build.dir}/ext/engine/src/com/eas/designer/installer/wizard/wizard-icon.png" overwrite="true"/>
+		<copy file="${nbi.icon.file}" tofile="${installer.build.dir}/ext/engine/src/com/eas/installer/wizard/wizard-icon.png" overwrite="true"/>
     </target>
 
     <target name="-prepare-dock-icon" if="dock.icon.defined">

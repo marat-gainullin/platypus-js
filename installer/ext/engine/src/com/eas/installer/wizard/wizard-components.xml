@@ -40,11 +40,11 @@
 
 <wizard xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="wizard-components.xsd">
     <component 
-        class="com.eas.designer.installer.wizard.components.actions.InitializeAction"/>
+        class="com.eas.installer.wizard.components.actions.InitializeAction"/>
     <component
-        class="com.eas.designer.installer.wizard.components.panels.WelcomePanel"/>
+        class="com.eas.installer.wizard.components.panels.WelcomePanel"/>
     <component
-        class="com.eas.designer.installer.wizard.components.sequences.MainSequence"/>
+        class="com.eas.installer.wizard.components.sequences.MainSequence"/>
     <component 
         class="org.netbeans.installer.wizard.components.sequences.CreateBundleSequence"/>
     <component 

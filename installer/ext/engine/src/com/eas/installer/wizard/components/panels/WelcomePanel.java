@@ -36,7 +36,7 @@
  * the option applies only if the new code is made subject to such option by the
  * copyright holder.
  */
-package com.eas.designer.installer.wizard.components.panels;
+package com.eas.installer.wizard.components.panels;
 
 import java.awt.Component;
 import java.awt.Dimension;

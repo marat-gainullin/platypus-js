@@ -36,14 +36,14 @@
  * the option applies only if the new code is made subject to such option by the
  * copyright holder.
  */
-package com.eas.designer.installer.wizard.components.sequences;
+package com.eas.installer.wizard.components.sequences;
 
 import org.netbeans.installer.wizard.components.sequences.ProductWizardSequence;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.eas.designer.installer.wizard.components.panels.PostInstallSummaryPanel;
-import com.eas.designer.installer.wizard.components.panels.PreInstallSummaryPanel;
+import com.eas.installer.wizard.components.panels.PostInstallSummaryPanel;
+import com.eas.installer.wizard.components.panels.PreInstallSummaryPanel;
 import org.netbeans.installer.product.components.Product;
 import org.netbeans.installer.product.Registry;
 import org.netbeans.installer.utils.ResourceUtils;
