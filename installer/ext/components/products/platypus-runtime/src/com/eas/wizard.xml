@@ -39,5 +39,5 @@
 -->
 
 <wizard xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="wizard-components.xsd">
-    <component class="com.eas.wizard.panels.PlatypusRuntimePanel"/>    
+    <component class="com.eas.wizard.panels.HelloWorldPanel"/>    
 </wizard>
