@@ -51,7 +51,6 @@ import org.netbeans.installer.utils.StringUtils;
 import org.netbeans.installer.utils.SystemUtils;
 import org.netbeans.installer.utils.exceptions.NativeException;
 import org.netbeans.installer.utils.system.WindowsNativeUtils;
-import org.netbeans.installer.utils.system.WindowsNativeUtils;
 import org.netbeans.installer.utils.system.windows.WindowsRegistry;
 
 /**
