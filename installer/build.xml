@@ -12,8 +12,8 @@
 
 	<target name="-clean" depends="-clean-cvs" unless="no.clean">
 		<delete dir="${output.dir}"/>
-		<delete dir="${nbi.ext.dir}/products/helloworld/build"/>
-		<delete dir="${nbi.ext.dir}/products/helloworld/dist"/>
+		<delete dir="${nbi.ext.dir}/products/platypus-designer/build"/>
+		<delete dir="${nbi.ext.dir}/products/platypus-designer/dist"/>
 		<delete dir="${nbi.ext.dir}/products/platypus-runtime/build"/>
 		<delete dir="${nbi.ext.dir}/products/platypus-runtime/dist"/>
 		<delete dir="${nbi.ext.dir}/products/tomcat/build"/>
@@ -122,10 +122,10 @@
 
 
 		<echo message="BUILDING PLATYPUS DESIGNER PRODUCT =================================="/>
-		<ant dir="${nbi.ext.dir}/infra/build/products/helloworld" target="release-all">
+		<ant dir="${nbi.ext.dir}/infra/build/products/platypus-designer" target="release-all">
 			<property 
 				name="basedir" 
-				value="${nbi.ext.dir}/infra/build/products/helloworld"/>
+				value="${nbi.ext.dir}/infra/build/products/platypus-designer"/>
 			<property 
 				name="environment.properties" 
 				value="${environment.properties}"/>
