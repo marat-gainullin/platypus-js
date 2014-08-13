@@ -82,13 +82,10 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     protected void resignOnQueries() {
         unsignFromQueries();
         if (getClient() != null) {
-            projectClientQueriesListener = getClient().addQueriesListener(new DbClient.QueriesListener() {
-                @Override
-                public void cleared() {
-                    if (isModelValid()) {
-                        setModelValid(false);
-                        startModelValidating();
-                    }
+            projectClientQueriesListener = getClient().addQueriesListener(() -> {
+                if (isModelValid()) {
+                    setModelValid(false);
+                    startModelValidating();
                 }
             });
         }
@@ -102,22 +99,16 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     public void startModelValidating() {
         if (!isModelValid() && !validationStarted) {
             validationStarted = true;
-            RP.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        validateModel();
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-                    } finally {
-                        EventQueue.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                validationStarted = false;
-                                setModelValid(true);
-                            }
-                        });
-                    }
+            RP.execute(() -> {
+                try {
+                    validateModel();
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+                } finally {
+                    EventQueue.invokeLater(() -> {
+                        validationStarted = false;
+                        setModelValid(true);
+                    });
                 }
             });
         }

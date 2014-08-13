@@ -260,6 +260,12 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         }
     }
 
+    @Override
+    protected void notifyModuleChanged() {
+        // Reports are not allowed for use as datasource modules, rather then simple modules.
+        // Because of this we have to ignore changes.
+    }
+
     // ------------
     // other interface methods
 

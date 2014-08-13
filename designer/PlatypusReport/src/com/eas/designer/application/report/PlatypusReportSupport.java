@@ -12,7 +12,6 @@ import java.util.MissingResourceException;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDisplayer;
-import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.util.NbBundle;
@@ -39,31 +38,14 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
     }
 
     @Override
-    protected boolean canClose() {
+    public void saveDocument() throws IOException {
         try {
             PlatypusReportDataObject reportObject = (PlatypusReportDataObject) dataObject;
-            boolean res = reportObject.isTemplateValid() && super.canClose();
-            if (!res)// We can't close document while report layout been edited.
-            {       // In this case we have to warn the user about this situation.
-                NotifyDescriptor message = new NotifyDescriptor.Message(NbBundle.getMessage(PlatypusReportSupport.class, "Can_tCloseWhileEditingReportLayout"), NotifyDescriptor.Message.INFORMATION_MESSAGE);
-                DialogDisplayer.getDefault().notify(message);
-            }
-            return res;
-        } catch (Exception ex) {
-            ErrorManager.getDefault().notify(ex);
-            return true;
-        }
-    }
-
-    @Override
-    public void save() throws IOException {
-        try {
-            PlatypusReportDataObject reportObject = (PlatypusReportDataObject) dataObject;
-            if (reportObject.isTemplateValid()) {
-                // save js source and datamodel
-                super.save();
-            } else // We can't save document while report layout been edited.
-            {     // In this case we have to warn the user about this situation.
+            // Save js source and datamodel
+            super.saveDocument();
+            if (!reportObject.isTemplateValid()) {
+                // We can't save document while report layout been edited.
+                // In this case we have to warn the user about this situation.
                 NotifyDescriptor message = new NotifyDescriptor.Message(NbBundle.getMessage(PlatypusReportSupport.class, "Can_tSaveWhileEditingReportLayout"), NotifyDescriptor.Message.INFORMATION_MESSAGE);
                 DialogDisplayer.getDefault().notify(message);
             }
@@ -72,5 +54,16 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
         } catch (MissingResourceException ex) {
             throw new IOException(ex);
         }
+    }
+
+    @Override
+    public void save() throws IOException {
+        saveDocument();
+    }
+
+    @Override
+    protected void notifyModuleChanged() {
+        // Reports are not allowed for use as datasource modules, rather then simple modules.
+        // Because of this we have to ignore changes.
     }
 }
