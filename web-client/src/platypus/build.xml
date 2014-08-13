@@ -67,7 +67,7 @@
 
 	<target name="copy-dest" depends="copy-pwc" description="Copy pwc-external files to destination directory">
 		<!-- pwc-external resources to pwc -->
-		<copy todir="${destdir}/pwc">
+		<copy todir="${destdir}/pwc" overwrite="true" force="true">
 			<fileset dir="../pwc-external" includes="**" />
 		</copy>
 	</target>
