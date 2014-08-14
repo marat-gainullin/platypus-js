@@ -198,19 +198,11 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public void clearQueries() throws Exception {
-        super.clearQueries();
+    public void clearQueries(boolean fireEvents) throws Exception {
         scriptedQueries.clear();
+        super.clearQueries(fireEvents);
     }
-
-    @Override
-    public void appEntityChanged(String aEntityId) throws Exception {
-        super.appEntityChanged(aEntityId);
-        if (scriptedQueries.containsKey(aEntityId)) {
-            clearQueries();
-        }
-    }
-
+    
     @Override
     public SqlQuery getAppQuery(final String aQueryId, boolean aCopy) throws Exception {
         SqlQuery query = scriptedQueries.get(aQueryId);
