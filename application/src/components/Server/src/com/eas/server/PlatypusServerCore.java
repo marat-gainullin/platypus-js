@@ -21,15 +21,10 @@ import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.filter.AppElementsFilter;
 import java.io.File;
-import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -82,7 +77,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
     public static PlatypusServerCore getInstance() throws Exception {
         return instance;
     }
-
+/*
     public static void registerMBean(String aName, Object aBean) throws Exception {
         // Get the platform MBeanServer
         // Uniquely identify the MBeans and register them with the platform MBeanServer
@@ -96,6 +91,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
             //no-op
         }
     }
+*/    
     protected String defaultAppElement;
     protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
