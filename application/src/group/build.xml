@@ -297,12 +297,9 @@
                                 /-->
 	<target description="Create update file" name="setversion">
 	    <buildnumber file="build.num"/>
-            <property name="curver" value="4.0."/> 
-            <property name="fullcurversion" value="${curver}${build.number}"/>
-	
             <replaceregexp file="../../updates/version.xml"
-                   match="&lt;Version version=&quot;\d+\.\d+\.\d+&quot;/&gt;"
-                   replace="&lt;Version version=&quot;${fullcurversion}&quot;/&gt;"
+                   match="&lt;Version version=&quot;(\d+\.\d+\.)\d+&quot;/&gt;"
+                   replace="&lt;Version version=&quot;\1${build.num}&quot;/&gt;"
                    byline="true"/> 
 	</target>
 	                            <!--
@@ -319,6 +316,7 @@
 	    <zip destfile="../../updates/application.zip">
             <fileset dir="../../" >
                 <include name="bin/**"/>
+                <include name="api/**"/>
 				<exclude name="bin/DatamodelDesigner.jar"/>
 				<include name="lib/**/*.jar"/>
 				<exclude name="lib/own/Updater.jar"/>
@@ -331,6 +329,7 @@
     <target name="thinclientzip" depends="copyupdater">
         <zip destfile="../../updates/thinclient.zip">
             <fileset dir="../../" >
+                <include name="api/**"/>
                 <include name="bin/Application.jar"/>
 				<include name="bin/Core.jar"/>
 				<include name="bin/Datamodel.jar"/>
@@ -339,7 +338,6 @@
 				<include name="bin/GeoAddon.jar"/>
 				<include name="bin/Modules.jar"/>
 				<include name="bin/Reports.jar"/>
-				
 				<include name="lib/own/BinaryTags.jar"/>
 				<include name="lib/own/CommonUtils.jar"/>
 				<include name="lib/own/Controls.jar"/>
@@ -349,35 +347,29 @@
 				<include name="lib/own/Rowsets.jar"/>
 				<include name="lib/own/Updater-new.jar"/>
 				<include name="lib/own/ScalablePane.jar"/>
-				
 				<include name="lib/thirdparty/JCalendar.jar"/>
-				
 				<include name="lib/thirdparty/chart/*.jar"/>
-				
 				<include name="lib/thirdparty/j-interop/*.jar"/>
-				
 				<include name="lib/thirdparty/jxls/*.jar"/>
-				
 				<include name="lib/thirdparty/laf/*.jar"/>
-				
 				<include name="lib/thirdparty/misc/jh.jar"/>
 				
-                                <include name="lib/thirdparty/geotools/geoapi-2.3-M1.jar"/>
-                                <include name="lib/thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-api-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-coverage-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-cql-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-data-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-epsg-wkt-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-main-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-metadata-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-referencing-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-render-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-wms-10.3.jar"/>
-                                <include name="lib/thirdparty/geotools/jai_core-1.1.3.jar"/>
-                                <include name="lib/thirdparty/geotools/jsr-275-1.0-beta-2.jar"/>
-                                <include name="lib/thirdparty/geotools/jts-1.13.jar"/>
-                                <include name="lib/thirdparty/geotools/vecmath-1.3.2.jar"/>
+				<include name="lib/thirdparty/geotools/geoapi-2.3-M1.jar"/>
+				<include name="lib/thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
+				<include name="lib/thirdparty/geotools/gt-api-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-coverage-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-cql-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-data-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-epsg-wkt-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-main-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-metadata-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-referencing-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-render-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/gt-wms-10.3.jar"/>
+				<include name="lib/thirdparty/geotools/jai_core-1.1.3.jar"/>
+				<include name="lib/thirdparty/geotools/jsr-275-1.0-beta-2.jar"/>
+				<include name="lib/thirdparty/geotools/jts-1.13.jar"/>
+				<include name="lib/thirdparty/geotools/vecmath-1.3.2.jar"/>
                 
 				<include name="lib/thirdparty/commons/commons-beanutils-1.8.2.jar"/>
 				<include name="lib/thirdparty/commons/commons-collections-3.2.1.jar"/>
