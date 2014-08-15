@@ -688,7 +688,7 @@ public class Entity implements RowsetListener, HasPublished{
 				}});
 				Object.defineProperty(published, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
 				Object.defineProperty(published, "length", { get : function(){ return published.schema.length; }});
-				for(var i=0;i<published.schema.length;i++)
+				for(var i = 0; i < published.schema.length; i++)
 				{
 					(function(){
 						var _i = i;

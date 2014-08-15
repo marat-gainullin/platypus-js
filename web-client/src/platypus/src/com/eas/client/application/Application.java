@@ -851,6 +851,16 @@ public class Application {
 				return hex_md5(aSource).toLowerCase();
 			}
 		};
+		$wnd.P.MD5 = {
+			generate : function(aSource){
+				return hex_md5(aSource).toLowerCase();
+			}
+		};
+		$wnd.P.ID = {
+			generate : function(){
+				return @com.bearsoft.rowset.utils.IDGenerator::genId()();
+			}
+		};
 		$wnd.P.Logger = new (function(){
 			var nativeLogger = @com.eas.client.application.Application::platypusApplicationLogger;
 			this.severe = function(aMessage){

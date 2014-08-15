@@ -10,5 +10,8 @@ function ${appElementName}(){
     self.show = function(){
         form.show();
     };
+    
+    model.requery(/*function(){}*/);
+    
     // TODO : place your code here
 }

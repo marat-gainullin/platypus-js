@@ -11,6 +11,7 @@ function ${appElementName}(){
     
     self.execute = function(){
         
+        model.requery();
         // TODO : place data processing code here
         
         var report = template.generateReport();

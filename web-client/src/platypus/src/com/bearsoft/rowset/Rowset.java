@@ -1813,7 +1813,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			addRow2Filters(row, colIndex);
 			modified = true;
 			generateUpdate(colIndex, row, evt.getOldValue(), evt.getNewValue());
-			rowsetChangeSupport.fireRowChangedEvent(row, colIndex, evt.getOldValue());
+			rowsetChangeSupport.fireRowChangedEvent(row, colIndex, evt.getOldValue(), evt.getNewValue());
 			if (activeFilter != null && immediateFilter && activeFilter.isFilteringCriteria(colIndex)) {
 				activeFilter.refilterRowset();
 			}
