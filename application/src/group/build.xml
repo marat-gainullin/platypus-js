@@ -299,7 +299,7 @@
 	    <buildnumber file="build.num"/>
             <replaceregexp file="../../updates/version.xml"
                    match="&lt;Version version=&quot;(\d+\.\d+\.)\d+&quot;/&gt;"
-                   replace="&lt;Version version=&quot;\1${build.num}&quot;/&gt;"
+                   replace="&lt;Version version=&quot;\1${build.number}&quot;/&gt;"
                    byline="true"/> 
 	</target>
 	                            <!--
