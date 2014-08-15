@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.CallNode;
 import jdk.nashorn.internal.ir.Expression;
+import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
@@ -26,7 +27,7 @@ public class DependenciesWalker {
     public static final String REQUIRE_FUNCTION_NAME = "require";
     public static final String MODULES = "Modules";
     public static final String GET = "get";
-    public static final String CREATE = "create";    
+    public static final String CREATE = "create";
     public static final String MODEL = "model";
     public static final String LOAD_ENTITY = "loadEntity";
     public static final String MODULE = "Module";
@@ -35,6 +36,7 @@ public class DependenciesWalker {
     public static final String REPORT = "Report";
     public static final String SERVER_REPORT = "ServerReport";
     private final Set<String> localFunctions = new HashSet<>();
+    private final Set<String> dependenceLikeIdentifiers = new HashSet<>();
     private final Set<String> dependencies = new HashSet<>();
     private final Set<String> queryDependencies = new HashSet<>();
     private final Set<String> serverDependencies = new HashSet<>();
@@ -62,6 +64,9 @@ public class DependenciesWalker {
             @Override
             public boolean enterCallNode(CallNode callNode) {
                 calls.push(callNode);
+                if (callNode.getFunction() instanceof IdentNode) {
+                    processIdentNode((IdentNode) callNode.getFunction());
+                }
                 return super.enterCallNode(callNode);
             }
 
@@ -129,10 +134,18 @@ public class DependenciesWalker {
             }
 
             @Override
-            public boolean enterIdentNode(IdentNode identNode) {
+            public boolean enterAccessNode(AccessNode accessNode) {
+                if (accessNode.getBase() instanceof IdentNode) {
+                    processIdentNode((IdentNode) accessNode.getBase());
+                }
+                return super.enterAccessNode(accessNode);
+            }
+
+            private void processIdentNode(IdentNode identNode) {
                 String name = identNode.getName();
+                dependenceLikeIdentifiers.add(name);
                 if (cache != null) {
-                    try {                        
+                    try {
                         ApplicationElement appElement = cache.get(name);
                         if (appElement != null) {
                             if (appElement.getType() == ClientConstants.ET_COMPONENT
@@ -147,7 +160,6 @@ public class DependenciesWalker {
                         Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }
                 }
-                return super.enterIdentNode(identNode);
             }
 
             private int scopeLevel;
@@ -208,4 +220,9 @@ public class DependenciesWalker {
             serverDependencies.add(aEntityId);
         }
     }
+
+    public Set<String> getDependenceLikeIdentifiers() {
+        return dependenceLikeIdentifiers;
+    }
+
 }

@@ -121,11 +121,13 @@
         value: boxAsJs
     });
 
+    var serverCoreClass;
     try {
-        Java.type('com.eas.server.PlatypusServerCore');
+        serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
         load("classpath:server-deps.js");
     } catch (e) {
+        serverCoreClass = null;
         // in client
         load("classpath:deps.js");
         // gui imports
@@ -661,6 +663,15 @@
 
     var cached = {};
     function getModule(aName) {
+        if (serverCoreClass) {
+            var core = serverCoreClass.getInstance();
+            var session = core.getSessionManager().getCurrentSession();
+            if (session !== null) {
+                var sessionModule = session.getModule(aName);
+                if (sessionModule)
+                    return sessionModule;
+            }
+        }
         if (!cached[aName]) {
             var c = global[aName];
             if (c) {
@@ -701,6 +712,13 @@
     });
     Object.defineProperty(PModules, "create", {
         value: createModule
+    });
+
+    Object.defineProperty(P, "principal", {
+        get: function(){
+            var principalHost = ScriptedResourceClass.getPrincipalHost();
+            return principalHost !== null ? boxAsJs(principalHost.getPrincipal()) : null;
+        }
     });
 
     function objectToInsertIniting(aObject) {
@@ -1382,6 +1400,7 @@ if (!P) {
     P.Resource = {};
     P.logout = function() {
     };
+    P.principal = {name: ""};
     P.Icon = {};
     P.ID = {generate: function(aValue) {
             return "";

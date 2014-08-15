@@ -104,4 +104,25 @@ public class DependenciesWalkerTest {
         assertEquals("someQuery", walker.getQueryDependencies().iterator().next());
     }
     
+    @Test
+    public void testParseDependencies10() {
+        String va1 = "var m = HY.HT.IO.PK.SomeModule;";
+        DependenciesWalker walker = new DependenciesWalker(va1);
+        walker.walk();
+        assertEquals(1, walker.getDependenceLikeIdentifiers().size());
+        assertEquals("HY", walker.getDependenceLikeIdentifiers().iterator().next());
+        assertTrue(walker.getServerDependencies().isEmpty());
+        assertTrue(walker.getQueryDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseDependencies11() {
+        String va1 = "var m = new SomeModule();";
+        DependenciesWalker walker = new DependenciesWalker(va1);
+        walker.walk();
+        assertEquals(1, walker.getDependenceLikeIdentifiers().size());
+        assertEquals("SomeModule", walker.getDependenceLikeIdentifiers().iterator().next());
+        assertTrue(walker.getServerDependencies().isEmpty());
+        assertTrue(walker.getQueryDependencies().isEmpty());
+    }
 }

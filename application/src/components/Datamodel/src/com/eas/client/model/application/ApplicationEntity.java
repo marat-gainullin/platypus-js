@@ -991,7 +991,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
-            + "* The handler function for the event occured after the entity's data have been required.\n"
+            + "* The handler function for the event occured after the entity's data have been requeried.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
