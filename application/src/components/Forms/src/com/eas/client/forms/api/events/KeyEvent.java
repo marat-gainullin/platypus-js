@@ -68,6 +68,17 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
         return delegate.isMetaDown();
     }
 
+    private static final String KEY_CHAR_JS_DOC = ""
+            + "/**\n"
+            + "* Char associated with this event.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = KEY_CHAR_JS_DOC)
+    public String getChar() {
+        char res = delegate.getKeyChar();
+        return res == java.awt.event.KeyEvent.CHAR_UNDEFINED ? "" : Character.toString(res);
+    }
+
     @Override
     public Object getPublished() {
         if (published == null) {

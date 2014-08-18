@@ -256,7 +256,14 @@ public class JsEvents {
 			});
 			Object.defineProperty(this, "key", {
 				get : function() {
-					return aEvent.@com.google.gwt.event.dom.client.KeyCodeEvent::getNativeKeyCode()();
+					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
+					return ne.@com.google.gwt.dom.client.NativeEvent::getKeyCode()(); 
+				}
+			});
+			Object.defineProperty(aPublishedEvent, "char", {
+				get : function() {
+					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
+					return String.fromCharCode(ne.@com.google.gwt.dom.client.NativeEvent::getCharCode()()); 
 				}
 			});
 		};
