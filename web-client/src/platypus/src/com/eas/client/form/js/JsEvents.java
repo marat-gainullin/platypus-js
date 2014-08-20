@@ -247,7 +247,7 @@ public class JsEvents {
 			Object.defineProperty(this, "shiftDown", {
 				get : function() {
 					return aEvent.@com.google.gwt.event.dom.client.KeyEvent::isShiftKeyDown()();
-				}
+				}																																																																			
 			});
 			Object.defineProperty(this, "metaDown", {
 				get : function() {
@@ -255,15 +255,15 @@ public class JsEvents {
 				}
 			});
 			Object.defineProperty(this, "key", {
-				get : function() {
+				get : function() {																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
 					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
-					return ne.@com.google.gwt.dom.client.NativeEvent::getKeyCode()(); 
+					return ne.keyCode || 0;																																																																																																																																																																																																																																																																																																																																																																																																																																																																													
 				}
 			});
 			Object.defineProperty(aPublishedEvent, "char", {
-				get : function() {
+				get : function() {																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
 					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
-					return String.fromCharCode(ne.@com.google.gwt.dom.client.NativeEvent::getCharCode()()); 
+					return String.fromCharCode(ne.charCode || 0); 
 				}
 			});
 		};
