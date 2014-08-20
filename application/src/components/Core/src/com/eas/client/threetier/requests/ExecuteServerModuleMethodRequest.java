@@ -7,7 +7,6 @@ package com.eas.client.threetier.requests;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
-import com.eas.script.ScriptUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
@@ -23,12 +22,12 @@ public class ExecuteServerModuleMethodRequest extends Request {
     private Object[] arguments;
     private String moduleName;
 
-    public ExecuteServerModuleMethodRequest(long aRequestId) {
-        super(aRequestId, Requests.rqExecuteServerModuleMethod);
+    public ExecuteServerModuleMethodRequest() {
+        super(Requests.rqExecuteServerModuleMethod);
     }
 
-    public ExecuteServerModuleMethodRequest(long aRequestId, String aModuleName, String aMethodName, Object[] aArguments) {
-        this(aRequestId);
+    public ExecuteServerModuleMethodRequest(String aModuleName, String aMethodName, Object[] aArguments) {
+        this();
         moduleName = aModuleName;
         methodName = aMethodName;
         if (aArguments == null) {
@@ -117,8 +116,8 @@ public class ExecuteServerModuleMethodRequest extends Request {
 
         private Object result;
 
-        public Response(long requestID, Object aResult) {
-            super(requestID);
+        public Response(Object aResult) {
+            super();
             result = aResult;
         }
 

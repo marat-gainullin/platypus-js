@@ -9,6 +9,7 @@ import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.security.Principal;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  *
@@ -35,19 +36,22 @@ public abstract class PlatypusPrincipal implements Principal, HasPublished {
         return name;
     }
     
-    private static final String HAS_ROLE_JS_DOC = "/**\n"
+    private static final String HAS_ROLE_JS_DOC = ""
+            + "/**\n"
             + "* Checks if a user have a specified role.\n"
-            + "* @param role a role's name to test\n"
+            + "* @param role a role's name to test.\n"
+            + "* @param onSuccess A success callback. Optional."
+            + "* @param onFailure A failure callback. Optional."
             + "* @return <code>true</code> if the user has the provided role\n"
             + "*/";
     
     @ScriptFunction(jsDoc = HAS_ROLE_JS_DOC)
-    public abstract boolean hasRole(String aRole) throws Exception;
+    public abstract boolean hasRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     public boolean hasAnyRole(Set<String> aRoles) throws Exception {
         if (aRoles != null && !aRoles.isEmpty()) {
             for (String role : aRoles) {
-                if (hasRole(role)) {
+                if (hasRole(role, null, null)) {
                     return true;
                 }
             }
@@ -66,16 +70,13 @@ public abstract class PlatypusPrincipal implements Principal, HasPublished {
         if (o == null) {
             return false;
         }
-
         if (this == o) {
             return true;
         }
-
         if (!(o instanceof PlatypusPrincipal)) {
             return false;
         }
         PlatypusPrincipal that = (PlatypusPrincipal) o;
-
         if (this.getName().equals(that.getName())) {
             return true;
         }

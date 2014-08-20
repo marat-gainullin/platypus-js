@@ -4,12 +4,11 @@
  */
 package com.eas.client.login;
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.script.NoPublisherException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -27,17 +26,29 @@ public class AppPlatypusPrincipal extends PlatypusPrincipal {
     }
 
     @Override
-    public boolean hasRole(String aRole) throws Exception {
-        if (allowedRoles.contains(aRole)) {
-            return true;
-        } else {
-            IsUserInRoleRequest rq = new IsUserInRoleRequest(IDGenerator.genID(), aRole);
-            client.executeRequest(rq);
-            boolean res = ((IsUserInRoleRequest.Response) rq.getResponse()).isRole();
-            if (res) {
-                allowedRoles.add(aRole);
+    public boolean hasRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            if (allowedRoles.contains(aRole)) {
+                onSuccess.accept(true);
+            } else {
+                client.isUserInRole(aRole, (Boolean res) -> {
+                    if (res) {
+                        allowedRoles.add(aRole);
+                    }
+                    onSuccess.accept(res);
+                }, onFailure);
             }
-            return res;
+            return false;
+        } else {
+            if (allowedRoles.contains(aRole)) {
+                return true;
+            } else {
+                boolean res = client.isUserInRole(aRole, null, null);
+                if (res) {
+                    allowedRoles.add(aRole);
+                }
+                return res;
+            }
         }
     }
 

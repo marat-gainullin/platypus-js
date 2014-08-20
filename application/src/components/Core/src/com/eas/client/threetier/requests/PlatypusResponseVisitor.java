@@ -19,7 +19,7 @@ public interface PlatypusResponseVisitor {
 
     public void visit(StartAppElementRequest.Response rsp) throws Exception;
 
-    public void visit(RowsetResponse rsp) throws Exception;
+    public void visit(ExecuteQueryRequest.Response rsp) throws Exception;
 
     public void visit(LogoutRequest.Response rsp) throws Exception;
 
@@ -37,11 +37,11 @@ public interface PlatypusResponseVisitor {
 
     public void visit(DbTableChangedRequest.Response rsp) throws Exception;
 
-    public void visit(CreateServerModuleResponse rsp) throws Exception;
+    public void visit(CreateServerModuleRequest.Response rsp) throws Exception;
 
     public void visit(CommitRequest.Response rsp) throws Exception;
 
-    public void visit(AppQueryResponse rsp) throws Exception;
+    public void visit(AppQueryRequest.Response rsp) throws Exception;
 
     public void visit(AppElementRequest.Response rsp) throws Exception;
 

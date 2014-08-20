@@ -13,8 +13,8 @@ import com.eas.client.threetier.Requests;
  */
 public class StartAppElementRequest extends Request {
 
-    public StartAppElementRequest(long aRequestId) {
-        super(aRequestId, Requests.rqStartAppElement);
+    public StartAppElementRequest() {
+        super(Requests.rqStartAppElement);
     }
     
     @Override
@@ -26,8 +26,8 @@ public class StartAppElementRequest extends Request {
 
         private String appElementId;
 
-        public Response(long aRequestId, String aAppElementId) {
-            super(aRequestId);
+        public Response(String aAppElementId) {
+            super();
             appElementId = aAppElementId;
         }
 

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import javax.sql.DataSource;
 
 /**
@@ -74,11 +75,11 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     }
     
     @Override
-    public Rowset refresh(Parameters aParams) throws Exception {
+    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (client.getPrincipalHost() != null) {
             checkReadPrincipalPermission();
         }
-        return super.refresh(aParams);
+        return super.refresh(aParams, onSuccess, onFailure);
     }
 
     @Override

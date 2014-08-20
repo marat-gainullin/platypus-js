@@ -12,13 +12,14 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppCache;
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.client.queries.Query;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
@@ -29,6 +30,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.*;
@@ -73,28 +75,27 @@ public abstract class PlatypusClient implements AppClient {
     private final PlatypusAppCache appCache;
     protected String url;
     protected PlatypusPrincipal principal;
+    protected PlatypusConnection conn;
     protected List<Change> changeLog = new ArrayList<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
-    public PlatypusClient(String aUrl) throws Exception{
+    public PlatypusClient(String aUrl, PlatypusConnection aConn) throws Exception {
         super();
         url = aUrl;
+        conn = aConn;
         appCache = new PlatypusAppCache(this);
     }
-    
+
     @Override
     public String getUrl() {
         return url;
     }
-    
+
     @Override
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                transactionListeners.remove(aListener);
-            }
+        return () -> {
+            transactionListeners.remove(aListener);
         };
     }
 
@@ -104,43 +105,86 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    abstract public void executeRequest(Request aRequest) throws Exception;
+    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        StartAppElementRequest request = new StartAppElementRequest();
+        if (onSuccess != null) {
+            conn.<StartAppElementRequest.Response>enqueueRequest(request, (StartAppElementRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.getAppElementId());
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return null;
+        } else {
+            StartAppElementRequest.Response response = conn.executeRequest(request);
+            return response.getAppElementId();
+        }
+    }
 
     @Override
-    public String getStartAppElement() throws Exception {
-        StartAppElementRequest rq = new StartAppElementRequest(IDGenerator.genID());
-        executeRequest(rq);
-        return ((StartAppElementRequest.Response) rq.getResponse()).getAppElementId();
+    public boolean isUserInRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        IsUserInRoleRequest request = new IsUserInRoleRequest(aRole);
+        if (onSuccess != null) {
+            conn.<IsUserInRoleRequest.Response>enqueueRequest(request, (IsUserInRoleRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.isRole());
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return false;
+        } else {
+            IsUserInRoleRequest.Response response = conn.executeRequest(request);
+            return response.isRole();
+        }
     }
 
     @Override
     public FlowProvider createFlowProvider(String aQueryId, Fields aExpectedFields) {
-        FlowProvider flowProvider = new PlatypusThreeTierFlowProvider(this, aQueryId, aExpectedFields);
-        return flowProvider;
+        return new PlatypusFlowProvider(this, conn, aQueryId, aExpectedFields);
     }
 
     @Override
-    public CreateServerModuleResponse createServerModule(String aModuleName) throws Exception {
-        Request req = new CreateServerModuleRequest(IDGenerator.genID(), aModuleName);
-        executeRequest(req);
-        Response resp = req.getResponse();
-        assert resp instanceof CreateServerModuleResponse;
-        return (CreateServerModuleResponse) resp;
+    public CreateServerModuleRequest.Response createServerModule(String aModuleName, Consumer<CreateServerModuleRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        CreateServerModuleRequest request = new CreateServerModuleRequest(aModuleName);
+        if (onSuccess != null) {
+            conn.<CreateServerModuleRequest.Response>enqueueRequest(request, (CreateServerModuleRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse);
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return null;
+        } else {
+            CreateServerModuleRequest.Response response = conn.executeRequest(request);
+            return response;
+        }
     }
 
     @Override
     public void disposeServerModule(String aModuleName) throws Exception {
-        DisposeServerModuleRequest req = new DisposeServerModuleRequest(IDGenerator.genID(), aModuleName);
-        executeRequest(req);
+        DisposeServerModuleRequest request = new DisposeServerModuleRequest(aModuleName);
+        conn.enqueueRequest(request, null, null);
     }
 
     @Override
-    public Object executeServerModuleMethod(String moduleId, String methodName, Object... arguments) throws Exception {
-        final ExecuteServerModuleMethodRequest rq = new ExecuteServerModuleMethodRequest(IDGenerator.genID(), moduleId, methodName, arguments);
-        executeRequest(rq);
-        final Response rsp = rq.getResponse();
-        assert rsp instanceof ExecuteServerModuleMethodRequest.Response;
-        return ((ExecuteServerModuleMethodRequest.Response) rsp).getResult();
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
+        final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
+        if (onSuccess != null) {
+            conn.<ExecuteServerModuleMethodRequest.Response>enqueueRequest(request, (ExecuteServerModuleMethodRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.getResult());
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return null;
+        } else {
+            ExecuteServerModuleMethodRequest.Response response = conn.executeRequest(request);
+            return response.getResult();
+        }
     }
 
     @Override
@@ -149,22 +193,42 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public int commit() throws Exception {
-        CommitRequest request = new CommitRequest(IDGenerator.genID(), changeLog);
-        try {
-            executeRequest(request);
-            changeLog.clear();
-            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                try {
-                    l.commited();
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+    public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        CommitRequest request = new CommitRequest(changeLog);
+        if (onSuccess != null) {
+            conn.<CommitRequest.Response>enqueueRequest(request, (CommitRequest.Response aResponse) -> {
+                changeLog.clear();
+                for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
+                    try {
+                        l.commited();
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+                onSuccess.accept(aResponse.getUpdated());
+            }, (Exception aException) -> {
+                rollback();
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return 0;
+        } else {
+            try {
+                CommitRequest.Response response = conn.executeRequest(request);
+                changeLog.clear();
+                for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
+                    try {
+                        l.commited();
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                return response.getUpdated();
+            } catch (Exception ex) {
+                rollback();
+                throw ex;
             }
-            return ((CommitRequest.Response) request.getResponse()).getUpdated();
-        } catch (Exception ex) {
-            rollback();
-            throw ex;
         }
     }
 
@@ -189,25 +253,48 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public PlatypusQuery getAppQuery(String aQueryId) throws Exception {
-        AppQueryRequest request = new AppQueryRequest(IDGenerator.genID(), aQueryId);
-        executeRequest(request);
-        PlatypusQuery query = (PlatypusQuery) ((AppQueryResponse) request.getResponse()).getAppQuery();
-        query.setClient(this);
-        assert aQueryId.equals(query.getEntityId());
-        return query;
+    public Query getAppQuery(String aQueryId, Consumer<Query> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        AppQueryRequest request = new AppQueryRequest(aQueryId);
+        if (onSuccess != null) {
+            conn.<AppQueryRequest.Response>enqueueRequest(request, (AppQueryRequest.Response aResponse) -> {
+                assert aResponse.getAppQuery() instanceof PlatypusQuery;
+                PlatypusQuery query = (PlatypusQuery) aResponse.getAppQuery();
+                query.setClient(this);
+                assert aQueryId.equals(query.getEntityId());
+                onSuccess.accept(query);
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return null;
+        } else {
+            AppQueryRequest.Response response = conn.executeRequest(request);
+            assert response.getAppQuery() instanceof PlatypusQuery;
+            PlatypusQuery query = (PlatypusQuery) response.getAppQuery();
+            query.setClient(this);
+            assert aQueryId.equals(query.getEntityId());
+            return query;
+        }
+
     }
 
     @Override
-    abstract public void appEntityChanged(String aEntityId) throws Exception;
+    public abstract void appEntityChanged(String aEntityId, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     @Override
-    public void dbTableChanged(String aDbId, String aSchema, String aTable) throws Exception {
-        DbTableChangedRequest request = new DbTableChangedRequest(IDGenerator.genID(), aDbId, aSchema, aTable);
-        try {
-            executeRequest(request);
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+    public void dbTableChanged(String aDbId, String aSchema, String aTable, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        DbTableChangedRequest request = new DbTableChangedRequest(aDbId, aSchema, aTable);
+        if (onSuccess != null) {
+            conn.<DbTableChangedRequest.Response>enqueueRequest(request, (DbTableChangedRequest.Response aResponse) -> {
+                onSuccess.accept(null);
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+        } else {
+            conn.executeRequest(request);
         }
     }
 
@@ -315,10 +402,9 @@ public abstract class PlatypusClient implements AppClient {
                     throw ex;
                 } else {
                     try {
-                        // Accept
-                        for (int i = 0; i < aCertsChain.length; i++) {
+                        for (X509Certificate aCertsChain1 : aCertsChain) {
                             String alias = generateUniqueAlias(keyStore);
-                            keyStore.setCertificateEntry(alias, aCertsChain[i]);
+                            keyStore.setCertificateEntry(alias, aCertsChain1);
                         }
                         if (userChoice == JOptionPane.NO_OPTION) {
                             // Save accepted
@@ -371,4 +457,40 @@ public abstract class PlatypusClient implements AppClient {
         changeLog.add(command);
     }
 
+    @Override
+    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        IsAppElementActualRequest request = new IsAppElementActualRequest(aId, aTxtContentLength, aTxtCrc32);
+        if (onSuccess != null) {
+            conn.<IsAppElementActualRequest.Response>enqueueRequest(request, (IsAppElementActualRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.isActual());
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return false;
+        } else {
+            IsAppElementActualRequest.Response response = conn.executeRequest(request);
+            return response.isActual();
+        }
+    }
+
+    @Override
+    public ApplicationElement getAppElement(String aAppelementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        AppElementRequest request = new AppElementRequest(aAppelementId);
+        if (onSuccess != null) {
+            conn.<AppElementRequest.Response>enqueueRequest(request, (AppElementRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.getAppElement());
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return null;
+        } else {
+            conn.executeRequest(request);
+            AppElementRequest.Response response = (AppElementRequest.Response) conn.executeRequest(request);
+            return response.getAppElement();
+        }
+    }
 }

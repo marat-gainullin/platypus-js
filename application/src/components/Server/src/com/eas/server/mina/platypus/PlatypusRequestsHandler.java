@@ -103,10 +103,9 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     if (handler == null) {
                         ioSession.write(new ErrorResponse(rq.getID(), "Unknown request type " + rq.getType()));
                     } else {
-                        handler.run();
-                        final Response response = handler.getResponse();
+                        final Response response = handler.call();
                         if (handler instanceof LoginRequestHandler && response instanceof LoginRequest.Response) {
-                            session = server.getSessionManager().get(((LoginRequest.Response) handler.getResponse()).getSessionId());
+                            session = server.getSessionManager().get(((LoginRequest.Response) response).getSessionId());
                             ioSession.setAttribute(SESSION_ID, session.getId());
                             ioSession.write(response);
                             //session.processPendingResponses(new PendingResponseSender(ioSession, session));

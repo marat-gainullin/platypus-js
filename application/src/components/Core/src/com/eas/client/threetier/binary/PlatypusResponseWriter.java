@@ -8,17 +8,19 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
 import com.eas.client.ClientConstants;
+import com.eas.client.report.Report;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.AppElementRequest;
-import com.eas.client.threetier.requests.AppQueryResponse;
+import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleResponse;
+import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
+import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
@@ -26,9 +28,7 @@ import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
-import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.client.threetier.requests.StartAppElementRequest;
-import com.eas.client.report.Report;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
@@ -56,9 +56,9 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
 
     public static void write(Response response, ProtoWriter writer) throws Exception {
         if (response instanceof ErrorResponse) {
-            writer.put(RequestsTags.TAG_ERROR_RESPONSE, response.getRequestID());
+            writer.put(RequestsTags.TAG_ERROR_RESPONSE);
         } else {
-            writer.put(RequestsTags.TAG_RESPONSE, response.getRequestID());
+            writer.put(RequestsTags.TAG_RESPONSE);
         }
         writer.put(RequestsTags.TAG_RESPONSE_DATA);
         ByteArrayOutputStream subOut = new ByteArrayOutputStream();
@@ -84,8 +84,8 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ErrorResponse rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getError() != null) {
-            writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getError());
+        if (rsp.getErrorMessage() != null) {
+            writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
         }
         if (rsp.getSqlErrorCode() != null) {
             writer.put(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE, rsp.getSqlErrorCode());
@@ -126,7 +126,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
      }
      */
     @Override
-    public void visit(RowsetResponse rsp) throws Exception {
+    public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_UPDATE_COUNT, rsp.getUpdateCount());
         if (rsp.getRowset() != null) {
@@ -175,7 +175,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getResult() instanceof Report) {
-            Report report = (Report)rsp.getResult();
+            Report report = (Report) rsp.getResult();
             writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
             writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
             writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
@@ -194,7 +194,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleResponse rsp) throws Exception {
+    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_MODULE_ID, rsp.getModuleName());
         writer.put(RequestsTags.TAG_MODULE_PERMITTED, rsp.isPermitted());
@@ -219,7 +219,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(AppQueryResponse rsp) throws Exception {
+    public void visit(AppQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
         PlatypusRowsetWriter rsWriter = new PlatypusRowsetWriter();

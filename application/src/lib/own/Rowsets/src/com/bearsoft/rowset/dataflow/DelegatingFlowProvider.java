@@ -9,6 +9,7 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  *
@@ -33,13 +34,13 @@ public class DelegatingFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset refresh(Parameters aParams) throws Exception {
-        return delegate.refresh(aParams);
+    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        return delegate.refresh(aParams, onSuccess, onFailure);
     }
 
     @Override
-    public Rowset nextPage() throws Exception {
-        return delegate.nextPage();
+    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        return delegate.nextPage(onSuccess, onFailure);
     }
 
     @Override

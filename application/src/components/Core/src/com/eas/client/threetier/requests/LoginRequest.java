@@ -17,18 +17,18 @@ public class LoginRequest extends Request {
     private String password;
     private String session2restore;
 
-    public LoginRequest(long aRequestId) {
-        super(aRequestId, Requests.rqLogin);
+    public LoginRequest() {
+        super(Requests.rqLogin);
     }
-    
-    public LoginRequest(long aRequestId, String aLogin, String aPassword) {
-        this(aRequestId);
+
+    public LoginRequest(String aLogin, String aPassword) {
+        this();
         login = aLogin;
         password = aPassword;
     }
 
-    public LoginRequest(long aRequestId, String aLogin, String aPassword, String aSession2restore) {
-        this(aRequestId, aLogin, aPassword);
+    public LoginRequest(String aLogin, String aPassword, String aSession2restore) {
+        this(aLogin, aPassword);
         session2restore = aSession2restore;
     }
 
@@ -65,8 +65,8 @@ public class LoginRequest extends Request {
 
         private String sessionId;
 
-        public Response(long requestID, String aSessionId) {
-            super(requestID);
+        public Response(String aSessionId) {
+            super();
             sessionId = aSessionId;
         }
 

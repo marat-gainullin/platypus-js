@@ -7,6 +7,7 @@ package com.eas.client.login;
 import com.eas.script.NoPublisherException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -31,7 +32,10 @@ public class DbPlatypusPrincipal extends PlatypusPrincipal {
     }
 
     @Override
-    public boolean hasRole(String aRole) {
+    public boolean hasRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) {
+        if (onSuccess != null) {
+            onSuccess.accept(roles != null ? roles.contains(aRole) : false);
+        }
         return roles != null ? roles.contains(aRole) : false;
     }
 

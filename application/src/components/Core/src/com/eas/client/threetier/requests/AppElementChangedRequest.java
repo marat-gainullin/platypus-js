@@ -16,12 +16,12 @@ public class AppElementChangedRequest extends Request {
     protected String databaseId;
     protected String entityId;
 
-    public AppElementChangedRequest(long aRequestId) {
-        super(aRequestId, Requests.rqAppElementChanged);
+    public AppElementChangedRequest() {
+        super(Requests.rqAppElementChanged);
     }
     
-    public AppElementChangedRequest(long aRequestId, String aDatadaseId, String aEntityId) {
-        this(aRequestId);
+    public AppElementChangedRequest(String aDatadaseId, String aEntityId) {
+        this();
         databaseId = aDatadaseId;
         entityId = aEntityId;
     }
@@ -49,8 +49,8 @@ public class AppElementChangedRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        public Response(long requestId) {
-            super(requestId);
+        public Response() {
+            super();
         }
 
         @Override

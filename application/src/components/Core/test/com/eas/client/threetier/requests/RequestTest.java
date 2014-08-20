@@ -110,7 +110,7 @@ public class RequestTest {
         Request instance = new RequestImpl(1, 2);
         instance.setResponse(new ErrorResponse(1, "Test error"));
         assertTrue(instance.getResponse() instanceof ErrorResponse);
-        assertEquals("Test error", ((ErrorResponse) instance.getResponse()).getError());
+        assertEquals("Test error", ((ErrorResponse) instance.getResponse()).getErrorMessage());
         assertEquals(instance.getID(), instance.getResponse().getRequestID());
         try {
             instance.setResponse(new ErrorResponse(2, ""));

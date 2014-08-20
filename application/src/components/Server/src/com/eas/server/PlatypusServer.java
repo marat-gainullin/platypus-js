@@ -101,8 +101,7 @@ public class PlatypusServer extends PlatypusServerCore {
         bgTasksExecutor.execute(() -> {
             try {
                 final RequestHandler handler = RequestHandlerFactory.getHandler(PlatypusServer.this, sessionManager.getSystemSession(), aRequest);
-                handler.run();
-                if (handler.getResponse() instanceof ErrorResponse) {
+                if (handler.call() instanceof ErrorResponse) {
                     if (onFailure != null) {
                         onFailure.run();
                     }
@@ -208,7 +207,7 @@ public class PlatypusServer extends PlatypusServerCore {
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
                 IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
         acceptor.getFilterChain().addLast("encryption", sslFilter);
-        acceptor.getFilterChain().addLast("platypusRequestCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
+        acceptor.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
         PlatypusRequestsHandler handler = new PlatypusRequestsHandler(this);
         acceptor.setHandler(handler);
 

@@ -18,6 +18,7 @@ import com.eas.client.Client;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 /** 
  * Abstract platypus query with parameters.
@@ -277,7 +278,7 @@ public abstract class Query<T extends Client> {
         parametersBinds = aValue;
     }
 
-    public abstract Rowset execute() throws Exception;
+    public abstract Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     //public abstract void enqueueUpdate() throws Exception;
     

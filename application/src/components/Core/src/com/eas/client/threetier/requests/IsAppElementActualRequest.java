@@ -17,12 +17,12 @@ public class IsAppElementActualRequest extends Request {
     private long txtContentSize;
     private long txtContentCrc32;
 
-    public IsAppElementActualRequest(long aRequestId) {
-        super(aRequestId, Requests.rqIsAppElementActual);
+    public IsAppElementActualRequest() {
+        super(Requests.rqIsAppElementActual);
     }
-    
-    public IsAppElementActualRequest(long aRequestId, String aAppElementId, long aTxtContentSize, long aTxtContentCrc32) {
-        this(aRequestId);
+
+    public IsAppElementActualRequest(String aAppElementId, long aTxtContentSize, long aTxtContentCrc32) {
+        this();
         appElementId = aAppElementId;
         txtContentSize = aTxtContentSize;
         txtContentCrc32 = aTxtContentCrc32;
@@ -61,8 +61,8 @@ public class IsAppElementActualRequest extends Request {
 
         private boolean actual;
 
-        public Response(long aRequestId, boolean aActual) {
-            super(aRequestId);
+        public Response(boolean aActual) {
+            super();
             actual = aActual;
         }
 

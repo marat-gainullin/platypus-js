@@ -6,6 +6,7 @@ package com.eas.client.login;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.script.NoPublisherException;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -19,7 +20,10 @@ public class SystemPlatypusPrincipal extends PlatypusPrincipal {
     }
 
     @Override
-    public boolean hasRole(String aRole) throws Exception {
+    public boolean hasRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            onSuccess.accept(Boolean.TRUE);
+        }
         return true;
     }
 

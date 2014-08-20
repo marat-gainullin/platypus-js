@@ -9,8 +9,8 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.AppClient;
 import com.eas.client.threetier.PlatypusClient;
-import com.eas.client.threetier.PlatypusThreeTierFlowProvider;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Query of data for three-tier application. Uses three-tier Flow provider for retriving data and 
@@ -38,11 +38,11 @@ public class PlatypusQuery extends Query<AppClient> {
     }
 
     @Override
-    public Rowset execute() throws Exception {
-        Rowset rs = new Rowset(flow);
-        rs.refresh(params);
+    public Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Rowset rowset = new Rowset(flow);
+        rowset.refresh(params, onSuccess, onFailure);
         //lightMergeFields(rs.getFields(), fields);
-        return rs;
+        return rowset;
     }
     
     public Rowset prepareRowset() throws InvalidFieldsExceptionException{
@@ -92,7 +92,7 @@ public class PlatypusQuery extends Query<AppClient> {
 
     private void createFlow() {
         if (client != null && entityId != null) {
-            flow = new PlatypusThreeTierFlowProvider(client, entityId, fields);
+            flow = client.createFlowProvider(entityId, fields);
         }
     }
 

@@ -6,6 +6,7 @@ package com.bearsoft.rowset.dataflow;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Parameters;
+import java.util.function.Consumer;
 
 /**
  * This flow provider intended to support the flow process from and to jdbc data sources.
@@ -67,12 +68,12 @@ public abstract class DatabaseFlowProvider<JKT> implements FlowProvider {
      * @inheritDoc
      */
     @Override
-    public abstract Rowset nextPage() throws Exception;
+    public abstract Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * @inheritDoc
      */
     @Override
-    public abstract Rowset refresh(Parameters aParams) throws Exception;
+    public abstract Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
 }

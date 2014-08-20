@@ -71,8 +71,8 @@ public class RequestsTags extends CoreTags{
     /**
      * ******************* responses tags *************************************
      */
-    public static final int TAG_RESPONSE = 34; //long inside, id of request, marks the start of a response.
-    public static final int TAG_ERROR_RESPONSE = 35; //long inside, id of request, marks the start of a response.
+    public static final int TAG_RESPONSE = 34; //marker of an ordinary response.
+    public static final int TAG_ERROR_RESPONSE = 35; //marker of an error response.
     public static final int TAG_RESPONSE_ERROR = 36; //string inside, message of exception.
     public static final int TAG_RESPONSE_DATA = 37; //any request-specific response data as a substream.
     public static final int TAG_RESPONSE_END = 38; //empty, marks the end of a response.

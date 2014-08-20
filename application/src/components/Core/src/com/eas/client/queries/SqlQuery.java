@@ -15,6 +15,7 @@ import com.eas.client.SQLUtils;
 import com.eas.client.exceptions.UnboundSqlParameterException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -302,8 +303,8 @@ public class SqlQuery extends Query<DbClient> {
     }
 
     @Override
-    public Rowset execute() throws Exception {
-        return compile().executeQuery();
+    public Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        return compile().executeQuery(onSuccess, onFailure);
     }
 
     /*

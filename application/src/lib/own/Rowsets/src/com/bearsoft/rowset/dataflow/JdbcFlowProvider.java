@@ -16,6 +16,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.sql.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -78,7 +79,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @inheritDoc
      */
     @Override
-    public Rowset nextPage() throws Exception {
+    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (!isPaged() || lowLevelResults == null) {
             throw new FlowProviderNotPagedException(BAD_NEXTPAGE_REFRESH_CHAIN_MSG);
         } else if (converter != null) {
@@ -130,7 +131,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @inheritDoc
      */
     @Override
-    public Rowset refresh(Parameters aParams) throws Exception {
+    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (lowLevelResults != null) {
             assert isPaged();
             // Let's abort paging process

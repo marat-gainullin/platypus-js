@@ -17,7 +17,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.Query;
 import com.eas.client.threetier.PlatypusNativeClient;
-import com.eas.client.threetier.PlatypusThreeTierFlowProvider;
+import com.eas.client.threetier.PlatypusFlowProvider;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
@@ -297,8 +297,8 @@ public class PlatypusClientTest {
         Rowset rowset = query.execute();
 
         assertNotNull(rowset.getFlowProvider());
-        assertTrue(rowset.getFlowProvider() instanceof PlatypusThreeTierFlowProvider);
-        PlatypusThreeTierFlowProvider flow = (PlatypusThreeTierFlowProvider) rowset.getFlowProvider();
+        assertTrue(rowset.getFlowProvider() instanceof PlatypusFlowProvider);
+        PlatypusFlowProvider flow = (PlatypusFlowProvider) rowset.getFlowProvider();
         assertEquals(flow.getEntityId(), queryId);
         assertTrue(rowset.getFields().get(1).isPk());
         assertTrue(rowset.size() > 0);

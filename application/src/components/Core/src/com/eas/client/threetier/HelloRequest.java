@@ -13,8 +13,8 @@ import com.eas.client.threetier.requests.PlatypusResponseVisitor;
  */
 public class HelloRequest extends Request {
 
-    public HelloRequest(long aRequestId) {
-        super(aRequestId, Requests.rqHello);
+    public HelloRequest() {
+        super(Requests.rqHello);
     }
     
     @Override
@@ -24,8 +24,8 @@ public class HelloRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        public Response(long requestID) {
-            super(requestID);
+        public Response() {
+            super();
         }
 
         @Override

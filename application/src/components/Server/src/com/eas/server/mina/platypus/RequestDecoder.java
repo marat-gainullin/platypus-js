@@ -6,7 +6,6 @@ package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.binary.PlatypusRequestReader;
 import com.eas.client.threetier.binary.RequestsTags;
-import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -38,7 +37,8 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
                 return false;
             }
             in.skip(tagSize);
-        } while (tag != RequestsTags.TAG_REQUEST_END && tag != CoreTags.TAG_SIGNATURE);
+        } while (tag != RequestsTags.TAG_REQUEST_END);
+        
         int position = in.position();
         int limit = in.limit();
         Object msg = null;
@@ -48,9 +48,6 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
             final ProtoReader reader = new ProtoReader(in.slice().asInputStream());
             if (tag == RequestsTags.TAG_REQUEST_END) {
                 msg = PlatypusRequestReader.read(reader);
-            } else if (tag == CoreTags.TAG_SIGNATURE) {
-                reader.getSignature();
-                msg = new Signature();
             }
         } finally {
             in.position(position);

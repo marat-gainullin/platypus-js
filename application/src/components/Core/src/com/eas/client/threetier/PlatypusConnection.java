@@ -15,8 +15,8 @@ import java.util.logging.Logger;
  * @author kl, mg refactoring
  */
 public abstract class PlatypusConnection implements AppConnection {
-    public static final String ACCESSCONTROL_EXCEPTION_LOG_MSG = "AccessControl in response {0}: {1}";
-    public static final String SQL_EXCEPTION_LOG_MSG = "SQLException in response {0}: {1} {2} {3}";
+    public static final String ACCESSCONTROL_EXCEPTION_LOG_MSG = "AccessControl in response {0}}";
+    public static final String SQL_EXCEPTION_LOG_MSG = "SQLException in response {0} {1} {2}";
 
     protected String sessionId;
     protected String password;
@@ -28,16 +28,15 @@ public abstract class PlatypusConnection implements AppConnection {
         sessionId = aSessionId;
     }
 
-    @Override
-    public void handleErrorResponse(ErrorResponse aResponse) throws Exception {
+    public Exception handleErrorResponse(ErrorResponse aResponse) {
         if (aResponse.getSqlErrorCode() != null || aResponse.getSqlState() != null) {
-            Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.FINEST, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getRequestID(), aResponse.getError(), aResponse.getSqlState(), aResponse.getSqlErrorCode()});
-            throw new SQLException(aResponse.getError(), aResponse.getSqlState(), aResponse.getSqlErrorCode());
+            Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.FINEST, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode()});
+            return new SQLException(aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode());
         } else if (aResponse.isAccessControl()) {
-            Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.FINEST, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getRequestID(), aResponse.getError()});
-            throw new AccessControlException(((ErrorResponse) aResponse).getError());
+            Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.FINEST, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage()});
+            return new AccessControlException(((ErrorResponse) aResponse).getErrorMessage());
         } else {
-            throw new Exception("Error from server: "+((ErrorResponse) aResponse).getError());
+            return new Exception("Error from server: "+((ErrorResponse) aResponse).getErrorMessage());
         }
     }
 }

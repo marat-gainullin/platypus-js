@@ -16,42 +16,42 @@ import java.io.IOException;
  */
 public class PlatypusRequestsFactory {
 
-    public static Request create(long aRequestId, int aType) throws IOException, ProtoReaderException {
+    public static Request create(int aType) throws IOException, ProtoReaderException {
         switch (aType) {
             case Requests.rqHello:
-                return new HelloRequest(aRequestId);
+                return new HelloRequest();
             case Requests.rqLogin:
-                return new LoginRequest(aRequestId);
+                return new LoginRequest();
             // Database access requests
             case Requests.rqExecuteQuery:
-                return new ExecuteQueryRequest(aRequestId);
+                return new ExecuteQueryRequest();
             case Requests.rqCommit:
-                return new CommitRequest(aRequestId);
+                return new CommitRequest();
             case Requests.rqAppQuery:
-                return new AppQueryRequest(aRequestId);
+                return new AppQueryRequest();
             // Server modules requests
             case Requests.rqCreateServerModule:
-                return new CreateServerModuleRequest(aRequestId);
+                return new CreateServerModuleRequest();
             case Requests.rqDisposeServerModule:
-                return new DisposeServerModuleRequest(aRequestId);
+                return new DisposeServerModuleRequest();
             case Requests.rqExecuteServerModuleMethod:
-                return new ExecuteServerModuleMethodRequest(aRequestId);
+                return new ExecuteServerModuleMethodRequest();
             case Requests.rqLogout:
-                return new LogoutRequest(aRequestId);
+                return new LogoutRequest();
             case Requests.rqAppElementChanged:
-                return new AppElementChangedRequest(aRequestId);
+                return new AppElementChangedRequest();
             case Requests.rqDbTableChanged:
-                return new DbTableChangedRequest(aRequestId);
+                return new DbTableChangedRequest();
             case Requests.rqKeepAlive:
-                return new KeepAliveRequest(aRequestId);
+                return new KeepAliveRequest();
             case Requests.rqIsAppElementActual:
-                return new IsAppElementActualRequest(aRequestId);
+                return new IsAppElementActualRequest();
             case Requests.rqAppElement:
-                return new AppElementRequest(aRequestId);
+                return new AppElementRequest();
             case Requests.rqIsUserInRole:
-                return new IsUserInRoleRequest(aRequestId);
+                return new IsUserInRoleRequest();
             case Requests.rqStartAppElement:
-                return new StartAppElementRequest(aRequestId);
+                return new StartAppElementRequest();
             default:
                 return null;
         }

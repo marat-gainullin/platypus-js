@@ -9,11 +9,11 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.threetier.Request;
-import com.eas.client.threetier.requests.CreateServerModuleResponse;
+import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.queries.Query;
+import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import java.util.List;
-import javax.security.auth.login.LoginException;
+import java.util.function.Consumer;
 
 /**
  * Interface intended to extend Client interface with application servers's
@@ -31,10 +31,14 @@ public interface AppClient extends Client, PrincipalHost {
      * Returns PlatypusQuery instance, containing fields and parameters
      * description. It returned without sql text and main table.
      *
+     * @param aQueryId
+     * @param onSuccess
+     * @param onFailure
      * @return PlatypusQuery instance.
+     * @throws java.lang.Exception
      */
     @Override
-    public PlatypusQuery getAppQuery(String aQueryId) throws Exception;
+    public Query getAppQuery(String aQueryId, Consumer<Query> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Logs in to application server.
@@ -49,25 +53,20 @@ public interface AppClient extends Client, PrincipalHost {
      * @param aPassword the password to log in with.
      * @return the session id.
      * @throws javax.security.auth.login.LoginException
-     */
+     *
     public String login(String aUserName, char[] aPassword) throws LoginException;
+    */ 
 
     /**
      * Logs out current session from the appliction server.
      *
+     * @param onSuccess
+     * @param onFailure
      * @throws Exception
      */
-    public void logout() throws Exception;
+    public void logout(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     public List<Change> getChangeLog();
-
-    /**
-     * execute request
-     *
-     * @param aRequest request
-     * @throws java.lang.Exception
-     */
-    public void executeRequest(Request aRequest) throws Exception;
 
     /**
      * Creates and returns new data flow provider, setted up, according to
@@ -76,33 +75,35 @@ public interface AppClient extends Client, PrincipalHost {
      * @param aEntityId - Entity application element identifier.
      * @param aExpectedFields
      * @return New data flow provider instance.
-     * @throws java.lang.Exception
      */
-    public FlowProvider createFlowProvider(String aEntityId, Fields aExpectedFields) throws Exception;
+    public FlowProvider createFlowProvider(String aEntityId, Fields aExpectedFields);
 
     /**
      * Commits all previous calls to executeUpdate and enqueueRowsetUpdate
      * methods.
      *
+     * @param onSuccess
+     * @param onFailure
      * @throws Exception
      * @return Affected in this transaction rows count from commited calls to
      * enqueueUpdate, not to enqueueRowsetUpdate. Number of affected rows by
      * rowset's changes you can take from the rowset directly.
      * @see #enqueueRowsetUpdate(com.bearsoft.rowset.Rowset)
      */
-    public int commit() throws Exception;
+    public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Requests the application server to create session bean (server module).
      *
-     * @param moduleName Name of created module. It's considered, that module id
-     * is resolved through some registry.
+     * @param aModuleName
+     * @param onSuccess
+     * @param onFailure
      * @return The created module name or null if creation has failed. The
      * returned module name is used in further work to call server module's
      * methods.
      * @throws Exception
      */
-    public CreateServerModuleResponse createServerModule(String moduleName) throws Exception;
+    public CreateServerModuleRequest.Response createServerModule(String aModuleName, Consumer<CreateServerModuleRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Requests the application server to destroy session bean.
@@ -115,14 +116,15 @@ public interface AppClient extends Client, PrincipalHost {
     /**
      * Requests the application server to call session bean method.
      *
-     * @param moduleId String identifier (name) of the session bean been called.
-     * @param methodName Name of the method to call.
-     * @param arguments Argument array to be passed to session bean's method
-     * when calling it.
+     * @param aModuleName
+     * @param aMethodName
+     * @param onSuccess
+     * @param onFailure
+     * @param aArguments
      * @return Marshalled result of the ben's method call.
      * @throws Exception
      */
-    public Object executeServerModuleMethod(String moduleId, String methodName, Object... arguments) throws Exception;
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception;
 
     /**
      * Метод предназначен для исполнения DML запросов (insert, uddate, delete и
@@ -134,4 +136,9 @@ public interface AppClient extends Client, PrincipalHost {
      */
     public void enqueueUpdate(String entityId, Parameters params) throws Exception;
 
+    public boolean isUserInRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    
+    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    
+    public ApplicationElement getAppElement(String aAppelementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception;
 }

@@ -52,7 +52,6 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
 
     public static void write(Request aRequest, ProtoWriter writer) throws IOException {
         try {
-            writer.put(RequestsTags.TAG_REQUEST, aRequest.getID());
             writer.put(RequestsTags.TAG_REQUEST_TYPE, aRequest.getType());
             writer.put(RequestsTags.TAG_REQUEST_DATA);
             ByteArrayOutputStream subOut = new ByteArrayOutputStream();

@@ -12,14 +12,8 @@ import com.eas.client.threetier.requests.PlatypusResponseVisitor;
  */
 public abstract class Response {
 
-    private long requestId;
-
-    protected Response(long aRequestId) {
-        requestId = aRequestId;
-    }
-    
-    public long getRequestID() {
-        return requestId;
+    protected Response() {
+        super();
     }
     
     public abstract void accept(PlatypusResponseVisitor aVisitor) throws Exception;

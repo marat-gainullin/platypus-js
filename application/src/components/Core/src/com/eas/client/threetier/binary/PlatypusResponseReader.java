@@ -15,11 +15,12 @@ import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetReader;
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.AppElementRequest;
-import com.eas.client.threetier.requests.AppQueryResponse;
+import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleResponse;
+import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
+import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
@@ -27,7 +28,6 @@ import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
-import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
@@ -49,18 +49,26 @@ import java.util.Set;
 public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     protected byte[] bytes;
+    protected int offset;
+    protected int size;
 
     public PlatypusResponseReader(byte[] aBytes) {
+        this(aBytes, 0, aBytes.length);
+    }
+    
+    public PlatypusResponseReader(byte[] aBytes, int aOffset, int aSize) {
         super();
         bytes = aBytes;
+        offset = aOffset;
+        size = aSize;
     }
 
     @Override
     public void visit(ErrorResponse rsp) throws Exception {
         if (bytes != null) {
-            final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
+            final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes, offset, size);
             if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
-                rsp.setError(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
+                rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
             }
             if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE)) {
                 rsp.setSqlErrorCode(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE).getInt());
@@ -85,7 +93,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(RowsetResponse rsp) throws Exception {
+    public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         ProtoReader reader = new ProtoReader(new ByteArrayInputStream(bytes));
         do {
             switch (reader.getNextTag()) {
@@ -137,8 +145,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             ProtoNode dataNode = input.getChild(RequestsTags.TAG_RESULT_VALUE);
             ByteArrayOutputStream st = new ByteArrayOutputStream();
             st.write(dataNode.getData(), dataNode.getOffset(), dataNode.getSize());
-            result = new Report(st.toByteArray(), 
-                    input.getChild(RequestsTags.TAG_FORMAT).getString(), 
+            result = new Report(st.toByteArray(),
+                    input.getChild(RequestsTags.TAG_FORMAT).getString(),
                     input.getChild(RequestsTags.TAG_FILE_NAME).getString());
         } else if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
             result = ScriptUtils.parseDates(ScriptUtils.parseJson(input.getChild(RequestsTags.TAG_RESULT_VALUE).getString()));
@@ -155,7 +163,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleResponse rsp) throws Exception {
+    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         boolean permitted = false;
         if (!input.containsChild(RequestsTags.TAG_MODULE_ID)) {
@@ -184,7 +192,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(AppQueryResponse rsp) throws Exception {
+    public void visit(AppQueryRequest.Response rsp) throws Exception {
         PlatypusQuery appQuery = new PlatypusQuery(null);
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (!dom.containsChild(RequestsTags.TAG_QUERY_ID)) {

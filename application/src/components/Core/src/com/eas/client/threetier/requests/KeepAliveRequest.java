@@ -11,22 +11,21 @@ import com.eas.client.threetier.Requests;
  *
  * @author pk, mg refactoring
  */
-public class KeepAliveRequest extends Request
-{
-    public KeepAliveRequest(long aRequestId) {
-        super(aRequestId, Requests.rqKeepAlive);
+public class KeepAliveRequest extends Request {
+
+    public KeepAliveRequest() {
+        super(Requests.rqKeepAlive);
     }
-    
+
     @Override
     public void accept(PlatypusRequestVisitor aVisitor) throws Exception {
         aVisitor.visit(this);
     }
 
-    public static class Response extends com.eas.client.threetier.Response
-    {
-        public Response(long l)
-        {
-            super(l);
+    public static class Response extends com.eas.client.threetier.Response {
+
+        public Response() {
+            super();
         }
 
         @Override

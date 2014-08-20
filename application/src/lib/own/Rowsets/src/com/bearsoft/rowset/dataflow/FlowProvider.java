@@ -10,6 +10,7 @@ import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * This interface is intended to serve as base contract for data
@@ -43,21 +44,25 @@ public interface FlowProvider {
      * rowset can't be achieved, in some circumstances, this method must return
      * at least an empty Rowset instance. Values from this parameter collection
      * are applied one by one in the straight order.
+     * @param onSuccess
+     * @param onFailure
      * @return Rowset instance, containing data, retrieved from the source.
      * @throws java.lang.Exception
      * @see Parameters
      */
-    public Rowset refresh(Parameters aParams) throws Exception;
+    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Fetches a next page of data from an abstract data source.
      *
+     * @param onSuccess
+     * @param onFailure
      * @return Rowset instance, containing data, retrieved from the source while
      * fetching a page.
      * @throws Exception
      * @see FlowProviderNotPagedException
      */
-    public Rowset nextPage() throws Exception;
+    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Returns page size for paged flow providers.

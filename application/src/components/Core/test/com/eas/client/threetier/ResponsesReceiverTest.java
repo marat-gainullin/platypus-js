@@ -122,7 +122,7 @@ public class ResponsesReceiverTest {
         assertNotNull(rq.getResponse());
         assertEquals(rq.getID(), rq.getResponse().getRequestID());
         assertTrue(rq.getResponse() instanceof ErrorResponse);
-        assertEquals("Test error", ((ErrorResponse) rq.getResponse()).getError());
+        assertEquals("Test error", ((ErrorResponse) rq.getResponse()).getErrorMessage());
         waiterThread.join();
         assertTrue(waiter.notified);
     }

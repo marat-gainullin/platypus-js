@@ -11,9 +11,11 @@ import com.bearsoft.rowset.serial.BinaryRowsetWriter;
 import com.bearsoft.rowset.serial.RowsetReader;
 import com.bearsoft.rowset.serial.RowsetWriter;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 /**
  * It's abstract because of getting in/out streams.
+ *
  * @author mg
  */
 public abstract class SerialFlowProvider implements FlowProvider {
@@ -22,8 +24,11 @@ public abstract class SerialFlowProvider implements FlowProvider {
 
     /**
      * Constructor accepting reader and writer instances.
-     * @param aReader A reader to be used in flow process. If null is passed, then BinaryRowsetReader is created.
-     * @param aWriter A writer to be used in flow process. If null is passed, then BinaryRowsetWriter is created.
+     *
+     * @param aReader A reader to be used in flow process. If null is passed,
+     * then BinaryRowsetReader is created.
+     * @param aWriter A writer to be used in flow process. If null is passed,
+     * then BinaryRowsetWriter is created.
      * @see BinaryRowsetReader
      * @see BinaryRowsetWriter
      */
@@ -39,8 +44,13 @@ public abstract class SerialFlowProvider implements FlowProvider {
      * @inheritDoc
      */
     @Override
-    public Rowset nextPage() throws Exception {
-        return new Rowset();
+    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            onSuccess.accept(new Rowset());
+            return null;
+        } else {
+            return new Rowset();
+        }
     }
 
     /**
@@ -55,16 +65,21 @@ public abstract class SerialFlowProvider implements FlowProvider {
      * @inheritDoc
      */
     @Override
-    public Rowset refresh(Parameters aParams) throws Exception {
-        return reader.read(getInputStream(aParams));
+    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            onSuccess.accept(reader.read(getInputStream(aParams)));
+            return null;
+        } else {
+            return reader.read(getInputStream(aParams));
+        }
     }
 
     protected abstract InputStream getInputStream(Parameters aParams);
 
-    /**
-     * @inheritDoc
-     */
-    public boolean apply(Rowset aRowset) throws Exception {
+    public boolean apply(Rowset aRowset, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            onSuccess.accept(Boolean.FALSE);
+        }
         return false;
     }
 }

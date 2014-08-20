@@ -56,7 +56,7 @@ public class ErrorResponseTest {
         PlatypusResponseReader bodyReader = new PlatypusResponseReader(reader.getSubStreamData());
         ErrorResponse instance1 = new ErrorResponse(instance.getRequestID(), "");
         instance1.accept(bodyReader);
-        assertEquals(instance.getError(), instance1.getError());
+        assertEquals(instance.getErrorMessage(), instance1.getErrorMessage());
         assertEquals(RequestsTags.TAG_RESPONSE_END, reader.getNextTag());
         assertEquals(0, reader.getCurrentTagSize());
         assertEquals(CoreTags.TAG_EOF, reader.getNextTag());

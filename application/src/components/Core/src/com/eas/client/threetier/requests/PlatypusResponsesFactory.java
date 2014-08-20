@@ -14,12 +14,10 @@ import java.util.Collections;
  */
 public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
-    protected long requestId;
     protected Response response;
 
-    public PlatypusResponsesFactory(long aRequestId) {
+    public PlatypusResponsesFactory() {
         super();
-        requestId = aRequestId;
     }
 
     public Response getResponse() {
@@ -28,81 +26,81 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(AppQueryRequest rq) throws Exception {
-        response = new AppQueryResponse(requestId, null);
+        response = new AppQueryRequest.Response(null);
     }
 
     @Override
     public void visit(LoginRequest rq) throws Exception {
-        response = new LoginRequest.Response(requestId, null);
+        response = new LoginRequest.Response(null);
     }
 
     @Override
     public void visit(LogoutRequest rq) throws Exception {
-        response = new LogoutRequest.Response(requestId);
+        response = new LogoutRequest.Response();
     }
 
     @Override
     public void visit(CommitRequest rq) throws Exception {
-        response = new CommitRequest.Response(requestId, 0);
+        response = new CommitRequest.Response(0);
     }
 
     @Override
     public void visit(CreateServerModuleRequest rq) throws Exception {
-        response = new CreateServerModuleResponse(requestId, null, Collections.<String>emptySet(), true);
+        response = new CreateServerModuleRequest.Response(null, Collections.<String>emptySet(), true);
     }
 
     @Override
     public void visit(DisposeServerModuleRequest rq) throws Exception {
-        response = new DisposeServerModuleRequest.Response(requestId);
+        response = new DisposeServerModuleRequest.Response();
     }
 
     @Override
     public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
-        response = new ExecuteServerModuleMethodRequest.Response(requestId, null);
+        response = new ExecuteServerModuleMethodRequest.Response(null);
     }
 
     @Override
     public void visit(AppElementChangedRequest rq) throws Exception {
-        response = new AppElementChangedRequest.Response(requestId);
+        response = new AppElementChangedRequest.Response();
     }
 
     @Override
     public void visit(DbTableChangedRequest rq) throws Exception {
-        response = new DbTableChangedRequest.Response(requestId);
+        response = new DbTableChangedRequest.Response();
     }
 
     @Override
     public void visit(HelloRequest rq) throws Exception {
-        response = new HelloRequest.Response(requestId);
+        response = new HelloRequest.Response();
     }
 
     @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
-        response = new RowsetResponse(requestId, null, 0, rq.getExpectedFields());
+        response = new ExecuteQueryRequest.Response(null, 0, rq.getExpectedFields());
     }
 
     @Override
     public void visit(KeepAliveRequest rq) throws Exception {
-        response = new KeepAliveRequest.Response(requestId);
+        response = new KeepAliveRequest.Response();
     }
 
     @Override
     public void visit(StartAppElementRequest rq) throws Exception {
-        response = new StartAppElementRequest.Response(requestId, null);
+        response = new StartAppElementRequest.Response(null);
     }
 
     @Override
     public void visit(IsUserInRoleRequest rq) throws Exception {
-        response = new IsUserInRoleRequest.Response(requestId, false);
+        response = new IsUserInRoleRequest.Response(false);
     }
 
     @Override
     public void visit(IsAppElementActualRequest rq) throws Exception {
-        response = new IsAppElementActualRequest.Response(requestId, false);
+        response = new IsAppElementActualRequest.Response(false);
     }
 
     @Override
     public void visit(AppElementRequest rq) throws Exception {
-        response = new AppElementRequest.Response(requestId, null);
+        response = new AppElementRequest.Response(null);
     }
 }

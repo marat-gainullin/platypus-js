@@ -14,38 +14,42 @@ import java.sql.SQLException;
  */
 public class ErrorResponse extends Response {
 
-    private String error;
+    private String errorMessage;
     private boolean accessControl;
     private String sqlState;
     private Integer sqlErrorCode;
 
-    public ErrorResponse(long requestId, String aError) {
-        super(requestId);
-        error = aError;
-        if (error == null) {
-            throw new IllegalArgumentException("Creating error response for request " + getRequestID() + " with no error message!");
+    public ErrorResponse() {
+        super();
+    }
+    
+    public ErrorResponse(String aErrorMessage) {
+        super();
+        errorMessage = aErrorMessage;
+        if (errorMessage == null) {
+            throw new IllegalArgumentException("Creating error response with no error message!");
         }
     }
 
-    public ErrorResponse(long requestId, SQLException aException) {
-        super(requestId);
-        error = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.getClass().getSimpleName();
+    public ErrorResponse(SQLException aException) {
+        super();
+        errorMessage = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.getClass().getSimpleName();
         sqlState = aException.getSQLState();
         sqlErrorCode = aException.getErrorCode();
     }
 
-    public ErrorResponse(long requestId, AccessControlException aException) {
-        super(requestId);
+    public ErrorResponse(AccessControlException aException) {
+        super();
         accessControl = true;
-        error = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.getClass().getSimpleName();
+        errorMessage = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.getClass().getSimpleName();
     }
 
-    public String getError() {
-        return error;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setError(String aValue) {
-        error = aValue;
+    public void setErrorMessage(String aValue) {
+        errorMessage = aValue;
     }
 
     public Integer getSqlErrorCode() {

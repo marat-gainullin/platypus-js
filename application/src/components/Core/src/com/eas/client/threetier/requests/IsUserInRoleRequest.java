@@ -15,12 +15,12 @@ public class IsUserInRoleRequest extends Request {
 
     private String roleName;
 
-    public IsUserInRoleRequest(long aRequestId) {
-        super(aRequestId, Requests.rqIsUserInRole);
+    public IsUserInRoleRequest() {
+        super(Requests.rqIsUserInRole);
     }
-    
-    public IsUserInRoleRequest(long aRequestId, String aRoleName) throws Exception {
-        this(aRequestId);
+
+    public IsUserInRoleRequest(String aRoleName) throws Exception {
+        this();
         if (aRoleName == null || aRoleName.isEmpty()) {
             throw new Exception("Role name is reqired parameter!");
         }
@@ -44,8 +44,8 @@ public class IsUserInRoleRequest extends Request {
 
         private boolean role;
 
-        public Response(long aRequestId, boolean aRole) {
-            super(aRequestId);
+        public Response(boolean aRole) {
+            super();
             role = aRole;
         }
 

@@ -11,22 +11,20 @@ import com.eas.client.threetier.Requests;
  *
  * @author pk, mg, kl refactoring
  */
-public class DisposeServerModuleRequest extends Request
-{
+public class DisposeServerModuleRequest extends Request {
+
     private String moduleName;
 
-    public DisposeServerModuleRequest(long aRequestId) {
-        super(aRequestId, Requests.rqDisposeServerModule);
+    public DisposeServerModuleRequest() {
+        super(Requests.rqDisposeServerModule);
     }
-    
-    public DisposeServerModuleRequest(long aRequestId, String aModuleName)
-    {
-        this(aRequestId);
+
+    public DisposeServerModuleRequest(String aModuleName) {
+        this();
         moduleName = aModuleName;
     }
 
-    public String getModuleName()
-    {
+    public String getModuleName() {
         return moduleName;
     }
 
@@ -39,11 +37,10 @@ public class DisposeServerModuleRequest extends Request
         aVisitor.visit(this);
     }
 
-    public static class Response extends com.eas.client.threetier.Response
-    {
-        public Response(long requestID)
-        {
-            super(requestID);
+    public static class Response extends com.eas.client.threetier.Response {
+
+        public Response() {
+            super();
         }
 
         @Override

@@ -21,7 +21,6 @@ import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import static com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest.ArgumentType.STRING;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
@@ -64,14 +63,10 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
      */
     public static Request read(ProtoReader reader) throws Exception {
         Request rq = null;
-        Long id = null;
         Integer type = null;
         byte[] data = null;
         do {
             switch (reader.getNextTag()) {
-                case RequestsTags.TAG_REQUEST:
-                    id = reader.getLong();
-                    break;
                 case RequestsTags.TAG_REQUEST_TYPE:
                     type = reader.getInt();
                     break;
@@ -79,13 +74,10 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     data = reader.getSubStreamData();
                     break;
                 case RequestsTags.TAG_REQUEST_END:
-                    if (id == null) {
-                        throw new NullPointerException("id");
-                    }
                     if (type == null) {
                         throw new NullPointerException("type");
                     }
-                    rq = PlatypusRequestsFactory.create(id, type);
+                    rq = PlatypusRequestsFactory.create(type);
                     PlatypusRequestReader requestReader = new PlatypusRequestReader(data);
                     rq.accept(requestReader);
                     break;

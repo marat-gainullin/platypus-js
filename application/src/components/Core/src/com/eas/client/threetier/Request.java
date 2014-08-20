@@ -12,48 +12,22 @@ import com.eas.client.threetier.requests.PlatypusRequestVisitor;
  */
 public abstract class Request {
 
-    private long id;
     protected int type;
-    private Response response;
     private boolean done;
     private boolean cancelled;
 
-    protected Request(long aRequestId, int aType) {
-        id = aRequestId;
+    protected Request(int aType) {
+        super();
         type = aType;
     }
 
     public abstract void accept(PlatypusRequestVisitor aVisitor) throws Exception;
 
     /**
-     * @return the id
-     */
-    public long getID() {
-        return id;
-    }
-
-    /**
      * @return the type
      */
     public int getType() {
         return type;
-    }
-
-    /**
-     * @return the response
-     */
-    public Response getResponse() throws Exception {
-        return response;
-    }
-
-    /**
-     * @param aResponse the response to set
-     */
-    public void setResponse(Response aResponse) {
-        if (aResponse.getRequestID() != id) {
-            throw new IllegalArgumentException("Alien response. Our ID " + id + " its requestID " + aResponse.getRequestID());
-        }
-        response = aResponse;
     }
 
     /**
@@ -74,15 +48,9 @@ public abstract class Request {
     public void setCancelled(boolean aValue) {
         cancelled = aValue;
     }
-
-    public synchronized void waitCompletion() throws InterruptedException {
-        while (!isDone()) {
-            wait();
-        }
-    }
-
+    
     @Override
     public String toString() {
-        return getClass().getName() + "[ID: " + id + ", TYPE: " + type + "]";
+        return getClass().getName() + "[TYPE: " + type + "]";
     }
 }

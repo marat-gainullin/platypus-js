@@ -18,12 +18,12 @@ public class CommitRequest extends Request {
 
     protected List<Change> changes;
     
-    public CommitRequest(long aRequestId) {
-        super(aRequestId, Requests.rqCommit);
+    public CommitRequest() {
+        super(Requests.rqCommit);
     }
     
-    public CommitRequest(long aRequestId, List<Change> aChanges) {
-        this(aRequestId);
+    public CommitRequest(List<Change> aChanges) {
+        this();
         changes = aChanges;
     }
 
@@ -44,8 +44,8 @@ public class CommitRequest extends Request {
 
         protected int updated;
 
-        public Response(long requestID, int aUpdated) {
-            super(requestID);
+        public Response(int aUpdated) {
+            super();
             updated = aUpdated;
         }
 

@@ -5,7 +5,6 @@
 package com.eas.client.queries;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
@@ -16,6 +15,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DbClient;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A compiled SQL query.
@@ -166,9 +166,9 @@ public class SqlCompiledQuery {
      * @throws RowsetException
      * @see Rowset
      */
-    public Rowset executeQuery() throws Exception {
+    public Rowset executeQuery(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Rowset rs = new Rowset(flow);
-        rs.refresh(parameters);
+        rs.refresh(parameters, onSuccess, onFailure);
         /*
         if(expectedFields != rs.getFields())
             refineFields(rs);

@@ -6,6 +6,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.util.FileUtils;
 import java.io.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,9 +86,9 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     }
 
     @Override
-    public abstract boolean isActual(String aId, long aAppElementTxtContentLength, long aAppElementTxtCrc32) throws Exception;
+    public abstract boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
-    protected abstract ApplicationElement achieveAppElement(String aId) throws Exception;
+    protected abstract ApplicationElement achieveAppElement(String aAppElementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Revomes application element from both memory and file caches.

@@ -8,6 +8,7 @@
 package com.eas.client;
 
 import com.eas.client.metadata.ApplicationElement;
+import java.util.function.Consumer;
 
 /**
  *
@@ -19,7 +20,7 @@ public interface AppCache {
     
     public String translateScriptPath(String aName) throws Exception;
     
-    public boolean isActual(String aName, long aTxtContentLength, long aTxtCrc32) throws Exception;
+    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     /**
      * Tests if an arbitrary application query object (only query) is in the cache.

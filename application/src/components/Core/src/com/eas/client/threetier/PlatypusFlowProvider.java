@@ -12,27 +12,31 @@ import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
+import com.eas.client.AppConnection;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  *
  * @author mg
  */
-public class PlatypusThreeTierFlowProvider implements FlowProvider {
+public class PlatypusFlowProvider implements FlowProvider {
+
+    private static final String ROWSET_MISSING_IN_RESPONSE = "Rowset response hasn't returned any rowset. May be dml query is executed as select query.";
 
     protected AppClient client;
     protected Fields expectedFields;
     protected boolean procedure = false;
     protected String entityId;
+    protected AppConnection conn;
 
-    public PlatypusThreeTierFlowProvider(AppClient aClient, String aEntityId, Fields aExpectedFields) {
+    public PlatypusFlowProvider(AppClient aClient, AppConnection aConn, String aEntityId, Fields aExpectedFields) {
         super();
         client = aClient;
+        conn = aConn;
         entityId = aEntityId;
         expectedFields = aExpectedFields;
     }
@@ -48,38 +52,44 @@ public class PlatypusThreeTierFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset nextPage() throws RowsetException {
+    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws RowsetException {
         throw new RowsetException("Method \"nextPage()\" is not supported in three-tier mode.");
     }
 
     @Override
-    public Rowset refresh(Parameters aParams) throws RowsetException {
-        try {
-            ExecuteQueryRequest request = new ExecuteQueryRequest(IDGenerator.genID(), entityId, aParams, expectedFields);
-            client.executeRequest(request);
-            RowsetResponse response = (RowsetResponse) request.getResponse();
-            // let's return parameters
-            /*
-            if (procedure) {
-                for (int i = 1; i <= aParams.getParametersCount(); i++) {
-                    Parameter innerParam = aParams.get(i);
-                    if (innerParam.getMode() == ParameterMetaData.parameterModeOut
-                            || innerParam.getMode() == ParameterMetaData.parameterModeInOut) {
-                        Parameter paramFromServer = response.getParameters().get(i);
-                        innerParam.setValue(paramFromServer.getValue());
+    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws RowsetException {
+        ExecuteQueryRequest request = new ExecuteQueryRequest(entityId, aParams, expectedFields);
+        if (onSuccess != null) {
+            try {
+                conn.<ExecuteQueryRequest.Response>enqueueRequest(request, (ExecuteQueryRequest.Response aResponse) -> {
+                    if (aResponse.getRowset() == null) {
+                        if (onFailure != null) {
+                            onFailure.accept(new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE));
+                        }
+                    } else {
+                        aResponse.getRowset().setFlowProvider(this);
+                        onSuccess.accept(aResponse.getRowset());
                     }
+                }, (Exception aException) -> {
+                    if (onFailure != null) {
+                        onFailure.accept(aException);
+                    }
+                });
+                return null;
+            } catch (Exception ex) {
+                throw new RowsetException(ex);
+            }
+        } else {
+            try {
+                ExecuteQueryRequest.Response response = conn.executeRequest(request);
+                if (response.getRowset() == null) {
+                    throw new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE);
                 }
+                response.getRowset().setFlowProvider(this);
+                return response.getRowset();
+            } catch (Exception ex) {
+                throw new RowsetException(ex);
             }
-            */ 
-            // let's retrun rowset
-            Rowset rs = response.getRowset();
-            if(rs == null) {
-                throw new FlowProviderFailedException("Rowset response hasn't returned any rowset. May be dml query is executed as select query.");
-            }
-            rs.setFlowProvider(this);
-            return rs;
-        } catch (Exception ex) {
-            throw new FlowProviderFailedException(ex);
         }
     }
 
@@ -102,7 +112,7 @@ public class PlatypusThreeTierFlowProvider implements FlowProvider {
     public int getPageSize() {
         throw new UnsupportedOperationException("Not supported yet."); //NOI18N
     }
-    
+
     @Override
     public void setPageSize(int i) {
     }

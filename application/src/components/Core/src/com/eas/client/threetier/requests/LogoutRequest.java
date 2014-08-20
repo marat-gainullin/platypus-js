@@ -11,22 +11,21 @@ import com.eas.client.threetier.Requests;
  *
  * @author pk
  */
-public class LogoutRequest extends Request
-{
-    public LogoutRequest(long aRequestId) {
-        super(aRequestId, Requests.rqLogout);
+public class LogoutRequest extends Request {
+
+    public LogoutRequest() {
+        super(Requests.rqLogout);
     }
-    
+
     @Override
     public void accept(PlatypusRequestVisitor aVisitor) throws Exception {
         aVisitor.visit(this);
     }
 
-    public static class Response extends com.eas.client.threetier.Response
-    {
-        public Response(long requestID)
-        {
-            super(requestID);
+    public static class Response extends com.eas.client.threetier.Response {
+
+        public Response() {
+            super();
         }
 
         @Override

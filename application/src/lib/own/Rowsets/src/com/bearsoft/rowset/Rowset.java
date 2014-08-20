@@ -29,6 +29,7 @@ import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.util.ListenerRegistration;
 import java.beans.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -422,8 +423,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
         }
     }
 
-    public void refresh() throws Exception {
-        refresh(new Parameters());
+    public void refresh(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        refresh(new Parameters(), onSuccess, onFailure);
     }
 
     /**
@@ -434,29 +435,61 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * rowset.
      *
      * @param aParams Parameters values, ordered with some unknown criteria.
+     * @param onSuccess
+     * @param onFailure
      * @throws java.lang.Exception
      * @see Parameters
      */
-    public void refresh(Parameters aParams) throws Exception {
+    public void refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (flow != null) {
             if (rowsetChangeSupport.fireWillRequeryEvent()) {
-                Rowset rs = flow.refresh(aParams);
-                if (rs != null) {
-                    if (activeFilter != null && activeFilter.isApplied()) {
-                        activeFilter.deactivate(); // No implicit calls to setCurrent and etc.
-                        activeFilter = null;
-                    }
-                    if (fields == null) {
-                        setFields(rs.getFields());
-                    }
-                    List<Row> rows = rs.getCurrent();
-                    rs.setCurrent(new ArrayList<>());
-                    setCurrent(rows);
-                    currentToOriginal();
-                    invalidateFilters();
-                    rowsetChangeSupport.fireRequeriedEvent();
+                if (onSuccess != null) {
+                    flow.refresh(aParams, (Rowset aRowset) -> {
+                        if (aRowset != null) {
+                            try {
+                                if (activeFilter != null && activeFilter.isApplied()) {
+                                    activeFilter.deactivate(); // No implicit calls to setCurrent and etc.
+                                    activeFilter = null;
+                                }
+                                if (fields == null) {
+                                    setFields(aRowset.getFields());
+                                }
+                                List<Row> rows = aRowset.getCurrent();
+                                aRowset.setCurrent(new ArrayList<>());
+                                setCurrent(rows);
+                                currentToOriginal();
+                                invalidateFilters();
+                                rowsetChangeSupport.fireRequeriedEvent();
+                            } catch (Exception ex) {
+                                if (onFailure != null) {
+                                    onFailure.accept(ex);
+                                }
+                            }
+                        } else {
+                            if (onFailure != null) {
+                                onFailure.accept(new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG));
+                            }
+                        }
+                    }, onFailure);
                 } else {
-                    throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
+                    Rowset rowset = flow.refresh(aParams, null, null);
+                    if (rowset != null) {
+                        if (activeFilter != null && activeFilter.isApplied()) {
+                            activeFilter.deactivate(); // No implicit calls to setCurrent and etc.
+                            activeFilter = null;
+                        }
+                        if (fields == null) {
+                            setFields(rowset.getFields());
+                        }
+                        List<Row> rows = rowset.getCurrent();
+                        rowset.setCurrent(new ArrayList<>());
+                        setCurrent(rows);
+                        currentToOriginal();
+                        invalidateFilters();
+                        rowsetChangeSupport.fireRequeriedEvent();
+                    } else {
+                        throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
+                    }
                 }
             }
         } else {
@@ -476,26 +509,50 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * @throws java.lang.Exception
      * @see RowsetNextPageEvent
      */
-    public boolean nextPage() throws Exception {
+    public boolean nextPage(Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (flow != null) {
             if (flow.getPageSize() <= size()) {
                 if (rowsetChangeSupport.fireWillNextPageEvent()) {
-                    Rowset rs = flow.nextPage();
-                    if (rs != null) {
-                        assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
-                        int fetched = rs.getCurrent().size();
-                        if (fetched > 0) {
-                            setCurrent(rs.getCurrent());
-                            rs.setCurrent(new ArrayList<>());
-                            currentToOriginal();
-                            invalidateFilters();
-                            rowsetChangeSupport.fireNextPageFetchedEvent();
-                            return true;
-                        } else {
-                            return false;
-                        }
+                    if (onSuccess != null) {
+                        flow.nextPage((Rowset aRowset) -> {
+                            if (aRowset != null) {
+                                assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
+                                int fetched = aRowset.getCurrent().size();
+                                if (fetched > 0) {
+                                    setCurrent(aRowset.getCurrent());
+                                    aRowset.setCurrent(new ArrayList<>());
+                                    currentToOriginal();
+                                    invalidateFilters();
+                                    rowsetChangeSupport.fireNextPageFetchedEvent();
+                                    onSuccess.accept(true);
+                                } else {
+                                    onSuccess.accept(false);
+                                }
+                            } else {
+                                if (onFailure != null) {
+                                    onFailure.accept(new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG));
+                                }
+                            }
+                        }, onFailure);
+                        return false;
                     } else {
-                        throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
+                        Rowset rowset = flow.nextPage(null, null);
+                        if (rowset != null) {
+                            assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
+                            int fetched = rowset.getCurrent().size();
+                            if (fetched > 0) {
+                                setCurrent(rowset.getCurrent());
+                                rowset.setCurrent(new ArrayList<>());
+                                currentToOriginal();
+                                invalidateFilters();
+                                rowsetChangeSupport.fireNextPageFetchedEvent();
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
+                        }
                     }
                 } else {
                     return false;
@@ -1077,10 +1134,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /*
-    public Row insertAt(int insertAt, Object... initingValues) throws RowsetException {
-        return insertAt(insertAt, false, initingValues);
-    }
-*/
+     public Row insertAt(int insertAt, Object... initingValues) throws RowsetException {
+     return insertAt(insertAt, false, initingValues);
+     }
+     */
     /**
      * Simple insert method. Inserts a new <code>Row</code> in this rowset in
      * both original and current rows arrays. First, filter's values are used

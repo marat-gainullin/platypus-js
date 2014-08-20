@@ -5,6 +5,7 @@
 package com.eas.client.login;
 
 import com.eas.script.NoPublisherException;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -18,7 +19,10 @@ public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
     }
 
     @Override
-    public boolean hasRole(String string) throws Exception {
+    public boolean hasRole(String string, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            onSuccess.accept(Boolean.FALSE);
+        }
         return false;
     }
 

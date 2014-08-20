@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client.threetier.requests;
 
 import com.eas.client.threetier.Request;
@@ -12,19 +11,18 @@ import com.eas.client.threetier.Requests;
  *
  * @author mg
  */
-public class DbTableChangedRequest extends Request{
+public class DbTableChangedRequest extends Request {
 
     protected String databaseId;
     protected String schema;
     protected String table;
 
-    public DbTableChangedRequest(long aRequestId) {
-        super(aRequestId, Requests.rqDbTableChanged);
+    public DbTableChangedRequest() {
+        super(Requests.rqDbTableChanged);
     }
-    
-    public DbTableChangedRequest(long aRequestId, String aDatabaseId, String aSchemaName, String aTableName)
-    {
-        this(aRequestId);
+
+    public DbTableChangedRequest(String aDatabaseId, String aSchemaName, String aTableName) {
+        this();
         databaseId = aDatabaseId;
         schema = aSchemaName;
         table = aTableName;
@@ -60,11 +58,10 @@ public class DbTableChangedRequest extends Request{
         aVisitor.visit(this);
     }
 
-    public static class Response extends com.eas.client.threetier.Response
-    {
-        public Response(long requestID)
-        {
-            super(requestID);
+    public static class Response extends com.eas.client.threetier.Response {
+
+        public Response() {
+            super();
         }
 
         @Override

@@ -16,12 +16,12 @@ public class AppElementRequest extends Request {
 
     protected String appElementId;
 
-    public AppElementRequest(long aRequestId) {
-        super(aRequestId, Requests.rqAppElement);
+    public AppElementRequest() {
+        super(Requests.rqAppElement);
     }
     
-    public AppElementRequest(long aRequestId, String aAppElementId) {
-        this(aRequestId);
+    public AppElementRequest(String aAppElementId) {
+        this();
         appElementId = aAppElementId;
     }
 
@@ -42,8 +42,8 @@ public class AppElementRequest extends Request {
 
         protected ApplicationElement appElement;
 
-        public Response(long aRequestId, ApplicationElement aAppElement) {
-            super(aRequestId);
+        public Response(ApplicationElement aAppElement) {
+            super();
             appElement = aAppElement;
         }
 

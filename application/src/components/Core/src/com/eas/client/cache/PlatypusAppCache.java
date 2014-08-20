@@ -15,6 +15,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import java.io.File;
+import java.util.function.Consumer;
 
 /**
  *
@@ -35,17 +36,13 @@ public class PlatypusAppCache extends AppElementsCache{
     }
 
     @Override
-    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32) throws Exception {
-        IsAppElementActualRequest rq = new IsAppElementActualRequest(IDGenerator.genID(), aId, aTxtContentLength, aTxtCrc32);
-        client.executeRequest(rq);
-        return ((IsAppElementActualRequest.Response)rq.getResponse()).isActual();
+    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        client.isActual(aId, aTxtContentLength, aTxtCrc32, onSuccess, onFailure);
     }
 
     @Override
-    protected ApplicationElement achieveAppElement(String aId) throws Exception {
-        AppElementRequest rq = new AppElementRequest(IDGenerator.genID(), aId);
-        client.executeRequest(rq);
-        return ((AppElementRequest.Response)rq.getResponse()).getAppElement();
+    protected ApplicationElement achieveAppElement(String aAppElementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        client.getAppElement(aAppElementId, onSuccess, onFailure);
     }
 
 }
