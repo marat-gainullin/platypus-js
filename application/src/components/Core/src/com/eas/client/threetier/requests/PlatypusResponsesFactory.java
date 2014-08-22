@@ -4,7 +4,6 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.Response;
 import java.util.Collections;
 

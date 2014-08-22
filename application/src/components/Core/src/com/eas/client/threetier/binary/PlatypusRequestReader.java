@@ -9,7 +9,7 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.serial.CustomSerializer;
-import com.eas.client.threetier.HelloRequest;
+import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetReader;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppElementChangedRequest;

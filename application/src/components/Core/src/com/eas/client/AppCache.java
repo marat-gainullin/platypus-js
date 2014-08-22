@@ -18,7 +18,7 @@ public interface AppCache {
 
     public String getApplicationPath();
     
-    public String translateScriptPath(String aName) throws Exception;
+    public String translateScriptPath(ApplicationElement aAppElement) throws Exception;
     
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
@@ -30,7 +30,7 @@ public interface AppCache {
      */
     public boolean containsKey(String aName) throws Exception;
 
-    public ApplicationElement get(String aName) throws Exception;
+    public ApplicationElement get(String aName, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     public void put(String aId, ApplicationElement aAppElement) throws Exception;
 

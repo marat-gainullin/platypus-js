@@ -9,13 +9,14 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.login.PrincipalHost;
+import com.eas.client.queries.Query;
 import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  *
@@ -59,7 +60,7 @@ public interface DbClient extends Client {
      * @throws java.lang.Exception
      */
     @Override
-    public SqlQuery getAppQuery(String aQueryId) throws Exception;
+    public Query getAppQuery(String aQueryId, Consumer<Query> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     public ListenerRegistration addQueriesListener(QueriesListener aListener);
     

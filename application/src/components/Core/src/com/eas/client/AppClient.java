@@ -14,6 +14,7 @@ import com.eas.client.queries.Query;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.security.auth.login.LoginException;
 
 /**
  * Interface intended to extend Client interface with application servers's
@@ -26,7 +27,7 @@ import java.util.function.Consumer;
 public interface AppClient extends Client, PrincipalHost {
 
     public String getUrl();
-    
+
     /**
      * Returns PlatypusQuery instance, containing fields and parameters
      * description. It returned without sql text and main table.
@@ -43,19 +44,22 @@ public interface AppClient extends Client, PrincipalHost {
     /**
      * Logs in to application server.
      *
-     * <p>The returned value indicates the session id which is designated to
-     * this session from now on.</p>
+     * <p>
+     * The returned value indicates the session id which is designated to this
+     * session from now on.</p>
      *
-     * <p>On unsuccessful login it throws
-     * <code>FailedLoginException</code>.</p>
+     * <p>
+     * On unsuccessful login it throws <code>FailedLoginException</code>.</p>
      *
      * @param aUserName the user name to log in with.
      * @param aPassword the password to log in with.
+     * @param onSuccess
+     * @param onFailure
      * @return the session id.
      * @throws javax.security.auth.login.LoginException
      *
-    public String login(String aUserName, char[] aPassword) throws LoginException;
-    */ 
+     */
+    public abstract String login(String aUserName, char[] aPassword, Consumer<String> onSuccess, Consumer<Exception> onFailure) throws LoginException;
 
     /**
      * Logs out current session from the appliction server.
@@ -137,8 +141,8 @@ public interface AppClient extends Client, PrincipalHost {
     public void enqueueUpdate(String entityId, Parameters params) throws Exception;
 
     public boolean isUserInRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
-    
+
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
-    
+
     public ApplicationElement getAppElement(String aAppelementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception;
 }

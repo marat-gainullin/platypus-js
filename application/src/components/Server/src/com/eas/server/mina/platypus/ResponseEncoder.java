@@ -35,16 +35,6 @@ public class ResponseEncoder implements ProtocolEncoder {
                 writer.flush();
             }
             output.write(IoBuffer.wrap(outStream.toByteArray()));
-        } else if (aResponse instanceof Signature) {
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            ProtoWriter writer = new ProtoWriter(outStream);
-            try {
-                writer.putSignature();
-            } finally {
-                writer.flush();
-
-            }
-            output.write(IoBuffer.wrap(outStream.toByteArray()));
         }
     }
 

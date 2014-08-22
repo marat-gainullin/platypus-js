@@ -4,6 +4,9 @@
  */
 package com.eas.client.threetier;
 
+import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.HelloRequest;
+import com.eas.client.threetier.platypus.PlatypusNativeConnection;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.threetier.binary.PlatypusResponseWriter;
 import com.eas.proto.ProtoWriter;

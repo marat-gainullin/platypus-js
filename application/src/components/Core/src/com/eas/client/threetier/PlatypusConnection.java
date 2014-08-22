@@ -4,9 +4,12 @@
  */
 package com.eas.client.threetier;
 
+import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.platypus.PlatypusNativeConnection;
 import com.eas.client.AppConnection;
 import java.security.AccessControlException;
 import java.sql.SQLException;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +21,25 @@ public abstract class PlatypusConnection implements AppConnection {
     public static final String ACCESSCONTROL_EXCEPTION_LOG_MSG = "AccessControl in response {0}}";
     public static final String SQL_EXCEPTION_LOG_MSG = "SQLException in response {0} {1} {2}";
 
+    public static class RequestCallback {
+
+        public Request request;
+        public Response response;
+        public Consumer<Response> onComplete;
+
+        public RequestCallback(Request aRequest, Consumer<Response> aOnSuccess) {
+            super();
+            request = aRequest;
+            onComplete = aOnSuccess;
+        }
+
+        public synchronized void waitCompletion() throws InterruptedException {
+            while (!request.isDone()) {
+                wait();
+            }
+        }
+    }
+    
     protected String sessionId;
     protected String password;
     protected String login;

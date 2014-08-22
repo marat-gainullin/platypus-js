@@ -4,7 +4,6 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.binary.PlatypusResponseReader;
 import com.eas.client.threetier.binary.PlatypusResponseWriter;
 import com.eas.client.threetier.binary.RequestsTags;

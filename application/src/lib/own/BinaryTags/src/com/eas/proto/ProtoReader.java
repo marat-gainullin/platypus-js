@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,7 +35,6 @@ public class ProtoReader {
     private int currentTag;
     private int currentSize;
     private boolean isTagReady;
-    private static final String INVALID_FORMAT_MSG = "Invalid stream format";
     private static final String INVALID_TAG_MSG = "Invalid tag";
     private static final String INVALID_TAG_SIZE_MSG = "Invalid tag size";
     private static final String UNEXPECTED_EOF_MSG = "Unexpected end of stream";
@@ -584,7 +582,7 @@ public class ProtoReader {
         }
         byte[] data = new byte[currentSize];
         get(data, currentSize);
-        String val = new String(data, Charset.forName("UTF-16LE"));
+        String val = new String(data, "UTF-16LE");
         isTagReady = false;
         return val;
     }
@@ -605,7 +603,7 @@ public class ProtoReader {
         }
         byte[] data = new byte[currentSize];
         get(data, currentSize);
-        String val = new String(data, Charset.forName("UTF-16LE"));
+        String val = new String(data, "UTF-16LE");
         isTagReady = false;
         return val;
     }

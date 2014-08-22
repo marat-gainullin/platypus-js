@@ -37,12 +37,12 @@ public class PlatypusAppCache extends AppElementsCache{
 
     @Override
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        client.isActual(aId, aTxtContentLength, aTxtCrc32, onSuccess, onFailure);
+        return client.isActual(aId, aTxtContentLength, aTxtCrc32, onSuccess, onFailure);
     }
 
     @Override
     protected ApplicationElement achieveAppElement(String aAppElementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        client.getAppElement(aAppElementId, onSuccess, onFailure);
+        return client.getAppElement(aAppElementId, onSuccess, onFailure);
     }
 
 }

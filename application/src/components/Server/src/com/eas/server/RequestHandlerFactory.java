@@ -4,7 +4,6 @@
  */
 package com.eas.server;
 
-import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.*;
 import com.eas.proto.ProtoReaderException;

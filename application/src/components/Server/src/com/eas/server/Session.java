@@ -8,11 +8,8 @@ import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.threetier.Response;
-import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,14 +36,7 @@ public class Session implements PrincipalHost {
     private final long ctime;
     private final AtomicLong atime = new AtomicLong();
     private final Map<String, JSObject> modulesInstances = new HashMap<>();
-    private final Map<Long, Response> pendingResponses = new HashMap<>();
     private int maxInactiveInterval = 3600000; // 1 hour
-    /*
-     // HttpSession
-     private final Map<String, Object> values = new HashMap<>();
-     private final Map<String, Object> attributes = new HashMap<>();
-     * 
-     */
 
     /**
      * Creates a new session with given session id.
@@ -69,8 +59,6 @@ public class Session implements PrincipalHost {
     public synchronized void cleanup() {
         // server modules
         modulesInstances.clear();
-        // request's responses
-        pendingResponses.clear();
         // data in client's transaction
     }
 
@@ -145,7 +133,7 @@ public class Session implements PrincipalHost {
                     Map<String, String> userProps = DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), userName);
                     userContext = userProps.get(ClientConstants.F_USR_CONTEXT);
                 } catch (Exception ex) {
-                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user " + userName + " properties.");
+                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user {0} properties.", userName);
                 }
             }
         }
@@ -178,27 +166,6 @@ public class Session implements PrincipalHost {
 
     public synchronized void unregisterModules() {
         modulesInstances.clear();
-    }
-
-    public synchronized void addPendingResponse(Response response) {
-        pendingResponses.put(response.getRequestID(), response);
-    }
-
-    public synchronized void removePendingResponse(Response response) {
-        final Response rsp = pendingResponses.get(response.getRequestID());
-        if (rsp == response) {
-            pendingResponses.remove(response.getRequestID());
-        }
-    }
-
-    public synchronized Response getPendingResponse(Long requestID) {
-        return pendingResponses.get(requestID);
-    }
-
-    public synchronized void processPendingResponses(ResponseProcessor proc) throws Exception {
-        for (Entry<Long, Response> e : pendingResponses.entrySet()) {
-            proc.processResponse(e.getValue());
-        }
     }
 
     /**

@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.CRC32;
@@ -52,7 +53,7 @@ public class FilesAppCache extends AppElementsCache {
                     if (keyTaken.isValid() && watchKey2Directory.containsKey(keyTaken)) {
                         Path directoryPathTaken = watchKey2Directory.get(keyTaken);
                         List<WatchEvent<?>> events = keyTaken.pollEvents();
-                        for (WatchEvent<?> event : events) {
+                        events.stream().forEach((event) -> {
                             try {
                                 Path path = (Path) event.context();
                                 WatchEvent.Kind<Path> kind = (WatchEvent.Kind<Path>) event.kind();
@@ -84,7 +85,7 @@ public class FilesAppCache extends AppElementsCache {
                             } catch (Exception ex) {
                                 Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
                             }
-                        }
+                        });
                     }
                     boolean resetted = keyTaken.reset();
                     if (!keyTaken.isValid() || !resetted) {
@@ -198,60 +199,99 @@ public class FilesAppCache extends AppElementsCache {
     }
 
     @Override
-    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32) throws Exception {
-        ApplicationElement appElement = get(aId);
-        if (appElement != null) {
-            long ourSize = appElement.getTxtContentLength();
-            long ourCrc32 = appElement.getTxtCrc32();
-            long thiersSize = aTxtContentLength;
-            long thiersCrc32 = aTxtCrc32;
-            return thiersSize == ourSize && thiersCrc32 == ourCrc32;
-        } else {
+    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            try {
+                get(aId, (ApplicationElement appElement) -> {
+                    if (appElement != null) {
+                        long ourSize = appElement.getTxtContentLength();
+                        long ourCrc32 = appElement.getTxtCrc32();
+                        long thiersSize = aTxtContentLength;
+                        long thiersCrc32 = aTxtCrc32;
+                        onSuccess.accept(thiersSize == ourSize && thiersCrc32 == ourCrc32);
+                    } else {
+                        onSuccess.accept(false);
+                    }
+                }, onFailure);
+            } catch (Exception ex) {
+                if (onFailure != null) {
+                    onFailure.accept(ex);
+                }
+            }
             return false;
+        } else {
+            ApplicationElement appElement = get(aId, null, null);
+            if (appElement != null) {
+                long ourSize = appElement.getTxtContentLength();
+                long ourCrc32 = appElement.getTxtCrc32();
+                long thiersSize = aTxtContentLength;
+                long thiersCrc32 = aTxtCrc32;
+                return thiersSize == ourSize && thiersCrc32 == ourCrc32;
+            } else {
+                return false;
+            }
         }
     }
 
     @Override
-    protected synchronized ApplicationElement achieveAppElement(String aId) throws Exception {
-        Set<String> familyPaths = id2Paths.get(aId);
-        String familyPath = familyPaths != null && !familyPaths.isEmpty() ? familyPaths.iterator().next() : null;
-        if (familyPath != null) {
-            AppElementFiles family = families.get(familyPath);
-            if (family != null && family.getAppElementType() != null) {
-                return family.getApplicationElement();
+    protected synchronized ApplicationElement achieveAppElement(String aId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        try {
+            ApplicationElement res;
+            Set<String> familyPaths = id2Paths.get(aId);
+            String familyPath = familyPaths != null && !familyPaths.isEmpty() ? familyPaths.iterator().next() : null;
+            if (familyPath != null) {
+                AppElementFiles family = families.get(familyPath);
+                if (family != null && family.getAppElementType() != null) {
+                    return family.getApplicationElement();
+                }
             }
-        }
-        File resFile = new File((calcSrcPath() + File.separatorChar + aId).replace('/', File.separatorChar));
-        if (resFile.exists()) {
-            String ext = FileUtils.getFileExtension(resFile);
-            String fileName = resFile.getPath();
-            String withoutExt = ext != null && !ext.isEmpty() ? fileName.substring(0, fileName.length() - ext.length() - 1) : fileName;
-            AppElementFiles family = families.get(withoutExt);
-            if (family != null && family.hasExtension(ext) && family.getAppElementType() != null) {
-                return null;// application elements are not allowed to download partially!
+            File resFile = new File((calcSrcPath() + File.separatorChar + aId).replace('/', File.separatorChar));
+            if (resFile.exists()) {
+                String ext = FileUtils.getFileExtension(resFile);
+                String fileName = resFile.getPath();
+                String withoutExt = ext != null && !ext.isEmpty() ? fileName.substring(0, fileName.length() - ext.length() - 1) : fileName;
+                AppElementFiles family = families.get(withoutExt);
+                if (family != null && family.hasExtension(ext) && family.getAppElementType() != null) {
+                    res = null;// application elements are not allowed to download partially!
+                } else {
+                    ApplicationElement appElement = new ApplicationElement();
+                    appElement.setId(aId);
+                    appElement.setName(resFile.getName());
+                    appElement.setType(ClientConstants.ET_RESOURCE);
+                    //appElement.setParentId(aParentDirectoryAppElementId);
+                    appElement.setBinaryContent(FileUtils.readBytes(resFile));
+                    // hack, but it works fine.
+                    appElement.setTxtContentLength((long) appElement.getBinaryContent().length);
+                    CRC32 crc = new CRC32();
+                    crc.update(appElement.getBinaryContent());
+                    appElement.setTxtCrc32(crc.getValue());
+                    res = appElement;
+                }
             } else {
-                ApplicationElement appElement = new ApplicationElement();
-                appElement.setId(aId);
-                appElement.setName(resFile.getName());
-                appElement.setType(ClientConstants.ET_RESOURCE);
-                //appElement.setParentId(aParentDirectoryAppElementId);
-                appElement.setBinaryContent(FileUtils.readBytes(resFile));
-                // hack, but it works fine.
-                appElement.setTxtContentLength((long) appElement.getBinaryContent().length);
-                CRC32 crc = new CRC32();
-                crc.update(appElement.getBinaryContent());
-                appElement.setTxtCrc32(crc.getValue());
-                return appElement;
+                res = null;
+            }
+            if (onSuccess != null) {
+                onSuccess.accept(res);
+                return null;
+            } else {
+                return res;
+            }
+        } catch (Exception ex) {
+            if (onSuccess != null) {
+                if (onFailure != null) {
+                    onFailure.accept(ex);
+                }
+                return null;
+            } else {
+                throw ex;
             }
         }
-        return null;
     }
 
     private static boolean isWindows() {
         String os = System.getProperty("os.name").toLowerCase();
         // windows
-        return (os.indexOf("win") >= 0);
-
+        return (os.contains("win"));
     }
 
     public synchronized void rescan() {
@@ -406,13 +446,16 @@ public class FilesAppCache extends AppElementsCache {
     }
 
     @Override
-    public String translateScriptPath(String aName) throws Exception {
-        ApplicationElement appElement = get(aName);
-        if (appElement != null && appElement.getType() != ClientConstants.ET_RESOURCE) {
-            String path = id2Paths.get(aName).iterator().next();
-            return path + "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+    public String translateScriptPath(ApplicationElement aAppElement) throws Exception {
+        if (aAppElement != null) {
+            if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
+                return calcSrcPath() + File.separator + aAppElement.getName().replace('/', File.separatorChar);
+            } else {
+                String path = id2Paths.get(aAppElement.getName()).iterator().next();
+                return path + "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+            }
         } else {
-            return calcSrcPath() + File.separator + aName.replace('/', File.separatorChar);
+            return null;
         }
     }
 

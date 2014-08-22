@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.eas.client.threetier.mina.platypus;
+package com.eas.client.threetier.platypus;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.binary.PlatypusRequestWriter;
+import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayOutputStream;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -19,14 +19,19 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
  *
  * @author mg
  */
-public class RequestEncoder implements ProtocolEncoder{
+public class RequestEncoder implements ProtocolEncoder {
+
+    protected String sessionTicket;
 
     @Override
     public void encode(IoSession is, Object o, ProtocolEncoderOutput peo) throws Exception {
         assert o instanceof Request;
-        Request request = (Request)o;
+        Request request = (Request) o;
         ByteArrayOutputStream bufOutStream = new ByteArrayOutputStream();
         ProtoWriter writer = new ProtoWriter(bufOutStream);
+        if (sessionTicket != null) {
+            writer.put(CoreTags.TAG_SESSION_TICKET, sessionTicket);
+        }
         PlatypusRequestWriter.write(request, writer);
         writer.flush();
         peo.write(IoBuffer.wrap(bufOutStream.toByteArray()));
@@ -35,5 +40,9 @@ public class RequestEncoder implements ProtocolEncoder{
     @Override
     public void dispose(IoSession is) throws Exception {
     }
-    
+
+    void setSessionTicket(String aTicket) {
+        sessionTicket = aTicket;
+    }
+
 }

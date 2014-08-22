@@ -4,8 +4,6 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.eas.client.threetier.HelloRequest;
-
 /**
  *
  * @author kl

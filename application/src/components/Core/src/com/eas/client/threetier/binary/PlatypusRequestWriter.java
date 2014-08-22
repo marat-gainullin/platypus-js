@@ -9,7 +9,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.CustomSerializer;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.threetier.HelloRequest;
+import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppElementChangedRequest;

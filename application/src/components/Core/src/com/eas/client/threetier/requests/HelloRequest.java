@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier;
+package com.eas.client.threetier.requests;
 
-import com.eas.client.threetier.requests.PlatypusRequestVisitor;
-import com.eas.client.threetier.requests.PlatypusResponseVisitor;
+import com.eas.client.threetier.Request;
+import com.eas.client.threetier.Requests;
 
 /**
  *

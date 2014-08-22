@@ -4,10 +4,10 @@
  */
 package com.eas.server.mina.platypus;
 
-import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
+import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.server.*;
 import com.eas.server.handlers.LoginRequestHandler;
@@ -53,7 +53,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
     public void setSessionIdleTime(int aValue) {
         sessionIdleTime = aValue;
     }
-    
+
     @Override
     public void sessionCreated(IoSession session) throws Exception {
         super.sessionCreated(session);
@@ -82,52 +82,36 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
      */
     @Override
     public void messageReceived(IoSession ioSession, Object msg) throws Exception {
-        if (msg instanceof Signature) {
-            Logger.getLogger(PlatypusRequestsHandler.class.getName()).finest(GOT_SIGNATURE_MSG);
-            ioSession.write(new Signature());
-        } else if (msg instanceof Request) {
-            final Request rq = (Request) msg;
-            Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", rq.toString());
-            String sessionId = (String) ioSession.getAttribute(SESSION_ID);
-            if (sessionId != null || rq.getType() == Requests.rqLogin) {
-                Session session = server.getSessionManager().get(sessionId);
-                if (session != null) {
-                    final Response pendingResponse = session.getPendingResponse(rq.getID());
-                    if (pendingResponse != null) {
-                        ioSession.write(pendingResponse);
-                        return;
-                    }
-                }
-                try {
-                    final RequestHandler<?> handler = RequestHandlerFactory.getHandler(server, session, rq);
-                    if (handler == null) {
-                        ioSession.write(new ErrorResponse(rq.getID(), "Unknown request type " + rq.getType()));
-                    } else {
-                        final Response response = handler.call();
-                        if (handler instanceof LoginRequestHandler && response instanceof LoginRequest.Response) {
-                            session = server.getSessionManager().get(((LoginRequest.Response) response).getSessionId());
-                            ioSession.setAttribute(SESSION_ID, session.getId());
-                            ioSession.write(response);
-                            //session.processPendingResponses(new PendingResponseSender(ioSession, session));
-                        } else {
+        if (msg instanceof RequestDecoder.RequestEnvelope) {
+            try {
+                final Request request = ((RequestDecoder.RequestEnvelope) msg).request;
+                String sessionTicket = ((RequestDecoder.RequestEnvelope) msg).ticket;
+                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", request.toString());
+                if (sessionTicket != null) {
+                    assert request.getType() != Requests.rqLogin;
+                    Session session = server.getSessionManager().get(sessionTicket);
+                    assert session != null;
+                    final RequestHandler<?> handler = RequestHandlerFactory.getHandler(server, session, request);
+                    if (handler != null) {
+                        handler.call((Response aResponse) -> {
                             if (!(handler instanceof LogoutRequestHandler)) {
-                                if (session != null) {
-                                    session.addPendingResponse(response);
-                                }
-                                ioSession.write(response);
+                                ioSession.write(aResponse);
                             }
-                        }
+                        });
+                    } else {
+                        throw new IllegalStateException("Unknown request type " + request.getType());
                     }
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
-                    Response r = new ErrorResponse(rq.getID(), ex.getMessage());
-                    if (session != null) {
-                        session.addPendingResponse(r);
-                    }
-                    ioSession.write(r);
+                } else {
+                    assert request instanceof LoginRequest : "Unauthorized. Login first.";
+                    LoginRequestHandler loginHandler = new LoginRequestHandler(server, (LoginRequest) request);
+                    LoginRequest.Response response = (LoginRequest.Response) loginHandler.call(null);
+                    Session session = server.getSessionManager().get(response.getSessionId());
+                    assert session != null : "Session had to be created by login request handler.";
+                    ioSession.setAttribute(SESSION_ID, response.getSessionId());
+                    ioSession.write(response);
                 }
-            } else {
-                throw new IllegalArgumentException(BAD_SESSION_ID_MSG);
+            } catch (Exception ex) {
+                ioSession.write(new ErrorResponse(ex.getMessage()));
             }
         } else {
             throw new IllegalArgumentException(BAD_PROTOCOL_MSG);
@@ -141,28 +125,6 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
 
     @Override
     public void messageSent(IoSession ioSession, Object message) throws Exception {
-        String sessionId = (String) ioSession.getAttribute(SESSION_ID);
-        Session session = server.getSessionManager().get(sessionId);
-        if (session != null && message instanceof Response) {
-            session.removePendingResponse((Response) message);
-        }
     }
 
-    private static class PendingResponseSender implements ResponseProcessor {
-
-        private final Session session;
-        private final IoSession ioSession;
-
-        public PendingResponseSender(IoSession aIoSession, Session aSession) {
-            ioSession = aIoSession;
-            session = aSession;
-        }
-
-        @Override
-        public void processResponse(Response aResponse) {
-            Logger.getLogger(PendingResponseSender.class.getName()).log(Level.FINE, "Sending pending response {0}", aResponse);
-            ioSession.write(aResponse);
-            session.removePendingResponse(aResponse);
-        }
-    }
 }

@@ -26,7 +26,14 @@ public class PlatypusHttpConstants {
     public static final String HEADER_CONTENTTYPE = "Content-Type";    
     public static final String HEADER_USER_AGENT = "User-Agent";    
     public static final String HEADER_COOKIE = "Cookie";    
+    public static final String HEADER_LOCATION = "Location";
     public static final String BASIC_AUTH_NAME = "Basic";    
+    public static final String FORM_AUTH_NAME = "Form";
+    public static final String DIGEST_AUTH_NAME = "Digest";
     public static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    public static final String SECURITY_REDIRECT_LOCATION = "j_security_check";
+    public static final String SECURITY_CHECK_USER = "j_username";
+    public static final String SECURITY_CHECK_PASSWORD = "j_password";
+    public static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     
 }

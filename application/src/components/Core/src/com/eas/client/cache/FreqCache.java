@@ -11,10 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author mg
+ * @param <K>
+ * @param <V>
  */
 public abstract class FreqCache<K, V> {
 
@@ -31,7 +36,7 @@ public abstract class FreqCache<K, V> {
     }
     protected final Object lock = new Object();
     protected Map<K, CacheEntry> entries = new HashMap<>();
-    private CachingSupport<K> cachingSupport = new CachingSupport<>();
+    private final CachingSupport<K> cachingSupport = new CachingSupport<>();
     protected int MAX_CACHE_SIZE = 512;
     protected int SIZE_TO_SHRINK = MAX_CACHE_SIZE / 2;
 
@@ -53,15 +58,15 @@ public abstract class FreqCache<K, V> {
     protected final void shrink() throws Exception {
         if (entries.size() > MAX_CACHE_SIZE) {
             SortedMap<Integer, CacheEntry> sorter = new TreeMap<>();
-            for (CacheEntry entry : entries.values()) {
+            entries.values().stream().forEach((entry) -> {
                 // There might be same get counters for different entries
                 while (sorter.containsKey(entry.getCounter)) {
                     entry.getCounter++;
                 }
                 assert !sorter.containsKey(entry.getCounter);
                 sorter.put(entry.getCounter, entry);
-                entry.getCounter = 0; // Let's equalize getting counters
-            }
+                entry.getCounter = 0;
+            });
             assert sorter.size() == entries.size();
             while (sorter.size() > SIZE_TO_SHRINK) {
                 Integer sorterKey = sorter.firstKey();
@@ -105,7 +110,7 @@ public abstract class FreqCache<K, V> {
         return aKey;
     }
 
-    public V get(K aKey) throws Exception {
+    public V get(K aKey, Consumer<V> onSuccess, Consumer<Exception> onFailure) throws Exception {
         K aId = transformKey(aKey);
         V element = null;
         boolean contains;
@@ -115,20 +120,60 @@ public abstract class FreqCache<K, V> {
                 element = entries.get(aId).value;
             }
         }
-
-        if (!contains) {
-            element = getNewEntry(aKey); // Get it from somewhere
-        }
-
-        synchronized (lock) {
-            if (entries.containsKey(aId)) {
-                CacheEntry entry = entries.get(aId);
-                entry.getCounter++;
-                element = entry.value; // Probably it's not nessasary
-            } else if(element != null){
-                putEntry(new CacheEntry(aId, element));
+        if (onSuccess != null) {
+            try {
+                if (contains) {
+                    synchronized (lock) {
+                        if (entries.containsKey(aId)) {
+                            CacheEntry entry = entries.get(aId);
+                            entry.getCounter++;
+                            element = entry.value; // Probably it's not nessasary
+                        } else if (element != null) {
+                            putEntry(new CacheEntry(aId, element));
+                        }
+                        shrink();
+                        onSuccess.accept(element);
+                    }
+                } else {
+                    // Get it from somewhere            
+                    getNewEntry(aKey, (V aElement) -> {
+                        synchronized (lock) {
+                            try {
+                                if (entries.containsKey(aId)) {
+                                    CacheEntry entry = entries.get(aId);
+                                    entry.getCounter++;
+                                } else if (aElement != null) {
+                                    putEntry(new CacheEntry(aId, aElement));
+                                }
+                                shrink();
+                                onSuccess.accept(aElement);
+                            } catch (Exception ex) {
+                                Logger.getLogger(FreqCache.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    }, onFailure);
+                }
+            } catch (Exception ex) {
+                if (onFailure != null) {
+                    onFailure.accept(ex);
+                }
             }
-            shrink();
+            return null;
+        } else {
+            if (!contains) {
+                // Get it from somewhere            
+                element = getNewEntry(aKey, null, null);
+            }
+            synchronized (lock) {
+                if (entries.containsKey(aId)) {
+                    CacheEntry entry = entries.get(aId);
+                    entry.getCounter++;
+                    element = entry.value; // Probably it's not nessasary
+                } else if (element != null) {
+                    putEntry(new CacheEntry(aId, element));
+                }
+                shrink();
+            }
             return element;
         }
     }
@@ -164,8 +209,15 @@ public abstract class FreqCache<K, V> {
 
     /**
      * Gets a new entry from somewhere. Descendants take care about it.
-     * Attention! Warning! This function is not synchronized!!! Descendants shound
-     * synchronize any this cache operations by 'lock' object synchronization!
+     * Attention! Warning! This function is not synchronized!!! Descendants
+     * shound synchronize any this cache operations by 'lock' object
+     * synchronization!
+     *
+     * @param aId
+     * @param onSuccess
+     * @param onFailure
+     * @return
+     * @throws java.lang.Exception
      */
-    protected abstract V getNewEntry(K aId) throws Exception;
+    protected abstract V getNewEntry(K aId, Consumer<V> onSuccess, Consumer<Exception> onFailure) throws Exception;
 }

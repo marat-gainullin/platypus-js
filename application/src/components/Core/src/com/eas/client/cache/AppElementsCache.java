@@ -3,7 +3,7 @@ package com.eas.client.cache;
 import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.threetier.PlatypusNativeClient;
+import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import com.eas.util.FileUtils;
 import java.io.*;
 import java.util.function.Consumer;
@@ -73,13 +73,12 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     }
 
     @Override
-    public String translateScriptPath(String aName) throws Exception {
-        ApplicationElement appElement = get(aName);
-        if (appElement != null) {
-            if (appElement.getType() == ClientConstants.ET_RESOURCE) {
-                return basePath + File.separator + aName.replace('/', File.separatorChar);
-            } else if (appElement.isModule()) {
-                return generateAppElementPath(aName) + File.separator + appElement.getName() + ".js";
+    public String translateScriptPath(ApplicationElement aAppElement) throws Exception {
+        if (aAppElement != null) {
+            if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
+                return basePath + File.separator + aAppElement.getName().replace('/', File.separatorChar);
+            } else if (aAppElement.isModule()) {
+                return generateAppElementPath(aAppElement.getName()) + File.separator + aAppElement.getName() + "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
             }
         }
         return "";
@@ -105,15 +104,47 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     }
 
     @Override
-    protected ApplicationElement getNewEntry(String aId) throws Exception {
-        ApplicationElement appElement = getFromFileCache(aId);
-        if (appElement == null || !isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
-            appElement = achieveAppElement(aId);
+    protected ApplicationElement getNewEntry(String aId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            ApplicationElement appElement = getFromFileCache(aId);
             if (appElement != null) {
-                putToFileCache(appElement);
+                isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), (Boolean actual) -> {
+                    if (actual) {
+                        onSuccess.accept(appElement);
+                    } else {
+                        try {
+                            achieveAppElement(aId, (ApplicationElement aAppElement) -> {
+                                if (aAppElement != null) {
+                                    putToFileCache(aAppElement);
+                                }
+                                onSuccess.accept(aAppElement);
+                            }, onFailure);
+                        } catch (Exception ex) {
+                            if (onFailure != null) {
+                                onFailure.accept(ex);
+                            }
+                        }
+                    }
+                }, onFailure);
+            } else {
+                achieveAppElement(aId, (ApplicationElement aAppElement) -> {
+                    if (aAppElement != null) {
+                        putToFileCache(aAppElement);
+                    }
+                    onSuccess.accept(aAppElement);
+                }, onFailure);
             }
+            return null;
+        } else {
+            ApplicationElement appElement = getFromFileCache(aId);
+            if (appElement == null || !isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), null, null)) {
+                appElement = achieveAppElement(aId, null, null);
+                if (appElement != null) {
+                    putToFileCache(appElement);
+                }
+            }
+            return appElement;
         }
-        return appElement;
     }
 
     @Override

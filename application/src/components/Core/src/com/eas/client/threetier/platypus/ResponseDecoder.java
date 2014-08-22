@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.mina.platypus;
+package com.eas.client.threetier.platypus;
 
-import com.eas.client.threetier.ErrorResponse;
-import com.eas.client.threetier.PlatypusNativeConnection;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.binary.PlatypusResponseReader;
 import com.eas.client.threetier.binary.RequestsTags;
+import com.eas.client.threetier.platypus.PlatypusNativeConnection;
+import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.PlatypusResponsesFactory;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;

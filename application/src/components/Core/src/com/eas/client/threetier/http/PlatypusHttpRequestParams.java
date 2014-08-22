@@ -11,7 +11,6 @@ package com.eas.client.threetier.http;
 public class PlatypusHttpRequestParams {
 
     public static final String QUERY_ID = "__queryId";
-    public static final String ID = "__id";
     public static final String TYPE = "__type";
     public static final String DATABASE_ID = "__databaseId";
     public static final String TEXT_CONTENT_SIZE = "__textContentSize";

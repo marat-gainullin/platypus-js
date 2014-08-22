@@ -16,10 +16,12 @@ import com.eas.client.AppCache;
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusAppCache;
+import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.Query;
+import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
@@ -34,6 +36,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.*;
+import javax.security.auth.login.LoginException;
 import javax.swing.JOptionPane;
 
 /**
@@ -280,8 +283,78 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public abstract void appEntityChanged(String aEntityId, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public String login(String aUserName, char[] aPassword, Consumer<String> onSuccess, Consumer<Exception> onFailure) throws LoginException {
+        LoginRequest rq = new LoginRequest(aUserName, aPassword != null ? new String(aPassword) : null);
+        try {
+            if (onSuccess != null) {
+                conn.enqueueRequest(rq, (LoginRequest.Response aResponse) -> {
+                    String sessionId = aResponse.getSessionId();
+                    conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
+                    principal = new AppPlatypusPrincipal(aUserName, this);
+                    onSuccess.accept(sessionId);
+                }, onFailure);
+                return null;
+            } else {
+                LoginRequest.Response response = conn.executeRequest(rq);
+                String sessionId = response.getSessionId();
+                conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
+                principal = new AppPlatypusPrincipal(aUserName, this);
+                return sessionId;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+            LoginException wrapped = new LoginException(ex.getMessage());
+            if (onSuccess != null) {
+                if (onFailure != null) {
+                    onFailure.accept(wrapped);
+                }
+                return null;
+            } else {
+                throw wrapped;
+            }
+        }
+    }
 
+    @Override
+    public void logout(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        LogoutRequest request = new LogoutRequest();
+        if (onSuccess != null) {
+            conn.<LogoutRequest.Response>enqueueRequest(request, (LogoutRequest.Response aResponse) -> {
+                onSuccess.accept(null);
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+        } else {
+            conn.executeRequest(request);
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        if (conn != null) {
+            conn.shutdown();
+            conn = null;
+        }
+    }
+
+    @Override
+    public void appEntityChanged(String aEntityId, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        AppElementChangedRequest request = new AppElementChangedRequest(null, aEntityId);
+        if (onSuccess != null) {
+            conn.<AppElementChangedRequest.Response>enqueueRequest(request, (AppElementChangedRequest.Response aResponse) -> {
+                onSuccess.accept(null);
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+        } else {
+            conn.executeRequest(request);
+        }
+    }
+    
     @Override
     public void dbTableChanged(String aDbId, String aSchema, String aTable, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         DbTableChangedRequest request = new DbTableChangedRequest(aDbId, aSchema, aTable);

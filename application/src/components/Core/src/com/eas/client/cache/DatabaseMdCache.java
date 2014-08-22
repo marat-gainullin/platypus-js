@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  *
@@ -72,7 +73,7 @@ public class DatabaseMdCache implements DbMetadataCache {
 
     @Override
     public Fields getTableMetadata(String aTableName) throws Exception {
-        return tablesFields.get(aTableName);
+        return tablesFields.get(aTableName, null, null);
     }
 
     @Override
@@ -128,7 +129,7 @@ public class DatabaseMdCache implements DbMetadataCache {
             SqlDriver driver = getConnectionDriver();
             String queryText = driver.getSql4TablesEnumeration(schema4Sql);
             SqlCompiledQuery query = new SqlCompiledQuery(client, dbId, queryText);
-            Rowset rs = query.executeQuery();
+            Rowset rs = query.executeQuery(null, null);
             int colIndex = rs.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
             assert colIndex > 0;
             tablesFields.clear();
@@ -221,7 +222,7 @@ public class DatabaseMdCache implements DbMetadataCache {
         }
 
         @Override
-        protected Fields getNewEntry(String aId) throws Exception {
+        protected Fields getNewEntry(String aId, Consumer<Fields> onSuccess, Consumer<Exception> onFailure) throws Exception {
             if (client != null && aId != null && !aId.isEmpty()) {
                 SqlDriver sqlDriver = getConnectionDriver();
                 assert sqlDriver != null;
@@ -245,14 +246,27 @@ public class DatabaseMdCache implements DbMetadataCache {
                         Map<String, Fields> fieldses = query(lOwner, lTableNames, true);
                         if (fieldses != null && !fieldses.isEmpty()) {
                             assert fieldses.size() == 1;
-                            return fieldses.values().iterator().next();
+                            if (onSuccess != null) {
+                                onSuccess.accept(fieldses.values().iterator().next());
+                                return null;
+                            } else {
+                                return fieldses.values().iterator().next();
+                            }
                         } else {
                             SqlCompiledQuery compiledQuery = new SqlCompiledQuery(client, dbId, SQLUtils.makeTableNameMetadataQuery(aId));
-                            Rowset rs = compiledQuery.executeQuery();
-                            return rs.getFields();
+                            Rowset rs = compiledQuery.executeQuery(null, null);
+                            if (onSuccess != null) {
+                                onSuccess.accept(rs.getFields());
+                                return null;
+                            } else {
+                                return rs.getFields();
+                            }
                         }
                     }
                 }
+            }
+            if (onSuccess != null) {
+                onSuccess.accept(null);
             }
             return null;
         }
@@ -282,23 +296,23 @@ public class DatabaseMdCache implements DbMetadataCache {
                     Rowset foreignKeysRs = null;
                     String colsSql = driver.getSql4TableColumns(schema4Sql, tables2Retrive);
                     if (colsSql != null && !colsSql.isEmpty()) {
-                        tablesColumnsRs = new SqlCompiledQuery(client, dbId, colsSql).executeQuery();
+                        tablesColumnsRs = new SqlCompiledQuery(client, dbId, colsSql).executeQuery(null, null);
                     }
                     String sqlPks = driver.getSql4TablePrimaryKeys(schema4Sql, tables2Retrive);
                     if (sqlPks != null && !sqlPks.isEmpty()) {
-                        primaryKeysRs = new SqlCompiledQuery(client, dbId, sqlPks).executeQuery();
+                        primaryKeysRs = new SqlCompiledQuery(client, dbId, sqlPks).executeQuery(null, null);
                     }
                     if (aFullMetadata) {
                         String sqlTC = driver.getSql4TableComments(schema4Sql, tables2Retrive);
                         String sqlCC = driver.getSql4ColumnsComments(schema4Sql, tables2Retrive);
                         if (sqlTC != null && !sqlTC.isEmpty()
                                 && sqlCC != null && !sqlCC.isEmpty()) {
-                            tablesCommentsRs = new SqlCompiledQuery(client, dbId, sqlTC).executeQuery();
-                            columnsCommentsRs = new SqlCompiledQuery(client, dbId, sqlCC).executeQuery();
+                            tablesCommentsRs = new SqlCompiledQuery(client, dbId, sqlTC).executeQuery(null, null);
+                            columnsCommentsRs = new SqlCompiledQuery(client, dbId, sqlCC).executeQuery(null, null);
                         }
                         String sqlFks = driver.getSql4TableForeignKeys(schema4Sql, tables2Retrive);
                         if (sqlFks != null && !sqlFks.isEmpty()) {
-                            foreignKeysRs = new SqlCompiledQuery(client, dbId, sqlFks).executeQuery();
+                            foreignKeysRs = new SqlCompiledQuery(client, dbId, sqlFks).executeQuery(null, null);
                         }
                     }
                     return read(tablesColumnsRs, tablesCommentsRs, columnsCommentsRs, primaryKeysRs, foreignKeysRs, aSchema, driver);
@@ -488,7 +502,7 @@ public class DatabaseMdCache implements DbMetadataCache {
     @Override
     public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
         if (aTableName != null && !aTableName.isEmpty() && tablesIndexes != null) {
-            return tablesIndexes.get(aTableName);
+            return tablesIndexes.get(aTableName, null, null);
         }
         return null;
     }
@@ -505,7 +519,7 @@ public class DatabaseMdCache implements DbMetadataCache {
         }
 
         @Override
-        protected DbTableIndexes getNewEntry(String aId) throws Exception {
+        protected DbTableIndexes getNewEntry(String aId, Consumer<DbTableIndexes> onSuccess, Consumer<Exception> onFailure) throws Exception {
             if (client != null) {
                 SqlDriver sqlDriver = getConnectionDriver();
                 assert sqlDriver != null;
@@ -534,7 +548,7 @@ public class DatabaseMdCache implements DbMetadataCache {
                         String sql4IndexesText = sqlDriver.getSql4Indexes(schema4Sql, lTableNames);
                         if (sql4IndexesText != null && !sql4IndexesText.isEmpty()) {
                             SqlCompiledQuery indexesQuery = new SqlCompiledQuery(client, dbId, sql4IndexesText);
-                            Rowset indexesRs = indexesQuery.executeQuery();
+                            Rowset indexesRs = indexesQuery.executeQuery(null, null);
                             if (indexesRs != null) {
                                 indexesRs.beforeFirst();
                                 while (indexesRs.next()) {
@@ -542,10 +556,18 @@ public class DatabaseMdCache implements DbMetadataCache {
                                 }
                                 dbTableIndexes.sortIndexesColumns();
                             }
-                            return dbTableIndexes;
+                            if (onSuccess != null) {
+                                onSuccess.accept(dbTableIndexes);
+                                return null;
+                            } else {
+                                return dbTableIndexes;
+                            }
                         }
                     }
                 }
+            }
+            if (onSuccess != null) {
+                onSuccess.accept(null);
             }
             return null;
         }
