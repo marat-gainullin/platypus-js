@@ -8,29 +8,27 @@ import com.bearsoft.rowset.changes.*;
 import com.eas.client.DatabasesClient;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  *
  * @author pk, mg refactoring
  */
-public class CommitRequestHandler extends SessionRequestHandler<CommitRequest> {
+public class CommitRequestHandler extends CommonRequestHandler<CommitRequest, CommitRequest.Response> {
 
-    public CommitRequestHandler(PlatypusServerCore server, Session session, CommitRequest rq) {
-        super(server, session, rq);
+    public CommitRequestHandler(PlatypusServerCore aServerCore, CommitRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    public Response handle2() throws Exception {
+    public void handle(Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         Map<String, List<Change>> changeLogs = new HashMap<>();
         DatabasesClient client = getServerCore().getDatabasesClient();
         Map<String, SqlCompiledQuery> entities = new HashMap<>();
@@ -56,6 +54,6 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest> {
             targetChangeLog.add(change);
         }
         int updated = client.commit(changeLogs);
-        return new CommitRequest.Response(getRequest().getID(), updated);
+        return new CommitRequest.Response(updated);
     }
 }

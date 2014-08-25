@@ -2,30 +2,33 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.server.handlers;
 
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
+import java.util.function.Consumer;
 
 /**
  *
  * @author mg
  */
-public class DbTableChangedRequestHandler extends SessionRequestHandler<DbTableChangedRequest>
-{
-    public DbTableChangedRequestHandler(PlatypusServerCore server, Session session, DbTableChangedRequest rq)
-    {
-        super(server, session, rq);
+public class DbTableChangedRequestHandler extends CommonRequestHandler<DbTableChangedRequest, DbTableChangedRequest.Response> {
+
+    public DbTableChangedRequestHandler(PlatypusServerCore aServerCore, DbTableChangedRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    public Response handle2() throws Exception
-    {
-        getServerCore().getDatabasesClient().dbTableChanged(getRequest().getDatabaseId(), getRequest().getSchema(), getRequest().getTable());
-        return new DbTableChangedRequest.Response(getRequest().getID());
+    public void handle(Consumer<DbTableChangedRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+        try {
+            getServerCore().getDatabasesClient().dbTableChanged(getRequest().getDatabaseId(), getRequest().getSchema(), getRequest().getTable());
+            if (onSuccess != null) {
+                onSuccess.accept(new DbTableChangedRequest.Response());
+            }
+        } catch (Exception ex) {
+            if (onFailure != null) {
+                onFailure.accept(ex);
+            }
+        }
     }
 }

@@ -20,7 +20,6 @@ import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.queries.Query;
 import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
@@ -154,11 +153,7 @@ public abstract class PlatypusClient implements AppClient {
         if (onSuccess != null) {
             conn.<CreateServerModuleRequest.Response>enqueueRequest(request, (CreateServerModuleRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse);
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
+            }, onFailure);
             return null;
         } else {
             CreateServerModuleRequest.Response response = conn.executeRequest(request);
@@ -178,11 +173,7 @@ public abstract class PlatypusClient implements AppClient {
         if (onSuccess != null) {
             conn.<ExecuteServerModuleMethodRequest.Response>enqueueRequest(request, (ExecuteServerModuleMethodRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getResult());
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
+            }, onFailure);
             return null;
         } else {
             ExecuteServerModuleMethodRequest.Response response = conn.executeRequest(request);
@@ -197,17 +188,20 @@ public abstract class PlatypusClient implements AppClient {
 
     @Override
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Runnable doWork = () -> {
+            changeLog.clear();
+            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
+                try {
+                    l.commited();
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        };
         CommitRequest request = new CommitRequest(changeLog);
         if (onSuccess != null) {
             conn.<CommitRequest.Response>enqueueRequest(request, (CommitRequest.Response aResponse) -> {
-                changeLog.clear();
-                for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                    try {
-                        l.commited();
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                doWork.run();
                 onSuccess.accept(aResponse.getUpdated());
             }, (Exception aException) -> {
                 rollback();
@@ -219,14 +213,7 @@ public abstract class PlatypusClient implements AppClient {
         } else {
             try {
                 CommitRequest.Response response = conn.executeRequest(request);
-                changeLog.clear();
-                for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                    try {
-                        l.commited();
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                doWork.run();
                 return response.getUpdated();
             } catch (Exception ex) {
                 rollback();
@@ -256,7 +243,7 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public Query getAppQuery(String aQueryId, Consumer<Query> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public PlatypusQuery getAppQuery(String aQueryId, Consumer<PlatypusQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
         AppQueryRequest request = new AppQueryRequest(aQueryId);
         if (onSuccess != null) {
             conn.<AppQueryRequest.Response>enqueueRequest(request, (AppQueryRequest.Response aResponse) -> {
@@ -303,15 +290,7 @@ public abstract class PlatypusClient implements AppClient {
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
-            LoginException wrapped = new LoginException(ex.getMessage());
-            if (onSuccess != null) {
-                if (onFailure != null) {
-                    onFailure.accept(wrapped);
-                }
-                return null;
-            } else {
-                throw wrapped;
-            }
+            throw new LoginException(ex.getMessage());
         }
     }
 
@@ -354,7 +333,7 @@ public abstract class PlatypusClient implements AppClient {
             conn.executeRequest(request);
         }
     }
-    
+
     @Override
     public void dbTableChanged(String aDbId, String aSchema, String aTable, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         DbTableChangedRequest request = new DbTableChangedRequest(aDbId, aSchema, aTable);

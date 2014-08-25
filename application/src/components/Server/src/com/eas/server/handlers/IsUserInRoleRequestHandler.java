@@ -4,26 +4,32 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
+import java.util.function.Consumer;
 
 /**
  *
  * @author mg
  */
-public class IsUserInRoleRequestHandler extends SessionRequestHandler<IsUserInRoleRequest> {
+public class IsUserInRoleRequestHandler extends SessionRequestHandler<IsUserInRoleRequest, IsUserInRoleRequest.Response> {
 
-    public IsUserInRoleRequestHandler(PlatypusServerCore aServerCore, Session aSession, IsUserInRoleRequest aRequest) {
-        super(aServerCore, aSession, aRequest);
+    public IsUserInRoleRequestHandler(PlatypusServerCore aServerCore, IsUserInRoleRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    protected Response handle2() throws Exception {
-        IsUserInRoleRequest.Response response = new IsUserInRoleRequest.Response(getRequest().getID(),
-                getSession().getPrincipal().hasRole(getRequest().getRoleName()));
-        return response;
+    protected void handle2(Session aSession, Consumer<IsUserInRoleRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+        try {
+            aSession.getPrincipal().hasRole(getRequest().getRoleName(), (Boolean hasRole) -> {
+                if (onSuccess != null) {
+                    onSuccess.accept(new IsUserInRoleRequest.Response(hasRole));
+                }
+            }, onFailure);
+        } catch (Exception ex) {
+            if(onFailure != null)
+                onFailure.accept(ex);
+        }
     }
 }

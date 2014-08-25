@@ -9,8 +9,8 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.queries.Query;
 import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  *
  * @author mg
  */
-public interface DbClient extends Client {
+public interface DbClient extends Client<SqlQuery> {
     
     public interface QueriesListener {
 
@@ -60,7 +60,7 @@ public interface DbClient extends Client {
      * @throws java.lang.Exception
      */
     @Override
-    public Query getAppQuery(String aQueryId, Consumer<Query> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public SqlQuery getAppQuery(String aQueryId, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     public ListenerRegistration addQueriesListener(QueriesListener aListener);
     
@@ -91,25 +91,27 @@ public interface DbClient extends Client {
      * Wraps query executing in a single transaction. Commit is called immidiatly after 
      * executing the query.
      * @param aQuery SqlCompiledQuery instance for execute i.e. insert, update or delete dml statements.
+     * @param onSuccess
+     * @param onFailure
      * @return Rows count affected by this query.
      * @throws Exception
      * @see SqlCompiledQuery
      */
-    public int executeUpdate(SqlCompiledQuery aQuery) throws Exception;
+    public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     /**
      * Commits all previous calls to executeUpdate and enqueueRowsetUpdate methods in aSessionId context.
      * @param aDatasourcesChangeLogs Changes to be commited to various datasources.
+     * @param onSuccess
+     * @param onFailure
      * @throws Exception
      * @return Affected in this transaction rows count from commited calls to enqueueUpdate, not to enqueueRowsetUpdate.
      * Number of affected rows by rowset's changes you can take from the rowset directly.
      * @see #enqueueRowsetUpdate(com.bearsoft.rowset.Rowset)
      *
      */
-    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs) throws Exception;
-    /**
-     * Forgets all previous calls to executeUpdate in aSessionId context.
-     */
+    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
+
     public void rollback();
 
     /**

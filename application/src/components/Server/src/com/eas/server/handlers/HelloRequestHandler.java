@@ -7,21 +7,23 @@ package com.eas.server.handlers;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.RequestHandler;
+import java.util.function.Consumer;
 
 /**
  *
  * @author pk
  */
-public class HelloRequestHandler extends RequestHandler<HelloRequest> {
+public class HelloRequestHandler extends CommonRequestHandler<HelloRequest, HelloRequest.Response> {
 
-    public HelloRequestHandler(PlatypusServerCore server, HelloRequest rq) {
-        super(server, rq);
+    public HelloRequestHandler(PlatypusServerCore aServerCore, HelloRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    protected Response handle() throws Exception {
-        return new HelloRequest.Response();
+    public void handle(Consumer<HelloRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+        if (onSuccess != null) {
+            onSuccess.accept(new HelloRequest.Response());
+        }
     }
 
 }

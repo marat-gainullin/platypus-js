@@ -5,29 +5,35 @@
 package com.eas.server.handlers;
 
 import com.eas.client.threetier.requests.AppElementChangedRequest;
-import com.eas.client.threetier.requests.AppElementChangedRequest.Response;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
+import java.util.function.Consumer;
 
 /**
  *
  * @author mg
  */
-public class AppElementChangedRequestHandler extends SessionRequestHandler<AppElementChangedRequest> {
+public class AppElementChangedRequestHandler extends CommonRequestHandler<AppElementChangedRequest, AppElementChangedRequest.Response> {
 
-    public AppElementChangedRequestHandler(PlatypusServerCore server, Session session, AppElementChangedRequest rq) {
-        super(server, session, rq);
+    public AppElementChangedRequestHandler(PlatypusServerCore aServerCore, AppElementChangedRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    public Response handle2() throws Exception {
-        if (getRequest().getEntityId() != null) {
-            handleApplicationElementChanged();
-        } else {
-            redeployWholeApplication();
+    public void handle(Consumer<AppElementChangedRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+        try {
+            if (getRequest().getEntityId() != null) {
+                handleApplicationElementChanged();
+            } else {
+                redeployWholeApplication();
+            }
+            if (onSuccess != null) {
+                onSuccess.accept(new AppElementChangedRequest.Response());
+            }
+        } catch (Exception ex) {
+            if (onFailure != null) {
+                onFailure.accept(ex);
+            }
         }
-        return new AppElementChangedRequest.Response(getRequest().getID());
     }
 
     public void redeployWholeApplication() throws Exception {
@@ -43,13 +49,13 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
     }
 
     public void unregisterAllModules() {
-        getSessionManager().entrySet().stream().forEach((sEntry) -> {
+        serverCore.getSessionManager().entrySet().stream().forEach((sEntry) -> {
             sEntry.getValue().unregisterModules();
         });
     }
 
     public void handleApplicationElementChanged() throws Exception {
-        getSessionManager().entrySet().stream().forEach((sEntry) -> {
+        serverCore.getSessionManager().entrySet().stream().forEach((sEntry) -> {
             sEntry.getValue().unregisterModule(getRequest().getEntityId());
         });
         // Элементы приложения, которые закэшировались из-за серверных модулей
@@ -60,7 +66,7 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
 
     public void registerBackgroundModules() throws Exception {
         for (String moduleId : getServerCore().getTasks()) {
-            if (getSessionManager().getSystemSession().getModule(moduleId) == null) {
+            if (serverCore.getSessionManager().getSystemSession().getModule(moduleId) == null) {
                 getServerCore().startServerTask(moduleId);
             }
         }

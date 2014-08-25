@@ -6,32 +6,33 @@ package com.eas.server.handlers;
 
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
+import java.util.function.Consumer;
 
 /**
  *
  * @author mg
  */
-public class StartAppElementRequestHandler extends SessionRequestHandler<StartAppElementRequest> {
+public class StartAppElementRequestHandler extends SessionRequestHandler<StartAppElementRequest, StartAppElementRequest.Response> {
 
-    public StartAppElementRequestHandler(PlatypusServerCore aServerCore, Session aSession, StartAppElementRequest aRequest) {
-        super(aServerCore, aSession, aRequest);
+    public StartAppElementRequestHandler(PlatypusServerCore aServerCore, StartAppElementRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    protected Response handle2() throws Exception {
+    protected void handle2(Session aSession, Consumer<StartAppElementRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String startAppElement = null;
-        PlatypusPrincipal principal = getSession().getPrincipal();
+        PlatypusPrincipal principal = aSession.getPrincipal();
         if (principal instanceof DbPlatypusPrincipal) {
             startAppElement = ((DbPlatypusPrincipal) principal).getStartAppElement();
         }
         if (startAppElement == null) {
             startAppElement = getServerCore().getDefaultAppElement();
         }
-        return new StartAppElementRequest.Response(getRequest().getID(), startAppElement);
+        if (onSuccess != null) {
+            onSuccess.accept(new StartAppElementRequest.Response(startAppElement));
+        }
     }
 }

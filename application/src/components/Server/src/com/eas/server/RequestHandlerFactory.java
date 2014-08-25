@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public class RequestHandlerFactory implements PlatypusRequestVisitor {
 
-    protected RequestHandler<?> handler;
+    protected RequestHandler<?, ?> handler;
     protected PlatypusServerCore serverCore;
     protected Session session;
 
@@ -26,7 +26,7 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
         session = aSession;
     }
 
-    public RequestHandler<?> getHandler() {
+    public RequestHandler<?, ?> getHandler() {
         return handler;
     }
 
@@ -43,7 +43,7 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
      * @see Session
      * @see UnknownRequest
      */
-    public static RequestHandler<?> getHandler(PlatypusServerCore serverCore, Session session, Request rq) throws Exception {
+    public static RequestHandler<?, ?> getHandler(PlatypusServerCore serverCore, Session session, Request rq) throws Exception {
         RequestHandlerFactory factory = new RequestHandlerFactory(serverCore, session);
         rq.accept(factory);
         return factory.getHandler();
@@ -51,7 +51,7 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(AppQueryRequest rq) throws Exception {
-        handler = new AppQueryRequestHandler(serverCore, session, rq);
+        handler = new AppQueryRequestHandler(serverCore, rq);
     }
 
     @Override
@@ -61,37 +61,37 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(LogoutRequest rq) throws Exception {
-        handler = new LogoutRequestHandler(serverCore, session, rq);
+        handler = new LogoutRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(CommitRequest rq) throws Exception {
-        handler = new CommitRequestHandler(serverCore, session, rq);
+        handler = new CommitRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(CreateServerModuleRequest rq) throws Exception {
-        handler = new CreateServerModuleRequestHandler(serverCore, session, rq);
+        handler = new CreateServerModuleRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(DisposeServerModuleRequest rq) throws Exception {
-        handler = new DisposeServerModuleRequestHandler(serverCore, session, rq);
+        handler = new DisposeServerModuleRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
-        handler = new ExecuteServerModuleMethodRequestHandler(serverCore, session, rq);
+        handler = new ExecuteServerModuleMethodRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(AppElementChangedRequest rq) throws Exception {
-        handler = new AppElementChangedRequestHandler(serverCore, session, rq);
+        handler = new AppElementChangedRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(DbTableChangedRequest rq) throws Exception {
-        handler = new DbTableChangedRequestHandler(serverCore, session, rq);
+        handler = new DbTableChangedRequestHandler(serverCore, rq);
     }
 
     @Override
@@ -101,31 +101,31 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
-        handler = new ExecuteQueryRequestHandler(serverCore, session, rq);
+        handler = new ExecuteQueryRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(KeepAliveRequest rq) throws Exception {
-        handler = new KeepAliveRequestHandler(serverCore, session, rq);
+        handler = new KeepAliveRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(StartAppElementRequest rq) throws Exception {
-        handler = new StartAppElementRequestHandler(serverCore, session, rq);
+        handler = new StartAppElementRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(IsUserInRoleRequest rq) throws Exception {
-        handler = new IsUserInRoleRequestHandler(serverCore, session, rq);
+        handler = new IsUserInRoleRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(IsAppElementActualRequest rq) throws Exception {
-        handler = new IsAppElementActualRequestHandler(serverCore, session, rq);
+        handler = new IsAppElementActualRequestHandler(serverCore, rq);
     }
 
     @Override
     public void visit(AppElementRequest rq) throws Exception {
-        handler = new AppElementRequestHandler(serverCore, session, rq);
+        handler = new AppElementRequestHandler(serverCore, rq);
     }
 }

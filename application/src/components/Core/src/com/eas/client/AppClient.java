@@ -10,7 +10,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.queries.Query;
+import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,7 +24,7 @@ import javax.security.auth.login.LoginException;
  * @author pk, mg
  * @see Client
  */
-public interface AppClient extends Client, PrincipalHost {
+public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
 
     public String getUrl();
 
@@ -39,7 +39,7 @@ public interface AppClient extends Client, PrincipalHost {
      * @throws java.lang.Exception
      */
     @Override
-    public Query getAppQuery(String aQueryId, Consumer<Query> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public PlatypusQuery getAppQuery(String aQueryId, Consumer<PlatypusQuery> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Logs in to application server.

@@ -15,6 +15,8 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
+import com.bearsoft.rowset.exceptions.InvalidColIndexException;
+import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.jdbc.StatementsGenerator;
@@ -33,12 +35,15 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.concurrent.CallableConsumer;
 import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
 import java.security.AccessControlException;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.Context;
@@ -187,28 +192,48 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public String getStartAppElement() throws Exception {
+    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
         String userName = principalHost.getPrincipal().getName();
         SqlQuery query = new SqlQuery(this, String.format(SQLUtils.SQL_SELECT_COMMON_WHERE_BY_FIELD, ClientConstants.T_MTD_USERS, ClientConstants.T_MTD_USERS, ClientConstants.F_USR_NAME, SQLUtils.SQL_PARAMETER_FIELD_VALUE));
         query.putParameter(SQLUtils.SQL_PARAMETER_FIELD_VALUE, DataTypeInfo.VARCHAR, userName);
-        Rowset rowset = query.compile().executeQuery();
-        if (!rowset.isEmpty()) {
-            rowset.first();
-            return rowset.getString(rowset.getFields().find(ClientConstants.F_USR_FORM));
+        SqlCompiledQuery compiledQuery = query.compile();
+        if (onSuccess != null) {
+            compiledQuery.executeQuery((Rowset rowset) -> {
+                if (!rowset.isEmpty()) {
+                    try {
+                        rowset.first();
+                        onSuccess.accept(rowset.getString(rowset.getFields().find(ClientConstants.F_USR_FORM)));
+                    } catch (InvalidCursorPositionException | InvalidColIndexException ex) {
+                        if (onFailure != null) {
+                            onFailure.accept(ex);
+                        }
+                    }
+                } else {
+                    onSuccess.accept(null);
+                }
+            }, onFailure);
+            return null;
+        } else {
+            Rowset rowset = compiledQuery.executeQuery(null, null);
+            if (!rowset.isEmpty()) {
+                rowset.first();
+                return rowset.getString(rowset.getFields().find(ClientConstants.F_USR_FORM));
+            } else {
+                return null;
+            }
         }
-        return null;
     }
 
     @Override
-    public SqlQuery getAppQuery(String aQueryId) throws Exception {
-        return getAppQuery(aQueryId, true);
+    public SqlQuery getAppQuery(String aQueryId, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        return getAppQuery(aQueryId, true, onSuccess, onFailure);
     }
 
-    public SqlQuery getAppQuery(String aQueryId, boolean aCopy) throws Exception {
+    public SqlQuery getAppQuery(String aQueryId, boolean aCopy, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (queries == null) {
             throw new IllegalStateException("Query factory is absent, so don't call getAppQuery.");
         }
-        return queries.getQuery(aQueryId, aCopy);
+        return queries.getQuery(aQueryId, aCopy, onSuccess, onFailure);
     }
 
     /**
@@ -245,44 +270,111 @@ public class DatabasesClient implements DbClient {
         return sb.toString();
     }
 
-    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName) throws Exception {
-        Map<String, String> properties = new HashMap<>();
+    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         aClient.initUsersSpace(q.getDbId());
-        final Rowset rs = q.compile().executeQuery();
-        if (rs.first()) {
-            properties.put(ClientConstants.F_USR_NAME, aUserName);
-            properties.put(ClientConstants.F_USR_CONTEXT, rs.getString(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
-            properties.put(ClientConstants.F_USR_EMAIL, rs.getString(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
-            properties.put(ClientConstants.F_USR_PHONE, rs.getString(rs.getFields().find(ClientConstants.F_USR_PHONE)));
-            properties.put(ClientConstants.F_USR_FORM, rs.getString(rs.getFields().find(ClientConstants.F_USR_FORM)));
-            properties.put(ClientConstants.F_USR_PASSWD, rs.getString(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
+        SqlCompiledQuery compiled = q.compile();
+        CallableConsumer<Map<String, String>, Rowset> doWork = (Rowset rs) -> {
+            Map<String, String> properties = new HashMap<>();
+            if (rs.first()) {
+                properties.put(ClientConstants.F_USR_NAME, aUserName);
+                properties.put(ClientConstants.F_USR_CONTEXT, rs.getString(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
+                properties.put(ClientConstants.F_USR_EMAIL, rs.getString(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
+                properties.put(ClientConstants.F_USR_PHONE, rs.getString(rs.getFields().find(ClientConstants.F_USR_PHONE)));
+                properties.put(ClientConstants.F_USR_FORM, rs.getString(rs.getFields().find(ClientConstants.F_USR_FORM)));
+                properties.put(ClientConstants.F_USR_PASSWD, rs.getString(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
+            }
+            return properties;
+        };
+        if (onSuccess != null) {
+            compiled.executeQuery((Rowset rs) -> {
+                try {
+                    onSuccess.accept(doWork.call(rs));
+                } catch (Exception ex) {
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
+                }
+            }, onFailure);
+            return null;
+        } else {
+            final Rowset rs = compiled.executeQuery(null, null);
+            return doWork.call(rs);
         }
-        return properties;
     }
 
-    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password) throws Exception {
-        Map<String, String> userProperties = getUserProperties(aClient, aUserName);
-        if (password.equals(userProperties.get(ClientConstants.F_USR_PASSWD))) {
+    private static class UserInfo {
+
+        public Map<String, String> props;
+        public Set<String> roles;
+
+        public DbPlatypusPrincipal principal(String aUserName) {
             return new DbPlatypusPrincipal(aUserName,
-                    userProperties.get(ClientConstants.F_USR_CONTEXT),
-                    userProperties.get(ClientConstants.F_USR_EMAIL),
-                    userProperties.get(ClientConstants.F_USR_PHONE),
-                    userProperties.get(ClientConstants.F_USR_FORM),
-                    getUserRoles(aClient, aUserName));
+                    props.get(ClientConstants.F_USR_CONTEXT),
+                    props.get(ClientConstants.F_USR_EMAIL),
+                    props.get(ClientConstants.F_USR_PHONE),
+                    props.get(ClientConstants.F_USR_FORM),
+                    roles);
         }
-        return null;
     }
 
-    public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName) throws Exception {
-        Map<String, String> userProperties = getUserProperties(aClient, aUserName);
-        return new DbPlatypusPrincipal(aUserName,
-                userProperties.get(ClientConstants.F_USR_CONTEXT),
-                userProperties.get(ClientConstants.F_USR_EMAIL),
-                userProperties.get(ClientConstants.F_USR_PHONE),
-                userProperties.get(ClientConstants.F_USR_FORM),
-                getUserRoles(aClient, aUserName));
+    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        UserInfo ui = new UserInfo();
+        if (onSuccess != null) {
+            getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
+                ui.props = userProperties;
+                if (ui.roles != null) {
+                    if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+                        onSuccess.accept(ui.principal(aUserName));
+                    } else {
+                        onSuccess.accept(null);
+                    }
+                }
+            }, onFailure);
+            getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
+                ui.roles = aRoles;
+                if (ui.props != null) {
+                    if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+                        onSuccess.accept(ui.principal(aUserName));
+                    } else {
+                        onSuccess.accept(null);
+                    }
+                }
+            }, onFailure);
+            return null;
+        } else {
+            ui.props = getUserProperties(aClient, aUserName, null, null);
+            ui.roles = getUserRoles(aClient, aUserName, null, null);
+            if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+                return ui.principal(aUserName);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        UserInfo ui = new UserInfo();
+        if (onSuccess != null) {
+            getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
+                ui.props = userProperties;
+                if (ui.roles != null) {
+                    onSuccess.accept(ui.principal(aUserName));
+                }
+            }, onFailure);
+            getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
+                ui.roles = aRoles;
+                if (ui.props != null) {
+                    onSuccess.accept(ui.principal(aUserName));
+                }
+            }, onFailure);
+            return null;
+        } else {
+            ui.props = getUserProperties(aClient, aUserName, null, null);
+            ui.roles = getUserRoles(aClient, aUserName, null, null);
+            return ui.principal(aUserName);
+        }
     }
 
     /**
@@ -300,7 +392,7 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public int executeUpdate(SqlCompiledQuery aQuery) throws Exception {
+    public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         int rowsAffected = 0;
         Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
         DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
@@ -346,7 +438,7 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs) throws Exception {
+    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         int rowsAffected = 0;
         try {
             for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
@@ -368,7 +460,7 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    protected int commit(final String aDatasourceId, List<Change> aLog) throws Exception {
+    protected int commit(final String aDatasourceId, List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         int rowsAffected = 0;
         SqlDriver driver = getDbMetadataCache(aDatasourceId).getConnectionDriver();
         if (driver != null) {
@@ -601,16 +693,33 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    protected static Set<String> getUserRoles(DbClient aClient, String aUserName) throws Exception {
-        Set<String> roles = new HashSet<>();
+    protected static Set<String> getUserRoles(DbClient aClient, String aUserName, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        CallableConsumer<Set<String>, Rowset> doWork = (Rowset rs) -> {
+            Set<String> roles = new HashSet<>();
+            int roleNameColumnIndex = rs.getFields().find(ClientConstants.F_GROUP_NAME);
+            for (int i = 1; i <= rs.size(); i++) {
+                roles.add((String) rs.getRow(i).getColumnObject(roleNameColumnIndex));
+            }
+            return roles;
+        };
         final SqlQuery q = new SqlQuery(aClient, USER_GROUPS_QUERY_TEXT);
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
-        final Rowset rs = q.compile().executeQuery();
-        int roleNameColumnIndex = rs.getFields().find(ClientConstants.F_GROUP_NAME);
-        for (int i = 1; i <= rs.size(); i++) {
-            roles.add((String) rs.getRow(i).getColumnObject(roleNameColumnIndex));
+        SqlCompiledQuery compiled = q.compile();
+        if (onSuccess != null) {
+            compiled.executeQuery((Rowset rs) -> {
+                try {
+                    onSuccess.accept(doWork.call(rs));
+                } catch (Exception ex) {
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
+                }
+            }, onFailure);
+            return null;
+        } else {
+            Rowset rs = compiled.executeQuery(null, null);
+            return doWork.call(rs);
         }
-        return roles;
     }
 
     private int riddleStatements(List<StatementsLogEntry> aStatements, Connection aConnection) throws Exception {

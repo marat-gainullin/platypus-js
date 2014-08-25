@@ -9,7 +9,6 @@ import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.SecuredJSConstructor;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.CreateServerModuleResponse;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.*;
@@ -17,6 +16,7 @@ import java.security.AccessControlException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -25,14 +25,14 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author pk, mg, ab
  */
-public class CreateServerModuleRequestHandler extends SessionRequestHandler<CreateServerModuleRequest> {
+public class CreateServerModuleRequestHandler extends SessionRequestHandler<CreateServerModuleRequest, CreateServerModuleRequest.Response> {
 
-    public CreateServerModuleRequestHandler(PlatypusServerCore server, Session session, CreateServerModuleRequest rq) {
-        super(server, session, rq);
+    public CreateServerModuleRequestHandler(PlatypusServerCore aServerCore, CreateServerModuleRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    public Response handle2() throws Exception {
+    protected void handle2(Session aSession, Consumer<CreateServerModuleRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String moduleName = getRequest().getModuleName();
         if (moduleName == null || moduleName.isEmpty()) {
             throw new Exception("Module name is missing. Unnamed server modules are not allowed.");

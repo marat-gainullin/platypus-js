@@ -12,8 +12,8 @@ import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
 import java.security.AccessControlException;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -22,23 +22,24 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author pk
  */
-public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandler<ExecuteServerModuleMethodRequest> {
+public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandler<ExecuteServerModuleMethodRequest, ExecuteServerModuleMethodRequest.Response> {
 
     public static final String EXECUTING_METHOD_TRACE_MSG = "Executing method {0} of module {1}";
     public static final String MODEL_SAVE_ERROR_MSG = "While attempting to save model of unactual server module %s";
     public static final String MODULE_MISSING_MSG = "No module %s";
     public static final String METHOD_MISSING_MSG = "No method %s in module %s";
     public static final String RERUN_MSG = "About to re-run server module {0}";
+    
     /**
-     * There are cases when a request needs to be complemented by temporarily
-     * environment. Such as http request/response facades of servlet container
+     * @param aServerCore
+     * @param aRequest
      */
-    public ExecuteServerModuleMethodRequestHandler(PlatypusServerCore aServerCore, Session aSession, ExecuteServerModuleMethodRequest aRequest) {
-        super(aServerCore, aSession, aRequest);
+    public ExecuteServerModuleMethodRequestHandler(PlatypusServerCore aServerCore, ExecuteServerModuleMethodRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    public Response handle2() throws Exception {
+    protected void handle2(Session aSession, Consumer<ExecuteServerModuleMethodRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String moduleName = getRequest().getModuleName();
         if (moduleName == null || moduleName.isEmpty()) {
             throw new Exception("Module name is missing. Unnamed server modules are not allowed.");
@@ -53,18 +54,18 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
             if (jsConstr instanceof SecuredJSConstructor) {
                 SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
                 // Let's check the if module is resident
-                JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
+                JSObject moduleInstance = serverCore.getSessionManager().getSystemSession().getModule(moduleName);
                 if (moduleInstance != null) {
                     // Resident module roles need to be checked against a current user.
-                    CreateServerModuleRequestHandler.checkPrincipalPermission(getServerCore(), sjsConstr.getModuleAllowedRoles(), moduleName);
+                    CreateServerModuleRequestHandler.checkPrincipalPermission(serverCore, sjsConstr.getModuleAllowedRoles(), moduleName);
                 } else {
-                    if (getSession().containsModule(moduleName)) {
-                        moduleInstance = getSession().getModule(moduleName);
+                    if (aSession.containsModule(moduleName)) {
+                        moduleInstance = aSession.getModule(moduleName);
                     } else {
                         if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                             if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                 moduleInstance = (JSObject) sjsConstr.newObject(new Object[]{});
-                                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1} on request {2}", new Object[]{getRequest().getModuleName(), moduleName, getRequest().getID()});
+                                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
                             } else {
                                 throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", moduleName));
                             }
@@ -78,7 +79,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                     Object oFun = moduleInstance.getMember(methodName);
                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                         Object result = ((JSObject) oFun).call(moduleInstance, getRequest().getArguments());
-                        return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
+                        return new ExecuteServerModuleMethodRequest.Response(result);
                     } else {
                         throw new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName()));
                     }

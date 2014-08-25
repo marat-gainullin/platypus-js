@@ -8,21 +8,23 @@ import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
-import com.eas.server.SessionRequestHandler;
+import java.util.function.Consumer;
 
 /**
  *
  * @author pk
  */
-public class LogoutRequestHandler extends SessionRequestHandler<LogoutRequest> {
+public class LogoutRequestHandler extends SessionRequestHandler<LogoutRequest, LogoutRequest.Response> {
 
-    public LogoutRequestHandler(PlatypusServerCore server, Session session, LogoutRequest rq) {
-        super(server, session, rq);
+    public LogoutRequestHandler(PlatypusServerCore aServerCore, LogoutRequest aRequest) {
+        super(aServerCore, aRequest);
     }
 
     @Override
-    public Response handle2() throws Exception {
-        getServerCore().getSessionManager().remove(getSession().getId());
-        return new LogoutRequest.Response(getRequest().getID());
+    protected void handle2(Session aSession, Consumer<LogoutRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+        getServerCore().getSessionManager().remove(aSession.getId());
+        if (onSuccess != null) {
+            onSuccess.accept(new LogoutRequest.Response());
+        }
     }
 }
