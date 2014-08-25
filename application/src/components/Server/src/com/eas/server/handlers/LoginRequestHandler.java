@@ -33,7 +33,7 @@ public class LoginRequestHandler extends CommonRequestHandler<LoginRequest, Logi
     }
 
     @Override
-    public void handle(Consumer<Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public void handle(Consumer<Response> onSuccess, Consumer<Exception> onFailure) {
         Thread.sleep(LOGIN_DELAY);
         try {
             if (getRequest().getLogin() != null && !getRequest().getLogin().isEmpty() && getRequest().getPassword() != null) {

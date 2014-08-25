@@ -122,7 +122,7 @@ public class DatabasesClient implements DbClient {
             if (newMdCache != null) {
                 mdCaches.put(null, newMdCache);
             }
-            appEntityChanged(null, fireEvents);
+            appEntityChanged(null, fireEvents, null, null);
         }
     }
 
@@ -310,35 +310,43 @@ public class DatabasesClient implements DbClient {
         public Set<String> roles;
 
         public DbPlatypusPrincipal principal(String aUserName) {
-            return new DbPlatypusPrincipal(aUserName,
-                    props.get(ClientConstants.F_USR_CONTEXT),
-                    props.get(ClientConstants.F_USR_EMAIL),
-                    props.get(ClientConstants.F_USR_PHONE),
-                    props.get(ClientConstants.F_USR_FORM),
-                    roles);
+            if (roles != null && props != null) {
+                return new DbPlatypusPrincipal(aUserName,
+                        props.get(ClientConstants.F_USR_CONTEXT),
+                        props.get(ClientConstants.F_USR_EMAIL),
+                        props.get(ClientConstants.F_USR_PHONE),
+                        props.get(ClientConstants.F_USR_FORM),
+                        roles);
+            } else {
+                return null;
+            }
         }
     }
 
     public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        UserInfo ui = new UserInfo();
+        final UserInfo ui = new UserInfo();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
-                ui.props = userProperties;
-                if (ui.roles != null) {
-                    if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
-                        onSuccess.accept(ui.principal(aUserName));
-                    } else {
-                        onSuccess.accept(null);
+                synchronized (ui) {
+                    ui.props = userProperties;
+                    if (ui.roles != null) {
+                        if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+                            onSuccess.accept(ui.principal(aUserName));
+                        } else {
+                            onSuccess.accept(null);
+                        }
                     }
                 }
             }, onFailure);
             getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
-                ui.roles = aRoles;
-                if (ui.props != null) {
-                    if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
-                        onSuccess.accept(ui.principal(aUserName));
-                    } else {
-                        onSuccess.accept(null);
+                synchronized (ui) {
+                    ui.roles = aRoles;
+                    if (ui.props != null) {
+                        if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+                            onSuccess.accept(ui.principal(aUserName));
+                        } else {
+                            onSuccess.accept(null);
+                        }
                     }
                 }
             }, onFailure);
@@ -355,18 +363,22 @@ public class DatabasesClient implements DbClient {
     }
 
     public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        UserInfo ui = new UserInfo();
+        final UserInfo ui = new UserInfo();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
-                ui.props = userProperties;
-                if (ui.roles != null) {
-                    onSuccess.accept(ui.principal(aUserName));
+                synchronized (ui) {
+                    ui.props = userProperties;
+                    if (ui.roles != null) {
+                        onSuccess.accept(ui.principal(aUserName));
+                    }
                 }
             }, onFailure);
             getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
-                ui.roles = aRoles;
-                if (ui.props != null) {
-                    onSuccess.accept(ui.principal(aUserName));
+                synchronized (ui) {
+                    ui.roles = aRoles;
+                    if (ui.props != null) {
+                        onSuccess.accept(ui.principal(aUserName));
+                    }
                 }
             }, onFailure);
             return null;
@@ -437,26 +449,79 @@ public class DatabasesClient implements DbClient {
         return mdCaches.get(aDatasourceId);
     }
 
-    @Override
-    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        int rowsAffected = 0;
-        try {
-            for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
-                List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
-                rowsAffected += commit(datasourceName, dbLog);
-            }
-            TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
-            for (TransactionListener l : listeners) {
-                try {
-                    l.commited();
-                } catch (Exception ex) {
-                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
+    private static class CommitInfo {
+
+        public int expected;
+        public int completed;
+        public int rowsAffected;
+        public Set<Exception> exceptions = new HashSet<>();
+        public Consumer<Integer> onSuccess;
+        public Consumer<Exception> onFailure;
+
+        public CommitInfo(int aExpected, Consumer<Integer> aOnSuccess, Consumer<Exception> aOnFailure) {
+            expected = aExpected;
+            onSuccess = aOnSuccess;
+            onFailure = aOnFailure;
+        }
+
+        public synchronized void complete(int aRowsAffected, Exception aFailureCause) {
+            rowsAffected += aRowsAffected;
+            if(aFailureCause != null)
+                exceptions.add(aFailureCause);
+            if (++completed == expected) {
+                if (exceptions.isEmpty()) {
+                    if (onSuccess != null) {
+                        onSuccess.accept(rowsAffected);
+                    }
+                } else {
+                    if (onFailure != null) {
+                        StringBuilder eMessagesSum = new StringBuilder();
+                        exceptions.stream().forEach((ex) -> {
+                            if (eMessagesSum.length() > 0) {
+                                eMessagesSum.append("\n");
+                            }
+                            eMessagesSum.append(ex.getMessage());
+                        });
+                        onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
+                    }
                 }
             }
-            return rowsAffected;
-        } catch (Exception ex) {
-            rollback();
-            throw ex;
+        }
+    }
+
+    @Override
+    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            final CommitInfo ci = new CommitInfo(aDatasourcesChangeLogs.size(), onSuccess, onFailure);
+            for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
+                List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
+                commit(datasourceName, dbLog, (Integer rowsAffected) -> {
+                    ci.complete(rowsAffected, null);
+                }, (Exception ex) -> {
+                    ci.complete(0, ex);
+                });
+            }
+            return 0;
+        } else {
+            int rowsAffected = 0;
+            try {
+                for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
+                    List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
+                    rowsAffected += commit(datasourceName, dbLog, null, null);
+                }
+                TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
+                for (TransactionListener l : listeners) {
+                    try {
+                        l.commited();
+                    } catch (Exception ex) {
+                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                return rowsAffected;
+            } catch (Exception ex) {
+                rollback();
+                throw ex;
+            }
         }
     }
 
@@ -593,24 +658,44 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public synchronized void appEntityChanged(String aEntityId) throws Exception {
-        appEntityChanged(aEntityId, true);
+    public synchronized void appEntityChanged(String aEntityId, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        appEntityChanged(aEntityId, true, onSuccess, onFailure);
     }
 
-    public synchronized void appEntityChanged(String aEntityId, boolean fireEvents) throws Exception {
+    public synchronized void appEntityChanged(String aEntityId, boolean fireEvents, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aEntityId != null) {
-            if (appCache != null) {
-                ApplicationElement appElement = appCache.get(aEntityId);
-                if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
-                    clearQueries(fireEvents);
+            if (onSuccess != null) {
+                if (appCache != null) {
+                    appCache.get(aEntityId, (ApplicationElement appElement) -> {
+                        try {
+                            if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
+                                clearQueries(fireEvents);
+                            }
+                            appCache.remove(aEntityId);
+                        } catch (Exception ex) {
+                            if (onFailure != null) {
+                                onFailure.accept(ex);
+                            }
+                        }
+                    }, onFailure);
                 }
-                appCache.remove(aEntityId);
+            } else {
+                if (appCache != null) {
+                    ApplicationElement appElement = appCache.get(aEntityId, null, null);
+                    if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
+                        clearQueries(fireEvents);
+                    }
+                    appCache.remove(aEntityId);
+                }
             }
         } else {
             if (appCache != null) {
                 appCache.clear();
             }
             clearQueries(fireEvents);
+            if (onSuccess != null) {
+                onSuccess.accept(null);
+            }
         }
     }
 
@@ -628,15 +713,26 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
-        DbMetadataCache cache = getDbMetadataCache(aDatasourceName);
-        String fullTableName = aTable;
-        if (aSchema != null && !aSchema.isEmpty()) {
-            fullTableName = aSchema + "." + fullTableName;
+    public void dbTableChanged(String aDatasourceName, String aSchema, String aTable, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        try {
+            DbMetadataCache cache = getDbMetadataCache(aDatasourceName);
+            String fullTableName = aTable;
+            if (aSchema != null && !aSchema.isEmpty()) {
+                fullTableName = aSchema + "." + fullTableName;
+            }
+            cache.removeTableMetadata(fullTableName);
+            cache.removeTableIndexes(fullTableName);
+            clearQueries();
+            if (onSuccess != null) {
+                onSuccess.accept(null);
+            }
+        } catch (Exception ex) {
+            if (onSuccess != null) {
+                onFailure.accept(ex);
+            } else {
+                throw ex;
+            }
         }
-        cache.removeTableMetadata(fullTableName);
-        cache.removeTableIndexes(fullTableName);
-        clearQueries();
     }
 
     /**
