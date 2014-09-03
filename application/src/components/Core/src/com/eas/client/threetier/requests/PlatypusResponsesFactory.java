@@ -25,7 +25,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(AppQueryRequest rq) throws Exception {
-        response = new AppQueryRequest.Response(null);
+        response = new AppQueryRequest.Response(null, null);
     }
 
     @Override
@@ -59,16 +59,6 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(AppElementChangedRequest rq) throws Exception {
-        response = new AppElementChangedRequest.Response();
-    }
-
-    @Override
-    public void visit(DbTableChangedRequest rq) throws Exception {
-        response = new DbTableChangedRequest.Response();
-    }
-
-    @Override
     public void visit(HelloRequest rq) throws Exception {
         response = new HelloRequest.Response();
     }
@@ -94,12 +84,12 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(IsAppElementActualRequest rq) throws Exception {
-        response = new IsAppElementActualRequest.Response(false);
+    public void visit(ModuleStructureRequest rq) throws Exception {
+        response = new ModuleStructureRequest.Response();
     }
 
     @Override
-    public void visit(AppElementRequest rq) throws Exception {
-        response = new AppElementRequest.Response(null);
+    public void visit(ResourceRequest rq) throws Exception {
+        response = new ResourceRequest.Response();
     }
 }

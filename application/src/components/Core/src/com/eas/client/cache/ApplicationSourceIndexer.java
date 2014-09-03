@@ -1,8 +1,6 @@
 package com.eas.client.cache;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.metadata.ApplicationElement;
-import com.eas.util.FileUtils;
+import com.eas.client.AppElementFiles;
 import com.sun.nio.file.ExtendedWatchEventModifier;
 import java.io.File;
 import java.io.IOException;
@@ -23,16 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.CRC32;
 
 /**
  *
  * @author mg
  */
-public class FilesAppCache extends AppElementsCache {
+public class ApplicationSourceIndexer {
 
     public interface ScanCallback {
 
@@ -83,7 +79,7 @@ public class FilesAppCache extends AppElementsCache {
                                     }
                                 }
                             } catch (Exception ex) {
-                                Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         });
                     }
@@ -98,22 +94,12 @@ public class FilesAppCache extends AppElementsCache {
                     }
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClosedWatchServiceException ex1) {
                 //no-op
             }
         }
     }
-    protected boolean secondCacheEnabled;//WARNING!!! If you whant to set this flag to true,
-    //you have to review server code, that translates an application element to clients.
-    //That code shouldn't cache application elements by itself, but in file mode
-    //that code utilizes the AppElementsCache code, rather than do things directly.
-    //Thus, if the flag will have true value, it will lead to double client and server side caching.
-    //It very harmful and you should clearily think before changing this flag.
-    //Subjects to review:
-    // - FilteredAppElementRequestHandler (PlatypusHttpServlet),
-    // - IsAppElementActualRequestHandler (Server),
-    // - AppElementRequestHandler (Server).
     protected String appPathName;
     protected Thread watchDog;
     protected Map<WatchKey, Path> watchKey2Directory = new HashMap<>();
@@ -124,16 +110,16 @@ public class FilesAppCache extends AppElementsCache {
     protected ScanCallback scanCallback;
     protected boolean autoScan;
 
-    public FilesAppCache(String aAppPathName) throws Exception {
+    public ApplicationSourceIndexer(String aAppPathName) throws Exception {
         this(aAppPathName, true, null);
     }
 
-    public FilesAppCache(String aAppPathName, ScanCallback aScanCallback) throws Exception {
+    public ApplicationSourceIndexer(String aAppPathName, ScanCallback aScanCallback) throws Exception {
         this(aAppPathName, true, aScanCallback);
     }
 
-    public FilesAppCache(String aAppPathName, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
-        super("app-" + String.valueOf(aAppPathName.hashCode()));
+    public ApplicationSourceIndexer(String aAppPathName, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
+        super();
         autoScan = aAutoScan;
         appPathName = aAppPathName;
         scanCallback = aScanCallback;
@@ -143,11 +129,6 @@ public class FilesAppCache extends AppElementsCache {
         }
     }
 
-    @Override
-    public String getApplicationPath() {
-        return appPathName;
-    }
-
     private File checkRootDirectory() throws IllegalArgumentException {
         String srcPathName = calcSrcPath();
         File srcDirectory = new File(srcPathName);
@@ -155,22 +136,6 @@ public class FilesAppCache extends AppElementsCache {
             throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", srcPathName));
         }
         return srcDirectory;
-    }
-
-    @Override
-    protected ApplicationElement getFromFileCache(String aId) throws Exception {
-        if (secondCacheEnabled) {
-            return super.getFromFileCache(aId);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    protected void putToFileCache(ApplicationElement aAppElement) {
-        if (secondCacheEnabled) {
-            super.putToFileCache(aAppElement);
-        }
     }
 
     public synchronized void watch() throws Exception {
@@ -198,96 +163,6 @@ public class FilesAppCache extends AppElementsCache {
         watchKey2Directory.clear();
     }
 
-    @Override
-    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (onSuccess != null) {
-            try {
-                get(aId, (ApplicationElement appElement) -> {
-                    if (appElement != null) {
-                        long ourSize = appElement.getTxtContentLength();
-                        long ourCrc32 = appElement.getTxtCrc32();
-                        long thiersSize = aTxtContentLength;
-                        long thiersCrc32 = aTxtCrc32;
-                        onSuccess.accept(thiersSize == ourSize && thiersCrc32 == ourCrc32);
-                    } else {
-                        onSuccess.accept(false);
-                    }
-                }, onFailure);
-            } catch (Exception ex) {
-                if (onFailure != null) {
-                    onFailure.accept(ex);
-                }
-            }
-            return false;
-        } else {
-            ApplicationElement appElement = get(aId, null, null);
-            if (appElement != null) {
-                long ourSize = appElement.getTxtContentLength();
-                long ourCrc32 = appElement.getTxtCrc32();
-                long thiersSize = aTxtContentLength;
-                long thiersCrc32 = aTxtCrc32;
-                return thiersSize == ourSize && thiersCrc32 == ourCrc32;
-            } else {
-                return false;
-            }
-        }
-    }
-
-    @Override
-    protected synchronized ApplicationElement achieveAppElement(String aId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        try {
-            ApplicationElement res;
-            Set<String> familyPaths = id2Paths.get(aId);
-            String familyPath = familyPaths != null && !familyPaths.isEmpty() ? familyPaths.iterator().next() : null;
-            if (familyPath != null) {
-                AppElementFiles family = families.get(familyPath);
-                if (family != null && family.getAppElementType() != null) {
-                    return family.getApplicationElement();
-                }
-            }
-            File resFile = new File((calcSrcPath() + File.separatorChar + aId).replace('/', File.separatorChar));
-            if (resFile.exists()) {
-                String ext = FileUtils.getFileExtension(resFile);
-                String fileName = resFile.getPath();
-                String withoutExt = ext != null && !ext.isEmpty() ? fileName.substring(0, fileName.length() - ext.length() - 1) : fileName;
-                AppElementFiles family = families.get(withoutExt);
-                if (family != null && family.hasExtension(ext) && family.getAppElementType() != null) {
-                    res = null;// application elements are not allowed to download partially!
-                } else {
-                    ApplicationElement appElement = new ApplicationElement();
-                    appElement.setId(aId);
-                    appElement.setName(resFile.getName());
-                    appElement.setType(ClientConstants.ET_RESOURCE);
-                    //appElement.setParentId(aParentDirectoryAppElementId);
-                    appElement.setBinaryContent(FileUtils.readBytes(resFile));
-                    // hack, but it works fine.
-                    appElement.setTxtContentLength((long) appElement.getBinaryContent().length);
-                    CRC32 crc = new CRC32();
-                    crc.update(appElement.getBinaryContent());
-                    appElement.setTxtCrc32(crc.getValue());
-                    res = appElement;
-                }
-            } else {
-                res = null;
-            }
-            if (onSuccess != null) {
-                onSuccess.accept(res);
-                return null;
-            } else {
-                return res;
-            }
-        } catch (Exception ex) {
-            if (onSuccess != null) {
-                if (onFailure != null) {
-                    onFailure.accept(ex);
-                }
-                return null;
-            } else {
-                throw ex;
-            }
-        }
-    }
-
     private static boolean isWindows() {
         String os = System.getProperty("os.name").toLowerCase();
         // windows
@@ -311,14 +186,14 @@ public class FilesAppCache extends AppElementsCache {
                     try {
                         addFileToIndex(aFilePath.toFile());
                     } catch (Exception ex) {
-                        Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     return FileVisitResult.CONTINUE;
                 }
             });
         } catch (Exception ex) {
             // Files.walkFileTree may fail due to some programs activity
-            Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -333,14 +208,14 @@ public class FilesAppCache extends AppElementsCache {
                         WatchKey wk = aDirectoryPath.register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
                         watchKey2Directory.put(wk, aDirectoryPath);
                     } catch (Exception ex) {
-                        Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     return FileVisitResult.CONTINUE;
                 }
             });
         } catch (Exception ex) {
             // Files.walkFileTree may fail due to some programs activity
-            Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -365,7 +240,7 @@ public class FilesAppCache extends AppElementsCache {
             if (familyPath != null) {
                 AppElementFiles family = families.get(familyPath);
                 if (family == null) {
-                    family = new AppElementFiles(null);
+                    family = new AppElementFiles();
                     families.put(familyPath, family);
                 }
                 Integer type1 = family.getAppElementType();
@@ -391,8 +266,6 @@ public class FilesAppCache extends AppElementsCache {
                     }
                     newPaths.add(familyPath);
                 }
-                remove(id1);// force the cache to refresh application element's content
-                remove(id2);// force the cache to refresh application element's content
                 if (scanCallback != null && id2 != null) {
                     for (File f : family.getFiles()) {
                         scanCallback.fileScanned(id2, f);
@@ -400,7 +273,7 @@ public class FilesAppCache extends AppElementsCache {
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -410,16 +283,7 @@ public class FilesAppCache extends AppElementsCache {
             if (familyPath != null) {
                 AppElementFiles family = families.get(familyPath);
                 if (family != null) {
-                    String id1 = path2Id.get(familyPath);
                     family.removeFile(aFile);
-                    // force the cache to refresh application element's content                    
-                    if (id1 != null) {
-                        remove(id1);
-                    } else {
-                        String id = aFile.getPath().substring(calcSrcPath().length() + 1).replace(File.separatorChar, '/');
-                        assert !id.startsWith("/") : "Cached platypus application element's id can't start with /. Id from absolute path is not caching subject.";
-                        remove(id);
-                    }
                     Integer type2 = family.getAppElementType();
                     if (type2 == null) {
                         String familyId = path2Id.remove(familyPath);
@@ -437,7 +301,7 @@ public class FilesAppCache extends AppElementsCache {
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -445,14 +309,22 @@ public class FilesAppCache extends AppElementsCache {
         return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT;
     }
 
-    @Override
-    public String translateScriptPath(ApplicationElement aAppElement) throws Exception {
-        if (aAppElement != null) {
-            if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
-                return calcSrcPath() + File.separator + aAppElement.getName().replace('/', File.separatorChar);
+    /**
+     * Resolves an application element name to a path of local file.
+     * @param aName
+     * @return
+     * @throws Exception 
+     */
+    public AppElementFiles nameToFiles(String aName) throws Exception {
+        if (aName != null) {
+            File resource = new File(calcSrcPath() + File.separator + aName.replace('/', File.separatorChar));
+            if(resource.exists()){
+                AppElementFiles files = new AppElementFiles();
+                files.addFile(resource);
+                return files;
             } else {
-                String path = id2Paths.get(aAppElement.getName()).iterator().next();
-                return path + "." + PlatypusFiles.JAVASCRIPT_EXTENSION;
+                Set<String> paths = id2Paths.get(aName);
+                return paths != null && !paths.isEmpty() ? families.get(paths.iterator().next()) : null;
             }
         } else {
             return null;

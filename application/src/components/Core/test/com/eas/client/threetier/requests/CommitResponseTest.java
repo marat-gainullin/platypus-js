@@ -6,8 +6,8 @@
 package com.eas.client.threetier.requests;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.binary.PlatypusResponseReader;
-import com.eas.client.threetier.binary.PlatypusResponseWriter;
+import com.eas.client.threetier.platypus.PlatypusResponseReader;
+import com.eas.client.threetier.platypus.PlatypusResponseWriter;
 import java.io.ByteArrayOutputStream;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;

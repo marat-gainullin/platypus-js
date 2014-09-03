@@ -50,7 +50,7 @@ public class SqlQuery extends Query<DbClient> {
      * Creates an instance of Query with empty SQL query text and parameters
      * map.
      */
-    protected SqlQuery() {
+    public SqlQuery() {
         super();
     }
 

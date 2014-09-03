@@ -62,16 +62,6 @@ public abstract class ConnectionSettings {
         this.password = password;
     }
 
-    /*
-    public static boolean isJdbcUrl(String url) {
-        return url.startsWith("jdbc:");//NOI18N
-    }
-    
-    public static boolean isAppServerUrl(String url) {
-        return url.startsWith("platypus") || url.startsWith("http");//NOI18N
-    }
-    */
-
     public boolean isEditable() {
         return editable;
     }

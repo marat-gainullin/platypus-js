@@ -4,10 +4,8 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.Session;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 

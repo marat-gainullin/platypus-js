@@ -44,6 +44,7 @@ public class SqlCompiledQuery {
      *
      * @param aClient
      * @param aSqlClause the SQL query text
+     * @throws java.lang.Exception
      */
     public SqlCompiledQuery(DbClient aClient, String aSqlClause) throws Exception {
         super();
@@ -109,6 +110,7 @@ public class SqlCompiledQuery {
      * @param aClient
      * @param aDbId Database identifier.
      * @param aSqlClause the SQL query text
+     * @throws java.lang.Exception
      */
     public SqlCompiledQuery(DbClient aClient, String aDbId, String aSqlClause) throws Exception {
         super();
@@ -162,6 +164,8 @@ public class SqlCompiledQuery {
     /**
      * Executes query and returns results whatever setted in procedure flag.
      *
+     * @param onSuccess
+     * @param onFailure
      * @return Rowset insatance, representing query results.
      * @throws RowsetException
      * @see Rowset

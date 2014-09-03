@@ -23,12 +23,10 @@ import com.bearsoft.rowset.jdbc.StatementsGenerator;
 import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
 import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.DatabaseMdCache;
-import com.eas.client.cache.FilesAppCache;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.model.StoredQueryFactory;
+import com.eas.client.model.query.StoredQueryFactory;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.PlatypusJdbcFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
@@ -43,6 +41,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,7 +69,6 @@ public class DatabasesClient implements DbClient {
     // metadata
     protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();
     protected boolean autoFillMetadata = true;
-    protected AppCache appCache;
     // queries
     protected StoredQueryFactory queries;
     // callback interface for context
@@ -78,28 +77,22 @@ public class DatabasesClient implements DbClient {
     protected PrincipalHost principalHost;
     // transactions
     protected final Set<TransactionListener> transactionListeners = new CopyOnWriteArraySet<>();
-    // queries management fro designers
-    protected final Set<QueriesListener> queriesListeners = new CopyOnWriteArraySet<>();
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
+    protected ExecutorService commitProcessor = Executors.newCachedThreadPool();
 
     /**
      *
-     * @param anAppCache
      * @param aDefaultDatasourceName
      * @param aAutoFillMetadata If true, metadatacache will be filled with
      * tables, keys and other metadata in schema automatically. Otherwise it
      * will query metadata table by table in each case. Default is true.
      * @throws Exception
      */
-    public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
+    public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
         super();
         autoFillMetadata = aAutoFillMetadata;
         defaultDatasourceName = aDefaultDatasourceName;
-        appCache = anAppCache;
-        if (appCache != null) {
-            queries = new StoredQueryFactory(this, appCache);
-        }
     }
 
     public String getDefaultDatasourceName() {
@@ -122,7 +115,6 @@ public class DatabasesClient implements DbClient {
             if (newMdCache != null) {
                 mdCaches.put(null, newMdCache);
             }
-            appEntityChanged(null, fireEvents, null, null);
         }
     }
 
@@ -157,30 +149,9 @@ public class DatabasesClient implements DbClient {
     @Override
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                transactionListeners.remove(aListener);
-            }
+        return () -> {
+            transactionListeners.remove(aListener);
         };
-    }
-
-    @Override
-    public ListenerRegistration addQueriesListener(final QueriesListener aListener) {
-        queriesListeners.add(aListener);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                queriesListeners.remove(aListener);
-            }
-        };
-    }
-
-    protected void fireQueriesCleared() {
-        QueriesListener[] listeners = queriesListeners.toArray(new QueriesListener[]{});
-        for (QueriesListener l : listeners) {
-            l.cleared();
-        }
     }
 
     /**
@@ -226,14 +197,31 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public SqlQuery getAppQuery(String aQueryId, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        return getAppQuery(aQueryId, true, onSuccess, onFailure);
+        if (onSuccess != null) {
+            try {
+                SqlQuery res = getAppQuery(aQueryId);
+                try {
+                    onSuccess.accept(res);
+                } catch (Exception ex) {
+                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (Exception ex) {
+                if (onFailure != null) {
+                    onFailure.accept(ex);
+                }
+            }
+            return null;
+        } else {
+            SqlQuery res = getAppQuery(aQueryId);
+            return res;
+        }
     }
 
-    public SqlQuery getAppQuery(String aQueryId, boolean aCopy, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public SqlQuery getAppQuery(String aQueryId) throws Exception {
         if (queries == null) {
             throw new IllegalStateException("Query factory is absent, so don't call getAppQuery.");
         }
-        return queries.getQuery(aQueryId, aCopy, onSuccess, onFailure);
+        return queries.loadQuery(aQueryId);
     }
 
     /**
@@ -251,7 +239,7 @@ public class DatabasesClient implements DbClient {
      */
     @Override
     public FlowProvider createFlowProvider(String aDatasourceId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDatasourceId, aEntityId, obtainDataSource(aDatasourceId), getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
+        return new PlatypusJdbcFlowProvider(this, aDatasourceId, aEntityId, obtainDataSource(aDatasourceId), commitProcessor, getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
@@ -304,7 +292,7 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    private static class UserInfo {
+    private static class UserProcess {
 
         public Map<String, String> props;
         public Set<String> roles;
@@ -324,7 +312,7 @@ public class DatabasesClient implements DbClient {
     }
 
     public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserInfo ui = new UserInfo();
+        final UserProcess ui = new UserProcess();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
                 synchronized (ui) {
@@ -363,7 +351,7 @@ public class DatabasesClient implements DbClient {
     }
 
     public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserInfo ui = new UserInfo();
+        final UserProcess ui = new UserProcess();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
                 synchronized (ui) {
@@ -394,13 +382,6 @@ public class DatabasesClient implements DbClient {
      */
     @Override
     public void shutdown() {
-        if (appCache instanceof FilesAppCache) {
-            try {
-                ((FilesAppCache) appCache).unwatch();
-            } catch (Exception ex) {
-                Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     @Override
@@ -429,11 +410,6 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public AppCache getAppCache() throws Exception {
-        return appCache;
-    }
-
-    @Override
     public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
         if (!mdCaches.containsKey(aDatasourceId)) {
             DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceId);
@@ -449,7 +425,7 @@ public class DatabasesClient implements DbClient {
         return mdCaches.get(aDatasourceId);
     }
 
-    private static class CommitInfo {
+    private static class CommitProcess {
 
         public int expected;
         public int completed;
@@ -458,7 +434,7 @@ public class DatabasesClient implements DbClient {
         public Consumer<Integer> onSuccess;
         public Consumer<Exception> onFailure;
 
-        public CommitInfo(int aExpected, Consumer<Integer> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public CommitProcess(int aExpected, Consumer<Integer> aOnSuccess, Consumer<Exception> aOnFailure) {
             expected = aExpected;
             onSuccess = aOnSuccess;
             onFailure = aOnFailure;
@@ -466,8 +442,9 @@ public class DatabasesClient implements DbClient {
 
         public synchronized void complete(int aRowsAffected, Exception aFailureCause) {
             rowsAffected += aRowsAffected;
-            if(aFailureCause != null)
+            if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
+            }
             if (++completed == expected) {
                 if (exceptions.isEmpty()) {
                     if (onSuccess != null) {
@@ -492,7 +469,7 @@ public class DatabasesClient implements DbClient {
     @Override
     public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            final CommitInfo ci = new CommitInfo(aDatasourcesChangeLogs.size(), onSuccess, onFailure);
+            final CommitProcess ci = new CommitProcess(aDatasourcesChangeLogs.size(), onSuccess, onFailure);
             for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
                 List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
                 commit(datasourceName, dbLog, (Integer rowsAffected) -> {
@@ -525,94 +502,115 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    protected int commit(final String aDatasourceId, List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        int rowsAffected = 0;
-        SqlDriver driver = getDbMetadataCache(aDatasourceId).getConnectionDriver();
-        if (driver != null) {
-            Converter converter = driver.getConverter();
-            assert aLog != null;
-            DataSource dataSource = obtainDataSource(aDatasourceId);
-            try (Connection connection = dataSource.getConnection()) {
-                connection.setAutoCommit(false);
-                try {
-                    List<StatementsLogEntry> statements = new ArrayList<>();
-                    // This structure helps us to avoid actuality check for queries while 
-                    // processing each statement in transaction. Thus, we can avoid speed degradation.
-                    // It doesn't break security, because such "unactual" lookup takes place ONLY
-                    // while transaction processing.
-                    final Map<String, SqlQuery> entityQueries = new HashMap<>();
-                    for (Change change : aLog) {
-                        StatementsGenerator generator = new StatementsGenerator(converter, new EntitiesHost() {
-                            @Override
-                            public void checkRights(String aEntityId) throws Exception {
-                                if (queries != null && aEntityId != null) {
-                                    SqlQuery query = entityQueries.get(aEntityId);
-                                    if (query == null) {
-                                        query = queries.getQuery(aEntityId, false);
-                                        if (query != null) {
-                                            entityQueries.put(aEntityId, query);
-                                        }
-                                    }
-                                    if (query != null) {
-                                        checkWritePrincipalPermission(aEntityId, query.getWriteRoles());
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public Field resolveField(String aEntityId, String aFieldName) throws Exception {
-                                if (aEntityId != null) {
-                                    SqlQuery query;
-                                    if (queries != null) {
-                                        query = entityQueries.get(aEntityId);
+    protected int commit(final String aDatasourceName, List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Callable<Integer> doWork = () -> {
+            int rowsAffected = 0;
+            SqlDriver driver = getDbMetadataCache(aDatasourceName).getConnectionDriver();
+            if (driver != null) {
+                Converter converter = driver.getConverter();
+                assert aLog != null;
+                DataSource dataSource = obtainDataSource(aDatasourceName);
+                try (Connection connection = dataSource.getConnection()) {
+                    connection.setAutoCommit(false);
+                    try {
+                        List<StatementsLogEntry> statements = new ArrayList<>();
+                        // This structure helps us to avoid actuality check for queries while
+                        // processing each statement in transaction. Thus, we can avoid speed degradation.
+                        // It doesn't break security, because such "unactual" lookup takes place ONLY
+                        // while transaction processing.
+                        final Map<String, SqlQuery> entityQueries = new HashMap<>();
+                        for (Change change : aLog) {
+                            StatementsGenerator generator = new StatementsGenerator(converter, new EntitiesHost() {
+                                @Override
+                                public void checkRights(String aEntityId) throws Exception {
+                                    if (queries != null && aEntityId != null) {
+                                        SqlQuery query = entityQueries.get(aEntityId);
                                         if (query == null) {
-                                            query = queries.getQuery(aEntityId, false);
+                                            query = queries.loadQuery(aEntityId);
                                             if (query != null) {
                                                 entityQueries.put(aEntityId, query);
                                             }
                                         }
-                                    } else {
-                                        query = null;
+                                        if (query != null) {
+                                            checkWritePrincipalPermission(aEntityId, query.getWriteRoles());
+                                        }
                                     }
-                                    Fields fields;
-                                    if (query != null && query.getEntityId() != null) {
-                                        fields = query.getFields();
-                                    } else {// It seems, that aEntityId is a table name...
-                                        fields = mdCaches.get(aDatasourceId).getTableMetadata(aEntityId);
-                                    }
-                                    if (fields != null) {
-                                        Field resolved = fields.get(aFieldName);
-                                        String resolvedTableName = resolved != null ? resolved.getTableName() : null;
-                                        resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
-                                        if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
-                                            return null;
+                                }
+
+                                @Override
+                                public Field resolveField(String aEntityId, String aFieldName) throws Exception {
+                                    if (aEntityId != null) {
+                                        SqlQuery query;
+                                        if (queries != null) {
+                                            query = entityQueries.get(aEntityId);
+                                            if (query == null) {
+                                                query = queries.loadQuery(aEntityId);
+                                                if (query != null) {
+                                                    entityQueries.put(aEntityId, query);
+                                                }
+                                            }
                                         } else {
-                                            return resolved;
+                                            query = null;
+                                        }
+                                        Fields fields;
+                                        if (query != null && query.getEntityId() != null) {
+                                            fields = query.getFields();
+                                        } else {// It seems, that aEntityId is a table name...
+                                            fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityId);
+                                        }
+                                        if (fields != null) {
+                                            Field resolved = fields.get(aFieldName);
+                                            String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                            resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
+                                            if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
+                                                return null;
+                                            } else {
+                                                return resolved;
+                                            }
+                                        } else {
+                                            Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityId);
+                                            return null;
                                         }
                                     } else {
-                                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityId);
                                         return null;
                                     }
-                                } else {
-                                    return null;
                                 }
-                            }
-                        }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
-                        change.accept(generator);
-                        statements.addAll(generator.getLogEntries());
+                            }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
+                            change.accept(generator);
+                            statements.addAll(generator.getLogEntries());
+                        }
+                        rowsAffected = riddleStatements(statements, connection);
+                        connection.commit();
+                    } catch (Exception ex) {
+                        connection.rollback();
+                        throw ex;
                     }
-                    rowsAffected = riddleStatements(statements, connection);
-                    connection.commit();
-                } catch (Exception ex) {
-                    connection.rollback();
-                    throw ex;
                 }
+                aLog.clear();
+                return rowsAffected;
+            } else {
+                Logger.getLogger(DatabasesClient.class.getName()).log(Level.INFO, "Unknown datasource: {0}. Can't commit to it", aDatasourceName);
+                return 0;
             }
-            aLog.clear();
-            return rowsAffected;
-        } else {
-            Logger.getLogger(DatabasesClient.class.getName()).log(Level.INFO, "Unknown datasource: {0}. Can't commit to it", aDatasourceId);
+        };
+        if (onSuccess != null) {
+            commitProcessor.submit(() -> {
+                try {
+                    int rowsAffected = doWork.call();
+                    try {// We have to handle commit exceptions and onSuccess.accept() exceptions separatly.
+                        onSuccess.accept(rowsAffected);
+                    } catch (Exception ex) {
+                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } catch (Exception ex) {
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
+                }
+            });
             return 0;
+        } else {
+            return doWork.call();
         }
     }
 
@@ -657,99 +655,14 @@ public class DatabasesClient implements DbClient {
         return lrowSet;
     }
 
-    @Override
-    public synchronized void appEntityChanged(String aEntityId, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        appEntityChanged(aEntityId, true, onSuccess, onFailure);
-    }
-
-    public synchronized void appEntityChanged(String aEntityId, boolean fireEvents, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (aEntityId != null) {
-            if (onSuccess != null) {
-                if (appCache != null) {
-                    appCache.get(aEntityId, (ApplicationElement appElement) -> {
-                        try {
-                            if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
-                                clearQueries(fireEvents);
-                            }
-                            appCache.remove(aEntityId);
-                        } catch (Exception ex) {
-                            if (onFailure != null) {
-                                onFailure.accept(ex);
-                            }
-                        }
-                    }, onFailure);
-                }
-            } else {
-                if (appCache != null) {
-                    ApplicationElement appElement = appCache.get(aEntityId, null, null);
-                    if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
-                        clearQueries(fireEvents);
-                    }
-                    appCache.remove(aEntityId);
-                }
-            }
-        } else {
-            if (appCache != null) {
-                appCache.clear();
-            }
-            clearQueries(fireEvents);
-            if (onSuccess != null) {
-                onSuccess.accept(null);
-            }
+    public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
+        DbMetadataCache cache = getDbMetadataCache(aDatasourceName);
+        String fullTableName = aTable;
+        if (aSchema != null && !aSchema.isEmpty()) {
+            fullTableName = aSchema + "." + fullTableName;
         }
-    }
-
-    public void clearQueries() throws Exception {
-        clearQueries(true);
-    }
-
-    public void clearQueries(boolean fireEvents) throws Exception {
-        if (queries != null) {
-            queries.clearCache();
-            if (fireEvents) {
-                fireQueriesCleared();
-            }
-        }
-    }
-
-    @Override
-    public void dbTableChanged(String aDatasourceName, String aSchema, String aTable, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        try {
-            DbMetadataCache cache = getDbMetadataCache(aDatasourceName);
-            String fullTableName = aTable;
-            if (aSchema != null && !aSchema.isEmpty()) {
-                fullTableName = aSchema + "." + fullTableName;
-            }
-            cache.removeTableMetadata(fullTableName);
-            cache.removeTableIndexes(fullTableName);
-            clearQueries();
-            if (onSuccess != null) {
-                onSuccess.accept(null);
-            }
-        } catch (Exception ex) {
-            if (onSuccess != null) {
-                onFailure.accept(ex);
-            } else {
-                throw ex;
-            }
-        }
-    }
-
-    /**
-     * Returns StoredQueryFactory instance, used by this client. Such
-     * functionality is specific to two-tier client. So don't move it to Client
-     * interface.
-     *
-     * @return StoredQueryFactory instance.
-     * @see StoredQueryFactory
-     * @see Client
-     */
-    public StoredQueryFactory getQueryFactory() {
-        return queries;
-    }
-
-    public void setQueryFactory(StoredQueryFactory aQueries) {
-        queries = aQueries;
+        cache.removeTableMetadata(fullTableName);
+        cache.removeTableIndexes(fullTableName);
     }
 
     @Override
@@ -865,15 +778,6 @@ public class DatabasesClient implements DbClient {
             Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't obtain sql driver for %s", aConnection.toString()));
         }
         return null;
-    }
-
-    public static void initApplication(DataSource aSource) throws Exception {
-        try (Connection lconn = aSource.getConnection()) {
-            lconn.setAutoCommit(false);
-            String dialect = dialectByConnection(lconn);
-            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-            driver.initializeApplication(lconn);
-        }
     }
 
     public void initUsersSpace(String aDatasourceName) throws Exception {

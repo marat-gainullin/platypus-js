@@ -12,8 +12,8 @@ import javax.xml.soap.SOAPFactory;
  *
  * @author pk
  */
-public class ProtocolConstants
-{
+public class ProtocolConstants {
+
     public static final String PLATYPUS_NS_PREFIX = "platypus";
     public static final String PLATYPUS_NS_URL = "http://xml.netbeans.org/schema/platypus";
     public static final String SOAP_RPC_NS_PREFIX = "rpc";
@@ -65,8 +65,7 @@ public class ProtocolConstants
     private static Name exceptionDetailTagName;
     private static Name exceptionClassAttrName;
 
-    public static void initialize(SOAPFactory factory) throws SOAPException
-    {
+    public static void initialize(SOAPFactory factory) throws SOAPException {
         // temporary objects
         checkObjectTagName = createPlatypusName(factory, "checkObject");
         createObjectTagName = createPlatypusName(factory, "createObject");
@@ -92,8 +91,8 @@ public class ProtocolConstants
         sqlQueryTagName = createPlatypusName(factory, "sqlQuery");
         parameterTagName = createPlatypusName(factory, "parameter");
         sqlTypeAttrName = createPlatypusName(factory, "sqlType");
-        parameterNameAttrName =createPlatypusName(factory, "name");
-        modifiedRowsTagName =  createPlatypusName(factory, "modified");
+        parameterNameAttrName = createPlatypusName(factory, "name");
+        modifiedRowsTagName = createPlatypusName(factory, "modified");
         updateRowsetTagName = createPlatypusName(factory, "updateRowset");
 
         //metadata
@@ -115,287 +114,252 @@ public class ProtocolConstants
         rpcResultTagName = factory.createName(SOAP_RPC_RESULT_TAG_NAME, SOAP_RPC_NS_PREFIX, SOAP_RPC_NS_URL);
     }
 
-    private static Name createPlatypusName(SOAPFactory factory, String localName) throws SOAPException
-    {
+    private static Name createPlatypusName(SOAPFactory factory, String localName) throws SOAPException {
         return factory.createName(localName, PLATYPUS_NS_PREFIX, PLATYPUS_NS_URL);
     }
 
     /**
      * @return the checkObjectTagName
      */
-    public static Name getCheckObjectTagName()
-    {
+    public static Name getCheckObjectTagName() {
         return checkObjectTagName;
     }
 
     /**
      * @return the createObjectTagName
      */
-    public static Name getCreateObjectTagName()
-    {
+    public static Name getCreateObjectTagName() {
         return createObjectTagName;
     }
 
     /**
      * @return the deleteObjectTagName
      */
-    public static Name getDeleteObjectTagName()
-    {
+    public static Name getDeleteObjectTagName() {
         return deleteObjectTagName;
     }
 
     /**
      * @return the objectTagName
      */
-    public static Name getObjectTagName()
-    {
+    public static Name getObjectTagName() {
         return objectTagName;
     }
 
     /**
      * @return the objectUrlAttrName
      */
-    public static Name getObjectUrlAttrName()
-    {
+    public static Name getObjectUrlAttrName() {
         return objectUrlAttrName;
     }
 
     /**
      * @return the versionTagName
      */
-    public static Name getVersionTagName()
-    {
+    public static Name getVersionTagName() {
         return versionTagName;
     }
 
     /**
      * @return the objectCapacityAttrName
      */
-    public static Name getObjectCapacityAttrName()
-    {
+    public static Name getObjectCapacityAttrName() {
         return objectCapacityAttrName;
     }
 
     /**
      * @return the objectSizeAttrName
      */
-    public static Name getObjectSizeAttrName()
-    {
+    public static Name getObjectSizeAttrName() {
         return objectSizeAttrName;
     }
 
     /**
      * @return the okTagName
      */
-    public static Name getOkTagName()
-    {
+    public static Name getOkTagName() {
         return okTagName;
     }
 
     /**
      * @return the rpcResultTagName
      */
-    public static Name getRpcResultTagName()
-    {
+    public static Name getRpcResultTagName() {
         return rpcResultTagName;
     }
 
     /**
      * @return the sessionTagName
      */
-    public static Name getSessionTagName()
-    {
+    public static Name getSessionTagName() {
         return sessionTagName;
     }
 
     /**
      * @return the helloPasswordAttrName
      */
-    public static Name getHelloPasswordAttrName()
-    {
+    public static Name getHelloPasswordAttrName() {
         return helloPasswordAttrName;
     }
 
     /**
      * @return the helloUserAttrName
      */
-    public static Name getHelloUserAttrName()
-    {
+    public static Name getHelloUserAttrName() {
         return helloUserAttrName;
     }
 
     /**
      * @return the helloTagName
      */
-    public static Name getHelloTagName()
-    {
+    public static Name getHelloTagName() {
         return helloTagName;
     }
 
     /**
      * @return the executeQueryTagName
      */
-    public static Name getExecuteQueryTagName()
-    {
+    public static Name getExecuteQueryTagName() {
         return executeQueryTagName;
     }
 
     /**
      * @return the databaseIdAttrName
      */
-    public static Name getDatabaseIdAttrName()
-    {
+    public static Name getDatabaseIdAttrName() {
         return databaseIdAttrName;
     }
 
     /**
      * @return the sqlQueryTagName
      */
-    public static Name getSqlQueryTagName()
-    {
+    public static Name getSqlQueryTagName() {
         return sqlQueryTagName;
     }
 
     /**
      * @return the parameterTagName
      */
-    public static Name getParameterTagName()
-    {
+    public static Name getParameterTagName() {
         return parameterTagName;
     }
 
     /**
      * @return the sqlTypeAttrName
      */
-    public static Name getSqlTypeAttrName()
-    {
+    public static Name getSqlTypeAttrName() {
         return sqlTypeAttrName;
     }
 
     /**
      * @return the parameterNameAttrName
      */
-    public static Name getParameterNameAttrName()
-    {
+    public static Name getParameterNameAttrName() {
         return parameterNameAttrName;
     }
 
     /**
      * @return the executeUpdateTagName
      */
-    public static Name getExecuteUpdateTagName()
-    {
+    public static Name getExecuteUpdateTagName() {
         return executeUpdateTagName;
     }
 
     /**
      * @return the modifiedRowsTagName
      */
-    public static Name getModifiedRowsTagName()
-    {
+    public static Name getModifiedRowsTagName() {
         return modifiedRowsTagName;
     }
 
     /**
      * @return the updateRowsetTagName
      */
-    public static Name getUpdateRowsetTagName()
-    {
+    public static Name getUpdateRowsetTagName() {
         return updateRowsetTagName;
     }
 
     /**
      * @return the primaryKeysTagName
      */
-    public static Name getPrimaryKeysTagName()
-    {
+    public static Name getPrimaryKeysTagName() {
         return primaryKeysTagName;
     }
 
     /**
      * @return the catalogAttrName
      */
-    public static Name getCatalogAttrName()
-    {
+    public static Name getCatalogAttrName() {
         return catalogAttrName;
     }
 
     /**
      * @return the schemaAttrName
      */
-    public static Name getSchemaAttrName()
-    {
+    public static Name getSchemaAttrName() {
         return schemaAttrName;
     }
 
     /**
      * @return the tableAttrName
      */
-    public static Name getTableAttrName()
-    {
+    public static Name getTableAttrName() {
         return tableAttrName;
     }
 
     /**
      * @return the foreignKeysTagName
      */
-    public static Name getForeignKeysTagName()
-    {
+    public static Name getForeignKeysTagName() {
         return foreignKeysTagName;
     }
 
     /**
      * @return the indexKeysTagName
      */
-    public static Name getIndexKeysTagName()
-    {
+    public static Name getIndexKeysTagName() {
         return indexKeysTagName;
     }
+
     /**
      * @return the achiveDbMetadataTagName
      */
-    public static Name getAchiveDbMetadataTagName()
-    {
+    public static Name getAchiveDbMetadataTagName() {
         return achiveDbMetadataTagName;
     }
 
     /**
      * @return the metadataTypeAttrName
      */
-    public static Name getMetadataTypeAttrName()
-    {
+    public static Name getMetadataTypeAttrName() {
         return metadataTypeAttrName;
     }
 
     /**
      * @return the tableCommentsTagName
      */
-    public static Name getTableCommentsTagName()
-    {
+    public static Name getTableCommentsTagName() {
         return tableCommentsTagName;
     }
 
     /**
      * @return the schemaTablesCommentsTagName
      */
-    public static Name getSchemaTablesCommentsTagName()
-    {
+    public static Name getSchemaTablesCommentsTagName() {
         return schemaTablesCommentsTagName;
     }
 
     /**
      * @return the exceptionDetailTagName
      */
-    public static Name getExceptionDetailTagName()
-    {
+    public static Name getExceptionDetailTagName() {
         return exceptionDetailTagName;
     }
 
     /**
      * @return the exceptionClassAttrName
      */
-    public static Name getExceptionClassAttrName()
-    {
+    public static Name getExceptionClassAttrName() {
         return exceptionClassAttrName;
     }
 }

@@ -5,9 +5,9 @@
 package com.eas.client.threetier.requests;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.binary.PlatypusResponseReader;
-import com.eas.client.threetier.binary.PlatypusResponseWriter;
-import com.eas.client.threetier.binary.RequestsTags;
+import com.eas.client.threetier.platypus.PlatypusResponseReader;
+import com.eas.client.threetier.platypus.PlatypusResponseWriter;
+import com.eas.client.threetier.platypus.RequestsTags;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoWriter;

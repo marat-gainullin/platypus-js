@@ -7,15 +7,14 @@
  */
 package com.eas.client;
 
-import com.eas.client.cache.FilesAppCache;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
-import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpsClient;
+import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import java.io.File;
 import java.net.URI;
 import java.util.Map;
@@ -45,25 +44,17 @@ public class ClientFactory {
 
     public static Client getInstance(String aApplicationUrl, String aDefaultDatasourceName) throws Exception {
         if (aApplicationUrl != null) {
-            if (aApplicationUrl.endsWith(H2DB_FILE_SUFFIX) && (new File(aApplicationUrl)).exists()) {
-                aDefaultDatasourceName = "ds-" + Math.abs(aApplicationUrl.hashCode());
-                String jndiUrl = "jndi://" + aDefaultDatasourceName;
-                GeneralResourceProvider.getInstance().registerDatasource(aDefaultDatasourceName, new DbConnectionSettings("jdbc:h2:/" + aApplicationUrl.substring(0, aApplicationUrl.length() - H2DB_FILE_SUFFIX.length()), "sa", "sa", "PUBLIC", null));
-                AppCache appCache = obtainTwoTierAppCache(jndiUrl, null);
+            if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTP)) {
+                return new PlatypusHttpsClient(aApplicationUrl);
+            } else if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
+                return new PlatypusHttpClient(aApplicationUrl);
+            } else if (aApplicationUrl.toLowerCase().startsWith("platypus")) {
+                return new PlatypusNativeClient(aApplicationUrl);
+            } else if (aApplicationUrl.toLowerCase().startsWith("file")) {
+                AppCache appCache = obtainTwoTierAppCache(aApplicationUrl, null);
                 return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
             } else {
-                if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    return new PlatypusHttpsClient(aApplicationUrl);
-                } else if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    return new PlatypusHttpClient(aApplicationUrl);
-                } else if (aApplicationUrl.toLowerCase().startsWith("platypus")) {
-                    return new PlatypusNativeClient(aApplicationUrl);
-                } else if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
-                    AppCache appCache = obtainTwoTierAppCache(aApplicationUrl, null);
-                    return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
-                } else {
-                    throw new Exception("Unknown protocol in url: " + aApplicationUrl);
-                }
+                throw new Exception("Unknown protocol in url: " + aApplicationUrl);
             }
         } else {
             throw new IllegalArgumentException("Application url is missing. url is a required parameter.");

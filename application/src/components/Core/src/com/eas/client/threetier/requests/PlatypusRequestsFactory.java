@@ -37,16 +37,8 @@ public class PlatypusRequestsFactory {
                 return new ExecuteServerModuleMethodRequest();
             case Requests.rqLogout:
                 return new LogoutRequest();
-            case Requests.rqAppElementChanged:
-                return new AppElementChangedRequest();
-            case Requests.rqDbTableChanged:
-                return new DbTableChangedRequest();
             case Requests.rqKeepAlive:
                 return new KeepAliveRequest();
-            case Requests.rqIsAppElementActual:
-                return new IsAppElementActualRequest();
-            case Requests.rqAppElement:
-                return new AppElementRequest();
             case Requests.rqIsUserInRole:
                 return new IsUserInRoleRequest();
             case Requests.rqStartAppElement:

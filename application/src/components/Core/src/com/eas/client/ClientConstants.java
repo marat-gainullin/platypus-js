@@ -14,17 +14,6 @@ package com.eas.client;
  * @author Marat
  */
 public class ClientConstants {
-
-    // Eas metadata tables and fields names
-    public static final String T_MTD_ENTITIES = "MTD_ENTITIES";
-    public static final String F_MDENT_ID = "MDENT_ID";
-    public static final String F_MDENT_CONTENT_TXT = "MDENT_CONTENT_TXT";
-    public static final String F_MDENT_NAME = "MDENT_NAME";
-    public static final String F_MDENT_PARENT_ID = "MDENT_PARENT_ID";
-    public static final String F_MDENT_TYPE = "MDENT_TYPE";
-    public static final String F_MDENT_ORDER = "MDENT_ORDER";
-    public static final String F_MDENT_CONTENT_TXT_SIZE = "MDENT_CONTENT_TXT_SIZE";
-    public static final String F_MDENT_CONTENT_TXT_CRC32 = "MDENT_CONTENT_TXT_CRC32";
     public static final String T_MTD_USERS = "MTD_USERS";
     public static final String T_MTD_GROUPS = "MTD_GROUPS";
     public static final String F_USR_NAME = "USR_NAME";
@@ -40,8 +29,6 @@ public class ClientConstants {
     public static final String F_MDLOC_ID = "MDLOC_ID";
     public static final String F_MDLOC_NAME = "MDLOC_NAME";
     public static final String F_MDLOC_TRANSLATION = "MDLOC_TRANSLATION";
-    public static final String APP_ELEMENT_SQL_PARAM_NAME = "md_id";
-    public static final String SQL_SELECT_MD = "select * from " + ClientConstants.T_MTD_ENTITIES + " where " + ClientConstants.T_MTD_ENTITIES + "." + ClientConstants.F_MDENT_ID + "=:"+APP_ELEMENT_SQL_PARAM_NAME;
     public static final String JDBCFKS_FKTABLE_SCHEM = "FKTABLE_SCHEM";
     public static final String JDBCFKS_FKTABLE_NAME = "FKTABLE_NAME";
     public static final String JDBCFKS_FKCOLUMN_NAME = "FKCOLUMN_NAME";
@@ -128,5 +115,4 @@ public class ClientConstants {
     public static final String SERVER_PROPERTY_MYSQL_DIALECT = "MySql";
     public static final String SERVER_PROPERTY_DB2_DIALECT = "Db2";
     public static final String SERVER_PROPERTY_H2_DIALECT = "H2";
-    public static final long APP_DB_DUMMY_ID = -1l;
 }

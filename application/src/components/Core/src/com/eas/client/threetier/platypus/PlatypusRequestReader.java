@@ -2,32 +2,30 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.binary;
+package com.eas.client.threetier.platypus;
 
 import com.bearsoft.rowset.changes.serial.ChangesReader;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.serial.CustomSerializer;
-import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetReader;
 import com.eas.client.threetier.Request;
-import com.eas.client.threetier.requests.AppElementChangedRequest;
-import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.IsAppElementActualRequest;
+import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.PlatypusRequestsFactory;
+import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
@@ -87,12 +85,36 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     }
 
     @Override
+    public void visit(ModuleStructureRequest rq) throws Exception {
+        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
+        if (!dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+            throw new NullPointerException("No module name specified");
+        }
+        rq.setModuleOrResourceName(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
+    }
+
+    @Override
     public void visit(AppQueryRequest rq) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (!dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
             throw new NullPointerException("No query specified");
         }
-        rq.setQueryId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+        rq.setQueryName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+        if (dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+            rq.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+        }
+    }
+
+    @Override
+    public void visit(ResourceRequest rq) throws Exception {
+        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
+        if (!dom.containsChild(RequestsTags.TAG_RESOURCE_NAME)) {
+            throw new NullPointerException("No module name specified");
+        }
+        rq.setResourceName(dom.getChild(RequestsTags.TAG_RESOURCE_NAME).getString());
+        if (dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+            rq.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+        }
     }
 
     @Override
@@ -174,27 +196,9 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(AppElementChangedRequest rq) throws Exception {
-        ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        rq.setDatabaseId(input.containsChild(RequestsTags.DATABASE_TAG) ? input.getChild(RequestsTags.DATABASE_TAG).getString() : null);
-        rq.setEntityId(input.containsChild(RequestsTags.ENTITY_ID_TAG) ? input.getChild(RequestsTags.ENTITY_ID_TAG).getString() : null);
-    }
-
-    @Override
-    public void visit(DbTableChangedRequest rq) throws Exception {
-        ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        rq.setDatabaseId(input.containsChild(RequestsTags.DATABASE_TAG) ? input.getChild(RequestsTags.DATABASE_TAG).getString() : null);
-        rq.setSchema(input.containsChild(RequestsTags.SCHEMA_NAME_TAG) ? input.getChild(RequestsTags.SCHEMA_NAME_TAG).getString() : null);
-        if (!input.containsChild(RequestsTags.TABLE_NAME_TAG)) {
-            throw new ProtoReaderException("No table specified");
-        }
-        rq.setTable(input.getChild(RequestsTags.TABLE_NAME_TAG).getString());
-    }
-
-    @Override
     public void visit(HelloRequest rq) throws Exception {
     }
-    private static PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader(null);
+    private static final PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader(null);
 
     public static Parameter readParameter(ProtoNode node) throws ProtoReaderException {
         Parameter param = new Parameter();
@@ -283,31 +287,5 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
             throw new ProtoReaderException("No user name");
         }
         rq.setRoleName(input.getChild(RequestsTags.TAG_ROLE_NAME).getString());
-    }
-
-    @Override
-    public void visit(IsAppElementActualRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_APP_ELEMENT_ID)) {
-            throw new ProtoReaderException("No application element id");
-        }
-        if (!input.containsChild(RequestsTags.TAG_TEXT_SIZE)) {
-            throw new ProtoReaderException("No text content size");
-        }
-        if (!input.containsChild(RequestsTags.TAG_TEST_CRC32)) {
-            throw new ProtoReaderException("No text content crc32");
-        }
-        rq.setAppElementId(input.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
-        rq.setTxtContentSize(input.getChild(RequestsTags.TAG_TEXT_SIZE).getLong());
-        rq.setTxtContentCrc32(input.getChild(RequestsTags.TAG_TEST_CRC32).getLong());
-    }
-
-    @Override
-    public void visit(AppElementRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_APP_ELEMENT_ID)) {
-            throw new ProtoReaderException("No application element id");
-        }
-        rq.setAppElementId(input.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
     }
 }

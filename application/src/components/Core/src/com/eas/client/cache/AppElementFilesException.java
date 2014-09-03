@@ -9,11 +9,12 @@ package com.eas.client.cache;
 
 /**
  * Custom exception shows error in deploy process
+ *
  * @author vv
  */
 public class AppElementFilesException extends Exception {
-    
-    public AppElementFilesException(String message) {
-        super(message);
+
+    public AppElementFilesException(String aMessage) {
+        super(aMessage);
     }
 }

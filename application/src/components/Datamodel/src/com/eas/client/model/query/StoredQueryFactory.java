@@ -2,33 +2,26 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model;
+package com.eas.client.model.query;
 
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.AppCache;
+import com.eas.client.AppElementFiles;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
-import com.eas.client.cache.ActualCacheEntry;
-import com.eas.client.cache.FreqCache;
-import com.eas.client.exceptions.NoSuchEntityException;
-import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
-import com.eas.client.model.query.QueryEntity;
-import com.eas.client.model.query.QueryModel;
-import com.eas.client.model.query.QueryParametersEntity;
-import com.eas.client.model.store.XmlDom2QueryDocument;
+import com.eas.client.model.Relation;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.JsDoc;
 import java.io.StringReader;
 import java.sql.Types;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.xml.parsers.ParserConfigurationException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.ResultsFinder;
 import net.sf.jsqlparser.SourcesFinder;
@@ -37,7 +30,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
-import org.w3c.dom.Document;
 
 /**
  *
@@ -55,65 +47,6 @@ public class StoredQueryFactory {
         return subFields;
     }
 
-    protected class StoredQueryCache extends FreqCache<String, ActualCacheEntry<SqlQuery>> {
-
-        public StoredQueryCache() {
-            super();
-        }
-
-        @Override
-        public ActualCacheEntry<SqlQuery> get(String aId, Consumer<ActualCacheEntry<SqlQuery>> onSuccess, Consumer<Exception> onFailure) throws Exception {
-            // Ordinary queries will be checked against underlying application element.
-            // Dynamic queries will be treated as unactual and will be re-cached.
-            // It's not harmful as long as factory maintains dynamic queries cache by itself.
-            // It will be simple projection one cache on another.
-            if (onSuccess != null) {
-                super.get(aId, (ActualCacheEntry<SqlQuery> res) -> {
-                    if (res != null) {
-                        try {
-                            appCache.isActual(aId, res.getTxtContentSize(), res.getTxtContentCrc32(), (Boolean actual) -> {
-                                if (actual) {
-                                    onSuccess.accept(res);
-                                } else {
-                                    try {
-                                        remove(aId);
-                                        appCache.remove(aId);
-                                        StoredQueryCache.super.get(aId, (ActualCacheEntry<SqlQuery> res1) -> {
-                                            onSuccess.accept(res1);
-                                        }, onFailure);
-                                    } catch (Exception ex) {
-                                        if (onFailure != null) {
-                                            onFailure.accept(ex);
-                                        }
-                                    }
-                                }
-                            }, onFailure);
-                        } catch (Exception ex) {
-                            if (onFailure != null) {
-                                onFailure.accept(ex);
-                            }
-                        }
-                    } else {
-                        onSuccess.accept(null);
-                    }
-                }, onFailure);
-                return null;
-            } else {
-                ActualCacheEntry<SqlQuery> res = super.get(aId, null, null);
-                if (res != null && !appCache.isActual(aId, res.getTxtContentSize(), res.getTxtContentCrc32(), null, null)) {
-                    remove(aId);
-                    appCache.remove(aId);
-                    res = super.get(aId, null, null);
-                }
-                return res;
-            }
-        }
-
-        @Override
-        protected ActualCacheEntry<SqlQuery> getNewEntry(String aId, Consumer<ActualCacheEntry<SqlQuery>> onSuccess, Consumer<Exception> onFailure) throws Exception {
-            return loadQuery(aId, onSuccess, onFailure);
-        }
-    }
     public static final String INNER_JOIN_CONSTRUCTION = "select %s from %s %s inner join %s on (%s.%s = %s.%s)";
     public static final String ABSENT_QUERY_MSG = "Query %s is not found";
     public static final String CANT_LOAD_NULL_MSG = "Query Id is null.";
@@ -123,15 +56,14 @@ public class StoredQueryFactory {
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
     private DbClient client;
-    private AppCache appCache;
-    private StoredQueryCache queriesCache;
+    private ApplicationSourceIndexer indexer;
+    private LocalQueriesProxy subQueriesProxy;
     private boolean preserveDatasources;
-    private final List<String> processedQueries = new ArrayList<>();// for circular references discovering
 
     public void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
         Fields fields = getTableFields(aQuery.getDbId(), table);
         if (fields != null) {
-            for (Field field : fields.toCollection()) {
+            fields.toCollection().stream().forEach((Field field) -> {
                 Field copied = field.copy();
                 /*
                  * if (copied.isPk()) { checkPrimaryKey(aQuery, copied); }
@@ -161,202 +93,61 @@ public class StoredQueryFactory {
                      */
                 }
                 aQuery.getFields().add(copied);
-            }
+            });
         }
     }
 
     public static Map<String, FromItem> prepareUniqueTables(Map<String, FromItem> tables) {
         Map<String, FromItem> uniqueTables = new HashMap<>();
-        for (FromItem fromItem : tables.values()) {
+        tables.values().stream().forEach((fromItem) -> {
             if (fromItem.getAlias() != null && !fromItem.getAlias().getName().isEmpty()) {
                 uniqueTables.put(fromItem.getAlias().getName().toLowerCase(), fromItem);
             } else if (fromItem instanceof Table) {
                 uniqueTables.put(((Table) fromItem).getWholeTableName().toLowerCase(), fromItem);
             }
-        }
+        });
         return uniqueTables;
     }
 
-    protected synchronized ActualCacheEntry<SqlQuery> loadQuery(String aAppElementId, Consumer<ActualCacheEntry<SqlQuery>> onSuccess, Consumer<Exception> onFailure) throws ParserConfigurationException, Exception {
+    public synchronized SqlQuery loadQuery(String aAppElementId) throws Exception {
         if (aAppElementId == null) {
             throw new NullPointerException(CANT_LOAD_NULL_MSG);
         }
         Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
-        if (onSuccess != null) {
-            appCache.get(aAppElementId, (ApplicationElement appElement) -> {
-                try {
-                    onSuccess.accept(appElementToSqlQuery(appElement));
-                } catch (Exception ex) {
-                    if (onFailure != null) {
-                        onFailure.accept(ex);
-                    }
-                }
-            }, onFailure);
-            return null;
-        } else {
-            ApplicationElement appElement = appCache.get(aAppElementId, null, null);
-            return appElementToSqlQuery(appElement);
-        }
+        AppElementFiles queryFiles = indexer.nameToFiles(aAppElementId);
+        SqlQuery res = filesToSqlQuery(aAppElementId, queryFiles);
+        return res;
     }
 
-    protected ActualCacheEntry<SqlQuery> appElementToSqlQuery(ApplicationElement aAppElement) throws Exception {
-        if (aAppElement != null && aAppElement.getType() == ClientConstants.ET_QUERY) {// Ordinary queries, stored in application database
-            Document queryDom = aAppElement.getContent();
-            if (queryDom != null) {
-                QueryDocument queryDoc = XmlDom2QueryDocument.transform(client, aAppElement.getId(), queryDom);
-                QueryModel model = queryDoc.getModel();
-                SqlQuery query = queryDoc.getQuery();
-                putRolesMutatables(query);
-                List<StoredFieldMetadata> additionalFieldsMetadata = queryDoc.getAdditionalFieldsMetadata();
-                String sqlText = query.getSqlText();
-                if (sqlText != null && !sqlText.isEmpty()) {
-                    if (query.getFullSqlText() != null && !query.getFullSqlText().isEmpty()) {
-                        sqlText = query.getFullSqlText();
-                    }
-                    try {
-                        String compiledSqlText = compileSubqueries(sqlText, model);
-                        try {
-                            putParametersMetadata(query, model);
-                            if (putTableFieldsMetadata(query)) {
-                                putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
-                            } else {
-                                query.setCommand(true);
-                            }
-                        } finally {
-                            query.setSqlText(compiledSqlText);
-                        }
-                    } finally {
-                        query.setTitle(aAppElement.getName());
-                        query.getFields().setTableDescription(query.getTitle());
-                    }
-                }
-                return new ActualCacheEntry<>(query, aAppElement.getTxtContentLength(), aAppElement.getTxtCrc32());
-            } else {
-                throw new IllegalArgumentException(String.format(CONTENT_EMPTY_MSG, aAppElement.getId()));
+    protected SqlQuery filesToSqlQuery(String aName, AppElementFiles aFiles) throws Exception {
+        QueryDocument queryDoc = QueryDocument.parse(aName, aFiles);
+        QueryModel model = queryDoc.getModel();
+        SqlQuery query = queryDoc.getQuery();
+        putRolesMutatables(query);
+        List<StoredFieldMetadata> additionalFieldsMetadata = queryDoc.getAdditionalFieldsMetadata();
+        String sqlText = query.getSqlText();
+        if (sqlText != null && !sqlText.isEmpty()) {
+            if (query.getFullSqlText() != null && !query.getFullSqlText().isEmpty()) {
+                sqlText = query.getFullSqlText();
             }
-        } else {
-            return null;// It is regular situation that query is absent. Just return null. WARNING: don't throw an exception!
+            try {
+                String compiledSqlText = compileSubqueries(sqlText, model);
+                try {
+                    putParametersMetadata(query, model);
+                    if (putTableFieldsMetadata(query)) {
+                        putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
+                    } else {
+                        query.setCommand(true);
+                    }
+                } finally {
+                    query.setSqlText(compiledSqlText);
+                }
+            } finally {
+                query.setTitle(aName);
+                query.getFields().setTableDescription(query.getTitle());
+            }
         }
-    }
-    /**
-     * WARNING! Operating with dynamicQueries map is synchronized in
-     * innerJoinQueryTable() and loadQuery() methods. If semantics is to be
-     * changed, than you should review the synchronization scheme!!!
-     */
-    protected Map<String, SqlQuery> dynamicQueries = new HashMap<>();
-    /*
-     public synchronized void innerJoinQueryTable(String newQueryId, String leftQueryId, String rightTableName, String leftFieldName, String rightFieldName) throws Exception {
-     if (!dynamicQueries.containsKey(newQueryId)) {
-     ActualCacheEntry<SqlQuery> leftSqlQueryEntry = loadQuery(leftQueryId);
-     SqlQuery leftSqlQuery = leftSqlQueryEntry != null ? leftSqlQueryEntry.getValue() : null;
-     DbMetadataCache dbMdCache = client.getDbMetadataCache(null);
-     Fields rightTableFields = dbMdCache.getTableMetadata(rightTableName);
-
-     if (leftSqlQuery != null && rightTableFields != null) {
-     Logger.getLogger(this.getClass().getName()).finer(String.format(INEER_JOIN_CONSTRUCTING_MSG, leftQueryId, rightTableName));
-     SqlQuery result = new SqlQuery(client);
-     result.setEntityId(IDGenerator.genID().toString());
-     result.setDbId(leftSqlQuery.getDbId());
-     String leftQueryName = ClientConstants.STORED_QUERY_REF_PREFIX + leftQueryId.toString();
-     String leftQueryAlias = leftQueryId.toString();
-     // Text for sql query is generated
-     String selectClause = "*";
-     if (!rightTableFields.isEmpty()) {
-     selectClause = "";
-     for (int i = 1; i <= rightTableFields.getFieldsCount(); i++) {
-     Field f = rightTableFields.get(i);
-     if (!selectClause.isEmpty()) {
-     selectClause += ", ";
-     }
-     selectClause += rightTableName + "." + f.getName();
-     }
-     }
-     String sqlText = String.format(INNER_JOIN_CONSTRUCTION, selectClause, leftQueryName, leftQueryAlias, rightTableName, leftQueryAlias, leftFieldName, rightTableName, rightFieldName);
-     // model for sql query join and parameters is generated
-     QueryModel rootModel = new QueryModel(client);
-     rootModel.setDbId(result.getDbId());
-     QueryEntity leftQueryEntity = rootModel.newGenericEntity();
-     leftQueryEntity.setQueryId(leftQueryId);
-     leftQueryEntity.setAlias(leftQueryAlias);
-
-     rootModel.addEntity(leftQueryEntity);
-     QueryEntity rightTableEntity = rootModel.newGenericEntity();
-     rightTableEntity.setTableName(rightTableName);
-     rootModel.addEntity(rightTableEntity);
-     Relation<QueryEntity> joinRel = new Relation<>(leftQueryEntity, leftQueryEntity.getFields().get(leftFieldName), rightTableEntity, rightTableEntity.getFields().get(rightFieldName));
-     rootModel.addRelation(joinRel);
-
-     Parameters rootParams = rootModel.getParameters();
-     Parameters leftQueryParams = leftSqlQuery.getParameters();
-     for (int i = 1; i <= leftQueryParams.getParametersCount(); i++) {
-     Parameter rootParam = new Parameter(leftQueryParams.get(i));
-     assert rootParam.getName().equals(leftQueryParams.get(i).getName());
-     rootParams.add(rootParam);
-     Relation<QueryEntity> rel = new Relation<>(rootModel.getParametersEntity(), rootParam, leftQueryEntity, leftQueryEntity.getQuery().getParameters().get(rootParam.getName()));
-     rootModel.addRelation(rel);
-     }
-     result.setSqlText(compileSubqueries(sqlText, rootModel));
-     //result.setMainTable(rightTableName);
-     result.setFields(rightTableEntity.getFields());
-     putParametersMetadata(result, rootModel);
-     result.setEntityId(newQueryId);
-     dynamicQueries.put(newQueryId, result);
-     }
-     }
-     }
-     */
-
-    /**
-     * Returns a copy of cached SqlQuery instance. Takes into account, that
-     * underlying application element might be changed since last request. In
-     * such case it will be removed from cached and re-built and re-cached.
-     *
-     * @param aAppElementId Underlying application element identiifer.
-     * @return Cached instance of SqlQuery.
-     * @throws Exception
-     */
-    public SqlQuery getQuery(String aAppElementId, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        return getQuery(aAppElementId, true, onSuccess, onFailure);
-    }
-
-    /**
-     * Returns cached instance of SqlQuery. Takes into account, that underlying
-     * application element might be changed since last request. In such case it
-     * will be removed from cached and rebuilded and recached.
-     *
-     * @param aAppElementId Underlying application element identiifer.
-     * @param aCopy True if client code needs a copy of the query, false
-     * otherwise. Default is true.
-     * @param onSuccess
-     * @param onFailure
-     * @return Cached instance of SqlQuery.
-     * @throws Exception
-     */
-    public SqlQuery getQuery(String aAppElementId, boolean aCopy, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (onSuccess != null) {
-            queriesCache.get(aAppElementId, (ActualCacheEntry<SqlQuery> entry) -> {
-                onSuccess.accept(entry != null && entry.getValue() != null ? (aCopy ? entry.getValue().copy() : entry.getValue()) : null);
-            }, onFailure);
-            return null;
-        } else {
-            ActualCacheEntry<SqlQuery> entry = queriesCache.get(aAppElementId, null, null);
-            // It's significant to copy the query.
-            return entry != null && entry.getValue() != null ? (aCopy ? entry.getValue().copy() : entry.getValue()) : null;
-        }
-        /**
-         * Otherwise we will get situation with same query instance across
-         * multiple entities or across multiple calls to execute query request
-         * handler. Such situations are VERY HARMFUL for parameters behaviour
-         * and etc.
-         */
-    }
-
-    public void clearCache(String aAppElementId) throws Exception {
-        queriesCache.remove(aAppElementId);
-    }
-
-    public void clearCache() throws Exception {
-        queriesCache.clear();
+        return query;
     }
 
     /**
@@ -364,18 +155,16 @@ public class StoredQueryFactory {
      *
      * @param aClient ClientIntf instance, responsible for interacting with
      * appliction database.
-     * @param aAppCache Application elements cache. Used to obtain application
-     * queries data.
+     * @param aQueriesProxy
+     * @param aIndexer
      * @throws java.lang.Exception
      * @see DbClientIntf
      */
-    public StoredQueryFactory(DbClient aClient, AppCache aAppCache) throws Exception {
+    public StoredQueryFactory(DbClient aClient, LocalQueriesProxy aQueriesProxy, ApplicationSourceIndexer aIndexer) throws Exception {
+        super();
         client = aClient;
-        if (aAppCache == null) {
-            throw new IllegalArgumentException("StoredQueryFactory needs an application cache. It can't be null");
-        }
-        appCache = aAppCache;
-        queriesCache = new StoredQueryCache();
+        indexer = aIndexer;
+        subQueriesProxy = aQueriesProxy;
     }
 
     /**
@@ -383,17 +172,16 @@ public class StoredQueryFactory {
      *
      * @param aClient ClientIntf instance, responsible for interacting with
      * appliction database.
-     * @param aAppCache Application elements cache. Used to obtain application
-     * queries data.
+     * @param aQueriesProxy
+     * @param aIndexer
      * @param aPreserveDatasources If true, aliased names of tables
      * (datasources) are setted to resulting fields in query compilation
      * process. If false, query's virtual table name (e.g. q76067e72752) is
      * setted to resulting fields.
      * @throws java.lang.Exception
-     * @see ClientIntf
      */
-    public StoredQueryFactory(DbClient aClient, AppCache aAppCache, boolean aPreserveDatasources) throws Exception {
-        this(aClient, aAppCache);
+    public StoredQueryFactory(DbClient aClient, LocalQueriesProxy aQueriesProxy, ApplicationSourceIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
+        this(aClient, aQueriesProxy, aIndexer);
         preserveDatasources = aPreserveDatasources;
     }
 
@@ -440,24 +228,19 @@ public class StoredQueryFactory {
                     }
                     Matcher subQueryMatcher = subQueryPattern.matcher(processedSql);
                     if (subQueryMatcher.find()) {
-                        ActualCacheEntry<SqlQuery> entry = queriesCache.get(entity.getQueryId(), null, null);
-                        if (entry != null) {
-                            SqlQuery subQuery = entry.getValue();
-                            if (subQuery != null && subQuery.getSqlText() != null) {
-                                String subQueryText = subQuery.getSqlText();
-                                subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
+                        SqlQuery subQuery = subQueriesProxy.getQuery(entity.getQueryId(), null, null);
+                        if (subQuery != null && subQuery.getSqlText() != null) {
+                            String subQueryText = subQuery.getSqlText();
+                            subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
 
-                                String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
-                                String sqlToInsert = " (" + subQueryText + ") ";
-                                String sqlTail = processedSql.substring(subQueryMatcher.end());
-                                if (tAlias != null && !tAlias.isEmpty()) {
-                                    processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
-                                } else {
-                                    processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
-                                }
+                            String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
+                            String sqlToInsert = " (" + subQueryText + ") ";
+                            String sqlTail = processedSql.substring(subQueryMatcher.end());
+                            if (tAlias != null && !tAlias.isEmpty()) {
+                                processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
+                            } else {
+                                processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
                             }
-                        } else {
-                            throw new NoSuchEntityException(entity.getQueryId());
                         }
                     }
                 }
@@ -484,7 +267,7 @@ public class StoredQueryFactory {
     private void putStoredTableFieldsMetadata(SqlQuery aQuery, List<StoredFieldMetadata> storedMetadata) {
         Fields fields = aQuery.getFields();
         if (fields != null) {
-            for (StoredFieldMetadata addition : storedMetadata) {
+            storedMetadata.stream().forEach((addition) -> {
                 Field queryField = fields.get(addition.getBindedColumn());
                 if (queryField != null) {
                     if (addition.description != null && !addition.description.isEmpty()) {
@@ -494,7 +277,7 @@ public class StoredQueryFactory {
                         queryField.setTypeInfo(addition.getTypeInfo());
                     }
                 }
-            }
+            });
         }
     }
 
@@ -534,11 +317,11 @@ public class StoredQueryFactory {
                     case JsDoc.Tag.WRITABLE_TAG:
                         Set<String> writables = new HashSet<>();
                         if (tag.getParams() != null) {
-                            for (String writable : tag.getParams()) {
+                            tag.getParams().stream().forEach((writable) -> {
                                 if (writable != null) {
                                     writables.add(writable.toLowerCase());
                                 }
-                            }
+                            });
                         }
                         aQuery.setWritable(writables);
                         break;
@@ -574,9 +357,9 @@ public class StoredQueryFactory {
                 SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
                 Fields queryFields = aQuery.getFields();
                 if (queryFields != null) {
-                    for (Field field : queryFields.toCollection()) {
+                    queryFields.toCollection().stream().forEach((field) -> {
                         driver.getTypesResolver().resolve2Application(field);
-                    }
+                    });
                 }
 
                 return true;
@@ -611,9 +394,9 @@ public class StoredQueryFactory {
                     } else if (source instanceof SubSelect) {
                         Fields subFields = processSubQuery(aQuery, (SubSelect) source);
                         Fields destFields = aQuery.getFields();
-                        for (Field field : subFields.toCollection()) {
+                        subFields.toCollection().stream().forEach((field) -> {
                             destFields.add(field);
-                        }
+                        });
                     }
                 }
             } else if (sItem instanceof AllTableColumns) {// t.*
@@ -625,9 +408,9 @@ public class StoredQueryFactory {
                 } else if (source instanceof SubSelect) {
                     Fields subFields = processSubQuery(aQuery, (SubSelect) source);
                     Fields destFields = aQuery.getFields();
-                    for (Field field : subFields.toCollection()) {
+                    subFields.toCollection().stream().forEach((field) -> {
                         destFields.add(field);
-                    }
+                    });
                 }
             } else {
                 assert sItem instanceof SelectExpressionItem;
@@ -689,9 +472,9 @@ public class StoredQueryFactory {
     /**
      * Returns cached table fields if <code>aTablyName</code> is a table name or
      * query fields if <code>aTablyName</code> is query tably name in format:
-     * #<id>.
+     * #&lt;id&gt;.
      *
-     * @param aDbId Databse identifier, the query belongs to. That database is
+     * @param aDbId Database identifier, the query belongs to. That database is
      * query-inner table metadata source, but query is stored in application.
      * @param aTablyName Table or query tably name.
      * @return Fields instance.
@@ -712,9 +495,8 @@ public class StoredQueryFactory {
         if (tableFields != null) {// Tables have a higher priority in soft reference case
             return tableFields;
         } else {
-            ApplicationElement testAppElement = appCache.get(aTablyName, null, null);
-            if (testAppElement != null && testAppElement.getType() == ClientConstants.ET_QUERY) {
-                SqlQuery query = queriesCache.get(aTablyName, null, null).getValue();
+            SqlQuery query = loadQuery(aTablyName);
+            if (query != null) {
                 return query.getFields();
             } else {
                 return null;

@@ -287,16 +287,6 @@ public class MsSqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4MtdEntitiesParentsList(String aChildParamName) {
-        return "select * from buildMtdEntitiesParents(:" + aChildParamName + ")";
-    }
-
-    @Override
-    public String getSql4MtdEntitiesChildrenList(String aParentParamName) {
-        return "select * from buildMtdEntitiesChildrenList(:" + aParentParamName + ")";
-    }
-
-    @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
         String fullName = makeFullName(aSchemaName, aTableName);
         return String.format(COMMIT_DDL_CLAUSE, "drop table " + fullName);
@@ -371,11 +361,6 @@ public class MsSqlSqlDriver extends SqlDriver {
         List<ForeignKeySpec> fkList = new ArrayList();
         fkList.add(aFk);
         return getSql4CreateFkConstraint(aSchemaName, fkList);
-    }
-
-    @Override
-    public String getApplicationInitResourceName() {
-        return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitApp.sql";
     }
 
     @Override

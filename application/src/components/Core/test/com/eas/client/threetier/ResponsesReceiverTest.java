@@ -8,7 +8,7 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.platypus.PlatypusNativeConnection;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.binary.PlatypusResponseWriter;
+import com.eas.client.threetier.platypus.PlatypusResponseWriter;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -10,12 +10,11 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.cache.FreqCache;
 import com.eas.client.exceptions.UnboundSqlParameterException;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.queries.PlatypusScriptedFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.scripts.PlatypusScriptedResource;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.scripts.store.Dom2ModelDocument;
 import com.eas.script.ScriptUtils;
 import java.util.Collection;
@@ -173,7 +172,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     };
 
     protected JSObject createModule(String aModuleId) throws Exception {
-        PlatypusScriptedResource.executeScriptResource(aModuleId);
+        ScriptedResource.executeScriptResource(aModuleId);
         return ScriptUtils.createModule(aModuleId);
     }
 

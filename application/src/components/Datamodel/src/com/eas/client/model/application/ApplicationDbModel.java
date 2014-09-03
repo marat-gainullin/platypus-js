@@ -7,7 +7,7 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DbClient;
-import com.eas.client.model.StoredQueryFactory;
+import com.eas.client.model.query.StoredQueryFactory;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.script.NoPublisherException;
@@ -69,19 +69,19 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @Override
     public int commit() throws Exception {
-        for (List<Change> changeLog : changeLogs.values()) {
-            for (Change change : changeLog) {
+        changeLogs.values().stream().forEach((changeLog) -> {
+            changeLog.stream().forEach((change) -> {
                 change.trusted = true;
-            }
-        }
+            });
+        });
         return client.commit(changeLogs);
     }
 
     @Override
     public void saved() throws Exception {
-        for (List<Change> changeLog : changeLogs.values()) {
+        changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
-        }
+        });
         fireCommited();
     }
 
@@ -163,7 +163,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "/**\n"
             + "* Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
             + "* @param sqlText SQL text for the new entity.\n"
-            + "* @param dbId Optional. the concrete database ID (optional).\n"
+            + "* @param datasourceName. The specific databsource name (optional).\n"
             + "* @return an entity instance.\n"
             + "*/";
 

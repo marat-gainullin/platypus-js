@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.binary;
+package com.eas.client.threetier.platypus;
 
 import com.eas.proto.CoreTags;
 
@@ -33,6 +33,8 @@ public class RequestsTags extends CoreTags{
     //ExecuteServerModuleMethodRequest
     //SetServerModulePropertyRequest
     //GetServerModulePropertyRequest
+    //ResourceRequest
+    //ModuleStructureRequest
     public static final int TAG_MODULE_NAME = 10;
     public static final int TAG_METHOD_NAME = 11;
     public static final int TAG_ARGUMENT_TYPE = 12;
@@ -58,16 +60,8 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_SQL_PARAMETER_MODE = 26;
     public static final int TAG_SQL_PARAMETER_NAME = 27;
     public static final int TAG_SQL_PARAMETER_DESCRIPTION = 28;
-    //OutHashRequest
-    public static final int TAG_USERNAME = 29;
     //IsUserInRoleRequest
     public static final int TAG_ROLE_NAME = 30;
-    //AppElementRequest
-    //IsAppElementActualRequest
-    public static final int TAG_APP_ELEMENT_ID = 31;
-    //IsAppElementActualRequest
-    public static final int TAG_TEXT_SIZE = 32;
-    public static final int TAG_TEST_CRC32 = 33;
     /**
      * ******************* responses tags *************************************
      */
@@ -84,7 +78,7 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_FILE_NAME = 42;
     public static final int TAG_FORMAT = 43;
     public static final int TAG_RESULT_VALUE = 44;
-    //RowsetResponse
+    //ExecuteQueryRequest.Response
     public static final int TAG_ROWSET = 46;
     public static final int TAG_PARAMETERS = 47;
     public static final int TAG_UPDATE_COUNT = 48;
@@ -97,25 +91,28 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_ROLE = 52;
     //IsAppElementActualRequest.Response
     public static final int TAG_ACTUAL = 53;
-    //CreateServerModuleResponse
-    public static final int TAG_MODULE_ID = 55;
     public static final int TAG_MODULE_PERMITTED = 56;
     public static final int TAG_MODULE_FUNCTION_NAMES = 57;
     public static final int TAG_MODULE_FUNCTION_NAME = 58;
     //CommitRequest.Response
     public static final int UPDATED_TAG = 59;
-    //AppQueryResponse
+    //AppQueryRequest.Response
     public static final int TAG_TITLE = 60;
     public static final int TAG_DML = 61;
     public static final int TAG_FIELDS = 62;
     public static final int TAG_QUERY_SQL_PARAMETER = 63;
     public static final int TAG_READ_ROLE = 64;
     public static final int TAG_WRITE_ROLE = 65;
-    //AppElementRequest.Response
-    public static final int TAG_NAME = 66;
-    public static final int TAG_TYPE = 67;
-    public static final int TAG_TEXT = 68;
-    public static final int TAG_TEXT_LENGTH = 69;
-    public static final int TAG_TEXT_CRC32 = 70;
-    public static final int TAG_RESOURCE = 71;
+    //ResourceRequest
+    //ResourceRequest.Response
+    public static final int TAG_TIMESTAMP = 66;
+    //ResourceRequest.Response
+    public static final int TAG_RESOUCRE_CONTENT = 67;
+    //ResourceRequest
+    //ModuleStructureRequest.Response
+    public static final int TAG_RESOURCE_NAME = 68;
+    //ModuleStructureRequest.Response
+    public static final int TAG_MODULE_CLIENT_DEPENDENCY = 69;
+    public static final int TAG_MODULE_SERVER_DEPENDENCY = 70;
+    public static final int TAG_MODULE_QUERY_DEPENDENCY = 71;
 }

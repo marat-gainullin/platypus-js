@@ -8,6 +8,7 @@ import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
+import com.bearsoft.rowset.exceptions.FlowProviderPagedException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -16,6 +17,8 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.sql.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,13 +36,16 @@ import javax.sql.DataSource;
 public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
 
     protected static final Logger queriesLogger = Logger.getLogger(JdbcFlowProvider.class.getName());
+
     protected DataSource dataSource;
     protected Converter converter;
     protected Fields expectedFields;
-    protected ResultSet lowLevelResults = null;
-    protected Connection lowLevelConnection = null;
-    protected PreparedStatement lowLevelStatement = null;
-    protected boolean procedure = false;
+    protected ExecutorService dataPuller;
+    protected boolean procedure;
+
+    protected ResultSet lowLevelResults;
+    protected Connection lowLevelConnection;
+    protected PreparedStatement lowLevelStatement;
 
     /**
      * A flow dataSource, intended to support jdbc data sources.
@@ -49,6 +55,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @param aDataSource A DataSource instance, that would supply resources for
      * use them by flow dataSource in single operations, like retriving data of
      * applying data changes.
+     * @param aDataPuller
      * @param aClause A sql clause, dataSource should use to achieve
      * PreparedStatement instance to use it in the result set querying process.
      * @param aExpectedFields
@@ -56,9 +63,10 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * a jdbc datasource.
      * @see DataSource
      */
-    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, Converter aConverter, String aClause, Fields aExpectedFields) {
+    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, ExecutorService aDataPuller, Converter aConverter, String aClause, Fields aExpectedFields) {
         super(aJdbcSourceTag, aClause);
         dataSource = aDataSource;
+        dataPuller = aDataPuller;
         converter = aConverter;
         expectedFields = aExpectedFields;
         assert dataSource != null : "Flow provider can't exist without a data source";
@@ -83,17 +91,36 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         if (!isPaged() || lowLevelResults == null) {
             throw new FlowProviderNotPagedException(BAD_NEXTPAGE_REFRESH_CHAIN_MSG);
         } else if (converter != null) {
-            try {
+            JdbcReader reader = new JdbcReader(converter, expectedFields);
+            Callable<Rowset> doWork = () -> {
                 try {
-                    JdbcReader reader = new JdbcReader(converter, expectedFields);
                     return reader.readRowset(lowLevelResults, pageSize);
+                } catch (SQLException ex) {
+                    throw new FlowProviderFailedException(ex);
                 } finally {
                     if (lowLevelResults.isAfterLast()) {
                         endPaging();
                     }
                 }
-            } catch (SQLException ex) {
-                throw new FlowProviderFailedException(ex);
+            };
+            if (onSuccess != null) {
+                dataPuller.submit(() -> {
+                    try {
+                        Rowset rs = doWork.call();
+                        try {
+                            onSuccess.accept(rs);
+                        } catch (Exception ex) {
+                            Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } catch (Exception ex) {
+                        if (onFailure != null) {
+                            onFailure.accept(ex);
+                        }
+                    }
+                });
+                return null;
+            } else {
+                return doWork.call();
             }
         } else {
             throw new FlowProviderFailedException(CONVERTER_MISSING_MSG);
@@ -136,118 +163,138 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             assert isPaged();
             // Let's abort paging process
             endPaging();
-            //throw new FlowProviderPagedException(BAD_REFRESH_NEXTPAGE_CHAIN_MSG);
         }
         if (converter != null) {
-            String sqlClause = clause;
-            if (isUndefinedInParameters(aParams)) {
-                sqlClause = RowsetUtils.makeQueryMetadataQuery(sqlClause);
-            }
-            Connection connection = dataSource.getConnection();
-            if (connection != null) {
-                try {
-                    PreparedStatement stmt = getFlowStatement(connection, sqlClause);
-                    if (stmt != null) {
-                        try {
-                            prepareConnection(connection);
+            Callable<Rowset> doWork = () -> {
+                String sqlClause = clause;
+                if (isUndefinedInParameters(aParams)) {
+                    sqlClause = RowsetUtils.makeQueryMetadataQuery(sqlClause);
+                }
+                Connection connection = dataSource.getConnection();
+                if (connection != null) {
+                    try {
+                        PreparedStatement stmt = getFlowStatement(connection, sqlClause);
+                        if (stmt != null) {
                             try {
-                                for (int i = 1; i <= aParams.getParametersCount(); i++) {
-                                    Parameter param = aParams.get(i);
-                                    Object paramValue = param.getValue();
-                                    if (paramValue == RowsetUtils.UNDEFINED_SQL_VALUE) {
-                                        paramValue = null;
-                                    }
-                                    if (converter != null) {
-                                        if (paramValue != null) {
-                                            converter.convert2JdbcAndAssign(paramValue, param.getTypeInfo(), null, i, stmt);
+                                prepareConnection(connection);
+                                try {
+                                    for (int i = 1; i <= aParams.getParametersCount(); i++) {
+                                        Parameter param = aParams.get(i);
+                                        Object paramValue = param.getValue();
+                                        if (paramValue == RowsetUtils.UNDEFINED_SQL_VALUE) {
+                                            paramValue = null;
+                                        }
+                                        if (converter != null) {
+                                            if (paramValue != null) {
+                                                converter.convert2JdbcAndAssign(paramValue, param.getTypeInfo(), null, i, stmt);
+                                            } else {
+                                                try {
+                                                    stmt.setNull(i, param.getTypeInfo().getSqlType());
+                                                } catch (SQLException ex) {
+                                                    stmt.setNull(i, param.getTypeInfo().getSqlType(), param.getTypeInfo().getSqlTypeName());
+                                                }
+                                            }
                                         } else {
-                                            try {
-                                                stmt.setNull(i, param.getTypeInfo().getSqlType());
-                                            } catch (SQLException ex) {
-                                                stmt.setNull(i, param.getTypeInfo().getSqlType(), param.getTypeInfo().getSqlTypeName());
+                                            stmt.setObject(i, paramValue, param.getTypeInfo().getSqlType());
+                                        }
+                                        if (procedure && (param.getMode() == ParameterMetaData.parameterModeOut
+                                                || param.getMode() == ParameterMetaData.parameterModeInOut)) {
+                                            assert stmt instanceof CallableStatement;
+                                            CallableStatement cStmt = (CallableStatement) stmt;
+                                            cStmt.registerOutParameter(i, param.getTypeInfo().getSqlType());
+                                        }
+                                    }
+
+                                    if (queriesLogger.isLoggable(Level.FINE)) {
+                                        queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n{1}", new Object[]{aParams.getParametersCount(), sqlClause});
+                                    }
+                                    ResultSet rs = null;
+                                    if (procedure) {
+                                        assert stmt instanceof CallableStatement;
+                                        CallableStatement cStmt = (CallableStatement) stmt;
+                                        cStmt.execute();
+                                        // let's return parameters
+                                        for (int i = 1; i <= aParams.getParametersCount(); i++) {
+                                            Parameter param = aParams.get(i);
+                                            if (param.getMode() == ParameterMetaData.parameterModeOut
+                                                    || param.getMode() == ParameterMetaData.parameterModeInOut) {
+                                                Object outedParamValue = converter.convert2RowsetCompatible(cStmt.getObject(i), param.getTypeInfo());
+                                                param.setValue(outedParamValue);
+                                            }
+                                        }
+                                        // let's return a ResultSet
+                                        rs = cStmt.getResultSet();
+                                    } else {
+                                        rs = stmt.executeQuery();
+                                    }
+                                    if (rs != null) {
+                                        try {
+                                            JdbcReader reader = new JdbcReader(converter, expectedFields);
+                                            return reader.readRowset(rs, pageSize);
+                                        } finally {
+                                            if (isPaged()) {
+                                                lowLevelResults = rs;
+                                                lowLevelStatement = stmt;
+                                                lowLevelConnection = connection;
+                                            } else {
+                                                rs.close();
                                             }
                                         }
                                     } else {
-                                        stmt.setObject(i, paramValue, param.getTypeInfo().getSqlType());
+                                        return new Rowset(new Fields());
                                     }
-                                    if (procedure && (param.getMode() == ParameterMetaData.parameterModeOut
-                                            || param.getMode() == ParameterMetaData.parameterModeInOut)) {
-                                        assert stmt instanceof CallableStatement;
-                                        CallableStatement cStmt = (CallableStatement) stmt;
-                                        cStmt.registerOutParameter(i, param.getTypeInfo().getSqlType());
-                                    }
-                                }
-
-                                if (queriesLogger.isLoggable(Level.FINE)) {
-                                    queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n{1}", new Object[]{aParams.getParametersCount(), sqlClause});
-                                }
-                                ResultSet rs = null;
-                                if (procedure) {
-                                    assert stmt instanceof CallableStatement;
-                                    CallableStatement cStmt = (CallableStatement) stmt;
-                                    cStmt.execute();
-                                    // let's return parameters
-                                    for (int i = 1; i <= aParams.getParametersCount(); i++) {
-                                        Parameter param = aParams.get(i);
-                                        if (param.getMode() == ParameterMetaData.parameterModeOut
-                                                || param.getMode() == ParameterMetaData.parameterModeInOut) {
-                                            Object outedParamValue = converter.convert2RowsetCompatible(cStmt.getObject(i), param.getTypeInfo());
-                                            param.setValue(outedParamValue);
-                                        }
-                                    }
-                                    // let's return a ResultSet
-                                    rs = cStmt.getResultSet();
-                                } else {
-                                    rs = stmt.executeQuery();
-                                }
-                                if (rs != null) {
+                                } catch (SQLException ex) {
                                     try {
-                                        JdbcReader reader = new JdbcReader(converter, expectedFields);
-                                        return reader.readRowset(rs, pageSize);
-                                    } finally {
-                                        if (isPaged()) {
-                                            lowLevelResults = rs;
-                                            lowLevelStatement = stmt;
-                                            lowLevelConnection = connection;
-                                        } else {
-                                            rs.close();
-                                        }
+                                        connection.rollback();
+                                        throw new FlowProviderFailedException(ex);
+                                    } catch (SQLException ex1) {
+                                        throw new FlowProviderFailedException(ex);
                                     }
-                                } else {
-                                    return new Rowset(new Fields());
-                                }
-                            } catch (SQLException ex) {
-                                try {
-                                    connection.rollback();
-                                    throw new FlowProviderFailedException(ex);
-                                } catch (SQLException ex1) {
-                                    throw new FlowProviderFailedException(ex);
+                                } finally {
+                                    assert dataSource != null; // since we've aquired a statement, dataSource must present.
+                                    unprepareConnection(connection);
                                 }
                             } finally {
-                                assert dataSource != null; // since we've aquired a statement, dataSource must present.
-                                unprepareConnection(connection);
+                                stmt.close();
                             }
-                        } finally {
-                            stmt.close();
+                        }
+                    } finally {
+                        if (!isPaged()) {
+                            // Paged connections can't be closed, because of ResultSet-s existance.
+                            connection.close();
+                        } else if (connection instanceof BearDatabaseConnection) {// Paged case
+                            // We no, that BearDatabaseConnection pool's underlying native jdbc connection
+                            // is never closed and so we know, that in the case we can safely close bear connection,
+                            // returning the resource into the resource pool.
+                            // Unfortunately, we can't do like this with J2EE pools.
+                            // A little hacky, but it's needed by paging process in designer.
+                            lowLevelStatement = null;
+                            connection.close();
+                            lowLevelConnection = null;
                         }
                     }
-                } finally {
-                    if (!isPaged()) {
-                        // Paged connections can't be closed, because of ResultSet-s existance.
-                        connection.close();
-                    } else if (connection instanceof BearDatabaseConnection) {// Paged case
-                        // We no, that Bear database connection pool's underlying native jdbc connection
-                        // is never closed and so we know, that in the case we can safely close bear connection,
-                        // returning the resource into the resource pool.
-                        // Unfortunately, we can't do like this with J2EE pools.
-                        // A little hacky, but it's needed by paging process in designers.
-                        lowLevelStatement = null;
-                        connection.close();
-                        lowLevelConnection = null;
-                    }
                 }
+                return null;
+            };
+            if (onSuccess != null) {
+                dataPuller.submit(() -> {
+                    try {
+                        Rowset rs = doWork.call();
+                        try {
+                            onSuccess.accept(rs);
+                        } catch (Exception ex) {
+                            Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } catch (Exception ex) {
+                        if (onFailure != null) {
+                            onFailure.accept(ex);
+                        }
+                    }
+                });
+                return null;
+            } else {
+                return doWork.call();
             }
-            return null;
         } else {
             throw new FlowProviderFailedException(CONVERTER_MISSING_MSG);
         }

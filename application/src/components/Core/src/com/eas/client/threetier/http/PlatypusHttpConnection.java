@@ -33,8 +33,9 @@ public class PlatypusHttpConnection extends PlatypusConnection implements HttpRe
         url = aUrl;
     }
 
-    public void setUrl(String aUrl) {
-        url = aUrl;
+    @Override
+    public String getUrl() {
+        return url;
     }
 
     @Override

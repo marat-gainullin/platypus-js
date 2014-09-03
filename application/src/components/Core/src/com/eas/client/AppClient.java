@@ -9,7 +9,6 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import java.util.List;
@@ -27,19 +26,6 @@ import javax.security.auth.login.LoginException;
 public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
 
     public String getUrl();
-
-    /**
-     * Returns PlatypusQuery instance, containing fields and parameters
-     * description. It returned without sql text and main table.
-     *
-     * @param aQueryId
-     * @param onSuccess
-     * @param onFailure
-     * @return PlatypusQuery instance.
-     * @throws java.lang.Exception
-     */
-    @Override
-    public PlatypusQuery getAppQuery(String aQueryId, Consumer<PlatypusQuery> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Logs in to application server.
@@ -131,7 +117,7 @@ public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception;
 
     /**
-     * Метод предназначен для исполнения DML запросов (insert, uddate, delete и
+     * Метод предназначен для исполнения DML запросов (insert, update, delete и
      * хранимых процедур).
      *
      * @param entityId Идентификатор сущности в базе данных приложения.
@@ -141,8 +127,4 @@ public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
     public void enqueueUpdate(String entityId, Parameters params) throws Exception;
 
     public boolean isUserInRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
-    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
-    public ApplicationElement getAppElement(String aAppelementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception;
 }

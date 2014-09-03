@@ -6,8 +6,6 @@
 package com.eas.client.threetier.platypus;
 
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.binary.PlatypusResponseReader;
-import com.eas.client.threetier.binary.RequestsTags;
 import com.eas.client.threetier.platypus.PlatypusNativeConnection;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.PlatypusResponsesFactory;

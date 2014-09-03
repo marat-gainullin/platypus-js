@@ -4,10 +4,12 @@
  */
 package com.eas.client.threetier.requests;
 
+import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.Query;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
+import java.util.Date;
 
 /**
  *
@@ -15,23 +17,33 @@ import com.eas.client.threetier.Requests;
  */
 public class AppQueryRequest extends Request {
 
-    protected String queryId;
+    protected String queryName;
+    protected Date timeStamp;
 
     public AppQueryRequest() {
         super(Requests.rqAppQuery);
     }
 
-    public AppQueryRequest(String aQueryId) {
+    public AppQueryRequest(String aQueryName, Date aTimeStamp) {
         this();
-        queryId = aQueryId;
+        queryName = aQueryName;
+        timeStamp = aTimeStamp;
     }
 
-    public String getQueryId() {
-        return queryId;
+    public String getQueryName() {
+        return queryName;
     }
 
-    public void setQueryId(String aValue) {
-        queryId = aValue;
+    public void setQueryName(String aValue) {
+        queryName = aValue;
+    }
+
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Date aValue) {
+        timeStamp = aValue;
     }
 
     @Override
@@ -42,18 +54,28 @@ public class AppQueryRequest extends Request {
     public static class Response extends com.eas.client.threetier.Response {
 
         protected Query appQuery;
+        protected Date timeStamp;
 
-        public Response(SqlQuery aAppQuery) {
+        public Response(SqlQuery aAppQuery, Date aTimeStamp) {
             super();
             appQuery = aAppQuery;
+            timeStamp = aTimeStamp;
         }
 
         public Query getAppQuery() {
             return appQuery;
         }
 
-        public void setAppQuery(Query aValue) {
+        public void setAppQuery(PlatypusQuery aValue) {
             appQuery = aValue;
+        }
+
+        public Date getTimeStamp() {
+            return timeStamp;
+        }
+
+        public void setTimeStamp(Date aValue) {
+            timeStamp = aValue;
         }
 
         @Override

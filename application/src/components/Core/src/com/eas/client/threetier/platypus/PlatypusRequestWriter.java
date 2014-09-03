@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.binary;
+package com.eas.client.threetier.platypus;
 
 import com.bearsoft.rowset.changes.serial.ChangesWriter;
 import com.bearsoft.rowset.metadata.Field;
@@ -12,21 +12,19 @@ import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Request;
-import com.eas.client.threetier.requests.AppElementChangedRequest;
-import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
+import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
@@ -77,9 +75,29 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
+    public void visit(ModuleStructureRequest rq) throws Exception {
+        ProtoWriter pw = new ProtoWriter(out);
+        pw.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleOrResourceName());
+        pw.flush();
+    }
+
+    @Override
     public void visit(AppQueryRequest rq) throws Exception {
         ProtoWriter pw = new ProtoWriter(out);
-        pw.put(RequestsTags.TAG_QUERY_ID, rq.getQueryId());
+        pw.put(RequestsTags.TAG_QUERY_ID, rq.getQueryName());
+        if (rq.getTimeStamp() != null) {
+            pw.put(RequestsTags.TAG_TIMESTAMP, rq.getTimeStamp());
+        }
+        pw.flush();
+    }
+
+    @Override
+    public void visit(ResourceRequest rq) throws Exception {
+        ProtoWriter pw = new ProtoWriter(out);
+        pw.put(RequestsTags.TAG_RESOURCE_NAME, rq.getResourceName());
+        if (rq.getTimeStamp() != null) {
+            pw.put(RequestsTags.TAG_TIMESTAMP, rq.getTimeStamp());
+        }
         pw.flush();
     }
 
@@ -132,31 +150,6 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         for (Object arg : rq.getArguments()) {
             writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ScriptUtils.toJson(arg));
         }
-        writer.flush();
-    }
-
-    @Override
-    public void visit(AppElementChangedRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        if (rq.getDatabaseId() != null) {
-            writer.put(RequestsTags.DATABASE_TAG, rq.getDatabaseId());
-        }
-        if (rq.getEntityId() != null) {
-            writer.put(RequestsTags.ENTITY_ID_TAG, rq.getEntityId());
-        }
-        writer.flush();
-    }
-
-    @Override
-    public void visit(DbTableChangedRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        if (rq.getDatabaseId() != null) {
-            writer.put(RequestsTags.DATABASE_TAG, rq.getDatabaseId());
-        }
-        if (rq.getSchema() != null) {
-            writer.put(RequestsTags.SCHEMA_NAME_TAG, rq.getSchema());
-        }
-        writer.put(RequestsTags.TABLE_NAME_TAG, rq.getTable());
         writer.flush();
     }
 
@@ -219,22 +212,6 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     public void visit(IsUserInRoleRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_ROLE_NAME, rq.getRoleName());
-        writer.flush();
-    }
-
-    @Override
-    public void visit(IsAppElementActualRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_APP_ELEMENT_ID, rq.getAppElementId());
-        writer.put(RequestsTags.TAG_TEXT_SIZE, rq.getTxtContentSize());
-        writer.put(RequestsTags.TAG_TEST_CRC32, rq.getTxtContentCrc32());
-        writer.flush();
-    }
-
-    @Override
-    public void visit(AppElementRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_APP_ELEMENT_ID, rq.getAppElementId());
         writer.flush();
     }
 }

@@ -2,32 +2,29 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.binary;
+package com.eas.client.threetier.platypus;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetReader;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
-import com.eas.client.threetier.requests.ErrorResponse;
-import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetReader;
-import com.eas.client.threetier.requests.AppElementChangedRequest;
-import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
+import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.IsAppElementActualRequest;
+import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
+import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
@@ -35,9 +32,9 @@ import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
 import com.eas.script.ScriptUtils;
-import com.eas.xml.dom.Source2XmlDom;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +52,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     public PlatypusResponseReader(byte[] aBytes) {
         this(aBytes, 0, aBytes.length);
     }
-    
+
     public PlatypusResponseReader(byte[] aBytes, int aOffset, int aSize) {
         super();
         bytes = aBytes;
@@ -87,8 +84,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(StartAppElementRequest.Response rsp) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (dom.containsChild(RequestsTags.TAG_APP_ELEMENT_ID)) {
-            rsp.setAppElementId(dom.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
+        if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+            rsp.setAppElementId(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
         }
     }
 
@@ -132,12 +129,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(IsAppElementActualRequest.Response rsp) throws Exception {
-        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        rsp.setActual(dom.containsChild(RequestsTags.TAG_ACTUAL));
-    }
-
-    @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         Object result = null;
@@ -159,17 +150,13 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(DbTableChangedRequest.Response rsp) throws Exception {
-    }
-
-    @Override
     public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         boolean permitted = false;
-        if (!input.containsChild(RequestsTags.TAG_MODULE_ID)) {
-            throw new ProtoReaderException("No module ID specified!");
+        if (!input.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+            throw new ProtoReaderException("No module name specified!");
         }
-        rsp.setModuleName(input.getChild(RequestsTags.TAG_MODULE_ID).getString());
+        rsp.setModuleName(input.getChild(RequestsTags.TAG_MODULE_NAME).getString());
         if (input.containsChild(RequestsTags.TAG_MODULE_PERMITTED)) {
             permitted = input.getChild(RequestsTags.TAG_MODULE_PERMITTED).getBoolean();
         }
@@ -192,71 +179,90 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
+    public void visit(ModuleStructureRequest.Response rsp) throws Exception {
+        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
+        Collection<ProtoNode> parts = dom.getChildren(RequestsTags.TAG_RESOURCE_NAME);
+        if (parts != null) {
+            for (ProtoNode node : parts) {
+                rsp.getStructure().add(node.getString());
+            }
+        }
+        Collection<ProtoNode> clientDependencies = dom.getChildren(RequestsTags.TAG_MODULE_CLIENT_DEPENDENCY);
+        if (clientDependencies != null) {
+            for (ProtoNode node : clientDependencies) {
+                rsp.getClientDependencies().add(node.getString());
+            }
+        }
+        Collection<ProtoNode> serverDependencies = dom.getChildren(RequestsTags.TAG_MODULE_SERVER_DEPENDENCY);
+        if (serverDependencies != null) {
+            for (ProtoNode node : serverDependencies) {
+                rsp.getServerDependencies().add(node.getString());
+            }
+        }
+        Collection<ProtoNode> queriesDependecies = dom.getChildren(RequestsTags.TAG_MODULE_QUERY_DEPENDENCY);
+        if (queriesDependecies != null) {
+            for (ProtoNode node : queriesDependecies) {
+                rsp.getQueryDependencies().add(node.getString());
+            }
+        }
+    }
+
+    @Override
     public void visit(AppQueryRequest.Response rsp) throws Exception {
-        PlatypusQuery appQuery = new PlatypusQuery(null);
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (!dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
-            throw new ProtoReaderException("Query is not specified");
-        }
-        if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
-            throw new ProtoReaderException("Query fields are not specified");
-        }
-        appQuery.setEntityId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
-        if (dom.containsChild(RequestsTags.TAG_DML)) {
-            appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
-        }
-        ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
-        if (titleNode != null) {
-            appQuery.setTitle(titleNode.getString());
-        }
-
-        BinaryRowsetReader rsReader = new BinaryRowsetReader();
-        Fields fields = rsReader.parseFieldsNode(dom.getChild(RequestsTags.TAG_FIELDS));
-        appQuery.setFields(fields);
-        List<ProtoNode> paramsNodes = dom.getChildren(RequestsTags.TAG_QUERY_SQL_PARAMETER);
-        for (ProtoNode node : paramsNodes) {
-            appQuery.getParameters().add(PlatypusRequestReader.readParameter(node));
-        }
-        List<ProtoNode> rolesNodes = dom.getChildren(RequestsTags.TAG_READ_ROLE);
-        if (rolesNodes != null) {
-            for (ProtoNode node : rolesNodes) {
-                appQuery.getReadRoles().add(node.getString());
+        if (dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
+            if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+                throw new NullPointerException("No query time stamp specified");
             }
-        }
-        rolesNodes = dom.getChildren(RequestsTags.TAG_WRITE_ROLE);
-        if (rolesNodes != null) {
-            for (ProtoNode node : rolesNodes) {
-                appQuery.getWriteRoles().add(node.getString());
+            rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+            PlatypusQuery appQuery = new PlatypusQuery(null);
+            if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
+                throw new ProtoReaderException("Query fields are not specified");
             }
-        }
-        rsp.setAppQuery(appQuery);
-    }
+            appQuery.setEntityId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+            if (dom.containsChild(RequestsTags.TAG_DML)) {
+                appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
+            }
+            ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
+            if (titleNode != null) {
+                appQuery.setTitle(titleNode.getString());
+            }
 
-    @Override
-    public void visit(AppElementRequest.Response rsp) throws Exception {
-        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (dom.containsChild(RequestsTags.TAG_APP_ELEMENT_ID)) {
-            ApplicationElement appElement = new ApplicationElement();
-            appElement.setId(dom.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
-            appElement.setType(dom.getChild(RequestsTags.TAG_TYPE).getInt());
-            appElement.setName(dom.getChild(RequestsTags.TAG_NAME).getString());
-            if (dom.containsChild(RequestsTags.TAG_RESOURCE)) {
-                ProtoNode resNode = dom.getChild(RequestsTags.TAG_RESOURCE);
-                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                bStream.write(resNode.getData(), resNode.getOffset(), resNode.getSize());
-                appElement.setBinaryContent(bStream.toByteArray());
-            } else {
-                if (dom.containsChild(RequestsTags.TAG_TEXT)) {
-                    appElement.setContent(Source2XmlDom.transform(dom.getChild(RequestsTags.TAG_TEXT).getString()));
+            BinaryRowsetReader rsReader = new BinaryRowsetReader();
+            Fields fields = rsReader.parseFieldsNode(dom.getChild(RequestsTags.TAG_FIELDS));
+            appQuery.setFields(fields);
+            List<ProtoNode> paramsNodes = dom.getChildren(RequestsTags.TAG_QUERY_SQL_PARAMETER);
+            for (ProtoNode node : paramsNodes) {
+                appQuery.getParameters().add(PlatypusRequestReader.readParameter(node));
+            }
+            List<ProtoNode> rolesNodes = dom.getChildren(RequestsTags.TAG_READ_ROLE);
+            if (rolesNodes != null) {
+                for (ProtoNode node : rolesNodes) {
+                    appQuery.getReadRoles().add(node.getString());
                 }
-                appElement.setTxtContentLength(dom.getChild(RequestsTags.TAG_TEXT_LENGTH).getLong());
-                appElement.setTxtCrc32(dom.getChild(RequestsTags.TAG_TEXT_CRC32).getLong());
             }
-            rsp.setAppElement(appElement);
+            rolesNodes = dom.getChildren(RequestsTags.TAG_WRITE_ROLE);
+            if (rolesNodes != null) {
+                for (ProtoNode node : rolesNodes) {
+                    appQuery.getWriteRoles().add(node.getString());
+                }
+            }
+            rsp.setAppQuery(appQuery);
         }
     }
 
     @Override
-    public void visit(AppElementChangedRequest.Response rsp) throws Exception {
+    public void visit(ResourceRequest.Response rsp) throws Exception {
+        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
+        if (dom.containsChild(RequestsTags.TAG_RESOUCRE_CONTENT)) {
+            if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+                throw new NullPointerException("No resource time stamp specified");
+            }
+            rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+            ByteArrayOutputStream st = new ByteArrayOutputStream();
+            ProtoNode dataNode = dom.getChild(RequestsTags.TAG_RESOUCRE_CONTENT);
+            st.write(dataNode.getData(), dataNode.getOffset(), dataNode.getSize());
+            rsp.setContent(st.toByteArray());
+        }
     }
 }

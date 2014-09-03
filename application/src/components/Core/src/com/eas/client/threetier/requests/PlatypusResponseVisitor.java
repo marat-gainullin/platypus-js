@@ -26,21 +26,17 @@ public interface PlatypusResponseVisitor {
 
     public void visit(IsUserInRoleRequest.Response rsp) throws Exception;
 
-    public void visit(IsAppElementActualRequest.Response rsp) throws Exception;
-
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception;
 
     public void visit(DisposeServerModuleRequest.Response rsp) throws Exception;
-
-    public void visit(DbTableChangedRequest.Response rsp) throws Exception;
 
     public void visit(CreateServerModuleRequest.Response rsp) throws Exception;
 
     public void visit(CommitRequest.Response rsp) throws Exception;
 
+    public void visit(ModuleStructureRequest.Response rsp) throws Exception;
+
+    public void visit(ResourceRequest.Response rsp) throws Exception;
+
     public void visit(AppQueryRequest.Response rsp) throws Exception;
-
-    public void visit(AppElementRequest.Response rsp) throws Exception;
-
-    public void visit(AppElementChangedRequest.Response rsp) throws Exception;
 }

@@ -85,6 +85,11 @@ public class PlatypusNativeConnection extends PlatypusConnection {
     }
 
     @Override
+    public String getUrl() {
+        return host + ":" + port;
+    }
+
+    @Override
     public void setLoginCredentials(String aUserName, String aPassword, String aSessionId) {
         requestEncoder.setSessionTicket(aSessionId);
         super.setLoginCredentials(aUserName, aPassword, aSessionId);

@@ -8,7 +8,6 @@ import com.bearsoft.rowset.metadata.*;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
-import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
@@ -127,15 +126,12 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                 }
                 readRelations();
                 final Runnable[] resolvers = relationsResolvers.toArray(new Runnable[]{});
-                Runnable relationsResolver = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (Runnable resolver : resolvers) {
-                            resolver.run();
-                        }
-                        // Let's check relations in our model for integrity
-                        aModel.checkRelationsIntegrity();
+                Runnable relationsResolver = () -> {
+                    for (Runnable resolver : resolvers) {
+                        resolver.run();
                     }
+                    // Let's check relations in our model for integrity
+                    aModel.checkRelationsIntegrity();
                 };
                 if (currentModel.getClient() != null) {
                     relationsResolver.run();

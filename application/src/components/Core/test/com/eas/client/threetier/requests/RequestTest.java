@@ -6,8 +6,8 @@ package com.eas.client.threetier.requests;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.binary.PlatypusRequestWriter;
-import com.eas.client.threetier.binary.RequestsTags;
+import com.eas.client.threetier.platypus.PlatypusRequestWriter;
+import com.eas.client.threetier.platypus.RequestsTags;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.proto.CoreTags;

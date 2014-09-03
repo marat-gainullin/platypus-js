@@ -327,16 +327,6 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4MtdEntitiesParentsList(String aChildParamName) {
-        return String.format(SQL_PARENTS_LIST, aChildParamName);
-    }
-
-    @Override
-    public String getSql4MtdEntitiesChildrenList(String aParentParamName) {
-        return String.format(SQL_CHILDREN_LIST, aParentParamName);
-    }
-
-    @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
         return "drop table " + makeFullName(aSchemaName, aTableName);
     }
@@ -528,11 +518,6 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public TypesResolver getTypesResolver() {
         return resolver;
-    }
-
-    @Override
-    public String getApplicationInitResourceName() {
-        return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitApp.sql";
     }
 
     @Override

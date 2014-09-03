@@ -19,6 +19,7 @@ import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,20 +36,58 @@ import org.xml.sax.SAXException;
  *
  * @author vv
  */
-public class DbMigrator extends BaseDeployer {
+public class DbMigrator {
 
     public static final String MTD_SNAPSHOT_MIGRATION_EXT = "xdm"; // NOI18N
     public static final String SQL_BATCH_MIGRATION_EXT = "batch"; // NOI18N
     protected static final String GET_CURRENT_DB_VERSION_SQL = "SELECT VERSION_VALUE FROM " // NOI18N
             + ClientConstants.T_MTD_VERSION;
     private static final String ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG = "Illegal versions records number - only one record allowed."; // NOI18N
+    protected static final String LOCKED_MSG = "Migrator is locked.";
+
+    protected DatabasesClient client;
+    protected boolean silentMode;
+    protected PrintWriter out = new PrintWriter(System.out, true);
+    protected PrintWriter err = new PrintWriter(System.err, true);
+    protected boolean busy;
     protected File dir;
 
     public DbMigrator(File aDir, DatabasesClient aClient) {
-        super(aClient);
+        super();
+        client = aClient;
         dir = aDir;
     }
 
+    /**
+     * Sets default messages output
+     *
+     * @param anOut Print destination
+     */
+    public void setOut(PrintWriter anOut) {
+        out = anOut;
+    }
+
+    /**
+     * Sets default error messages output
+     *
+     * @param anErr Print destination
+     */
+    public void setErr(PrintWriter anErr) {
+        err = anErr;
+    }
+
+    public void setSilentMode(boolean silent) {
+        silentMode = silent;
+    }
+
+    public boolean isSilentMode(boolean silent) {
+        return silentMode;
+    }
+
+    public boolean isBusy() {
+        return busy;
+    }
+    
     /**
      * Apply all required migrations to the database.
      *
@@ -56,7 +95,7 @@ public class DbMigrator extends BaseDeployer {
     public void applyMigrations() {
         synchronized (this) {
             if (busy) {
-                Logger.getLogger(Deployer.class.getName()).log(Level.WARNING, LOCKED_MSG);
+                Logger.getLogger(DbMigrator.class.getName()).log(Level.WARNING, LOCKED_MSG);
                 return;
             }
             busy = true;
@@ -84,7 +123,7 @@ public class DbMigrator extends BaseDeployer {
     public void createDbMetadataMigration() {
         synchronized (this) {
             if (busy) {
-                Logger.getLogger(Deployer.class.getName()).log(Level.WARNING, LOCKED_MSG);
+                Logger.getLogger(DbMigrator.class.getName()).log(Level.WARNING, LOCKED_MSG);
                 return;
             }
             busy = true;
@@ -118,7 +157,7 @@ public class DbMigrator extends BaseDeployer {
     public void createSqlMigration() {
         synchronized (this) {
             if (busy) {
-                Logger.getLogger(Deployer.class.getName()).log(Level.WARNING, LOCKED_MSG);
+                Logger.getLogger(DbMigrator.class.getName()).log(Level.WARNING, LOCKED_MSG);
                 return;
             }
             busy = true;
@@ -151,7 +190,7 @@ public class DbMigrator extends BaseDeployer {
     public void cleanup() {
         synchronized (this) {
             if (busy) {
-                Logger.getLogger(Deployer.class.getName()).log(Level.WARNING, LOCKED_MSG);
+                Logger.getLogger(DbMigrator.class.getName()).log(Level.WARNING, LOCKED_MSG);
                 return;
             }
             busy = true;
@@ -183,7 +222,7 @@ public class DbMigrator extends BaseDeployer {
         try {
             assert client != null;
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
-            Rowset rs = versionQuery.compile().executeQuery();
+            Rowset rs = versionQuery.compile().executeQuery(null, null);
             if (rs.size() != 1) {
                 throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
             }
@@ -200,7 +239,7 @@ public class DbMigrator extends BaseDeployer {
             assert client != null;
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
             versionQuery.setEntityId(ClientConstants.T_MTD_VERSION);
-            Rowset rs = versionQuery.compile().executeQuery();
+            Rowset rs = versionQuery.compile().executeQuery(null, null);
             if (rs.size() != 1) {
                 throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
             }

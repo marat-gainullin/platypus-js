@@ -11,9 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -110,7 +107,7 @@ public abstract class FreqCache<K, V> {
         return aKey;
     }
 
-    public V get(K aKey, Consumer<V> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public V get(K aKey) throws Exception {
         K aId = transformKey(aKey);
         V element = null;
         boolean contains;
@@ -120,62 +117,21 @@ public abstract class FreqCache<K, V> {
                 element = entries.get(aId).value;
             }
         }
-        if (onSuccess != null) {
-            try {
-                if (contains) {
-                    synchronized (lock) {
-                        if (entries.containsKey(aId)) {
-                            CacheEntry entry = entries.get(aId);
-                            entry.getCounter++;
-                            element = entry.value; // Probably it's not nessasary
-                        } else if (element != null) {
-                            putEntry(new CacheEntry(aId, element));
-                        }
-                        shrink();
-                        onSuccess.accept(element);
-                    }
-                } else {
-                    // Get it from somewhere            
-                    getNewEntry(aKey, (V aElement) -> {
-                        synchronized (lock) {
-                            try {
-                                if (entries.containsKey(aId)) {
-                                    CacheEntry entry = entries.get(aId);
-                                    entry.getCounter++;
-                                } else if (aElement != null) {
-                                    putEntry(new CacheEntry(aId, aElement));
-                                }
-                                shrink();
-                                onSuccess.accept(aElement);
-                            } catch (Exception ex) {
-                                Logger.getLogger(FreqCache.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    }, onFailure);
-                }
-            } catch (Exception ex) {
-                if (onFailure != null) {
-                    onFailure.accept(ex);
-                }
-            }
-            return null;
-        } else {
-            if (!contains) {
-                // Get it from somewhere            
-                element = getNewEntry(aKey, null, null);
-            }
-            synchronized (lock) {
-                if (entries.containsKey(aId)) {
-                    CacheEntry entry = entries.get(aId);
-                    entry.getCounter++;
-                    element = entry.value; // Probably it's not nessasary
-                } else if (element != null) {
-                    putEntry(new CacheEntry(aId, element));
-                }
-                shrink();
-            }
-            return element;
+        if (!contains) {
+            // Get it from somewhere            
+            element = getNewEntry(aKey);
         }
+        synchronized (lock) {
+            if (entries.containsKey(aId)) {
+                CacheEntry entry = entries.get(aId);
+                entry.getCounter++;
+                element = entry.value; // Probably it's not nessasary
+            } else if (element != null) {
+                putEntry(new CacheEntry(aId, element));
+            }
+            shrink();
+        }
+        return element;
     }
 
     public void put(K aKey, V aValue) throws Exception {
@@ -219,5 +175,5 @@ public abstract class FreqCache<K, V> {
      * @return
      * @throws java.lang.Exception
      */
-    protected abstract V getNewEntry(K aId, Consumer<V> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    protected abstract V getNewEntry(K aId) throws Exception;
 }

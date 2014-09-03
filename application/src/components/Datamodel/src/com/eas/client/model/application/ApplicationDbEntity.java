@@ -34,8 +34,8 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         super(aModel);
     }
 
-    public ApplicationDbEntity(String aQueryId) {
-        super(aQueryId);
+    public ApplicationDbEntity(String aEntityId) {
+        super(aEntityId);
     }
 
     @Override

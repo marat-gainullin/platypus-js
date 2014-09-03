@@ -5,9 +5,9 @@
 package com.eas.client.threetier.requests;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.binary.PlatypusRequestReader;
-import com.eas.client.threetier.binary.PlatypusRequestWriter;
-import com.eas.client.threetier.binary.RequestsTags;
+import com.eas.client.threetier.platypus.PlatypusRequestReader;
+import com.eas.client.threetier.platypus.PlatypusRequestWriter;
+import com.eas.client.threetier.platypus.RequestsTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
@@ -32,7 +32,7 @@ public class AppQueryRequestTest {
         AppQueryRequest req = new AppQueryRequest(IDGenerator.genID());
         PlatypusRequestReader bodyReader = new PlatypusRequestReader(out.toByteArray());
         req.accept(bodyReader);
-        assertEquals(queryId, req.getQueryId());
+        assertEquals(queryId, req.getQueryName());
     }
 
     @Test

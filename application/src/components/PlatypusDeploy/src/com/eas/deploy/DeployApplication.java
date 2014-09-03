@@ -15,21 +15,17 @@ import java.io.File;
  */
 public class DeployApplication {
 
-    private static final String DEPLOY_TARGET_DATASOURCE = "deployTarget";
+    private static final String TARGET_DATASOURCE = "deployTarget";
     public static final String APP_PATH_CMD_SWITCH = "ap";
     public static final String MIGRATIONS_PATH_CMD_SWITCH = "migrations";
     public static final String URL_CMD_SWITCH = "url";
     public static final String DBUSER_CMD_SWITCH = "dbuser";
     public static final String DBSCHEMA_CMD_SWITCH = "dbschema";
     public static final String DBPASSWORD_CMD_SWITCH = "dbpassword";
-    public static final String DEPLOY_CMD_SWITCH = "deploy";  // NOI18N
-    public static final String UNDEPLOY_CMD_SWITCH = "undeploy"; // NOI18N
-    public static final String IMPORT_CMD_SWITCH = "import"; // NOI18N
     public static final String APPLY_MIGRATIONS_CMD_SWITCH = "apply"; // NOI18N
     public static final String CREATE_MTD_SNAPSHOT_CMD_SWITCH = "snapshot"; // NOI18N
     public static final String CREATE_SQL_BATCH_CMD_SWITCH = "batch"; // NOI18N
     public static final String CLEANUP_CMD_SWITCH = "clean"; // NOI18N
-    public static final String INIT_APP_CMD_SWITCH = "initapp"; // NOI18N
     public static final String INIT_USERS_SPACE_CMD_SWITCH = "initusers"; // NOI18N
     public static final String INIT_VERSIONING_CMD_SWITCH = "initversioning";
     public static final String GET_CURRENT_VERSION_CMD_SWITCH = "getver"; // NOI18N
@@ -37,14 +33,10 @@ public class DeployApplication {
     public static final String CMD_SWITCHS_PREFIX = "-";
     protected static final String USAGE_MSG = "Platypus deploy console.\n\n"
             + "Options:\n\n"
-            + CMD_SWITCHS_PREFIX + DEPLOY_CMD_SWITCH + " - deploys application from the <app_path> to the database\n"
-            + CMD_SWITCHS_PREFIX + UNDEPLOY_CMD_SWITCH + " - removes application from the database\n"
-            + CMD_SWITCHS_PREFIX + IMPORT_CMD_SWITCH + " - imports application sources from the database to the <app_path>\n"
             + CMD_SWITCHS_PREFIX + APPLY_MIGRATIONS_CMD_SWITCH + " - applies migrations set from the project to the database\n"
             + CMD_SWITCHS_PREFIX + CREATE_MTD_SNAPSHOT_CMD_SWITCH + " - creates new database metadata snapshot in project's migrations directory\n"
             + CMD_SWITCHS_PREFIX + CREATE_SQL_BATCH_CMD_SWITCH + " - creates new empty database SQL batch migration file in project's migrations directory\n"
             + CMD_SWITCHS_PREFIX + CLEANUP_CMD_SWITCH + " - performs cleanup - removes unused metadata snapshots\n"
-            + CMD_SWITCHS_PREFIX + INIT_APP_CMD_SWITCH + "- checks and initializes application database store if it is not initialized\n"
             + CMD_SWITCHS_PREFIX + INIT_USERS_SPACE_CMD_SWITCH + "- checks and initializes users database store if it is not initialized\n"
             + CMD_SWITCHS_PREFIX + GET_CURRENT_VERSION_CMD_SWITCH + " - prints current database vesion\n"
             + CMD_SWITCHS_PREFIX + SET_CURRENT_VERSION_CMD_SWITCH + " <version>  - sets database version to number set in <version>\n"
@@ -62,14 +54,13 @@ public class DeployApplication {
     private String dbpassword;
     private File platypusAppDir;
     private File migrationsDir;
-    private Deployer deployer;
     private DbMigrator migrator;
     private DeployMode mode = DeployMode.PRINT_HELP;
     private int version;
 
     public enum DeployMode {
 
-        DEPLOY, UNDEPLOY, IMPORT, APPLY_MIGRATIONS, CREATE_MTD_SNAPSHOT, CREATE_SQL_BATCH, CLEANUP, INITAPP, INITUSERS, INITVERSIONING, GET_CURRENT_VERSION, SET_CURRENT_VERSION, PRINT_HELP
+        APPLY_MIGRATIONS, CREATE_MTD_SNAPSHOT, CREATE_SQL_BATCH, CLEANUP, INITUSERS, INITVERSIONING, GET_CURRENT_VERSION, SET_CURRENT_VERSION, PRINT_HELP
     }
 
     /**
@@ -139,15 +130,6 @@ public class DeployApplication {
                 } else {
                     throw new IllegalArgumentException("Db password syntax: " + CMD_SWITCHS_PREFIX + DBPASSWORD_CMD_SWITCH + " <value>");
                 }
-            } else if ((CMD_SWITCHS_PREFIX + DEPLOY_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                mode = DeployMode.DEPLOY;
-                i++;
-            } else if ((CMD_SWITCHS_PREFIX + UNDEPLOY_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                mode = DeployMode.UNDEPLOY;
-                i++;
-            } else if ((CMD_SWITCHS_PREFIX + IMPORT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                mode = DeployMode.IMPORT;
-                i++;
             } else if ((CMD_SWITCHS_PREFIX + APPLY_MIGRATIONS_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 mode = DeployMode.APPLY_MIGRATIONS;
                 i++;
@@ -159,9 +141,6 @@ public class DeployApplication {
                 i++;
             } else if ((CMD_SWITCHS_PREFIX + CLEANUP_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 mode = DeployMode.CLEANUP;
-                i++;
-            } else if ((CMD_SWITCHS_PREFIX + INIT_APP_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                mode = DeployMode.INITAPP;
                 i++;
             } else if ((CMD_SWITCHS_PREFIX + INIT_USERS_SPACE_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 mode = DeployMode.INITUSERS;
@@ -191,23 +170,11 @@ public class DeployApplication {
                 settings.setUser(dbuser);
                 settings.setPassword(dbpassword);
                 settings.setSchema(dbschema);
-                GeneralResourceProvider.getInstance().registerDatasource(DEPLOY_TARGET_DATASOURCE, settings);
+                GeneralResourceProvider.getInstance().registerDatasource(TARGET_DATASOURCE, settings);
             } else {
                 throw new IllegalArgumentException("Database connection arguments are not set properly");
             }
             switch (mode) {
-                case DEPLOY:
-                    initDeployer();
-                    deployer.deploy();
-                    break;
-                case UNDEPLOY:
-                    initDeployer();
-                    deployer.undeploy();
-                    break;
-                case IMPORT:
-                    initDeployer();
-                    deployer.importApplication();
-                    break;
                 case APPLY_MIGRATIONS:
                     initMigrator();
                     migrator.applyMigrations();
@@ -224,14 +191,11 @@ public class DeployApplication {
                     initMigrator();
                     migrator.cleanup();
                     break;
-                case INITAPP:
-                    initDeployer();
-                    deployer.initApp();
-                    break;
-                case INITUSERS:
-                    initDeployer();
-                    deployer.initUsersSpace();
-                    break;
+                case INITUSERS: {
+                    DatabasesClient client = new DatabasesClient(null, TARGET_DATASOURCE, false);
+                    DatabasesClient.initUsersSpace(client.obtainDataSource(null));
+                }
+                break;
                 case INITVERSIONING:
                     initMigrator();
                     migrator.initVersioning();
@@ -253,17 +217,9 @@ public class DeployApplication {
         }
     }
 
-    private void initDeployer() throws Exception {
-        if (isDbParamsSetExplicitly()) {
-            deployer = new Deployer(platypusAppDir, new DatabasesClient(null, DEPLOY_TARGET_DATASOURCE, false));
-        } else {
-            throw new IllegalArgumentException("Database connection arguments are not set properly");
-        }
-    }
-
     private void initMigrator() throws Exception {
         if (isDbParamsSetExplicitly()) {
-            migrator = new DbMigrator(migrationsDir, new DatabasesClient(null, DEPLOY_TARGET_DATASOURCE, false));
+            migrator = new DbMigrator(migrationsDir, new DatabasesClient(null, TARGET_DATASOURCE, false));
         } else {
             throw new IllegalArgumentException("Database connection arguments are not set properly");
         }
@@ -277,7 +233,7 @@ public class DeployApplication {
         }
         throw new IllegalStateException("Some db connection parameters set, but some not.");
     }
-    
+
     private void printVersion() {
         System.out.println("Current database version is " + migrator.getCurrentDbVersion()); // NOI18N
     }

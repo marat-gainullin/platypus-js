@@ -161,7 +161,7 @@ public class PlatypusScriptedResourceTest {
                 + "    \"traveltime\": \"235\"\n"
                 + "    }\n"
                 + "}\n";
-        String result = PlatypusScriptedResource.loadText(aResourceId, aEncodingName);
+        String result = ScriptedResource.loadText(aResourceId, aEncodingName);
         assertEquals(expResult, result);
     }
 

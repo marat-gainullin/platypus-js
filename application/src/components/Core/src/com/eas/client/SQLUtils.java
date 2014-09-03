@@ -39,34 +39,16 @@ public class SQLUtils {
     public static final String TABLE_NAME_2_SQL = "select * from %s";
     public static final String PARAMETER_NAME_REGEXP = ":{1}([A-za-z]\\w*\\b)";
     public static final String PROPERTIES_VALUE_REGEXP = "={1}([A-za-z]\\w+\\b)";
-    public static final String SQL_PARAM_MDENT_PARENT_ID = "aParentID";
-    public static final String SQL_SELECT_MD_ROOTS = "select * from " + ClientConstants.T_MTD_ENTITIES + " where " + ClientConstants.T_MTD_ENTITIES + "." + ClientConstants.F_MDENT_PARENT_ID + " is null";
-    public static final String SQL_SELECT_MD_ROOTS_LIGHT = "select " + ClientConstants.F_MDENT_ID + ", " + ClientConstants.F_MDENT_NAME + ", " + ClientConstants.F_MDENT_TYPE + ", " + ClientConstants.F_MDENT_ORDER + ", " + ClientConstants.F_MDENT_PARENT_ID + ", " + ClientConstants.F_MDENT_CONTENT_TXT_SIZE + ", " + ClientConstants.F_MDENT_CONTENT_TXT_CRC32 + " from " + ClientConstants.T_MTD_ENTITIES + " where " + ClientConstants.T_MTD_ENTITIES + "." + ClientConstants.F_MDENT_PARENT_ID + " is null";
-    public static final String SQL_SELECT_MD_BY_PARENT = "select * from " + ClientConstants.T_MTD_ENTITIES + " where " + ClientConstants.T_MTD_ENTITIES + "." + ClientConstants.F_MDENT_PARENT_ID + "=:" + SQL_PARAM_MDENT_PARENT_ID;
-    public static final String SQL_SELECT_MD_BY_PARENT_LIGHT = "select " + ClientConstants.F_MDENT_ID + ", " + ClientConstants.F_MDENT_NAME + ", " + ClientConstants.F_MDENT_TYPE + ", " + ClientConstants.F_MDENT_ORDER + ", " + ClientConstants.F_MDENT_PARENT_ID + ", " + ClientConstants.F_MDENT_CONTENT_TXT_SIZE + ", " + ClientConstants.F_MDENT_CONTENT_TXT_CRC32 + " from " + ClientConstants.T_MTD_ENTITIES + " where " + ClientConstants.T_MTD_ENTITIES + "." + ClientConstants.F_MDENT_PARENT_ID + "=:" + SQL_PARAM_MDENT_PARENT_ID;
-    public static final String SQL_FIELD_CHILDREN_COUNT = "childrenCount";
-    public static final String SQL_SELECT_MD_WITH_CHILDREN_COUNT_BY_PARENT = "select parents." + ClientConstants.F_MDENT_ID + " " + ClientConstants.F_MDENT_ID + ", count(children." + ClientConstants.F_MDENT_ID + ") " + SQL_FIELD_CHILDREN_COUNT + " from " + ClientConstants.T_MTD_ENTITIES + " parents left outer join " + ClientConstants.T_MTD_ENTITIES + " children on (parents." + ClientConstants.F_MDENT_ID + " = children." + ClientConstants.F_MDENT_PARENT_ID + ") where parents." + ClientConstants.F_MDENT_PARENT_ID + "=:" + SQL_PARAM_MDENT_PARENT_ID + " group by parents." + ClientConstants.F_MDENT_ID;
-    public static final String SQL_SELECT_MD_WITH_CHILDREN_COUNT_ROOTS = "select parents." + ClientConstants.F_MDENT_ID + " " + ClientConstants.F_MDENT_ID + ", count(children." + ClientConstants.F_MDENT_ID + ") " + SQL_FIELD_CHILDREN_COUNT + " from " + ClientConstants.T_MTD_ENTITIES + " parents left outer join " + ClientConstants.T_MTD_ENTITIES + " children on (parents." + ClientConstants.F_MDENT_ID + " = children." + ClientConstants.F_MDENT_PARENT_ID + ") where parents." + ClientConstants.F_MDENT_PARENT_ID + " is null group by parents." + ClientConstants.F_MDENT_ID;
     public static final String SQL_SELECT_COMMON_WHERE_BY_FIELD = "select * from %s where %s.%s = :%s";
     public static final String SQL_SELECT_COMMON_WHERE_ISNULL_FIELD = "select * from %s where %s.%s is null";
     public static final String SQL_PARAMETER_FIELD_VALUE = "fieldValue";
-    public static final String SQL_PARAMETER_ID_VALUE = "md_id";
-    public static final String SQL_PARAMETER_TYPE_VALUE = "md_type";
-    public static final String SQL_PARAMETER_NAME_VALUE = "md_name";
-    public static final String SQL_PARAMETER_CONTENT_TXT_VALUE = "md_content_txt";
-    public static final String SQL_PARAMETER_CONTENT_DATA_VALUE = "md_content_data";
-    public static final String SQL_PARAMETER_CONTENT_SIZE_VALUE = "md_content_size";
-    public static final String SQL_PARAMETER_CONTENT_CRC32_VALUE = "md_content_crc32";
-    public static final String SQL_PARAMETER_PARENT_ID_VALUE = "md_parent_id";
     public static final String SQL_UPDATE_COMMON_WHERE_BY_FIELD = "update %s set %s = %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_UPDATE2_COMMON_WHERE_BY_FIELD = "update %s set %s = %s, %s = %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_UPDATE3_COMMON_WHERE_BY_FIELD = "update %s set %s = %s, %s = %s, %s = %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_UPDATE4_COMMON_WHERE_BY_FIELD = "update %s set %s = %s, %s = %s, %s = %s, %s = %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_DELETE_COMMON_WHERE_BY_FIELD = "delete from %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_INSERT_COMMON_ID_FIELD = "insert into %s columns = (%s) values = ( :" + SQL_PARAMETER_FIELD_VALUE + ")";
-    public static final String SQL_INSERT_MD_ID_NAME_TYPE_PARENT_CONTENT_FIELDS = "insert into %s (" + ClientConstants.F_MDENT_ID + "," + ClientConstants.F_MDENT_TYPE + "," + ClientConstants.F_MDENT_NAME + "," + ClientConstants.F_MDENT_PARENT_ID + "," + ClientConstants.F_MDENT_CONTENT_TXT + "," + ClientConstants.F_MDENT_CONTENT_TXT_SIZE + "," + ClientConstants.F_MDENT_CONTENT_TXT_CRC32 + ") values ( :" + SQL_PARAMETER_ID_VALUE + ", :" + SQL_PARAMETER_TYPE_VALUE + ", :" + SQL_PARAMETER_NAME_VALUE + ", :" + SQL_PARAMETER_PARENT_ID_VALUE + ", :" + SQL_PARAMETER_CONTENT_TXT_VALUE + ", :" + SQL_PARAMETER_CONTENT_DATA_VALUE + ", :" + SQL_PARAMETER_CONTENT_SIZE_VALUE + ", :" + SQL_PARAMETER_CONTENT_CRC32_VALUE + ")";
     public static final String SQL_MAX_COMMON_BY_FIELD = "select max(%s) %s from %s";
-    public static final String SQL_SELECT_MD_BY_TYPE_LIGHT = "select MDENT_ID, MDENT_NAME, MDENT_TYPE, MDENT_ORDER, MDENT_PARENT_ID, MDENT_CONTENT_TXT_SIZE, MDENT_CONTENT_TXT_CRC32 from MTD_ENTITIES where MTD_ENTITIES.MDENT_TYPE=:" + SQL_PARAMETER_FIELD_VALUE;
     protected static final OracleSqlDriver easOraDriver = new OracleSqlDriver();
     protected static final MsSqlSqlDriver easMsSqlDriver = new MsSqlSqlDriver();
     protected static final PostgreSqlDriver easPostgreSqlDriver = new PostgreSqlDriver();
@@ -236,17 +218,17 @@ public class SQLUtils {
         String dialect = null;
         if (aJdbcUrl != null) {
             aJdbcUrl = aJdbcUrl.toLowerCase();
-            if (aJdbcUrl.indexOf("jdbc:oracle") != -1) { //NOI18N
+            if (aJdbcUrl.contains("jdbc:oracle")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT;
-            } else if (aJdbcUrl.indexOf("jdbc:jtds:sqlserver") != -1) { //NOI18N
+            } else if (aJdbcUrl.contains("jdbc:jtds:sqlserver")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT;
-            } else if (aJdbcUrl.indexOf("jdbc:postgre") != -1) { //NOI18N
+            } else if (aJdbcUrl.contains("jdbc:postgre")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT;
-            } else if (aJdbcUrl.indexOf("jdbc:db2") != -1) { //NOI18N
+            } else if (aJdbcUrl.contains("jdbc:db2")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_DB2_DIALECT;
-            } else if (aJdbcUrl.indexOf("jdbc:mysql") != -1) { //NOI18N
+            } else if (aJdbcUrl.contains("jdbc:mysql")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT;
-            } else if (aJdbcUrl.indexOf("jdbc:h2") != -1) { //NOI18N
+            } else if (aJdbcUrl.contains("jdbc:h2")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_H2_DIALECT;
             }
         }
@@ -257,17 +239,17 @@ public class SQLUtils {
         String dialect = null;
         if (aName != null) {
             aName = aName.toLowerCase();
-            if (aName.indexOf("oracle") != -1) { //NOI18N
+            if (aName.contains("oracle")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT;
-            } else if (aName.indexOf("microsoft") != -1) { //NOI18N
+            } else if (aName.contains("microsoft")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT;
-            } else if (aName.indexOf("postgre") != -1) { //NOI18N
+            } else if (aName.contains("postgre")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT;
-            } else if (aName.indexOf("db2") != -1) { //NOI18N
+            } else if (aName.contains("db2")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_DB2_DIALECT;
-            } else if (aName.indexOf("mysql") != -1) { //NOI18N
+            } else if (aName.contains("mysql")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT;
-            } else if (aName.indexOf("h2") != -1) { //NOI18N
+            } else if (aName.contains("h2")) { //NOI18N
                 dialect = ClientConstants.SERVER_PROPERTY_H2_DIALECT;
             }
         }
@@ -452,23 +434,6 @@ public class SQLUtils {
 
     public static String makeTableNameMetadataQuery(String aTableName) {
         return RowsetUtils.makeQueryMetadataQuery(makeQueryByTableName(aTableName));
-    }
-
-    /*
-     * public static String extractConnectionSchema(Properties aProps) { if
-     * (aProps != null) { String schema =
-     * aProps.getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME); if
-     * (schema == null) { schema =
-     * aProps.getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME); }
-     * return schema; } return null; }
-     */
-    // Not doing anything yet. Just return SQl passed
-    public static String resolveSQL_n_BindParameters(String sql, AppCache aCache) {
-        // aCache - metadata cache. It's synchronized.
-        // But evrything else is unsynchronized. And because
-        // of that this function is static and uses only
-        // local variables.
-        return sql;
     }
 
     public static Object cloneFieldValue(Object aValue) {

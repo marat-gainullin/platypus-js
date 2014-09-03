@@ -19,6 +19,7 @@ import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -50,59 +51,108 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
         return (String) ((JSObject) source.getMember("constructor")).getMember("name");
     }
 
-    private Rowset readRowset(JSObject oFirstPage, Object[] aArgs) throws RowsetMissingException, RowsetException {
-        Rowset rowset = new Rowset(expectedFields);
-        if (oFirstPage.isFunction()) {
-            Object oRowset = oFirstPage.call(source, ScriptUtils.toJs(aArgs));
-            if (oRowset instanceof JSObject) {
-                JSObject sRowset = (JSObject) oRowset;
-                Object oLength = sRowset.getMember("length");
-                if (oLength instanceof Number) {
-                    List<Row> rows = new ArrayList<>();
-                    int length = ((Number) oLength).intValue();
-                    for (int i = 0; i < length; i++) {
-                        Object oRow = sRowset.getSlot(i);
-                        if (oRow instanceof JSObject) {
-                            JSObject sRow = (JSObject) oRow;
-                            Row row = new Row(expectedFields);
-                            for (Field field : expectedFields.toCollection()) {
-                                if (sRow.hasMember(field.getName())) {
-                                    Object javaValue = ScriptUtils.toJava(sRow.getMember(field.getName()));
-                                    row.setColumnObject(expectedFields.find(field.getName()), javaValue);
-                                } else {
-                                    Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.WARNING, "{0} property was not found while reading script data from {1}", new Object[]{field.getName(), getEntityId()});
-                                }
+    private void readRowset(Object oRowset, Rowset aRowset) throws RowsetMissingException, RowsetException {
+        if (oRowset instanceof JSObject) {
+            JSObject sRowset = (JSObject) oRowset;
+            Object oLength = sRowset.getMember("length");
+            if (oLength instanceof Number) {
+                List<Row> rows = new ArrayList<>();
+                int length = ((Number) oLength).intValue();
+                for (int i = 0; i < length; i++) {
+                    Object oRow = sRowset.getSlot(i);
+                    if (oRow instanceof JSObject) {
+                        JSObject sRow = (JSObject) oRow;
+                        Row row = new Row(expectedFields);
+                        for (Field field : expectedFields.toCollection()) {
+                            if (sRow.hasMember(field.getName())) {
+                                Object javaValue = ScriptUtils.toJava(sRow.getMember(field.getName()));
+                                row.setColumnObject(expectedFields.find(field.getName()), javaValue);
+                            } else {
+                                Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.WARNING, "{0} property was not found while reading script data from {1}", new Object[]{field.getName(), getEntityId()});
                             }
-                            rows.add(row);
                         }
+                        rows.add(row);
                     }
-                    rowset.setCurrent(rows);
-                    rowset.currentToOriginal();
                 }
+                aRowset.setCurrent(rows);
+                aRowset.currentToOriginal();
             }
         }
-        return rowset;
     }
 
     @Override
-    public Rowset refresh(final Parameters aParameters) throws Exception {
+    public Rowset refresh(final Parameters aParameters, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("fetch")) {
             Object oFirstPage = source.getMember("fetch");
             if (oFirstPage instanceof JSObject) {
-                Rowset rowset = readRowset((JSObject) oFirstPage, new Object[]{aParameters.getPublished()});
-                return rowset;
+                JSObject jsFirstPage = (JSObject) oFirstPage;
+                if (jsFirstPage.isFunction()) {
+                    if (onSuccess != null) {
+                        jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{new Consumer<JSObject>() {
+
+                            @Override
+                            public void accept(JSObject jsRowset) {
+                                Rowset rowset = new Rowset(expectedFields);
+                                try {
+                                    readRowset(jsRowset, rowset);
+                                } catch (Exception ex) {
+                                    if (onFailure != null) {
+                                        onFailure.accept(ex);
+                                    }
+                                    return;
+                                }
+                                onSuccess.accept(rowset);
+                            }
+
+                        }, onFailure}));
+                        return null;
+                    } else {
+                        Rowset rowset = new Rowset(expectedFields);
+                        Object oRowset = jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{aParameters.getPublished()}));
+                        readRowset((JSObject) oRowset, rowset);
+                        return rowset;
+                    }
+                }
             }
         }
         return null;
     }
 
     @Override
-    public Rowset nextPage() throws Exception {
+    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("nextPage")) {
             Object oNextPage = source.getMember("nextPage");
             if (oNextPage instanceof JSObject) {
-                Rowset rowset = readRowset((JSObject) oNextPage, new Object[]{});
-                return rowset;
+                JSObject jsNextPage = (JSObject) oNextPage;
+                if (jsNextPage.isFunction()) {
+                    if (onSuccess != null) {
+                        jsNextPage.call(source, ScriptUtils.toJs(new Object[]{new Consumer<JSObject>() {
+
+                            @Override
+                            public void accept(JSObject jsRowset) {
+                                Rowset rowset = new Rowset(expectedFields);
+                                try {
+                                    readRowset(jsRowset, rowset);
+                                } catch (Exception ex) {
+                                    if (onFailure != null) {
+                                        onFailure.accept(ex);
+                                    }
+                                    return;
+                                }
+                                onSuccess.accept(rowset);
+                            }
+
+                        }, onFailure}));
+                        return null;
+                    } else {
+                        Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
+                        if (oRowset != null) {
+                            Rowset rowset = new Rowset(expectedFields);
+                            readRowset((JSObject) oRowset, rowset);
+                            return rowset;
+                        }
+                    }
+                }
             }
         }
         return null;

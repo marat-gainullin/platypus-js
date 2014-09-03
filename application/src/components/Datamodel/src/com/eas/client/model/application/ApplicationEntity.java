@@ -91,8 +91,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         super(aModel);
     }
 
-    public ApplicationEntity(String aQueryId) {
-        super(aQueryId);
+    public ApplicationEntity(String aEntityId) {
+        super(aEntityId);
     }
 
     private Locator checkUserLocator(List<Integer> constraints) throws IllegalStateException {

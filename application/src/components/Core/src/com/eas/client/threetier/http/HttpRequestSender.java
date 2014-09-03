@@ -5,27 +5,21 @@
 package com.eas.client.threetier.http;
 
 import com.eas.client.settings.SettingsConstants;
-import com.eas.client.threetier.requests.ErrorResponse;
-import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.binary.PlatypusRequestWriter;
-import com.eas.client.threetier.binary.PlatypusResponseReader;
-import com.eas.client.threetier.binary.RequestsTags;
 import com.eas.client.threetier.requests.*;
-import com.eas.proto.ProtoReader;
-import com.eas.proto.ProtoReaderException;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.HelloRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -46,7 +40,6 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     }
 
     public static final String RESPONSE_MISSING_MSG = "%s must have a response.";
-    public static final String RESOURCES_URL_PREFIX = "/resources/";
     //
     protected String url;
     protected Map<String, Cookie> cookies;
@@ -81,7 +74,7 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     }
 
     private void executeRequest(Request request, Consumer<HttpURLConnection> onHeaders) throws Exception {
-        params.put(PlatypusHttpRequestParams.TYPE, request.getType());
+        //params.put(PlatypusHttpRequestParams.TYPE, request.getType());
         URL rqUrl = new URL(assembleUrl());
         conn = (HttpURLConnection) rqUrl.openConnection();
         conn.setDefaultUseCaches(false);
@@ -91,12 +84,8 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
         if (onHeaders != null) {
             onHeaders.accept(conn);
         }
-        conn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.CONTENT_TYPE);
         conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
         addCookies();
-        if (PlatypusHttpConstants.HTTP_METHOD_POST.equals(method)) {
-            writeRequestBody(request);
-        }
         String authScheme = completeRequest(request);
         final String redirectLocation = conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION);
         conn.disconnect();
@@ -213,92 +202,55 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
 
     private String completeRequest(Request aRequest) throws Exception {
         int responseCode = conn.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            if (conn.getContentLength() > 0) {
-                Long requestId = null;
-                byte[] responseData = null;
-                boolean errorResponse = false;
-                InputStream is = conn.getInputStream();
-                ProtoReader reader = new ProtoReader(new BufferedInputStream(is));
-                try {
-                    int tag = -1;
-                    while (tag != RequestsTags.TAG_RESPONSE_END) {
-                        tag = reader.getNextTag();
-                        switch (tag) {
-                            case RequestsTags.TAG_RESPONSE:
-                                requestId = reader.getLong();
-                                break;
-                            case RequestsTags.TAG_ERROR_RESPONSE:
-                                requestId = reader.getLong();
-                                errorResponse = true;
-                                break;
-                            case RequestsTags.TAG_RESPONSE_DATA:
-                                responseData = reader.getSubStreamData();
-                                break;
-                            case RequestsTags.TAG_RESPONSE_END:
-                                respond(aRequest, responseData, errorResponse, "");
-                                requestId = null;
-                                responseData = null;
-                                errorResponse = false;
-                                break;
-                        }
-                    }
-                } catch (ProtoReaderException ex) {
-                    Logger.getLogger(HttpRequestSender.class.getName()).log(Level.SEVERE, "Error reading response on request " + requestId, ex);
-                    respond(aRequest, null, true, ex.getMessage());
-                    requestId = null;
-                    responseData = null;
-                    errorResponse = false;
-                }
-            }
-            acceptCookies();
-        } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             return conn.getHeaderField(PlatypusHttpConstants.HEADER_WWW_AUTH);
         } else if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
                 && conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION) != null
                 && conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION).toLowerCase().contains(PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION.toLowerCase())) {
             return "form";
         } else {
-            Logger.getLogger(HttpRequestSender.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s", conn.getResponseCode(), conn.getResponseMessage()));
-            respond(aRequest, null, true, conn.getResponseCode() + " " + conn.getResponseMessage());
+            if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
+                PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
+                aRequest.accept(responseFactory);
+                response = responseFactory.getResponse();
+                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(conn);
+                response.accept(reader);
+                acceptCookies();
+            } else {
+                Logger.getLogger(HttpRequestSender.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s", conn.getResponseCode(), conn.getResponseMessage()));
+                response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
+            }
         }
         return null;
-    }
-
-    private void writeRequestBody(Request rq) throws Exception {
-        OutputStream connOutStream = conn.getOutputStream();
-        rq.accept(new PlatypusRequestWriter(connOutStream));
-    }
-
-    private void respond(Request request, byte[] responseData, boolean aError, String aDefaultErrorMessage) throws Exception {
-        if (request != null) {
-            if (aError) {
-                response = new ErrorResponse(aDefaultErrorMessage);
-            } else {
-                PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
-                request.accept(responseFactory);
-                response = responseFactory.getResponse();
-            }
-            PlatypusResponseReader responseReader = new PlatypusResponseReader(responseData);
-            response.accept(responseReader);
-        } else {
-            Logger.getLogger(HttpRequestSender.class.getName()).log(Level.INFO, "Got response without a request");
-        }
     }
 
     @Override
     public void visit(AppQueryRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
-        params.put(PlatypusHttpRequestParams.QUERY_ID, rq.getQueryId());
+        params.put(PlatypusHttpRequestParams.QUERY_ID, rq.getQueryName());
         executeRequest(rq);
     }
 
     @Override
-    public void visit(AppElementChangedRequest rq) throws Exception {
+    public void visit(ModuleStructureRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
-        params.put(PlatypusHttpRequestParams.DATABASE_ID, rq.getDatabaseId());
-        params.put(PlatypusHttpRequestParams.QUERY_ID, rq.getEntityId());
+        params.put(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleOrResourceName());
         executeRequest(rq);
+    }
+
+    @Override
+    public void visit(ResourceRequest rq) throws Exception {
+        method = PlatypusHttpConstants.HTTP_METHOD_GET;
+        String encodedResourcePath = (new URI(null, null, rq.getResourceName(), null)).toASCIIString();
+        uriPrefix = "/" + encodedResourcePath;
+        if (rq.getTimeStamp() != null) {
+            executeRequest(rq, (HttpURLConnection aConn) -> {
+                SimpleDateFormat sdf = new SimpleDateFormat(PlatypusHttpConstants.HTTP_DATE_FORMAT, Locale.US);
+                aConn.addRequestProperty(PlatypusHttpConstants.HEADER_IF_MODIFIED_SINCE, sdf.format(rq.getTimeStamp()));
+            });
+        } else {
+            executeRequest(rq);
+        }
     }
 
     @Override
@@ -311,15 +263,6 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     public void visit(CreateServerModuleRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.put(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName());
-        executeRequest(rq);
-    }
-
-    @Override
-    public void visit(DbTableChangedRequest rq) throws Exception {
-        method = PlatypusHttpConstants.HTTP_METHOD_GET;
-        params.put(PlatypusHttpRequestParams.DATABASE_ID, rq.getDatabaseId());
-        params.put(PlatypusHttpRequestParams.SCHEMA, rq.getSchema());
-        params.put(PlatypusHttpRequestParams.TABLE, rq.getTable());
         executeRequest(rq);
     }
 
@@ -378,24 +321,6 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     public void visit(IsUserInRoleRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.put(PlatypusHttpRequestParams.ROLE_NAME, rq.getRoleName());
-        executeRequest(rq);
-    }
-
-    @Override
-    public void visit(IsAppElementActualRequest rq) throws Exception {
-        String encodedAppElementResourcePath = (new URI(null, null, rq.getAppElementId(), null)).toASCIIString();
-        uriPrefix = RESOURCES_URL_PREFIX + encodedAppElementResourcePath;
-        method = PlatypusHttpConstants.HTTP_METHOD_GET;
-        params.put(PlatypusHttpRequestParams.TEXT_CONTENT_SIZE, rq.getTxtContentSize());
-        params.put(PlatypusHttpRequestParams.TEXT_CONTENT_CRC32, rq.getTxtContentCrc32());
-        executeRequest(rq);
-    }
-
-    @Override
-    public void visit(AppElementRequest rq) throws Exception {
-        String encodedAppElementResourcePath = (new URI(null, null, rq.getAppElementId(), null)).toASCIIString();
-        uriPrefix = RESOURCES_URL_PREFIX + encodedAppElementResourcePath;
-        method = PlatypusHttpConstants.HTTP_METHOD_GET;
         executeRequest(rq);
     }
 }

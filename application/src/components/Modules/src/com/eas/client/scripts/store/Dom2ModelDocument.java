@@ -3,7 +3,6 @@ package com.eas.client.scripts.store;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationPlatypusModel;

@@ -12,13 +12,10 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.AppCache;
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
-import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import com.eas.client.threetier.requests.*;
@@ -74,7 +71,6 @@ public abstract class PlatypusClient implements AppClient {
         char[] password = DEFAULT_TRUSTSTORE_PASSWORD.toCharArray();
         return password;
     }
-    private final PlatypusAppCache appCache;
     protected String url;
     protected PlatypusPrincipal principal;
     protected PlatypusConnection conn;
@@ -85,7 +81,6 @@ public abstract class PlatypusClient implements AppClient {
         super();
         url = aUrl;
         conn = aConn;
-        appCache = new PlatypusAppCache(this);
     }
 
     @Override
@@ -238,38 +233,6 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public synchronized AppCache getAppCache() throws Exception {
-        return appCache;
-    }
-
-    @Override
-    public PlatypusQuery getAppQuery(String aQueryId, Consumer<PlatypusQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        AppQueryRequest request = new AppQueryRequest(aQueryId);
-        if (onSuccess != null) {
-            conn.<AppQueryRequest.Response>enqueueRequest(request, (AppQueryRequest.Response aResponse) -> {
-                assert aResponse.getAppQuery() instanceof PlatypusQuery;
-                PlatypusQuery query = (PlatypusQuery) aResponse.getAppQuery();
-                query.setClient(this);
-                assert aQueryId.equals(query.getEntityId());
-                onSuccess.accept(query);
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-            return null;
-        } else {
-            AppQueryRequest.Response response = conn.executeRequest(request);
-            assert response.getAppQuery() instanceof PlatypusQuery;
-            PlatypusQuery query = (PlatypusQuery) response.getAppQuery();
-            query.setClient(this);
-            assert aQueryId.equals(query.getEntityId());
-            return query;
-        }
-
-    }
-
-    @Override
     public String login(String aUserName, char[] aPassword, Consumer<String> onSuccess, Consumer<Exception> onFailure) throws LoginException {
         LoginRequest rq = new LoginRequest(aUserName, aPassword != null ? new String(aPassword) : null);
         try {
@@ -315,38 +278,6 @@ public abstract class PlatypusClient implements AppClient {
         if (conn != null) {
             conn.shutdown();
             conn = null;
-        }
-    }
-
-    @Override
-    public void appEntityChanged(String aEntityId, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        AppElementChangedRequest request = new AppElementChangedRequest(null, aEntityId);
-        if (onSuccess != null) {
-            conn.<AppElementChangedRequest.Response>enqueueRequest(request, (AppElementChangedRequest.Response aResponse) -> {
-                onSuccess.accept(null);
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-        } else {
-            conn.executeRequest(request);
-        }
-    }
-
-    @Override
-    public void dbTableChanged(String aDbId, String aSchema, String aTable, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        DbTableChangedRequest request = new DbTableChangedRequest(aDbId, aSchema, aTable);
-        if (onSuccess != null) {
-            conn.<DbTableChangedRequest.Response>enqueueRequest(request, (DbTableChangedRequest.Response aResponse) -> {
-                onSuccess.accept(null);
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-        } else {
-            conn.executeRequest(request);
         }
     }
 
@@ -507,42 +438,5 @@ public abstract class PlatypusClient implements AppClient {
             command.parameters[i] = new ChangeValue(p.getName(), p.getValue(), p.getTypeInfo());
         }
         changeLog.add(command);
-    }
-
-    @Override
-    public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        IsAppElementActualRequest request = new IsAppElementActualRequest(aId, aTxtContentLength, aTxtCrc32);
-        if (onSuccess != null) {
-            conn.<IsAppElementActualRequest.Response>enqueueRequest(request, (IsAppElementActualRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.isActual());
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-            return false;
-        } else {
-            IsAppElementActualRequest.Response response = conn.executeRequest(request);
-            return response.isActual();
-        }
-    }
-
-    @Override
-    public ApplicationElement getAppElement(String aAppelementId, Consumer<ApplicationElement> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        AppElementRequest request = new AppElementRequest(aAppelementId);
-        if (onSuccess != null) {
-            conn.<AppElementRequest.Response>enqueueRequest(request, (AppElementRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.getAppElement());
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-            return null;
-        } else {
-            conn.executeRequest(request);
-            AppElementRequest.Response response = (AppElementRequest.Response) conn.executeRequest(request);
-            return response.getAppElement();
-        }
     }
 }

@@ -4,31 +4,29 @@
  */
 package com.eas.client.cache;
 
+import java.util.Date;
+
 /**
  *
  * @author mg
+ * @param <E>
  */
-public class ActualCacheEntry<EV> {
+public class ActualCacheEntry<E> {
 
-    protected EV value;
-    protected long txtContentSize;
-    protected long txtContentCrc32;
+    protected E value;
+    protected Date timeStamp;
 
-    public ActualCacheEntry(EV aValue, long aTxtContentSize, long aTxtContentCrc32) {
+    public ActualCacheEntry(E aValue, Date aTimeStamp) {
+        super();
         value = aValue;
-        txtContentSize = aTxtContentSize;
-        txtContentCrc32 = aTxtContentCrc32;
+        timeStamp = aTimeStamp;
     }
 
-    public EV getValue() {
+    public E getValue() {
         return value;
     }
 
-    public long getTxtContentSize() {
-        return txtContentSize;
-    }
-
-    public long getTxtContentCrc32() {
-        return txtContentCrc32;
+    public Date getTimeStamp() {
+        return timeStamp;
     }
 }

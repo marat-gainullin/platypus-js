@@ -296,14 +296,6 @@ public class H2SqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String getApplicationInitResourceName() {
-        return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitApp.sql";
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
     public String getUsersSpaceInitResourceName() {
         return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitUsersSpace.sql";
     }
@@ -520,22 +512,6 @@ public class H2SqlDriver extends SqlDriver {
             return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
         }
         return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public String getSql4MtdEntitiesParentsList(String aChildParamName) {
-        return String.format(SQL_PARENTS_LIST, aChildParamName);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public String getSql4MtdEntitiesChildrenList(String aParentParamName) {
-        return String.format(SQL_CHILDREN_LIST, aParentParamName);
     }
 
     /**

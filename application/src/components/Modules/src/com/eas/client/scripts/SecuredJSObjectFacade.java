@@ -23,7 +23,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SecuredJSObjectFacade extends JSObjectFacade {
 
     private final Pattern roleTemplate = Pattern.compile("(\\$\\d+)");// WARNING!!! Don't make this member static!
-    protected String appElementId;
+    protected String moduleName;
     protected ScriptDocument config;
 
     /**
@@ -33,7 +33,7 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
 
     public SecuredJSObjectFacade(JSObject aDelegate, String aAppElementId, PrincipalHost aPrincipalHost, ScriptDocument aConfig) {
         super(aDelegate);
-        appElementId = aAppElementId;
+        moduleName = aAppElementId;
         principalHost = aPrincipalHost;
         config = aConfig;
     }
@@ -65,7 +65,7 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
                 PlatypusPrincipal principal = getPrincipal();
                 if (principal == null || !principal.hasAnyRole(config.getModuleAllowedRoles())) {
                     throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
-                            appElementId,
+                            moduleName,
                             principal != null ? principal.getName() : null));
                 }
             } catch (Exception ex) {
@@ -137,7 +137,7 @@ public class SecuredJSObjectFacade extends JSObjectFacade {
                 if (principal == null || !principal.hasAnyRole(filteredRoles)) {
                     throw new AccessControlException(String.format("Access denied to %s function in %s module for '%s'.",//NOI18N
                             aName,
-                            appElementId,
+                            moduleName,
                             principal != null ? principal.getName() : null));
                 }
             } else {

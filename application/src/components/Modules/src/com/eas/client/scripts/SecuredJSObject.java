@@ -26,7 +26,7 @@ public class SecuredJSObject extends SecuredJSObjectFacade {
     public synchronized Object getMember(String name) {
         Object res = super.getMember(name);
         if (res instanceof JSObject && ((JSObject) res).isFunction()) {
-            return new SecuredJSFunction(name, (JSObject) res, appElementId, principalHost, config);
+            return new SecuredJSFunction(name, (JSObject) res, moduleName, principalHost, config);
         } else {
             checkPropertyPermission(name);
             return res;

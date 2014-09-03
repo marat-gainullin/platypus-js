@@ -4,7 +4,6 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.server.PlatypusServerCore;
 import java.util.function.Consumer;

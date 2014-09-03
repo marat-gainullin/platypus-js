@@ -5,14 +5,15 @@
 package com.eas.server;
 
 import com.eas.client.ScriptedDatabasesClient;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
-import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
+import com.eas.client.threetier.Response;
+import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.script.JsDoc;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
+import com.eas.server.handlers.SessionRequestHandler;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
 import com.eas.server.mina.platypus.RequestDecoder;
 import com.eas.server.mina.platypus.ResponseEncoder;

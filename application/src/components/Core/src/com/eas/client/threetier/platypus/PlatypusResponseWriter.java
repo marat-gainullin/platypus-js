@@ -2,37 +2,33 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.binary;
+package com.eas.client.threetier.platypus;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
-import com.eas.client.ClientConstants;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.requests.AppElementChangedRequest;
-import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
+import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
-import com.eas.xml.dom.XmlDom2String;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Set;
@@ -110,7 +106,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(StartAppElementRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getAppElementId() != null) {
-            writer.put(RequestsTags.TAG_APP_ELEMENT_ID, rsp.getAppElementId());
+            writer.put(RequestsTags.TAG_MODULE_NAME, rsp.getAppElementId());
         }
         writer.flush();
     }
@@ -163,15 +159,6 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(IsAppElementActualRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.isActual()) {
-            writer.put(RequestsTags.TAG_ACTUAL);
-        }
-        writer.flush();
-    }
-
-    @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getResult() instanceof Report) {
@@ -190,13 +177,9 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(DbTableChangedRequest.Response rsp) throws Exception {
-    }
-
-    @Override
     public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_MODULE_ID, rsp.getModuleName());
+        writer.put(RequestsTags.TAG_MODULE_NAME, rsp.getModuleName());
         writer.put(RequestsTags.TAG_MODULE_PERMITTED, rsp.isPermitted());
         if (!rsp.getFunctionsNames().isEmpty()) {
             ByteArrayOutputStream functions = new ByteArrayOutputStream();
@@ -219,54 +202,61 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
+    public void visit(ModuleStructureRequest.Response rsp) throws Exception {
+        ProtoWriter writer = new ProtoWriter(out);
+        for (String partName : rsp.getStructure()) {
+            writer.put(RequestsTags.TAG_RESOURCE_NAME, partName);
+        }
+        for (String clientDependency : rsp.getClientDependencies()) {
+            writer.put(RequestsTags.TAG_MODULE_CLIENT_DEPENDENCY, clientDependency);
+        }
+        for (String serverDependency : rsp.getServerDependencies()) {
+            writer.put(RequestsTags.TAG_MODULE_SERVER_DEPENDENCY, serverDependency);
+        }
+        for (String queryDependency : rsp.getQueryDependencies()) {
+            writer.put(RequestsTags.TAG_MODULE_QUERY_DEPENDENCY, queryDependency);
+        }
+        writer.flush();
+    }
+
+    @Override
     public void visit(AppQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
-        PlatypusRowsetWriter rsWriter = new PlatypusRowsetWriter();
-        rsWriter.writeFields(rsp.getAppQuery().getFields(), fieldsStream);
-        writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityId());
-        writer.put(RequestsTags.TAG_DML, rsp.getAppQuery().isManual() ? 1 : 0);
-        if (rsp.getAppQuery().getTitle() != null) {
-            writer.put(RequestsTags.TAG_TITLE, rsp.getAppQuery().getTitle());
-        }
-        writer.put(RequestsTags.TAG_FIELDS);
-        writer.put(CoreTags.TAG_STREAM, fieldsStream);
-        for (Field param : rsp.getAppQuery().getParameters().toCollection()) {
-            writer.put(RequestsTags.TAG_QUERY_SQL_PARAMETER);
-            writer.put(CoreTags.TAG_STREAM, PlatypusRequestWriter.writeParameter((Parameter) param));
-        }
-        Set<String> roles = rsp.getAppQuery().getReadRoles();
-        for (String role : roles) {
-            writer.put(RequestsTags.TAG_READ_ROLE, role);
-        }
-        roles = rsp.getAppQuery().getWriteRoles();
-        for (String role : roles) {
-            writer.put(RequestsTags.TAG_WRITE_ROLE, role);
-        }
-        writer.flush();
-    }
-
-    @Override
-    public void visit(AppElementRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getAppElement() != null) {
-            writer.put(RequestsTags.TAG_APP_ELEMENT_ID, rsp.getAppElement().getId());
-            writer.put(RequestsTags.TAG_NAME, rsp.getAppElement().getName());
-            writer.put(RequestsTags.TAG_TYPE, rsp.getAppElement().getType());
-            if (rsp.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
-                if (rsp.getAppElement().getBinaryContent() != null) {
-                    writer.put(RequestsTags.TAG_RESOURCE, rsp.getAppElement().getBinaryContent());
-                }
-            } else {
-                writer.put(RequestsTags.TAG_TEXT, XmlDom2String.transform(rsp.getAppElement().getContent()));
+        if (rsp.getAppQuery() != null) {
+            writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
+            writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityId());
+            ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
+            PlatypusRowsetWriter rsWriter = new PlatypusRowsetWriter();
+            rsWriter.writeFields(rsp.getAppQuery().getFields(), fieldsStream);
+            writer.put(RequestsTags.TAG_DML, rsp.getAppQuery().isManual() ? 1 : 0);
+            if (rsp.getAppQuery().getTitle() != null) {
+                writer.put(RequestsTags.TAG_TITLE, rsp.getAppQuery().getTitle());
             }
-            writer.put(RequestsTags.TAG_TEXT_LENGTH, rsp.getAppElement().getTxtContentLength());
-            writer.put(RequestsTags.TAG_TEXT_CRC32, rsp.getAppElement().getTxtCrc32());
+            writer.put(RequestsTags.TAG_FIELDS);
+            writer.put(CoreTags.TAG_STREAM, fieldsStream);
+            for (Field param : rsp.getAppQuery().getParameters().toCollection()) {
+                writer.put(RequestsTags.TAG_QUERY_SQL_PARAMETER);
+                writer.put(CoreTags.TAG_STREAM, PlatypusRequestWriter.writeParameter((Parameter) param));
+            }
+            Set<String> roles = rsp.getAppQuery().getReadRoles();
+            for (String role : roles) {
+                writer.put(RequestsTags.TAG_READ_ROLE, role);
+            }
+            roles = rsp.getAppQuery().getWriteRoles();
+            for (String role : roles) {
+                writer.put(RequestsTags.TAG_WRITE_ROLE, role);
+            }
+            writer.flush();
         }
-        writer.flush();
     }
 
     @Override
-    public void visit(AppElementChangedRequest.Response rsp) throws Exception {
+    public void visit(ResourceRequest.Response rsp) throws Exception {
+        ProtoWriter writer = new ProtoWriter(out);
+        if (rsp.getContent() != null) {
+            writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
+            writer.put(RequestsTags.TAG_RESOUCRE_CONTENT, rsp.getContent());
+        }
+        writer.flush();
     }
 }

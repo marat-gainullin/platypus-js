@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  *
@@ -73,7 +72,7 @@ public class DatabaseMdCache implements DbMetadataCache {
 
     @Override
     public Fields getTableMetadata(String aTableName) throws Exception {
-        return tablesFields.get(aTableName, null, null);
+        return tablesFields.get(aTableName);
     }
 
     @Override
@@ -222,7 +221,7 @@ public class DatabaseMdCache implements DbMetadataCache {
         }
 
         @Override
-        protected Fields getNewEntry(String aId, Consumer<Fields> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        protected Fields getNewEntry(String aId) throws Exception {
             if (client != null && aId != null && !aId.isEmpty()) {
                 SqlDriver sqlDriver = getConnectionDriver();
                 assert sqlDriver != null;
@@ -246,27 +245,14 @@ public class DatabaseMdCache implements DbMetadataCache {
                         Map<String, Fields> fieldses = query(lOwner, lTableNames, true);
                         if (fieldses != null && !fieldses.isEmpty()) {
                             assert fieldses.size() == 1;
-                            if (onSuccess != null) {
-                                onSuccess.accept(fieldses.values().iterator().next());
-                                return null;
-                            } else {
-                                return fieldses.values().iterator().next();
-                            }
+                            return fieldses.values().iterator().next();
                         } else {
                             SqlCompiledQuery compiledQuery = new SqlCompiledQuery(client, dbId, SQLUtils.makeTableNameMetadataQuery(aId));
                             Rowset rs = compiledQuery.executeQuery(null, null);
-                            if (onSuccess != null) {
-                                onSuccess.accept(rs.getFields());
-                                return null;
-                            } else {
-                                return rs.getFields();
-                            }
+                            return rs.getFields();
                         }
                     }
                 }
-            }
-            if (onSuccess != null) {
-                onSuccess.accept(null);
             }
             return null;
         }
@@ -502,7 +488,7 @@ public class DatabaseMdCache implements DbMetadataCache {
     @Override
     public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
         if (aTableName != null && !aTableName.isEmpty() && tablesIndexes != null) {
-            return tablesIndexes.get(aTableName, null, null);
+            return tablesIndexes.get(aTableName);
         }
         return null;
     }
@@ -519,7 +505,7 @@ public class DatabaseMdCache implements DbMetadataCache {
         }
 
         @Override
-        protected DbTableIndexes getNewEntry(String aId, Consumer<DbTableIndexes> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        protected DbTableIndexes getNewEntry(String aId) throws Exception {
             if (client != null) {
                 SqlDriver sqlDriver = getConnectionDriver();
                 assert sqlDriver != null;
@@ -556,18 +542,10 @@ public class DatabaseMdCache implements DbMetadataCache {
                                 }
                                 dbTableIndexes.sortIndexesColumns();
                             }
-                            if (onSuccess != null) {
-                                onSuccess.accept(dbTableIndexes);
-                                return null;
-                            } else {
-                                return dbTableIndexes;
-                            }
+                            return dbTableIndexes;
                         }
                     }
                 }
-            }
-            if (onSuccess != null) {
-                onSuccess.accept(null);
             }
             return null;
         }

@@ -312,11 +312,6 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationInitResourceName() {
-        return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitApp.sql";
-    }
-
-    @Override
     public String getUsersSpaceInitResourceName() {
         return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitUsersSpace.sql";
     }
@@ -442,16 +437,6 @@ public class PostgreSqlDriver extends SqlDriver {
             aDescription = "";
         }
         return String.format(COMMIT_DDL_CLAUSE, String.format("comment on table %s is '%s'", sqlText, aDescription.replaceAll("'", "''")));
-    }
-
-    @Override
-    public String getSql4MtdEntitiesParentsList(String aChildParamName) {
-        return String.format(SQL_PARENTS_LIST, aChildParamName);
-    }
-
-    @Override
-    public String getSql4MtdEntitiesChildrenList(String aParentParamName) {
-        return String.format(SQL_CHILDREN_LIST, aParentParamName);
     }
 
     @Override

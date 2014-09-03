@@ -82,11 +82,6 @@ public class ParametersRowset extends Rowset {
     }
 
     @Override
-    public boolean nextPage() {
-        return false;
-    }
-
-    @Override
     public boolean next() {
         return currentRowPos++ < 1;
     }

@@ -53,19 +53,6 @@ public abstract class SqlDriver {
     }
 
     /**
-     * Adds tables, foreign keys etc. to a database for application in database storage.
-     * @param aConnection
-     * @throws Exception 
-     */
-    public void initializeApplication(Connection aConnection) throws Exception {
-        if (!checkApplicationInitialized(aConnection)) {
-            String scriptText = readApplicationInitScriptResource();
-            Logger.getLogger(SqlDriver.class.getName()).log(Level.INFO, "About to initialize in-database application.");
-            applyScript(scriptText, aConnection);
-        }
-    }
-    
-    /**
      * Adds tables, foreign keys etc. to a database for in database users space
      * @param aConnection
      * @throws Exception 
@@ -116,14 +103,6 @@ public abstract class SqlDriver {
      * @return TypesResolver instance
      */
     public abstract TypesResolver getTypesResolver();
-
-    /**
-     *
-     * Gets in database application initial script location and file name.
-     *
-     * @return
-     */
-    public abstract String getApplicationInitResourceName();
 
     /**
      *
@@ -329,24 +308,6 @@ public abstract class SqlDriver {
 
     /**
      * *
-     * Gets sql for getting parents nodes from MTD_ENTITIES table.
-     *
-     * @param aChildParamName id of the child node
-     * @return sql text
-     */
-    public abstract String getSql4MtdEntitiesParentsList(String aChildParamName);
-
-    /**
-     * *
-     * Gets sql for getting children nodes from MTD_ENTITIES table.
-     *
-     * @param aChildParamName id of the parent node
-     * @return sql text
-     */
-    public abstract String getSql4MtdEntitiesChildrenList(String aParentParamName);
-
-    /**
-     * *
      * Gets sql clause for dropping the table.
      *
      * @param aSchemaName Schema name
@@ -548,24 +509,6 @@ public abstract class SqlDriver {
         }
     }
 
-    private boolean checkApplicationInitialized(Connection aConnection) {
-        try {
-            try (PreparedStatement stmt = aConnection.prepareStatement(String.format(SQLUtils.SQL_MAX_COMMON_BY_FIELD, ClientConstants.F_MDENT_ID, ClientConstants.F_MDENT_ID, ClientConstants.T_MTD_ENTITIES))) {
-                ResultSet res = stmt.executeQuery();
-                res.close();
-            }
-            return true;
-        } catch (SQLException ex) {
-            try {
-                aConnection.rollback();
-            } catch (SQLException ex1) {
-                Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, null, ex1);
-            }
-            Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Application schema seems to be uninitialized. {0}", ex.getMessage());
-        }
-        return false;
-    }
-
     private boolean checkUsersSpaceInitialized(Connection aConnection) {
         try {
             try (PreparedStatement stmt = aConnection.prepareStatement(String.format(SQLUtils.SQL_MAX_COMMON_BY_FIELD, ClientConstants.F_USR_NAME, ClientConstants.F_USR_NAME, ClientConstants.T_MTD_USERS))) {
@@ -600,11 +543,6 @@ public abstract class SqlDriver {
             Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Database vertioning seems to be uninitialized. {0}", ex.getMessage());
         }
         return false;
-    }
-    
-    private String readApplicationInitScriptResource() throws IOException {
-        String resName = getApplicationInitResourceName();
-        return readScriptResource(resName);
     }
     
     private String readUsersSpaceInitScriptResource() throws IOException {

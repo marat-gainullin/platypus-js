@@ -319,24 +319,6 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4MtdEntitiesParentsList(String aChildParamName) {
-        if (aChildParamName != null) {
-            return "select mtd." + ClientConstants.F_MDENT_ID + ", mtd." + ClientConstants.F_MDENT_PARENT_ID + " from " + ClientConstants.T_MTD_ENTITIES + " mtd start with mtd." + ClientConstants.F_MDENT_ID + " = :" + aChildParamName + " connect by prior mtd." + ClientConstants.F_MDENT_PARENT_ID + "=mtd." + ClientConstants.F_MDENT_ID;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4MtdEntitiesChildrenList(String aParentParamName) {
-        if (aParentParamName == null || aParentParamName.isEmpty()) {
-            return null;
-        } else {
-            return "SELECT T_MTD_ENTITIES_1.MDENT_ID, T_MTD_ENTITIES_1.MDENT_NAME, T_MTD_ENTITIES_1.MDENT_PARENT_ID, T_MTD_ENTITIES_1.MDENT_TYPE, T_MTD_ENTITIES_1.MDENT_CONTENT_TXT, T_MTD_ENTITIES_1.MDENT_CONTENT_TXT_SIZE, T_MTD_ENTITIES_1.MDENT_CONTENT_TXT_CRC32 FROM MTD_ENTITIES T_MTD_ENTITIES_1 START WITH (T_MTD_ENTITIES_1.MDENT_ID=:" + aParentParamName + ") CONNECT BY (PRIOR T_MTD_ENTITIES_1.MDENT_ID=T_MTD_ENTITIES_1.MDENT_PARENT_ID)";
-        }
-    }
-
-    @Override
     public String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException {
         if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
             return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
@@ -453,11 +435,6 @@ public class OracleSqlDriver extends SqlDriver {
         List<ForeignKeySpec> fkList = new ArrayList();
         fkList.add(aFk);
         return getSql4CreateFkConstraint(aSchemaName, fkList);
-    }
-
-    @Override
-    public String getApplicationInitResourceName() {
-        return "/" + OracleSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/OracleInitApp.sql";
     }
 
     @Override

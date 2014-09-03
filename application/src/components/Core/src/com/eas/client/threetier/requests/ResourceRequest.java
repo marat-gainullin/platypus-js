@@ -6,15 +6,41 @@ package com.eas.client.threetier.requests;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
+import java.util.Date;
 
 /**
  *
  * @author pk, mg refactoring
  */
-public class KeepAliveRequest extends Request {
+public class ResourceRequest extends Request {
 
-    public KeepAliveRequest() {
-        super(Requests.rqKeepAlive);
+    protected Date timeStamp;
+    protected String resourceName;
+
+    public ResourceRequest() {
+        super(Requests.rqResource);
+    }
+
+    public ResourceRequest(Date aTimeStamp, String aResourceName) {
+        this();
+        timeStamp = aTimeStamp;
+        resourceName = aResourceName;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String aValue) {
+        resourceName = aValue;
+    }
+
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Date aValue) {
+        timeStamp = aValue;
     }
 
     @Override
@@ -24,8 +50,31 @@ public class KeepAliveRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
+        protected byte[] content;
+        protected Date timeStamp;
+
         public Response() {
             super();
+        }
+
+        public Response(byte[] content, Date timeStamp) {
+            super();
+        }
+
+        public byte[] getContent() {
+            return content;
+        }
+
+        public void setContent(byte[] aValue) {
+            content = aValue;
+        }
+
+        public Date getTimeStamp() {
+            return timeStamp;
+        }
+
+        public void setTimeStamp(Date aValue) {
+            timeStamp = aValue;
         }
 
         @Override

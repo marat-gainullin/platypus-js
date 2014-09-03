@@ -1,8 +1,6 @@
 package com.eas.client.scripts;
 
-import com.eas.client.AppCache;
-import com.eas.client.ClientConstants;
-import com.eas.client.metadata.ApplicationElement;
+import com.eas.concurrent.CallableConsumer;
 import com.eas.script.ScriptUtils;
 import java.util.*;
 import java.util.logging.Level;
@@ -10,7 +8,6 @@ import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.CallNode;
 import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
@@ -43,16 +40,16 @@ public class DependenciesWalker {
     private final Set<String> dynamicDependencies = new HashSet<>();
     private FunctionNode sourceRoot;
     private String source;
-    private AppCache cache;
+    private CallableConsumer<Boolean, String> validator;
 
     public DependenciesWalker(String aSource) {
         this(aSource, null);
     }
 
-    public DependenciesWalker(String aSource, AppCache aCache) {
+    public DependenciesWalker(String aSource, CallableConsumer<Boolean, String> aValidator) {
         super();
         source = aSource;
-        cache = aCache;
+        validator = aValidator;
     }
 
     public void walk() {
@@ -144,21 +141,12 @@ public class DependenciesWalker {
             private void processIdentNode(IdentNode identNode) {
                 String name = identNode.getName();
                 dependenceLikeIdentifiers.add(name);
-                if (cache != null) {
-                    try {
-                        ApplicationElement appElement = cache.get(name);
-                        if (appElement != null) {
-                            if (appElement.getType() == ClientConstants.ET_COMPONENT
-                                    || appElement.getType() == ClientConstants.ET_FORM
-                                    || appElement.getType() == ClientConstants.ET_REPORT) {
-                                putDependence(name);
-                            } else {
-                                Logger.getLogger(DependenciesWalker.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript indentifier {0} found that is the same with non-module application element).", appElement.getName());
-                            }
-                        }// ordinary script class
-                    } catch (Exception ex) {
-                        Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, ex.getMessage());
+                try {
+                    if (validator != null && validator.call(name)) {
+                        putDependence(name);
                     }
+                } catch (Exception ex) {
+                    Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
             }
 

@@ -40,6 +40,8 @@ public abstract class PlatypusConnection implements AppConnection {
         }
     }
     
+    public abstract String getUrl();
+    
     protected String sessionId;
     protected String password;
     protected String login;

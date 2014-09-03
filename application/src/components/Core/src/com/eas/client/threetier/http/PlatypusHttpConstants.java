@@ -19,6 +19,7 @@ public class PlatypusHttpConstants {
     public static final String SSL = "SSL";    
     public static final int PORT_HTTP = 80;    
     public static final int PORT_HTTPS = 443;    
+    public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
     public static final String HEADERS_ENCODING_NAME = "US-ASCII";    
     public static final String HEADER_WWW_AUTH = "WWW-Authenticate";    
     public static final String HEADER_AUTHORIZATION = "authorization";    
@@ -27,6 +28,8 @@ public class PlatypusHttpConstants {
     public static final String HEADER_USER_AGENT = "User-Agent";    
     public static final String HEADER_COOKIE = "Cookie";    
     public static final String HEADER_LOCATION = "Location";
+    public static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Sicne";
+    public static final String HEADER_LAST_MODIFIED = "Last-Modified";
     public static final String BASIC_AUTH_NAME = "Basic";    
     public static final String FORM_AUTH_NAME = "Form";
     public static final String DIGEST_AUTH_NAME = "Digest";

@@ -343,11 +343,6 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationInitResourceName() {
-        return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitApp.sql";
-    }
-
-    @Override
     public String getUsersSpaceInitResourceName() {
         return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitUsersSpace.sql";
     }
@@ -513,25 +508,6 @@ public class MySqlSqlDriver extends SqlDriver {
             return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
         }
         return null;
-    }
-
-    @Override
-    public String getSql4MtdEntitiesParentsList(String aChildParamName) {
-        if (aChildParamName == null || aChildParamName.isEmpty()) {
-            return null;
-        } else {
-            return "call fetch_parent('mtd_entities', 'mdent_id, mdent_parent_id', 'mdent_id', 'mdent_parent_id', :" + aChildParamName + " , 1000, false, @a);";
-        }
-    }
-
-    @Override
-    public String getSql4MtdEntitiesChildrenList(String aParentParamName) {
-        if (aParentParamName == null || aParentParamName.isEmpty()) {
-            return null;
-        } else {
-            return "call fetch_children('mtd_entities', 'mdent_id, mdent_name, mdent_parent_id, mdent_type, mdent_content_txt, mdent_content_txt_size, mdent_content_txt_crc32','mdent_id', 'mdent_parent_id', :" + aParentParamName + " , 1000, false, @a);";
-        }
-
     }
 
     @Override

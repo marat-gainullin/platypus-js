@@ -289,14 +289,19 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public final void requery() throws Exception {
         requery(null, null);
     }
+    
+    public void requery(final JSObject aOnSuccess) throws Exception {
+        requery(aOnSuccess, null);
+    }
+    
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
+            + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
+            + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
         try {
             executeRootEntities(true);
@@ -322,11 +327,11 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
             + "* Refreshes the model, only if any of its parameters has changed.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
+            + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
+            + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
+    @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
         try {
             executeRootEntities(false);
@@ -383,18 +388,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         boolean res = isAjusting();
         assert res;
         if (ajustingCounter == 1 && savedEntitiesRowIndexes != null && savedRowIndexEntities != null) {
-            for (Entry<E, Integer> entr : savedEntitiesRowIndexes) {
-                if (entr != null) {
+            savedEntitiesRowIndexes.stream().forEach((entry) -> {
+                if (entry != null) {
                     try {
-                        E ent = entr.getKey();
+                        E ent = entry.getKey();
                         if (ent != null && ent.getRowset() != null) {
-                            ent.getRowset().absolute(entr.getValue());
+                            ent.getRowset().absolute(entry.getValue());
                         }
                     } catch (Exception ex) {
                         Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            }
+            });
             savedRowIndexEntities.clear();
             savedEntitiesRowIndexes.clear();
         }
@@ -451,9 +456,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         if (entity2Delete != null) {
             Set<Relation<E>> rels = entity2Delete.getInOutRelations();
             if (rels != null) {
-                for (Relation<E> rel : rels) {
+                rels.stream().forEach((rel) -> {
                     removeRelation(rel);
-                }
+                });
             }
             removeEntity((E) entity2Delete);
         }

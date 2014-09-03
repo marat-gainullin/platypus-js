@@ -6,8 +6,8 @@ package com.eas.client.threetier;
 
 import com.eas.client.threetier.platypus.PlatypusNativeConnection;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.binary.PlatypusRequestReader;
-import com.eas.client.threetier.binary.RequestsTags;
+import com.eas.client.threetier.platypus.PlatypusRequestReader;
+import com.eas.client.threetier.platypus.RequestsTags;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;

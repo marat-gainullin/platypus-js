@@ -9,6 +9,7 @@
  */
 package com.eas.client.model;
 
+import com.eas.client.model.query.StoredQueryFactory;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;

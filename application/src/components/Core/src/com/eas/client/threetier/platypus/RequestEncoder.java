@@ -6,7 +6,6 @@
 package com.eas.client.threetier.platypus;
 
 import com.eas.client.threetier.Request;
-import com.eas.client.threetier.binary.PlatypusRequestWriter;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayOutputStream;
