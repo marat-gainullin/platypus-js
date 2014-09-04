@@ -2,28 +2,23 @@ package com.eas.client;
 
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.cache.FreqCache;
-import com.eas.client.exceptions.UnboundSqlParameterException;
-import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.queries.JsQuery;
 import com.eas.client.queries.PlatypusScriptedFlowProvider;
-import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.client.scripts.store.Dom2ModelDocument;
 import com.eas.script.ScriptUtils;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -36,151 +31,21 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ScriptedDatabasesClient extends DatabasesClient {
 
-    protected static final String JAVASCRIPT_QUERY_CONTENTS = "javascript query";
+    protected ApplicationSourceIndexer indexer;
     // key - validator name, value datasources list
     protected Map<String, Collection<String>> validators = new HashMap<>();
-    //
-    protected FreqCache<String, SqlQuery> scriptedQueries = new FreqCache<String, SqlQuery>() {
-
-        private void readScriptFields(String aQueryId, JSObject sSchema, Fields fields) {
-            Object oLength = sSchema.getMember("length");
-            if (oLength instanceof Number) {
-                int length = ((Number) oLength).intValue();
-                for (int i = 0; i < length; i++) {
-                    Object oElement = sSchema.getSlot(i);
-                    if (oElement instanceof JSObject) {
-                        JSObject sElement = (JSObject) oElement;
-                        Object oFieldName = ScriptUtils.toJava(sElement.hasMember("name") ? sElement.getMember("name") : null);
-                        if (oFieldName instanceof String && !((String) oFieldName).isEmpty()) {
-                            String sFieldName = (String) oFieldName;
-                            Field field = fields instanceof Parameters ? new Parameter() : new Field();
-                            field.setTypeInfo(DataTypeInfo.OTHER);
-                            fields.add(field);
-                            field.setName(sFieldName);
-                            field.setOriginalName(sFieldName);
-                            Object oEntity = ScriptUtils.toJava(sElement.hasMember("entity") ? sElement.getMember("entity") : null);
-                            if (oEntity instanceof String && !((String) oEntity).isEmpty()) {
-                                field.setTableName((String) oEntity);
-                            } else {
-                                field.setTableName(aQueryId);
-                            }
-                            Object oDescription = ScriptUtils.toJava(sElement.hasMember("description") ? sElement.getMember("description") : null);
-                            if (oDescription instanceof String && !((String) oDescription).isEmpty()) {
-                                field.setDescription((String) oDescription);
-                            }
-                            Object oType = sElement.getMember("type");
-                            if (oType instanceof JSObject && ((JSObject) oType).isFunction()) {
-                                Object ofName = ScriptUtils.toJava(((JSObject) oType).getMember("name"));
-                                if (ofName instanceof String) {
-                                    String fName = (String) ofName;
-                                    if (String.class.getSimpleName().equals(fName)) {
-                                        field.setTypeInfo(DataTypeInfo.VARCHAR.copy());
-                                    } else if (Number.class.getSimpleName().equals(fName)) {
-                                        field.setTypeInfo(DataTypeInfo.DECIMAL.copy());
-                                    } else if (Boolean.class.getSimpleName().equals(fName)) {
-                                        field.setTypeInfo(DataTypeInfo.BOOLEAN.copy());
-                                    } else if (Date.class.getSimpleName().equals(fName)) {
-                                        field.setTypeInfo(DataTypeInfo.TIMESTAMP.copy());
-                                    }
-                                }
-                            }
-                            Object oRequired = ScriptUtils.toJava(sElement.hasMember("required") ? sElement.getMember("required") : null);
-                            if (oRequired instanceof Boolean) {
-                                boolean bRequired = (Boolean) oRequired;
-                                field.setNullable(!bRequired);
-                            }
-                            Object oKey = ScriptUtils.toJava(sElement.hasMember("key") ? sElement.getMember("key") : null);
-                            if (oKey instanceof Boolean) {
-                                boolean bKey = (Boolean) oKey;
-                                field.setPk(bKey);
-                                field.setNullable(false);
-                            }
-                            Object oRef = sElement.hasMember("ref") ? sElement.getMember("ref") : null;
-                            if (oRef instanceof JSObject) {
-                                JSObject sRef = (JSObject) oRef;
-                                Object oProperty = ScriptUtils.toJava(sRef.hasMember("property") ? sRef.getMember("property") : null);
-                                if (oProperty instanceof String) {
-                                    String sProperty = (String) oProperty;
-                                    if (!sProperty.isEmpty()) {
-                                        Object oRefEntity = sRef.hasMember("entity") ? sRef.getMember("entity") : null;
-                                        String sRefEntity;
-                                        if (oRefEntity instanceof String && !((String) oRefEntity).isEmpty()) {
-                                            sRefEntity = (String) oRefEntity;
-                                        } else {
-                                            sRefEntity = aQueryId;
-                                        }
-                                        field.setFk(new ForeignKeySpec(null, aQueryId, field.getName(), null, ForeignKeySpec.ForeignKeyRule.CASCADE, ForeignKeySpec.ForeignKeyRule.CASCADE, false, null, sRefEntity, sProperty, null));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected SqlQuery getNewEntry(final String aQueryId) throws Exception {
-            ApplicationElement ae = appCache.get(aQueryId);
-            if (ae != null && ae.getType() == ClientConstants.ET_COMPONENT) {
-                final String aDatasourceId = aQueryId;
-                SqlQuery query = new SqlQuery(ScriptedDatabasesClient.this) {
-                    @Override
-                    public SqlCompiledQuery compile() throws UnboundSqlParameterException, Exception {
-                        SqlCompiledQuery compiled = new SqlCompiledQuery(ScriptedDatabasesClient.this, aDatasourceId, aQueryId, JAVASCRIPT_QUERY_CONTENTS, getParameters(), getFields(), Collections.<String>emptySet(), Collections.<String>emptySet());
-                        return compiled;
-                    }
-
-                    @Override
-                    public boolean isPublicAccess() {
-                        return true;
-                    }
-                };
-                JSObject schemaContainer = createModule(aQueryId);
-                if (schemaContainer != null) {
-                    Fields fields = new Fields();
-                    query.setFields(fields);
-                    query.setEntityId(aQueryId);
-                    query.setDbId(aDatasourceId);
-                    Object oSchema = schemaContainer.hasMember("schema") ? schemaContainer.getMember("schema") : null;
-                    if (oSchema instanceof JSObject) {
-                        readScriptFields(aQueryId, (JSObject) oSchema, fields);
-                        Parameters params;
-                        Object oParams = schemaContainer.hasMember("params") ? schemaContainer.getMember("params") : null;
-                        if (oParams instanceof JSObject) {
-                            params = new Parameters();
-                            readScriptFields(aQueryId, (JSObject) oParams, params);
-                        } else {
-                            ApplicationElement moduleQuery = getAppCache().get(aQueryId);
-                            ApplicationModel<?, ?, ?, ?> model = Dom2ModelDocument.transform(ScriptedDatabasesClient.this, moduleQuery.getContent());
-                            params = model != null ? model.getParameters() : new Parameters();
-                        }
-                        params.toCollection().stream().forEach((p) -> {
-                            query.putParameter(p.getName(), p.getTypeInfo(), null);
-                        });
-                        return query;
-                    } else {
-                        throw new IllegalStateException(" datasource module: " + aQueryId + " doesn't contain schema");
-                    }
-                } else {
-                    throw new IllegalStateException(" datasource module: " + aQueryId + " not found");
-                }
-            } else {
-                return null;
-            }
-        }
-    };
-
-    protected JSObject createModule(String aModuleId) throws Exception {
-        ScriptedResource.executeScriptResource(aModuleId);
-        return ScriptUtils.createModule(aModuleId);
-    }
 
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
-        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata);
+    public ScriptedDatabasesClient(String aDefaultDatasourceName, ApplicationSourceIndexer aIndexer, boolean aAutoFillMetadata) throws Exception {
+        super(aDefaultDatasourceName, aAutoFillMetadata);
+        indexer = aIndexer;
+    }
+
+    protected JSObject createModule(String aModuleName) throws Exception {
+        ScriptedResource.executeScriptResource(aModuleName);
+        return ScriptUtils.createModule(aModuleName);
     }
 
     /**
@@ -197,25 +62,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public void clearQueries(boolean fireEvents) throws Exception {
-        scriptedQueries.clear();
-        super.clearQueries(fireEvents);
-    }
-    
-    @Override
-    public SqlQuery getAppQuery(final String aQueryId, boolean aCopy) throws Exception {
-        SqlQuery query = scriptedQueries.get(aQueryId);
-        if (query == null) {
-            query = super.getAppQuery(aQueryId, aCopy);
-        }
-        return query;
-    }
-
-    @Override
-    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
-        ApplicationElement appElement = aDatasourceId != null ? getAppCache().get(aDatasourceId) : null;
-        if (appElement == null || appElement.getType() != ClientConstants.ET_COMPONENT) {
-            return super.getDbMetadataCache(aDatasourceId);
+    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceName) throws Exception {
+        AppElementFiles files = indexer.nameToFiles(aDatasourceName);
+        if (files == null || !files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+            return super.getDbMetadataCache(aDatasourceName);
         } else {
             return null;
         }
@@ -223,12 +73,12 @@ public class ScriptedDatabasesClient extends DatabasesClient {
 
     @Override
     public FlowProvider createFlowProvider(String aDbId, final String aEntityId, String aSqlClause, final Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        if (JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
+        if (JsQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
             JSObject dataFeeder = createModule(aEntityId);
             if (dataFeeder != null) {
                 return new PlatypusScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
             } else {
-                throw new IllegalStateException(" datasource module: " + aEntityId + " not found");
+                throw new IllegalStateException(" datasource module: " + aEntityId + " is not found");
             }
         } else {
             return super.createFlowProvider(aDbId, aEntityId, aSqlClause, aExpectedFields, aReadRoles, aWriteRoles);
@@ -236,20 +86,161 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    protected int commit(final String aDatasourceId, final List<Change> aLog) throws Exception {
-        for (String validatorName : validators.keySet()) {
-            Collection<String> datasourcesUnderControl = validators.get(validatorName);
-            // aDatasourceId must be null or it must be contained in datasourcesUnderControl to be validated by script validator
-            if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && aDatasourceId == null) || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceId))) {
-                JSObject validator = ScriptUtils.createModule(validatorName);
-                if (validator != null) {
-                    Object oValidate = validator.getMember("validate");
-                    if (oValidate instanceof JSObject) {
-                        JSObject fValidate = (JSObject) oValidate;
-                        Object oResult = ScriptUtils.toJava(fValidate.call(validator, new Object[]{ScriptUtils.toJs(aLog.toArray()), aDatasourceId}));
-                        if (oResult != null && Boolean.FALSE.equals(ScriptUtils.toJava(oResult))) {
-                            break;
+    protected int commit(final String aDatasourceName, final List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            validate(aDatasourceName, aLog, (Void v) -> {
+                try {
+                    scriptApply(aDatasourceName, aLog, (Integer affectedInModules) -> {
+                        for (int i = aLog.size() - 1; i >= 0; i--) {
+                            if (aLog.get(i).consumed) {
+                                aLog.remove(i);
+                            }
                         }
+                        try {
+                            super.commit(aDatasourceName, aLog, (Integer affectedInBase) -> {
+                                onSuccess.accept((affectedInBase != null ? affectedInBase : 0) + (affectedInModules != null ? affectedInModules : 0));
+                            }, onFailure);
+                        } catch (Exception ex) {
+                            if (onFailure != null) {
+                                onFailure.accept(ex);
+                            }
+                        }
+                    }, onFailure);
+                } catch (Exception ex) {
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
+                }
+            }, onFailure);
+            return 0;
+        } else {
+            validate(aDatasourceName, aLog, null, null);
+            int affectedInModules = scriptApply(aDatasourceName, aLog, null, null);
+            for (int i = aLog.size() - 1; i >= 0; i--) {
+                if (aLog.get(i).consumed) {
+                    aLog.remove(i);
+                }
+            }
+            int affectedInBase = super.commit(aDatasourceName, aLog, null, null);
+            return affectedInModules + affectedInBase;
+        }
+    }
+
+    private int scriptApply(final String aDatasourceName, final List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        List<CallPoint> toBeCalled = new ArrayList<>();
+        if (aDatasourceName != null) {
+            AppElementFiles files = indexer.nameToFiles(aDatasourceName);
+            if (files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                JSObject module = createModule(aDatasourceName);
+                if (module != null) {
+                    Object oApply = module.getMember("apply");
+                    if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
+                        JSObject applyFunction = (JSObject) oApply;
+                        toBeCalled.add(new CallPoint(module, applyFunction));
+                    }
+                }
+            }
+        }
+        if (onSuccess != null) {
+            if (toBeCalled.isEmpty()) {
+                onSuccess.accept(0);
+            } else {
+                CommitProcess process = new CommitProcess(toBeCalled.size(), onSuccess, onFailure);
+                toBeCalled.stream().forEach((v) -> {
+                    v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()),
+                        new Consumer<Integer>() {
+
+                            @Override
+                            public void accept(Integer t) {
+                                process.complete(t != null ? t : 0, null);
+                            }
+                        },
+                        new Consumer<Exception>() {
+
+                            @Override
+                            public void accept(Exception ex) {
+                                process.complete(0, ex);
+                            }
+                        }
+                    });
+                });
+            }
+            return 0;
+        } else {
+            int affected = 0;
+            for (CallPoint v : toBeCalled) {
+                Object oAffected = ScriptUtils.toJava(v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray())}));
+                if (oAffected instanceof Number) {
+                    affected += ((Number) oAffected).intValue();
+                }
+            }
+            return affected;
+        }
+    }
+
+    private static class CallPoint {
+
+        public JSObject module;
+        public JSObject function;
+
+        public CallPoint(JSObject aModule, JSObject aFunction) {
+            super();
+            module = aModule;
+            function = aFunction;
+        }
+    }
+
+    private static class ValidateProcess {
+
+        public int expected;
+        public int completed;
+        public int rowsAffected;
+        public Set<Exception> exceptions = new HashSet<>();
+        public Consumer<Void> onSuccess;
+        public Consumer<Exception> onFailure;
+
+        public ValidateProcess(int aExpected, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
+            expected = aExpected;
+            onSuccess = aOnSuccess;
+            onFailure = aOnFailure;
+        }
+
+        public synchronized void complete(Exception aFailureCause) {
+            if (aFailureCause != null) {
+                exceptions.add(aFailureCause);
+            }
+            if (++completed == expected) {
+                if (exceptions.isEmpty()) {
+                    if (onSuccess != null) {
+                        onSuccess.accept(null);
+                    }
+                } else {
+                    if (onFailure != null) {
+                        StringBuilder eMessagesSum = new StringBuilder();
+                        exceptions.stream().forEach((ex) -> {
+                            if (eMessagesSum.length() > 0) {
+                                eMessagesSum.append("\n");
+                            }
+                            eMessagesSum.append(ex.getMessage());
+                        });
+                        onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
+                    }
+                }
+            }
+        }
+    }
+
+    private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure) {
+        List<CallPoint> toBeCalled = new ArrayList<>();
+        validators.keySet().stream().forEach((validatorName) -> {
+            Collection<String> datasourcesUnderControl = validators.get(validatorName);
+            if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && aDatasourceName == null) || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
+                JSObject module = ScriptUtils.createModule(validatorName);
+                if (module != null) {
+                    Object oValidate = module.getMember("validate");
+                    if (oValidate instanceof JSObject) {
+                        JSObject validateFunction = (JSObject) oValidate;
+                        toBeCalled.add(new CallPoint(module, validateFunction));
                     } else {
                         Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
                     }
@@ -257,31 +248,35 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                     Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
                 }
             }
-        }
-        if (aDatasourceId != null) {
-            ApplicationElement appElement = getAppCache().get(aDatasourceId);
-            if (appElement != null && appElement.getType() == ClientConstants.ET_COMPONENT) {
-                JSObject dataSourceApplier = createModule(aDatasourceId);
-                if (dataSourceApplier != null) {
-                    Object oApply = dataSourceApplier.getMember("apply");
-                    if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
-                        JSObject fApply = (JSObject) oApply;
-                        fApply.call(dataSourceApplier, new Object[]{ScriptUtils.toJs(aLog.toArray())});
-                    }
-                }
+        });
+        if (onSuccess != null) {
+            if (toBeCalled.isEmpty()) {
+                onSuccess.accept(null);
+            } else {
+                ValidateProcess process = new ValidateProcess(toBeCalled.size(), onSuccess, onFailure);
+                toBeCalled.stream().forEach((v) -> {
+                    v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()), aDatasourceName,
+                        new Consumer<Void>() {
+
+                            @Override
+                            public void accept(Void t) {
+                                process.complete(null);
+                            }
+                        },
+                        new Consumer<Exception>() {
+
+                            @Override
+                            public void accept(Exception ex) {
+                                process.complete(ex);
+                            }
+                        }
+                    });
+                });
             }
-        }
-        boolean consumed = true;
-        for (Change change : aLog) {
-            if (!change.consumed) {
-                consumed = false;
-            }
-        }
-        if (!consumed) {
-            return super.commit(aDatasourceId, aLog);
         } else {
-            aLog.clear();
-            return 0;
+            toBeCalled.stream().forEach((v) -> {
+                v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()), aDatasourceName});
+            });
         }
     }
 }

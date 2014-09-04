@@ -4,7 +4,7 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.model.query.StoredQueryFactory;
+import com.eas.client.queries.StoredQueryFactory;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;

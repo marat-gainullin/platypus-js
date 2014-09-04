@@ -7,9 +7,10 @@
  */
 package com.eas.client;
 
-import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.queries.LocalQueriesProxy;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.settings.ConnectionSettings;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
@@ -51,33 +52,22 @@ public class ClientFactory {
             } else if (aApplicationUrl.toLowerCase().startsWith("platypus")) {
                 return new PlatypusNativeClient(aApplicationUrl);
             } else if (aApplicationUrl.toLowerCase().startsWith("file")) {
-                AppCache appCache = obtainTwoTierAppCache(aApplicationUrl, null);
-                return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
+            File f = new File(new URI(aApplicationUrl));
+            if (f.exists() && f.isDirectory()) {
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath());
+                ScriptedDatabasesClient client = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true);
+                QueriesProxy qp = new LocalQueriesProxy(client, indexer);
+                client.setQueries(qp);
+                return client;
+            } else {
+                throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory or JNDI resource.");
+            }
             } else {
                 throw new Exception("Unknown protocol in url: " + aApplicationUrl);
             }
         } else {
             throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
         }
-    }
-    public static final String H2DB_FILE_SUFFIX = ".h2.db";
-
-    public static AppCache obtainTwoTierAppCache(String aApplicationUrl, FilesAppCache.ScanCallback aCallBack) throws Exception {
-        AppCache appCache;
-        if (aApplicationUrl.startsWith("jndi")) {
-            Logger.getLogger(ClientFactory.class.getName()).info("Resident modules are specified on the command line via parameter 'tasks'.");
-            appCache = new DatabaseAppCache(aApplicationUrl);
-        } else {// file://
-            File f = new File(new URI(aApplicationUrl));
-            if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(f.getPath(), aCallBack);
-                filesAppCache.watch();
-                appCache = filesAppCache;
-            } else {
-                throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory or JNDI resource.");
-            }
-        }
-        return appCache;
     }
 
     public static ConnectionSettings[] getSettings() throws Exception {

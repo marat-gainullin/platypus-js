@@ -9,7 +9,6 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.model.query.StoredQueryFactory;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -35,7 +34,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
     public static final String DATASOURCE_NAME_TAG_NAME = "Name";
     public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-    protected StoredQueryFactory queryFactory;
     protected C client;
     protected Set<Relation<E>> relations = new HashSet<>();
     protected Map<Long, E> entities = new HashMap<>();

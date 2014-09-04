@@ -57,16 +57,6 @@ public interface DbClient extends Client<SqlQuery> {
     public SqlDriver getConnectionDriver(String aDatasource) throws Exception;
 
     /**
-     * Returns SqlQuery instance, containing fields and parameters description.
-     * It returned without sql text and main table.
-     *
-     * @param aQueryId
-     * @return SqlQuery instance.
-     * @throws java.lang.Exception
-     */
-    public SqlQuery getAppQuery(String aQueryId, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
-    /**
      * Creates and returns new data flow provider, setted up with settings
      * passed through parameters
      *

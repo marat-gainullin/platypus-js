@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  * Specific <code>FlowProvider</code> implementation, that allows js modules to
@@ -88,29 +89,42 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
                 JSObject jsFirstPage = (JSObject) oFirstPage;
                 if (jsFirstPage.isFunction()) {
                     if (onSuccess != null) {
-                        jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{new Consumer<JSObject>() {
+                        Object oRowset = jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{new Consumer<JSObject>() {
 
                             @Override
                             public void accept(JSObject jsRowset) {
-                                Rowset rowset = new Rowset(expectedFields);
                                 try {
+                                    Rowset rowset = new Rowset(expectedFields);
                                     readRowset(jsRowset, rowset);
-                                } catch (Exception ex) {
+                                    try {
+                                        onSuccess.accept(rowset);
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                } catch (RowsetMissingException | RowsetException ex) {
                                     if (onFailure != null) {
                                         onFailure.accept(ex);
                                     }
-                                    return;
                                 }
-                                onSuccess.accept(rowset);
                             }
 
                         }, onFailure}));
-                        return null;
+                        if (oRowset == null || oRowset instanceof Undefined) {
+                            return null;
+                        } else {
+                            Rowset rowset = new Rowset(expectedFields);
+                            readRowset((JSObject) oRowset, rowset);
+                            return rowset;
+                        }
                     } else {
-                        Rowset rowset = new Rowset(expectedFields);
                         Object oRowset = jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{aParameters.getPublished()}));
-                        readRowset((JSObject) oRowset, rowset);
-                        return rowset;
+                        if (oRowset == null || oRowset instanceof Undefined) {
+                            return null;
+                        } else {
+                            Rowset rowset = new Rowset(expectedFields);
+                            readRowset((JSObject) oRowset, rowset);
+                            return rowset;
+                        }
                     }
                 }
             }
@@ -126,27 +140,38 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
                 JSObject jsNextPage = (JSObject) oNextPage;
                 if (jsNextPage.isFunction()) {
                     if (onSuccess != null) {
-                        jsNextPage.call(source, ScriptUtils.toJs(new Object[]{new Consumer<JSObject>() {
+                        Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{new Consumer<JSObject>() {
 
                             @Override
                             public void accept(JSObject jsRowset) {
                                 Rowset rowset = new Rowset(expectedFields);
                                 try {
                                     readRowset(jsRowset, rowset);
-                                } catch (Exception ex) {
+                                    try {
+                                        onSuccess.accept(rowset);
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                } catch (RowsetMissingException | RowsetException ex) {
                                     if (onFailure != null) {
                                         onFailure.accept(ex);
                                     }
-                                    return;
                                 }
-                                onSuccess.accept(rowset);
                             }
 
                         }, onFailure}));
-                        return null;
+                        if (oRowset == null || oRowset instanceof Undefined) {
+                            return null;
+                        } else {
+                            Rowset rowset = new Rowset(expectedFields);
+                            readRowset((JSObject) oRowset, rowset);
+                            return rowset;
+                        }
                     } else {
                         Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
-                        if (oRowset != null) {
+                        if (oRowset == null || oRowset instanceof Undefined) {
+                            return null;
+                        } else {
                             Rowset rowset = new Rowset(expectedFields);
                             readRowset((JSObject) oRowset, rowset);
                             return rowset;

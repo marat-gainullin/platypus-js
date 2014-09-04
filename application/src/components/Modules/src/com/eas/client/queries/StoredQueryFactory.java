@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.query;
+package com.eas.client.queries;
 
 import com.bearsoft.rowset.metadata.*;
 import com.eas.client.AppElementFiles;
@@ -12,7 +12,9 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.Relation;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.model.query.QueryEntity;
+import com.eas.client.model.query.QueryModel;
+import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.JsDoc;
 import java.io.StringReader;

@@ -42,9 +42,9 @@ public class SqlQuery extends Query<DbClient> {
     // the same as sqlText, but it is used when very custom sql is needed.
     protected String fullSqlText;
     protected Set<String> writable;
-    private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
-    private boolean publicAccess;
-    private boolean command;
+    protected int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
+    protected boolean publicAccess;
+    protected boolean command;
 
     /**
      * Creates an instance of Query with empty SQL query text and parameters
@@ -56,7 +56,7 @@ public class SqlQuery extends Query<DbClient> {
 
     public SqlQuery(DbClient aClient) {
         this();
-        client = aClient;
+        core = aClient;
     }
 
     /**
@@ -252,7 +252,7 @@ public class SqlQuery extends Query<DbClient> {
                 compiledSb.append(sm.group(0));
             }
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(client, datasourceName, compiledSb.toString(), ps, fields, readRoles, writeRoles);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(core, datasourceName, compiledSb.toString(), ps, fields, readRoles, writeRoles);
         compiled.setEntityId(entityId);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);
@@ -297,7 +297,7 @@ public class SqlQuery extends Query<DbClient> {
         }
         String sqlCompiledText = m.replaceAll("?");
         sqlCompiledText = RowsetUtils.makeQueryMetadataQuery(sqlCompiledText);
-        SqlCompiledQuery compiled = new SqlCompiledQuery(client, datasourceName, sqlCompiledText, ps);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(core, datasourceName, sqlCompiledText, ps);
         compiled.setPageSize(pageSize);
         return compiled;
     }

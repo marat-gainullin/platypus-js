@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  */
 public abstract class Query<T extends Client> {
 
-    protected T client;
+    protected T core;
     // parameters propagation. ParamName - DsName, ParamName
     protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected transient Fields fields = new Fields();
@@ -52,7 +52,7 @@ public abstract class Query<T extends Client> {
 
     public Query(T aClient) {
         this();
-        client = aClient;
+        core = aClient;
     }
 
     /**
@@ -134,7 +134,7 @@ public abstract class Query<T extends Client> {
                     }
                 }
             }
-            client = aSource.getClient();
+            core = aSource.getClient();
         }
     }
 
@@ -157,7 +157,7 @@ public abstract class Query<T extends Client> {
     }
 
     public T getClient() {
-        return client;
+        return core;
     }
 
     public PropertyChangeSupport getChangeSupport() {

@@ -27,7 +27,7 @@ public class PlatypusQuery extends Query<AppClient> {
 
     protected PlatypusQuery(Query<AppClient> aSource) {
         super(aSource);
-        client = aSource.getClient();
+        core = aSource.getClient();
         createFlow();
     }
 
@@ -52,7 +52,7 @@ public class PlatypusQuery extends Query<AppClient> {
     }
 
     public void enqueueUpdate() throws Exception {
-        client.enqueueUpdate(entityId, params);
+        core.enqueueUpdate(entityId, params);
     }
 
     /**
@@ -91,13 +91,13 @@ public class PlatypusQuery extends Query<AppClient> {
     }
 
     private void createFlow() {
-        if (client != null && entityId != null) {
-            flow = client.createFlowProvider(entityId, fields);
+        if (core != null && entityId != null) {
+            flow = core.createFlowProvider(entityId, fields);
         }
     }
 
-    public void setClient(PlatypusClient aClient) {
-        client = aClient;
+    public void setClient(PlatypusClient aCore) {
+        core = aCore;
         createFlow();
     }
 }

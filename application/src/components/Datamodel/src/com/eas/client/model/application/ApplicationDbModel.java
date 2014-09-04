@@ -7,7 +7,7 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DbClient;
-import com.eas.client.model.query.StoredQueryFactory;
+import com.eas.client.queries.StoredQueryFactory;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.script.NoPublisherException;

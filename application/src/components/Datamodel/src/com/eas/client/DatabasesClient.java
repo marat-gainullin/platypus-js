@@ -26,9 +26,9 @@ import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.model.query.StoredQueryFactory;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.PlatypusJdbcFlowProvider;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
@@ -69,8 +69,6 @@ public class DatabasesClient implements DbClient {
     // metadata
     protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();
     protected boolean autoFillMetadata = true;
-    // queries
-    protected StoredQueryFactory queries;
     // callback interface for context
     protected ContextHost contextHost;
     // callback interface for principal
@@ -79,11 +77,13 @@ public class DatabasesClient implements DbClient {
     protected final Set<TransactionListener> transactionListeners = new CopyOnWriteArraySet<>();
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
+    protected QueriesProxy<SqlQuery> queries;
     protected ExecutorService commitProcessor = Executors.newCachedThreadPool();
 
     /**
      *
      * @param aDefaultDatasourceName
+     * @param aQueries
      * @param aAutoFillMetadata If true, metadatacache will be filled with
      * tables, keys and other metadata in schema automatically. Otherwise it
      * will query metadata table by table in each case. Default is true.
@@ -91,8 +91,16 @@ public class DatabasesClient implements DbClient {
      */
     public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
         super();
-        autoFillMetadata = aAutoFillMetadata;
         defaultDatasourceName = aDefaultDatasourceName;
+        autoFillMetadata = aAutoFillMetadata;
+    }
+
+    public QueriesProxy<SqlQuery> getQueries() {
+        return queries;
+    }
+
+    public void setQueries(QueriesProxy<SqlQuery> aQueries) {
+        queries = aQueries;
     }
 
     public String getDefaultDatasourceName() {
@@ -193,35 +201,6 @@ public class DatabasesClient implements DbClient {
                 return null;
             }
         }
-    }
-
-    @Override
-    public SqlQuery getAppQuery(String aQueryId, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (onSuccess != null) {
-            try {
-                SqlQuery res = getAppQuery(aQueryId);
-                try {
-                    onSuccess.accept(res);
-                } catch (Exception ex) {
-                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (Exception ex) {
-                if (onFailure != null) {
-                    onFailure.accept(ex);
-                }
-            }
-            return null;
-        } else {
-            SqlQuery res = getAppQuery(aQueryId);
-            return res;
-        }
-    }
-
-    public SqlQuery getAppQuery(String aQueryId) throws Exception {
-        if (queries == null) {
-            throw new IllegalStateException("Query factory is absent, so don't call getAppQuery.");
-        }
-        return queries.loadQuery(aQueryId);
     }
 
     /**
@@ -425,7 +404,7 @@ public class DatabasesClient implements DbClient {
         return mdCaches.get(aDatasourceId);
     }
 
-    private static class CommitProcess {
+    protected static class CommitProcess {
 
         public int expected;
         public int completed;
@@ -473,7 +452,7 @@ public class DatabasesClient implements DbClient {
             for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
                 List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
                 commit(datasourceName, dbLog, (Integer rowsAffected) -> {
-                    ci.complete(rowsAffected, null);
+                    ci.complete(rowsAffected != null ? rowsAffected : 0, null);
                 }, (Exception ex) -> {
                     ci.complete(0, ex);
                 });
@@ -526,7 +505,7 @@ public class DatabasesClient implements DbClient {
                                     if (queries != null && aEntityId != null) {
                                         SqlQuery query = entityQueries.get(aEntityId);
                                         if (query == null) {
-                                            query = queries.loadQuery(aEntityId);
+                                            query = queries.getQuery(aEntityId, null, null);
                                             if (query != null) {
                                                 entityQueries.put(aEntityId, query);
                                             }
@@ -544,7 +523,7 @@ public class DatabasesClient implements DbClient {
                                         if (queries != null) {
                                             query = entityQueries.get(aEntityId);
                                             if (query == null) {
-                                                query = queries.loadQuery(aEntityId);
+                                                query = queries.getQuery(aEntityId, null, null);
                                                 if (query != null) {
                                                     entityQueries.put(aEntityId, query);
                                                 }
