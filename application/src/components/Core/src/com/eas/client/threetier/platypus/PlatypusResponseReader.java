@@ -7,6 +7,7 @@ package com.eas.client.threetier.platypus;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetReader;
+import com.eas.client.ServerModuleInfo;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.PlatypusRowsetReader;
@@ -35,6 +36,7 @@ import com.eas.script.ScriptUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -150,29 +152,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        boolean permitted = false;
-        if (!input.containsChild(RequestsTags.TAG_MODULE_NAME)) {
-            throw new ProtoReaderException("No module name specified!");
-        }
-        rsp.setModuleName(input.getChild(RequestsTags.TAG_MODULE_NAME).getString());
-        if (input.containsChild(RequestsTags.TAG_MODULE_PERMITTED)) {
-            permitted = input.getChild(RequestsTags.TAG_MODULE_PERMITTED).getBoolean();
-        }
-        rsp.setPermitted(permitted);
-        if (input.containsChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES)) {
-            Set<String> functionNames = new HashSet<>();
-            List<ProtoNode> functionNodes = input.getChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES).getChildren(RequestsTags.TAG_MODULE_FUNCTION_NAME);
-            for (ProtoNode functionNode : functionNodes) {
-                assert functionNode != null;
-                functionNames.add(functionNode.getString());
-            }
-            rsp.setFunctionsNames(functionNames);
-        }
-    }
-
-    @Override
     public void visit(CommitRequest.Response rsp) throws Exception {
         ProtoReader reader = new ProtoReader((new ByteArrayInputStream(bytes)));
         rsp.setUpdated(reader.getInt(RequestsTags.UPDATED_TAG));
@@ -212,7 +191,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
             if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
-                throw new NullPointerException("No query time stamp specified");
+                throw new NullPointerException("No query time-stamp specified");
             }
             rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
             PlatypusQuery appQuery = new PlatypusQuery(null);
@@ -256,7 +235,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (dom.containsChild(RequestsTags.TAG_RESOUCRE_CONTENT)) {
             if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
-                throw new NullPointerException("No resource time stamp specified");
+                throw new NullPointerException("No resource time-stamp specified");
             }
             rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
             ByteArrayOutputStream st = new ByteArrayOutputStream();
@@ -265,4 +244,27 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             rsp.setContent(st.toByteArray());
         }
     }
+
+    @Override
+    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
+        final ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
+        if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+            if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+                throw new NullPointerException("No server module info time-stamp specified");
+            }
+            rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+            String moduleName = dom.getChild(RequestsTags.TAG_MODULE_NAME).getString();
+            boolean permitted = dom.containsChild(RequestsTags.TAG_MODULE_PERMITTED);
+            Set<String> functionNames = new HashSet<>();
+            if (dom.containsChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES)) {
+                List<ProtoNode> functionNodes = dom.getChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES).getChildren(RequestsTags.TAG_MODULE_FUNCTION_NAME);
+                for (ProtoNode functionNode : functionNodes) {
+                    assert functionNode != null;
+                    functionNames.add(functionNode.getString());
+                }
+            }
+            rsp.setInfo(new ServerModuleInfo(moduleName, functionNames, permitted));
+        }
+    }
+
 }

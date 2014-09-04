@@ -7,17 +7,18 @@ package com.eas.client.threetier.platypus;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
+import com.eas.client.ServerModuleInfo;
 import com.eas.client.report.Report;
-import com.eas.client.threetier.requests.ErrorResponse;
-import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
+import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
@@ -177,24 +178,6 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_MODULE_NAME, rsp.getModuleName());
-        writer.put(RequestsTags.TAG_MODULE_PERMITTED, rsp.isPermitted());
-        if (!rsp.getFunctionsNames().isEmpty()) {
-            ByteArrayOutputStream functions = new ByteArrayOutputStream();
-            ProtoWriter functionsWriter = new ProtoWriter(functions);
-            for (String functionName : rsp.getFunctionsNames()) {
-                functionsWriter.put(RequestsTags.TAG_MODULE_FUNCTION_NAME, functionName);
-            }
-            functionsWriter.flush();
-            writer.put(RequestsTags.TAG_MODULE_FUNCTION_NAMES);
-            writer.put(CoreTags.TAG_STREAM, functions);
-        }
-        writer.flush();
-    }
-
-    @Override
     public void visit(CommitRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.UPDATED_TAG, rsp.getUpdated());
@@ -259,4 +242,29 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         }
         writer.flush();
     }
+
+    @Override
+    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
+        ProtoWriter pw = new ProtoWriter(out);
+        if (rsp.getInfo() != null) {
+            ServerModuleInfo info = rsp.getInfo();
+            pw.put(RequestsTags.TAG_MODULE_NAME, info.getModuleName());
+            pw.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
+            if (info.isPermitted()) {
+                pw.put(RequestsTags.TAG_MODULE_PERMITTED);
+            }
+            if (!info.getFunctionsNames().isEmpty()) {
+                ByteArrayOutputStream functions = new ByteArrayOutputStream();
+                ProtoWriter fw = new ProtoWriter(functions);
+                for (String functionName : info.getFunctionsNames()) {
+                    fw.put(RequestsTags.TAG_MODULE_FUNCTION_NAME, functionName);
+                }
+                fw.flush();
+                pw.put(RequestsTags.TAG_MODULE_FUNCTION_NAMES);
+                pw.put(CoreTags.TAG_STREAM, functions);
+            }
+        }
+        pw.flush();
+    }
+
 }

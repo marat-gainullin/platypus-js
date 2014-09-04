@@ -47,22 +47,28 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
                     assert aName.equals(query.getEntityId());
                     entries.put(aName, new ActualCacheEntry<>(query, aResponse.getTimeStamp()));
                     onSuccess.accept(query);
+                } else {
+                    assert entry != null : NEITHER_QUERY_DATA;
+                    onSuccess.accept(entry.getValue());
                 }
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
+            }, onFailure);
             return null;
         } else {
             AppQueryRequest.Response response = conn.executeRequest(request);
-            assert response.getAppQuery() instanceof PlatypusQuery;
-            PlatypusQuery query = (PlatypusQuery) response.getAppQuery();
-            query.setClient(core);
-            assert aName.equals(query.getEntityId());
-            entries.put(aName, new ActualCacheEntry<>(query, response.getTimeStamp()));
-            return query;
+            if (response.getAppQuery() != null) {
+                assert response.getAppQuery() instanceof PlatypusQuery;
+                PlatypusQuery query = (PlatypusQuery) response.getAppQuery();
+                query.setClient(core);
+                assert aName.equals(query.getEntityId());
+                entries.put(aName, new ActualCacheEntry<>(query, response.getTimeStamp()));
+                return query;
+            } else {
+                assert entry != null : NEITHER_QUERY_DATA;
+                return entry.getValue();
+
+            }
         }
     }
+    private static final String NEITHER_QUERY_DATA = "Neither cached, nor network response query found";
 
 }

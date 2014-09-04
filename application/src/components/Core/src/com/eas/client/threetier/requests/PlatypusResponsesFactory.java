@@ -45,7 +45,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(CreateServerModuleRequest rq) throws Exception {
-        response = new CreateServerModuleRequest.Response(null, Collections.<String>emptySet(), true);
+        response = new CreateServerModuleRequest.Response(null);
     }
 
     @Override

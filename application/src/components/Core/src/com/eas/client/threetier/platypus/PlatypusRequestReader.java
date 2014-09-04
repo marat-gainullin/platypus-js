@@ -109,9 +109,21 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     public void visit(ResourceRequest rq) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (!dom.containsChild(RequestsTags.TAG_RESOURCE_NAME)) {
-            throw new NullPointerException("No module name specified");
+            throw new NullPointerException("No resource name specified");
         }
         rq.setResourceName(dom.getChild(RequestsTags.TAG_RESOURCE_NAME).getString());
+        if (dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+            rq.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+        }
+    }
+
+    @Override
+    public void visit(CreateServerModuleRequest rq) throws Exception {
+        final ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
+        if (!dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+            throw new ProtoReaderException("Module name not specified.");
+        }
+        rq.setModuleName(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
         if (dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
             rq.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
         }
@@ -152,15 +164,6 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     break;
             }
         } while (reader.getCurrentTag() != CoreTags.TAG_EOF);
-    }
-
-    @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_MODULE_NAME)) {
-            throw new ProtoReaderException("Module name not specified.");
-        }
-        rq.setModuleName(input.getChild(RequestsTags.TAG_MODULE_NAME).getString());
     }
 
     @Override

@@ -70,7 +70,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                 }
                 entries.put(aName, new ActualCacheEntry<>(query, filesTimeStamp));
             } else {
-                assert entry != null;
+                assert entry != null : "Neither im memory, nor in files query found";
                 query = entry.getValue();
             }
             return query;

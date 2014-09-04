@@ -83,7 +83,6 @@ public class DatabasesClient implements DbClient {
     /**
      *
      * @param aDefaultDatasourceName
-     * @param aQueries
      * @param aAutoFillMetadata If true, metadatacache will be filled with
      * tables, keys and other metadata in schema automatically. Otherwise it
      * will query metadata table by table in each case. Default is true.
@@ -354,13 +353,6 @@ public class DatabasesClient implements DbClient {
             ui.roles = getUserRoles(aClient, aUserName, null, null);
             return ui.principal(aUserName);
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public void shutdown() {
     }
 
     @Override

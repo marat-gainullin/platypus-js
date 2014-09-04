@@ -13,9 +13,8 @@ import java.util.function.Consumer;
  * Interface, declaring work with queries, transactions and some common methods.
  *
  * @author mg
- * @param <Q>
  */
-public interface Client<Q extends Query> {
+public interface Client {
 
     public static final String APPLICATION_LOGGER_NAME = "Application";
 
@@ -29,11 +28,6 @@ public interface Client<Q extends Query> {
      * @throws Exception
      */
     public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
-    /**
-     * Frees all resources and disconnects from any servers.
-     */
-    public void shutdown();
 
     public ListenerRegistration addTransactionListener(TransactionListener aListener);
 }

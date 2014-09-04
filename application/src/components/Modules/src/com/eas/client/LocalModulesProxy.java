@@ -5,6 +5,7 @@
  */
 package com.eas.client;
 
+import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.store.Model2XmlDom;
@@ -64,7 +65,7 @@ public class LocalModulesProxy implements ModulesProxy {
             //Query dependencies from loadEntity() calls
             structure.getQueryDependencies().addAll(walker.getQueryDependencies());
             //Query dependencies from model's xml
-            Document modelDoc = ApplicationModels.transform(aName, structure.getParts());
+            Document modelDoc = ModelsDocuments.transform(aName, structure.getParts());
             Element rootNode = modelDoc.getDocumentElement();
             NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
             for (int i = docNodes.getLength() - 1; i >= 0; i--) {

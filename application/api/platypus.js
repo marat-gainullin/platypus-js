@@ -1166,9 +1166,9 @@
         if (client) {
             var request = new CreateRequestClass(IDGeneratorClass.genID(), aModuleName);
             client.executeRequest(request);
-            var responce = request.getResponse();
-            if (responce.isPermitted()) {
-                var functions = responce.getFunctionsNames();
+            var response = request.getResponse();
+            if (response.isPermitted()) {
+                var functions = response.getFunctionsNames();
                 var currentObject = this;
                 functions.forEach(function(aFunctionName) {
                     currentObject[aFunctionName] = function() {

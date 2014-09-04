@@ -16,7 +16,6 @@ import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
@@ -140,26 +139,6 @@ public abstract class PlatypusClient implements AppClient {
     @Override
     public FlowProvider createFlowProvider(String aQueryId, Fields aExpectedFields) {
         return new PlatypusFlowProvider(this, conn, aQueryId, aExpectedFields);
-    }
-
-    @Override
-    public CreateServerModuleRequest.Response createServerModule(String aModuleName, Consumer<CreateServerModuleRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        CreateServerModuleRequest request = new CreateServerModuleRequest(aModuleName);
-        if (onSuccess != null) {
-            conn.<CreateServerModuleRequest.Response>enqueueRequest(request, (CreateServerModuleRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse);
-            }, onFailure);
-            return null;
-        } else {
-            CreateServerModuleRequest.Response response = conn.executeRequest(request);
-            return response;
-        }
-    }
-
-    @Override
-    public void disposeServerModule(String aModuleName) throws Exception {
-        DisposeServerModuleRequest request = new DisposeServerModuleRequest(aModuleName);
-        conn.enqueueRequest(request, null, null);
     }
 
     @Override

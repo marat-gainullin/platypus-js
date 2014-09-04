@@ -4,9 +4,10 @@
  */
 package com.eas.client.threetier.requests;
 
+import com.eas.client.ServerModuleInfo;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
-import java.util.Set;
+import java.util.Date;
 
 /**
  *
@@ -15,14 +16,16 @@ import java.util.Set;
 public class CreateServerModuleRequest extends Request {
 
     private String moduleName;
+    private Date timeStamp;
 
     public CreateServerModuleRequest() {
         super(Requests.rqCreateServerModule);
     }
 
-    public CreateServerModuleRequest(String aModuleName) {
+    public CreateServerModuleRequest(String aModuleName, Date aTimeStamp) {
         this();
         moduleName = aModuleName;
+        timeStamp = aTimeStamp;
     }
 
     public String getModuleName() {
@@ -33,6 +36,14 @@ public class CreateServerModuleRequest extends Request {
         moduleName = aValue;
     }
 
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Date aValue) {
+        timeStamp = aValue;
+    }
+
     @Override
     public void accept(PlatypusRequestVisitor aVisitor) throws Exception {
         aVisitor.visit(this);
@@ -40,39 +51,28 @@ public class CreateServerModuleRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        private String moduleName;
-        private Set<String> functionsNames;
-        private boolean permitted;
+        protected ServerModuleInfo info;
+        private Date timeStamp;
 
-        public Response(String aModuleName, Set<String> aFunctionsNames, boolean aPermitted) {
+        public Response(ServerModuleInfo aInfo) {
             super();
-            moduleName = aModuleName;
-            functionsNames = aFunctionsNames;
-            permitted = aPermitted;
+            info = aInfo;
         }
 
-        public String getModuleName() {
-            return moduleName;
+        public ServerModuleInfo getInfo() {
+            return info;
         }
 
-        public void setModuleName(String aValue) {
-            moduleName = aValue;
+        public void setInfo(ServerModuleInfo aValue) {
+            info = aValue;
         }
 
-        public Set<String> getFunctionsNames() {
-            return functionsNames;
+        public Date getTimeStamp() {
+            return timeStamp;
         }
 
-        public void setFunctionsNames(Set<String> aFuntionNames) {
-            functionsNames = aFuntionNames;
-        }
-
-        public boolean isPermitted() {
-            return permitted;
-        }
-
-        public void setPermitted(boolean aPermitted) {
-            permitted = aPermitted;
+        public void setTimeStamp(Date aValue) {
+            timeStamp = aValue;
         }
 
         @Override
@@ -80,4 +80,5 @@ public class CreateServerModuleRequest extends Request {
             aVisitor.visit(this);
         }
     }
+
 }

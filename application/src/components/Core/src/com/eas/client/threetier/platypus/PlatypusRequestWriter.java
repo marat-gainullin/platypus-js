@@ -102,6 +102,16 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
+    public void visit(CreateServerModuleRequest rq) throws Exception {
+        ProtoWriter pw = new ProtoWriter(out);
+        pw.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
+        if (rq.getTimeStamp() != null) {
+            pw.put(RequestsTags.TAG_TIMESTAMP, rq.getTimeStamp());
+        }
+        pw.flush();
+    }
+
+    @Override
     public void visit(LoginRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rq.getLogin() != null) {
@@ -125,13 +135,6 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_CHANGES);
         writer.put(CoreTags.TAG_STREAM, ChangesWriter.write(rq.getChanges(), customWritersContainer));
-        writer.flush();
-    }
-
-    @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.flush();
     }
 

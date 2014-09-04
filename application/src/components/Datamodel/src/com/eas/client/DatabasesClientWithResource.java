@@ -24,7 +24,7 @@ public class DatabasesClientWithResource implements AutoCloseable {
         super();
         resourceName = "TestDb-" + String.valueOf(IDGenerator.genID());
         GeneralResourceProvider.getInstance().registerDatasource(resourceName, aSettings);
-        client = new DatabasesClient(resourceName, aQueries, true);
+        client = new DatabasesClient(resourceName, true);
     }
 
     public DatabasesClient getClient() {
@@ -33,7 +33,6 @@ public class DatabasesClientWithResource implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        client.shutdown();
         GeneralResourceProvider.getInstance().unregisterDatasource(resourceName);
     }
 

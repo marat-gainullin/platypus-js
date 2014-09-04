@@ -9,8 +9,6 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.security.auth.login.LoginException;
@@ -23,7 +21,7 @@ import javax.security.auth.login.LoginException;
  * @author pk, mg
  * @see Client
  */
-public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
+public interface AppClient extends Client, PrincipalHost {
 
     public String getUrl();
 
@@ -83,27 +81,6 @@ public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
-     * Requests the application server to create session bean (server module).
-     *
-     * @param aModuleName
-     * @param onSuccess
-     * @param onFailure
-     * @return The created module name or null if creation has failed. The
-     * returned module name is used in further work to call server module's
-     * methods.
-     * @throws Exception
-     */
-    public CreateServerModuleRequest.Response createServerModule(String aModuleName, Consumer<CreateServerModuleRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
-    /**
-     * Requests the application server to destroy session bean.
-     *
-     * @param moduleName Modeule name of the session bean being destroyed.
-     * @throws Exception
-     */
-    public void disposeServerModule(String moduleName) throws Exception;
-
-    /**
      * Requests the application server to call session bean method.
      *
      * @param aModuleName
@@ -127,4 +104,10 @@ public interface AppClient extends Client<PlatypusQuery>, PrincipalHost {
     public void enqueueUpdate(String entityId, Parameters params) throws Exception;
 
     public boolean isUserInRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    
+    /**
+     * Frees all resources and disconnects from any servers.
+     */
+    public void shutdown();
+
 }

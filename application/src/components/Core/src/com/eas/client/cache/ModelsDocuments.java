@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client;
+package com.eas.client.cache;
 
+import com.eas.client.AppElementFiles;
 import com.eas.client.cache.ActualCache;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.settings.SettingsConstants;
@@ -18,15 +19,9 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class ApplicationModels extends ActualCache<Document> {
+public class ModelsDocuments extends ActualCache<Document> {
 
-    protected static ApplicationModels content = new ApplicationModels();
-
-    public static Document transform(String aName, AppElementFiles aFiles) throws Exception {
-        return content.get(aName, aFiles);
-    }
-
-    public ApplicationModels() {
+    public ModelsDocuments() {
         super();
     }
 
