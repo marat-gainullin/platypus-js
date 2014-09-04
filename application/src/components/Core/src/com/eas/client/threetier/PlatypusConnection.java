@@ -23,7 +23,7 @@ public abstract class PlatypusConnection implements AppConnection {
 
     public static class RequestCallback {
 
-        public Request request;
+        public final Request request;
         public Response response;
         public Consumer<Response> onComplete;
 
@@ -33,6 +33,11 @@ public abstract class PlatypusConnection implements AppConnection {
             onComplete = aOnSuccess;
         }
 
+        /**
+         * Waits infinite for request done status.
+         * Synchronized due to J2SE javadoc on wait()/notify() methods
+         * @throws InterruptedException 
+         */
         public synchronized void waitCompletion() throws InterruptedException {
             while (!request.isDone()) {
                 wait();

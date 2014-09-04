@@ -119,4 +119,12 @@ public class AppElementFiles {
         }
         return lastModified != 0 ? new Date(lastModified) : null;
     }
+
+    public AppElementFiles copy() {
+        AppElementFiles aFiles = new AppElementFiles();
+        files.stream().forEach((f) -> {
+            aFiles.addFile(f);
+        });
+        return aFiles;
+    }
 }

@@ -48,7 +48,7 @@ public abstract class Request {
     public void setCancelled(boolean aValue) {
         cancelled = aValue;
     }
-    
+
     @Override
     public String toString() {
         return getClass().getName() + "[TYPE: " + type + "]";

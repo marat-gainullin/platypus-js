@@ -311,20 +311,30 @@ public class ApplicationSourceIndexer {
 
     /**
      * Resolves an application element name to a path of local file.
+     *
      * @param aName
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
-    public AppElementFiles nameToFiles(String aName) throws Exception {
+    public synchronized AppElementFiles nameToFiles(String aName) throws Exception {
         if (aName != null) {
             File resource = new File(calcSrcPath() + File.separator + aName.replace('/', File.separatorChar));
-            if(resource.exists()){
+            if (resource.exists()) {
                 AppElementFiles files = new AppElementFiles();
                 files.addFile(resource);
                 return files;
             } else {
                 Set<String> paths = id2Paths.get(aName);
-                return paths != null && !paths.isEmpty() ? families.get(paths.iterator().next()) : null;
+                if (paths != null && !paths.isEmpty()) {
+                    AppElementFiles files = families.get(paths.iterator().next());
+                    if (files != null) {
+                        return files.copy();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
             }
         } else {
             return null;

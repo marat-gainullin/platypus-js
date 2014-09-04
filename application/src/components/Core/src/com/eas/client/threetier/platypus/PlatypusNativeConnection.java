@@ -61,13 +61,9 @@ public class PlatypusNativeConnection extends PlatypusConnection {
                 session.removeAttribute(RequestCallback.class.getSimpleName());
                 sessionsPool.returnResource(session);
                 Response response = (Response) message;
+                rqc.response = response;
                 rqc.request.setDone(true);
-                if (rqc.onComplete != null) {
-                    rqc.onComplete.accept(response);
-                } else {
-                    rqc.response = response;
-                    rqc.notifyAll();
-                }
+                rqc.request.notifyAll();
             }
 
             @Override
@@ -114,8 +110,17 @@ public class PlatypusNativeConnection extends PlatypusConnection {
         requestsSender.submit(() -> {
             try {
                 IoSession session = sessionsPool.achieveResource();
-                session.setAttribute(RequestCallback.class.getSimpleName(), rqc);
                 session.write(rqc.request);
+                synchronized (rqc.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
+                    while (!rqc.request.isDone()) {
+                        rqc.request.wait();
+                    }
+                }
+                if (rqc.onComplete != null) {
+                    rqc.onComplete.accept(rqc.response);
+                } else {
+                    rqc.notifyAll();
+                }
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.SEVERE, null, ex);
                 if (onFailure != null) {

@@ -57,7 +57,7 @@ public class PlatypusHttpConnection extends PlatypusConnection implements HttpRe
         requestsSender.submit(() -> {
             try {
                 HttpRequestSender httpSender = new HttpRequestSender(url, cookies, login, password, this, 1);
-                rqc.request.accept(httpSender);
+                rqc.request.accept(httpSender);// wait complition analog
                 rqc.request.setDone(true);
                 if (rqc.onComplete != null) {
                     rqc.onComplete.accept(httpSender.getResponse());
