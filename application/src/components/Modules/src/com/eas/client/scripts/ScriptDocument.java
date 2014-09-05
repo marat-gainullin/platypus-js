@@ -35,9 +35,14 @@ public class ScriptDocument {
      */
     private Map<String, Set<String>> propertyAllowedRoles = new HashMap<>();
 
-    public ScriptDocument(String aSource) {
+    protected ScriptDocument() {
         super();
-        readScriptAnnotations(aSource);
+    }
+    
+    public static ScriptDocument parse(String aSource){
+        ScriptDocument doc = new ScriptDocument();
+        doc.readScriptAnnotations(aSource);
+        return doc;
     }
     
     public Set<String> getModuleAllowedRoles() {

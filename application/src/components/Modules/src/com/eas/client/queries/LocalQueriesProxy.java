@@ -16,7 +16,6 @@ import com.eas.client.DbClient;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.ScriptUtils;
 import java.util.Date;
 import java.util.Map;
@@ -172,7 +171,6 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     }
 
     protected JSObject createModule(String aModuleName) throws Exception {
-        ScriptedResource.executeScriptResource(aModuleName);
         return ScriptUtils.createModule(aModuleName);
     }
 

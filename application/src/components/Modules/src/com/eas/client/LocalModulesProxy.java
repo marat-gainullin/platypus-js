@@ -28,14 +28,17 @@ import org.w3c.dom.NodeList;
 public class LocalModulesProxy implements ModulesProxy {
 
     protected ApplicationSourceIndexer indexer;
+    protected ModelsDocuments modelsDocs;
 
-    public LocalModulesProxy(String aAppPathName) throws Exception {
-        this(new ApplicationSourceIndexer(aAppPathName));
-    }
-
-    public LocalModulesProxy(ApplicationSourceIndexer aIndexer) throws Exception {
+    public LocalModulesProxy(ApplicationSourceIndexer aIndexer, ModelsDocuments aModelsDocs) throws Exception {
         super();
         indexer = aIndexer;
+        modelsDocs = aModelsDocs;
+    }
+
+    @Override
+    public String getLocalPath() {
+        return indexer.calcSrcPath();
     }
 
     @Override
@@ -65,7 +68,7 @@ public class LocalModulesProxy implements ModulesProxy {
             //Query dependencies from loadEntity() calls
             structure.getQueryDependencies().addAll(walker.getQueryDependencies());
             //Query dependencies from model's xml
-            Document modelDoc = ModelsDocuments.transform(aName, structure.getParts());
+            Document modelDoc = modelsDocs.get(aName, structure.getParts());
             Element rootNode = modelDoc.getDocumentElement();
             NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
             for (int i = docNodes.getLength() - 1; i >= 0; i--) {

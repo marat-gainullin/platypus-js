@@ -1,16 +1,13 @@
 package com.eas.client.scripts.store;
 
 import com.eas.client.Client;
-import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationPlatypusModel;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusClient;
-import com.eas.xml.dom.Source2XmlDom;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +23,7 @@ public class Dom2ModelDocument {
     public static final String BAD_ROOT_TAGS_MSG = "Should be only one root tag in platypus documents";
 
     public static ApplicationModel<?, ?, ?, ?> load(Client aClient, String aAppElementName) throws Exception {
+        /*
         ApplicationElement appElement = aClient.getAppCache().get(aAppElementName);
         if (appElement.getType() == ClientConstants.ET_RESOURCE) {
             Document doc = Source2XmlDom.transform(new String(appElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING));
@@ -33,6 +31,8 @@ public class Dom2ModelDocument {
         } else {
             return transform(aClient, appElement.getContent());
         }
+                */
+        return null;
     }
 
     public static ApplicationModel<?, ?, ?, ?> transform(Client aClient, Document aDocument) throws Exception {

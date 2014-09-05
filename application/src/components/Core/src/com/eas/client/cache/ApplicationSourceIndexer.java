@@ -305,7 +305,7 @@ public class ApplicationSourceIndexer {
         }
     }
 
-    private String calcSrcPath() {
+    public String calcSrcPath() {
         return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT;
     }
 

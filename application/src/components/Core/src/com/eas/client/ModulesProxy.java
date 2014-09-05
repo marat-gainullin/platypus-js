@@ -15,4 +15,6 @@ import java.util.function.Consumer;
 public interface ModulesProxy {
     
     public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    
+    public String getLocalPath();
 }

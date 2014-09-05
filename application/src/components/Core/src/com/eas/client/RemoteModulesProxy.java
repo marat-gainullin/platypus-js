@@ -35,6 +35,11 @@ public class RemoteModulesProxy implements ModulesProxy {
     }
 
     @Override
+    public String getLocalPath() {
+        return basePath;
+    }
+
+    @Override
     public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             requestModuleStructure(aName, (ModuleStructureRequest.Response structureResp) -> {

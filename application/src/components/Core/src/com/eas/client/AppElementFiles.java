@@ -5,7 +5,6 @@
 package com.eas.client;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.util.FileUtils;

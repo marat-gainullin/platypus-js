@@ -7,9 +7,6 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.queries.JsQuery;
 import com.eas.client.queries.PlatypusScriptedFlowProvider;
-import com.eas.client.queries.QueriesProxy;
-import com.eas.client.queries.SqlQuery;
-import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +41,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     protected JSObject createModule(String aModuleName) throws Exception {
-        ScriptedResource.executeScriptResource(aModuleName);
         return ScriptUtils.createModule(aModuleName);
     }
 

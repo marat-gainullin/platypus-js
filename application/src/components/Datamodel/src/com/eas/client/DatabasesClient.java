@@ -270,7 +270,7 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    private static class UserProcess {
+    private static class UserInfo {
 
         public Map<String, String> props;
         public Set<String> roles;
@@ -290,7 +290,7 @@ public class DatabasesClient implements DbClient {
     }
 
     public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserProcess ui = new UserProcess();
+        final UserInfo ui = new UserInfo();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
                 synchronized (ui) {
@@ -329,7 +329,7 @@ public class DatabasesClient implements DbClient {
     }
 
     public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserProcess ui = new UserProcess();
+        final UserInfo ui = new UserInfo();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
                 synchronized (ui) {
@@ -396,43 +396,27 @@ public class DatabasesClient implements DbClient {
         return mdCaches.get(aDatasourceId);
     }
 
-    protected static class CommitProcess {
+    protected static class CommitProcess extends AsyncProcess<Integer> {
 
-        public int expected;
-        public int completed;
         public int rowsAffected;
-        public Set<Exception> exceptions = new HashSet<>();
-        public Consumer<Integer> onSuccess;
-        public Consumer<Exception> onFailure;
 
         public CommitProcess(int aExpected, Consumer<Integer> aOnSuccess, Consumer<Exception> aOnFailure) {
-            expected = aExpected;
-            onSuccess = aOnSuccess;
-            onFailure = aOnFailure;
+            super(aExpected, aOnSuccess, aOnFailure);
         }
 
-        public synchronized void complete(int aRowsAffected, Exception aFailureCause) {
+        /**
+         *
+         * @param aRowsAffected
+         * @param aFailureCause
+         */
+        @Override
+        public synchronized void complete(Integer aRowsAffected, Exception aFailureCause) {
             rowsAffected += aRowsAffected;
             if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
             }
             if (++completed == expected) {
-                if (exceptions.isEmpty()) {
-                    if (onSuccess != null) {
-                        onSuccess.accept(rowsAffected);
-                    }
-                } else {
-                    if (onFailure != null) {
-                        StringBuilder eMessagesSum = new StringBuilder();
-                        exceptions.stream().forEach((ex) -> {
-                            if (eMessagesSum.length() > 0) {
-                                eMessagesSum.append("\n");
-                            }
-                            eMessagesSum.append(ex.getMessage());
-                        });
-                        onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
-                    }
-                }
+                doComplete(rowsAffected);
             }
         }
     }
@@ -440,14 +424,21 @@ public class DatabasesClient implements DbClient {
     @Override
     public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            final CommitProcess ci = new CommitProcess(aDatasourcesChangeLogs.size(), onSuccess, onFailure);
-            for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
-                List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
-                commit(datasourceName, dbLog, (Integer rowsAffected) -> {
-                    ci.complete(rowsAffected != null ? rowsAffected : 0, null);
-                }, (Exception ex) -> {
-                    ci.complete(0, ex);
-                });
+            if (!aDatasourcesChangeLogs.isEmpty()) {
+                final CommitProcess ci = new CommitProcess(aDatasourcesChangeLogs.size(), (Integer rowsAffected) -> {
+                    commited();
+                    onSuccess.accept(rowsAffected != null ? rowsAffected : 0);
+                }, onFailure);
+                for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
+                    List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
+                    commit(datasourceName, dbLog, (Integer rowsAffected) -> {
+                        ci.complete(rowsAffected != null ? rowsAffected : 0, null);
+                    }, (Exception ex) -> {
+                        ci.complete(0, ex);
+                    });
+                }
+            } else {
+                onSuccess.accept(0);
             }
             return 0;
         } else {
@@ -457,18 +448,22 @@ public class DatabasesClient implements DbClient {
                     List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
                     rowsAffected += commit(datasourceName, dbLog, null, null);
                 }
-                TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
-                for (TransactionListener l : listeners) {
-                    try {
-                        l.commited();
-                    } catch (Exception ex) {
-                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                commited();
                 return rowsAffected;
             } catch (Exception ex) {
                 rollback();
                 throw ex;
+            }
+        }
+    }
+
+    private void commited() {
+        TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
+        for (TransactionListener l : listeners) {
+            try {
+                l.commited();
+            } catch (Exception ex) {
+                Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
