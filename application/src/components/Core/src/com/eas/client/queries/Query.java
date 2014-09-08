@@ -14,21 +14,18 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Client;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-/** 
+/**
  * Abstract platypus query with parameters.
  *
  * @author mg
- * @param <T>
  */
-public abstract class Query<T extends Client> {
+public abstract class Query {
 
-    protected T core;
     // parameters propagation. ParamName - DsName, ParamName
     protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected transient Fields fields = new Fields();
@@ -42,24 +39,20 @@ public abstract class Query<T extends Client> {
     protected Set<String> writeRoles = new HashSet<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
-    /** 
-     * Creates an instance of Query with empty SQL query text and
-     * parameters map.
+    /**
+     * Creates an instance of Query with empty SQL query text and parameters
+     * map.
      */
     protected Query() {
         super();
     }
 
-    public Query(T aClient) {
-        this();
-        core = aClient;
-    }
-
     /**
      * Copy constructor
+     *
      * @param aSource Another Query instance the data to be copied from.
      */
-    protected Query(Query<T> aSource) {
+    protected Query(Query aSource) {
         if (aSource != null) {
             String sourceDatasourceName = aSource.getDbId();
             if (sourceDatasourceName != null) {
@@ -134,7 +127,6 @@ public abstract class Query<T extends Client> {
                     }
                 }
             }
-            core = aSource.getClient();
         }
     }
 
@@ -156,16 +148,13 @@ public abstract class Query<T extends Client> {
         writeRoles = aRoles;
     }
 
-    public T getClient() {
-        return core;
-    }
-
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }
 
     /**
      * Returns whether this query is stored procedure call.
+     *
      * @return True if this query is stored procedure call.
      */
     public boolean isProcedure() {
@@ -174,7 +163,8 @@ public abstract class Query<T extends Client> {
 
     /**
      * Sets procedure flag.
-     * @param aValue 
+     *
+     * @param aValue
      */
     public void setProcedure(boolean aValue) {
         boolean oldValue = procedure;
@@ -183,9 +173,10 @@ public abstract class Query<T extends Client> {
     }
 
     /**
-     * Returns whether this query is executed manually.
-     * Such execution way effictive with data manipulation (INSERT, UPDATE, DELETE) queries
-     * and some others.
+     * Returns whether this query is executed manually. Such execution way
+     * effictive with data manipulation (INSERT, UPDATE, DELETE) queries and
+     * some others.
+     *
      * @return True if this query is data manipulation query.
      */
     public boolean isManual() {
@@ -194,7 +185,8 @@ public abstract class Query<T extends Client> {
 
     /**
      * Sets manual flag.
-     * @param aValue 
+     *
+     * @param aValue
      */
     public void setManual(boolean aValue) {
         boolean oldValue = manual;
@@ -230,20 +222,20 @@ public abstract class Query<T extends Client> {
     }
 
     /*
-    public void putParameter(String aName, int aType, Object aValue) {
-    if (params == null) {
-    params = new Parameters();
-    }
-    Parameter param = params.getApplicationElement(aName);
-    if (param == null) {
-    param = new Parameter();
-    params.add(param);
-    }
-    param.setName(aName.toUpperCase());
-    param.getTypeInfo().setSqlType(aType);
-    param.setDefaultValue(aValue);
-    param.setValue(aValue);
-    }
+     public void putParameter(String aName, int aType, Object aValue) {
+     if (params == null) {
+     params = new Parameters();
+     }
+     Parameter param = params.getApplicationElement(aName);
+     if (param == null) {
+     param = new Parameter();
+     params.add(param);
+     }
+     param.setName(aName.toUpperCase());
+     param.getTypeInfo().setSqlType(aType);
+     param.setDefaultValue(aValue);
+     param.setValue(aValue);
+     }
      */
     public void putParameter(String aName, int aType, Object aDefaultValue, Object aValue) {
         if (params == null) {
@@ -279,9 +271,8 @@ public abstract class Query<T extends Client> {
     }
 
     public abstract Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
-    
+
     //public abstract void enqueueUpdate() throws Exception;
-    
     /**
      * @return the datasourceName
      */

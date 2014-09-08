@@ -6,10 +6,10 @@
 package com.eas.client.model.query;
 
 import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
-import com.eas.client.queries.SqlQuery;
 
 /**
  *
@@ -52,7 +52,7 @@ public class QueryParametersEntity extends QueryEntity {
     }
 
     @Override
-    public String getQueryId() {
+    public String getQueryName() {
         return null;
     }
 
@@ -62,12 +62,12 @@ public class QueryParametersEntity extends QueryEntity {
     }
 
     @Override
-    public String getTableDbId() {
+    public String getTableDatasourceName() {
         return null;
     }
 
     @Override
-    public void setTableDbId(String tableDbId) {
+    public void setTableDatasourceName(String tableDbId) {
     }
 
     @Override

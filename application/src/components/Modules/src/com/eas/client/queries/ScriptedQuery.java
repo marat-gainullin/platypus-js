@@ -5,7 +5,9 @@
  */
 package com.eas.client.queries;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
 import java.util.Collections;
 import java.util.Set;
 
@@ -13,11 +15,11 @@ import java.util.Set;
  *
  * @author mg
  */
-public class JsQuery extends SqlQuery {
+public class ScriptedQuery extends SqlQuery {
 
     public static final String JAVASCRIPT_QUERY_CONTENTS = "JavaScript query";
 
-    public JsQuery(DbClient aCore, String aModuleName) {
+    public ScriptedQuery(DatabasesClient aCore, String aModuleName) {
         super(aCore);
         publicAccess = true;
         sqlText = JAVASCRIPT_QUERY_CONTENTS;
@@ -30,7 +32,7 @@ public class JsQuery extends SqlQuery {
 
     @Override
     public SqlCompiledQuery compile() throws Exception {
-        SqlCompiledQuery compiled = new SqlCompiledQuery(core, datasourceName, entityId, sqlText, params, fields, readRoles, writeRoles);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, entityId, sqlText, params, fields, readRoles, writeRoles);
         return compiled;
     }
 

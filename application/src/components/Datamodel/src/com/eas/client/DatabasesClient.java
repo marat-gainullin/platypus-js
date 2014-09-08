@@ -15,22 +15,16 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
-import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.jdbc.StatementsGenerator;
 import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.ContextHost;
-import com.eas.client.queries.PlatypusJdbcFlowProvider;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
@@ -57,7 +51,7 @@ import javax.sql.DataSource;
  * @author mg
  * @see Client
  */
-public class DatabasesClient implements DbClient {
+public class DatabasesClient {
 
     public static final String BAD_LOGIN_MSG = "Login incorrect";
     private static final String USERNAME_PARAMETER_NAME = "userName";
@@ -153,7 +147,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
         return () -> {
@@ -169,39 +162,6 @@ public class DatabasesClient implements DbClient {
         contextHost = aContextHost;
     }
 
-    @Override
-    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        String userName = principalHost.getPrincipal().getName();
-        SqlQuery query = new SqlQuery(this, String.format(SQLUtils.SQL_SELECT_COMMON_WHERE_BY_FIELD, ClientConstants.T_MTD_USERS, ClientConstants.T_MTD_USERS, ClientConstants.F_USR_NAME, SQLUtils.SQL_PARAMETER_FIELD_VALUE));
-        query.putParameter(SQLUtils.SQL_PARAMETER_FIELD_VALUE, DataTypeInfo.VARCHAR, userName);
-        SqlCompiledQuery compiledQuery = query.compile();
-        if (onSuccess != null) {
-            compiledQuery.executeQuery((Rowset rowset) -> {
-                if (!rowset.isEmpty()) {
-                    try {
-                        rowset.first();
-                        onSuccess.accept(rowset.getString(rowset.getFields().find(ClientConstants.F_USR_FORM)));
-                    } catch (InvalidCursorPositionException | InvalidColIndexException ex) {
-                        if (onFailure != null) {
-                            onFailure.accept(ex);
-                        }
-                    }
-                } else {
-                    onSuccess.accept(null);
-                }
-            }, onFailure);
-            return null;
-        } else {
-            Rowset rowset = compiledQuery.executeQuery(null, null);
-            if (!rowset.isEmpty()) {
-                rowset.first();
-                return rowset.getString(rowset.getFields().find(ClientConstants.F_USR_FORM));
-            } else {
-                return null;
-            }
-        }
-    }
-
     /**
      * Factory method for DatabaseFlowProvider. Intended to incapsulate flow
      * provider creation in two tier or three tier applications.
@@ -215,7 +175,6 @@ public class DatabasesClient implements DbClient {
      * @return FlowProvider created.
      * @throws Exception
      */
-    @Override
     public FlowProvider createFlowProvider(String aDatasourceId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         return new PlatypusJdbcFlowProvider(this, aDatasourceId, aEntityId, obtainDataSource(aDatasourceId), commitProcessor, getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
     }
@@ -355,7 +314,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         int rowsAffected = 0;
         Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
@@ -380,8 +338,7 @@ public class DatabasesClient implements DbClient {
         return rowsAffected;
     }
 
-    @Override
-    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
+    public synchronized DatabaseMdCache getDbMetadataCache(String aDatasourceId) throws Exception {
         if (!mdCaches.containsKey(aDatasourceId)) {
             DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceId);
             mdCaches.put(aDatasourceId, cache);
@@ -421,7 +378,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             if (!aDatasourcesChangeLogs.isEmpty()) {
@@ -590,7 +546,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public void rollback() {
         TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
         for (TransactionListener l : listeners) {
@@ -602,7 +557,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public Rowset getDbTypesInfo(String aDatasourceId) throws Exception {
         Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceId));
         Rowset lrowSet = new Rowset();
@@ -622,7 +576,7 @@ public class DatabasesClient implements DbClient {
     }
 
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
-        DbMetadataCache cache = getDbMetadataCache(aDatasourceName);
+        DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
         String fullTableName = aTable;
         if (aSchema != null && !aSchema.isEmpty()) {
             fullTableName = aSchema + "." + fullTableName;
@@ -631,7 +585,6 @@ public class DatabasesClient implements DbClient {
         cache.removeTableIndexes(fullTableName);
     }
 
-    @Override
     public PrincipalHost getPrincipalHost() {
         return principalHost;
     }
@@ -640,7 +593,6 @@ public class DatabasesClient implements DbClient {
         principalHost = aPrincipalHost;
     }
 
-    @Override
     public String getConnectionSchema(String aDatasourceId) throws Exception {
         DataSource ds = obtainDataSource(aDatasourceId);
         if (ds != null) {
@@ -652,7 +604,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public String getConnectionDialect(String aDatasourceId) throws Exception {
         DataSource ds = obtainDataSource(aDatasourceId);
         try (Connection conn = ds.getConnection()) {
@@ -660,7 +611,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
     public SqlDriver getConnectionDriver(String aDatasourceId) throws Exception {
         DataSource ds = obtainDataSource(aDatasourceId);
         try (Connection conn = ds.getConnection()) {
@@ -668,7 +618,7 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    protected static Set<String> getUserRoles(DbClient aClient, String aUserName, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         CallableConsumer<Set<String>, Rowset> doWork = (Rowset rs) -> {
             Set<String> roles = new HashSet<>();
             int roleNameColumnIndex = rs.getFields().find(ClientConstants.F_GROUP_NAME);

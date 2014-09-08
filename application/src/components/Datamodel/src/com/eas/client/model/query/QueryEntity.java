@@ -5,10 +5,10 @@
 package com.eas.client.model.query;
 
 import com.eas.client.SQLUtils;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
-import com.eas.client.queries.SqlQuery;
 
 /**
  *
@@ -27,20 +27,21 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
         super(aModel);
     }
 
-    public QueryEntity(String aSqlId) {
-        super(aSqlId);
+    public QueryEntity(String aQueryName) {
+        super(aQueryName);
     }
 
     @Override
-    public String getTableDbId() {
+    public String getTableDatasourceName() {
         if (model != null) {
-            return model.getDbId();
+            return model.getDatasourceName();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
-    public void setTableDbId(String tableDbId) {
+    public void setTableDatasourceName(String tableDbId) {
     }
 
     public String getAlias() {
@@ -64,10 +65,10 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
     public void validateQuery() throws Exception {
         if (query == null) {
             try {
-                if (queryId != null) {
-                    query = model.getClient().getAppQuery(queryId, null, null);
+                if (queryName != null) {
+                    query = null;//model.getClient().getAppQuery(queryName, null, null);
                 } else if (tableName != null) {
-                    query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient());
+                    query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
                 } else {
                     assert false : "Query entity needs table name or a subquery name";
                 }

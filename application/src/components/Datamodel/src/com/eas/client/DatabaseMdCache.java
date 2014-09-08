@@ -7,21 +7,17 @@
  * author.
  * All rights reserved.
  */
-package com.eas.client.cache;
+package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
-import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableComments;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.metadata.DbTableKeys;
-import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.cache.FreqCache;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.ResultSetMetaData;
 import java.util.HashMap;
@@ -34,10 +30,10 @@ import java.util.Set;
  *
  * @author mg
  */
-public class DatabaseMdCache implements DbMetadataCache {
+public class DatabaseMdCache {
 
     protected String dbId;
-    protected DbClient client;
+    protected DatabasesClient client;
     // Named tables cache
     protected TablesFieldsCache tablesFields;
     // Named tables indexes cache
@@ -46,7 +42,7 @@ public class DatabaseMdCache implements DbMetadataCache {
     protected SqlDriver connectionDriver;
     protected Rowset dbmsSupportedTypes;
 
-    public DatabaseMdCache(DbClient aClient, String aDbId) throws Exception {
+    public DatabaseMdCache(DatabasesClient aClient, String aDbId) throws Exception {
         super();
         client = aClient;
         dbId = aDbId;
@@ -54,7 +50,6 @@ public class DatabaseMdCache implements DbMetadataCache {
         tablesIndexes = new IndexesCache();
     }
 
-    @Override
     public String getConnectionSchema() throws Exception {
         if (connectionSchema == null) {
             connectionSchema = client.getConnectionSchema(dbId);
@@ -62,7 +57,6 @@ public class DatabaseMdCache implements DbMetadataCache {
         return connectionSchema;
     }
 
-    @Override
     public SqlDriver getConnectionDriver() throws Exception {
         if (connectionDriver == null) {
             connectionDriver = client.getConnectionDriver(dbId);
@@ -70,27 +64,22 @@ public class DatabaseMdCache implements DbMetadataCache {
         return connectionDriver;
     }
 
-    @Override
     public Fields getTableMetadata(String aTableName) throws Exception {
         return tablesFields.get(aTableName);
     }
 
-    @Override
     public void removeTableMetadata(String aTableName) throws Exception {
         tablesFields.remove(aTableName);
     }
 
-    @Override
     public boolean containsTableMetadata(String aTableName) throws Exception {
         return tablesFields.containsKey(aTableName);
     }
 
-    @Override
     public void removeTableIndexes(String aTableName) throws Exception {
         tablesIndexes.remove(aTableName);
     }
 
-    @Override
     public Rowset getDbTypesInfo() throws Exception {
         if (dbmsSupportedTypes == null) {
             dbmsSupportedTypes = client.getDbTypesInfo(dbId);
@@ -105,7 +94,6 @@ public class DatabaseMdCache implements DbMetadataCache {
      * @param aFullMetadata
      * @throws Exception
      */
-    @Override
     public final void fillTablesCacheByConnectionSchema(boolean aFullMetadata) throws Exception {
         fillTablesCacheBySchema(null, aFullMetadata);
     }
@@ -118,7 +106,6 @@ public class DatabaseMdCache implements DbMetadataCache {
      * @param aFullMetadata Indicated that full metadata is to be archieved.
      * @throws Exception
      */
-    @Override
     public void fillTablesCacheBySchema(String aSchema, boolean aFullMetadata) throws Exception {
         String schema4Sql = aSchema;
         if (schema4Sql == null || schema4Sql.isEmpty()) {
@@ -150,7 +137,6 @@ public class DatabaseMdCache implements DbMetadataCache {
         }
     }
 
-    @Override
     public void clear() throws Exception {
         if (tablesFields != null) {
             tablesFields.clear();
@@ -485,7 +471,6 @@ public class DatabaseMdCache implements DbMetadataCache {
 
     }
 
-    @Override
     public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
         if (aTableName != null && !aTableName.isEmpty() && tablesIndexes != null) {
             return tablesIndexes.get(aTableName);

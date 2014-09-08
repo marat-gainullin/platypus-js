@@ -7,7 +7,6 @@ package com.eas.client;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 

@@ -12,7 +12,6 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -38,7 +37,7 @@ import javax.swing.JOptionPane;
  *
  * @author kl, mg refactoring
  */
-public abstract class PlatypusClient implements AppClient {
+public abstract class PlatypusClient {
 
     // SSL defaults
     public static final String DEFAULT_KEYSTORE_PASSWORD = "keyword";
@@ -82,12 +81,10 @@ public abstract class PlatypusClient implements AppClient {
         conn = aConn;
     }
 
-    @Override
     public String getUrl() {
         return url;
     }
 
-    @Override
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
         return () -> {
@@ -95,53 +92,14 @@ public abstract class PlatypusClient implements AppClient {
         };
     }
 
-    @Override
     public List<Change> getChangeLog() {
         return changeLog;
     }
 
-    @Override
-    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        StartAppElementRequest request = new StartAppElementRequest();
-        if (onSuccess != null) {
-            conn.<StartAppElementRequest.Response>enqueueRequest(request, (StartAppElementRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.getAppElementId());
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-            return null;
-        } else {
-            StartAppElementRequest.Response response = conn.executeRequest(request);
-            return response.getAppElementId();
-        }
-    }
-
-    @Override
-    public boolean isUserInRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        IsUserInRoleRequest request = new IsUserInRoleRequest(aRole);
-        if (onSuccess != null) {
-            conn.<IsUserInRoleRequest.Response>enqueueRequest(request, (IsUserInRoleRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.isRole());
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-            return false;
-        } else {
-            IsUserInRoleRequest.Response response = conn.executeRequest(request);
-            return response.isRole();
-        }
-    }
-
-    @Override
     public FlowProvider createFlowProvider(String aQueryId, Fields aExpectedFields) {
         return new PlatypusFlowProvider(this, conn, aQueryId, aExpectedFields);
     }
 
-    @Override
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
         final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
         if (onSuccess != null) {
@@ -155,12 +113,10 @@ public abstract class PlatypusClient implements AppClient {
         }
     }
 
-    @Override
     public PlatypusPrincipal getPrincipal() {
         return principal;
     }
 
-    @Override
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Runnable doWork = () -> {
             changeLog.clear();
@@ -211,7 +167,6 @@ public abstract class PlatypusClient implements AppClient {
         }
     }
 
-    @Override
     public String login(String aUserName, char[] aPassword, Consumer<String> onSuccess, Consumer<Exception> onFailure) throws LoginException {
         LoginRequest rq = new LoginRequest(aUserName, aPassword != null ? new String(aPassword) : null);
         try {
@@ -219,7 +174,7 @@ public abstract class PlatypusClient implements AppClient {
                 conn.enqueueRequest(rq, (LoginRequest.Response aResponse) -> {
                     String sessionId = aResponse.getSessionId();
                     conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
-                    principal = new AppPlatypusPrincipal(aUserName, this);
+                    principal = new AppPlatypusPrincipal(aUserName, conn);
                     onSuccess.accept(sessionId);
                 }, onFailure);
                 return null;
@@ -227,7 +182,7 @@ public abstract class PlatypusClient implements AppClient {
                 LoginRequest.Response response = conn.executeRequest(rq);
                 String sessionId = response.getSessionId();
                 conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
-                principal = new AppPlatypusPrincipal(aUserName, this);
+                principal = new AppPlatypusPrincipal(aUserName, conn);
                 return sessionId;
             }
         } catch (Exception ex) {
@@ -236,7 +191,6 @@ public abstract class PlatypusClient implements AppClient {
         }
     }
 
-    @Override
     public void logout(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         LogoutRequest request = new LogoutRequest();
         if (onSuccess != null) {
@@ -252,7 +206,6 @@ public abstract class PlatypusClient implements AppClient {
         }
     }
 
-    @Override
     public void shutdown() {
         if (conn != null) {
             conn.shutdown();
@@ -408,7 +361,6 @@ public abstract class PlatypusClient implements AppClient {
         }
     }
 
-    @Override
     public void enqueueUpdate(String aQueryId, Parameters aParams) throws Exception {
         Command command = new Command(aQueryId);
         command.parameters = new ChangeValue[aParams.getParametersCount()];

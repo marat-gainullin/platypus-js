@@ -5,6 +5,7 @@
  */
 package com.eas.client.queries;
 
+import com.eas.client.StoredQueryFactory;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -12,7 +13,8 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.AppElementFiles;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
@@ -35,16 +37,16 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     protected Map<String, ActualCacheEntry<SqlQuery>> entries = new ConcurrentHashMap<>();
     protected ApplicationSourceIndexer indexer;
     protected StoredQueryFactory factory;
-    protected DbClient core;
+    protected DatabasesClient core;
 
-    public LocalQueriesProxy(DbClient aCore, String aAppPathName) throws Exception {
+    public LocalQueriesProxy(DatabasesClient aCore, String aAppPathName) throws Exception {
         this(aCore, new ApplicationSourceIndexer(aAppPathName));
     }
 
-    public LocalQueriesProxy(DbClient aCore, ApplicationSourceIndexer aIndexer) throws Exception {
+    public LocalQueriesProxy(DatabasesClient aCore, ApplicationSourceIndexer aIndexer) throws Exception {
         super();
         indexer = aIndexer;
-        factory = new StoredQueryFactory(aCore, this, indexer);
+        factory = new ScriptedQueryFactory(aCore, this, indexer);
         core = aCore;
     }
 
@@ -175,7 +177,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     }
 
     protected SqlQuery queryFromModule(String aModuleName) throws Exception {
-        SqlQuery query = new JsQuery(core, aModuleName);
+        SqlQuery query = new ScriptedQuery(core, aModuleName);
         JSObject schemaContainer = createModule(aModuleName);
         if (schemaContainer != null) {
             Fields fields = new Fields();
@@ -200,4 +202,15 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             throw new IllegalStateException(" datasource module: " + aModuleName + " is not found");
         }
     }
+    
+    @Override
+    public SqlQuery getCachedQuery(String aName) {
+        ActualCacheEntry<SqlQuery> entry = entries.get(aName);
+        if (entry != null) {
+            return entry.getValue();
+        } else {
+            return null;
+        }
+    }
+
 }

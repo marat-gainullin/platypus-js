@@ -4,13 +4,13 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.model.query.QueryModel;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.AppElementFiles;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.XmlDom2QueryModel;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.Source2XmlDom;
@@ -80,7 +80,7 @@ public class QueryDocument {
         query = aQuery;
         model = aModel;
         additionalFieldsMetadata = aAdditionalFieldsMetadata;
-        query.setDbId(model.getDbId());
+        query.setDbId(model.getDatasourceName());
         assert query.getEntityId() != null : "SqlQuery should be constructured with non-null entity id!";
     }
 
@@ -107,14 +107,14 @@ public class QueryDocument {
         File modelFile = aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION);
         String modelContent = FileUtils.readString(modelFile, SettingsConstants.COMMON_ENCODING);
         Document modelDoc = Source2XmlDom.transform(modelContent);        
-        QueryModel model = XmlDom2QueryModel.transform((DbClient)null, modelDoc);
+        QueryModel model = XmlDom2QueryModel.transform((DatabasesClient)null, modelDoc);
         // output fields hints
         File outFile = aFiles.findFileByExtension(PlatypusFiles.OUT_EXTENSION);
         String outContent = FileUtils.readString(outFile, SettingsConstants.COMMON_ENCODING);
         Document outDoc = Source2XmlDom.transform(outContent);
         List<QueryDocument.StoredFieldMetadata> additionalFields = parseFieldsHintsTag(outDoc.getDocumentElement());
         //
-        SqlQuery query = new SqlQuery();
+        SqlQuery query = new SqlQuery((DatabasesClient)null);
         query.setEntityId(aName);
         query.setSqlText(sqlContent);
         query.setFullSqlText(dialectContent);

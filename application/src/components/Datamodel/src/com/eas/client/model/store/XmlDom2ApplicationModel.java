@@ -33,7 +33,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
     }
     
     @Override
-    public void visit(ApplicationModel<E, ?, ?, ?> aModel) {
+    public void visit(ApplicationModel<E, ?, ?> aModel) {
         readModel(aModel);
     }
 
@@ -82,7 +82,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         aRelation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
         aRelation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
         if (currentModel != null) {
-            ((ApplicationModel<E, ?, ?, ?>)currentModel).getReferenceRelations().add(aRelation);
+            ((ApplicationModel<E, ?, ?>)currentModel).getReferenceRelations().add(aRelation);
         }
     }
 

@@ -30,17 +30,17 @@ public class RelationsTest extends BaseTest {
             ApplicationDbEntity entity11 = model.newGenericEntity();
             entity11.setTableName("GOODORDER");
             ApplicationDbEntity entity21 = model.newGenericEntity();
-            entity21.setQueryId("124349292311931632");
+            entity21.setQueryName("124349292311931632");
             ApplicationDbEntity entity22 = model.newGenericEntity();
-            entity22.setQueryId("124349292311931632");
+            entity22.setQueryName("124349292311931632");
             ApplicationDbEntity entity31 = model.newGenericEntity();
-            entity31.setQueryId("124349292311931632");
+            entity31.setQueryName("124349292311931632");
             ApplicationDbEntity entity32 = model.newGenericEntity();
-            entity32.setQueryId("124349292311931632");
+            entity32.setQueryName("124349292311931632");
             ApplicationDbEntity entity33 = model.newGenericEntity();
-            entity33.setQueryId("124349292311931632");
+            entity33.setQueryName("124349292311931632");
             ApplicationDbEntity entity41 = model.newGenericEntity();
-            entity41.setQueryId("124349292311931632");
+            entity41.setQueryName("124349292311931632");
 
             assertTrue(model.getEntities().isEmpty());// Parameters entity is always present
             assertNotNull(model.getParametersEntity());

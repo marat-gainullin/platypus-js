@@ -9,15 +9,16 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.DbMetadataCache;
+import com.eas.client.DatabaseMdCache;
 import com.eas.client.SQLUtils;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.NoPublisherException;
 import java.sql.ParameterMetaData;
 import java.util.List;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -44,14 +45,14 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
-    public int executeUpdate() throws Exception {
-        return model.getClient().executeUpdate(getQuery().compile());
+    public int executeUpdate(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        return model.getBasesProxy().executeUpdate(getQuery().compile(), onSuccess, onFailure);
     }
 
     @Override
     protected List<Change> getChangeLog() throws Exception {
         validateQuery();
-        String dbId = tableName != null && !tableName.isEmpty() ? tableDbId : query != null ? query.getDbId() : null;
+        String dbId = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDbId() : null;
         return model.getChangeLog(dbId);
     }
 
@@ -81,15 +82,15 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     @Override
     public void validateQuery() throws Exception {
         if (query == null) {
-            if (queryId != null) {
-                query = model.getClient().getAppQuery(queryId);
+            if (queryName != null) {
+                query = model.queries.getCachedQuery(queryName);
                 if (query != null) {
                     query.clearRoles();
                 }
             } else if (tableName != null) {
-                query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient());
+                query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
             } else {
-                assert false : "Entity must have queryId or tableName to validate it's query";
+                assert false : "Entity must have queryName or tableName to validate it's query";
             }
             prepareRowsetByQuery();
         }
@@ -106,7 +107,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             SqlCompiledQuery compiled = query.compile();
             rowset = compiled.prepareRowset();
             if (tableName != null && !tableName.isEmpty()) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
-                DbMetadataCache mdCache = model.getClient().getDbMetadataCache(query.getDbId());
+                DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDbId());
                 SqlDriver driver = mdCache.getConnectionDriver();
                 TypesResolver resolver = driver.getTypesResolver();
                 for (Field field : rowset.getFields().toCollection()) {

@@ -4,11 +4,11 @@
  */
 package com.eas.client.model.query;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.Set;
 import java.util.logging.Level;
@@ -19,9 +19,10 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClient, SqlQuery> {
+public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQuery> {
 
-    protected String dbId;
+    protected DatabasesClient basesProxy;
+    protected String datasourceName;
     private Set<Integer> supportedTypes;
 
     public QueryModel() {
@@ -30,22 +31,26 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClie
         parametersEntity.setModel(this);
     }
 
-    public QueryModel(DbClient aClient) {
+    public QueryModel(DatabasesClient aBasesProxy) {
         this();
-        setClient(aClient);
+        basesProxy = aBasesProxy;
     }
 
-    public QueryModel(DbClient aClient, String aDbId) {
-        this(aClient);
-        dbId = aDbId;
+    public QueryModel(DatabasesClient aaBasesProxy, String aDatasourceName) {
+        this(aaBasesProxy);
+        datasourceName = aDatasourceName;
     }
 
-    public String getDbId() {
-        return dbId;
+    public DatabasesClient getBasesProxy() {
+        return basesProxy;
+    }
+
+    public String getDatasourceName() {
+        return datasourceName;
     }
 
     public void setDbId(String aValue) {
-        dbId = aValue;
+        datasourceName = aValue;
     }
 
     @Override
@@ -84,9 +89,9 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClie
     }
 
     protected void checkSupportedTypes() {
-        if (supportedTypes == null && client != null) {
+        if (supportedTypes == null && basesProxy != null) {
             try {
-                SqlDriver driver = ((DbClient) client).getDbMetadataCache(dbId).getConnectionDriver();
+                SqlDriver driver = basesProxy.getDbMetadataCache(datasourceName).getConnectionDriver();
                 assert driver != null;
                 supportedTypes = driver.getSupportedJdbcDataTypes();
             } catch (Exception ex) {

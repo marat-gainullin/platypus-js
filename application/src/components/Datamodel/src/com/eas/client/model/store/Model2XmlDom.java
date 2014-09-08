@@ -56,7 +56,7 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         }
     }
 
-    protected Document model2XmlDom(Model<E, ?, ?, ?> aModel) {
+    protected Document model2XmlDom(Model<E, ?, ?> aModel) {
         if (aModel != null && builder != null) {
             doc = builder.newDocument();
             doc.setXmlStandalone(true);
@@ -73,7 +73,7 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         currentNode = null;
     }
 
-    public void writeModel(Model<E, ?, ?, ?> aModel) {
+    public void writeModel(Model<E, ?, ?> aModel) {
         if (aModel != null) {
             Element datamodelNode = doc.createElement(DATAMODEL_TAG_NAME);
             currentNode.appendChild(datamodelNode);

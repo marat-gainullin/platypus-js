@@ -17,18 +17,9 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
 
     protected Set<ModelEditingListener<E>> listeners = new HashSet<>();
     protected Set<ModelEditingValidator<E>> validators = new HashSet<>();
-    protected GuiCallback guiCallback;
 
     public ModelEditingSupport() {
         super();
-    }
-
-    public GuiCallback getGuiCallback() {
-        return guiCallback;
-    }
-
-    public void setGuiCallback(GuiCallback aCallback) {
-        guiCallback = aCallback;
     }
 
     public void addListener(ModelEditingListener<E> l) {
@@ -40,9 +31,8 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
     }
 
     /**
-     * Registers an
-     * <code>DatamodelEditingValidator</code>. The validator is notified
-     * whenever an datamodel edit action will occur.
+     * Registers an <code>DatamodelEditingValidator</code>. The validator is
+     * notified whenever an datamodel edit action will occur.
      *
      * @param v an <code>DatamodelEditingValidator</code> object
      * @see #removeDatamodelEditingValidator
@@ -52,8 +42,7 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
     }
 
     /**
-     * Removes an
-     * <code>DatamodelEditingValidator</code>.
+     * Removes an <code>DatamodelEditingValidator</code>.
      *
      * @param v the <code>DatamodelEditingValidator</code> object to be removed
      * @see #addDatamodelEditingValidator
@@ -71,9 +60,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
             }
             return true;
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While Validating (checkRelationAddingValid) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (checkRelationAddingValid) ", ex);
         }
         return false;
@@ -88,9 +74,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
             }
             return true;
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While Validating (checkRelationRemovingValid) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (checkRelationRemovingValid) ", ex);
         }
         return false;
@@ -105,9 +88,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
             }
             return true;
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While Validating (checkEntityAddingValid) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (checkEntityAddingValid) ", ex);
         }
         return false;
@@ -122,9 +102,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
             }
             return true;
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While Validating (checkEntityRemovingValid) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (checkEntityRemovingValid) ", ex);
         }
         return false;
@@ -140,9 +117,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
                 }
             }
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While firing an event (fireEntityAdded) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (fireEntityAdded) ", ex);
         }
     }
@@ -157,9 +131,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
                 }
             }
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While firing an event (fireEntityRemoved) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (fireEntityRemoved) ", ex);
         }
     }
@@ -176,9 +147,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
                 }
             }
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While firing an event (fireRelationAdded) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (fireRelationAdded) ", ex);
         }
     }
@@ -195,9 +163,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
                 }
             }
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While firing an event (fireRelationRemoved) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (fireRelationRemoved) ", ex);
         }
     }
@@ -212,9 +177,6 @@ public class ModelEditingSupport<E extends Entity<?, ?, E>> {
                 }
             }
         } catch (Exception ex) {
-            if (guiCallback != null) {
-                guiCallback.showMessageDialog("While firing an event (fireIndexesChanged) " + ex.getMessage(), "datamodel", GuiCallback.ERROR_MESSAGE);
-            }
             Logger.getLogger(ModelEditingSupport.class.getName()).log(Level.SEVERE, "While firing an event (fireIndexesChanged) ", ex);
         }
     }

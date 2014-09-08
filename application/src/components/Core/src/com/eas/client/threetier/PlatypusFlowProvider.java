@@ -12,7 +12,6 @@ import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.AppClient;
 import com.eas.client.AppConnection;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.util.ListenerRegistration;
@@ -27,13 +26,13 @@ public class PlatypusFlowProvider implements FlowProvider {
 
     private static final String ROWSET_MISSING_IN_RESPONSE = "Rowset response hasn't returned any rowset. May be dml query is executed as select query.";
 
-    protected AppClient client;
+    protected PlatypusClient client;
     protected Fields expectedFields;
     protected boolean procedure = false;
     protected String entityId;
     protected AppConnection conn;
 
-    public PlatypusFlowProvider(AppClient aClient, AppConnection aConn, String aEntityId, Fields aExpectedFields) {
+    public PlatypusFlowProvider(PlatypusClient aClient, AppConnection aConn, String aEntityId, Fields aExpectedFields) {
         super();
         client = aClient;
         conn = aConn;

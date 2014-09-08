@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.queries;
+package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.ChangeValue;
@@ -12,7 +12,6 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.DbClient;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -27,8 +26,8 @@ import java.util.function.Consumer;
  */
 public class SqlCompiledQuery {
 
-    protected DbClient client;
-    protected String databaseId;
+    protected DatabasesClient client;
+    protected String datasourceName;
     protected String entityId;
     protected String sqlClause;
     protected Parameters parameters;// 1 - Based    
@@ -46,7 +45,7 @@ public class SqlCompiledQuery {
      * @param aSqlClause the SQL query text
      * @throws java.lang.Exception
      */
-    public SqlCompiledQuery(DbClient aClient, String aSqlClause) throws Exception {
+    public SqlCompiledQuery(DatabasesClient aClient, String aSqlClause) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = new Parameters();
@@ -63,7 +62,7 @@ public class SqlCompiledQuery {
      * @param sql the SQL query text.
      * @param params parameters' values vector.
      */
-    SqlCompiledQuery(DbClient aClient, String aSqlClause, Parameters aParams) throws Exception {
+    SqlCompiledQuery(DatabasesClient aClient, String aSqlClause, Parameters aParams) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
@@ -71,20 +70,20 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
-    SqlCompiledQuery(DbClient aClient, String aDbId, String aSqlClause, Parameters aParams) throws Exception {
+    SqlCompiledQuery(DatabasesClient aClient, String aDbId, String aSqlClause, Parameters aParams) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        databaseId = aDbId;
+        datasourceName = aDbId;
         client = aClient;
         createFlow();
     }
 
-    public SqlCompiledQuery(DbClient aClient, String aDbId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public SqlCompiledQuery(DatabasesClient aClient, String aDbId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        databaseId = aDbId;
+        datasourceName = aDbId;
         expectedFields = aExpectedFields;
         client = aClient;
         readRoles = aReadRoles;
@@ -92,11 +91,11 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
-    public SqlCompiledQuery(DbClient aClient, String aDbId, String aEntityId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public SqlCompiledQuery(DatabasesClient aClient, String aDbId, String aEntityId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        databaseId = aDbId;
+        datasourceName = aDbId;
         entityId = aEntityId;
         expectedFields = aExpectedFields;
         client = aClient;
@@ -108,13 +107,13 @@ public class SqlCompiledQuery {
      * Creates an instance of compiled query.
      *
      * @param aClient
-     * @param aDbId Database identifier.
+     * @param aDatasourceName Database identifier.
      * @param aSqlClause the SQL query text
      * @throws java.lang.Exception
      */
-    public SqlCompiledQuery(DbClient aClient, String aDbId, String aSqlClause) throws Exception {
+    public SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aSqlClause) throws Exception {
         super();
-        databaseId = aDbId;
+        datasourceName = aDatasourceName;
         sqlClause = aSqlClause;
         parameters = new Parameters();
         client = aClient;
@@ -155,7 +154,7 @@ public class SqlCompiledQuery {
 
     private void createFlow() throws Exception {
         if (client != null) {
-            flow = client.createFlowProvider(databaseId, entityId, sqlClause, expectedFields, readRoles, writeRoles);
+            flow = client.createFlowProvider(datasourceName, entityId, sqlClause, expectedFields, readRoles, writeRoles);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
         }
@@ -237,11 +236,11 @@ public class SqlCompiledQuery {
      * @return the databaseId
      */
     public String getDatabaseId() {
-        return databaseId;
+        return datasourceName;
     }
 
     public void setDatabaseId(String aValue) throws Exception {
-        databaseId = aValue;
+        datasourceName = aValue;
         createFlow();
     }
 

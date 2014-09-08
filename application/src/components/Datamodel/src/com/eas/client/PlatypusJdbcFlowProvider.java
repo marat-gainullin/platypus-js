@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.queries;
+package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
@@ -10,9 +10,8 @@ import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.queries.ContextHost;
 import com.eas.util.ListenerRegistration;
 import java.security.AccessControlException;
 import java.sql.Connection;
@@ -35,14 +34,14 @@ import javax.sql.DataSource;
 public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
 
     protected String entityId;
-    protected DbClient client;
-    protected DbMetadataCache cache;
+    protected DatabasesClient client;
+    protected DatabaseMdCache cache;
     protected ContextHost contextHost;
     protected List<Change> changeLog = new ArrayList<>();
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
-    public PlatypusJdbcFlowProvider(DbClient aClient, String aJdbcSourceId, String aEntityId, DataSource aDataSource, ExecutorService aDataPuller, DbMetadataCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aJdbcSourceId, String aEntityId, DataSource aDataSource, ExecutorService aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         super(aJdbcSourceId, aDataSource, aDataPuller, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
         entityId = aEntityId;
         client = aClient;

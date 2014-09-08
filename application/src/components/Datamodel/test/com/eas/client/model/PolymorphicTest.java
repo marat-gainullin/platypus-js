@@ -60,10 +60,10 @@ public class PolymorphicTest extends BaseTest{
         String tableName = "sampleTable";
         ApplicationDbModel dm = new ApplicationDbModel();
         ApplicationDbEntity entity = dm.newGenericEntity();
-        entity.setTableDbId(dbId);
+        entity.setTableDatasourceName(dbId);
         entity.setTableSchemaName(schemaName);
         entity.setTableName(tableName);
-        assertEquals(entity.getTableDbId(), dbId);
+        assertEquals(entity.getTableDatasourceName(), dbId);
         assertEquals(entity.getTableSchemaName(), schemaName);
         assertEquals(entity.getTableName(), tableName);
     }
@@ -81,16 +81,16 @@ public class PolymorphicTest extends BaseTest{
         QueryEntity entity = qm.newGenericEntity();
 
         String dbId1 = "89096465";
-        entity.setTableDbId(dbId1);
+        entity.setTableDatasourceName(dbId1);
         entity.setTableSchemaName(schemaName);
         entity.setTableName(tableName);
 
-        assertEquals(entity.getTableDbId(), dbId);
+        assertEquals(entity.getTableDatasourceName(), dbId);
         assertEquals(entity.getTableSchemaName(), schemaName);
         assertEquals(entity.getTableName(), tableName);
 
         // SlaveEntity instances can't be responsible on database. Only model is responsible.
-        assertFalse(entity.getTableDbId().equals(dbId1));
+        assertFalse(entity.getTableDatasourceName().equals(dbId1));
     }
 
     @Test
@@ -108,15 +108,15 @@ public class PolymorphicTest extends BaseTest{
         FieldsEntity entity = sm.newGenericEntity();
         String dbId1 = "89096465";
         String schemaName1 = "entitySampleSchema";
-        entity.setTableDbId(dbId1);
+        entity.setTableDatasourceName(dbId1);
         entity.setTableSchemaName(schemaName1);
         entity.setTableName(tableName);
 
-        assertEquals(entity.getTableDbId(), dbId);
+        assertEquals(entity.getTableDatasourceName(), dbId);
         assertEquals(entity.getTableSchemaName(), schemaName);
         assertEquals(entity.getTableName(), tableName);
 
-        assertFalse(entity.getTableDbId().equals(dbId1));
+        assertFalse(entity.getTableDatasourceName().equals(dbId1));
         assertFalse(entity.getTableSchemaName().equals(schemaName1));
     }
 }

@@ -5,30 +5,37 @@
 package com.eas.client.model.application;
 
 import com.bearsoft.rowset.changes.Change;
-import com.eas.client.AppClient;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.client.queries.QueriesProxy;
+import com.eas.client.threetier.PlatypusClient;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatypusEntity, ApplicationPlatypusParametersEntity, AppClient, PlatypusQuery> {
+public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatypusEntity, ApplicationPlatypusParametersEntity, PlatypusQuery> {
 
     protected List<Change> changeLog = new ArrayList<>();
+    protected PlatypusClient serverProxy;
 
-    public ApplicationPlatypusModel() {
-        super();
+    public ApplicationPlatypusModel(QueriesProxy<PlatypusQuery> aQueries) {
+        super(aQueries);
         parametersEntity = new ApplicationPlatypusParametersEntity(this);
     }
 
-    public ApplicationPlatypusModel(AppClient aClient) {
-        this();
-        setClient(aClient);
+    public ApplicationPlatypusModel(PlatypusClient aServerProxy, QueriesProxy<PlatypusQuery> aQueries) {
+        this(aQueries);
+        serverProxy = aServerProxy;
+    }
+
+    public PlatypusClient getServerProxy() {
+        return serverProxy;
     }
 
     @Override
@@ -50,23 +57,25 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
-            + " * Saves model data changes. Calls aCallback when done.\n"
+            + " * Saves model data changes. Calls onSuccess when done.\n"
             + " * If model can't apply the changed, than exception is thrown.\n"
             + " * In this case, application can call model.save() another time to save the changes.\n"
-            + " * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().\n")
+            + " * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().\n"
+            + " * @param onSuccess Success callback.\n"
+            + " * @param onFailure Failure callback.\n")
     @Override
-    public boolean save(JSObject aCallback) throws Exception {
-        client.getChangeLog().addAll(changeLog);
-        return super.save(aCallback);
+    public void save(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        serverProxy.getChangeLog().addAll(changeLog);
+        super.save(aOnSuccess, aOnFailure);
     }
 
     @Override
-    public int commit() throws Exception {
-        return client.commit();
+    public int commit(final Consumer<Integer> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        return serverProxy.commit(aOnSuccess, aOnFailure);
     }
 
     @Override
-    public void saved() throws Exception {
+    public void saved() {
         changeLog.clear();
         fireCommited();
     }
@@ -78,7 +87,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     }
 
     @Override
-    public void rolledback() throws Exception {
+    public void rolledback() {
     }
 
     @ScriptFunction(jsDoc = ""

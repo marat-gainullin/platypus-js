@@ -90,7 +90,6 @@ public class Entity implements RowsetListener, HasPublished{
 	protected Cancellable pending;
 	protected boolean valid;
 	protected Rowset rowset;
-	protected boolean filteredWhileAjusting;
 	protected Filter filter;
 	protected boolean userFiltering;
 	protected Map<List<Integer>, Locator> userLocators = new HashMap<List<Integer>, Locator>();
@@ -98,7 +97,7 @@ public class Entity implements RowsetListener, HasPublished{
 	protected List<Relation> rtInFilterRelations;
 	protected int updatingCounter;
 	protected String title;
-	protected String name; // data source name
+	protected String name;
 	protected String entityId = String.valueOf((long) IDGenerator.genId());
 	protected String queryId;
 	protected Model model;
@@ -1260,15 +1259,9 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	public void refresh(final Callback<Rowset, String> aCallback) throws Exception {
-		if (model != null/* && model.isRuntime()*/) {
+		if (model != null) {
 			invalidate();
 			internalExecute(aCallback);
-			/*
-			 * internalExecute(new CancellableCallbackAdapter() {
-			 * 
-			 * @Override public void doWork() throws Exception {
-			 * onSuccess.run(); internalExecuteChildren(true); } });
-			 */
 		}
 	}
 	
@@ -1300,19 +1293,13 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	public void execute(Callback<Rowset, String> aCallback) throws Exception {
-		if (model != null/* && model.isRuntime()*/) {
+		if (model != null) {
 			internalExecute(aCallback);
-			/*
-			 * internalExecute(new CancellableCallbackAdapter() {
-			 * 
-			 * @Override public void doWork() throws Exception {
-			 * onSuccess.run(); internalExecuteChildren(false); } });
-			 */
 		}
 	}
 
 	protected void internalExecute(final Callback<Rowset, String> aCallback) throws Exception {
-		if (model != null/* && model.isRuntime()*/) {
+		if (model != null) {
 			assert query != null : QUERY_REQUIRED;
 			// try to select any data only within non-manual queries
 			// platypus manual queries are:
@@ -1320,10 +1307,8 @@ public class Entity implements RowsetListener, HasPublished{
 			// - stored procedures, which changes data.
 			if (!query.isManual()) {
 				// There might be entities - parameters values sources, with no
-				// data in theirs rowsets,
-				// so we can't bind query parameters to proper values. In the
-				// such case we initialize
-				// parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
+				// data in theirs rowsets, so we can't bind query parameters to proper values. In the
+				// such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
 				boolean parametersBinded = bindQueryParameters();
 				if(parametersBinded)
 					invalidate();
@@ -1848,19 +1833,11 @@ public class Entity implements RowsetListener, HasPublished{
 			assert pending != null;
 			pending = null;// network response must null the pending state before any other script activities will occur.
 			valid = true;
-			filterRowset();// filtering must go here, because of onRequiried script event is an endpoint of the network process. And it expects the data will be processed already before it will be called.
-			// So onFiltered script event goes before onRequeired script event.
-			rowset.silentFirst();
-			//
+			filterRowset();
 			if (jsPublished != null)
 				publishRows(jsPublished);
 			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
-				/*
-				 * if (model.isPending()) model.enqueueEvent(new
-				 * ScriptEvent(jsPublished, this, onRequeried, publishedEvent));
-				 * else
-				 */
 				Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
 			}
 			internalExecuteChildren(false);

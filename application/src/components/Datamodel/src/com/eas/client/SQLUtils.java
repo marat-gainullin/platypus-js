@@ -16,7 +16,6 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.queries.Query;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -277,23 +276,23 @@ public class SQLUtils {
         return null;
     }
 
-    public static SqlQuery validateTableSqlQuery(String aTableDbId, String tableName, String tableSchemaName, DbClient aClient) throws Exception {
+    public static SqlQuery validateTableSqlQuery(String aTableDbId, String tableName, String tableSchemaName, DatabasesClient aClient) throws Exception {
         return validateTableSqlQuery(aTableDbId, tableName, tableSchemaName, aClient, true);
     }
 
-    public static SqlQuery validateTableSqlQuery(String aTableDbId, String tableName, String tableSchemaName, DbClient aClient, boolean forceMdQuery) throws Exception {
-        String fullTableName = tableName;
-        if (tableSchemaName != null && !tableSchemaName.isEmpty()) {
-            fullTableName = tableSchemaName + "." + fullTableName;
+    public static SqlQuery validateTableSqlQuery(String aTableDatasourceName, String aTableName, String aTableSchemaName, DatabasesClient aClient, boolean forceMdQuery) throws Exception {
+        String fullTableName = aTableName;
+        if (aTableSchemaName != null && !aTableSchemaName.isEmpty()) {
+            fullTableName = aTableSchemaName + "." + fullTableName;
         }
-        SqlQuery query = new SqlQuery(aClient, aTableDbId, SQLUtils.makeQueryByTableName(fullTableName));
-        DbMetadataCache mdCache = aClient.getDbMetadataCache(aTableDbId);
+        SqlQuery query = new SqlQuery(aClient, aTableDatasourceName, SQLUtils.makeQueryByTableName(fullTableName));
+        DatabaseMdCache mdCache = aClient.getDbMetadataCache(aTableDatasourceName);
         if (mdCache != null) {
             Fields tableFields = forceMdQuery || mdCache.containsTableMetadata(fullTableName) ? mdCache.getTableMetadata(fullTableName) : null;
             if (tableFields != null) {
                 query.setFields(tableFields);
             } else {
-                throw new Exception("Table " + fullTableName + " doesn't exist. Datasource: " + aTableDbId);
+                throw new Exception("Table " + fullTableName + " doesn't exist. Datasource: " + aTableDatasourceName);
             }
         }
         return query;
@@ -795,7 +794,7 @@ public class SQLUtils {
         return null;
     }
 
-    public static SqlQuery constructQueryByTableName(DbClient aClient, String aTableName) {
+    public static SqlQuery constructQueryByTableName(DatabasesClient aClient, String aTableName) {
         if (aTableName != null) {
             SqlQuery query = new SqlQuery(aClient, SQLUtils.makeQueryByTableName(aTableName));
             return query;

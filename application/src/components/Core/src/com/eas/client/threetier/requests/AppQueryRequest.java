@@ -5,8 +5,6 @@
 package com.eas.client.threetier.requests;
 
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.queries.Query;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import java.util.Date;
@@ -53,16 +51,16 @@ public class AppQueryRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        protected Query appQuery;
+        protected PlatypusQuery appQuery;
         protected Date timeStamp;
 
-        public Response(SqlQuery aAppQuery, Date aTimeStamp) {
+        public Response(PlatypusQuery aAppQuery, Date aTimeStamp) {
             super();
             appQuery = aAppQuery;
             timeStamp = aTimeStamp;
         }
 
-        public Query getAppQuery() {
+        public PlatypusQuery getAppQuery() {
             return appQuery;
         }
 

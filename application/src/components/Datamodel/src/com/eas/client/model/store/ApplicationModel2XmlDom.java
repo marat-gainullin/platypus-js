@@ -23,21 +23,21 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
     protected static final String SCALAR_PROP_NAME_ATTR_NAME = "scalarPropertyName";
     protected static final String COLLECTION_PROP_NAME_ATTR_NAME = "collectionPropertyName";
 
-    public static <E extends ApplicationEntity<?, ?, E>> Document transform(ApplicationModel<E, ?, ?, ?> aModel) {
+    public static <E extends ApplicationEntity<?, ?, E>> Document transform(ApplicationModel<E, ?, ?> aModel) {
         ApplicationModel2XmlDom<E> transformer = new ApplicationModel2XmlDom<>();
         return transformer.model2XmlDom(aModel);
     }
 
     @Override
-    public void visit(ApplicationModel<E, ?, ?, ?> aModel) {
+    public void visit(ApplicationModel<E, ?, ?> aModel) {
         writeModel(aModel);
     }
 
     @Override
-    public void writeModel(Model<E, ?, ?, ?> aModel) {
+    public void writeModel(Model<E, ?, ?> aModel) {
         super.writeModel(aModel);
-        if (aModel != null && ((ApplicationModel<E, ?, ?, ?>) aModel).getReferenceRelations() != null) {
-            for (ReferenceRelation<E> relation : ((ApplicationModel<E, ?, ?, ?>) aModel).getReferenceRelations()) {
+        if (aModel != null && ((ApplicationModel<E, ?, ?>) aModel).getReferenceRelations() != null) {
+            for (ReferenceRelation<E> relation : ((ApplicationModel<E, ?, ?>) aModel).getReferenceRelations()) {
                 relation.accept(this);
             }
         }
@@ -66,11 +66,11 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
             node.setAttribute(Model.DATASOURCE_NAME_TAG_NAME, aEntity.getName());
             node.setAttribute(Model.DATASOURCE_TITLE_TAG_NAME, aEntity.getTitle());
             node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(aEntity.getEntityId()));
-            if (aEntity.getQueryId() != null) {
-                node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(aEntity.getQueryId()));
+            if (aEntity.getQueryName() != null) {
+                node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(aEntity.getQueryName()));
             }
-            if (aEntity.getTableDbId() != null) {
-                node.setAttribute(TABLE_DB_ID_ATTR_NAME, String.valueOf(aEntity.getTableDbId()));
+            if (aEntity.getTableDatasourceName() != null) {
+                node.setAttribute(TABLE_DB_ID_ATTR_NAME, String.valueOf(aEntity.getTableDatasourceName()));
             }
             node.setAttribute(TABLE_SCHEMA_NAME_ATTR_NAME, aEntity.getTableSchemaName());
             node.setAttribute(TABLE_NAME_ATTR_NAME, aEntity.getTableName());

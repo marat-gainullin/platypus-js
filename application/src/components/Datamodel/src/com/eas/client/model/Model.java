@@ -13,7 +13,6 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import java.beans.PropertyChangeSupport;
@@ -23,32 +22,26 @@ import org.w3c.dom.Document;
 /**
  * @param <E> Entity generic type.
  * @param <P> Parameters entity generic type.
- * @param <C> Client generic type.
  * @param <Q> Query generic type.
  * @author mg
  */
-public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> {
+public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Query> {
 
     public static final long PARAMETERS_ENTITY_ID = -1L;
     public static final String PARAMETERS_SCRIPT_NAME = "params";
     public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
     public static final String DATASOURCE_NAME_TAG_NAME = "Name";
     public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-    protected C client;
     protected Set<Relation<E>> relations = new HashSet<>();
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
-    protected int ajustingCounter;
-    protected Runnable resolver;
-    protected GuiCallback guiCallback;
     protected ModelEditingSupport<E> editingSupport = new ModelEditingSupport<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected boolean relationsAgressiveCheck;
 
-    public Model<E, P, C, Q> copy() throws Exception {
-        Model<E, P, C, Q> copied = getClass().newInstance();
-        copied.setClient(client);
+    public Model<E, P, Q> copy() throws Exception {
+        Model<E, P, Q> copied = getClass().newInstance();
         for (E entity : entities.values()) {
             copied.addEntity((E) entity.copy());
         }
@@ -73,45 +66,17 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         super();
     }
 
-    /**
-     * Constructor of datamodel. Used in designers.
-     *
-     * @param aClient C instance all queries to be sent to.
-     * @see C
-     */
-    public Model(C aClient) {
-        this();
-        setClient(aClient);
-    }
-
-    public void setResolver(Runnable aResolver) {
-        resolver = aResolver;
-    }
-
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
-    }
-
-    public void setClient(C aValue) {
-        client = aValue;
-        if (client != null && resolver != null) {
-            resolver.run();
-            resolver = null;
-        }
-        if (client == null) {
-            for (E e : entities.values()) {
-                e.clearFields();
-            }
-        }
     }
 
     public void clearRelations() {
         if (relations != null) {
             relations.clear();
-            for (E e : entities.values()) {
+            entities.values().stream().forEach((e) -> {
                 e.getInRelations().clear();
                 e.getOutRelations().clear();
-            }
+            });
         }
     }
 
@@ -119,6 +84,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
      * Tests if entities' internal data is actual, updating it if necessary.
      *
      * @return True if any change occur and false is all is actual.
+     * @throws java.lang.Exception
      */
     public synchronized boolean validate() throws Exception {
         if (validateEntities()) {
@@ -158,13 +124,8 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         }
     }
 
-    public GuiCallback getGuiCallback() {
-        return guiCallback;
-    }
-
-    public void setGuiCallback(GuiCallback aValue) {
-        guiCallback = aValue;
-        editingSupport.setGuiCallback(aValue);
+    public ModelEditingSupport<E> getEditingSupport() {
+        return editingSupport;
     }
 
     /**
@@ -319,27 +280,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         return aEntity.getInOutRelations();
     }
 
-    public int getAjustingCounter() {
-        return ajustingCounter;
-    }
-
-    public boolean isAjusting() {
-        return ajustingCounter > 0;
-    }
-
-    public void beginAjusting() {
-        ajustingCounter++;
-    }
-
-    public void endAjusting() {
-        ajustingCounter--;
-        assert (ajustingCounter >= 0);
-    }
-
-    public C getClient() {
-        return client;
-    }
-
     public void removeRelation(Relation<E> aRelation) {
         relations.remove(aRelation);
         E lEntity = aRelation.getLeftEntity();
@@ -453,7 +393,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         relationsAgressiveCheck = aValue;
     }
 
-    protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
+    protected void resolveRelation(Relation<E> aRelation, Model<E, P, Q> aModel) throws Exception {
         if (aRelation.getLeftEntity() != null) {
             aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
         }
@@ -463,7 +403,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         if (aRelation.getLeftField() != null) {
             String targetName = aRelation.getLeftField().getName();
             if (aRelation.getLeftEntity() != null) {
-                if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
+                if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryName() != null) {
                     Q lQuery = aRelation.getLeftEntity().getQuery();
                     if (lQuery != null) {
                         aRelation.setLeftField(lQuery.getParameters().get(targetName));
@@ -491,7 +431,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         if (aRelation.getRightField() != null) {
             String targetName = aRelation.getRightField().getName();
             if (aRelation.getRightEntity() != null) {
-                if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
+                if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryName() != null) {
                     Q rQuery = aRelation.getRightEntity().getQuery();
                     if (rQuery != null) {
                         aRelation.setRightField(rQuery.getParameters().get(targetName));
@@ -520,12 +460,12 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
 
     public void checkRelationsIntegrity() {
         List<Relation<E>> toDel = new ArrayList<>();
-        for (Relation<E> rel : relations) {
+        relations.stream().forEach((rel) -> {
             if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
                     || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
                 toDel.add(rel);
             }
-        }
+        });
         toDel.stream().forEach((rel) -> {
             removeRelation(rel);
         });

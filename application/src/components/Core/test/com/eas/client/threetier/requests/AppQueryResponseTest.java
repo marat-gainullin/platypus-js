@@ -9,7 +9,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DbClient;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.SqlQuery;
 import com.eas.client.threetier.platypus.PlatypusResponseReader;
 import com.eas.client.threetier.platypus.PlatypusResponseWriter;
 import com.eas.client.threetier.platypus.RequestsTags;

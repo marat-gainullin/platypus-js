@@ -8,10 +8,10 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.ParametersRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.queries.SqlQuery;
 import com.eas.script.NoPublisherException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,6 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
         super();
         model = aModel;
         entityId = ApplicationModel.PARAMETERS_ENTITY_ID;
-        executed = true;
     }
 
     @Override
@@ -78,7 +77,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
-    public String getQueryId() {
+    public String getQueryName() {
         return null;
     }
 
@@ -88,12 +87,12 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
-    public String getTableDbId() {
+    public String getTableDatasourceName() {
         return null;
     }
 
     @Override
-    public void setTableDbId(String tableDbId) {
+    public void setTableDatasourceName(String tableDbId) {
     }
 
     @Override
@@ -120,10 +119,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
-    protected boolean internalExecute(boolean refresh) {
-        executing = false;
-        executed = true;
-        return true;
+    protected void internalExecute(boolean refresh) {
     }
 
     @Override

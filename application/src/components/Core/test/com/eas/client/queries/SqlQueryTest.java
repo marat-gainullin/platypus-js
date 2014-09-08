@@ -4,6 +4,8 @@
  */
 package com.eas.client.queries;
 
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.exceptions.UnboundSqlParameterException;
 import org.junit.After;

@@ -17,32 +17,13 @@ import com.eas.client.queries.Query;
 import java.beans.PropertyChangeSupport;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author mg
  */
-public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E extends Entity<M, Q, E>> {
+public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extends Entity<M, Q, E>> {
 
-    protected int x;
-    protected int y;
-    protected int width;
-    protected int height;
-    protected boolean iconified;
-    protected String title;
-    protected String name; // datasource name
-    protected Long entityId = IDGenerator.genID();
-    protected String queryId;
-    protected String tableDbId;
-    protected String tableSchemaName;
-    protected String tableName = null;
-    protected transient M model;
-    protected transient Q query;
-    protected transient Set<Relation<E>> inRelations = new HashSet<>();
-    protected transient Set<Relation<E>> outRelations = new HashSet<>();
-    protected PropertyChangeSupport changeSupport;
     public static final String MODEL_PROPERTY = "model";
     public static final String ENTITY_ID_PROPERTY = "entityId";
     public static final String X_PROPERTY = "x";
@@ -52,12 +33,31 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     public static final String ICONIFIED_PROPERTY = "iconified";
     public static final String TITLE_PROPERTY = "title";
     public static final String NAME_PROPERTY = "name";
-    public static final String QUERY_ID_PROPERTY = "queryId";
-    public static final String TABLE_DB_ID_PROPERTY = "tableDbId";
+    public static final String QUERY_ID_PROPERTY = "queryName";
+    public static final String TABLE_DATASOURCE_NAME_PROPERTY = "tableDatasourceName";
     public static final String TABLE_NAME_PROPERTY = "tableName";
     public static final String TABLE_SCHEMA_NAME_PROPERTY = "tableSchemaName";
     public static final String QUERY_PROPERTY = "query";
     public static final String QUERY_VALID_PROPERTY = "queryValid";
+    // stored data
+    protected int x;
+    protected int y;
+    protected int width;
+    protected int height;
+    protected boolean iconified;
+    protected String title;
+    protected String name;
+    protected Long entityId = IDGenerator.genID();
+    protected String queryName;
+    protected String tableDatasourceName;
+    protected String tableSchemaName;
+    protected String tableName;
+    // runtime data
+    protected transient M model;
+    protected transient Q query;
+    protected transient Set<Relation<E>> inRelations = new HashSet<>();
+    protected transient Set<Relation<E>> outRelations = new HashSet<>();
+    protected PropertyChangeSupport changeSupport;
 
     public Entity() {
         super();
@@ -69,40 +69,33 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         model = aModel;
     }
 
-    public Entity(String aQueryId) {
+    public Entity(String aQueryName) {
         this();
-        setQueryId(aQueryId);
+        setQueryName(aQueryName);
     }
 
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }
 
-    public boolean isQuery(){
+    public boolean isQuery() {
         return query != null;
     }
-    
+
     public abstract void validateQuery() throws Exception;
 
     public Fields getFields() {
-        if (model != null && model.getClient() != null) {
-            try {
-                validateQuery();
-                if (query != null) {
-                    return query.getFields();
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "line: 95. {0}", ex.getMessage());
-                return null;
-            }
+        if (query != null) {
+            return query.getFields();
+        } else {
+            return null;
         }
-        return null;
     }
 
     /**
-     * 
+     *
      * @return True if entity's contents (Query) changed
-     * @throws Exception 
+     * @throws Exception
      */
     public boolean validate() throws Exception {
         boolean res = false;
@@ -125,7 +118,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         return res;
     }
 
-    public void clearFields() {        
+    public void clearFields() {
         query = null;
     }
 
@@ -208,7 +201,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     public String getTitle() {
         return title;
     }
-    
+
     public void setTitle(String aValue) {
         if ((aValue == null && title != null) || (aValue != null && !aValue.equals(title))) {
             String oldValue = title;
@@ -255,18 +248,18 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         return (lName != null ? lName : "") + (lTitle != null && !"".equals(lTitle) ? " (" + lTitle + ")" : ""); //NO18IN
     }
 
-    public String getQueryId() {
-        return queryId;
+    public String getQueryName() {
+        return queryName;
     }
 
-    public void setQueryId(String aValue) {
-        String oldValue = queryId;
-        queryId = aValue;
+    public void setQueryName(String aValue) {
+        String oldValue = queryName;
+        queryName = aValue;
         changeSupport.firePropertyChange(QUERY_ID_PROPERTY, oldValue, aValue);
     }
 
-    public String getTableDbId() {
-        return tableDbId;
+    public String getTableDatasourceName() {
+        return tableDatasourceName;
     }
 
     public String getTableSchemaName() {
@@ -277,10 +270,10 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         return tableName;
     }
 
-    public void setTableDbId(String aValue) {
-        String oldValue = tableDbId;
-        tableDbId = aValue;
-        changeSupport.firePropertyChange(TABLE_DB_ID_PROPERTY, oldValue, aValue);
+    public void setTableDatasourceName(String aValue) {
+        String oldValue = tableDatasourceName;
+        tableDatasourceName = aValue;
+        changeSupport.firePropertyChange(TABLE_DATASOURCE_NAME_PROPERTY, oldValue, aValue);
     }
 
     public void setTableName(String aValue) {
@@ -296,12 +289,6 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     }
 
     public Q getQuery() {
-        try {
-            validateQuery();
-        } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "line: 302. {0}", ex.getMessage());
-            query = null;
-        }
         return query;
     }
 
@@ -359,8 +346,8 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
 
     protected void assign(E assignTo) throws Exception {
         assignTo.setEntityId(entityId);
-        assignTo.setQueryId(queryId);
-        assignTo.setTableDbId(tableDbId);
+        assignTo.setQueryName(queryName);
+        assignTo.setTableDatasourceName(tableDatasourceName);
         assignTo.setTableName(tableName);
         assignTo.setTableSchemaName(tableSchemaName);
         assignTo.setTitle(getTitle());

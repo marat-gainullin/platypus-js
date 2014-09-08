@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.queries;
+package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
@@ -10,9 +10,8 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.DbClient;
-import com.eas.client.SQLUtils;
 import com.eas.client.exceptions.UnboundSqlParameterException;
+import com.eas.client.queries.Query;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -32,7 +31,7 @@ import java.util.regex.Pattern;
  *
  * @author mg
  */
-public class SqlQuery extends Query<DbClient> {
+public class SqlQuery extends Query {
 
     private final static Pattern PARAMETER_NAME_PATTERN = Pattern.compile(SQLUtils.PARAMETER_NAME_REGEXP, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
     private final static Pattern STRINGS_PATTERN = Pattern.compile("'[^']*'", Pattern.MULTILINE);
@@ -45,18 +44,15 @@ public class SqlQuery extends Query<DbClient> {
     protected int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
     protected boolean publicAccess;
     protected boolean command;
+    protected DatabasesClient basesProxy;
 
     /**
      * Creates an instance of Query with empty SQL query text and parameters
      * map.
      */
-    public SqlQuery() {
+    public SqlQuery(DatabasesClient aBasesProxy) {
         super();
-    }
-
-    public SqlQuery(DbClient aClient) {
-        this();
-        core = aClient;
+        basesProxy = aBasesProxy;
     }
 
     /**
@@ -65,8 +61,8 @@ public class SqlQuery extends Query<DbClient> {
      *
      * @param aSqlText the SQL query text.
      */
-    public SqlQuery(DbClient aClient, String aSqlText) {
-        this(aClient);
+    public SqlQuery(DatabasesClient aBase, String aSqlText) {
+        this(aBase);
         sqlText = aSqlText;
     }
 
@@ -74,12 +70,12 @@ public class SqlQuery extends Query<DbClient> {
      * Creates an instance of Query with given SQL query text. Leaves the
      * parameters map empty.
      *
-     * @param aDbId A database identifier.
+     * @param aDatasourceName A database identifier.
      * @param aSqlText the SQL query text.
      */
-    public SqlQuery(DbClient aClient, String aDbId, String aSqlText) {
-        this(aClient, aSqlText);
-        datasourceName = aDbId;
+    public SqlQuery(DatabasesClient aBase, String aDatasourceName, String aSqlText) {
+        this(aBase, aSqlText);
+        datasourceName = aDatasourceName;
     }
 
     public SqlQuery(SqlQuery aSource) {
@@ -103,6 +99,10 @@ public class SqlQuery extends Query<DbClient> {
     @Override
     public SqlQuery copy() {
         return new SqlQuery(this);
+    }
+
+    public DatabasesClient getBasesProxy() {
+        return basesProxy;
     }
 
     public boolean isCommand() {
@@ -252,7 +252,7 @@ public class SqlQuery extends Query<DbClient> {
                 compiledSb.append(sm.group(0));
             }
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(core, datasourceName, compiledSb.toString(), ps, fields, readRoles, writeRoles);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), ps, fields, readRoles, writeRoles);
         compiled.setEntityId(entityId);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);
@@ -297,7 +297,7 @@ public class SqlQuery extends Query<DbClient> {
         }
         String sqlCompiledText = m.replaceAll("?");
         sqlCompiledText = RowsetUtils.makeQueryMetadataQuery(sqlCompiledText);
-        SqlCompiledQuery compiled = new SqlCompiledQuery(core, datasourceName, sqlCompiledText, ps);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, sqlCompiledText, ps);
         compiled.setPageSize(pageSize);
         return compiled;
     }

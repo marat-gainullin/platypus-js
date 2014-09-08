@@ -23,9 +23,9 @@ public class QueryModel2XmlDom extends Model2XmlDom<QueryEntity> implements Quer
     @Override
     public void visit(QueryModel aModel) {
         writeModel(aModel);
-        if (aModel.getDbId() != null && currentNode != null && currentNode instanceof Element) {
+        if (aModel.getDatasourceName() != null && currentNode != null && currentNode instanceof Element) {
             Element el = (Element) currentNode;
-            el.setAttribute(DATAMODEL_DB_ID, String.valueOf(aModel.getDbId()));
+            el.setAttribute(DATAMODEL_DB_ID, String.valueOf(aModel.getDatasourceName()));
         }
     }
 
@@ -37,8 +37,8 @@ public class QueryModel2XmlDom extends Model2XmlDom<QueryEntity> implements Quer
 
             node.setAttribute(QueryModel.DATASOURCE_TITLE_TAG_NAME, entity.getTitle());
             node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(entity.getEntityId()));
-            if (entity.getQueryId() != null) {
-                node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(entity.getQueryId()));
+            if (entity.getQueryName() != null) {
+                node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(entity.getQueryName()));
             }
             node.setAttribute(TABLE_SCHEMA_NAME_ATTR_NAME, entity.getTableSchemaName());
             node.setAttribute(TABLE_NAME_ATTR_NAME, entity.getTableName());

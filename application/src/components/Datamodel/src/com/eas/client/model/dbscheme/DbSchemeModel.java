@@ -5,13 +5,13 @@
 package com.eas.client.model.dbscheme;
 
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
+import com.eas.client.SqlQuery;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.DbSchemeModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.Types;
 import java.util.List;
@@ -22,25 +22,32 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, SqlQuery> {
+public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, SqlQuery> {
 
-    protected String dbId;
+    protected String datasourceName;
     protected String schema;
+    protected DatabasesClient basesProxy;
 
     public DbSchemeModel() {
         super();
         assert parametersEntity == null;
     }
 
-    public DbSchemeModel(DbClient aClient) {
-        super(aClient);
+    public DbSchemeModel(DatabasesClient aBasesProxy) {
+        super();
+        basesProxy = aBasesProxy;
         assert parametersEntity == null;
     }
 
-    public DbSchemeModel(DbClient aClient, String aDbId) {
-        super(aClient);
-        dbId = aDbId;
+    public DbSchemeModel(DatabasesClient aBasesProxy, String aDatasourceName) {
+        super();
+        basesProxy = aBasesProxy;
+        datasourceName = aDatasourceName;
         assert parametersEntity == null;
+    }
+
+    public DatabasesClient getBasesProxy() {
+        return basesProxy;
     }
 
     @Override
@@ -77,11 +84,11 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, S
     }
 
     public String getDbId() {
-        return dbId;
+        return datasourceName;
     }
 
     public void setDbId(String aValue) {
-        dbId = aValue;
+        datasourceName = aValue;
     }
 
     public String getSchema() {
@@ -134,10 +141,11 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, S
      *
      * @param type - the type to check.
      * @return true if the type is supported for datamodel's internal usage.
+     * @throws java.lang.Exception
      */
     @Override
     public boolean isTypeSupported(int type) throws Exception {
-        SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
+        SqlDriver driver = basesProxy.getDbMetadataCache(datasourceName).getConnectionDriver();
         Set<Integer> supportedTypes = driver.getSupportedJdbcDataTypes();
         if (SQLUtils.isTypeSupported(type)) {
             if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.NUMBERS) // numbers

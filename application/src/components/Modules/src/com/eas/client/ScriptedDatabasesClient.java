@@ -5,8 +5,8 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.queries.JsQuery;
-import com.eas.client.queries.PlatypusScriptedFlowProvider;
+import com.eas.client.queries.ScriptedQuery;
+import com.eas.client.queries.ScriptedFlowProvider;
 import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +58,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceName) throws Exception {
+    public synchronized DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
         AppElementFiles files = indexer.nameToFiles(aDatasourceName);
         if (files == null || !files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             return super.getDbMetadataCache(aDatasourceName);
@@ -69,10 +69,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
 
     @Override
     public FlowProvider createFlowProvider(String aDbId, final String aEntityId, String aSqlClause, final Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        if (JsQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
+        if (ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
             JSObject dataFeeder = createModule(aEntityId);
             if (dataFeeder != null) {
-                return new PlatypusScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
+                return new ScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
             } else {
                 throw new IllegalStateException(" datasource module: " + aEntityId + " is not found");
             }

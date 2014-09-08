@@ -4,7 +4,9 @@
  */
 package com.eas.client.login;
 
-import com.eas.client.AppClient;
+import com.eas.client.threetier.PlatypusConnection;
+import com.eas.client.threetier.requests.IsUserInRoleRequest;
+import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.script.NoPublisherException;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,38 +19,61 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class AppPlatypusPrincipal extends PlatypusPrincipal {
 
-    protected AppClient client;
+    protected PlatypusConnection conn;
     protected Set<String> allowedRoles = new HashSet<>();
 
-    public AppPlatypusPrincipal(String aUserName, AppClient aClient) {
+    public AppPlatypusPrincipal(String aUserName, PlatypusConnection aConn) {
         super(aUserName);
-        client = aClient;
+        conn = aConn;
     }
 
     @Override
     public boolean hasRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        IsUserInRoleRequest request = new IsUserInRoleRequest(aRole);
         if (onSuccess != null) {
             if (allowedRoles.contains(aRole)) {
                 onSuccess.accept(true);
             } else {
-                client.isUserInRole(aRole, (Boolean res) -> {
-                    if (res) {
+                conn.<IsUserInRoleRequest.Response>enqueueRequest(request, (IsUserInRoleRequest.Response aResponse) -> {
+                    if (aResponse.isRole()) {
                         allowedRoles.add(aRole);
                     }
-                    onSuccess.accept(res);
-                }, onFailure);
+                    onSuccess.accept(aResponse.isRole());
+                }, (Exception aException) -> {
+                    if (onFailure != null) {
+                        onFailure.accept(aException);
+                    }
+                });
             }
             return false;
         } else {
             if (allowedRoles.contains(aRole)) {
                 return true;
             } else {
-                boolean res = client.isUserInRole(aRole, null, null);
-                if (res) {
+                IsUserInRoleRequest.Response response = conn.executeRequest(request);
+                if (response.isRole()) {
                     allowedRoles.add(aRole);
                 }
-                return res;
+                return response.isRole();
             }
+        }
+    }
+
+    @Override
+    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        StartAppElementRequest request = new StartAppElementRequest();
+        if (onSuccess != null) {
+            conn.<StartAppElementRequest.Response>enqueueRequest(request, (StartAppElementRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.getAppElementId());
+            }, (Exception aException) -> {
+                if (onFailure != null) {
+                    onFailure.accept(aException);
+                }
+            });
+            return null;
+        } else {
+            StartAppElementRequest.Response response = conn.executeRequest(request);
+            return response.getAppElementId();
         }
     }
 

@@ -60,6 +60,8 @@ public abstract class PlatypusPrincipal implements Principal, HasPublished {
         return true;
     }
     
+    public abstract String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    
     @Override
     public String toString() {
         return super.toString() + "{username: \"" + name + "\"}";

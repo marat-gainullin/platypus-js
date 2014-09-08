@@ -4,18 +4,19 @@
  */
 package com.eas.client.model.application;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Client;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
@@ -24,13 +25,14 @@ import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import java.io.*;
 import java.sql.Types;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -41,16 +43,146 @@ import org.w3c.dom.Document;
  * @author mg
  * @param <E>
  * @param <P>
- * @param <C>
  * @param <Q>
  */
-public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> implements HasPublished {
+public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, Q extends Query> extends Model<E, P, Q> implements HasPublished {
 
     protected Object published;
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
-    protected Set<Long> savedRowIndexEntities = new HashSet<>();
-    protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
+    protected QueriesProxy<Q> queries;
+    protected RequeryProcess process;
+
+    public static class RequeryProcess<E extends ApplicationEntity<?, Q, E>, Q extends Query> {
+
+        public Map<E, Exception> errors = new HashMap<>();
+        public Consumer<Rowset> onSuccess;
+        public Consumer<Exception> onFailure;
+
+        public RequeryProcess(Consumer<Rowset> aOnSuccess, Consumer<Exception> aOnFailure) {
+            super();
+            onSuccess = aOnSuccess;
+            onFailure = aOnFailure;
+        }
+
+        protected String assembleErrors() {
+            if (errors != null && !errors.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (E entity : errors.keySet()) {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(errors.get(entity).getMessage()).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
+                }
+                return sb.toString();
+            }
+            return null;
+        }
+
+        public void cancel() throws Exception {
+            if (onFailure != null) {
+                onFailure.accept(new InterruptedException("Canceled"));
+            }
+        }
+
+        public void success() throws Exception {
+            if (onSuccess != null) {
+                onSuccess.accept(null);
+            }
+        }
+
+        public void failure() throws Exception {
+            if (onFailure != null) {
+                onFailure.accept(new Exception(assembleErrors()));
+            }
+        }
+
+        public void end() throws Exception {
+            if (errors.isEmpty()) {
+                success();
+            } else {
+                failure();
+            }
+        }
+    }
+
+    public ApplicationModel() {
+        super();
+    }
+
+    public ApplicationModel(QueriesProxy<Q> aQueries) {
+        super();
+        queries = aQueries;
+    }
+
+    public RequeryProcess getProcess() {
+        return process;
+    }
+
+    public void setProcess(RequeryProcess aValue) {
+        process = aValue;
+    }
+
+    public void terminateProcess(E aSource, Exception aErrorMessage) throws Exception {
+        if (process != null) {
+            if (aErrorMessage != null) {
+                process.errors.put(aSource, aErrorMessage);
+            }
+            if (!isPending()) {
+                RequeryProcess pr = process;
+                process = null;
+                pr.end();
+            }
+        }
+    }
+
+    public boolean isPending() {
+        return entities.values().stream().anyMatch((entity) -> (entity.isPending()));
+    }
+
+    public void ensureProcessCancelled() throws Exception{
+        if (process != null) {
+            proces s.cancel();
+            process = null;
+            // TODO: Ensure that all model's pendings are cancelled after this call
+        }
+    }
+    
+    public void executeEntities(boolean refresh, Set<E> toExecute, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (process == null) {
+            process = new RequeryProcess(onSuccess, onFailure);
+        }
+        if (refresh) {
+            toExecute.stream().forEach((entity) -> {
+                entity.invalidate();
+            });
+        }
+        for (E entity : toExecute) {
+            entity.internalExecute();
+        }
+    }
+
+    private Set<E> rootEntities() {
+        final Set<E> rootEntities = new HashSet<>();
+        for (E entity : entities.values()) {
+            Set<Relation> dependanceRels = new HashSet<>();
+            for (Relation inRel : entity.getInRelations()) {
+                if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
+                    dependanceRels.add(inRel);
+                }
+            }
+            if (dependanceRels.isEmpty()) {
+                rootEntities.add(entity);
+            }
+        }
+        return rootEntities;
+    }
+
+    public void validateQueries() throws Exception {
+        for (E entity : entities.values()) {
+            entity.validateQuery();
+        }
+    }
 
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
@@ -102,7 +234,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
+    protected void resolveRelation(Relation<E> aRelation, Model<E, P, Q> aModel) throws Exception {
         super.resolveRelation(aRelation, aModel);
         if (aRelation instanceof ReferenceRelation<?>) {
             if (aRelation.getLeftField() != null && !aRelation.getLeftField().isFk()) {
@@ -130,14 +262,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    public Model<E, P, C, Q> copy() throws Exception {
-        Model<E, P, C, Q> copied = super.copy();
+    public Model<E, P, Q> copy() throws Exception {
+        Model<E, P, Q> copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {
             ReferenceRelation<E> rcopied = (ReferenceRelation<E>) relation.copy();
             resolveRelation(rcopied, copied);
-            ((ApplicationModel<E, P, C, Q>) copied).getReferenceRelations().add(rcopied);
+            ((ApplicationModel<E, P, Q>) copied).getReferenceRelations().add(rcopied);
         }
-        ((ApplicationModel<E, P, C, Q>) copied).checkReferenceRelationsIntegrity();
+        ((ApplicationModel<E, P, Q>) copied).checkReferenceRelationsIntegrity();
         return copied;
     }
 
@@ -201,15 +333,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 || type == Types.CLOB;
     }
 
-    public void beginSavingCurrentRowIndexes() {
-        boolean res = isAjusting();
-        assert res;
-        if (ajustingCounter == 1) {
-            savedRowIndexEntities.clear();
-            savedEntitiesRowIndexes.clear();
-        }
-    }
-
     public boolean isModified() throws Exception {
         if (entities != null) {
             for (E ent : entities.values()) {
@@ -223,43 +346,48 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return false;
     }
 
-    /**
-     * Stub for compliance with asynchronous model within browser client.
-     *
-     * @return Allways false. Because of it is a stub.
-     */
-    public boolean isPending() {
-        return false;
-    }
-
-    public final boolean save() throws Exception {
-        return save(null);
-    }
     private static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
             + "* If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.\n"
             + "* Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.\n"
-            + "* @param callback the function to be envoked after the data changes saved (optional).\n"
+            + "* @param onSuccess The function to be invoked after the data changes saved (optional).\n"
+            + "* @param onFailure The function to be invoked when exception raised while commit process (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
-    public boolean save(final JSObject aCallback) throws Exception {
-        try {
-            commit();
-            saved();
-            if (aCallback != null) {
-                aCallback.call(getPublished(), new Object[]{});
+    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
+    public void save(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        if (aOnSuccess != null) {
+            commit((Integer aResult) -> {
+                saved();
+                aOnSuccess.accept(null);
+            }, (Exception ex) -> {
+                rolledback();
+                if (aOnFailure != null) {
+                    aOnFailure.accept(ex);
+                }
+            });
+        } else {
+            try {
+                commit(null, null);
+                saved();
+            } catch (Exception ex) {
+                rolledback();
+                throw ex;
             }
-        } catch (Exception ex) {
-            rolledback();
-            throw ex;
         }
-        return true;
     }
 
-    public abstract int commit() throws Exception;
+    public void save(final Consumer<Void> aOnSuccess) throws Exception {
+        save(aOnSuccess, null);
+    }
+
+    public void save() throws Exception {
+        save(null, null);
+    }
+
+    public abstract int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     private static final String REVERT_JSDOC = ""
             + "/**\n"
@@ -270,30 +398,38 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public abstract void revert() throws Exception;
 
-    public abstract void saved() throws Exception;
+    public abstract void saved();
 
-    public abstract void rolledback() throws Exception;
+    public abstract void rolledback();
 
-    protected void fireCommited() throws Exception {
-        for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-            l.commited();
+    protected void fireCommited() {
+        try {
+            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
+                l.commited();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    protected void fireReverted() throws Exception {
-        for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-            l.rolledback();
+    protected void fireReverted() {
+        try {
+            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
+                l.rolledback();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public final void requery() throws Exception {
         requery(null, null);
     }
-    
-    public void requery(final JSObject aOnSuccess) throws Exception {
-        requery(aOnSuccess, null);
+
+    public void requery(Consumer<Void> onSuccess) throws Exception {
+        requery(onSuccess, null);
     }
-    
+
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
@@ -302,27 +438,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
-    public void requery(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
-        try {
-            executeRootEntities(true);
-            if (aOnSuccess != null) {
-                aOnSuccess.call(getPublished(), new Object[]{});
-            }
-        } catch (final Exception ex) {
-            if (aOnFailure != null) {
-                aOnFailure.call(getPublished(), new Object[]{ex.getMessage()});
-            } else {
-                throw ex;
-            }
-        }
+    public void requery(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        ensureProcessCancelled();
+        executeEntities(true, rootEntities(), onSuccess, onFailure);
     }
 
     public void execute() throws Exception {
         execute(null, null);
     }
 
-    public void execute(JSObject aOnSuccess) throws Exception {
-        execute(aOnSuccess, null);
+    public void execute(Consumer<Void> onSuccess) throws Exception {
+        execute(onSuccess, null);
     }
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
@@ -332,77 +458,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
-    public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
-        try {
-            executeRootEntities(false);
-            if (aOnSuccess != null) {
-                aOnSuccess.call(getPublished(), new Object[]{});
-            }
-        } catch (final Exception ex) {
-            if (aOnFailure != null) {
-                aOnFailure.call(getPublished(), new Object[]{ex.getMessage()});
-            } else {
-                throw ex;
-            }
-        }
-    }
-
-    private void executeRootEntities(boolean refresh) throws Exception {
-        Set<E> toExecute = new HashSet<>();
-        for (E entity : entities.values()) {
-            Set<Relation<E>> dependanceRels = new HashSet<>();
-            for (Relation<E> inRel : entity.getInRelations()) {
-                if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
-                    dependanceRels.add(inRel);
-                }
-            }
-            if (dependanceRels.isEmpty()) {
-                toExecute.add(entity);
-            }
-        }
-        for (E entity : toExecute) {
-            entity.internalExecute(refresh);
-        }
-        Set<E> childrenToExecute = toExecute;
-        while (!childrenToExecute.isEmpty()) {
-            childrenToExecute = ApplicationEntity.internalExecuteChildrenImpl(refresh, childrenToExecute);
-        }
-    }
-
-    public boolean isEntityRowIndexStateSaved(E entity) {
-        return savedRowIndexEntities.contains(entity.getEntityId());
-    }
-
-    public void addSavedRowIndex(E aEntity, int aIndex) {
-        boolean res = isAjusting();
-        assert res;
-        assert (aEntity != null);
-        if (!isEntityRowIndexStateSaved(aEntity)) {
-            Entry<E, Integer> entry = new SimpleEntry<>(aEntity, aIndex);
-            savedEntitiesRowIndexes.add(entry);
-            savedRowIndexEntities.add(aEntity.getEntityId());
-        }
-    }
-
-    public void restoreRowIndexes() {
-        boolean res = isAjusting();
-        assert res;
-        if (ajustingCounter == 1 && savedEntitiesRowIndexes != null && savedRowIndexEntities != null) {
-            savedEntitiesRowIndexes.stream().forEach((entry) -> {
-                if (entry != null) {
-                    try {
-                        E ent = entry.getKey();
-                        if (ent != null && ent.getRowset() != null) {
-                            ent.getRowset().absolute(entry.getValue());
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-            savedRowIndexEntities.clear();
-            savedEntitiesRowIndexes.clear();
-        }
+    public void execute(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        ensureProcessCancelled();
+        executeEntities(false, rootEntities(), onSuccess, onFailure);
     }
 
     protected static final String USER_DATASOURCE_NAME = "userQuery";
@@ -420,23 +478,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
     public synchronized E loadEntity(String aQueryId) throws Exception {
-        if (client == null) {
-            throw new NullPointerException("Null client detected while creating an entity");
-        }
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
-        entity.setQueryId(aQueryId);
+        entity.setQueryName(aQueryId);
         entity.validateQuery();
         return entity;
     }
 
     public synchronized E createQuery(E aLeftEntity, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
-        if (client == null) {
-            throw new NullPointerException("Null client detected while creating a query");
-        }
         E rightEntity = newGenericEntity();
         rightEntity.setName(USER_DATASOURCE_NAME);
-        rightEntity.setQueryId(aRightQueryId);
+        rightEntity.setQueryName(aRightQueryId);
         addEntity(rightEntity);
         // filter relation
         Relation<E> rel = new Relation<>(aLeftEntity, aLeftField, rightEntity, aRightField);

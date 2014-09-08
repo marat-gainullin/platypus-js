@@ -29,7 +29,6 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
         super();
         model = aModel;
         entityId = ApplicationModel.PARAMETERS_ENTITY_ID;
-        executed = true;
     }
 
     @Override
@@ -78,7 +77,7 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
-    public String getQueryId() {
+    public String getQueryName() {
         return null;
     }
 
@@ -88,12 +87,12 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
-    public String getTableDbId() {
+    public String getTableDatasourceName() {
         return null;
     }
 
     @Override
-    public void setTableDbId(String tableDbId) {
+    public void setTableDatasourceName(String tableDbId) {
     }
 
     @Override
@@ -120,10 +119,7 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
-    protected boolean internalExecute(boolean refresh) {
-        executing = false;
-        executed = true;
-        return true;
+    protected void internalExecute(boolean refresh) {
     }
 
     @Override

@@ -28,6 +28,14 @@ public class SystemPlatypusPrincipal extends PlatypusPrincipal {
     }
 
     @Override
+    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            onSuccess.accept(null);
+        }
+        return null;
+    }
+
+    @Override
     public Object getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {

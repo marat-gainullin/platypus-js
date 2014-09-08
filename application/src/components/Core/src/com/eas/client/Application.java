@@ -13,7 +13,7 @@ import com.eas.client.queries.Query;
  * @author mg
  * @param <Q>
  */
-public interface Application<Q extends Query<?>> {
+public interface Application<Q extends Query> {
 
     public QueriesProxy<Q> getQueries();
 

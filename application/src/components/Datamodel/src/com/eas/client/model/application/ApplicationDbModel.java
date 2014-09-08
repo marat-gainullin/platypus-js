@@ -6,34 +6,41 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.DbClient;
-import com.eas.client.queries.StoredQueryFactory;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
+import com.eas.client.StoredQueryFactory;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, ApplicationDbParametersEntity, DbClient, SqlQuery> {
+public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, ApplicationDbParametersEntity, SqlQuery> {
 
     protected Map<String, List<Change>> changeLogs = new HashMap<>();
+    protected DatabasesClient basesProxy;
 
-    public ApplicationDbModel() {
-        super();
+    public ApplicationDbModel(QueriesProxy<SqlQuery> aQueries) {
+        super(aQueries);
         parametersEntity = new ApplicationDbParametersEntity(this);
     }
 
-    public ApplicationDbModel(DbClient aClient) {
-        this();
-        setClient(aClient);
+    public ApplicationDbModel(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueries) {
+        this(aQueries);
+        basesProxy = aBasesProxy;
+    }
+
+    public DatabasesClient getBasesProxy() {
+        return basesProxy;
     }
 
     @Override
@@ -53,32 +60,18 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         parametersEntity.setModel(this);
     }
 
-    private static final String SAVE_JSDOC = ""
-            + "/**\n"
-            + "* Saves model data changes.\n"
-            + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
-            + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
-            + "* @param callback the function to be envoked after the data changes saved (optional)\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     @Override
-    public boolean save(JSObject aCallback) throws Exception {
-        return super.save(aCallback);
-    }
-
-    @Override
-    public int commit() throws Exception {
+    public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.stream().forEach((change) -> {
                 change.trusted = true;
             });
         });
-        return client.commit(changeLogs);
+        return basesProxy.commit(changeLogs, onSuccess, onFailure);
     }
 
     @Override
-    public void saved() throws Exception {
+    public void saved() {
         changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
         });
@@ -94,7 +87,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     }
 
     @Override
-    public void rolledback() throws Exception {
+    public void rolledback() {
     }
 
     public void requery(JSObject aOnSuccess) throws Exception {
@@ -140,14 +133,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
     public synchronized ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
-        if (client == null) {
-            throw new NullPointerException("Null client detected while creating a query");
+        if (basesProxy == null) {
+            throw new NullPointerException("Null basesProxy detected while creating a query");
         }
         ApplicationDbEntity modelEntity = newGenericEntity();
         modelEntity.setName(USER_DATASOURCE_NAME);
-        SqlQuery query = new SqlQuery(client, aDatasourceName, aSqlText);
+        SqlQuery query = new SqlQuery(basesProxy, aDatasourceName, aSqlText);
         query.setEntityId(String.valueOf(IDGenerator.genID()));
-        StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache(), true);
+        StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         modelEntity.setQuery(query);
         modelEntity.prepareRowsetByQuery();
@@ -164,18 +157,28 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "* Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
             + "* @param sqlText SQL text for the new entity.\n"
             + "* @param datasourceName. The specific databsource name (optional).\n"
+            + "* @param onSuccess Success callback. Have a number argument, indicating updated rows count (optional).\n"
+            + "* @param onFailure Failure callback. Have a string argument, indicating an error occured (optional).\n"
             + "* @return an entity instance.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "datasourceName"})
-    public void executeSql(String aSqlClause, String aDatasourceName) throws Exception {
-        if (client == null) {
-            throw new NullPointerException("Null client detected while creating a query");
+    public void executeSql(String aSqlClause, String aDatasourceName, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (basesProxy == null) {
+            throw new NullPointerException("Null basesProxy detected while creating a query");
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(client, aDatasourceName, aSqlClause);
-        client.executeUpdate(compiled);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, aDatasourceName, aSqlClause);
+        basesProxy.executeUpdate(compiled, onSuccess, onFailure);
     }
-    
+
+    public void executeSql(String aSqlClause, String aDatasourceName, Consumer<Integer> onSuccess) throws Exception {
+        executeSql(aSqlClause, aDatasourceName, onSuccess, null);
+    }
+
+    public void executeSql(String aSqlClause, String aDatasourceName) throws Exception {
+        executeSql(aSqlClause, aDatasourceName, null, null);
+    }
+
     @Override
     public Object getPublished() {
         if (published == null) {
@@ -188,9 +191,9 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     }
 
     private static JSObject publisher;
-    
+
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
-    } 
+    }
 
 }

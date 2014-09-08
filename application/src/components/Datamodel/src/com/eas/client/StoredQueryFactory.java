@@ -2,19 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.queries;
+package com.eas.client;
 
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.AppElementFiles;
-import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
-import com.eas.client.model.Relation;
-import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
-import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.JsDoc;
 import java.io.StringReader;
@@ -22,8 +16,6 @@ import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.ResultsFinder;
 import net.sf.jsqlparser.SourcesFinder;
@@ -42,7 +34,7 @@ public class StoredQueryFactory {
     public static final String _Q = "\\" + ClientConstants.STORED_QUERY_REF_PREFIX + "?";
 
     private Fields processSubQuery(SqlQuery aQuery, SubSelect aSubSelect) throws Exception {
-        SqlQuery subQuery = new SqlQuery(aQuery.getClient(), aQuery.getDbId(), "");
+        SqlQuery subQuery = new SqlQuery(aQuery.getBasesProxy(), aQuery.getDbId(), "");
         subQuery.setEntityId(aSubSelect.getAliasName());
         resolveOutputFieldsFromTables(subQuery, aSubSelect.getSelectBody());
         Fields subFields = subQuery.getFields();
@@ -57,9 +49,8 @@ public class StoredQueryFactory {
     public static final String DUMMY_FIELD_NAME = "dummy";
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
-    private DbClient client;
+    private DatabasesClient basesProxy;
     private ApplicationSourceIndexer indexer;
-    private LocalQueriesProxy subQueriesProxy;
     private boolean preserveDatasources;
 
     public void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
@@ -155,18 +146,16 @@ public class StoredQueryFactory {
     /**
      * Constructs factory for stored in appliction database queries;
      *
-     * @param aClient ClientIntf instance, responsible for interacting with
+     * @param aBasesProxy ClientIntf instance, responsible for interacting with
      * appliction database.
-     * @param aQueriesProxy
      * @param aIndexer
      * @throws java.lang.Exception
      * @see DbClientIntf
      */
-    public StoredQueryFactory(DbClient aClient, LocalQueriesProxy aQueriesProxy, ApplicationSourceIndexer aIndexer) throws Exception {
+    public StoredQueryFactory(DatabasesClient aBasesProxy, ApplicationSourceIndexer aIndexer) throws Exception {
         super();
-        client = aClient;
+        basesProxy = aBasesProxy;
         indexer = aIndexer;
-        subQueriesProxy = aQueriesProxy;
     }
 
     /**
@@ -174,7 +163,6 @@ public class StoredQueryFactory {
      *
      * @param aClient ClientIntf instance, responsible for interacting with
      * appliction database.
-     * @param aQueriesProxy
      * @param aIndexer
      * @param aPreserveDatasources If true, aliased names of tables
      * (datasources) are setted to resulting fields in query compilation
@@ -182,76 +170,15 @@ public class StoredQueryFactory {
      * setted to resulting fields.
      * @throws java.lang.Exception
      */
-    public StoredQueryFactory(DbClient aClient, LocalQueriesProxy aQueriesProxy, ApplicationSourceIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        this(aClient, aQueriesProxy, aIndexer);
+    public StoredQueryFactory(DatabasesClient aClient, ApplicationSourceIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
+        this(aClient, aIndexer);
         preserveDatasources = aPreserveDatasources;
     }
 
-    /**
-     * Заменяет в запросе ссылки на подзапросы на их содержимое. Подставляет
-     * параметры запроса в соответствии со связями в параметры подзапросов.
-     *
-     * @param aSqlText
-     * @param aModel
-     * @return Запрос без ссылок на подзапросы.
-     * @throws java.lang.Exception
-     */
-    public String compileSubqueries(String aSqlText, QueryModel aModel) throws Exception {
-        /**
-         * Старая реализация заменяла текст всех подзапросов с одним и тем же
-         * идентификатором, не обращая внимания на алиасы. Поэтому запросы
-         * содержащие в себе один и тот же подзапрос несколько раз,
-         * компилировались неправильно. Неправильно подставлялись и параметры.
-         */
-        assert aModel != null;
-        if (aModel.getEntities() != null) {
-            String processedSql = aSqlText;
-            for (QueryEntity entity : aModel.getEntities().values()) {
-                assert entity != null;
-                if (entity.getQueryId() != null) {
-                    String queryTablyName = entity.getQueryId();
-                    Pattern subQueryPattern = Pattern.compile(_Q + queryTablyName, Pattern.CASE_INSENSITIVE);
-                    String tAlias = entity.getAlias();
-                    if (tAlias != null && !tAlias.isEmpty()) {
-                        subQueryPattern = Pattern.compile(_Q + queryTablyName + "[\\s]+" + tAlias, Pattern.CASE_INSENSITIVE);
-                        if (tAlias.equalsIgnoreCase(queryTablyName)
-                                && !subQueryPattern.matcher(processedSql).find()) {
-                            /**
-                             * Эта проверка с финтом ушами нужна, т.к. даже в
-                             * отсутствии алиаса, он все равно есть и равен
-                             * queryTablyName. А так как алиас может в SQL
-                             * совпадать с именем таблицы, то эти ситуации никак
-                             * не различить, кроме как явной проверкой на
-                             * нахождение такого алиаса и имени таблицы
-                             * (подзапроса).
-                             */
-                            subQueryPattern = Pattern.compile(_Q + queryTablyName, Pattern.CASE_INSENSITIVE);
-                        }
-                    }
-                    Matcher subQueryMatcher = subQueryPattern.matcher(processedSql);
-                    if (subQueryMatcher.find()) {
-                        SqlQuery subQuery = subQueriesProxy.getQuery(entity.getQueryId(), null, null);
-                        if (subQuery != null && subQuery.getSqlText() != null) {
-                            String subQueryText = subQuery.getSqlText();
-                            subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
-
-                            String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
-                            String sqlToInsert = " (" + subQueryText + ") ";
-                            String sqlTail = processedSql.substring(subQueryMatcher.end());
-                            if (tAlias != null && !tAlias.isEmpty()) {
-                                processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
-                            } else {
-                                processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
-                            }
-                        }
-                    }
-                }
-            }
-            return processedSql;
-        }
+    public String compileSubqueries(String aSqlText, QueryModel aModel) throws Exception{
         return aSqlText;
     }
-
+    
     private void putParametersMetadata(SqlQuery aQuery, QueryModel aModel) {
         for (int i = 1; i <= aModel.getParameters().getParametersCount(); i++) {
             Parameter p = aModel.getParameters().get(i);
@@ -356,14 +283,13 @@ public class StoredQueryFactory {
             if (parsedQuery instanceof Select) {
                 Select select = (Select) parsedQuery;
                 resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
-                SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
+                SqlDriver driver = basesProxy.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
                 Fields queryFields = aQuery.getFields();
                 if (queryFields != null) {
                     queryFields.toCollection().stream().forEach((field) -> {
                         driver.getTypesResolver().resolve2Application(field);
                     });
                 }
-
                 return true;
             }
         } catch (JSQLParserException ex) {
@@ -374,15 +300,6 @@ public class StoredQueryFactory {
             }
         }
         return false;
-    }
-
-    private String replaceLinkedParameters(String aSqlText, Set<Relation<QueryEntity>> parametersRelations) {
-        for (Relation<QueryEntity> rel : parametersRelations) {
-            if (rel.getLeftEntity() instanceof QueryParametersEntity && rel.getLeftField() != null && rel.getRightParameter() != null) {
-                aSqlText = Pattern.compile(COLON + rel.getRightParameter().getName() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftField().getName());
-            }
-        }
-        return aSqlText;
     }
 
     private void resolveOutputFieldsFromTables(SqlQuery aQuery, SelectBody aSelectBody) throws Exception {
@@ -489,7 +406,7 @@ public class StoredQueryFactory {
             aTablyName = aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length());
         } else {// soft reference to table or a stored subquery.
             try {
-                tableFields = client.getDbMetadataCache(aDbId).getTableMetadata(aTablyName);
+                tableFields = basesProxy.getDbMetadataCache(aDbId).getTableMetadata(aTablyName);
             } catch (Exception ex) {
                 tableFields = null;
             }

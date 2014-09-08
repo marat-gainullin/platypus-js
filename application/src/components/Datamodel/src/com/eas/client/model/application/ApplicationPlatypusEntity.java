@@ -10,6 +10,7 @@ import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
 import java.util.List;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -32,12 +33,15 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
 
     @Override
     public void enqueueUpdate() throws Exception {
-        model.getClient().enqueueUpdate(getQueryId(), getQuery().getParameters());
+        model.getServerProxy().enqueueUpdate(getQueryName(), getQuery().getParameters());
     }
 
     @Override
-    public int executeUpdate() throws Exception {
-        model.getClient().enqueueUpdate(getQueryId(), getQuery().getParameters());
+    public int executeUpdate(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        model.getServerProxy().enqueueUpdate(getQueryName(), getQuery().getParameters());
+        if (onSuccess != null) {
+            onSuccess.accept(0);
+        }
         return 0;
     }
 
@@ -56,10 +60,10 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     @Override
     public void validateQuery() throws Exception {
         if (query == null) {
-            if (queryId != null) {
-                query = model.getClient().getAppQuery(queryId);
+            if (queryName != null) {
+                query = model.queries.getCachedQuery(queryName);
             } else {
-                throw new IllegalStateException("In three-tier mode only managed queries are allowed!");
+                throw new IllegalStateException("Only managed queries are allowed in three-tier mode!");
             }
             prepareRowsetByQuery();
         }

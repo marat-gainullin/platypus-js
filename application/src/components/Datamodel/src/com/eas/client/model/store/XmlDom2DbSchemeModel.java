@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.store;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.visitors.DbSchemeModelVisitor;
@@ -27,7 +27,7 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity> implements 
         modelElement = aTag;
     }
 
-    public static DbSchemeModel transform(DbClient aClient, Document aDoc) throws Exception {
+    public static DbSchemeModel transform(DatabasesClient aClient, Document aDoc) throws Exception {
         DbSchemeModel model = new DbSchemeModel(aClient);
         model.accept(new XmlDom2DbSchemeModel(aDoc));
         return model;

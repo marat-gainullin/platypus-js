@@ -5,9 +5,10 @@
 package com.eas.client.model.dbscheme;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
+import com.eas.client.SqlQuery;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.model.Entity;
@@ -15,7 +16,6 @@ import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.DbSchemeModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.queries.SqlQuery;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -53,12 +53,12 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     }
 
     @Override
-    public String getTableDbId() {
+    public String getTableDatasourceName() {
         return model != null ? model.getDbId() : null;
     }
 
     @Override
-    public void setTableDbId(String tableDbId) {
+    public void setTableDatasourceName(String tableDbId) {
     }
 
     @Override
@@ -91,10 +91,10 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     }
 
     public void achiveIndexes() {
-        DbClient lclient = getModel().getClient();
-        if (lclient != null) {
+        DatabasesClient basesProxy = getModel().getBasesProxy();
+        if (basesProxy != null) {
             try {
-                DbMetadataCache mdCache = lclient.getDbMetadataCache(getTableDbId());
+                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(getTableDatasourceName());
                 assert getTableName() != null;
                 String ltblName = getTableName();
                 if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {
@@ -154,7 +154,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     @Override
     public void validateQuery() throws Exception {
         if (query == null && tableName != null) {
-            query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient(), true);
+            query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy(), true);
         }
     }
 }

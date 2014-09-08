@@ -38,7 +38,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
     protected Document doc;
     protected Element modelElement;
     protected Element currentNode;
-    protected Model<E, ?, ?, ?> currentModel;
+    protected Model<E, ?, ?> currentModel;
     protected Collection<Runnable> relationsResolvers = new ArrayList<>();
 
     protected XmlDom2Model() {
@@ -61,7 +61,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
         return null;
     }
 
-    public void readModel(final Model<E, ?, ?, ?> aModel) {
+    public Runnable readModel(final Model<E, ?, ?> aModel) {
         Element el = doc != null ? getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME) : modelElement;
         if (el != null && aModel != null) {
             currentModel = aModel;
@@ -133,15 +133,13 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                     // Let's check relations in our model for integrity
                     aModel.checkRelationsIntegrity();
                 };
-                if (currentModel.getClient() != null) {
-                    relationsResolver.run();
-                } else {
-                    currentModel.setResolver(relationsResolver);
-                }
+                return relationsResolver;
             } finally {
                 relationsResolvers.clear();
                 currentModel = null;
             }
+        }else{
+            return null;
         }
     }
 
@@ -151,20 +149,20 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
             if (currentNode.hasAttribute(Model2XmlDom.QUERY_ID_ATTR_NAME)) {
                 String sQueryId = currentNode.getAttribute(Model2XmlDom.QUERY_ID_ATTR_NAME);
                 if (!sQueryId.equals("null")) {
-                    entity.setQueryId(sQueryId);
+                    entity.setQueryName(sQueryId);
                 }
             }
             if (currentNode.hasAttribute(Model2XmlDom.TABLE_DB_ID_ATTR_NAME)) {
                 String aTableDbId = currentNode.getAttribute(Model2XmlDom.TABLE_DB_ID_ATTR_NAME);
                 if (!aTableDbId.equals("null")) {
-                    entity.setTableDbId(aTableDbId);
+                    entity.setTableDatasourceName(aTableDbId);
                 }
             }
             entity.setTableSchemaName(currentNode.getAttribute(Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME));
             entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
             readOldUserData(entity);
-            Model<E, ?, ?, ?> dm = entity.getModel();
+            Model<E, ?, ?> dm = entity.getModel();
             if (dm != null) {
                 dm.addEntity(entity);
             }
@@ -194,7 +192,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                     readPolyline(polyline, relation);
                 }
             }
-            final Model<E, ?, ?, ?> model = currentModel;
+            final Model<E, ?, ?> model = currentModel;
             relationsResolvers.add(new Runnable() {
                 @Override
                 public void run() {

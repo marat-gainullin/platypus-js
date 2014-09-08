@@ -6,7 +6,6 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.CacheListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -33,7 +32,6 @@ public abstract class FreqCache<K, V> {
     }
     protected final Object lock = new Object();
     protected Map<K, CacheEntry> entries = new HashMap<>();
-    private final CachingSupport<K> cachingSupport = new CachingSupport<>();
     protected int MAX_CACHE_SIZE = 512;
     protected int SIZE_TO_SHRINK = MAX_CACHE_SIZE / 2;
 
@@ -70,17 +68,8 @@ public abstract class FreqCache<K, V> {
                 CacheEntry entry = sorter.get(sorterKey);
                 sorter.remove(sorterKey);
                 entries.remove(entry.key);
-                cachingSupport.fireRemoved(entry.key);
             }
         }
-    }
-
-    public void addListener(CacheListener<K> aListener) throws Exception {
-        cachingSupport.addListener(aListener);
-    }
-
-    public void removeListener(CacheListener<K> aListener) throws Exception {
-        cachingSupport.removeListener(aListener);
     }
 
     /**
@@ -139,7 +128,6 @@ public abstract class FreqCache<K, V> {
             if (aValue != null) {
                 aKey = transformKey(aKey);
                 entries.put(aKey, new CacheEntry(aKey, aValue));
-                cachingSupport.fireAdded(aKey);
             }
         }
     }
@@ -149,7 +137,6 @@ public abstract class FreqCache<K, V> {
             if (aKey != null) {
                 aKey = transformKey(aKey);
                 entries.remove(aKey);
-                cachingSupport.fireRemoved(aKey);
             }
         }
     }
@@ -159,7 +146,6 @@ public abstract class FreqCache<K, V> {
             if (entries != null) {
                 entries.clear();
             }
-            cachingSupport.fireCleared();
         }
     }
 
@@ -170,8 +156,6 @@ public abstract class FreqCache<K, V> {
      * synchronization!
      *
      * @param aId
-     * @param onSuccess
-     * @param onFailure
      * @return
      * @throws java.lang.Exception
      */

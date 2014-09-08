@@ -13,7 +13,7 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
@@ -32,15 +32,15 @@ import jdk.nashorn.internal.runtime.Undefined;
  * @see FlowProvider
  * @author mg
  */
-public class PlatypusScriptedFlowProvider implements FlowProvider {
+public class ScriptedFlowProvider implements FlowProvider {
 
     protected int pageSize = NO_PAGING_PAGE_SIZE;
-    protected DbClient client;
+    protected DatabasesClient client;
     protected JSObject source;
     protected Fields expectedFields;
     protected List<Change> changeLog = new ArrayList<>();
 
-    public PlatypusScriptedFlowProvider(DbClient aClient, Fields aExpectedFields, JSObject aSource) {
+    public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) {
         super();
         client = aClient;
         expectedFields = aExpectedFields;
@@ -69,7 +69,7 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
                                 Object javaValue = ScriptUtils.toJava(sRow.getMember(field.getName()));
                                 row.setColumnObject(expectedFields.find(field.getName()), javaValue);
                             } else {
-                                Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.WARNING, "{0} property was not found while reading script data from {1}", new Object[]{field.getName(), getEntityId()});
+                                Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.WARNING, "{0} property was not found while reading script data from {1}", new Object[]{field.getName(), getEntityId()});
                             }
                         }
                         rows.add(row);
@@ -99,7 +99,7 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
                                     try {
                                         onSuccess.accept(rowset);
                                     } catch (Exception ex) {
-                                        Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 } catch (RowsetMissingException | RowsetException ex) {
                                     if (onFailure != null) {
@@ -150,7 +150,7 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
                                     try {
                                         onSuccess.accept(rowset);
                                     } catch (Exception ex) {
-                                        Logger.getLogger(PlatypusScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 } catch (RowsetMissingException | RowsetException ex) {
                                     if (onFailure != null) {

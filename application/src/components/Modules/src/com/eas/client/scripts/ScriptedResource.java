@@ -14,7 +14,6 @@ import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.IDN;
 import java.net.MalformedURLException;
@@ -33,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
-import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -43,7 +41,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ScriptedResource {
 
     private static final Pattern pattern = Pattern.compile("https?://.*");
-    protected static Application<Query<?>> app;
+    protected static Application<Query> app;
 
     /**
      * Initializes a static fields.
@@ -363,7 +361,7 @@ public class ScriptedResource {
             if (aQueriesNames != null && aQueriesNames.length > 0) {
                 RequireProcess process = new RequireProcess(aQueriesNames.length, onSuccess, onFailure);
                 for (String queryName : aQueriesNames) {
-                    app.getQueries().getQuery(queryName, (Query<?> query) -> {
+                    app.getQueries().getQuery(queryName, (Query query) -> {
                         process.complete(null, null);
                     }, (Exception ex) -> {
                         process.complete(null, ex);

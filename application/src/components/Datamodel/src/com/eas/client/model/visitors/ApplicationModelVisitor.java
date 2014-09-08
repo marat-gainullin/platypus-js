@@ -12,10 +12,11 @@ import com.eas.client.model.application.ReferenceRelation;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public interface ApplicationModelVisitor<E extends ApplicationEntity<?, ?, E>> extends ModelVisitor<E> {
 
-    public void visit(ApplicationModel<E, ?, ?, ?> aModel);
+    public void visit(ApplicationModel<E, ?, ?> aModel);
 
     public void visit(E aEntity);
 

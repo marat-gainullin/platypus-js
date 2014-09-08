@@ -7,7 +7,6 @@ package com.eas.client.queries;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
-import com.eas.client.AppClient;
 import com.eas.client.threetier.PlatypusClient;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -17,18 +16,24 @@ import java.util.function.Consumer;
  * for applying data changes.
  * @author mg
  */
-public class PlatypusQuery extends Query<AppClient> {
+public class PlatypusQuery extends Query {
 
     protected FlowProvider flow;
+    protected PlatypusClient serverProxy;
 
-    public PlatypusQuery(AppClient aClient) {
-        super(aClient);
+    public PlatypusQuery(PlatypusClient aServerProxy) {
+        super();
+        serverProxy = aServerProxy;
     }
 
-    protected PlatypusQuery(Query<AppClient> aSource) {
+    protected PlatypusQuery(PlatypusQuery aSource) {
         super(aSource);
-        core = aSource.getClient();
+        serverProxy = aSource.getServerProxy();
         createFlow();
+    }
+
+    public PlatypusClient getServerProxy() {
+        return serverProxy;
     }
 
     @Override
@@ -52,7 +57,7 @@ public class PlatypusQuery extends Query<AppClient> {
     }
 
     public void enqueueUpdate() throws Exception {
-        core.enqueueUpdate(entityId, params);
+        serverProxy.enqueueUpdate(entityId, params);
     }
 
     /**
@@ -91,13 +96,13 @@ public class PlatypusQuery extends Query<AppClient> {
     }
 
     private void createFlow() {
-        if (core != null && entityId != null) {
-            flow = core.createFlowProvider(entityId, fields);
+        if (serverProxy != null && entityId != null) {
+            flow = serverProxy.createFlowProvider(entityId, fields);
         }
     }
 
-    public void setClient(PlatypusClient aCore) {
-        core = aCore;
+    public void setServerProxy(PlatypusClient aServerProxy) {
+        serverProxy = aServerProxy;
         createFlow();
     }
 }

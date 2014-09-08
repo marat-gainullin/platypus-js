@@ -5,8 +5,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client;
+package com.eas.client.application;
 
+import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
@@ -136,12 +137,12 @@ public class ClientFactory {
 
     private static void settingsNodeToSettings(Preferences connectionsPrefs, Map<Integer, ConnectionSettings> settingsMap, boolean aEditable) throws Exception {
         String[] settingsNodesNames = connectionsPrefs.childrenNames();
-        for (int i = 0; i < settingsNodesNames.length; i++) {
-            Preferences connectionPrefs = connectionsPrefs.node(settingsNodesNames[i]);
+        for (String settingsNodesName : settingsNodesNames) {
+            Preferences connectionPrefs = connectionsPrefs.node(settingsNodesName);
             String connUrl = connectionPrefs.get(ClientFactory.CONNECTION_URL_SETTING, "jdbc");
             connUrl = connUrl.replaceAll("[\\s\\r\\n\\t]", "");
             ConnectionSettings connectionsettings = new PlatypusConnectionSettings();
-            settingsMap.put(Integer.valueOf(settingsNodesNames[i]), connectionsettings);
+            settingsMap.put(Integer.valueOf(settingsNodesName), connectionsettings);
             connectionsettings.setUrl(connUrl);
             connectionsettings.setName(connectionPrefs.get(ClientFactory.CONNECTION_TITLE_SETTING, ""));
             connectionsettings.setUser(connectionPrefs.get(ClientFactory.CONNECTION_USER_SETTING, ""));
@@ -155,6 +156,7 @@ public class ClientFactory {
      *
      * @return EasSettings instance as part of settings array, that have been
      * read previously.
+     * @throws java.lang.Exception
      */
     public static ConnectionSettings readDefaultSettings() throws Exception {
         int defaultConnectionIndex = Preferences.userRoot().node(SETTINGS_NODE).getInt(DEFAULT_CONNECTION_INDEX_SETTING, 0);
