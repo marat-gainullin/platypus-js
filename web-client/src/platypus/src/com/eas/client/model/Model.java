@@ -766,10 +766,14 @@ public class Model implements HasPublished {
 				}
 			}
 		}
-		if (process != null)
+		if (process != null){
 			process.cancel();
+		}
 		process = new NetworkProcess(aCallback);
 		executeEntities(toExecute);
+        if (!isPending() && process != null) {
+            process.end();
+        }
 	}
 
 	public void validateQueries() throws Exception {

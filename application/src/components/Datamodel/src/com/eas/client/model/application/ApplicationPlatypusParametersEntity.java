@@ -15,6 +15,7 @@ import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -110,20 +111,19 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
-    public boolean execute() {
+    public void execute() {
         if (rowset == null) {
             rowset = new ParametersRowset((Parameters) model.getParameters());
             rowset.addRowsetListener(this);
         }
-        return rowset != null;
     }
 
     @Override
-    protected void internalExecute(boolean refresh) {
+    protected void internalExecute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) {
     }
 
     @Override
-    protected void refreshRowset() throws Exception {
+    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         // no op
     }
 

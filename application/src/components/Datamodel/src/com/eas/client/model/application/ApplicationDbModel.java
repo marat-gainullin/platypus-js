@@ -90,20 +90,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void rolledback() {
     }
 
-    public void requery(JSObject aOnSuccess) throws Exception {
+    @Override
+    public void requery(Consumer<Void> aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
 
-    private static final String REQUERY_JSDOC = ""
-            + "/**\n"
-            + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
-    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+    public void requery(Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
         changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
         });

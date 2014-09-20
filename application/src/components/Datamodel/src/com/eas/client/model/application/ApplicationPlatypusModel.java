@@ -90,13 +90,9 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     public void rolledback() {
     }
 
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * Requeries model data. Calls onSuccess callback when complete and onError callback if error occured.\n"
-            + " */",
-            params = {"onSuccess", "onFailure"})
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
-    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+    public void requery(Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
         changeLog.clear();
         super.requery(aOnSuccess, aOnFailure);
     }

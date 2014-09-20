@@ -30,6 +30,7 @@ import com.eas.client.SQLUtils;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
+import com.eas.client.model.application.ApplicationModel.RequeryProcess;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
@@ -40,7 +41,10 @@ import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,8 +110,69 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         valid = false;
     }
 
+    protected class RowsetRefreshTask implements Future<Void> {
+
+        protected boolean cancelled;
+        protected Consumer<Exception> onCancel;
+
+        public RowsetRefreshTask(Consumer<Exception> aOnCancel) {
+            super();
+            onCancel = aOnCancel;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            cancelled = true;
+            valid = true;
+            pending = null;
+            Exception ex = new InterruptedException("Canceled");
+            model.terminateProcess((E)ApplicationEntity.this, ex);
+            if (onCancel != null) {
+                onCancel.accept(ex);
+            }
+            return cancelled;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public Void get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+
+        @Override
+        public Void get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return null;
+        }
+    }
+
     public boolean isPending() {
         return pending != null;
+    }
+
+    public void unpend() {
+        if (pending != null) {
+            pending.cancel(true);
+            pending = null;
+        }
+    }
+
+    protected void silentUnpend() {
+        RequeryProcess p = model.process;
+        model.process = null;
+        try {
+            unpend();
+        } finally {
+            model.process = p;
+        }
     }
 
     private Locator checkUserLocator(List<Integer> constraints) throws IllegalStateException {
@@ -553,7 +618,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     public void execute() throws Exception {
         execute(null, null);
     }
-    
+
     public void execute(Consumer<Void> aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
@@ -569,8 +634,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         boolean oldManual = getQuery().isManual();
         getQuery().setManual(false);
         try {
-            model.ensureProcessCancelled();
-            model.executeEntities(false, Collections.<E>singleton((E)this), aOnSuccess, aOnFailure);
+            internalExecute(aOnSuccess, aOnFailure);
         } finally {
             getQuery().setManual(oldManual);
         }
@@ -615,8 +679,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         boolean oldManual = getQuery().isManual();
         getQuery().setManual(false);
         try {
-            model.ensureProcessCancelled();
-            model.executeEntities(true, Collections.<E>singleton((E)this), aOnSuccess, aOnFailure);
+            internalExecute(aOnSuccess, aOnFailure);
         } finally {
             getQuery().setManual(oldManual);
         }
@@ -1088,40 +1151,29 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         return rowset;
     }
 
-    protected void internalExecute() throws Exception {
-        if (model != null && parentsValid()) {
-            if (query == null) {
-                throw new IllegalStateException("Query must present. QueryName: " + queryName + "; tableName: " + getTableNameForDescription());
+    protected void internalExecute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        if (query == null) {
+            throw new IllegalStateException("Query must present. QueryName: " + queryName + "; tableName: " + getTableNameForDescription());
+        }
+        bindQueryParameters();
+        if (isValid()) {
+            // Since we have no onRequeried event, we have to filter manually here.
+            assert rowset != null;
+            assert pending == null;
+            filterRowset();
+            silentFirst();
+            if (aOnSuccess != null) {
+                aOnSuccess.accept(null);
             }
-            // try to select any data only within non manual queries
-            // platypus manual queries are:
-            //  - insert, update, delete queries;
-            //  - stored procedures, witch changes data.
-            if (!query.isManual()) {
-                // There might be entities - parameters values sources, with no
-                // data in theirs rowsets, so we can't bind query parameters to proper values. In the
-                // such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
-                boolean parametersBinded = bindQueryParameters();
-                if (parametersBinded) {
-                    invalidate();
-                }
-                if (!isValid()) {
-                    // if we have no rowset yet or query parameters values have been changed ...
-                    // or we are forced to refresh the data.
-                    // requery ...
-                    uninstallUserFiltering();
-                    refreshRowse t();
-                    assert rowset != null;
-                    // filtering will be done while processing onRequeried event in ApplicationEntity code
-                } else {
-                    // if we have no onRequeried event, we call filter manually here.
-                    assert rowset != null;
-                    // TODO: Think about model.process callbacks here.
-                    assert pen ding == null;
-                    filterRowset();
-                    silentFirst();
-                }
-            }
+        } else {
+            // Requery if query parameters values have been changed while bindQueryParameters() call
+            // or we are forced to refresh the data via requery() call.
+            uninstallUserFiltering();
+            silentUnpend();
+            refreshRowset(aOnSuccess, aOnFailure);
+            assert rowset != null;
+            assert pending != null;
+            // filtering will be done while processing onRequeried event in ApplicationEntity code
         }
     }
 
@@ -1151,21 +1203,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         });
     }
 
-    protected boolean parentsValid() {
-        Set<Relation<E>> inRels = getInRelations();
-        if (inRels != null && !inRels.isEmpty()) {
-            for (Relation<E> rel : inRels) {
-                if (rel != null && rel.getLeftEntity() != null) {
-                    E ent = rel.getLeftEntity();
-                    if (!ent.valid && !(ent instanceof ApplicationParametersEntity)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     protected void uninstallUserFiltering() throws RowsetException {
         if (userFiltering && rowset != null && rowset.getActiveFilter() != null) {
             rowset.getActiveFilter().cancelFilter();
@@ -1183,10 +1220,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                         toExecute.add(outRel.getRightEntity());
                     }
                 });
-                // The model's network process may be already started.
-                // If so, callbacks from the following call will be ignored.
-                // It not, than process will be started as asynchronous process.
-                model.executeEntities(refresh, toExecute, (Void v)->{}, (Exception e)->{});
+                model.executeEntities(refresh, toExecute);
             }
         }
     }
@@ -1205,10 +1239,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                         }
                     }
                 });
-                // The model's network process may be already started.
-                // If so, callbacks from the following call will be ignored.
-                // It not, than process will be started as asynchronous process.
-                model.executeEntities(refresh, toExecute, (Void v)->{}, (Exception e)->{});
+                model.executeEntities(refresh, toExecute);
             }
         }
     }
@@ -1276,7 +1307,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         }
     }
 
-    protected abstract void refreshRowset() throws Exception;
+    protected abstract void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception;
 
     @Override
     public Fields getFields() {
@@ -1315,9 +1346,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         return queryName != null || (tableName != null && !tableName.isEmpty());
     }
 
-    public boolean bindQueryParameters() throws Exception {
+    public void bindQueryParameters() throws Exception {
         Parameters selfParameters = getQuery().getParameters();
-        // Let's correct Rhino evil!!!
+        // Let's correct script evil!!!
         for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
             Parameter p = selfParameters.get(i);
             boolean oldModified = p.isModified();
@@ -1334,6 +1365,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                     if (leftEntity != null) {
                         Object pValue = null;
                         if (relation.isLeftField()) {
+                            // There might be entities - parameters values sources, with no
+                            // data in theirs rowsets, so we can't bind query parameters to proper values. In the
+                            // such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
                             Rowset leftRowset = leftEntity.getRowset();
                             if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
                                 try {
@@ -1385,7 +1419,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                 param.setModified(false);
             }
         }
-        return parametersModified;
+        if (parametersModified) {
+            invalidate();
+        }
     }
 
     protected void validateInFilterRelations() {
@@ -1634,9 +1670,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     @Override
     public void rowInserted(final RowsetInsertEvent event) {
         try {
-            internalExecuteChildren(false);
             // call script method
             executeScriptEvent(onAfterInsert, new EntityInstanceInsertEvent(this, event.getRow()));
+            internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1645,9 +1681,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     @Override
     public void rowDeleted(final RowsetDeleteEvent event) {
         try {
-            internalExecuteChildren(false);
             // call script method
             executeScriptEvent(onAfterDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
+            internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1656,9 +1692,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
         try {
-            internalExecuteChildren(false);
             // call script method
             executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
+            internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1667,9 +1703,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     @Override
     public void rowsetSorted(RowsetSortEvent event) {
         try {
-            internalExecuteChildren(false);
             // call script method
             executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
+            internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1679,9 +1715,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     public void rowsetRequeried(RowsetRequeryEvent event) {
         try {
             assert rowset != null;
-            internalExecuteChildren(false);
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
+            internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1690,9 +1726,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
         try {
-            internalExecuteChildren(false);
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
+            internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }

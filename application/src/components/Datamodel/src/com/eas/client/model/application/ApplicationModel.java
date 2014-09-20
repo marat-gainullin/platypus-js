@@ -55,13 +55,16 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     public static class RequeryProcess<E extends ApplicationEntity<?, Q, E>, Q extends Query> {
 
+        public Collection<E> entities;
         public Map<E, Exception> errors = new HashMap<>();
         public Consumer<Rowset> onSuccess;
         public Consumer<Exception> onFailure;
 
-        public RequeryProcess(Consumer<Rowset> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public RequeryProcess(Collection<E> aEntities, Consumer<Rowset> aOnSuccess, Consumer<Exception> aOnFailure) {
             super();
+            entities = aEntities;
             onSuccess = aOnSuccess;
+            assert onSuccess != null : "aOnSuccess argument is required.";
             onFailure = aOnFailure;
         }
 
@@ -85,19 +88,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             }
         }
 
-        public void success() throws Exception {
-            if (onSuccess != null) {
-                onSuccess.accept(null);
-            }
+        public void success() {
+            onSuccess.accept(null);
         }
 
-        public void failure() throws Exception {
+        public void failure() {
             if (onFailure != null) {
                 onFailure.accept(new Exception(assembleErrors()));
             }
         }
 
-        public void end() throws Exception {
+        public void end() {
             if (errors.isEmpty()) {
                 success();
             } else {
@@ -115,15 +116,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         queries = aQueries;
     }
 
-    public RequeryProcess getProcess() {
-        return process;
-    }
-
-    public void setProcess(RequeryProcess aValue) {
-        process = aValue;
-    }
-
-    public void terminateProcess(E aSource, Exception aErrorMessage) throws Exception {
+    public void terminateProcess(E aSource, Exception aErrorMessage) {
         if (process != null) {
             if (aErrorMessage != null) {
                 process.errors.put(aSource, aErrorMessage);
@@ -140,25 +133,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return entities.values().stream().anyMatch((entity) -> (entity.isPending()));
     }
 
-    public void ensureProcessCancelled() throws Exception{
-        if (process != null) {
-            proces s.cancel();
-            process = null;
-            // TODO: Ensure that all model's pendings are cancelled after this call
-        }
-    }
-    
-    public void executeEntities(boolean refresh, Set<E> toExecute, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (process == null) {
-            process = new RequeryProcess(onSuccess, onFailure);
-        }
+    public void executeEntities(boolean refresh, Set<E> toExecute) throws Exception {
         if (refresh) {
             toExecute.stream().forEach((entity) -> {
                 entity.invalidate();
             });
         }
         for (E entity : toExecute) {
-            entity.internalExecute();
+            entity.internalExecute(null, null);
         }
     }
 
@@ -430,17 +412,26 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         requery(onSuccess, null);
     }
 
-    private static final String REQUERY_JSDOC = ""
+    protected static final String REQUERY_JSDOC = ""
             + "/**\n"
-            + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
+            + "* Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.\n"
             + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
             + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        ensureProcessCancelled();
-        executeEntities(true, rootEntities(), onSuccess, onFailure);
+        if (process != null) {
+            process.cancel();
+        }
+        if (onSuccess != null) {
+            process = new RequeryProcess(entities.values(), onSuccess, onFailure);
+        }
+        revert();
+        executeEntities(true, rootEntities());
+        if (!isPending() && process != null) {
+            process.end();
+        }
     }
 
     public void execute() throws Exception {
@@ -459,8 +450,16 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        ensureProcessCancelled();
-        executeEntities(false, rootEntities(), onSuccess, onFailure);
+        if (process != null) {
+            process.cancel();
+        }
+        if (onSuccess != null) {
+            process = new RequeryProcess(entities.values(), onSuccess, onFailure);
+        }
+        executeEntities(false, rootEntities());
+        if (!isPending() && process != null) {
+            process.end();
+        }
     }
 
     protected static final String USER_DATASOURCE_NAME = "userQuery";
@@ -576,14 +575,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return _loadClobFromFile(aFilePath, charsetName);
     }
 
-    public static CompactClob _loadClobFromFile(String aFilePath, String charsetName) throws IOException {
+    public static CompactClob _loadClobFromFile(String aFilePath, String aCharsetName) throws IOException {
         if (aFilePath != null && !aFilePath.isEmpty()) {
             File f = new File(aFilePath);
             if (f.canRead() && f.isFile()) {
                 try (InputStream fs = new FileInputStream(f)) {
                     byte[] data = new byte[(int) f.length()];
                     fs.read(data, 0, data.length);
-                    return new CompactClob(new String(data, charsetName));
+                    return new CompactClob(new String(data, aCharsetName));
                 }
             }
         }

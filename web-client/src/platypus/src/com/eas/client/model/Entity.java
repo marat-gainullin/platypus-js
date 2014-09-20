@@ -1075,11 +1075,35 @@ public class Entity implements RowsetListener, HasPublished{
 		return true;
 	}
 
-	protected Cancellable refreshRowset(Callback<Rowset, String> aCallback) throws Exception {
+	protected Cancellable refreshRowset(final Callback<Rowset, String> aCallback) throws Exception {
 		if (query != null && rowset != null) {
-			return rowset.refresh(query.getParameters(), aCallback);
-		}else
+			return rowset.refresh(query.getParameters(), new CallbackAdapter<Rowset, String>() {
+
+				@Override
+				public void doWork(Rowset aResult) throws Exception {
+					assert rowset != null;// pending nulling is done in onRequeried event handler
+					if (aCallback != null)
+						aCallback.onSuccess(aResult);
+				}
+				
+				@Override
+				public void onFailure(String aMessage) {
+					try{
+						assert pending != null;
+						pending = null;
+						valid = true;
+						model.terminateProcess(Entity.this, aMessage);
+						if(aCallback != null)
+							aCallback.onFailure(aMessage);
+					}catch(Exception ex){
+						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+				
+			});
+		}else{
 			return null;
+		}
 	}
 
 	public void validateQuery() throws Exception {
@@ -1299,70 +1323,39 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	protected void internalExecute(final Callback<Rowset, String> aCallback) throws Exception {
-		if (model != null) {
-			assert query != null : QUERY_REQUIRED;
-			// try to select any data only within non-manual queries
-			// platypus manual queries are:
-			// - insert, update, delete queries;
-			// - stored procedures, which changes data.
-			if (!query.isManual()) {
-				// There might be entities - parameters values sources, with no
-				// data in theirs rowsets, so we can't bind query parameters to proper values. In the
-				// such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
-				boolean parametersBinded = bindQueryParameters();
-				if(parametersBinded)
-					invalidate();
-				if (!isValid()) {
-					// if we have no rowset yet or query parameters values have
-					// been changed ...
-					// or we are forced to refresh the data.
-					// re-query ...
-					uninstallUserFiltering();
-					if (pending != null){
-						Model.NetworkProcess lprocess = model.getProcess();
-						model.setProcess(null);
-						try{
-							pending.cancel();
-							invalidate();
-						}finally{
-							model.setProcess(lprocess);
-						}
-					}
-					pending = refreshRowset(new CallbackAdapter<Rowset, String>() {
-
-						@Override
-						public void doWork(Rowset aResult) throws Exception {
-							assert rowset != null;// pending nulling is done in onRequeried event handler
-							if (aCallback != null)
-								aCallback.onSuccess(aResult);
-						}
-						
-						@Override
-						public void onFailure(String aMessage) {
-							try{
-								assert pending != null;
-								pending = null;
-								valid = true;
-								model.terminateProcess(Entity.this, aMessage);
-								if(aCallback != null)
-									aCallback.onFailure(aMessage);
-							}catch(Exception ex){
-								Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
-						
-					});
-				} else {
-					// There might be a case of only rowset filtering
-					assert rowset != null;
-					assert pending == null;
-					filterRowset();
-					rowset.silentFirst();
-				}
+		assert query != null : QUERY_REQUIRED;
+		bindQueryParameters();
+		if (isValid()) {
+			// There might be a case of only rowset filtering
+			assert rowset != null;
+			assert pending == null;
+			filterRowset();
+			rowset.silentFirst();
+			if(aCallback != null){
+				aCallback.onSuccess(rowset);
 			}
+		} else {
+            // Requery if query parameters values have been changed while bindQueryParameters() call
+            // or we are forced to refresh the data via requery() call.
+			uninstallUserFiltering();
+			silentCancel();
+			pending = refreshRowset(aCallback);
 		}
 	}
 
+	protected void silentCancel(){
+		if (isPending()){
+			Model.NetworkProcess lprocess = model.process;
+			model.process = null;
+			try{
+				pending.cancel();
+				invalidate();
+			}finally{
+				model.process = lprocess;
+			}
+		}
+	}
+	
 	protected void uninstallUserFiltering() throws RowsetException {
 		if (userFiltering && rowset != null && rowset.getActiveFilter() != null) {
 			rowset.getActiveFilter().cancelFilter();
@@ -1441,91 +1434,93 @@ public class Entity implements RowsetListener, HasPublished{
 		return rowset != null && !userFiltering && rtInFilterRelations != null && !rtInFilterRelations.isEmpty();
 	}
 
-	public boolean bindQueryParameters() throws Exception {
+	public void bindQueryParameters() throws Exception {
 		Query selfQuery = getQuery();
-		if (selfQuery != null) {
-			Parameters selfParameters = selfQuery.getParameters();
-			boolean parametersModified = false;
-			Set<Relation> inRels = getInRelations();
-			if (inRels != null && !inRels.isEmpty()) {
-				for (Relation relation : inRels) {
-					if (relation != null && relation.isRightParameter()) {
-						Entity leftEntity = relation.getLeftEntity();
-						if (leftEntity != null) {
-							Object pValue = null;
-							if (relation.isLeftField()) {
-								Rowset leftRowset = leftEntity.getRowset();
-								if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
-									try {
-										pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
-									} catch (Exception ex) {
-										pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-										Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
-										        "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
-									}
-								} else {
+		Parameters selfParameters = selfQuery.getParameters();
+		boolean parametersModified = false;
+		Set<Relation> inRels = getInRelations();
+		if (inRels != null && !inRels.isEmpty()) {
+			for (Relation relation : inRels) {
+				if (relation != null && relation.isRightParameter()) {
+					Entity leftEntity = relation.getLeftEntity();
+					if (leftEntity != null) {
+						Object pValue = null;
+						if (relation.isLeftField()) {
+							Rowset leftRowset = leftEntity.getRowset();
+							// There might be entities - parameters values sources, with no
+							// data in theirs rowsets, so we can't bind query parameters to proper values. In the
+							// such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
+							if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
+								try {
+									pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
+								} catch (Exception ex) {
 									pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
+									Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
+									        "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
 								}
 							} else {
-								/*
-								 * Query leftQuery = leftEntity.getQuery();
-								 * assert leftQuery != null :
-								 * "Left query must present (Relation points to query, but query is absent)"
-								 * ; Parameters leftParams =
-								 * leftQuery.getParameters(); assert leftParams
-								 * != null :
-								 * "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)"
-								 * ; Parameter leftParameter =
-								 * leftParams.get(relation.getLeftParameter());
-								 * if (leftParameter != null) { pValue =
-								 * leftParameter.getValue(); if (pValue == null)
-								 * { pValue = leftParameter.getDefaultValue(); }
-								 * } else {
-								 * Logger.getLogger(Entity.class.getName()).log(
-								 * Level.SEVERE,
-								 * "Parameter of left query must present (Relation points to query parameter "
-								 * + relation.getRightParameter() +
-								 * " in entity: " + getTitle() + " [" +
-								 * String.valueOf(getEntityId()) +
-								 * "], but query parameter with specified name is absent)"
-								 * ); }
-								 */
-								Parameter leftParameter = relation.getLeftParameter();
-								if (leftParameter != null) {
-									pValue = leftParameter.getValue();
-									if (pValue == null) {
-										pValue = leftParameter.getDefaultValue();
-									}
-								} else {
-									Logger.getLogger(Entity.class.getName()).log(
-									        Level.SEVERE,
-									        "Parameter of left query must present (Relation points to query parameter in entity: " + getTitle() + " [" + getEntityId()
-									                + "], but query parameter is absent)");
-								}
-							}
-							Parameter selfPm = relation.getRightParameter();
-							if (selfPm != null) {
-								Object selfValue = selfPm.getValue();
-								if ((selfValue == null && pValue != null) || (selfValue != null && !selfValue.equals(pValue))) {
-									selfPm.setValue(pValue);
-								}
+								pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 							}
 						} else {
-							Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation had no left entity");
+							/*
+							 * Query leftQuery = leftEntity.getQuery();
+							 * assert leftQuery != null :
+							 * "Left query must present (Relation points to query, but query is absent)"
+							 * ; Parameters leftParams =
+							 * leftQuery.getParameters(); assert leftParams
+							 * != null :
+							 * "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)"
+							 * ; Parameter leftParameter =
+							 * leftParams.get(relation.getLeftParameter());
+							 * if (leftParameter != null) { pValue =
+							 * leftParameter.getValue(); if (pValue == null)
+							 * { pValue = leftParameter.getDefaultValue(); }
+							 * } else {
+							 * Logger.getLogger(Entity.class.getName()).log(
+							 * Level.SEVERE,
+							 * "Parameter of left query must present (Relation points to query parameter "
+							 * + relation.getRightParameter() +
+							 * " in entity: " + getTitle() + " [" +
+							 * String.valueOf(getEntityId()) +
+							 * "], but query parameter with specified name is absent)"
+							 * ); }
+							 */
+							Parameter leftParameter = relation.getLeftParameter();
+							if (leftParameter != null) {
+								pValue = leftParameter.getValue();
+								if (pValue == null) {
+									pValue = leftParameter.getDefaultValue();
+								}
+							} else {
+								Logger.getLogger(Entity.class.getName()).log(
+								        Level.SEVERE,
+								        "Parameter of left query must present (Relation points to query parameter in entity: " + getTitle() + " [" + getEntityId()
+								                + "], but query parameter is absent)");
+							}
 						}
+						Parameter selfPm = relation.getRightParameter();
+						if (selfPm != null) {
+							Object selfValue = selfPm.getValue();
+							if ((selfValue == null && pValue != null) || (selfValue != null && !selfValue.equals(pValue))) {
+								selfPm.setValue(pValue);
+							}
+						}
+					} else {
+						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation had no left entity");
 					}
 				}
 			}
-			for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
-				Parameter param = selfParameters.get(i);
-				if (param.isModified()) {
-					parametersModified = true;
-					param.setModified(false);
-				}
-			}
-			return parametersModified;
 		}
-		return false;
+		for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
+			Parameter param = selfParameters.get(i);
+			if (param.isModified()) {
+				parametersModified = true;
+				param.setModified(false);
+			}
+		}
+		if(parametersModified){
+			invalidate();
+		}
 	}
 
 	protected void validateInFilterRelations() {

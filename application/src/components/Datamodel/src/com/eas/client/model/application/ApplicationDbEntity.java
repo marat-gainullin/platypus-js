@@ -18,6 +18,7 @@ import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.NoPublisherException;
 import java.sql.ParameterMetaData;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -57,22 +58,49 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
-    protected void refreshRowset() throws Exception {
-        if (query != null) {
-            SqlCompiledQuery compiled = query.compile();
-            Parameters rowsetParams = compiled.getParameters();
-            if (rowsetParams != null) {
-                rowset.refresh(rowsetParams);
-                if (query.isProcedure()) {
-                    for (int i = 1; i <= rowsetParams.getParametersCount(); i++) {
-                        Parameter param = rowsetParams.get(i);
-                        if (param.getMode() == ParameterMetaData.parameterModeOut
-                                || param.getMode() == ParameterMetaData.parameterModeInOut) {
-                            Parameter innerParam = query.getParameters().get(param.getName());
-                            if (innerParam != null) {
-                                innerParam.setValue(param.getValue());
-                            }
+    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        SqlCompiledQuery compiled = query.compile();
+        Parameters rowsetParams = compiled.getParameters();
+        if (rowsetParams != null) {
+            if (model.process != null || aOnSuccess != null) {
+                Future<Void> f = new RowsetRefreshTask(aOnFailure);
+                rowset.refresh(rowsetParams, (Rowset aRowset) -> {
+                    if (!f.isCancelled()) {
+                        valid = true;
+                        pending = null;
+                        pullOutParameters(rowsetParams);
+                        model.terminateProcess(ApplicationDbEntity.this, null);
+                        if (aOnSuccess != null) {
+                            aOnSuccess.accept(null);
                         }
+                    }
+                }, (Exception ex) -> {
+                    if (!f.isCancelled()) {
+                        valid = true;
+                        pending = null;
+                        model.terminateProcess(ApplicationDbEntity.this, ex);
+                        if (aOnFailure != null) {
+                            aOnFailure.accept(ex);
+                        }
+                    }
+                });
+                pending = f;
+            } else {
+                rowset.refresh(rowsetParams, null, null);
+                pullOutParameters(rowsetParams);
+            }
+        }
+    }
+
+    private void pullOutParameters(Parameters rowsetParams) {
+        if (query.isProcedure()) {
+            for (int i = 1; i <= rowsetParams.getParametersCount(); i++) {
+                Parameter param = rowsetParams.get(i);
+                if (param.getMode() == ParameterMetaData.parameterModeOut
+                        || param.getMode() == ParameterMetaData.parameterModeInOut) {
+                    Parameter innerParam = query.getParameters().get(param.getName());
+                    if (innerParam != null) {
+                        innerParam.setValue(param.getValue());
                     }
                 }
             }

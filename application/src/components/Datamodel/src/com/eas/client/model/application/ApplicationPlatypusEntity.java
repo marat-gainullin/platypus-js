@@ -10,6 +10,7 @@ import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -51,11 +52,36 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     }
 
     @Override
-    protected void refreshRowset() throws Exception {
-        if (query != null) {
-            rowset.refresh(query.getParameters());
+    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        if (model.process != null || aOnSuccess != null) {
+            Future<Void> f = new RowsetRefreshTask(aOnFailure);
+            rowset.refresh(query.getParameters(), (Rowset aRowset) -> {
+                if (!f.isCancelled()) {
+                    assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
+                    valid = true;
+                    pending = null;
+                    model.terminateProcess(ApplicationPlatypusEntity.this, null);
+                    if (aOnSuccess != null) {
+                        aOnSuccess.accept(null);
+                    }
+                }
+            }, (Exception ex) -> {
+                if (!f.isCancelled()) {
+                    assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
+                    valid = true;
+                    pending = null;
+                    model.terminateProcess(ApplicationPlatypusEntity.this, ex);
+                    if (aOnFailure != null) {
+                        aOnFailure.accept(ex);
+                    }
+                }
+            });
+            pending = f;
+        } else {
+            rowset.refresh(query.getParameters(), null, null);
         }
     }
+    protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
 
     @Override
     public void validateQuery() throws Exception {
