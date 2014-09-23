@@ -21,7 +21,7 @@ import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
-import com.eas.client.threetier.requests.StartAppElementRequest;
+import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +54,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor{
     }
 
     @Override
-    public void visit(StartAppElementRequest.Response rsp) throws Exception {
+    public void visit(CredentialRequest.Response rsp) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -7,8 +7,9 @@ package com.eas.server.handlers;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
+import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
@@ -33,7 +34,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
     @Override
     protected void handle2(Session aSession, Consumer<ExecuteQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            getServerCore().getDatabasesClient().getAppQuery(getRequest().getQueryId(), (SqlQuery query) -> {
+            ((LocalQueriesProxy)getServerCore().getQueries()).getQuery(getRequest().getQueryId(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityId() == null) {
                         throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryId()));

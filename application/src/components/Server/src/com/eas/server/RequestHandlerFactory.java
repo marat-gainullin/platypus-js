@@ -85,16 +85,6 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(AppElementChangedRequest rq) throws Exception {
-        handler = new AppElementChangedRequestHandler(serverCore, rq);
-    }
-
-    @Override
-    public void visit(DbTableChangedRequest rq) throws Exception {
-        handler = new DbTableChangedRequestHandler(serverCore, rq);
-    }
-
-    @Override
     public void visit(HelloRequest rq) throws Exception {
         handler = new HelloRequestHandler(serverCore, rq);
     }
@@ -110,8 +100,8 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(StartAppElementRequest rq) throws Exception {
-        handler = new StartAppElementRequestHandler(serverCore, rq);
+    public void visit(CredentialRequest rq) throws Exception {
+        handler = new CredentialRequestHandler(serverCore, rq);
     }
 
     @Override
@@ -120,12 +110,12 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(IsAppElementActualRequest rq) throws Exception {
-        handler = new IsAppElementActualRequestHandler(serverCore, rq);
+    public void visit(ModuleStructureRequest rq) throws Exception {
+        handler = new ModuleStructureRequestHandler(serverCore, rq);
     }
 
     @Override
-    public void visit(AppElementRequest rq) throws Exception {
-        handler = new AppElementRequestHandler(serverCore, rq);
+    public void visit(ResourceRequest rq) throws Exception {
+        handler = new ResourceRequestHandler(serverCore, rq);
     }
 }

@@ -143,7 +143,7 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
-    public static ApplicationEntity<?, ?, ?> resolveEntityByField(Field aField, ApplicationModel<?, ?, ?, ?> aModel) {
+    public static ApplicationEntity<?, ?, ?> resolveEntityByField(Field aField, ApplicationModel<?, ?, ?> aModel) {
         ApplicationEntity<?, ?, ?> found = null;
         if (aField != null) {
             if (aModel.getParametersEntity().getFields().get(aField.getName()) == aField) {
@@ -175,11 +175,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
             + "*/";
 
     @ScriptFunction(jsDoc = MODEL_JSDOC)
-    public ApplicationModel<?, ?, ?, ?> getModel() {
+    public ApplicationModel<?, ?, ?> getModel() {
         return delegate.getModel();
     }
 
-    public void setModel(ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public void setModel(ApplicationModel<?, ?, ?> aModel) throws Exception {
         delegate.setModel(aModel);
     }
 

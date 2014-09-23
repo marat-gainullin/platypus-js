@@ -42,7 +42,7 @@ public class PlatypusRequestsFactory {
             case Requests.rqIsUserInRole:
                 return new IsUserInRoleRequest();
             case Requests.rqStartAppElement:
-                return new StartAppElementRequest();
+                return new CredentialRequest();
             default:
                 return null;
         }

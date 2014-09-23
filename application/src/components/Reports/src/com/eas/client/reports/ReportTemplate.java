@@ -9,7 +9,7 @@ package com.eas.client.reports;
 
 import com.eas.client.report.Report;
 import com.bearsoft.rowset.compacts.CompactBlob;
-import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.cache.ReportConfig;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -22,19 +22,18 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ReportTemplate implements HasPublished{
 
-    protected byte[] template;
-    protected JSObject scriptData;
-    protected String format;
+    protected ReportConfig config;
+    //
     protected String name;
+    protected JSObject scriptData;
     private static JSObject publisher;
     protected Object published;
     
-    public ReportTemplate(byte[] aTemplate, JSObject aData, String aFormat, String aName) {
+    public ReportTemplate(ReportConfig aConfig, JSObject aData) {
         super();
-        template = aTemplate;
-        format = aFormat;
-        name = aName;
+        config = aConfig;
         scriptData = aData;
+        name = config.getNameTemplate();
     }
 
     public JSObject getScriptData() {
@@ -52,11 +51,11 @@ public class ReportTemplate implements HasPublished{
 
     @ScriptFunction(jsDoc = GENERATEREPORT_JSDOC)
     public Report generateReport() throws Exception {
-        if (template != null) {
-            ExelTemplate reportTemplate = new ExelTemplate(scriptData, format);
-            reportTemplate.setTemplate(new CompactBlob(template));
-            byte[] data = reportTemplate.create();
-            return new Report(data, format, name);
+        if (config != null) {
+            ExelTemplate reportTemplate = new ExelTemplate(scriptData, config.getFormat());
+            reportTemplate.setTemplate(new CompactBlob(config.getTemplateContent()));
+            byte[] generated = reportTemplate.create();
+            return new Report(generated, config.getFormat(), name);
         }
         return null;
     }

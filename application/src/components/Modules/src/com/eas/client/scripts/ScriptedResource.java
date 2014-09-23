@@ -247,7 +247,7 @@ public class ScriptedResource {
         jsRequire(aScriptsNames, new ConcurrentSkipListSet<>(), onSuccess, onFailure);
     }
 
-    public static void jsRequire(String[] aScriptsNames, Set<String> required, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected static void jsRequire(String[] aScriptsNames, Set<String> required, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
             aScriptsNames = Arrays.asList(aScriptsNames).stream().filter((String aScriptName) -> {
                 return !required.contains(aScriptName);
@@ -330,7 +330,7 @@ public class ScriptedResource {
         jsRequire(aScriptsNames, new ConcurrentSkipListSet<>());
     }
 
-    public static void jsRequire(String[] aScriptsNames, Set<String> required) throws Exception {
+    protected static void jsRequire(String[] aScriptsNames, Set<String> required) throws Exception {
         for (String aScriptName : aScriptsNames) {
             if (!required.contains(aScriptName)) {
                 required.add(aScriptName);

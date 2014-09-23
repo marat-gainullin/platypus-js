@@ -6,7 +6,7 @@ package com.eas.client.login;
 
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
-import com.eas.client.threetier.requests.StartAppElementRequest;
+import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.script.NoPublisherException;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,10 +61,10 @@ public class AppPlatypusPrincipal extends PlatypusPrincipal {
 
     @Override
     public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        StartAppElementRequest request = new StartAppElementRequest();
+        CredentialRequest request = new CredentialRequest();
         if (onSuccess != null) {
-            conn.<StartAppElementRequest.Response>enqueueRequest(request, (StartAppElementRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.getAppElementId());
+            conn.<CredentialRequest.Response>enqueueRequest(request, (CredentialRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.getAppElementName());
             }, (Exception aException) -> {
                 if (onFailure != null) {
                     onFailure.accept(aException);
@@ -72,8 +72,8 @@ public class AppPlatypusPrincipal extends PlatypusPrincipal {
             });
             return null;
         } else {
-            StartAppElementRequest.Response response = conn.executeRequest(request);
-            return response.getAppElementId();
+            CredentialRequest.Response response = conn.executeRequest(request);
+            return response.getAppElementName();
         }
     }
 

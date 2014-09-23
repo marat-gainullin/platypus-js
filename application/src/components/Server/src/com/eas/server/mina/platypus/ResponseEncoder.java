@@ -5,7 +5,7 @@
 package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.binary.PlatypusResponseWriter;
+import com.eas.client.threetier.platypus.PlatypusResponseWriter;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayOutputStream;
 import org.apache.mina.core.buffer.IoBuffer;

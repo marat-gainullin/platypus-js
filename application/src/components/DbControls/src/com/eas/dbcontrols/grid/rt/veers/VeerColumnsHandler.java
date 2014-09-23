@@ -24,10 +24,10 @@ import javax.swing.table.TableColumn;
  */
 public class VeerColumnsHandler implements TableColumnHandler {
 
-    protected ApplicationModel<?, ?, ?, ?> model;
+    protected ApplicationModel<?, ?, ?> model;
     protected DbGridColumn designColumn;
 
-    public VeerColumnsHandler(ApplicationModel<?, ?, ?, ?> aModel, DbGridColumn aDesignInfo) {
+    public VeerColumnsHandler(ApplicationModel<?, ?, ?> aModel, DbGridColumn aDesignInfo) {
         super();
         model = aModel;
         designColumn = aDesignInfo;

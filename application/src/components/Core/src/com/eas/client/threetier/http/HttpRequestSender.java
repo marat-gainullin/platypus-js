@@ -312,7 +312,7 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(StartAppElementRequest rq) throws Exception {
+    public void visit(CredentialRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         executeRequest(rq);
     }

@@ -111,8 +111,9 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     public void validateQuery() throws Exception {
         if (query == null) {
             if (queryName != null) {
-                query = model.queries.getCachedQuery(queryName);
-                if (query != null) {
+                SqlQuery q = model.queries.getCachedQuery(queryName);
+                if (q != null) {                    
+                    query = q.copy();
                     query.clearRoles();
                 }
             } else if (tableName != null) {

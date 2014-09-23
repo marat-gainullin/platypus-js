@@ -5,7 +5,6 @@
 package com.eas.dbcontrols;
 
 import com.eas.client.model.application.ApplicationModel;
-import java.beans.PropertyChangeListener;
 
 /**
  * Base interace for data aware controls.
@@ -29,7 +28,7 @@ public interface DbControl {
      * @return Datamodel instance.
      * @see Datamodel
      */
-    public ApplicationModel<?, ?, ?, ?> getModel();
+    public ApplicationModel<?, ?, ?> getModel();
 
     /**
      * Sets a datamodel to work with.
@@ -37,7 +36,7 @@ public interface DbControl {
      * @throws Exception
      * @see Datamodel
      */
-    public void setModel(ApplicationModel<?, ?, ?, ?> aModel) throws Exception;
+    public void setModel(ApplicationModel<?, ?, ?> aModel) throws Exception;
 
     /**
      * Begins an udate session. While update session is in progress, no data editing events will be generated.

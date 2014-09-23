@@ -250,7 +250,7 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
         ((EntityFieldsModel) getModel()).fireDataChanged();
     }
 
-    private Map<String, DbComboDesignInfo> gatherDirsConfig(ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    private Map<String, DbComboDesignInfo> gatherDirsConfig(ApplicationModel<?, ?, ?> aModel) throws Exception {
         Map<String, DbComboDesignInfo> infos = new HashMap<>();
         for (ApplicationEntity<?, ?, ?> appEntity : aModel.getEntities().values()) {
             if (!(appEntity instanceof ApplicationParametersEntity)) {

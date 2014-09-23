@@ -74,7 +74,7 @@ public class LocalModulesProxy implements ModulesProxy {
             for (int i = docNodes.getLength() - 1; i >= 0; i--) {
                 Node entityNode = docNodes.item(i);
                 Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
-                if(queryIdAttribute != null){
+                if (queryIdAttribute != null) {
                     String sQueryId = queryIdAttribute.getNodeValue();
                     structure.getQueryDependencies().add(sQueryId);
                 }
@@ -83,6 +83,11 @@ public class LocalModulesProxy implements ModulesProxy {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public AppElementFiles nameToFiles(String aName) throws Exception {
+        return indexer.nameToFiles(aName);
     }
 
 }

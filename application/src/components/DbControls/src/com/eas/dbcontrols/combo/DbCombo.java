@@ -306,50 +306,38 @@ public class DbCombo extends DbControlPanel implements DbControl {
         @Override
         public Component getListCellRendererComponent(JList<? extends Object> list, Object aValue, int index, boolean isSelected, boolean cellHasFocus) {
             Object lValue = null;
-            boolean lIsAjusting = model.isAjusting();
-            if (!lIsAjusting) {
-                model.beginAjusting();
-                model.beginSavingCurrentRowIndexes();
-            }
             try {
-                try {
-                    Object displayFromScript = null;
-                    if (standalone && published != null
-                            && getOnRender() != null) {
-                        if (displayCache.containsKey(aValue)) {
-                            displayFromScript = displayCache.get(aValue);
-                        } else {
-                            /*
-                             CellData cd = new CellData(styleValue, aValue, achiveDisplayValue(aValue));
-                             CellRenderEvent event = new CellRenderEvent(eventThis != null ? eventThis : scriptThis, null, null, cd, null);
-                             Object retValue = ScriptUtils.toJava(getOnRender().call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{event.getPublished()}));
-                             if (Boolean.TRUE.equals(retValue)) {
-                             try {
-                             aValue = ScriptUtils.js2Java(cd.data);
-                             displayFromScript = ScriptUtils.js2Java(cd.display);
-                             if (displayFromScript != null) {
-                             displayCache.put(aValue, displayFromScript);
-                             }
-                             } catch (Exception ex) {
-                             Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
-                             }
-                             }
-                             */
-                        }
-                    }
-                    if (displayFromScript != null) {
-                        lValue = displayFromScript;
+                Object displayFromScript = null;
+                if (standalone && published != null
+                        && getOnRender() != null) {
+                    if (displayCache.containsKey(aValue)) {
+                        displayFromScript = displayCache.get(aValue);
                     } else {
-                        lValue = achiveDisplayValue(aValue);
+                        /*
+                         CellData cd = new CellData(styleValue, aValue, achiveDisplayValue(aValue));
+                         CellRenderEvent event = new CellRenderEvent(eventThis != null ? eventThis : scriptThis, null, null, cd, null);
+                         Object retValue = ScriptUtils.toJava(getOnRender().call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{event.getPublished()}));
+                         if (Boolean.TRUE.equals(retValue)) {
+                         try {
+                         aValue = ScriptUtils.js2Java(cd.data);
+                         displayFromScript = ScriptUtils.js2Java(cd.display);
+                         if (displayFromScript != null) {
+                         displayCache.put(aValue, displayFromScript);
+                         }
+                         } catch (Exception ex) {
+                         Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
+                         }
+                         }
+                         */
                     }
-                } catch (Exception ex) {
-                    Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } finally {
-                if (!lIsAjusting) {
-                    model.restoreRowIndexes();
-                    model.endAjusting();
+                if (displayFromScript != null) {
+                    lValue = displayFromScript;
+                } else {
+                    lValue = achiveDisplayValue(aValue);
                 }
+            } catch (Exception ex) {
+                Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (lValue == null) {
                 lValue = "";
@@ -762,22 +750,10 @@ public class DbCombo extends DbControlPanel implements DbControl {
                 if (displayingValue != null) {
                     lValue = displayingValue;
                 } else {
-                    boolean lIsAjusting = model.isAjusting();
-                    if (!lIsAjusting && valueRsEntity != displayRsEntity) {
-                        model.beginAjusting();
-                        model.beginSavingCurrentRowIndexes();
-                    }
                     try {
-                        try {
-                            lValue = achiveDisplayValue(editingValue);
-                        } catch (Exception ex) {
-                            Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } finally {
-                        if (!lIsAjusting && valueRsEntity != displayRsEntity) {
-                            model.restoreRowIndexes();
-                            model.endAjusting();
-                        }
+                        lValue = achiveDisplayValue(editingValue);
+                    } catch (Exception ex) {
+                        Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 if (nonListRendererEditor != null) {

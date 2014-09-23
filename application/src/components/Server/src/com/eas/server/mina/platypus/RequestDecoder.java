@@ -5,8 +5,8 @@
 package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.Request;
-import com.eas.client.threetier.binary.PlatypusRequestReader;
-import com.eas.client.threetier.binary.RequestsTags;
+import com.eas.client.threetier.platypus.PlatypusRequestReader;
+import com.eas.client.threetier.platypus.RequestsTags;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import org.apache.mina.core.buffer.IoBuffer;

@@ -14,7 +14,7 @@ public interface PlatypusResponseVisitor {
 
     public void visit(HelloRequest.Response rsp) throws Exception;
 
-    public void visit(StartAppElementRequest.Response rsp) throws Exception;
+    public void visit(CredentialRequest.Response rsp) throws Exception;
 
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception;
 

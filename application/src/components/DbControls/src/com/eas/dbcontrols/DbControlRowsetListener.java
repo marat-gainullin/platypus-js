@@ -24,8 +24,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public boolean willScroll(RowsetScrollEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()
-                && control.isFieldContentModified()) {
+        if (control.getModel() != null && control.isFieldContentModified()) {
             try {
                 control.setValue2Rowset(control.getCellEditorValue());
             } catch (Exception ex) {
@@ -37,7 +36,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             control.beginUpdate();
             try {
                 try {
@@ -53,7 +52,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
-        if (control.getModel()!= null && !control.getModel().isAjusting()) {
+        if (control.getModel()!= null) {
             control.beginUpdate();
             try {
                 try {
@@ -69,7 +68,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             control.beginUpdate();
             try {
                 try {
@@ -89,7 +88,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetRolledback(RowsetRollbackEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             control.beginUpdate();
             try {
                 try {
@@ -105,7 +104,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetScrolled(RowsetScrollEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             control.beginUpdate();
             try {
                 try {
@@ -121,7 +120,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetSorted(RowsetSortEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             control.beginUpdate();
             try {
                 try {
@@ -137,7 +136,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             control.beginUpdate();
             try {
                 try {
@@ -153,7 +152,7 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowChanged(RowChangeEvent event) {
-        if (control.getModel() != null && !control.getModel().isAjusting()) {
+        if (control.getModel() != null) {
             if (control.getColIndex() == event.getFieldIndex()) {
                 control.beginUpdate();
                 try {

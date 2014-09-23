@@ -769,7 +769,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     // datamodel interacting
     protected ModelElementRef datamodelElement;
-    protected ApplicationModel<?, ?, ?, ?> model;
+    protected ApplicationModel<?, ?, ?> model;
     protected ApplicationEntity<?, ?, ?> rsEntity;
     protected int colIndex;
     protected DbControlRowsetListener rowsetListener;
@@ -913,13 +913,13 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     @Override
-    public ApplicationModel<?, ?, ?, ?> getModel() {
+    public ApplicationModel<?, ?, ?> getModel() {
         return model;
     }
 
     @Override
-    public void setModel(ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
-        ApplicationModel<?, ?, ?, ?> oldValue = model;
+    public void setModel(ApplicationModel<?, ?, ?> aModel) throws Exception {
+        ApplicationModel<?, ?, ?> oldValue = model;
         if (model != aModel) {
             if (model != null) {
                 unbind();

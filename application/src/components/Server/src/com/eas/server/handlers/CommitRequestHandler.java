@@ -5,9 +5,11 @@
 package com.eas.server.handlers;
 
 import com.bearsoft.rowset.changes.*;
+import com.eas.client.AsyncProcess;
 import com.eas.client.DatabasesClient;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
+import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.server.PlatypusServerCore;
 import java.security.AccessControlException;
@@ -15,7 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,37 +29,123 @@ import java.util.function.Consumer;
  */
 public class CommitRequestHandler extends CommonRequestHandler<CommitRequest, CommitRequest.Response> {
 
+    protected static class ChangesSortProcess {
+
+        private final int expectedChanges;
+        private int factCalls;
+        private final Consumer<Map<String, List<Change>>> onSuccess;
+        private final Consumer<Exception> onFailure;
+
+        private final Map<String, SqlCompiledQuery> entities = new HashMap<>();
+        private final List<AccessControlException> accessDeniedEntities = new CopyOnWriteArrayList<>();
+        private final List<Exception> notRetrievedQueries = new CopyOnWriteArrayList<>();
+        private final Map<String, List<Change>> changeLogs = new HashMap<>();
+
+        public ChangesSortProcess(int aExpectedChanges, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
+            super();
+            expectedChanges = aExpectedChanges;
+            onSuccess = aOnSuccess;
+            onFailure = aOnFailure;
+        }
+
+        protected String assembleErrors() {
+            if (accessDeniedEntities != null && !accessDeniedEntities.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                Consumer<Exception> appender = (ex) -> {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(ex.getMessage());
+                };
+                accessDeniedEntities.stream().forEach(appender);
+                notRetrievedQueries.stream().forEach(appender);
+                return sb.toString();
+            }
+            return null;
+        }
+
+        public synchronized void complete(Change aChange, SqlQuery aQuery, AccessControlException accessDenied, Exception failed) {
+            if (aChange != null && aQuery != null) {
+                try {
+                    SqlCompiledQuery entity = entities.get(aChange.entityId);
+                    if (entity == null) {
+                        entity = aQuery.compile();
+                        entities.put(aChange.entityId, entity);
+                    }
+                    if (aChange instanceof Command) {
+                        ((Command) aChange).command = entity.getSqlClause();
+                    }
+                    List<Change> targetChangeLog = changeLogs.get(entity.getDatabaseId());
+                    if (targetChangeLog == null) {
+                        targetChangeLog = new ArrayList<>();
+                        changeLogs.put(entity.getDatabaseId(), targetChangeLog);
+                    }
+                    targetChangeLog.add(aChange);
+                } catch (Exception ex) {
+                    Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    notRetrievedQueries.add(ex);
+                }
+            }
+            if (accessDenied != null) {
+                accessDeniedEntities.add(accessDenied);
+            }
+            if (failed != null) {
+                notRetrievedQueries.add(failed);
+            }
+
+            if (++factCalls == expectedChanges) {
+                if (accessDeniedEntities.isEmpty() && notRetrievedQueries.isEmpty()) {
+                    if (onSuccess != null) {
+                        onSuccess.accept(changeLogs);
+                    }
+                } else {
+                    if (onFailure != null) {
+                        onFailure.accept(new IllegalStateException(assembleErrors()));
+                    }
+                }
+            }
+        }
+    }
+
     public CommitRequestHandler(PlatypusServerCore aServerCore, CommitRequest aRequest) {
         super(aServerCore, aRequest);
     }
 
     @Override
     public void handle(Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
-        Map<String, List<Change>> changeLogs = new HashMap<>();
         DatabasesClient client = getServerCore().getDatabasesClient();
-        Map<String, SqlCompiledQuery> entities = new HashMap<>();
         List<Change> changes = getRequest().getChanges();
-        for (Change change : changes) {
-            SqlCompiledQuery entity = entities.get(change.entityId);
-            if (entity == null) {
-                SqlQuery query = client.getAppQuery(change.entityId, false);
-                if (!query.isPublicAccess()) {
-                    throw new AccessControlException(String.format("Public access to query entity %s is denied while commiting changes for that entity.", change.entityId));//NOI18N
+        ChangesSortProcess process = new ChangesSortProcess(changes.size(), (Map<String, List<Change>> changeLogs) -> {
+            try {
+                client.commit(changeLogs, (Integer aUpdated) -> {
+                    if (onSuccess != null) {
+                        onSuccess.accept(new CommitRequest.Response(aUpdated));
+                    }
+                }, onFailure);
+            } catch (Exception ex) {
+                Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }, onFailure);
+        if (changes.isEmpty()) {
+            if (onSuccess != null) {
+                onSuccess.accept(new CommitRequest.Response(0));
+            }
+        } else {
+            changes.stream().forEach((change) -> {
+                try {
+                    ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityId, (SqlQuery aQuery) -> {
+                        if (aQuery.isPublicAccess()) {
+                            process.complete(change, aQuery, null, null);
+                        } else {
+                            process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityId)), null);
+                        }
+                    }, (Exception ex) -> {
+                        process.complete(null, null, null, ex);
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                entity = query.compile();
-                entities.put(change.entityId, entity);
-            }
-            if(change instanceof Command){
-                ((Command)change).command = entity.getSqlClause();
-            }
-            List<Change> targetChangeLog = changeLogs.get(entity.getDatabaseId());
-            if(targetChangeLog == null){
-                targetChangeLog = new ArrayList<>();
-                changeLogs.put(entity.getDatabaseId(), targetChangeLog);
-            }
-            targetChangeLog.add(change);
+            });
         }
-        int updated = client.commit(changeLogs);
-        return new CommitRequest.Response(updated);
     }
 }

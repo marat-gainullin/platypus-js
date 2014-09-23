@@ -4,7 +4,7 @@
  */
 package com.eas.server;
 
-import com.eas.client.cache.FilesAppCache;
+import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.script.JsDoc;
@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class ServerTasksScanner implements FilesAppCache.ScanCallback {
+public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback {
     
     private final Set<String> tasks;
 
@@ -31,9 +31,9 @@ public class ServerTasksScanner implements FilesAppCache.ScanCallback {
 
     @Override
     public void fileScanned(String aAppElementId, File file) {
-        if ("js".equalsIgnoreCase(FileUtils.getFileExtension(file))) {
+        if (PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(FileUtils.getFileExtension(file))) {
             try {
-                ScriptDocument doc = new ScriptDocument(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING));
+                ScriptDocument doc = ScriptDocument.parse(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING));
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     for (JsDoc.Tag tag : annotations) {

@@ -17,4 +17,6 @@ public interface ModulesProxy {
     public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     public String getLocalPath();
+    
+    public AppElementFiles nameToFiles(String aName) throws Exception;
 }

@@ -198,10 +198,10 @@ public class PlatypusHttpClientTest {
 
     @Test
     public void testStartAppElementRequest() throws Exception {
-        StartAppElementRequest rq = new StartAppElementRequest(IDGenerator.genID());
+        CredentialRequest rq = new CredentialRequest(IDGenerator.genID());
         client.executeRequest(rq);
         assertNotNull(rq.getResponse());
-        String startAppElement = ((StartAppElementRequest.Response) rq.getResponse()).getAppElementId();
+        String startAppElement = ((CredentialRequest.Response) rq.getResponse()).getAppElementId();
         assertEquals("FormsAPI", startAppElement);
     }
 

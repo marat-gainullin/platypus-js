@@ -73,8 +73,8 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(StartAppElementRequest rq) throws Exception {
-        response = new StartAppElementRequest.Response(null);
+    public void visit(CredentialRequest rq) throws Exception {
+        response = new CredentialRequest.Response(null, null);
     }
 
     @Override

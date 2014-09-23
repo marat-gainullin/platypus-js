@@ -111,7 +111,7 @@ public class DbComboBox<T> extends JPanel
     protected DbComboPopup<T> popup;
     protected JButton dropdownButton = new JButton();
     protected JToolBar tools = new JToolBar();
-    protected ApplicationModel<?, ?, ?, ?> dm;
+    protected ApplicationModel<?, ?, ?> model;
 
     protected class ShowPopupAction extends AbstractAction {
 
@@ -148,11 +148,11 @@ public class DbComboBox<T> extends JPanel
         }
     }
 
-    public DbComboBox(ApplicationModel<?, ?, ?, ?> aDatamodel, ComboBoxModel<T> aComboModel, boolean aBorderless) {
+    public DbComboBox(ApplicationModel<?, ?, ?> aModel, ComboBoxModel<T> aComboModel, boolean aBorderless) {
         super(new BorderLayout(), true);
         setModel(aComboModel);
         init();
-        dm = aDatamodel;
+        model = aModel;
         popup = new DbComboPopup<>(this);
         dropdownButton.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
         dropdownButton.setAction(new ShowPopupAction());

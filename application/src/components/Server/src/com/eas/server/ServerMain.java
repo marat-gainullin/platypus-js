@@ -4,12 +4,14 @@
  */
 package com.eas.server;
 
-import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
-import com.eas.client.ClientFactory;
+import com.eas.client.LocalModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
-import com.eas.client.scripts.PlatypusScriptedResource;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
@@ -17,6 +19,7 @@ import com.eas.util.StringUtils;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -40,7 +43,6 @@ public class ServerMain {
     // security switches
     public static final String ANONYMOUS_ON_CMD_SWITCH = "enable-anonymous";
 
-    public static final String BACKGROUNDTASK_CONF_PARAM = "tasks";
     public static final String IFACE_CONF_PARAM = "iface";
     public static final String PROTOCOLS_CONF_PARAM = "protocols";
     public static final String NUM_WORKER_THREADS_CONF_PARAM = "numworkerthreads";
@@ -98,7 +100,7 @@ public class ServerMain {
         }
     }
 
-    private static void parseArgs(String[] args, Set<String> aTasksModules) throws Exception {
+    private static void parseArgs(String[] args) throws Exception {
         DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
         int i = 0;
         while (i < args.length) {
@@ -120,14 +122,6 @@ public class ServerMain {
                     i += 2;
                 } else {
                     printHelp(BAD_DEF_DATASOURCE_MSG);
-                }
-            } else if ((CMD_SWITCHS_PREFIX + BACKGROUNDTASK_CONF_PARAM).equalsIgnoreCase(args[i])) {
-                if (i + 1 < args.length) {
-                    String modulesNames = args[i + 1];
-                    aTasksModules.addAll(StringUtils.split(modulesNames, ","));
-                    i += 2;
-                } else {
-                    printHelp(BACKGROUND_TASK_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + IFACE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
@@ -197,32 +191,53 @@ public class ServerMain {
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
         ScriptUtils.init();
-        // tasks from command-line
-        Set<String> tasks = new HashSet<>();
-        parseArgs(args, tasks);
+        parseArgs(args);
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url (-url parameter) is required.");
         }
         SSLContext ctx = createSSLContext();
-        AppCache appCache = ClientFactory.obtainTwoTierAppCache(url, new ServerTasksScanner(tasks));
-        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true);
-        PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
-        server.setAnonymousEnabled(anonymousEnabled);
-        appDbClient.setContextHost(server);
-        appDbClient.setPrincipalHost(server);
-        PlatypusScriptedResource.init(appDbClient, server);
-        SensorsFactory.init(server.getAcceptorsFactory());
-        RetranslateFactory.init(server.getRetranslateFactory());
-        
-        //
-        server.start();
+
+        final Set<String> tasks = new HashSet<>();
+        ScriptedDatabasesClient serverCoreDbClient;
+        if (url.toLowerCase().startsWith("file")) {
+            File f = new File(new URI(url));
+            if (f.exists() && f.isDirectory()) {
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks));
+                indexer.watch();
+                serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true);
+                PlatypusServer server = new PlatypusServer(indexer
+                        , new LocalModulesProxy(indexer, new ModelsDocuments())
+                        , new LocalQueriesProxy(serverCoreDbClient, indexer)
+                        , serverCoreDbClient
+                        , ctx
+                        , parseListenAddresses()
+                        , parsePortsProtocols()
+                        , parsePortsSessionIdleTimeouts()
+                        , parsePortsSessionIdleCheckIntervals()
+                        , parsePortsNumWorkerThreads()
+                        , tasks
+                        , appElement);
+                server.setAnonymousEnabled(anonymousEnabled);
+                serverCoreDbClient.setContextHost(server);
+                serverCoreDbClient.setPrincipalHost(server);
+                ScriptedResource.init(server);
+                SensorsFactory.init(server.getAcceptorsFactory());
+                RetranslateFactory.init(server.getRetranslateFactory());
+                //
+                server.start();
+            } else {
+                throw new IllegalArgumentException("applicationUrl: " + url + " doesn't point to existent directory.");
+            }
+        } else {
+            throw new Exception("Unknown protocol in url: " + url);
+        }
     }
 
     private static void printHelp(String string) {
         System.err.println(string);
     }
 
-    private static InetSocketAddress[] getListenAddresses() {
+    private static InetSocketAddress[] parseListenAddresses() {
         if (iface == null || iface.isEmpty()) {
             return new InetSocketAddress[]{
                 new InetSocketAddress(PlatypusServer.DEFAULT_PORT)
@@ -245,7 +260,7 @@ public class ServerMain {
         }
     }
 
-    private static Map<Integer, String> getPortsProtocols() {
+    private static Map<Integer, String> parsePortsProtocols() {
         Map<Integer, String> protocolsMap = new HashMap<>();
         if (protocols != null && !protocols.isEmpty()) {
             String[] splitted = protocols.replace(" ", "").split(",");
@@ -262,7 +277,7 @@ public class ServerMain {
         return protocolsMap;
     }
 
-    private static Map<Integer, Integer> getPortsNumWorkerThreads() {
+    private static Map<Integer, Integer> parsePortsNumWorkerThreads() {
         Map<Integer, Integer> numWorkerThreadsMap = new HashMap<>();
         if (numWorkerThreads != null && !numWorkerThreads.isEmpty()) {
             String[] splitted = numWorkerThreads.replace(" ", "").split(",");
@@ -276,7 +291,7 @@ public class ServerMain {
         return numWorkerThreadsMap;
     }
 
-    private static Map<Integer, Integer> getPortsSessionIdleTimeouts() {
+    private static Map<Integer, Integer> parsePortsSessionIdleTimeouts() {
         Map<Integer, Integer> sessionIdleTimeoutMap = new HashMap<>();
         if (sessionIdleTimeout != null && !sessionIdleTimeout.isEmpty()) {
             String[] splitted = sessionIdleTimeout.replace(" ", "").split(",");
@@ -290,7 +305,7 @@ public class ServerMain {
         return sessionIdleTimeoutMap;
     }
 
-    private static Map<Integer, Integer> getPortsSessionIdleCheckIntervals() {
+    private static Map<Integer, Integer> parsePortsSessionIdleCheckIntervals() {
         Map<Integer, Integer> sessionIdleCheckIntervalsMap = new HashMap<>();
         if (sessionIdleCheckInterval != null && !sessionIdleCheckInterval.isEmpty()) {
             String[] splitted = sessionIdleCheckInterval.replace(" ", "").split(",");

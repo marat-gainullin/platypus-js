@@ -11,9 +11,9 @@ import com.eas.client.threetier.Requests;
  *
  * @author mg
  */
-public class StartAppElementRequest extends Request {
+public class CredentialRequest extends Request {
 
-    public StartAppElementRequest() {
+    public CredentialRequest() {
         super(Requests.rqStartAppElement);
     }
     
@@ -24,19 +24,29 @@ public class StartAppElementRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        private String appElementId;
+        private String startAppElementName;
+        private String name;
 
-        public Response(String aAppElementId) {
+        public Response(String aAppElementName, String aName) {
             super();
-            appElementId = aAppElementId;
+            startAppElementName = aAppElementName;
+            name = aName;
         }
 
-        public String getAppElementId() {
-            return appElementId;
+        public String getName() {
+            return name;
         }
 
-        public void setAppElementId(String aValue) {
-            appElementId = aValue;
+        public void setName(String aValue) {
+            name = aValue;
+        }
+
+        public String getAppElementName() {
+            return startAppElementName;
+        }
+
+        public void setAppElementName(String aValue) {
+            startAppElementName = aValue;
         }
 
         @Override

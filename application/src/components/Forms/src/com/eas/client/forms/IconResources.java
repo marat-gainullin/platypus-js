@@ -4,7 +4,7 @@
  */
 package com.eas.client.forms;
 
-import com.eas.client.scripts.PlatypusScriptedResource;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.resources.images.IconCache;
 import javax.swing.ImageIcon;
 
@@ -19,7 +19,7 @@ public class IconResources {
         if (icon != null) {
             return icon;
         } else {
-            byte[] resData = PlatypusScriptedResource.load(imageName);
+            byte[] resData = ScriptedResource.load(imageName);
             if (resData != null) {
                 return new ImageIcon(resData);
             } else {

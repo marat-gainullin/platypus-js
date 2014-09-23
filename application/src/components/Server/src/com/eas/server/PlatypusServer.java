@@ -4,19 +4,23 @@
  */
 package com.eas.server;
 
+import com.eas.client.AppElementFiles;
+import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.store.Dom2ScriptDocument;
-import com.eas.client.threetier.Request;
-import com.eas.client.threetier.Response;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.scripts.ScriptedResource;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
-import com.eas.server.handlers.SessionRequestHandler;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
 import com.eas.server.mina.platypus.RequestDecoder;
 import com.eas.server.mina.platypus.ResponseEncoder;
+import com.eas.util.FileUtils;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -24,8 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
@@ -51,7 +53,6 @@ public class PlatypusServer extends PlatypusServerCore {
     public final static String HTTP_PROTOCOL = "http";
     public final static String HTTPS_PROTOCOL = "https";
     public final static int DEFAULT_EXECUTOR_POOL_SIZE = 16;
-    private final ExecutorService bgTasksExecutor;
     private final SensorsFactory acceptorsFactory;
     private final RetranslateFactory retranslateFactory;
     private final InetSocketAddress[] listenAddresses;
@@ -60,15 +61,14 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
-        super(aDatabasesClient, aTasks, aDefaultAppElement);
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<?> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+        super(aIndexer, aModules, aQueries, aDatabasesClient, aTasks, aDefaultAppElement);
 
         if (aAddresses == null) {
             throw new NullPointerException("listenAddresses");
         } else if (aAddresses.length == 0) {
             throw new IllegalArgumentException("listenAddresses is empty");
         }
-        bgTasksExecutor = Executors.newCachedThreadPool();
         listenAddresses = aAddresses;
         portsProtocols = aPortsProtocols;
         portsSessionIdleTimeouts = aPortsSessionIdleTimeouts;
@@ -80,7 +80,7 @@ public class PlatypusServer extends PlatypusServerCore {
     }
 
     public void start() throws Exception {
-        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application is located at: {0}", databasesClient.getAppCache().getApplicationPath());
+        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application is located at: {0}", modules.getLocalPath());
         instance = this;// Hack, but server is natural singleton and so it is ok.
         startServerTasks();
         for (InetSocketAddress s : listenAddresses) {
@@ -89,43 +89,15 @@ public class PlatypusServer extends PlatypusServerCore {
         assert listenAddresses != null : "listenAddresses != null";
         assert listenAddresses.length > 0 : "listenAddresses.length > 0";
     }
-
-    public void stop(int awaitTimeout, TimeUnit timeUnit) {
-        try {
-            databasesClient.shutdown();
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public void enqueuePlatypusRequest(final Request aRequest, final Runnable onFailure, final Runnable onSuccess) throws Exception {
-        bgTasksExecutor.execute(() -> {
-            try {
-                final RequestHandler handler = RequestHandlerFactory.getHandler(PlatypusServer.this, sessionManager.getSystemSession(), aRequest);
-                if (handler.call() instanceof ErrorResponse) {
-                    if (onFailure != null) {
-                        onFailure.run();
-                    }
-                } else {
-                    if (onSuccess != null) {
-                        onSuccess.run();
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
-                if (onFailure != null) {
-                    onFailure.run();
-                }
-            }
-        });
-    }
-
+    
     private String findAcceptorModule(String aProtocol) throws Exception {
         String lastAcceptor = null;
         for (String taskModuleId : tasks) {
-            ApplicationElement appElement = getDatabasesClient().getAppCache().get(taskModuleId);
-            if (appElement != null && appElement.isModule()) {
-                ScriptDocument sDoc = Dom2ScriptDocument.transform(appElement.getContent());
+            ScriptedResource.require(new String[]{taskModuleId});
+            AppElementFiles files = modules.nameToFiles(taskModuleId);
+            if (files != null && files.isModule()) {
+                File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                ScriptDocument sDoc = ScriptDocument.parse(FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING));
                 boolean isAcceptor = false;
                 Set<String> protocols = new HashSet<>();
                 for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
@@ -237,27 +209,27 @@ public class PlatypusServer extends PlatypusServerCore {
         }
         logger.info(sb.toString());
     }
-    
+
     private SensorsFactory obtainAcceptorsFactory() {
         SensorsFactory recieveFactory = null;
         try {
             Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.AcceptorsFactory");
             recieveFactory = acceptorsFactoryClass.newInstance();
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");           
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");
         } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return recieveFactory;
     }
-    
+
     private RetranslateFactory obtainRetranslateFactory() {
         RetranslateFactory factory = null;
         try {
             Class<RetranslateFactory> retranslateFactoryClass = (Class<RetranslateFactory>) Class.forName("com.eas.sensors.ConnectorsFactory");
             factory = retranslateFactoryClass.getConstructor(new Class<?>[]{Map.class}).newInstance(portsNumWorkerThreads);
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");             
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -270,5 +242,5 @@ public class PlatypusServer extends PlatypusServerCore {
 
     public RetranslateFactory getRetranslateFactory() {
         return retranslateFactory;
-    }    
+    }
 }

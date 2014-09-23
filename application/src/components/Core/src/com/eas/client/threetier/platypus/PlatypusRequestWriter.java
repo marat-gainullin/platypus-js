@@ -25,7 +25,7 @@ import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
-import com.eas.client.threetier.requests.StartAppElementRequest;
+import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
@@ -208,7 +208,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(StartAppElementRequest rq) throws Exception {
+    public void visit(CredentialRequest rq) throws Exception {
     }
 
     @Override

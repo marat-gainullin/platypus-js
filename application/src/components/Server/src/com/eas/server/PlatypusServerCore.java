@@ -4,22 +4,29 @@
  */
 package com.eas.server;
 
-import com.eas.client.DatabaseAppCache;
+import com.eas.client.AppElementFiles;
+import com.eas.client.Application;
 import com.eas.client.DatabasesClient;
+import com.eas.client.LocalModulesProxy;
+import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
-import com.eas.client.cache.FilesAppCache;
+import com.eas.client.ServerModulesProxy;
+import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.ContextHost;
-import com.eas.client.scripts.PlatypusScriptedResource;
+import com.eas.client.queries.LocalQueriesProxy;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.store.Dom2ScriptDocument;
+import com.eas.client.scripts.ScriptedResource;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
-import com.eas.server.filter.AppElementsFilter;
+import com.eas.util.FileUtils;
 import java.io.File;
 import java.net.URI;
 import java.util.HashSet;
@@ -33,43 +40,32 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PlatypusServerCore implements ContextHost, PrincipalHost {
+public class PlatypusServerCore implements ContextHost, PrincipalHost, Application {
 
     protected static PlatypusServerCore instance;
 
-    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, Set<String> aTasks, String aStartAppElementId) throws Exception {
-        return getInstance(aApplicationUrl, aDefaultDatasourceName, aTasks, aStartAppElementId, null);
-    }
-    
-    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, Set<String> aTasks, String aStartAppElementId, String aAppCacheBasePath) throws Exception {
+    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementId) throws Exception {
         ScriptUtils.init();
         if (instance == null) {
             final Set<String> tasks = new HashSet<>();
-            if (aTasks != null) {
-                tasks.addAll(aTasks);
-            }
             ScriptedDatabasesClient serverCoreDbClient;
-            if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
-                if (aApplicationUrl.startsWith("jndi")) {
-                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl, aAppCacheBasePath), aDefaultDatasourceName, true);
-                } else {// file://
-                    File f = new File(new URI(aApplicationUrl));
-                    if (f.exists() && f.isDirectory()) {
-                        FilesAppCache filesAppCache = new FilesAppCache(f.getPath(), new ServerTasksScanner(tasks));
-                        filesAppCache.watch();
-                        serverCoreDbClient = new ScriptedDatabasesClient(filesAppCache, aDefaultDatasourceName, true);
-                    } else {
-                        throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
-                    }
+            if (aApplicationUrl.toLowerCase().startsWith("file")) {
+                File f = new File(new URI(aApplicationUrl));
+                if (f.exists() && f.isDirectory()) {
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks));
+                    indexer.watch();
+                    serverCoreDbClient = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true);
+                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments()), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, aStartAppElementId);
+                    serverCoreDbClient.setContextHost(instance);
+                    serverCoreDbClient.setPrincipalHost(instance);
+                    ScriptedResource.init(instance);
+                    instance.startServerTasks();
+                } else {
+                    throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
                 }
             } else {
                 throw new Exception("Unknown protocol in url: " + aApplicationUrl);
             }
-            instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
-            serverCoreDbClient.setContextHost(instance);
-            serverCoreDbClient.setPrincipalHost(instance);
-            PlatypusScriptedResource.init(serverCoreDbClient, instance);
-            instance.startServerTasks();
         }
         return instance;
     }
@@ -77,42 +73,51 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
     public static PlatypusServerCore getInstance() throws Exception {
         return instance;
     }
-/*
-    public static void registerMBean(String aName, Object aBean) throws Exception {
-        // Get the platform MBeanServer
-        // Uniquely identify the MBeans and register them with the platform MBeanServer
-        ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
-    }
 
-    public static void unRegisterMBean(String aName) throws MBeanRegistrationException, MalformedObjectNameException {
-        try {
-            ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName(aName));
-        } catch (InstanceNotFoundException ex) {
-            //no-op
-        }
-    }
-*/    
     protected String defaultAppElement;
     protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient databasesClient;
-    protected AppElementsFilter browsersFilter;
+    protected ApplicationSourceIndexer indexer;
+    protected ModulesProxy modules;
+    protected QueriesProxy<?> queries;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
     private final ThreadLocal<Object> currentRequest = new ThreadLocal<>();
     private final ThreadLocal<Object> currentResponse = new ThreadLocal<>();
 
-    public PlatypusServerCore(ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<?> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+        super();
+        indexer = aIndexer;
+        modules = aModules;
+        queries = aQueries;
         databasesClient = aDatabasesClient;
         sessionManager = new SessionManager(this);
-        browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
         tasks = aTasks;
-        instance = this;
+    }
+
+    public ApplicationSourceIndexer getIndexer() {
+        return indexer;
+    }
+
+    @Override
+    public ModulesProxy getModules() {
+        return modules;
+    }
+
+    @Override
+    public QueriesProxy<?> getQueries() {
+        return queries;
     }
 
     public boolean isAnonymousEnabled() {
         return anonymousEnabled;
+    }
+
+    @Override
+    public ServerModulesProxy getServerModules() {
+        return null;
     }
 
     public void setAnonymousEnabled(boolean aValue) {
@@ -157,7 +162,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
         getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
         try {
             if (module == null) {
-                PlatypusScriptedResource.executeScriptResource(aModuleName);
+                ScriptedResource.require(new String[]{aModuleName});
                 module = ScriptUtils.createModule(aModuleName);
             }
             if (module != null) {
@@ -174,7 +179,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
             getSessionManager().setCurrentSession(oldSession);
         }
     }
-
+    
     public Set<String> getTasks() {
         return tasks;
     }
@@ -206,9 +211,11 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
      */
     public boolean startServerTask(String aModuleName) throws Exception {
         Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleName));
-        ApplicationElement appElement = getDatabasesClient().getAppCache().get(aModuleName);
-        if (appElement != null && appElement.isModule()) {
-            ScriptDocument sDoc = Dom2ScriptDocument.transform(appElement.getContent());
+        ScriptedResource.require(new String[]{aModuleName});
+        AppElementFiles files = modules.nameToFiles(aModuleName);
+        if (files != null && files.isModule()) {
+            File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+            ScriptDocument sDoc = ScriptDocument.parse(FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING));
             boolean stateless = false;
             for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
                 switch (tag.getName()) {
@@ -273,10 +280,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost {
             // Construct a dummy Principal for a debugger can discover inner Principal's structure
             return new AnonymousPlatypusPrincipal("No current session found");
         }
-    }
-
-    public AppElementsFilter getBrowsersFilter() {
-        return browsersFilter;
     }
 
     /**

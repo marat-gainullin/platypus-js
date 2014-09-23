@@ -17,19 +17,19 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class ModelsDocuments extends ActualCache<Document> {
+public class FormsDocuments extends ActualCache<Document> {
 
-    public ModelsDocuments() {
+    public FormsDocuments() {
         super();
     }
 
     @Override
     public synchronized Document get(String aName, AppElementFiles aFiles) throws Exception {
         AppElementFiles files = new AppElementFiles();
-        if (aFiles.hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
-            files.addFile(aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION));
+        if (aFiles.hasExtension(PlatypusFiles.FORM_EXTENSION)) {
+            files.addFile(aFiles.findFileByExtension(PlatypusFiles.FORM_EXTENSION));
         } else {
-            throw new IllegalStateException("Application element " + aName + " has no model definition file (" + PlatypusFiles.MODEL_EXTENSION + ")");
+            throw new IllegalStateException("Application element " + aName + " has no form layout file (" + PlatypusFiles.FORM_EXTENSION + ")");
         }
         return super.get(aName, files);
     }

@@ -26,7 +26,7 @@ import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
-import com.eas.client.threetier.requests.StartAppElementRequest;
+import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
@@ -84,10 +84,10 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(StartAppElementRequest.Response rsp) throws Exception {
+    public void visit(CredentialRequest.Response rsp) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
-            rsp.setAppElementId(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
+            rsp.setAppElementName(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
         }
     }
 

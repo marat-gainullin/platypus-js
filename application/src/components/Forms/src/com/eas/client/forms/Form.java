@@ -158,7 +158,7 @@ public class Form implements HasPublished {
     protected Dimension windowDecorSize = new Dimension();
     protected WindowEventsIProxy windowHandler;
     // runtime 
-    protected ApplicationModel<?, ?, ?, ?> model;
+    protected ApplicationModel<?, ?, ?> model;
     protected JPanel view;
     protected Map<String, JComponent> components;
     protected Collection<JSObject> publishedComponents = new ArrayList<>();
@@ -169,14 +169,14 @@ public class Form implements HasPublished {
     protected Container surface;
     protected Object closeCallbackParameter;
 
-    public Form(String aFormKey, FormDesignInfo aDocument, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+    public Form(String aFormKey, FormDesignInfo aDocument, ApplicationModel<?, ?, ?> aModel) throws Exception {
         super();
         formKey = aFormKey;
         model = aModel;
         prepareForm(aDocument);
     }
 
-    public ApplicationModel<?, ?, ?, ?> getModel() {
+    public ApplicationModel<?, ?, ?> getModel() {
         return model;
     }
 

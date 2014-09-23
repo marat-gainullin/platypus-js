@@ -4,10 +4,10 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.ServerModuleInfo;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.scripts.PlatypusScriptedResource;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.scripts.SecuredJSConstructor;
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
@@ -35,52 +35,58 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
     protected void handle2(Session aSession, Consumer<CreateServerModuleRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String moduleName = getRequest().getModuleName();
         if (moduleName == null || moduleName.isEmpty()) {
-            throw new Exception("Module name is missing. Unnamed server modules are not allowed.");
-        }
-        PlatypusScriptedResource.executeScriptResource(moduleName);
-        Set<String> functionProps = new HashSet<>();
-        try {
-            JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
-            if (jsConstr != null) {
-                if (jsConstr instanceof SecuredJSConstructor) {
-                    SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
-                    // Let's check the if module is resident
-                    JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
-                    if (moduleInstance != null) {
-                        // Resident module roles need to be checked against a current user.
-                        checkPrincipalPermission(getServerCore(), sjsConstr.getModuleAllowedRoles(), moduleName);
-                    } else {
-                        if (getSession().containsModule(moduleName)) {
-                            moduleInstance = getSession().getModule(moduleName);
-                        } else {
-                            if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
-                                moduleInstance = (JSObject) sjsConstr.newObject(new Object[]{});
-                                // Let's decide if we have to register the module in user's session.
-                                if (!sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                                    getSession().registerModule(moduleInstance);
+            onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
+        } else {
+            try {
+                ScriptedResource.require(new String[]{moduleName}, (Void v) -> {
+                    Set<String> functionProps = new HashSet<>();
+                    try {
+                        JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
+                        if (jsConstr != null) {
+                            if (jsConstr instanceof SecuredJSConstructor) {
+                                SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
+                                // Let's check the if module is resident
+                                JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
+                                if (moduleInstance != null) {
+                                    // Resident module roles need to be checked against a current user.
+                                    checkPrincipalPermission(getServerCore(), sjsConstr.getModuleAllowedRoles(), moduleName);
+                                } else {
+                                    if (aSession.containsModule(moduleName)) {
+                                        moduleInstance = aSession.getModule(moduleName);
+                                    } else {
+                                        if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                                            moduleInstance = (JSObject) sjsConstr.newObject(new Object[]{});
+                                            // Let's decide if we have to register the module in user's session.
+                                            if (!sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
+                                                aSession.registerModule(moduleInstance);
+                                            }
+                                            Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
+                                        } else {
+                                            throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
+                                        }
+                                    }
                                 }
-                                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1} on request {2}", new Object[]{getRequest().getModuleName(), moduleName, getRequest().getID()});
+                                final JSObject funSource = moduleInstance;
+                                funSource.keySet().stream().forEach((String aKey) -> {
+                                    Object oFun = funSource.getMember(aKey);
+                                    if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                                        functionProps.add(aKey);
+                                    }
+                                });
+                                onSuccess.accept(new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, functionProps, true)));
                             } else {
-                                throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
+                                throw new AccessControlException(String.format("Access to unsecured module %s is denied.", moduleName));//NOI18N
                             }
+                        } else {
+                            onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
                         }
+                    } catch (AccessControlException ex) {
+                        onSuccess.accept(new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false)));
                     }
-                    final JSObject funSource = moduleInstance;
-                    funSource.keySet().stream().forEach((String aKey) -> {
-                        Object oFun = funSource.getMember(aKey);
-                        if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                            functionProps.add(aKey);
-                        }
-                    });
-                    return new CreateServerModuleResponse(getRequest().getID(), moduleName, functionProps, true);
-                } else {
-                    throw new AccessControlException(String.format("Access to unsecured module %s is denied.", moduleName));//NOI18N
-                }
-            } else {
-                throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName));
+                }, onFailure);
+            } catch (Exception ex) {
+                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (AccessControlException ex) {
-            return new CreateServerModuleResponse(getRequest().getID(), moduleName, Collections.emptySet(), false);
         }
     }
 
@@ -90,15 +96,19 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
      * @param aServerCore
      * @param anAllowedRoles
      * @param aModuleName
-     * @throws Exception
+     * @throws AccessControlException
      */
-    public static void checkPrincipalPermission(PlatypusServerCore aServerCore, Set<String> anAllowedRoles, String aModuleName) throws Exception {
+    public static void checkPrincipalPermission(PlatypusServerCore aServerCore, Set<String> anAllowedRoles, String aModuleName) throws AccessControlException {
         if (anAllowedRoles != null && !anAllowedRoles.isEmpty()) {
-            PlatypusPrincipal principal = aServerCore.getPrincipal();
-            if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
-                throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
-                        aModuleName,
-                        principal != null ? principal.getName() : null));
+            try {
+                PlatypusPrincipal principal = aServerCore.getPrincipal();
+                if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
+                    throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
+                            aModuleName,
+                            principal != null ? principal.getName() : null));
+                }
+            } catch (Exception ex) {
+                throw new AccessControlException(ex.getMessage());
             }
         }
     }

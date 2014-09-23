@@ -126,7 +126,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             valid = true;
             pending = null;
             Exception ex = new InterruptedException("Canceled");
-            model.terminateProcess((E)ApplicationEntity.this, ex);
+            model.terminateProcess((E) ApplicationEntity.this, ex);
             if (onCancel != null) {
                 onCancel.accept(ex);
             }
@@ -631,13 +631,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        boolean oldManual = getQuery().isManual();
-        getQuery().setManual(false);
-        try {
-            internalExecute(aOnSuccess, aOnFailure);
-        } finally {
-            getQuery().setManual(oldManual);
-        }
+        internalExecute(aOnSuccess, aOnFailure);
     }
     private static final String ENQEUE_UPDATE_JSDOC = ""
             + "/**\n"
@@ -676,13 +670,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        boolean oldManual = getQuery().isManual();
-        getQuery().setManual(false);
-        try {
-            internalExecute(aOnSuccess, aOnFailure);
-        } finally {
-            getQuery().setManual(oldManual);
-        }
+        internalExecute(aOnSuccess, aOnFailure);
     }
 
     // modify interface
@@ -1153,7 +1141,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
 
     protected void internalExecute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (query == null) {
-            throw new IllegalStateException("Query must present. QueryName: " + queryName + "; tableName: " + getTableNameForDescription());
+            throw new IllegalStateException("Query must present. Query name: " + queryName + "; tableName: " + getTableNameForDescription());
         }
         bindQueryParameters();
         if (isValid()) {
@@ -1216,8 +1204,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             if (rels != null) {
                 Set<E> toExecute = new HashSet<>();
                 rels.forEach((Relation<E> outRel) -> {
-                    if (outRel != null && outRel.getRightEntity() != null) {
-                        toExecute.add(outRel.getRightEntity());
+                    if (outRel != null) {
+                        E rEntity = outRel.getRightEntity();
+                        if (rEntity != null) {
+                            toExecute.add(rEntity);
+                        }
                     }
                 });
                 model.executeEntities(refresh, toExecute);
@@ -1233,9 +1224,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                 Set<E> toExecute = new HashSet<>();
                 rels.forEach((Relation<E> outRel) -> {
                     if (outRel != null) {
-                        E ent = outRel.getRightEntity();
-                        if (ent != null && outRel.getLeftField() == onlyField) {
-                            toExecute.add(ent);
+                        E rEntity = outRel.getRightEntity();
+                        if (rEntity != null && outRel.getLeftField() == onlyField) {
+                            toExecute.add(rEntity);
                         }
                     }
                 });

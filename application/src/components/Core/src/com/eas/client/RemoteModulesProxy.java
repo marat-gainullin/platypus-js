@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +29,7 @@ public class RemoteModulesProxy implements ModulesProxy {
 
     protected PlatypusConnection conn;
     protected String basePath;
+    protected Map<String, AppElementFiles> id2files = new ConcurrentHashMap<>();
 
     public RemoteModulesProxy(PlatypusConnection aConn) {
         super();
@@ -55,6 +58,7 @@ public class RemoteModulesProxy implements ModulesProxy {
                         File cachePath = new File(cachePathName);
                         syncResource(cachePath, aName, (Void aVoid) -> {
                             structure.getParts().addFile(cachePath);
+                            id2files.put(aName, structure.getParts());
                             onSuccess.accept(structure);
                         }, onFailure);
                     } else {
@@ -65,6 +69,7 @@ public class RemoteModulesProxy implements ModulesProxy {
                                 synchronized (structure) {
                                     structure.getParts().addFile(cachePath);
                                     if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
+                                        id2files.put(aName, structure.getParts());
                                         onSuccess.accept(structure);
                                     }
                                 }
@@ -81,6 +86,7 @@ public class RemoteModulesProxy implements ModulesProxy {
         } else {
             ModuleStructureRequest.Response structureResp = requestModuleStructure(aName, null, null);
             ModuleStructure structure = new ModuleStructure();
+            id2files.put(aName, structure.getParts());
             structure.getClientDependencies().addAll(structureResp.getClientDependencies());
             structure.getServerDependencies().addAll(structureResp.getServerDependencies());
             structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
@@ -199,5 +205,10 @@ public class RemoteModulesProxy implements ModulesProxy {
     protected String constructResourcePath(String aResourceName) {
         String pathName = basePath + File.separator + aResourceName;
         return pathName.replace('/', File.separatorChar);
+    }
+
+    @Override
+    public AppElementFiles nameToFiles(String aName) throws Exception {
+        return id2files.get(aName);
     }
 }

@@ -140,7 +140,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             });
         }
         for (E entity : toExecute) {
-            entity.internalExecute(null, null);
+            if (!entity.getQuery().isManual()) {
+                entity.internalExecute(null, null);
+            }
         }
     }
 
@@ -431,6 +433,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         executeEntities(true, rootEntities());
         if (!isPending() && process != null) {
             process.end();
+            process = null;
         }
     }
 
@@ -459,6 +462,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         executeEntities(false, rootEntities());
         if (!isPending() && process != null) {
             process.end();
+            process = null;
         }
     }
 

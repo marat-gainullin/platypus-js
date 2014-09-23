@@ -18,7 +18,7 @@ import javax.swing.Icon;
  */
 public class FormFactory extends DbSwingFactory {
 
-    public FormFactory(ApplicationModel<?, ?, ?, ?> aModel) {
+    public FormFactory(ApplicationModel<?, ?, ?> aModel) {
         super(aModel);
     }
 
