@@ -7,6 +7,7 @@ package com.eas.client.threetier;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.platypus.PlatypusNativeConnection;
 import com.eas.client.AppConnection;
+import java.net.URL;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 import java.util.function.Consumer;
@@ -45,7 +46,7 @@ public abstract class PlatypusConnection implements AppConnection {
         }
     }
     
-    public abstract String getUrl();
+    public abstract URL getUrl();
     
     protected String sessionId;
     protected String password;

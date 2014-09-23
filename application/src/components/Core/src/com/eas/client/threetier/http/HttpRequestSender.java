@@ -41,7 +41,7 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
 
     public static final String RESPONSE_MISSING_MSG = "%s must have a response.";
     //
-    protected String url;
+    protected URL url;
     protected Map<String, Cookie> cookies;
     protected String username;
     protected String password;
@@ -55,7 +55,7 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     protected Response response;
     protected int authenticateRequestsDeepness;
 
-    public HttpRequestSender(String aUrl, Map<String, Cookie> aCookies, String aUserName, String aPassword, Authenticator aAuthenticator, int aMaximumAuthenticateAttempts) {
+    public HttpRequestSender(URL aUrl, Map<String, Cookie> aCookies, String aUserName, String aPassword, Authenticator aAuthenticator, int aMaximumAuthenticateAttempts) {
         super();
         url = aUrl;
         cookies = aCookies;

@@ -334,9 +334,6 @@ public class MetadataUtils {
         if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_USERS)) {
             return true;
         }
-        if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_ENTITIES)) {
-            return true;
-        }
         if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_GROUPS)) {
             return true;
         }

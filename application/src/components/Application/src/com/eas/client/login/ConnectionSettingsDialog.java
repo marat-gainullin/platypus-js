@@ -17,7 +17,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -35,7 +34,7 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
     public static final int RET_OK = 1;
     private int returnStatus = RET_CANCEL;
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
-    private AddConnectionAction addConnectionAction = new AddConnectionAction();
+    private final AddConnectionAction addConnectionAction = new AddConnectionAction();
 
     /**
      * Creates new form ConnectionSettingsDialog
@@ -182,25 +181,6 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btnSelectH2FileActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                ConnectionSettingsDialog dialog = new ConnectionSettingsDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;

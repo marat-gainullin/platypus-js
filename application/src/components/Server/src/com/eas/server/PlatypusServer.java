@@ -7,6 +7,7 @@ package com.eas.server;
 import com.eas.client.AppElementFiles;
 import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.queries.QueriesProxy;
@@ -61,7 +62,7 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<?> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         super(aIndexer, aModules, aQueries, aDatabasesClient, aTasks, aDefaultAppElement);
 
         if (aAddresses == null) {

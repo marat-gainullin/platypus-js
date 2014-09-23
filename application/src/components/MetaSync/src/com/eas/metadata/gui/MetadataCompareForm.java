@@ -12,9 +12,9 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.metadata.DBStructure;
 import com.eas.metadata.MetadataSynchronizer;
@@ -1073,7 +1073,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         new Thread() {
             @Override
             public void run() {
-                try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(destUrl, destUser, destPassword))) {
+                try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(destUrl, destUser, destPassword), null)) {
                     DatabasesClient client = dbResource.getClient();
                     for (int i = 0; i < size; i++) {
                         if (sqlModel.isChoiced(i)) {
@@ -1082,7 +1082,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                                 query.enqueueUpdate();
                                 Map<String, List<Change>> changeLogs = new HashMap<>();
                                 changeLogs.put(null, query.getFlow().getChangeLog());
-                                client.commit(changeLogs);
+                                client.commit(changeLogs, null, null);
                                 sqlModel.setChoice(i, false);
                                 sqlModel.setResult(i, "Ok");
                                 final int row = i;

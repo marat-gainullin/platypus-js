@@ -6,17 +6,22 @@ package com.eas.client.threetier.platypus;
 
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.bearsoft.rowset.resourcepool.ResourcePool;
+import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.SSLContext;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -48,10 +53,10 @@ public class PlatypusNativeConnection extends PlatypusConnection {
         }
     };
 
-    public PlatypusNativeConnection(SSLContext aSSLContext, String aHost, int aPort) {
+    public PlatypusNativeConnection(URL aURL) throws Exception {
         super();
-        host = aHost;
-        port = aPort;
+        host = aURL.getHost();
+        port = aURL.getPort();
         connector = new NioSocketConnector();
         connector.setHandler(new IoHandlerAdapter() {
 
@@ -74,15 +79,24 @@ public class PlatypusNativeConnection extends PlatypusConnection {
 
         });
         connector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(requestEncoder, new ResponseDecoder()));
-        if (aSSLContext != null) {
-            final SslFilter sslFilter = new SslFilter(aSSLContext);
-            connector.getFilterChain().addLast("encryption", sslFilter);
-        }
+        final SslFilter sslFilter = new SslFilter(PlatypusClient.createSSLContext());
+        connector.getFilterChain().addLast("encryption", sslFilter);
     }
 
     @Override
-    public String getUrl() {
-        return host + ":" + port;
+    public URL getUrl() {
+        try {
+            return new URL("platypus", host, port, null, new URLStreamHandler() {
+
+                @Override
+                protected URLConnection openConnection(URL u) throws IOException {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            });
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     @Override

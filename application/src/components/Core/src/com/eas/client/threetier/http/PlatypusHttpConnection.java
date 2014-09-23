@@ -8,6 +8,7 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,18 +24,18 @@ import java.util.logging.Logger;
  */
 public class PlatypusHttpConnection extends PlatypusConnection implements HttpRequestSender.Authenticator {
 
-    private String url;
+    private final URL url;
     private boolean authenticated;
     protected Map<String, Cookie> cookies = new ConcurrentHashMap<>();
     private final ExecutorService requestsSender = Executors.newCachedThreadPool();
 
-    public PlatypusHttpConnection(String aUrl) throws Exception {
+    public PlatypusHttpConnection(URL aUrl) throws Exception {
         super();
         url = aUrl;
     }
 
     @Override
-    public String getUrl() {
+    public URL getUrl() {
         return url;
     }
 

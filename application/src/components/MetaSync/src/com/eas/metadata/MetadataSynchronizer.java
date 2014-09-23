@@ -13,7 +13,6 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.*;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.io.File;
@@ -180,11 +179,12 @@ public class MetadataSynchronizer {
      * Reads database meta data to the file.
      *
      * @param aClient Platypus Database client
+     * @param aSchema
      * @param aFileXmlPath Destination file
      * @param anOut PrintWriter for logging
      * @throws Exception
      */
-    public static void readMetadataSnapshot(DbClient aClient, String aSchema, String aFileXmlPath, PrintWriter anOut) throws Exception {
+    public static void readMetadataSnapshot(DatabasesClient aClient, String aSchema, String aFileXmlPath, PrintWriter anOut) throws Exception {
         Logger sysLog = initLogger(MetadataSynchronizer.class.getName() + "_" + System.currentTimeMillis() + "_system", Level.INFO, false);
         try {
             if (anOut != null) {
@@ -201,12 +201,13 @@ public class MetadataSynchronizer {
      * Applies meta data from file to the database.
      *
      * @param aClient Platypus Database client
+     * @param aSchema
      * @param aFileXmlPath Destination file
      * @param aLogPath output path for logging
      * @param anOut PrintWriter for logging
      * @throws Exception
      */
-    public static void applyMetadataSnapshot(DbClient aClient, String aSchema, String aFileXmlPath, String aLogPath, PrintWriter anOut) throws Exception {
+    public static void applyMetadataSnapshot(DatabasesClient aClient, String aSchema, String aFileXmlPath, String aLogPath, PrintWriter anOut) throws Exception {
         String loggerName = MetadataSynchronizer.class.getName() + "_" + System.currentTimeMillis();
         Logger sysLog = initLogger(loggerName + "_system", Level.INFO, false);
         Logger sqlLog = initLogger(loggerName + "_sql", Level.INFO, false);
@@ -281,7 +282,7 @@ public class MetadataSynchronizer {
 
         DBStructure srcDBStructure = null;
         if (!emptyFrom) {
-            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom))) {
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom), null)) {
                 srcDBStructure = readDBStructure(dbResorce.getClient(), schemaFrom);
                 if (!emptyXml) {
                     serializeMetadata(srcDBStructure, fileXml);
@@ -293,8 +294,8 @@ public class MetadataSynchronizer {
         }
 
         if (!emptyTo && srcDBStructure != null) {
-            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
-                DbClient client = dbResorce.getClient();
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo), null)) {
+                DatabasesClient client = dbResorce.getClient();
                 MetadataMerger metadataMerger = new MetadataMerger(client, schemaTo, srcDBStructure, readDBStructure(client, schemaTo), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
                 metadataMerger.run();
                 sqlsList = metadataMerger.getSqlsList();
@@ -302,7 +303,7 @@ public class MetadataSynchronizer {
 
             // re-read structure destination for compare with source
             if (infoLogger != null) {
-                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
+                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo), null)) {
                     MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(dbResorce.getClient(), schemaTo), infoLogger);
                 }
             }
@@ -316,7 +317,7 @@ public class MetadataSynchronizer {
      * @return structure metadata
      * @throws Exception
      */
-    private DBStructure readDBStructure(DbClient aClient, String dbSchema) throws Exception {
+    private DBStructure readDBStructure(DatabasesClient aClient, String dbSchema) throws Exception {
 
         int MAX_TABLES_IN_SQLS = 100;    // set max count fetched  from database descriptions for primary keys and indexes
 
@@ -332,11 +333,11 @@ public class MetadataSynchronizer {
             Map<String, TableStructure> mdStructure = new HashMap<>();
             String dbDialect = aClient.getConnectionDialect(null);
             SqlDriver driver = aClient.getConnectionDriver(null);
-            DbMetadataCache mdCache = aClient.getDbMetadataCache(null);
+            DatabaseMdCache mdCache = aClient.getDbMetadataCache(null);
             // search all tables
             String sql4Tables = driver.getSql4TablesEnumeration(dbSchema);
             SqlCompiledQuery query = new SqlCompiledQuery(aClient, null, sql4Tables);
-            Rowset rowsetTablesList = query.executeQuery();
+            Rowset rowsetTablesList = query.executeQuery(null, null);
 
             Fields fieldsTable = rowsetTablesList.getFields();
 
@@ -392,7 +393,7 @@ public class MetadataSynchronizer {
                         // indexes
                         String sql4Indexes = driver.getSql4Indexes(dbSchema, tablesSet);
                         SqlCompiledQuery queryIndexes = new SqlCompiledQuery(aClient, null, sql4Indexes);
-                        Rowset rowsetIndexes = queryIndexes.executeQuery();
+                        Rowset rowsetIndexes = queryIndexes.executeQuery(null, null);
                         cntIndexesF = cntIndexesF + addIndexFromRowset(mdStructure, rowsetIndexes);
 
                         // sort all columns in index
@@ -413,14 +414,14 @@ public class MetadataSynchronizer {
                         //pk
                         String sqlPK = driver.getSql4TablePrimaryKeys(dbSchema, tablesSet);
                         SqlCompiledQuery queryPK = new SqlCompiledQuery(aClient, null, sqlPK);
-                        Rowset rowsetPK = queryPK.executeQuery();
+                        Rowset rowsetPK = queryPK.executeQuery(null, null);
 
                         cntPKs = cntPKs + addPKeysFromRowset(mdStructure, rowsetPK);
 
                         //fk
                         String sqlFK = driver.getSql4TableForeignKeys(dbSchema, tablesSet);
                         SqlCompiledQuery queryFK = new SqlCompiledQuery(aClient, null, sqlFK);
-                        Rowset rowsetFK = queryFK.executeQuery();
+                        Rowset rowsetFK = queryFK.executeQuery(null, null);
 
                         cntFKs = cntFKs + addFKeysFromRowset(mdStructure, rowsetFK);
                     }
@@ -462,7 +463,7 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public DBStructure readDBStructure(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
-        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword))) {
+        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword), null)) {
             return readDBStructure(dbResource.getClient(), aSchema);
         }
     }
@@ -477,7 +478,6 @@ public class MetadataSynchronizer {
         assert aDBStructure != null;
         Map<String, TableStructure> tablesStructure = aDBStructure.getTablesStructure();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DbMetadataCache mdCache = null;
 
         // for default logger
         int cntTables = 0;

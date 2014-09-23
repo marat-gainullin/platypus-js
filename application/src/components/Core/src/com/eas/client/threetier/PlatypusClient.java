@@ -12,16 +12,23 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.Application;
 import com.eas.client.ClientConstants;
+import com.eas.client.ModulesProxy;
+import com.eas.client.RemoteModulesProxy;
+import com.eas.client.ServerModulesProxy;
 import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.threetier.platypus.PlatypusNativeClient;
+import com.eas.client.queries.PlatypusQuery;
+import com.eas.client.queries.QueriesProxy;
+import com.eas.client.queries.RemoteQueriesProxy;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -37,7 +44,16 @@ import javax.swing.JOptionPane;
  *
  * @author kl, mg refactoring
  */
-public abstract class PlatypusClient {
+public class PlatypusClient implements Application<PlatypusQuery>{
+
+    static {
+        try {
+            HttpsURLConnection.setDefaultHostnameVerifier((String aHostName, SSLSession aSslSession) -> aHostName.equalsIgnoreCase(aSslSession.getPeerHost()));
+            HttpsURLConnection.setDefaultSSLSocketFactory(createSSLContext().getSocketFactory());
+        } catch (NoSuchAlgorithmException | KeyManagementException | NoSuchProviderException | KeyStoreException | CertificateException | UnrecoverableKeyException | URISyntaxException | IOException ex) {
+            Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     // SSL defaults
     public static final String DEFAULT_KEYSTORE_PASSWORD = "keyword";
@@ -69,19 +85,40 @@ public abstract class PlatypusClient {
         char[] password = DEFAULT_TRUSTSTORE_PASSWORD.toCharArray();
         return password;
     }
-    protected String url;
+    protected URL url;
     protected PlatypusPrincipal principal;
     protected PlatypusConnection conn;
+    protected QueriesProxy<PlatypusQuery> queries;
+    protected ModulesProxy modules;
+    protected ServerModulesProxy serverModulesProxy;
     protected List<Change> changeLog = new ArrayList<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
-    public PlatypusClient(String aUrl, PlatypusConnection aConn) throws Exception {
+    public PlatypusClient(PlatypusConnection aConn) throws Exception {
         super();
-        url = aUrl;
+        url = aConn.getUrl();
         conn = aConn;
+        queries = new RemoteQueriesProxy(aConn, this);
+        modules = new RemoteModulesProxy(aConn);
+        serverModulesProxy = new ServerModulesProxy(aConn);
     }
 
-    public String getUrl() {
+    @Override
+    public QueriesProxy<PlatypusQuery> getQueries() {
+        return queries;
+    }
+
+    @Override
+    public ModulesProxy getModules() {
+        return modules;
+    }
+
+    @Override
+    public ServerModulesProxy getServerModules() {
+        return serverModulesProxy;
+    }
+
+    public URL getUrl() {
         return url;
     }
 
@@ -124,7 +161,7 @@ public abstract class PlatypusClient {
                 try {
                     l.commited();
                 } catch (Exception ex) {
-                    Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -159,11 +196,11 @@ public abstract class PlatypusClient {
                 try {
                     l.rolledback();
                 } catch (Exception ex) {
-                    Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -186,7 +223,7 @@ public abstract class PlatypusClient {
                 return sessionId;
             }
         } catch (Exception ex) {
-            Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
             throw new LoginException(ex.getMessage());
         }
     }
@@ -264,7 +301,7 @@ public abstract class PlatypusClient {
         }
     }
 
-    protected static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
+    public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
         SSLContext context = SSLContext.getInstance(DEFAULT_SSL_PROTOCOL);
         context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance(DEFAULT_SECURE_RANDOM_ALGORITHM));
         return context;

@@ -13,12 +13,12 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.Db2SqlDriver;
 import com.eas.client.sqldrivers.H2SqlDriver;
@@ -47,27 +47,27 @@ import javax.swing.event.PopupMenuListener;
 public class SqlDriversTester extends JFrame {
 
     //--- общие переменные ---
-    private Connection connectJDBC = null;   // для jdbc connection
-    private SqlDriver platypusDriver = null; // для jdbc connection
-    private DbClient client = null;           // для platypus connection
+    private Connection connectJDBC;   // для jdbc connection
+    private SqlDriver platypusDriver; // для jdbc connection
+    private DatabasesClient client;           // для platypus connection
     private SqlDriver driver = null;         // для platypus connection
     private Map<String, Object[]> jdbcSets = new HashMap<>();
     //--- переменные для SELECT ---
-    private String[] sqls_select = null;
+    private String[] sqls_select;
     //--- переменные для TABLE ---
-    private String[] sqls_table = null;
+    private String[] sqls_table;
     //--- переменные для FIELD ---
-    private String[] sqls_field = null;
+    private String[] sqls_field;
     private Fields fields;
     private Field oldField_field;
     //--- переменные для  commentsDS---
-    private String[] sqls_commentsDS = null;
+    private String[] sqls_commentsDS;
     //--- переменные для INDEX ---
-    private String[] sqls_index = null;
+    private String[] sqls_index;
     //--- переменные для  PK ---
-    private String[] sqls_pk = null;
+    private String[] sqls_pk;
     //--- переменные для  FK ---
-    private String[] sqls_fk = null;
+    private String[] sqls_fk;
     //--- компоненты для панели CONNECT к БД ---
     private JComboBox comboDB_connect = new JComboBox();
     private JTextField fldDriver_connect = new JTextField("", 50);
@@ -1134,7 +1134,7 @@ public class SqlDriversTester extends JFrame {
                         q.enqueueUpdate();
                         Map<String, List<Change>> changeLogs = new HashMap<>();
                         changeLogs.put(null, q.getFlow().getChangeLog());
-                        client.commit(changeLogs);
+                        client.commit(changeLogs, null, null);
                     } else {
                         try (Statement statementJDBC = connectJDBC.createStatement()) {
                             statementJDBC.execute(s);
@@ -1432,11 +1432,11 @@ public class SqlDriversTester extends JFrame {
      * @return
      * @throws Exception
      */
-    private DbClient createPlatypusClient(String aUrl, String aSchema, String aUser, String aPassword, boolean createSysTables) throws Exception {
+    private DatabasesClient createPlatypusClient(String aUrl, String aSchema, String aUser, String aPassword, boolean createSysTables) throws Exception {
         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Start creating connection to schema {0}", aSchema);
         try {
             DbConnectionSettings settings = new DbConnectionSettings(aUrl, aUser, aPassword);
-            DbClient dbClient = new DatabasesClientWithResource(settings).getClient();
+            DatabasesClient dbClient = new DatabasesClientWithResource(settings, null).getClient();
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema {0} created", dbClient.getConnectionSchema(null));
             return dbClient;
         } catch (Exception ex) {
@@ -1537,7 +1537,7 @@ public class SqlDriversTester extends JFrame {
                 if (source == btnGetColumnCommentFromCommentsDs_commentDS) {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery();
+                        Rowset rs = q.executeQuery(null, null);
                         textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getColumnCommentFromCommentsDs(rs);
@@ -1552,7 +1552,7 @@ public class SqlDriversTester extends JFrame {
                 if (source == btnGetColumnNameFromCommentsDs_commentDS) {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery();
+                        Rowset rs = q.executeQuery(null, null);
                         textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getColumnNameFromCommentsDs(rs);
@@ -1567,7 +1567,7 @@ public class SqlDriversTester extends JFrame {
                 if (source == btnGetTableCommentFromCommentsDs_commentDS) {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery();
+                        Rowset rs = q.executeQuery(null, null);
                         textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getTableCommentFromCommentsDs(rs);
@@ -1582,7 +1582,7 @@ public class SqlDriversTester extends JFrame {
                 if (source == btnGetTableNameFromCommentsDs_commentDS) {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery();
+                        Rowset rs = q.executeQuery(null, null);
                         textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getTableNameFromCommentsDs(rs);
@@ -1690,7 +1690,7 @@ public class SqlDriversTester extends JFrame {
             client = createPlatypusClient(fldUrl_connect.getText(), fldSchema_connect.getText(), fldUser_connect.getText(), new String(fldPassword_connect.getPassword()), chkCreatePlatypusTables_connect.isSelected());
             textLog_connect.append("Ok !!!\n");
 
-            DbMetadataCache mdCache = client.getDbMetadataCache(null);
+            DatabaseMdCache mdCache = client.getDbMetadataCache(null);
             driver = mdCache.getConnectionDriver();
             fldSchema_field.setText(fldSchema_connect.getText());
 
@@ -1718,7 +1718,7 @@ public class SqlDriversTester extends JFrame {
                 String sql = driver.getSql4TablesEnumeration(schemaName);
                 textLog.append(sql + "\nexecuteQuery: ");
                 SqlCompiledQuery query = new SqlCompiledQuery(client, null, sql);
-                Rowset rowsetTablesList = query.executeQuery();
+                Rowset rowsetTablesList = query.executeQuery(null, null);
                 Fields fieldsTable = rowsetTablesList.getFields();
 
                 if (rowsetTablesList.first()) {
@@ -1762,7 +1762,7 @@ public class SqlDriversTester extends JFrame {
         textLog.append("\n<< Установить список полей DbMetadataCache >>");
         if (client != null) {
             try {
-                DbMetadataCache mdCache = client.getDbMetadataCache(null);
+                DatabaseMdCache mdCache = client.getDbMetadataCache(null);
                 fields = mdCache.getTableMetadata((String) comboTable_field.getSelectedItem());
                 for (Field f : fields.toCollection()) {
                     comboField_field.addItem(f.getName());
@@ -1957,9 +1957,6 @@ public class SqlDriversTester extends JFrame {
     }
 
     private void logout() {
-        if (client != null) {
-            client.shutdown();
-        }
         if (connectJDBC != null) {
             try {
                 connectJDBC.close();

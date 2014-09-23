@@ -192,7 +192,7 @@ public class DeployApplication {
                     migrator.cleanup();
                     break;
                 case INITUSERS: {
-                    DatabasesClient client = new DatabasesClient(null, TARGET_DATASOURCE, false);
+                    DatabasesClient client = new DatabasesClient(TARGET_DATASOURCE, false);
                     DatabasesClient.initUsersSpace(client.obtainDataSource(null));
                 }
                 break;
@@ -219,7 +219,7 @@ public class DeployApplication {
 
     private void initMigrator() throws Exception {
         if (isDbParamsSetExplicitly()) {
-            migrator = new DbMigrator(migrationsDir, new DatabasesClient(null, TARGET_DATASOURCE, false));
+            migrator = new DbMigrator(migrationsDir, new DatabasesClient(TARGET_DATASOURCE, false));
         } else {
             throw new IllegalArgumentException("Database connection arguments are not set properly");
         }

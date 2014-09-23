@@ -10,8 +10,8 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.MetadataSynchronizer;
@@ -248,7 +248,7 @@ public class DbMigrator {
             r.setColumnObject(rs.getFields().find(ClientConstants.F_VERSION_VALUE), aVersion);
             Map<String, List<Change>> changeLogs = new HashMap<>();
             changeLogs.put(null, rs.getFlowProvider().getChangeLog());
-            client.commit(changeLogs);
+            client.commit(changeLogs, null, null);
         } catch (Exception ex) {
             client.rollback();
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);

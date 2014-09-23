@@ -1,39 +1,23 @@
 package com.eas.server.httpservlet;
 
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.ClientConstants;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.queries.Query;
-import com.eas.client.report.Report;
-import com.eas.client.settings.SettingsConstants;
-import com.eas.client.threetier.ErrorResponse;
-import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.RowsetJsonConstants;
-import com.eas.client.threetier.RowsetJsonWriter;
-import com.eas.client.threetier.binary.PlatypusResponseWriter;
-import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
-import com.eas.proto.ProtoWriter;
-import com.eas.script.ScriptUtils;
 import com.eas.server.*;
-import com.eas.server.filter.AppElementsFilter;
-import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
-import com.eas.util.StringUtils;
+import com.eas.server.handlers.CommonRequestHandler;
+import com.eas.server.handlers.SessionRequestHandler;
 import java.io.*;
-import java.net.URI;
-import java.net.URLConnection;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -41,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Platypus HTTP servlet implementation
@@ -70,9 +53,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String EXCELX_CONTENT_TYPE = "application/xlsx";
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
-    public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
-    public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
-    public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
     private PlatypusServerCore serverCore;
     private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
 
@@ -81,8 +61,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         try {
             super.init(config);
             ServerConfig scp = ServerConfig.parse(config);
-            String docsRoot = config.getServletContext().getRealPath("/");
-            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getTasks(), scp.getAppElementId(), docsRoot + File.separator + ClientConstants.ENTITIES_CACHE_DIRECTORY_NAME);
+            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getAppElementId());
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
@@ -90,12 +69,9 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        if (serverCore != null) {
-            serverCore.getDatabasesClient().shutdown();
-            serverCore = null;
-        }
         super.destroy();
     }
+
     protected static final Pattern fileNamePattern = Pattern.compile(".*filename=.*\"(.+)\".*", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
     protected static final String PUB_CONTEXT = "/pub/";
 
@@ -136,7 +112,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             }
             if (uploadedLocations.length() > 0) {
-                writeJsonResponse(uploadedLocations.toString(), response);
+                PlatypusResponseHttpWriter.writeJsonResponse(uploadedLocations.toString(), response);
                 return true;
             }
         }
@@ -223,81 +199,54 @@ public class PlatypusHttpServlet extends HttpServlet {
      */
     private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, Session aPlatypusSession, HttpSession aHttpSession) throws Exception {
         Request platypusRequest = readPlatypusRequest(aHttpRequest, aHttpResponse, aPlatypusSession);
-        RequestHandler<?> handler = findPlatypusHandler(platypusRequest, aPlatypusSession, aHttpRequest, aHttpResponse);
-        handler.run();
-        Response response = handler.getResponse();
-        // may be error response.
-        // in such case logs are already issued and  ecxeption is already handled.
-        platypusResponse(aHttpRequest, platypusRequest, response, aHttpResponse);
         if (platypusRequest.getType() == Requests.rqLogout) {
             aHttpRequest.logout();
             aHttpSession.invalidate();
+        } else {
+            RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(serverCore, aPlatypusSession, platypusRequest);
+            if (handler != null) {
+                Consumer<Exception> onFailure = (Exception ex) -> {
+                    try {
+                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
+                    } catch (IOException ex1) {
+                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                    }
+                };
+                Consumer<Response> onSuccess = (Response resp) -> {
+                    try {
+                        PlatypusResponseHttpWriter writer = new PlatypusResponseHttpWriter(aHttpResponse, aHttpRequest);
+                        resp.accept(writer);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                };
+                if (handler instanceof CommonRequestHandler<?, ?>) {
+                    AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
+                    CommonRequestHandler<?, Response> crh = (CommonRequestHandler<?, Response>) handler;
+                    crh.handle((Response resp) -> {
+                        async.complete();
+                        onSuccess.accept(resp);
+                    }, (Exception ex) -> {
+                        async.complete();
+                        onFailure.accept(ex);
+                    });
+                } else if (handler instanceof SessionRequestHandler<?, ?>) {
+                    AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
+                    SessionRequestHandler<?, Response> srh = (SessionRequestHandler<?, Response>) handler;
+                    srh.handle(aPlatypusSession, (Response resp) -> {
+                        async.complete();
+                        onSuccess.accept(resp);
+                    }, (Exception ex) -> {
+                        async.complete();
+                        onFailure.accept(ex);
+                    });
+                } else {
+                    throw new IllegalStateException("Bad request handler detected");
+                }
+            } else {
+                throw new IllegalStateException("No request handler found");
+            }
         }
-    }
-
-    private static String moduleResponseToJson(Set<String> functionsNames, boolean isPermitted) {
-        return (new StringBuilder())
-                .append("{")
-                .append("\"").append(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP).append("\"")
-                .append(":")
-                .append("[").append(functionsNames.isEmpty() ? "" : "\"").append(StringUtils.join("\", \"", functionsNames.toArray(new String[]{}))).append(functionsNames.isEmpty() ? "" : "\"").append("]")
-                .append(",")
-                .append("\"").append(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP).append("\"")
-                .append(":")
-                .append(isPermitted)
-                .append("}")
-                .toString();
-    }
-
-    private void writeResponse(Rowset aRowset, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        RowsetJsonWriter writer = new RowsetJsonWriter(aRowset);
-        String json = writer.write();
-        writeJsonResponse(json, response);
-    }
-
-    private void writeResponse(Query<?> query, HttpServletResponse aHttpResponse) throws Exception {
-        QueryJsonWriter writer = new QueryJsonWriter(query);
-        writeJsonResponse(writer.write(), aHttpResponse);
-    }
-
-    private void writeResponse(String aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
-        byte[] bytes = aResponse.getBytes(SettingsConstants.COMMON_ENCODING);
-        aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-        if (aHttpResponse.getContentType() == null) {
-            aHttpResponse.setContentType(aContentType);
-        }
-        aHttpResponse.setContentLength(bytes.length);
-        aHttpResponse.getOutputStream().write(bytes);
-        aHttpResponse.getOutputStream().flush();
-    }
-
-    private void writeJsonResponse(String aResponse, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
-        writeResponse(aResponse, aHttpResponse, RowsetJsonConstants.JSON_CONTENTTYPE);
-    }
-
-    private void writeResponse(byte[] aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
-        if (aContentType != null) {
-            aHttpResponse.setContentType(aContentType);
-        }
-        aHttpResponse.setContentLength(aResponse.length);
-        aHttpResponse.getOutputStream().write(aResponse);
-    }
-
-    private void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
-        aHttpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-        aHttpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
-        aHttpResponse.setDateHeader("Expires", 0);// Proxies
-    }
-
-    private void sendJ2SEResponse(Response aPlatypusResponse, HttpServletResponse aHttpResponse) throws Exception {
-        ByteArrayOutputStream baOut = new ByteArrayOutputStream();
-        ProtoWriter pw = new ProtoWriter(baOut);
-        PlatypusResponseWriter.write(aPlatypusResponse, pw);
-        pw.flush();
-        byte[] rsData = baOut.toByteArray();
-        aHttpResponse.setContentType(PlatypusHttpConstants.CONTENT_TYPE);
-        aHttpResponse.setContentLength(rsData.length);
-        aHttpResponse.getOutputStream().write(rsData);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -339,189 +288,21 @@ public class PlatypusHttpServlet extends HttpServlet {
         return "Platypus servlet provides platypus http clients communication with J2EE/Servlet containers";
     }// </editor-fold>
 
-    protected Request readPlatypusRequest(HttpServletRequest aRequest, HttpServletResponse aResponse, Session aSession) throws Exception {
-        if (!isApiRequest(aRequest) && !isResourceRequest(aRequest) && !isJ2SERequest(aRequest)) {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.ID);
-            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -1- ");
-        }
-        int rqType;
-        String sType = aRequest.getParameter(PlatypusHttpRequestParams.TYPE);
+    protected Request readPlatypusRequest(HttpServletRequest aHttpRequest, HttpServletResponse aResponse, Session aSession) throws Exception {
+        String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
         if (sType != null) {
-            rqType = Integer.valueOf(sType);
-        } else {
-            if (isResourceRequest(aRequest)) {
-                rqType = Requests.rqAppElement;
+            int rqType = Integer.valueOf(sType);
+            Request rq = PlatypusRequestsFactory.create(rqType);
+            if (rq != null) {
+                PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, aHttpRequest);
+                rq.accept(reader);
+                return rq;
             } else {
-                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
-                throw new Exception(REQUEST_NOT_CORRECT_MSG + " -0- ");
+                throw new Exception(String.format(UNKNOWN_REQUEST_MSG, rqType));
             }
-        }
-        Request rq = PlatypusRequestsFactory.create(IDGenerator.genID(), rqType);
-        if (rq == null) {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, String.format(UNKNOWN_REQUEST_MSG, rqType));
-            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -3- ");
-        }
-        PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, rq.getID(), aRequest, extractURI(aRequest));
-        rq.accept(reader);
-        if (rq instanceof AppElementRequest && !isJ2SERequest(aRequest)) {
-            rq = new FilteredAppElementRequest(((AppElementRequest) rq).getAppElementId());
-        }
-        return rq;
-    }
-
-    private String extractURI(HttpServletRequest aRequest) {
-        return aRequest.getPathInfo();
-    }
-
-    private boolean isApiRequest(HttpServletRequest aRequest) {
-        return PlatypusRequestHttpReader.isApiUri(extractURI(aRequest));
-    }
-
-    private boolean isResourceRequest(HttpServletRequest aRequest) {
-        return PlatypusRequestHttpReader.isResourceUri(extractURI(aRequest));
-    }
-
-    private boolean isJ2SERequest(HttpServletRequest aRequest) {
-        return PlatypusHttpConstants.AGENT_NAME.equals(aRequest.getHeader(PlatypusHttpConstants.HEADER_USER_AGENT));
-    }
-
-    private void platypusResponse(final HttpServletRequest aHttpRequest, Request aPlatypusRequest, Response aPlatypusResponse, final HttpServletResponse aHttpResponse) throws Exception {
-        if (isJ2SERequest(aHttpRequest)) {// platypus http client
-            sendJ2SEResponse(aPlatypusResponse, aHttpResponse);
-        } else { // browsers
-            assert isApiRequest(aHttpRequest) || isResourceRequest(aHttpRequest) : "Unknown request uri. Requests uri should be /api or /resources";
-            if (aPlatypusResponse instanceof ErrorResponse) {
-                ErrorResponse er = (ErrorResponse) aPlatypusResponse;
-                if (er.isAccessControl()) {
-                    if (aPlatypusRequest instanceof FilteredAppElementRequest && isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
-                        String moduleId = ((FilteredAppElementRequest) aPlatypusRequest).getAppElementId();
-                        if (moduleId != null && !moduleId.isEmpty()) {
-                            String userName = getPrincipal(aHttpRequest).getName();
-                            if (Character.isDigit(moduleId.charAt(0))) {
-                                String moduleConstructor = AppElementsFilter.checkModuleName("Module", moduleId);
-                                String formConstructor = AppElementsFilter.checkModuleName("Form", moduleId);
-                                writeJsonResponse(
-                                        String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleConstructor, moduleId, userName) + "\n"
-                                        + String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, formConstructor, moduleId, userName), aHttpResponse);
-                            } else {
-                                writeJsonResponse(String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleId, moduleId, userName), aHttpResponse);
-                            }
-                        } else {
-                            aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
-                        }
-                    } else {
-                        aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
-                    }
-                } else {
-                    aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, er.getError());
-                }
-            } else if (aPlatypusResponse instanceof RowsetResponse) {
-                makeResponseNotCacheable(aHttpResponse);
-                writeResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
-            } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
-                CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
-                makeResponseNotCacheable(aHttpResponse);
-                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isPermitted()), aHttpResponse);
-            } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
-                final Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
-                makeResponseNotCacheable(aHttpResponse);
-                if (result instanceof Rowset) {
-                    writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
-                } else if (result instanceof String) {
-                    writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
-                } else if (result instanceof JSObject) {
-                    writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
-                } else if (result instanceof Report) {
-                    Report report = (Report) result;
-                    String docsRoot = aHttpRequest.getServletContext().getRealPath("/");
-                    String userHome = "/reports/" + getPrincipal(aHttpRequest).getName() + "/";
-                    File userDir = new File(docsRoot + userHome);
-                    if (!userDir.exists()) {
-                        userDir.mkdirs();
-                    }
-                    String reportName = report.getName() + IDGenerator.genID() + "." + report.getFormat();
-                    File rep = new File(docsRoot + userHome + reportName);
-                    try (FileOutputStream out = new FileOutputStream(rep)) {
-                        out.write(report.getReport());
-                        out.flush();
-                    }
-                    String reportLocation = userHome + reportName;
-                    if (!"/".equals(aHttpRequest.getContextPath())) {
-                        reportLocation = aHttpRequest.getContextPath() + reportLocation;
-                    }
-                    reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
-                    writeResponse(reportLocation, aHttpResponse, REPORT_LOCATION_CONTENT_TYPE);
-                } else {// including null result
-                    writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), aHttpResponse);
-                }
-            } else if (aPlatypusResponse instanceof AppQueryResponse) {
-                Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();
-                makeResponseNotCacheable(aHttpResponse);
-                writeResponse(query, aHttpResponse);
-            } else if (aPlatypusResponse instanceof FilteredAppElementRequest.FilteredResponse) {
-                FilteredAppElementRequest.FilteredResponse resp = (FilteredAppElementRequest.FilteredResponse) aPlatypusResponse;
-                makeResponseNotCacheable(aHttpResponse);
-                if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
-                    String docsRoot = aHttpRequest.getServletContext().getRealPath("/");
-                    String scriptPath = resp.getScriptPath();
-                    if (scriptPath.startsWith(docsRoot)) {
-                        String newScriptUri = scriptPath.substring(docsRoot.length());
-                        String redirectLocation = aHttpResponse.encodeRedirectURL(newScriptUri.replace(File.separator, "/"));
-                        if (!"/".equals(aHttpRequest.getContextPath())) {
-                            redirectLocation = aHttpRequest.getContextPath() + redirectLocation;
-                        }
-                        redirectLocation = new URI(null, null, redirectLocation, null).toASCIIString();
-                        aHttpResponse.sendRedirect(redirectLocation);
-                    }
-                } else {
-                    writeJsonResponse(resp.getFilteredContent(), aHttpResponse);
-                }
-            } else if (aPlatypusResponse instanceof StartAppElementRequest.Response) {
-                String appElementIdToSend = ((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId();
-                writeJsonResponse(appElementIdToSend != null ? ("\"" + appElementIdToSend + "\"") : "null", aHttpResponse);
-            } else if (aPlatypusResponse instanceof AppElementRequest.Response) {
-                if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {
-                    AppElementRequest.Response appElementResponse = (AppElementRequest.Response) aPlatypusResponse;
-                    if (appElementResponse.getAppElement() != null) {
-                        if (appElementResponse.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
-                            ApplicationElement appElement = ((AppElementRequest.Response) aPlatypusResponse).getAppElement();
-                            String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
-                            makeResponseNotCacheable(aHttpResponse);
-                            writeResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
-                            if (mimeType != null && mimeType.contains("text")) {
-                                aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-                            }
-                        } else {
-                            aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] should be platypus application resource, but it is not!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
-                        }
-                    } else {
-                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] is absent!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
-                    }
-                } else {
-                    makeResponseNotCacheable(aHttpResponse);
-                    writeJsonResponse("", aHttpResponse);// Plain scripts have no model and other related resources
-                }
-            } else if (aPlatypusResponse instanceof CommitRequest.Response) {
-                // simple OK response is needed
-            } else if (aPlatypusResponse instanceof LogoutRequest.Response) {
-                // logout is processed out of this method
-            } else if (aPlatypusResponse instanceof HelloRequest.Response) {
-                // simple OK response is needed
-            } else if (aPlatypusResponse instanceof DisposeServerModuleRequest.Response) {
-                // simple OK response is needed
-            } else {
-                aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Unknown response. Don't know how to deal with it. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
-            }
-        }
-    }
-
-    private RequestHandler<?> findPlatypusHandler(Request rq, Session aSession, final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse) throws Exception {
-        RequestHandler<?> handler;
-        if (rq instanceof FilteredAppElementRequest) {
-            handler = new FilteredAppElementRequestHandler(serverCore, aSession, (FilteredAppElementRequest) rq);
         } else {
-            handler = RequestHandlerFactory.getHandler(serverCore, aSession, rq);
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
+            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -0- ");
         }
-        return handler;
     }
 }

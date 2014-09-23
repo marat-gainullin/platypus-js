@@ -11,6 +11,7 @@ import com.eas.client.LocalModulesProxy;
 import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.ServerModulesProxy;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.PlatypusFiles;
@@ -40,7 +41,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PlatypusServerCore implements ContextHost, PrincipalHost, Application {
+public class PlatypusServerCore implements ContextHost, PrincipalHost, Application<SqlQuery> {
 
     protected static PlatypusServerCore instance;
 
@@ -80,13 +81,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     protected ScriptedDatabasesClient databasesClient;
     protected ApplicationSourceIndexer indexer;
     protected ModulesProxy modules;
-    protected QueriesProxy<?> queries;
+    protected QueriesProxy<SqlQuery> queries;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
     private final ThreadLocal<Object> currentRequest = new ThreadLocal<>();
     private final ThreadLocal<Object> currentResponse = new ThreadLocal<>();
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<?> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
@@ -107,7 +108,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     }
 
     @Override
-    public QueriesProxy<?> getQueries() {
+    public QueriesProxy<SqlQuery> getQueries() {
         return queries;
     }
 

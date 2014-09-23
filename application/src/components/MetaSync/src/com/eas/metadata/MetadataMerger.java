@@ -12,11 +12,11 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.util.*;
@@ -32,7 +32,7 @@ public class MetadataMerger {
     private boolean noDropTables;
     private Set<String> listTables = new HashSet<>();
     private boolean noExecuteSQL;
-    private DbClient client;
+    private DatabasesClient client;
     private Map<String, TableStructure> srcMD;
     private Map<String, TableStructure> destMD;
     private String srcDialect;
@@ -65,7 +65,7 @@ public class MetadataMerger {
      * @param aNoDropTables if true then no execute drop table
      * @param aListTables list tables for work
      */
-    public MetadataMerger(DbClient aClient, String destSchema, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, boolean createSqlsList) throws Exception {
+    public MetadataMerger(DatabasesClient aClient, String destSchema, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, boolean createSqlsList) throws Exception {
         super();
         client = aClient;
         assert client != null;
@@ -87,7 +87,7 @@ public class MetadataMerger {
             listTables = aListTables;
         }
 
-        DbMetadataCache mdCache = client.getDbMetadataCache(null);
+        DatabaseMdCache mdCache = client.getDbMetadataCache(null);
         driver = mdCache.getConnectionDriver();
         dSchema = destSchema;
 
@@ -792,7 +792,7 @@ public class MetadataMerger {
                     try {
                         Map<String, List<Change>> changeLogs = new HashMap<>();
                         changeLogs.put(null, q.getFlow().getChangeLog());
-                        client.commit(changeLogs);
+                        client.commit(changeLogs, null, null);
                     } catch (Exception e) {
                         client.rollback();
                         throw e;
@@ -850,8 +850,7 @@ public class MetadataMerger {
             try {
                 assert client != null;
                 queryIndexes = new SqlCompiledQuery(client, null, sql4Indexes);
-                Rowset rowset = queryIndexes.executeQuery();
-
+                Rowset rowset = queryIndexes.executeQuery(null, null);
                 if (rowset.first()) {
                     Fields fields = rowset.getFields();
                     int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);

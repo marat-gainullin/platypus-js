@@ -19,9 +19,10 @@ public class QueryJsonWriter extends JsonWriter{
     private static final String APP_ELEMENT_PROP_NAME = "appelement";
     private static final String PARAMETERS_PROP_NAME = "parameters";
     private static final String FIELDS_PROP_NAME = "fields";
-    protected Query<?> query;
+    protected Query query;
 
-    public QueryJsonWriter(Query<?> aQuery) {
+    public QueryJsonWriter(Query aQuery) {
+        super();
         query = aQuery;
     }
 
@@ -30,7 +31,7 @@ public class QueryJsonWriter extends JsonWriter{
         JSONUtils.o(sb,
                 TITLE_PROP_NAME, JSONUtils.s(query.getTitle()),
                 MANUAL_PROP_NAME, String.valueOf(query.isManual()),
-                APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityId().toString()),
+                APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityId()),
                 PARAMETERS_PROP_NAME, fields2a(query.getParameters()),
                 FIELDS_PROP_NAME, fields2a(query.getFields())
                 );

@@ -4,7 +4,6 @@
  */
 package com.eas.client.login;
 
-import com.eas.client.ClientFactory;
 import com.eas.client.settings.ConnectionSettings;
 import java.awt.Color;
 import java.awt.Component;
@@ -63,8 +62,8 @@ public class ConnectionsListModel extends AbstractListModel {
     }
 
     private void fillElements() throws Exception {
-        ClientFactory.reset();
-        ConnectionSettings[] settings = ClientFactory.getSettings();
+        ConnectionsSelector.reset();
+        ConnectionSettings[] settings = ConnectionsSelector.getSettings();
         if (settings != null) {
             elements.addAll(Arrays.asList(settings));
         }
@@ -82,7 +81,7 @@ public class ConnectionsListModel extends AbstractListModel {
                 displayName = settings.getUrl();
             }
             if (!settings.isEditable()) {
-                displayName = displayName + " [" + LoginFrame.bundle.getString("systemConnectionPrefix") + "]";
+                displayName = displayName + " [" + ConnectionsSelector.bundle.getString("systemConnectionPrefix") + "]";
                 r.setForeground(textInactiveTextcolor);
             }
             r.setText(displayName);
