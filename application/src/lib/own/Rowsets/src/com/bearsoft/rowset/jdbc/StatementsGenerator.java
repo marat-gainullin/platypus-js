@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class StatementsGenerator implements ChangeVisitor {
 
     /**
-     * Stores short living information about statements, ti be executed while
+     * Stores short living information about statements, to be executed while
      * jdbc update process. Performs parameterized statements execution.
      */
     public static class StatementsLogEntry {
@@ -100,6 +100,7 @@ public class StatementsGenerator implements ChangeVisitor {
      * because we use simple "=" operator in WHERE clause.
      *
      * @param aKeys Keys array to deal with.
+     * @return 
      */
     protected String generateWhereClause(List<ChangeValue> aKeys) {
         StringBuilder whereClause = new StringBuilder();
@@ -126,8 +127,8 @@ public class StatementsGenerator implements ChangeVisitor {
             entitiesHost.checkRights(aChange.entityId);
         }
         Map<String, InsertChunk> inserts = new HashMap<>();
-        for (int i = 0; i < aChange.data.length; i++) {
-            Field field = entitiesHost.resolveField(aChange.entityId, aChange.data[i].name);
+        for (ChangeValue data : aChange.data) {
+            Field field = entitiesHost.resolveField(aChange.entityId, data.name);
             if (field != null) {
                 InsertChunk chunk = inserts.get(field.getTableName());
                 if (chunk == null) {
@@ -150,14 +151,13 @@ public class StatementsGenerator implements ChangeVisitor {
                         && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
                         && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
                     chunk.contexted = true;
-                    if (aChange.data[i] == null) {
+                    if (data.value == null) {
                         chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
                     } else {
-                        chunk.insert.parameters.add(aChange.data[i]);
+                        chunk.insert.parameters.add(data);
                     }
                 } else {
-                    //
-                    chunk.insert.parameters.add(aChange.data[i]);
+                    chunk.insert.parameters.add(data);
                 }
                 if (field.isPk()) {
                     chunk.keysColumnsNames.add(dataColumnName);
@@ -208,8 +208,8 @@ public class StatementsGenerator implements ChangeVisitor {
             }
             Map<String, UpdateChunk> updates = new HashMap<>();
             // data
-            for (int i = 0; i < aChange.data.length; i++) {
-                Field field = entitiesHost.resolveField(aChange.entityId, aChange.data[i].name);
+            for (ChangeValue data : aChange.data) {
+                Field field = entitiesHost.resolveField(aChange.entityId, data.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk == null) {
@@ -226,33 +226,35 @@ public class StatementsGenerator implements ChangeVisitor {
                         chunk.columnsClause.append(", ");
                     }
                     chunk.columnsClause.append(field.getOriginalName() != null ? field.getOriginalName() : field.getName()).append(" = ?");
-                    chunk.data.add(aChange.data[i]);
+                    chunk.data.add(data);
                 }
             }
             // keys
-            for (int i = 0; i < aChange.keys.length; i++) {
-                Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
+            for (ChangeValue key : aChange.keys) {
+                Field field = entitiesHost.resolveField(aChange.entityId, key.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk != null) {
                         if (chunk.keys == null) {
                             chunk.keys = new ArrayList<>();
                         }
-                        chunk.keys.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
+                        chunk.keys.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value, key.type));
                     }
                 }
             }
-            for (String tableName : updates.keySet()) {
-                UpdateChunk chunk = updates.get(tableName);
+            updates.entrySet().stream().forEach((Map.Entry<String, UpdateChunk> entry) -> {
+                String tableName = entry.getKey();                
+                UpdateChunk chunk = entry.getValue();
                 if (chunk.data != null && !chunk.data.isEmpty()
-                        && chunk.keys != null) {
+                        && chunk.keys != null && !chunk.keys.isEmpty()) {
                     chunk.update.clause = String.format(UPDATE_CLAUSE, tableName, chunk.columnsClause.toString(), generateWhereClause(chunk.keys));
                     chunk.update.parameters.addAll(chunk.data);
                     chunk.update.parameters.addAll(chunk.keys);
+                    chunk.update.valid = true;
+                } else {
+                    chunk.update.valid = false;
                 }
-                chunk.update.valid = chunk.data != null && !chunk.data.isEmpty()
-                        && chunk.keys != null && !chunk.keys.isEmpty();
-            }
+            });
         }
     }
 
@@ -263,8 +265,8 @@ public class StatementsGenerator implements ChangeVisitor {
                 entitiesHost.checkRights(aChange.entityId);
             }
             Map<String, StatementsLogEntry> deletes = new HashMap<>();
-            for (int i = 0; i < aChange.keys.length; i++) {
-                Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
+            for (ChangeValue key : aChange.keys) {
+                Field field = entitiesHost.resolveField(aChange.entityId, key.name);
                 if (field != null) {
                     StatementsLogEntry delete = deletes.get(field.getTableName());
                     if (delete == null) {
@@ -274,14 +276,15 @@ public class StatementsGenerator implements ChangeVisitor {
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(delete);
                     }
-                    delete.parameters.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
+                    delete.parameters.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value, key.type));
                 }
             }
-            for (String tableName : deletes.keySet()) {
-                StatementsLogEntry delete = deletes.get(tableName);
+            deletes.entrySet().stream().forEach((Map.Entry<String, StatementsLogEntry> entry) -> {
+                String tableName = entry.getKey();
+                StatementsLogEntry delete = entry.getValue();
                 delete.clause = String.format(DELETE_CLAUSE, tableName, generateWhereClause(delete.parameters));
                 delete.valid = !delete.parameters.isEmpty();
-            }
+            });
         }
     }
 
