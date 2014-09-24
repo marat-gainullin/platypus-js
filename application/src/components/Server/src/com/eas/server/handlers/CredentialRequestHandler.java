@@ -4,7 +4,6 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.server.PlatypusServerCore;
@@ -25,9 +24,7 @@ public class CredentialRequestHandler extends SessionRequestHandler<CredentialRe
     protected void handle2(Session aSession, Consumer<CredentialRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String startAppElement = null;
         PlatypusPrincipal principal = aSession.getPrincipal();
-        if (principal instanceof DbPlatypusPrincipal) {
-            startAppElement = ((DbPlatypusPrincipal) principal).getStartAppElement();
-        }
+        startAppElement = ((PlatypusPrincipal) principal).getStartAppElement();
         if (startAppElement == null) {
             startAppElement = getServerCore().getDefaultAppElement();
         }

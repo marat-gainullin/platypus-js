@@ -209,8 +209,8 @@ public class SqlTextEditsComplementor {
             if (entity.getAlias() != null && !entity.getAlias().isEmpty()) {
                 tablyName = entity.getAlias();
             } else {
-                if (entity.getQueryId() != null) {
-                    String inQueryName = entity.getQueryId();
+                if (entity.getQueryName() != null) {
+                    String inQueryName = entity.getQueryName();
                     tablyName = ClientConstants.STORED_QUERY_REF_PREFIX + inQueryName;
                 } else {
                     if (entity.getTableSchemaName() != null && !entity.getTableSchemaName().isEmpty()) {
@@ -354,7 +354,7 @@ public class SqlTextEditsComplementor {
                 toAdd.setHeight(rect.height);
                 toAdd.setAlias(table.getAlias() != null ? table.getAlias().getName() : "");
                 if (table.getName().startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {// strong referecne to stored subquery
-                    toAdd.setQueryId(table.getName().substring(1));
+                    toAdd.setQueryName(table.getName().substring(1));
                 } else {
                     String schema = table.getSchemaName();
                     if (schema != null && schema.equalsIgnoreCase(dataObject.getMetadataCache().getConnectionSchema())) {
@@ -365,7 +365,7 @@ public class SqlTextEditsComplementor {
                         toAdd.setTableSchemaName(schema);
                         toAdd.setTableName(table.getName());
                     } else {
-                        toAdd.setQueryId(table.getName());
+                        toAdd.setQueryName(table.getName());
                     }
                 }
                 NewEntityEdit<QueryEntity, QueryModel> edit = new NewEntityEdit<>(model, toAdd);

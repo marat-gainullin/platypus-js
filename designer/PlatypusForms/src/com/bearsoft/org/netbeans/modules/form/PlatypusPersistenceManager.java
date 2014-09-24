@@ -134,7 +134,7 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                 createdComponents.add(rFactory.getResult());
                 if (rFactory.getResult().getBeanInstance() instanceof DbControl) {
                     DbControl dbControl = (DbControl) rFactory.getResult().getBeanInstance();
-                    if (formObject.getClient() != null) {
+                    if (formObject.getBasesProxy() != null) {
                         dbControl.setModel(formObject.getModel());
                     }
                 }

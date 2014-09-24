@@ -7,9 +7,7 @@ package com.eas.server.httpservlet;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.RowsetConverter;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabaseMdCache;
@@ -87,24 +85,17 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     @Override
     public void visit(CommitRequest rq) throws Exception {
         String jsonText = getRequestText(httpRequest);
-        List<Change> changes = ChangeJsonReader.parse(jsonText, new EntitiesHost() {
-            @Override
-            public Field resolveField(String aEntityId, String aFieldName) throws Exception {
-                SqlQuery query = serverCore.getQueries().getQuery(aEntityId, null, null);
-                if (query != null) {
-                    if (!query.getFields().isEmpty()) {
-                        return query.getFields().get(aFieldName);
-                    } else {
-                        return query.getParameters().get(aFieldName);
-                    }
+        List<Change> changes = ChangeJsonReader.parse(jsonText, (String aEntityId, String aFieldName) -> {
+            SqlQuery query = serverCore.getQueries().getQuery(aEntityId, null, null);
+            if (query != null) {
+                if (!query.getFields().isEmpty()) {
+                    return query.getFields().get(aFieldName);
                 } else {
-                    Logger.getLogger(PlatypusRequestHttpReader.class.getName()).log(Level.SEVERE, String.format("Entity not found %s.", aEntityId));
-                    return null;
+                    return query.getParameters().get(aFieldName);
                 }
-            }
-
-            @Override
-            public void checkRights(String aEntityId) throws Exception {
+            } else {
+                Logger.getLogger(PlatypusRequestHttpReader.class.getName()).log(Level.SEVERE, String.format("Entity not found %s.", aEntityId));
+                return null;
             }
         });
         rq.setChanges(changes);

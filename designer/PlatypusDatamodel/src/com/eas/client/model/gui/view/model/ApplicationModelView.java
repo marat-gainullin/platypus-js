@@ -83,7 +83,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected ApplicationDbModel newModelInstance() {
-        return new ApplicationDbModel(model.getClient());
+        return new ApplicationDbModel(model.getQueries());
     }
 
     protected final void putActions() {

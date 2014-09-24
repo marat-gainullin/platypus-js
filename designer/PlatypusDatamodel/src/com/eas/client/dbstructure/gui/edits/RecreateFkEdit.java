@@ -6,7 +6,7 @@
 package com.eas.client.dbstructure.gui.edits;
 
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
@@ -65,9 +65,9 @@ public class RecreateFkEdit extends DbStructureEdit{
     @Override
     protected void clearTablesCache() {
         try {
-            DbClient client = sqlController.getClient();
-            client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), oldFkSpec.getTable());
-            client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), newFkSpec.getTable());
+            DatabasesClient client = sqlController.getBasesProxy();
+            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), oldFkSpec.getTable());
+            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), newFkSpec.getTable());
         } catch (Exception ex) {
             Logger.getLogger(RecreateFkEdit.class.getName()).log(Level.SEVERE, null, ex);
         }

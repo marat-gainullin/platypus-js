@@ -187,7 +187,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     private void initParametersView() throws Exception {
-        paramsModel = new ApplicationDbModel();
+        paramsModel = new ApplicationDbModel(null);
         paramsModel.setParameters(parentView.getParameters().copy());
         paramsModel.requery();
         parametersGrid = new EntityFieldsGrid();

@@ -114,8 +114,8 @@ public class TableNameSelector {
             for (TableRef tRef : aRefs) {
                 if (tRef != null && tRef.schema != null && !tRef.schema.isEmpty()) {
                     try {
-                        if (aProject.getClient() != null) {
-                            String schema = aProject.getClient().getConnectionSchema(tRef.dbId);
+                        if (aProject.getBasesProxy() != null) {
+                            String schema = aProject.getBasesProxy().getConnectionSchema(tRef.dbId);
                             if (schema != null && !schema.isEmpty()
                                     && schema.equalsIgnoreCase(tRef.schema)) {
                                 tRef.schema = null;

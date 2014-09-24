@@ -6,6 +6,7 @@ package com.eas.client.login;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.script.NoPublisherException;
+import java.util.Collections;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -16,23 +17,12 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SystemPlatypusPrincipal extends PlatypusPrincipal {
 
     public SystemPlatypusPrincipal() {
-        super("system-" + IDGenerator.genID());
+        super("system-" + IDGenerator.genID(), null, null, null, null, Collections.emptySet());
     }
 
     @Override
-    public boolean hasRole(String aRole, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (onSuccess != null) {
-            onSuccess.accept(Boolean.TRUE);
-        }
+    public boolean hasRole(String aRole) {
         return true;
-    }
-
-    @Override
-    public String getStartAppElement(Consumer<String> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (onSuccess != null) {
-            onSuccess.accept(null);
-        }
-        return null;
     }
 
     @Override

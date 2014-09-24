@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.selectors;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.gui.selectors.TableNameSelector;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
@@ -17,7 +17,7 @@ import java.awt.Component;
  */
 public class TablesSelector implements TablesSelectorCallback {
 
-    protected DbClient client;
+    protected DatabasesClient basesProxy;
     protected String title;
     protected Component parent;
     protected PlatypusProject project;
@@ -26,7 +26,7 @@ public class TablesSelector implements TablesSelectorCallback {
 
     public TablesSelector(PlatypusProject aProject, String aTitle, Component aParent) {
         super();
-        client = aProject.getClient();
+        basesProxy = aProject.getBasesProxy();
         project = aProject;
         title = aTitle;
         parent = aParent;
@@ -43,7 +43,7 @@ public class TablesSelector implements TablesSelectorCallback {
         return TableNameSelector.selectTableName(project, oldRef, allowDatabaseChange, allowSchemaChange, parent, title);
     }
 
-    public void setClient(DbClient aDbClient) {
-        client = aDbClient;
+    public void setBasesProxy(DatabasesClient aDbClient) {
+        basesProxy = aDbClient;
     }
 }

@@ -15,7 +15,6 @@ import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.designer.application.PlatypusUtils;
-import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.application.project.PlatypusProject;
@@ -287,9 +286,9 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     protected ApplicationDbModel readModel() throws Exception {
         String modelContent = getModelFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
-        org.w3c.dom.Document doc = Source2XmlDom.transform(modelContent);
-        ApplicationDbModel modelRead = new ApplicationDbModel(getClient());
-        modelRead.accept(new XmlDom2ApplicationModel<ApplicationDbEntity>(doc));
+        org.w3c.dom.Document doc = Source2XmlDom.transform(modelContent);        
+        ApplicationDbModel modelRead = new ApplicationDbModel(getProject().getQueries());
+        modelRead.accept(new XmlDom2ApplicationModel<>(doc));
         return modelRead;
     }
 
@@ -313,26 +312,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     @Override
     protected void handleDelete() throws IOException {
-        String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
         super.handleDelete();
-        if (getClient() != null) {
-            try {
-                getClient().appEntityChanged(oldId);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
-        }
-    }
-
-    public void notifyChanged() throws Exception {
-        if (getClient() != null) {
-            unsignFromQueries();
-            try {
-                getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
-            } finally {
-                resignOnQueries();
-            }
-        }
     }
 
     @Override

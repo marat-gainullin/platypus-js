@@ -9,6 +9,7 @@
  */
 package com.eas.client.model.gui.edits;
 
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 
@@ -16,7 +17,7 @@ import com.eas.client.model.Model;
  *
  * @author mg
  */
-public class DeleteEntityEdit<E extends Entity<?, ?, E>, M extends Model<E, ?, ?, ?>> extends DatamodelEdit {
+public class DeleteEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends DatamodelEdit {
 
     private M model;
     protected E entity;

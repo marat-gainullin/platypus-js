@@ -4,9 +4,9 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.metadata.ApplicationElement;
 import java.util.ArrayList;
 import java.util.List;
+import org.openide.loaders.DataObject;
 
 /**
  *
@@ -14,18 +14,18 @@ import java.util.List;
  */
 public class DefaultMtdSelectionValidator implements MtdSelectionValidator {
 
-    protected List<Integer> allowedTypes = new ArrayList<>();
+    protected List<String> allowedTypes = new ArrayList<>();
 
-    public DefaultMtdSelectionValidator(List<Integer> aAllowedTypes) {
+    public DefaultMtdSelectionValidator(List<String> aAllowedTypes) {
         super();
         allowedTypes = aAllowedTypes;
     }
 
     @Override
-    public boolean isEntityValid(ApplicationElement umdo) {
+    public boolean isEntityValid(DataObject umdo) {
         if (allowedTypes != null) {
-            if (umdo != null) {
-                return allowedTypes.contains(umdo.getType());
+            if (umdo != null) {                
+                return allowedTypes.contains(umdo.getPrimaryFile().getExt());
             } else {
                 return false;
             }
@@ -34,7 +34,8 @@ public class DefaultMtdSelectionValidator implements MtdSelectionValidator {
         }
     }
 
-    public List<Integer> getAllowedTypes() {
+    @Override
+    public List<String> getAllowedTypes() {
         return allowedTypes;
     }
 }

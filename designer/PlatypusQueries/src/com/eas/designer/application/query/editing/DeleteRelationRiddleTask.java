@@ -121,8 +121,8 @@ public class DeleteRelationRiddleTask implements RiddleTask {
             }
 
             String entityTableName = null;
-            if (aQueryEntity.getQueryId() != null) {
-                entityTableName = ClientConstants.STORED_QUERY_REF_PREFIX + aQueryEntity.getQueryId();
+            if (aQueryEntity.getQueryName() != null) {
+                entityTableName = ClientConstants.STORED_QUERY_REF_PREFIX + aQueryEntity.getQueryName();
             } else {
                 entityTableName = aQueryEntity.getTableName();
                 if (aQueryEntity.getTableSchemaName() != null && !aQueryEntity.getTableSchemaName().isEmpty()) {
@@ -143,8 +143,8 @@ public class DeleteRelationRiddleTask implements RiddleTask {
             String tableName = aTable.getWholeTableName();
 
             String entityTableName = null;
-            if (aQueryEntity.getQueryId() != null) {
-                entityTableName = ClientConstants.STORED_QUERY_REF_PREFIX + aQueryEntity.getQueryId();
+            if (aQueryEntity.getQueryName() != null) {
+                entityTableName = ClientConstants.STORED_QUERY_REF_PREFIX + aQueryEntity.getQueryName();
             } else {
                 entityTableName = aQueryEntity.getTableName();
                 if (aQueryEntity.getTableSchemaName() != null && !aQueryEntity.getTableSchemaName().isEmpty()) {

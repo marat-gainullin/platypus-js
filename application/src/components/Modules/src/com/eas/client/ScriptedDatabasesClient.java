@@ -3,8 +3,8 @@ package com.eas.client;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.ScriptedQuery;
 import com.eas.client.queries.ScriptedFlowProvider;
 import com.eas.script.ScriptUtils;
@@ -28,14 +28,14 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ScriptedDatabasesClient extends DatabasesClient {
 
-    protected ApplicationSourceIndexer indexer;
+    protected PlatypusIndexer indexer;
     // key - validator name, value datasources list
     protected Map<String, Collection<String>> validators = new HashMap<>();
 
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(String aDefaultDatasourceName, ApplicationSourceIndexer aIndexer, boolean aAutoFillMetadata) throws Exception {
+    public ScriptedDatabasesClient(String aDefaultDatasourceName, PlatypusIndexer aIndexer, boolean aAutoFillMetadata) throws Exception {
         super(aDefaultDatasourceName, aAutoFillMetadata);
         indexer = aIndexer;
     }
@@ -51,10 +51,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
      * module detects an errorneous data changes, than it should thor ab
      * exception.
      *
-     * @param aModuleId
+     * @param aModuleName
      */
-    public void addValidator(String aModuleId, Collection<String> aDatasources) {
-        validators.put(aModuleId, aDatasources);
+    public void addValidator(String aModuleName, Collection<String> aDatasources) {
+        validators.put(aModuleName, aDatasources);
     }
 
     @Override

@@ -62,11 +62,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @Override
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        changeLogs.values().stream().forEach((changeLog) -> {
-            changeLog.stream().forEach((change) -> {
-                change.trusted = true;
-            });
-        });
         return basesProxy.commit(changeLogs, onSuccess, onFailure);
     }
 

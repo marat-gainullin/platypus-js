@@ -84,7 +84,8 @@ public final class PlatypusModuleSourceView extends CloneableEditor implements M
     public void componentOpened() {
         super.componentOpened();
         updateName();
-        DebuggerManager.getDebuggerManager().getBreakpoints();// initialize breakpoints' storing listeners of the debugger manager
+        // If uncomment the following line, netbeans ocasionally hangs
+//        DebuggerManager.getDebuggerManager().getBreakpoints();// initialize breakpoints' storing listeners of the debugger manager
     }
 
     @Override

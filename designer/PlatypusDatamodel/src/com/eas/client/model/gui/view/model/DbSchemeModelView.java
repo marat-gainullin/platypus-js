@@ -9,7 +9,8 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.eas.client.DbMetadataCache;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.IconCache;
 import com.eas.client.dbstructure.SqlActionsController;
@@ -30,7 +31,6 @@ import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.entities.TableEntityView;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.xml.dom.Source2XmlDom;
 import java.awt.*;
@@ -83,7 +83,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     entitiesByTableName.put(entity.getTableName().toLowerCase(), entity);
                 }
             }
-            DbMetadataCache mdCache = model.getClient().getDbMetadataCache(model.getDbId());
+            DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(model.getDbId());
             String schema = model.getSchema();
             for (FieldsEntity entity : entities.values()) {
                 if (entity != null) {
@@ -164,7 +164,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
 
     @Override
     protected DbSchemeModel transformDocToModel(Document aDoc) throws Exception {
-        return (DbSchemeModel) XmlDom2DbSchemeModel.transform(model.getClient(), aDoc);
+        return (DbSchemeModel) XmlDom2DbSchemeModel.transform(model.getBasesProxy(), aDoc);
     }
 
     @Override
@@ -211,7 +211,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
 
     @Override
     protected DbSchemeModel newModelInstance() {
-        return new DbSchemeModel(model.getClient());
+        return new DbSchemeModel(model.getBasesProxy());
     }
 
     public Relation<FieldsEntity> getSelectedFkFieldRelation() {
@@ -456,8 +456,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     if (schemaName != null && !schemaName.isEmpty()) {
                         fullTableName = schemaName + "." + fullTableName;
                     }
-                    SqlCompiledQuery query = new SqlCompiledQuery(model.getClient(), tableEntity.getTableDbId(), "select count(*) cnt from " + fullTableName);
-                    Rowset rs = query.executeQuery();
+                    SqlCompiledQuery query = new SqlCompiledQuery(model.getBasesProxy(), tableEntity.getTableDatasourceName(), "select count(*) cnt from " + fullTableName);
+                    Rowset rs = query.executeQuery(null, null);
                     if (rs != null) {
                         if (rs.first()) {
                             Object cnt = rs.getObject(1);
@@ -769,8 +769,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     if (schemaName != null && !schemaName.isEmpty()) {
                         fullTableName = schemaName + "." + fullTableName;
                     }
-                    SqlCompiledQuery query = new SqlCompiledQuery(model.getClient(), tableEntity.getTableDbId(), "select count(*) cnt from " + fullTableName);
-                    Rowset rs = query.executeQuery();
+                    SqlCompiledQuery query = new SqlCompiledQuery(model.getBasesProxy(), tableEntity.getTableDatasourceName(), "select count(*) cnt from " + fullTableName);
+                    Rowset rs = query.executeQuery(null, null);
                     if (rs != null) {
                         if (rs.first()) {
                             Object cnt = rs.getObject(1);
@@ -822,7 +822,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         }
 
         private void pasteTables(DbSchemeModel innerModel, Document doc) throws Exception {
-            DbSchemeModel outerModel = XmlDom2DbSchemeModel.transform(model.getClient(), doc);
+            DbSchemeModel outerModel = XmlDom2DbSchemeModel.transform(model.getBasesProxy(), doc);
             if (outerModel != null) {
                 Map<Long, FieldsEntity> entities = outerModel.getEntities();
                 List<FieldsEntity> alreadyExistentEntities = new ArrayList<>();
@@ -1057,7 +1057,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         Map<Long, FieldsEntity> entities = model.getEntities();
         if (entities != null) {
             for (FieldsEntity entity : entities.values()) {
-                model.getClient().dbTableChanged(entity.getTableDbId(), entity.getTableSchemaName(), entity.getTableName());
+                model.getBasesProxy().dbTableChanged(entity.getTableDatasourceName(), entity.getTableSchemaName(), entity.getTableName());
             }
         }
     }
@@ -1085,7 +1085,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
-        DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
+        DatabaseMdCache cache = model.getBasesProxy().getDbMetadataCache(sqlController.getDatasourceName());
         return cache.containsTableMetadata(fEntity.getFullTableName());
         /*
         try {

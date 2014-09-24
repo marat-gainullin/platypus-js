@@ -43,7 +43,6 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.Event;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
@@ -611,7 +610,7 @@ public class RADComponentCreator {
         if (sourceComp.getBeanInstance() instanceof DbControl) {
             assert newComp.getBeanInstance() instanceof DbControl;
             DbControl destDbControl = (DbControl) newComp.getBeanInstance();
-            if (formModel.getDataObject().getClient() != null) {
+            if (formModel.getDataObject().getBasesProxy() != null) {
                 destDbControl.setModel(formModel.getDataObject().getModel());
             }
         }
@@ -759,7 +758,7 @@ public class RADComponentCreator {
 
         if (newRadComp.getBeanInstance() instanceof DbControl) {
             DbControl dbControl = (DbControl) newRadComp.getBeanInstance();
-            if (formModel.getDataObject().getClient() != null) {
+            if (formModel.getDataObject().getBasesProxy() != null) {
                 dbControl.setModel(formModel.getDataObject().getModel());
             }
         }

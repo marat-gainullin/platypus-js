@@ -12,7 +12,6 @@ package com.eas.client;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
@@ -20,7 +19,6 @@ import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.jdbc.StatementsGenerator;
 import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.ContextHost;
@@ -234,9 +232,9 @@ public class DatabasesClient {
         public Map<String, String> props;
         public Set<String> roles;
 
-        public DbPlatypusPrincipal principal(String aUserName) {
+        public PlatypusPrincipal principal(String aUserName) {
             if (roles != null && props != null) {
-                return new DbPlatypusPrincipal(aUserName,
+                return new PlatypusPrincipal(aUserName,
                         props.get(ClientConstants.F_USR_CONTEXT),
                         props.get(ClientConstants.F_USR_EMAIL),
                         props.get(ClientConstants.F_USR_PHONE),
@@ -248,7 +246,7 @@ public class DatabasesClient {
         }
     }
 
-    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<PlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
         final UserInfo ui = new UserInfo();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
@@ -287,7 +285,7 @@ public class DatabasesClient {
         }
     }
 
-    public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<DbPlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<PlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
         final UserInfo ui = new UserInfo();
         if (onSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
@@ -338,10 +336,10 @@ public class DatabasesClient {
         return rowsAffected;
     }
 
-    public synchronized DatabaseMdCache getDbMetadataCache(String aDatasourceId) throws Exception {
-        if (!mdCaches.containsKey(aDatasourceId)) {
-            DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceId);
-            mdCaches.put(aDatasourceId, cache);
+    public synchronized DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
+        if (!mdCaches.containsKey(aDatasourceName)) {
+            DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
+            mdCaches.put(aDatasourceName, cache);
             if (autoFillMetadata) {
                 try {
                     cache.fillTablesCacheByConnectionSchema(true);
@@ -350,7 +348,7 @@ public class DatabasesClient {
                 }
             }
         }
-        return mdCaches.get(aDatasourceId);
+        return mdCaches.get(aDatasourceName);
     }
 
     protected static class CommitProcess extends AsyncProcess<Integer> {
@@ -442,60 +440,41 @@ public class DatabasesClient {
                         // while transaction processing.
                         final Map<String, SqlQuery> entityQueries = new HashMap<>();
                         for (Change change : aLog) {
-                            StatementsGenerator generator = new StatementsGenerator(converter, new EntitiesHost() {
-                                @Override
-                                public void checkRights(String aEntityId) throws Exception {
-                                    if (queries != null && aEntityId != null) {
-                                        SqlQuery query = entityQueries.get(aEntityId);
+                            StatementsGenerator generator = new StatementsGenerator(converter, (String aEntityName, String aFieldName) -> {
+                                if (aEntityName != null) {
+                                    SqlQuery query;
+                                    if (queries != null) {
+                                        query = entityQueries.get(aEntityName);
                                         if (query == null) {
-                                            query = queries.getQuery(aEntityId, null, null);
+                                            query = queries.getQuery(aEntityName, null, null);
                                             if (query != null) {
-                                                entityQueries.put(aEntityId, query);
+                                                entityQueries.put(aEntityName, query);
                                             }
-                                        }
-                                        if (query != null) {
-                                            checkWritePrincipalPermission(aEntityId, query.getWriteRoles());
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public Field resolveField(String aEntityId, String aFieldName) throws Exception {
-                                    if (aEntityId != null) {
-                                        SqlQuery query;
-                                        if (queries != null) {
-                                            query = entityQueries.get(aEntityId);
-                                            if (query == null) {
-                                                query = queries.getQuery(aEntityId, null, null);
-                                                if (query != null) {
-                                                    entityQueries.put(aEntityId, query);
-                                                }
-                                            }
-                                        } else {
-                                            query = null;
-                                        }
-                                        Fields fields;
-                                        if (query != null && query.getEntityId() != null) {
-                                            fields = query.getFields();
-                                        } else {// It seems, that aEntityId is a table name...
-                                            fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityId);
-                                        }
-                                        if (fields != null) {
-                                            Field resolved = fields.get(aFieldName);
-                                            String resolvedTableName = resolved != null ? resolved.getTableName() : null;
-                                            resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
-                                            if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
-                                                return null;
-                                            } else {
-                                                return resolved;
-                                            }
-                                        } else {
-                                            Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityId);
-                                            return null;
                                         }
                                     } else {
+                                        query = null;
+                                    }
+                                    Fields fields;
+                                    if (query != null && query.getEntityId() != null) {
+                                        fields = query.getFields();
+                                    } else {// It seems, that aEntityId is a table name...
+                                        fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityName);
+                                    }
+                                    if (fields != null) {
+                                        Field resolved = fields.get(aFieldName);
+                                        String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                        resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
+                                        if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
+                                            return null;
+                                        } else {
+                                            return resolved;
+                                        }
+                                    } else {
+                                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityName);
                                         return null;
                                     }
+                                } else {
+                                    return null;
                                 }
                             }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
                             change.accept(generator);

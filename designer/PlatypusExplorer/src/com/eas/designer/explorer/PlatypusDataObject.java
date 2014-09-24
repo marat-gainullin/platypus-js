@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.util.ListenerRegistration;
 import java.awt.EventQueue;
@@ -31,8 +31,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     private static final RequestProcessor RP = new RequestProcessor(PlatypusDataObject.class.getName(), 10);
     private final Set<PlatypusProject.ClientChangeListener> clientListeners = new HashSet<>();
     protected ListenerRegistration projectClientListener;
-    protected ListenerRegistration projectClientQueriesListener;
-
+    
     public PlatypusDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException {
         super(pf, loader);
         if (getProject() != null) {
@@ -40,23 +39,19 @@ public abstract class PlatypusDataObject extends MultiDataObject {
 
                 @Override
                 public void connected(String aDatasourceName) {
-                    resignOnQueries();
                     fireClientConnected(aDatasourceName);
                 }
 
                 @Override
                 public void disconnected(String aDatasourceName) {
-                    resignOnQueries();
                     fireClientDisconnected(aDatasourceName);
                 }
 
                 @Override
                 public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
-                    resignOnQueries();
                     fireDeafultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
                 }
             });
-            resignOnQueries();
         }
     }
 
@@ -72,24 +67,6 @@ public abstract class PlatypusDataObject extends MultiDataObject {
      */
     protected abstract void validateModel() throws Exception;
 
-    protected void unsignFromQueries() {
-        if (projectClientQueriesListener != null) {
-            projectClientQueriesListener.remove();
-            projectClientQueriesListener = null;
-        }
-    }
-
-    protected void resignOnQueries() {
-        unsignFromQueries();
-        if (getClient() != null) {
-            projectClientQueriesListener = getClient().addQueriesListener(() -> {
-                if (isModelValid()) {
-                    setModelValid(false);
-                    startModelValidating();
-                }
-            });
-        }
-    }
     protected boolean validationStarted;
 
     public boolean isValidationStarted() {
@@ -125,10 +102,6 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         if (projectClientListener != null) {
             projectClientListener.remove();
             projectClientListener = null;
-        }
-        if (projectClientQueriesListener != null) {
-            projectClientQueriesListener.remove();
-            projectClientQueriesListener = null;
         }
         super.dispose();
     }
@@ -170,10 +143,10 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         }
     }
 
-    public DbClient getClient() {
+    public DatabasesClient getBasesProxy() {
         PlatypusProject project = getProject();
         if (project != null) {
-            return project.getClient();
+            return project.getBasesProxy();
         }
         return null;
     }

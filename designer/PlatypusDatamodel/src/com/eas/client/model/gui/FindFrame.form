@@ -15,6 +15,7 @@
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
   <Events>
     <EventHandler event="windowClosed" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowClosed"/>
@@ -52,18 +53,13 @@
                   </Group>
                   <Component id="txtFind" pref="266" max="32767" attributes="1"/>
               </Group>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                          <Component id="btnFindNext" alignment="0" max="32767" attributes="1"/>
-                          <Component id="btnFindPrev" alignment="0" pref="104" max="32767" attributes="1"/>
-                      </Group>
+                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="btnFindNext" alignment="0" max="32767" attributes="1"/>
+                      <Component id="btnFindPrev" alignment="0" pref="104" max="32767" attributes="1"/>
                   </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btnClose" min="-2" pref="104" max="-2" attributes="1"/>
-                  </Group>
+                  <Component id="btnClose" alignment="1" min="-2" pref="104" max="-2" attributes="1"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>

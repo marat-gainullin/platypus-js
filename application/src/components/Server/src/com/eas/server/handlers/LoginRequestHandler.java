@@ -7,7 +7,6 @@ package com.eas.server.handlers;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
-import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.LoginRequest;
@@ -41,7 +40,7 @@ public class LoginRequestHandler extends CommonRequestHandler<LoginRequest, Logi
                 String passwordMd5 = MD5Generator.generate(getRequest().getPassword());
                 String sessionId = getRequest().getSession2restore();
                 if (sessionId == null) {
-                    DatabasesClient.credentialsToPrincipalWithBasicAuthentication(getServerCore().getDatabasesClient(), getRequest().getLogin(), passwordMd5, (DbPlatypusPrincipal principal) -> {
+                    DatabasesClient.credentialsToPrincipalWithBasicAuthentication(getServerCore().getDatabasesClient(), getRequest().getLogin(), passwordMd5, (PlatypusPrincipal principal) -> {
                         if (principal != null) {
                             String newSessionId = String.valueOf(IDGenerator.genID());
                             getServerCore().getSessionManager().createSession(principal, newSessionId);
@@ -54,7 +53,7 @@ public class LoginRequestHandler extends CommonRequestHandler<LoginRequest, Logi
                     Session session = getServerCore().getSessionManager().get(sessionId);
                     if (session != null) {
                         session.accessed();
-                        DatabasesClient.credentialsToPrincipalWithBasicAuthentication(getServerCore().getDatabasesClient(), getRequest().getLogin(), passwordMd5, (DbPlatypusPrincipal principal) -> {
+                        DatabasesClient.credentialsToPrincipalWithBasicAuthentication(getServerCore().getDatabasesClient(), getRequest().getLogin(), passwordMd5, (PlatypusPrincipal principal) -> {
                             if (principal != null) {
                                 if (session.getUser().equals(getRequest().getLogin())) {
                                     onSuccess.accept(new LoginRequest.Response(sessionId));

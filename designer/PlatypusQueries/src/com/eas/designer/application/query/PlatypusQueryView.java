@@ -169,7 +169,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
 
         @Override
         public boolean isEnabled() {
-            return dataObject.getClient() != null;
+            return dataObject.getBasesProxy()!= null;
         }
     }
     public static final String PLATYPUS_QUERIES_GROUP_NAME = "PlatypusModel";
@@ -354,7 +354,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                         comboZoom.setSelectedItem(newSelectedZoom);
                     }
                 });
-                tablesSelector.setClient(dataObject.getClient());
+                tablesSelector.setBasesProxy(dataObject.getBasesProxy());
                 setupDiagramToolbar();
                 pnlFromNWhere.add(querySchemeScroll, BorderLayout.CENTER);
                 modelView.addModelSelectionListener(new ModelSelectionListener<QueryEntity>() {
@@ -403,7 +403,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 mnuCut.setText(dbValidatingMissingMessage);
                 mnuCopy.setText(dbValidatingMissingMessage);
                 mnuPaste.setText(dbValidatingMissingMessage);
-                tablesSelector.setClient(null);
+                tablesSelector.setBasesProxy(null);
                 pnlFromNWhere.add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);
             }
         } else {
@@ -414,7 +414,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             mnuCut.setText(clientMissingMessage);
             mnuCopy.setText(clientMissingMessage);
             mnuPaste.setText(clientMissingMessage);
-            tablesSelector.setClient(null);
+            tablesSelector.setBasesProxy(null);
             pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(dataObject.getDatasourceName()), BorderLayout.CENTER);
         }
         revalidate();

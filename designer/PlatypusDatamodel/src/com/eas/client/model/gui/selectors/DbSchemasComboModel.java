@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.utils.DatabaseConnections;
 import java.util.*;
@@ -20,15 +20,15 @@ import org.netbeans.api.db.explorer.DatabaseConnection;
  */
 public class DbSchemasComboModel implements ComboBoxModel<String> {
 
-    protected DbClient client;
+    protected DatabasesClient basesProxy;
     protected String dbId;
     protected String[] schemas = new String[]{};
     protected DbTablesListModel tablesModel;
     protected Set<ListDataListener> listeners = new HashSet<>();
 
-    public DbSchemasComboModel(DbClient aClient, String aDatasourceName, DbTablesListModel aTablesModel) {
+    public DbSchemasComboModel(DatabasesClient aBasesProxy, String aDatasourceName, DbTablesListModel aTablesModel) {
         super();
-        client = aClient;
+        basesProxy = aBasesProxy;
         dbId = aDatasourceName;
         tablesModel = aTablesModel;
         achieveSchemas();

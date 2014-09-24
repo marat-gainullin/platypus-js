@@ -4,9 +4,8 @@
  */
 package com.eas.designer.application.project;
 
-import com.eas.client.AppCache;
-import com.eas.client.DbClient;
-import com.eas.deploy.Deployer;
+import com.eas.client.DatabasesClient;
+import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
 import java.util.concurrent.ExecutionException;
@@ -32,17 +31,15 @@ public interface PlatypusProject extends Project {
         public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName);
     }
 
+    DatabasesClient getBasesProxy();
+    
+    LocalQueriesProxy getQueries();
+    
     boolean isDbConnected(String aDatasourceId);
-
-    DbClient getClient();
-
-    AppCache getAppCache() throws Exception;
 
     void startConnecting2db(String aDatasourceId);
 
     void disconnectFormDb(String aDatasourceId) throws InterruptedException, ExecutionException;
-
-    Deployer getDeployer();
 
     InputOutput getOutputWindowIO();
 

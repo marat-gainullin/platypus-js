@@ -116,6 +116,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         queries = aQueries;
     }
 
+    public QueriesProxy<Q> getQueries() {
+        return queries;
+    }
+
     public void terminateProcess(E aSource, Exception aErrorMessage) {
         if (process != null) {
             if (aErrorMessage != null) {

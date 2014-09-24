@@ -21,15 +21,6 @@ public class IsUserInRoleRequestHandler extends SessionRequestHandler<IsUserInRo
 
     @Override
     protected void handle2(Session aSession, Consumer<IsUserInRoleRequest.Response> onSuccess, Consumer<Exception> onFailure) {
-        try {
-            aSession.getPrincipal().hasRole(getRequest().getRoleName(), (Boolean hasRole) -> {
-                if (onSuccess != null) {
-                    onSuccess.accept(new IsUserInRoleRequest.Response(hasRole));
-                }
-            }, onFailure);
-        } catch (Exception ex) {
-            if(onFailure != null)
-                onFailure.accept(ex);
-        }
+        onSuccess.accept(new IsUserInRoleRequest.Response(aSession.getPrincipal().hasRole(getRequest().getRoleName())));
     }
 }

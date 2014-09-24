@@ -18,6 +18,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.cache.PlatypusIndexer;
 import com.eas.script.ScriptUtils;
 import java.util.Date;
 import java.util.Map;
@@ -35,19 +36,19 @@ import jdk.nashorn.api.scripting.JSObject;
 public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
 
     protected Map<String, ActualCacheEntry<SqlQuery>> entries = new ConcurrentHashMap<>();
-    protected ApplicationSourceIndexer indexer;
+    protected PlatypusIndexer indexer;
     protected StoredQueryFactory factory;
     protected DatabasesClient core;
 
-    public LocalQueriesProxy(DatabasesClient aCore, String aAppPathName) throws Exception {
-        this(aCore, new ApplicationSourceIndexer(aAppPathName));
+    public LocalQueriesProxy(DatabasesClient aBasesProxy, String aAppPathName) throws Exception {
+        this(aBasesProxy, new ApplicationSourceIndexer(aAppPathName));
     }
 
-    public LocalQueriesProxy(DatabasesClient aCore, ApplicationSourceIndexer aIndexer) throws Exception {
+    public LocalQueriesProxy(DatabasesClient aBasesProxy, PlatypusIndexer aIndexer) throws Exception {
         super();
         indexer = aIndexer;
-        factory = new ScriptedQueryFactory(aCore, this, indexer);
-        core = aCore;
+        factory = new ScriptedQueryFactory(aBasesProxy, this, indexer);
+        core = aBasesProxy;
     }
 
     @Override

@@ -4,17 +4,12 @@
  */
 package com.eas.server;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages active sessions.
@@ -33,6 +28,7 @@ public class SessionManager {
 
     /**
      * Creates a new session manager.
+     * @param aServerCore
      */
     public SessionManager(PlatypusServerCore aServerCore) {
         super();

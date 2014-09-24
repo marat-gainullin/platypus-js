@@ -5,6 +5,7 @@
 package com.eas.client.model.gui.selectors;
 
 import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingValidator;
@@ -13,7 +14,6 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.gui.ResultingDialog;
-import com.eas.client.model.gui.view.EntityViewDoubleClickListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.client.model.gui.view.model.DbSchemeModelView;
@@ -55,7 +55,7 @@ public class ModelElementSelector {
      */
     public static final int STRICT_DATASOURCE_PARAMETER_SELECTION_SUBJECT = 5;
 
-    public static <E extends Entity<?, ?, E>> ModelElementRef selectDatamodelElement(final Model<E, ?, ?, ?> aModel, final ModelElementRef aOldValue, int selectionSubject, ModelElementValidator aValidator, Component aParentComponent, String aTitle) {
+    public static <E extends Entity<?, SqlQuery, E>> ModelElementRef selectDatamodelElement(final Model<E, ?, ?> aModel, final ModelElementRef aOldValue, int selectionSubject, ModelElementValidator aValidator, Component aParentComponent, String aTitle) {
         if (aModel != null) {
             final ModelElementRef selected = new ModelElementRef();
             ResultingDialog dlg = prepareDialog(aModel, aTitle, selected, selectionSubject, aValidator, aOldValue, null);
@@ -67,7 +67,7 @@ public class ModelElementSelector {
         return null;
     }
 
-    public static <E extends Entity<?, ?, E>> ResultingDialog prepareDialog(final Model<E, ?, ?, ?> aModel, String aTitle, ModelElementRef trackSubject, int selectionSubject, ModelElementValidator aValidator, final ModelElementRef aOldValue, ActionListener aOkActionListener) {
+    public static <E extends Entity<?, SqlQuery, E>> ResultingDialog prepareDialog(final Model<E, ?, ?> aModel, String aTitle, ModelElementRef trackSubject, int selectionSubject, ModelElementValidator aValidator, final ModelElementRef aOldValue, ActionListener aOkActionListener) {
         ModelView<E, ?, ?> mView = null;
         if (aModel instanceof ApplicationDbModel) {
             mView = (ModelView<E, ?, ?>) new ApplicationModelView((ApplicationDbModel) aModel, null, null, null);
@@ -81,18 +81,15 @@ public class ModelElementSelector {
         scroll.setViewportView(mView);
         scroll.setPreferredSize(new Dimension(550, 500));
         final ResultingDialog dlg = new ResultingDialog(aOkActionListener, null, aTitle, scroll);
-        mView.addModelSelectionListener(new ModelElementRefSelectionValidator<E>(trackSubject, dlg.getOkAction(), selectionSubject, aValidator));
+        mView.addModelSelectionListener(new ModelElementRefSelectionValidator<>(trackSubject, dlg.getOkAction(), selectionSubject, aValidator));
         dlg.setSize(650, 600);
         dlg.getOkAction().setEnabled(false);
-        mView.addEntityViewDoubleClickListener(new EntityViewDoubleClickListener<E>() {
-            @Override
-            public void clicked(EntityView<E> eView, boolean fieldsClicked, boolean paramsClicked) {
-                if (dlg.getOkAction().isEnabled()) {
-                    dlg.getOkAction().actionPerformed(null);
-                }
+        mView.addEntityViewDoubleClickListener((EntityView<E> eView, boolean fieldsClicked, boolean paramsClicked) -> {
+            if (dlg.getOkAction().isEnabled()) {
+                dlg.getOkAction().actionPerformed(null);
             }
         });
-        dlg.addWindowListener(new Positioner<>(aOldValue, aModel, mView));
+        dlg.addWindowListener(new Positioner<E>(aOldValue, aModel, mView));
         return dlg;
     }
     /*
@@ -107,14 +104,14 @@ public class ModelElementSelector {
      }
      */
 
-    private static class Positioner<E extends Entity<?, ?, E>> extends WindowAdapter {
+    private static class Positioner<E extends Entity<?, SqlQuery, E>> extends WindowAdapter {
 
         private final ModelElementRef oldValue;
-        private final Model<E, ?, ?, ?> model;
+        private final Model<E, ?, ?> model;
         private final ModelView<E, ?, ?> mView;
         private final ModelEditingValidator<E> stopper = new ModelEditingStopper<>();
 
-        public Positioner(ModelElementRef aOldValue, Model<E, ?, ?, ?> aModel, ModelView<E, ?, ?> aMView) {
+        public Positioner(ModelElementRef aOldValue, Model<E, ?, ?> aModel, ModelView<E, ?, ?> aMView) {
             super();
             oldValue = aOldValue;
             model = aModel;

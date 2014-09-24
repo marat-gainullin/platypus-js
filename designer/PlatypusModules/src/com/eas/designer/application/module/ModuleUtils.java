@@ -26,7 +26,7 @@ public class ModuleUtils {
     
     private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
     private static final Class[] apiClasses = {
-        com.eas.client.scripts.PlatypusScriptedResource.class
+        com.eas.client.scripts.ScriptedResource.class
     };
 
     static {

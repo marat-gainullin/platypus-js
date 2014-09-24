@@ -5,7 +5,7 @@
 package com.eas.client;
 
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryModel;
@@ -50,7 +50,7 @@ public class StoredQueryFactory {
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
     private DatabasesClient basesProxy;
-    private ApplicationSourceIndexer indexer;
+    private PlatypusIndexer indexer;
     private boolean preserveDatasources;
 
     public void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
@@ -108,8 +108,7 @@ public class StoredQueryFactory {
         }
         Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
         AppElementFiles queryFiles = indexer.nameToFiles(aAppElementId);
-        SqlQuery res = filesToSqlQuery(aAppElementId, queryFiles);
-        return res;
+        return queryFiles != null ? filesToSqlQuery(aAppElementId, queryFiles) : null;
     }
 
     protected SqlQuery filesToSqlQuery(String aName, AppElementFiles aFiles) throws Exception {
@@ -152,7 +151,7 @@ public class StoredQueryFactory {
      * @throws java.lang.Exception
      * @see DbClientIntf
      */
-    public StoredQueryFactory(DatabasesClient aBasesProxy, ApplicationSourceIndexer aIndexer) throws Exception {
+    public StoredQueryFactory(DatabasesClient aBasesProxy, PlatypusIndexer aIndexer) throws Exception {
         super();
         basesProxy = aBasesProxy;
         indexer = aIndexer;
@@ -161,7 +160,7 @@ public class StoredQueryFactory {
     /**
      * Constructs factory for stored in appliction database queries;
      *
-     * @param aClient ClientIntf instance, responsible for interacting with
+     * @param aBasesProxy ClientIntf instance, responsible for interacting with
      * appliction database.
      * @param aIndexer
      * @param aPreserveDatasources If true, aliased names of tables
@@ -170,8 +169,8 @@ public class StoredQueryFactory {
      * setted to resulting fields.
      * @throws java.lang.Exception
      */
-    public StoredQueryFactory(DatabasesClient aClient, ApplicationSourceIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        this(aClient, aIndexer);
+    public StoredQueryFactory(DatabasesClient aBasesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
+        this(aBasesProxy, aIndexer);
         preserveDatasources = aPreserveDatasources;
     }
 
@@ -393,20 +392,20 @@ public class StoredQueryFactory {
      * query fields if <code>aTablyName</code> is query tably name in format:
      * #&lt;id&gt;.
      *
-     * @param aDbId Database identifier, the query belongs to. That database is
+     * @param aDatasourceName Database identifier, the query belongs to. That database is
      * query-inner table metadata source, but query is stored in application.
      * @param aTablyName Table or query tably name.
      * @return Fields instance.
      * @throws Exception
      */
-    protected Fields getTablyFields(String aDbId, String aTablyName) throws Exception {
+    protected Fields getTablyFields(String aDatasourceName, String aTablyName) throws Exception {
         Fields tableFields;
         if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {// strong reference to stored subquery
             tableFields = null;
             aTablyName = aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length());
         } else {// soft reference to table or a stored subquery.
             try {
-                tableFields = basesProxy.getDbMetadataCache(aDbId).getTableMetadata(aTablyName);
+                tableFields = basesProxy.getDbMetadataCache(aDatasourceName).getTableMetadata(aTablyName);
             } catch (Exception ex) {
                 tableFields = null;
             }

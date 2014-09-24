@@ -6,12 +6,10 @@ package com.bearsoft.org.netbeans.modules.form.editors;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.DbClient;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.ModelEntityParameterRef;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.gui.selectors.ModelElementSelector;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,7 @@ public class ModelEntityParameterRefEditor extends ModelElementRefEditor {
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
             element = lookupGridOrMapLayerRowsSource(element);
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
                 if (elementEntity != null && elementEntity.getQuery() != null) {
@@ -63,7 +61,7 @@ public class ModelEntityParameterRefEditor extends ModelElementRefEditor {
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
             element = lookupGridOrMapLayerRowsSource(element);
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
                 if (elementEntity != null && elementEntity.getQuery() != null) {

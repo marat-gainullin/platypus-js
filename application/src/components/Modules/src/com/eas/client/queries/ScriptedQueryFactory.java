@@ -9,9 +9,7 @@ package com.eas.client.queries;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
-import static com.eas.client.StoredQueryFactory.COLON;
-import static com.eas.client.StoredQueryFactory._Q;
-import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.model.Relation;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
@@ -28,12 +26,12 @@ public class ScriptedQueryFactory extends StoredQueryFactory{
 
     private final LocalQueriesProxy subQueriesProxy;
     
-    public ScriptedQueryFactory(DatabasesClient aClient, LocalQueriesProxy aQueriesProxy, ApplicationSourceIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
+    public ScriptedQueryFactory(DatabasesClient aClient, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
         super(aClient, aIndexer, aPreserveDatasources);
         subQueriesProxy = aQueriesProxy;
     }
 
-    public ScriptedQueryFactory(DatabasesClient aClient, LocalQueriesProxy aQueriesProxy, ApplicationSourceIndexer aIndexer) throws Exception {
+    public ScriptedQueryFactory(DatabasesClient aClient, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
         super(aClient, aIndexer);
         subQueriesProxy = aQueriesProxy;
     }

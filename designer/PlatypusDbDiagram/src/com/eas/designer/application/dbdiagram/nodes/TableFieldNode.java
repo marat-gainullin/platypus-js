@@ -7,7 +7,7 @@ package com.eas.designer.application.dbdiagram.nodes;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
@@ -130,7 +130,7 @@ public class TableFieldNode extends FieldNode {
             newContent.setTypeInfo(DataTypeInfo.valueOf(val));
             //
             DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
-            DbClient client = model.getClient();
+            DatabasesClient client = model.getBasesProxy();
             String dbId = model.getDbId();
             SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
             driver.getTypesResolver().resolve2RDBMS(newContent);
@@ -181,7 +181,7 @@ public class TableFieldNode extends FieldNode {
                 section.addEdit(diagramEdit);
                 section.end();
                 try {
-                    getEntity().getModel().getClient().dbTableChanged(getEntity().getTableDbId(), getEntity().getTableSchemaName(), getEntity().getTableName());
+                    sqlActionsController.getBasesProxy().dbTableChanged(getEntity().getTableDatasourceName(), getEntity().getTableSchemaName(), getEntity().getTableName());
                 } catch (Exception ex) {
                     Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, null, ex); //NOI18N
                 }

@@ -87,7 +87,10 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     public void validateQuery() throws Exception {
         if (query == null) {
             if (queryName != null) {
-                query = model.queries.getCachedQuery(queryName);
+                PlatypusQuery q = model.queries.getCachedQuery(queryName);
+                if (q != null) {
+                    query = q.copy();
+                }
             } else {
                 throw new IllegalStateException("Only managed queries are allowed in three-tier mode!");
             }

@@ -4,9 +4,9 @@
  */
 package com.eas.designer.explorer.model.windows;
 
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.gui.view.model.ModelView;
-import com.eas.client.queries.SqlQuery;
 import java.awt.event.ActionEvent;
 import java.util.Set;
 import javax.swing.AbstractAction;

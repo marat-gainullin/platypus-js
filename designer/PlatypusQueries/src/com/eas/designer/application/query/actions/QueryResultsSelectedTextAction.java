@@ -33,7 +33,7 @@ public final class QueryResultsSelectedTextAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ev) {
         try {
-            if (context.getClient() != null) {
+            if (context.getBasesProxy() != null) {
                 OpenedPaneEditorCookie ec = context.getLookup().lookup(OpenedPaneEditorCookie.class);
                 if (ec != null && ec.getOpenedPane() != null) {
                     String selectedText = ec.getOpenedPane().getSelectedText();

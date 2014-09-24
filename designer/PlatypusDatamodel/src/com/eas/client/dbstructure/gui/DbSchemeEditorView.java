@@ -56,9 +56,9 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         assert modelView != null;
         Collection<EntityView<FieldsEntity>> eViews = modelView.getViews();
         if (eViews != null) {
-            for (EntityView<FieldsEntity> eView : eViews) {
+            eViews.stream().forEach((eView) -> {
                 checkFkDragHandler(eView);
-            }
+            });
         }
     }
 
@@ -133,7 +133,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
             if (isEnabled()) {
                 FieldsEntity ent = modelView.getSelectedEntities().iterator().next();
                 if (ent != null && runQueryCallback != null) {
-                    runQueryCallback.runQuery(ent.getModel().getClient(), ent.getTableDbId(), ent.getTableSchemaName(), ent.getTableName());
+                    runQueryCallback.runQuery(ent.getModel().getBasesProxy(), ent.getTableDatasourceName(), ent.getTableSchemaName(), ent.getTableName());
                 }
             }
         }
@@ -538,8 +538,8 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
     public void setModel(DbSchemeModel aModel) throws Exception {
         modelView.setModel(aModel);
         if (aModel != null) {
-            sqlController.setClient(aModel.getClient());
-            sqlController.setDbId(aModel.getDbId());
+            sqlController.setBasesProxy(aModel.getBasesProxy());
+            sqlController.setDatasourceName(aModel.getDbId());
             sqlController.setSchema(aModel.getSchema());
         }
     }

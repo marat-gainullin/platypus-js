@@ -5,7 +5,7 @@
 package com.eas.client.dbstructure.gui.edits;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
@@ -75,7 +75,7 @@ public class NewFieldEdit extends DbStructureEdit {
             rsmd.setSize(100);
         }
         rsmd.setTableName(aEntity.getTableName());
-        DbClient client = aEntity.getModel().getClient();
+        DatabasesClient client = aEntity.getModel().getBasesProxy();
         String dbId = aEntity.getModel().getDbId();
         SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
         driver.getTypesResolver().resolve2RDBMS(rsmd);

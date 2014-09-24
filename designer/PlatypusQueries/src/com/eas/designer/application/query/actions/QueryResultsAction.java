@@ -40,7 +40,7 @@ public final class QueryResultsAction implements ActionListener {
 
     public static void runQuery(PlatypusQueryDataObject dataObject) {
         try {
-            if (dataObject.getClient() != null) {
+            if (dataObject.getBasesProxy() != null) {
                 openQueryResultsView(new QueryResultsView(dataObject));
             } else {
                 DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(NbBundle.getMessage(QueryResultsAction.class, "LBL_CantQueryWithoutClient"), NotifyDescriptor.WARNING_MESSAGE));

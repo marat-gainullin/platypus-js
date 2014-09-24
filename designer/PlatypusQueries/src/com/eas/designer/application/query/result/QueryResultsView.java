@@ -16,13 +16,12 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.DatabasesClient;
-import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
+import com.eas.client.SqlQuery;
+import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.Relation;
-import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.queries.SqlQuery;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
@@ -71,7 +70,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private final PlatypusQueryDataObject queryDataObject;
     private QuerySetupView querySetupView;
     private DbGrid dbGrid;
-    private final DbClient client;
+    private final DatabasesClient client;
     private String queryText;
     private Parameters parameters;
     private ApplicationDbModel model;
@@ -95,11 +94,11 @@ public class QueryResultsView extends javax.swing.JPanel {
         initPageSizes();
         initCopyMessage();
         queryDataObject = aQueryDataObject;
-        client = aQueryDataObject.getClient();
+        client = aQueryDataObject.getBasesProxy();
         dbId = queryDataObject.getDatasourceName();
         String storedQueryText = queryDataObject.getSqlTextDocument().getText(0, queryDataObject.getSqlTextDocument().getLength());
         String storedDialectQueryText = queryDataObject.getSqlFullTextDocument().getText(0, queryDataObject.getSqlFullTextDocument().getLength());
-        StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache());
+        StoredQueryFactory factory = new StoredQueryFactory(client, null);
         queryText = factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, queryDataObject.getModel());
         parameters = queryDataObject.getModel().getParameters();
         setName(queryDataObject.getName());
@@ -111,12 +110,12 @@ public class QueryResultsView extends javax.swing.JPanel {
         }
     }
 
-    public QueryResultsView(DbClient aClient, String aDbId, String aSchemaName, String aTableName) throws Exception {
+    public QueryResultsView(DatabasesClient aBasesProxy, String aDbId, String aSchemaName, String aTableName) throws Exception {
         initComponents();
         initPageSizes();
         initCopyMessage();
         queryDataObject = null;
-        client = aClient;
+        client = aBasesProxy;
         queryText = String.format(SQLUtils.TABLE_NAME_2_SQL, getTableName(aSchemaName, aTableName)); //NOI18N
         dbId = aDbId;
         parameters = new Parameters();
@@ -130,7 +129,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         initPageSizes();
         initCopyMessage();
         queryDataObject = aQueryDataObject;
-        client = aQueryDataObject.getClient();
+        client = aQueryDataObject.getBasesProxy();
         queryText = aQueryText;
         parseParameters();
         setName(getGeneratedTitle());
@@ -169,7 +168,7 @@ public class QueryResultsView extends javax.swing.JPanel {
      * @throws Exception
      */
     private boolean initModel() throws Exception {
-        model = new ApplicationDbModel(client);
+        model = new ApplicationDbModel(client, null);
         model.setParameters(parameters);
         setupQueryEntityBySql();
         setModelRelations();
@@ -177,7 +176,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         if (queryEntity.getQuery().isCommand()) {
             queryEntity.getQuery().setManual(true);
             model.requery();
-            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
+            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile(), null, null);
             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
             return false;
         } else {
@@ -200,11 +199,11 @@ public class QueryResultsView extends javax.swing.JPanel {
         for (Field p : parameters.toCollection()) {
             query.getParameters().add(p.copy());
         }
-        queryEntity.setQueryId(entityId);
+        queryEntity.setQueryName(entityId);
         queryEntity.setQuery(query);
         model.addEntity(queryEntity);
         try {
-            StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache(), false);
+            StoredQueryFactory factory = new StoredQueryFactory(client, null, false);
             query.setCommand(!factory.putTableFieldsMetadata(query));
             enableCommitQueryButton(!query.isCommand());
             enableNextPageButton(!query.isCommand());
@@ -433,7 +432,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                     ph.start();
                     try {
                         if (queryEntity.getQuery().isCommand()) {
-                            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
+                            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile(), null, null);
                             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
                         } else {
                             model.requery();
@@ -453,40 +452,18 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
         try {
             if (model != null && model.isModified()) {
-                RequestProcessor.getDefault().execute(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
-                                ph.start();
-                                try {
-                                    assert model.getClient() instanceof DatabasesClient;
-                                    DatabasesClient client = (DatabasesClient) model.getClient();
-                                    final StoredQueryFactory qFactory = client.getQueryFactory();
-                                    client.setQueryFactory(new StoredQueryFactory(client, client.getAppCache(), false) {
-                                        @Override
-                                        public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
-                                            if (entityId.equals(aAppElementId)) {
-                                                return queryEntity.getQuery();
-                                            } else {
-                                                return qFactory.getQuery(aAppElementId, aCopy);
-                                            }
-                                        }
-                                    });
-                                    try {
-                                        model.save();
-                                        showWarning(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
-                                    } finally {
-                                        client.setQueryFactory(qFactory);
-                                    }
-                                } catch (Exception ex) {
-                                    showInfo(ex.getMessage()); //NO1I18N
-                                } finally {
-                                    ph.finish();
-                                }
-                            }
-                        });
-
+                RequestProcessor.getDefault().execute(() -> {
+                    final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
+                    ph.start();
+                    try {
+                        model.save();
+                        showWarning(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
+                    } catch (Exception ex) {
+                        showInfo(ex.getMessage()); //NO1I18N
+                    } finally {
+                        ph.finish();
+                    }
+                });
             }
         } catch (Exception ex) {
             logger.log(Level.SEVERE, null, ex);
@@ -496,7 +473,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void nextPageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextPageButtonActionPerformed
         if (model != null && queryEntity != null) {
             try {
-                queryEntity.getRowset().nextPage();
+                queryEntity.getRowset().nextPage(null, null);
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -745,11 +722,11 @@ public class QueryResultsView extends javax.swing.JPanel {
             private String askFieldValue(Field field) {
                 NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
                         field.isFk()
-                        ? NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue")
-                        : NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"),
+                                ? NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue")
+                                : NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"),
                         field.isFk()
-                        ? String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName())
-                        : String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
+                                ? String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName())
+                                : String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
                 Object oAnswer = DialogDisplayer.getDefault().notify(input);
                 String sAnswer = input.getInputText();
                 if (oAnswer == NotifyDescriptor.OK_OPTION) {

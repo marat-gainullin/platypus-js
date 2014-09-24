@@ -4,7 +4,7 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.eas.client.DbClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.gui.IconCache;
@@ -24,7 +24,7 @@ import org.openide.util.ImageUtilities;
 /**
  * @author mg
  */
-public class ModelNode<E extends Entity<?, ?, E>, M extends Model<E, ?, DbClient, ?>> extends AbstractNode {
+public class ModelNode<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends AbstractNode {
 
     protected static final String DATAMODEL_ICON_NAME = "datamodel16.png"; //NOI18N
     protected DataObject dataObject;

@@ -43,18 +43,15 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String UNKNOWN_REQUEST_MSG = "Unknown http request has arrived. It's type is %d";
     public static final String REQUEST_PROCESSSING_ERROR_MSG = "Request processsing error";
     public static final String SUCCESS_JSON = "{\"success\": \"true\"}";
-    //public static final String ID = "id";
-    //public static final String JACC_ERROR_MSG = "JACC exception when getting current subject";
-    //public static final String QUERY_PARAMS = "queryParams";
-    //public static final String ERROR_JSON = "{\"success\": \"false\", \"error\": \"%s\", \"accessControl\": \"%s\", \"sqlstate\": \"%s\", \"sqlcode\": \"%s\"}";
     public static final String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
     public static final String HTTP_HOST_OBJECT_NAME = "http";
     public static final String EXCEL_CONTENT_TYPE = "application/xls";
     public static final String EXCELX_CONTENT_TYPE = "application/xlsx";
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
+    private static final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
+    private static final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<>();
     private PlatypusServerCore serverCore;
-    private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -128,42 +125,37 @@ public class PlatypusHttpServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkUpload(request, response)) {
             if (serverCore != null) {
-                serverCore.getCurrentRequest().set(request);
-                serverCore.getCurrentResponse().set(response);
-                try {
-                    HttpSession httpSession = request.getSession(true);
-                    if (httpSession != null) {
-                        SessionManager sessionManager = serverCore.getSessionManager();
-                        Session session;
-                        synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is on the same point
-                            String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
-                            if (platypusSessionId == null) {
-                                platypusSessionId = httpSession.getId();
-                            }
-                            session = sessionManager.getOrCreateSession(getPrincipal(request), platypusSessionId);
-                            httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
-                            httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, serverCore);
+                HttpSession httpSession = request.getSession(true);
+                if (httpSession != null) {
+                    SessionManager sessionManager = serverCore.getSessionManager();
+                    Session session;
+                    synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is on the same point
+                        String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
+                        if (platypusSessionId == null) {
+                            platypusSessionId = httpSession.getId();
                         }
-                        assert session != null : "Platypus session missing";
-                        session.setPrincipal(getPrincipal(request));
-                        // Thread-local current session setting. 
-                        // Thus, all code, executed under current principal (java or js code) can be authorized.
-                        sessionManager.setCurrentSession(session);
-                        try {
-                            processPlatypusRequest(request, response, session, httpSession);
-                        } finally {
-                            // Revoke current session to avoid ANY session/memory leak.
-                            sessionManager.setCurrentSession(null);
-                        }
+                        session = sessionManager.getOrCreateSession(getPrincipal(request), platypusSessionId);
+                        httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
+                        httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, serverCore);
                     }
-                } catch (Exception ex) {
-                    throw new ServletException(ex);
-                } finally {
-                    serverCore.getCurrentRequest().set(null);
-                    serverCore.getCurrentResponse().set(null);
+                    assert session != null : "Platypus session missing";
+                    session.setPrincipal(getPrincipal(request));
+                    // Thread-local current session setting. 
+                    // Thus, all code, executed under current principal (java or js code) can be authorized.
+                    currentRequest.set(request);
+                    currentResponse.set(response);
+                    sessionManager.setCurrentSession(session);
+                    try {
+                        processPlatypusRequest(request, response, session, httpSession);
+                    } finally {
+                        // Revoke current session to avoid ANY session/memory leak.
+                        sessionManager.setCurrentSession(null);
+                        currentRequest.remove();
+                        currentResponse.remove();
+                    }
                 }
             } else {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, CORE_MISSING_MSG);
@@ -173,7 +165,7 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     private PlatypusPrincipal getPrincipal(final HttpServletRequest aRequest) {
         if (aRequest.getUserPrincipal() != null) {
-            return new WebPlatypusPrincipal(aRequest.getUserPrincipal().getName(), serverCore);
+            return new WebPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aRequest);
         } else {
             return new AnonymousPlatypusPrincipal(aRequest.getSession().getId());
         }
@@ -183,13 +175,22 @@ public class PlatypusHttpServlet extends HttpServlet {
         return serverCore;
     }
 
-    public HttpServletRequest getCurrentRequest() {
+    /**
+     * @return The currentRequest
+     */
+    public static HttpServletRequest getCurrentRequest() {
         return currentRequest.get();
     }
 
     /**
-     * Precesses request for both PlatypusAPI requests and "Platypus protocol
-     * over http" requests.
+     * @return The currentResponse
+     */
+    public static HttpServletResponse getCurrentResponse() {
+        return currentResponse.get();
+    }
+
+    /**
+     * Precesses request for PlatypusAPI requests.
      *
      * @param aHttpRequest
      * @param aPlatypusSession
@@ -261,7 +262,11 @@ public class PlatypusHttpServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (Exception ex) {
+            throw new ServletException(ex);
+        }
     }
 
     /**
@@ -275,7 +280,11 @@ public class PlatypusHttpServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (Exception ex) {
+            throw new ServletException(ex);
+        }
     }
 
     /**

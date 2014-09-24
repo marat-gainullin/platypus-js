@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * DbSchemeSettingsVisualPanel.java
  *
  * Created on 25.03.2011, 11:54:03
@@ -46,7 +41,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     }
 
     public String getDefaultSchema() throws Exception {
-        return panel.getProject().getClient().getConnectionSchema(datasourceName);
+        return panel.getProject().getBasesProxy().getConnectionSchema(datasourceName);
     }
 
     private boolean refreshingControls;

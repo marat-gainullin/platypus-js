@@ -234,10 +234,6 @@ public class PlatypusProjectView implements LogicalViewProvider {
             actions.add(ProjectSensitiveActions.projectCommandAction(ActionProvider.COMMAND_DEBUG,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_DebugAction_Name"), null)); // NOI18N
             actions.add(null);
-            actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_DEPLOY,
-                    NbBundle.getMessage(PlatypusProjectView.class, "LBL_DeployAction_Name"), null)); // NOI18N
-            actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_IMPORT,
-                    NbBundle.getMessage(PlatypusProjectView.class, "LBL_ImportAction_Name"), null)); // NOI18N
             actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_CONNECT,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_ConnectToDbAction_Name"), null)); // NOI18N
             actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_DISCONNECT,

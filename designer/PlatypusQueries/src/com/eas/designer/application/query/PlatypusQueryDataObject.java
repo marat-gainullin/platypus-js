@@ -10,22 +10,21 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.SqlQuery;
+import com.eas.client.StoredQueryFactory;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.ModelEditingListener;
+import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.Relation;
-import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.QueryDocument2XmlDom;
-import com.eas.client.model.store.XmlDom2QueryDocument;
 import com.eas.client.model.store.XmlDom2QueryModel;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
@@ -246,7 +245,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             dialectText = dialectEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
         }
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
-        model = XmlDom2QueryModel.transform(getClient(), modelDoc);
+        model = XmlDom2QueryModel.transform(getBasesProxy(), modelDoc);
 
         model.addEditingListener(modelChangesObserver);
         model.getParametersEntity().getChangeSupport().addPropertyChangeListener(modelChangesObserver);
@@ -261,7 +260,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
         }
 
-        datasourceName = model.getDbId();
+        datasourceName = model.getDatasourceName();
         publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
         manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
@@ -334,7 +333,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         if (hintsContent != null && !hintsContent.isEmpty()) {
             Document fieldsHintsDoc = Source2XmlDom.transform(hintsContent);
             if (fieldsHintsDoc != null) {
-                outputFieldsHints = XmlDom2QueryDocument.parseFieldsHintsTag(fieldsHintsDoc.getDocumentElement());
+                outputFieldsHints = QueryDocument.parseFieldsHintsTag(fieldsHintsDoc.getDocumentElement());
             } else {
                 outputFieldsHints = new ArrayList<>();
             }
@@ -371,9 +370,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             model.setDbId(aValue);
         }
         firePropertyChange(CONN_PROP_NAME, oldValue, aValue);
-        if (getClient() != null) {
-            getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
-        }
     }
 
     public boolean isPublic() {
@@ -625,14 +621,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             write2File(outEntry.getFile(), XmlDom2String.transform(outHintsDocument));
             outputFieldsHintsModified = false;
         }
-        if (getClient() != null) {
-            unsignFromQueries();
-            try {
-                getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
-            } finally {
-                resignOnQueries();
-            }
-        }
     }
 
     private void write2File(FileObject aFile, String aContent) throws Exception {
@@ -647,13 +635,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected void handleDelete() throws IOException {
         String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
         super.handleDelete();
-        if (getClient() != null) {
-            try {
-                getClient().appEntityChanged(oldId);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
-        }
     }
 
     public Statement getCommitedStatement() {
@@ -689,13 +670,13 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     public Set<String> achieveSchemas() throws Exception {
         Set<String> schemas = new HashSet<>();
-        DbClient client = getClient();
-        if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(datasourceName);
+        DatabasesClient basesProxy = getBasesProxy();
+        if (basesProxy != null) {
+            DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
             SqlDriver driver = mdCache.getConnectionDriver();
             String sql4Schemas = driver.getSql4SchemasEnumeration();
-            SqlCompiledQuery schemasQuery = new SqlCompiledQuery(client, datasourceName, sql4Schemas);
-            Rowset schemasRowset = schemasQuery.executeQuery();
+            SqlCompiledQuery schemasQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Schemas);
+            Rowset schemasRowset = schemasQuery.executeQuery(null, null);
             int schemaColIndex = schemasRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
             schemasRowset.beforeFirst();
             while (schemasRowset.next()) {
@@ -708,9 +689,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     public Map<String, Fields> achieveTables(String aSchema) throws Exception {
         Map<String, Fields> tables = new HashMap<>();
-        DbClient client = getClient();
-        if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(datasourceName);
+        DatabasesClient basesProxy = getBasesProxy();
+        if (basesProxy != null) {
+            DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
             if (aSchema != null && aSchema.equalsIgnoreCase(mdCache.getConnectionSchema())) {
                 aSchema = null;
             }
@@ -719,8 +700,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             }
             SqlDriver driver = mdCache.getConnectionDriver();
             String sql4Tables = driver.getSql4TablesEnumeration(aSchema != null ? aSchema : mdCache.getConnectionSchema());
-            SqlCompiledQuery tablesQuery = new SqlCompiledQuery(client, datasourceName, sql4Tables);
-            Rowset tablesRowset = tablesQuery.executeQuery();
+            SqlCompiledQuery tablesQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
+            Rowset tablesRowset = tablesQuery.executeQuery(null, null);
             //int schemaColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
             int tableColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
             tablesRowset.beforeFirst();
@@ -733,13 +714,13 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return tables;
     }
 
-    public DbMetadataCache getMetadataCache() throws Exception {
-        DbClient client = getClient();
-        return client != null ? client.getDbMetadataCache(datasourceName) : null;
+    public DatabaseMdCache getMetadataCache() throws Exception {
+        DatabasesClient basesProxy = getBasesProxy();
+        return basesProxy != null ? basesProxy.getDbMetadataCache(datasourceName) : null;
     }
 
     private void validateStatement() throws Exception {
-        DbMetadataCache mdCache = getMetadataCache();
+        DatabaseMdCache mdCache = getMetadataCache();
         if (mdCache != null) {
             Map<String, Table> tables = TablesFinder.getTablesMap(TO_CASE.LOWER, statement, true);
             for (Table table : tables.values()) {
@@ -768,17 +749,17 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
      */
     public void refreshOutputFields() {
         Fields oldValue = outputFields;
-        DbClient client = getClient();
+        DatabasesClient basesProxy = getBasesProxy();
         String s = null;
         try {
             s = sqlTextDocument.getText(0, sqlTextDocument.getLength());
         } catch (BadLocationException ex) {
             ErrorManager.getDefault().log(ex.getMessage());
         }
-        if (statementError == null && client != null && s != null && !s.isEmpty()) {
+        if (statementError == null && basesProxy != null && s != null && !s.isEmpty()) {
             try {
-                StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache(), true);
-                SqlQuery outQuery = new SqlQuery(client, datasourceName, s);
+                StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, true);
+                SqlQuery outQuery = new SqlQuery(basesProxy, datasourceName, s);
                 outQuery.setEntityId(String.valueOf(IDGenerator.genID()));
                 factory.putTableFieldsMetadata(outQuery);
                 outputFields = outQuery.getFields();
@@ -799,12 +780,12 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         firePropertyChange(OUTPUT_FIELDS, aOldValue, aNewValue);
     }
 
-    public boolean existsAppQuery(String aStoreQueryName) {
+    public boolean existsAppQuery(String aStoredQueryName) {
         PlatypusProject project = getProject();
         if (project != null) {
             try {
-                ApplicationElement appElement = project.getAppCache().get(aStoreQueryName);
-                return appElement != null && appElement.getType() == ClientConstants.ET_QUERY;
+                FileObject sqlFile = IndexerQuery.appElementId2File(project, aStoredQueryName);
+                return sqlFile != null && sqlFile.isValid();
             } catch (Exception ex) {
                 return false;
             }
@@ -828,7 +809,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     }
 
     public boolean validateTableName(String aTablyName) throws Exception {
-        DbMetadataCache mdCache = getMetadataCache();
+        DatabaseMdCache mdCache = getMetadataCache();
         if (mdCache != null) {
             boolean containsTableMetadata;
             try {

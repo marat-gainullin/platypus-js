@@ -15,7 +15,6 @@ import com.eas.script.ScriptFunction;
 public abstract class Change implements HasPublished {
 
     public String entityId;
-    public boolean trusted;
     public boolean consumed;
     //
     

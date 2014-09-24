@@ -13,6 +13,4 @@ import com.bearsoft.rowset.metadata.Field;
 public interface EntitiesHost {
 
     public Field resolveField(String aEntityId, String aFieldName) throws Exception;
-
-    public void checkRights(String aEntityId) throws Exception;
 }

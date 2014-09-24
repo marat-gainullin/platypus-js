@@ -4,7 +4,7 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.eas.client.DbClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingListener;
@@ -23,7 +23,7 @@ import org.openide.util.Lookup;
  *
  * @author mg
  */
-public abstract class ModelNodeChildren<E extends Entity<?, ?, E>, MV extends Model<E, ?, DbClient, ?>> extends Children.Keys<Object> implements ModelEditingListener<E> {
+public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV extends Model<E, ?, SqlQuery>> extends Children.Keys<Object> implements ModelEditingListener<E> {
 
     protected MV model;
     protected NodePropertiesUndoRecorder undoRecordrer;

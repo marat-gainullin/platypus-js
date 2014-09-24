@@ -42,13 +42,13 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
     @Override
     protected TableRef prepareTableRef4Selection() {
         TableRef tr = new TableRef();
-        tr.dbId = model.getDbId();
+        tr.dbId = model.getDatasourceName();
         return tr;
     }
 
     @Override
     protected QueryModel transformDocToModel(Document aDoc) throws Exception {
-        return XmlDom2QueryModel.transform(model.getClient(), aDoc);
+        return XmlDom2QueryModel.transform(model.getBasesProxy(), aDoc);
     }
 
     @Override
@@ -62,15 +62,15 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
     }
 
     @Override
-    public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
-        if (aApplicationElementId != null && model != null) {
+    public void doAddQuery(String aAppElementName, int aX, int aY) throws Exception {
+        if (aAppElementName != null && model != null) {
             Rectangle rect = findPlaceForEntityAdd(aX, aY);
             QueryEntity entity = model.newGenericEntity();
             entity.setX(rect.x);
             entity.setY(rect.y);
             entity.setWidth(rect.width);
             entity.setHeight(rect.height);
-            entity.setQueryId(aApplicationElementId);            
+            entity.setQueryName(aAppElementName);            
             NewEntityEdit edit = new NewEntityEdit(model, entity);
             edit.redo();
             undoSupport.postEdit(edit);
@@ -95,7 +95,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
 
     @Override
     protected QueryModel newModelInstance() {
-        return new QueryModel(model.getClient());
+        return new QueryModel(model.getBasesProxy());
     }
 
     protected final void putAddQueryAction() {

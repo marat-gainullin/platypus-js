@@ -8,10 +8,10 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.dbscheme.DbSchemeModel;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,29 +26,29 @@ import java.util.logging.Logger;
  */
 public class SqlActionsController {
 
-    protected DbClient client;
-    protected String dbId;
+    protected DatabasesClient basesProxy;
+    protected String datasourceName;
     protected String schema;
 
-    public SqlActionsController(DbSchemeModel aSchemeModel) throws Exception {
+    public SqlActionsController(DbSchemeModel aModel) throws Exception {
         super();
-        if (aSchemeModel != null) {
-            client = aSchemeModel.getClient();
-            dbId = aSchemeModel.getDbId();
-            schema = aSchemeModel.getSchema();
+        if (aModel != null) {
+            basesProxy = aModel.getBasesProxy();
+            datasourceName = aModel.getDbId();
+            schema = aModel.getSchema();
         }
     }
 
-    public String getDbId() {
-        return dbId;
+    public String getDatasourceName() {
+        return datasourceName;
     }
 
     public String getSchema() {
         return schema;
     }
 
-    public void setDbId(String aDbId) {
-        dbId = aDbId;
+    public void setDatasourceName(String aValue) {
+        datasourceName = aValue;
     }
 
     public void setSchema(String aSchema) {
@@ -107,12 +107,12 @@ public class SqlActionsController {
         return new DescribeFieldAction(aTableName, aFieldName, aDescription);
     }
 
-    public DbClient getClient() {
-        return client;
+    public DatabasesClient getBasesProxy() {
+        return basesProxy;
     }
 
-    public void setClient(DbClient aClient) {
-        client = aClient;
+    public void setBasesProxy(DatabasesClient aBasesProxy) {
+        basesProxy = aBasesProxy;
     }
 
     public abstract class SqlAction {
@@ -140,10 +140,10 @@ public class SqlActionsController {
         public boolean execute() {
             try {
                 Map<String, List<Change>> logs = new HashMap<>();
-                logs.put(dbId, doSqlWork());
-                client.commit(logs);
+                logs.put(datasourceName, doSqlWork());
+                basesProxy.commit(logs, null, null);
             } catch (Exception ex) {
-                client.rollback();
+                basesProxy.rollback();
                 parseException(ex);
                 return false;
             }
@@ -151,7 +151,7 @@ public class SqlActionsController {
         }
 
         protected SqlDriver achiveSqlDriver() throws Exception {
-            return client.getDbMetadataCache(dbId).getConnectionDriver();
+            return basesProxy.getDbMetadataCache(datasourceName).getConnectionDriver();
         }
     }
 
@@ -168,7 +168,7 @@ public class SqlActionsController {
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateConstraintClause = driver.getSql4CreateFkConstraint(schema, fk);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateConstraintClause);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateConstraintClause);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -184,7 +184,7 @@ public class SqlActionsController {
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropConstraintClause = driver.getSql4DropFkConstraint(schema, fk);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropConstraintClause);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlDropConstraintClause);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -205,7 +205,7 @@ public class SqlActionsController {
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateTableClause = driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateTableClause);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateTableClause);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -226,7 +226,7 @@ public class SqlActionsController {
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateIndexClause = driver.getSql4CreateIndex(schema, tableName, index);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateIndexClause);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateIndexClause);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -247,7 +247,7 @@ public class SqlActionsController {
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropIndexClause = driver.getSql4DropIndex(schema, tableName, index.getName());
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropIndexClause);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlDropIndexClause);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -281,7 +281,7 @@ public class SqlActionsController {
                 }
             }
             sqlCreateTableClause += " )";
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateTableClause);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateTableClause);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -300,7 +300,7 @@ public class SqlActionsController {
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropTable = driver.getSql4DropTable(schema, tableName);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropTable);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlDropTable);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }
@@ -330,7 +330,7 @@ public class SqlActionsController {
             String[] sqls = driver.getSqls4AddingField(schema, tableName, fieldMd);
             List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqls.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls[i]);
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls[i]);
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
@@ -350,7 +350,7 @@ public class SqlActionsController {
             String[] sql4DropField = driver.getSql4DroppingField(schema, tableName, fieldMd.getName());
             List<Change> commonLog = new ArrayList<>();
             for (String sql : sql4DropField) {
-                SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sql);
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sql);
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
@@ -373,7 +373,7 @@ public class SqlActionsController {
             String[] sqls4ModifyField = driver.getSqls4ModifyingField(schema, tableName, fieldMd, newFieldMd);
             List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqls4ModifyField.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls4ModifyField[i]);
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls4ModifyField[i]);
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
@@ -400,7 +400,7 @@ public class SqlActionsController {
             String[] sqls4RenamingField = driver.getSqls4RenamingField(schema, tableName, oldFieldName, newField);
             List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqls4RenamingField.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls4RenamingField[i]);
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls4RenamingField[i]);
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
@@ -424,11 +424,11 @@ public class SqlActionsController {
         @Override
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String lschema = client.getDbMetadataCache(dbId).getConnectionSchema();
+            String lschema = basesProxy.getDbMetadataCache(datasourceName).getConnectionSchema();
             String[] sqlsText = driver.getSql4CreateColumnComment(schema != null ? schema : lschema, tableName, fieldName, newDescription);
             List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqlsText.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlsText[i]);
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlsText[i]);
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
@@ -450,10 +450,10 @@ public class SqlActionsController {
         @Override
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String lschema = client.getDbMetadataCache(dbId).getConnectionSchema();
+            String lschema = basesProxy.getDbMetadataCache(datasourceName).getConnectionSchema();
 
             String sqlText = driver.getSql4CreateTableComment(schema != null ? schema : lschema, tableName, newDescription);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlText);
+            SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlText);
             q.enqueueUpdate();
             return q.getFlow().getChangeLog();
         }

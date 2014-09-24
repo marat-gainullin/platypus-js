@@ -100,7 +100,7 @@ public class StatementsGenerator implements ChangeVisitor {
      * because we use simple "=" operator in WHERE clause.
      *
      * @param aKeys Keys array to deal with.
-     * @return 
+     * @return
      */
     protected String generateWhereClause(List<ChangeValue> aKeys) {
         StringBuilder whereClause = new StringBuilder();
@@ -123,72 +123,71 @@ public class StatementsGenerator implements ChangeVisitor {
 
     @Override
     public void visit(Insert aChange) throws Exception {
-        if (!aChange.trusted) {
-            entitiesHost.checkRights(aChange.entityId);
-        }
-        Map<String, InsertChunk> inserts = new HashMap<>();
-        for (ChangeValue data : aChange.data) {
-            Field field = entitiesHost.resolveField(aChange.entityId, data.name);
-            if (field != null) {
-                InsertChunk chunk = inserts.get(field.getTableName());
-                if (chunk == null) {
-                    chunk = new InsertChunk();
-                    inserts.put(field.getTableName(), chunk);
-                    chunk.insert = new StatementsLogEntry(converter);
+        if (!aChange.consumed) {
+            Map<String, InsertChunk> inserts = new HashMap<>();
+            for (ChangeValue data : aChange.data) {
+                Field field = entitiesHost.resolveField(aChange.entityId, data.name);
+                if (field != null) {
+                    InsertChunk chunk = inserts.get(field.getTableName());
+                    if (chunk == null) {
+                        chunk = new InsertChunk();
+                        inserts.put(field.getTableName(), chunk);
+                        chunk.insert = new StatementsLogEntry(converter);
                     // Adding here is strongly needed. Because of order in wich other and this statememts are added
-                    // to the log and therefore applied into a database during a transaction.
-                    logEntries.add(chunk.insert);
-                    chunk.dataColumnsNames = new StringBuilder();
-                    chunk.keysColumnsNames = new ArrayList<>();
-                }
-                if (!chunk.insert.parameters.isEmpty()) {
-                    chunk.dataColumnsNames.append(", ");
-                }
-                String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
-                chunk.dataColumnsNames.append(dataColumnName);
-                //
-                if (schemaContext != null && !schemaContext.isEmpty()
-                        && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
-                        && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
-                    chunk.contexted = true;
-                    if (data.value == null) {
-                        chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
-                    } else {
-                        chunk.insert.parameters.add(data);
+                        // to the log and therefore applied into a database during a transaction.
+                        logEntries.add(chunk.insert);
+                        chunk.dataColumnsNames = new StringBuilder();
+                        chunk.keysColumnsNames = new ArrayList<>();
                     }
-                } else {
-                    chunk.insert.parameters.add(data);
-                }
-                if (field.isPk()) {
-                    chunk.keysColumnsNames.add(dataColumnName);
-                }
-            }
-        }
-        for (String tableName : inserts.keySet()) {
-            InsertChunk chunk = inserts.get(tableName);
-            //
-            if (schemaContext != null && !schemaContext.isEmpty()
-                    && schemaContextFieldName != null && !schemaContextFieldName.isEmpty()
-                    && !chunk.contexted) {
-                Field contextField = entitiesHost.resolveField(tableName, schemaContextFieldName);
-                if (contextField != null) {
                     if (!chunk.insert.parameters.isEmpty()) {
                         chunk.dataColumnsNames.append(", ");
                     }
-                    chunk.dataColumnsNames.append(schemaContextFieldName);
-                    chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                    String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
+                    chunk.dataColumnsNames.append(dataColumnName);
+                    //
+                    if (schemaContext != null && !schemaContext.isEmpty()
+                            && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
+                            && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
+                        chunk.contexted = true;
+                        if (data.value == null) {
+                            chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                        } else {
+                            chunk.insert.parameters.add(data);
+                        }
+                    } else {
+                        chunk.insert.parameters.add(data);
+                    }
+                    if (field.isPk()) {
+                        chunk.keysColumnsNames.add(dataColumnName);
+                    }
                 }
             }
-            //
-            chunk.insert.clause = String.format(INSERT_CLAUSE, tableName, chunk.dataColumnsNames.toString(), generatePlaceholders(chunk.insert.parameters.size()));
+            for (String tableName : inserts.keySet()) {
+                InsertChunk chunk = inserts.get(tableName);
+                //
+                if (schemaContext != null && !schemaContext.isEmpty()
+                        && schemaContextFieldName != null && !schemaContextFieldName.isEmpty()
+                        && !chunk.contexted) {
+                    Field contextField = entitiesHost.resolveField(tableName, schemaContextFieldName);
+                    if (contextField != null) {
+                        if (!chunk.insert.parameters.isEmpty()) {
+                            chunk.dataColumnsNames.append(", ");
+                        }
+                        chunk.dataColumnsNames.append(schemaContextFieldName);
+                        chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                    }
+                }
+                //
+                chunk.insert.clause = String.format(INSERT_CLAUSE, tableName, chunk.dataColumnsNames.toString(), generatePlaceholders(chunk.insert.parameters.size()));
             // Validness of the insert statement is outlined by inserted columns and key columns existance also
-            // because we have to prevent unexpected inserts in any joined table.
-            // In this case inserts will be valid only if they include at least one key column per table.
-            // Another case is single table per Insert instance.
-            // So, we can avoid unexpected inserts in a transaction.
-            // It's considered that keyless inserts are easy to obtain with manual (dml flag) queries.
-            // So avoid keys in select columns list for a table to avoid unexpected inserts in that table! 
-            chunk.insert.valid = !chunk.insert.parameters.isEmpty() && (!chunk.keysColumnsNames.isEmpty() || inserts.size() == 1);
+                // because we have to prevent unexpected inserts in any joined table.
+                // In this case inserts will be valid only if they include at least one key column per table.
+                // Another case is single table per Insert instance.
+                // So, we can avoid unexpected inserts in a transaction.
+                // It's considered that keyless inserts are easy to obtain with manual (dml flag) queries.
+                // So avoid keys in select columns list for a table to avoid unexpected inserts in that table! 
+                chunk.insert.valid = !chunk.insert.parameters.isEmpty() && (!chunk.keysColumnsNames.isEmpty() || inserts.size() == 1);
+            }
         }
     }
 
@@ -203,9 +202,6 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Update aChange) throws Exception {
         if (!aChange.consumed) {
-            if (!aChange.trusted) {
-                entitiesHost.checkRights(aChange.entityId);
-            }
             Map<String, UpdateChunk> updates = new HashMap<>();
             // data
             for (ChangeValue data : aChange.data) {
@@ -243,7 +239,7 @@ public class StatementsGenerator implements ChangeVisitor {
                 }
             }
             updates.entrySet().stream().forEach((Map.Entry<String, UpdateChunk> entry) -> {
-                String tableName = entry.getKey();                
+                String tableName = entry.getKey();
                 UpdateChunk chunk = entry.getValue();
                 if (chunk.data != null && !chunk.data.isEmpty()
                         && chunk.keys != null && !chunk.keys.isEmpty()) {
@@ -261,9 +257,6 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Delete aChange) throws Exception {
         if (!aChange.consumed) {
-            if (!aChange.trusted) {
-                entitiesHost.checkRights(aChange.entityId);
-            }
             Map<String, StatementsLogEntry> deletes = new HashMap<>();
             for (ChangeValue key : aChange.keys) {
                 Field field = entitiesHost.resolveField(aChange.entityId, key.name);
@@ -291,9 +284,6 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Command aChange) throws Exception {
         if (!aChange.consumed) {
-            if (!aChange.trusted) {
-                entitiesHost.checkRights(aChange.entityId);
-            }
             StatementsLogEntry logEntry = new StatementsLogEntry(converter);
             logEntry.clause = aChange.command;
             logEntry.parameters.addAll(Arrays.asList(aChange.parameters));

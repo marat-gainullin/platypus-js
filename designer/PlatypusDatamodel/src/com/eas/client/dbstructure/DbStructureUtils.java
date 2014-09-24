@@ -8,9 +8,9 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.queries.SqlCompiledQuery;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,8 +80,8 @@ public class DbStructureUtils {
                 if (schemaName != null && !schemaName.isEmpty()) {
                     fullTableName = schemaName + "." + fullTableName;
                 }
-                SqlCompiledQuery query = new SqlCompiledQuery(tableEntity.getModel().getClient(), tableEntity.getTableDbId(), "select count(*) cnt from " + fullTableName + " where " + aFieldName + " is not null");
-                Rowset rs = query.executeQuery();
+                SqlCompiledQuery query = new SqlCompiledQuery(tableEntity.getModel().getBasesProxy(), tableEntity.getTableDatasourceName(), "select count(*) cnt from " + fullTableName + " where " + aFieldName + " is not null");
+                Rowset rs = query.executeQuery(null, null);
                 if (rs != null) {
                     if (rs.first()) {
                         Object cnt = rs.getObject(1);

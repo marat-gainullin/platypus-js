@@ -86,7 +86,7 @@ public class PlatypusQuery extends Query {
      * @return 
      */
     @Override
-    public Query copy() {
+    public PlatypusQuery copy() {
         return new PlatypusQuery(this);
     }
 

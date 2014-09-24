@@ -44,7 +44,6 @@ import org.openide.text.CloneableEditor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.DataEditorSupport;
 import org.openide.text.PositionRef;
-import org.openide.util.Exceptions;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;
@@ -181,11 +180,13 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     }
     
     protected void notifyModuleChanged(){
+        /*
         try {
             dataObject.notifyChanged();
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
+        */
     }
 
     @Override

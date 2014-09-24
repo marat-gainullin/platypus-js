@@ -48,11 +48,6 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
     }
 
     @Override
-    protected void resignOnQueries() {
-        // no op, since db diagrams doesn't contain queries.
-    }
-
-    @Override
     protected void validateModel() throws Exception {
         if (getModel() != null) {
             getModel().validate();
@@ -61,7 +56,7 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
 
     public void readModel() throws Exception {
         FileObject pf = getPrimaryFile();
-        model = XmlDom2DbSchemeModel.transform(getClient(), Source2XmlDom.transform(pf.asText(PlatypusUtils.COMMON_ENCODING_NAME)));
+        model = XmlDom2DbSchemeModel.transform(getBasesProxy(), Source2XmlDom.transform(pf.asText(PlatypusUtils.COMMON_ENCODING_NAME)));
     }
 
     protected void checkModelRead() throws Exception {

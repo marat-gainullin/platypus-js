@@ -11,8 +11,12 @@ import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
+import com.eas.client.queries.QueriesProxy;
+import com.eas.client.queries.Query;
 import com.eas.xml.dom.XmlDomUtils;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -31,10 +35,23 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         super();
         modelElement = aTag;
     }
-    
+
     @Override
     public void visit(ApplicationModel<E, ?, ?> aModel) {
-        readModel(aModel);
+        Runnable resolver = readModel(aModel);
+        QueriesProxy<?> queries = aModel.getQueries();
+        aModel.getEntities().values().stream().forEach((entity) -> {
+            try {
+                Query q = queries.getCachedQuery(entity.getQueryName());
+                if (q == null) {
+                    queries.getQuery(entity.getQueryName(), null, null);
+                }
+                entity.validateQuery();
+            } catch (Exception ex) {
+                Logger.getLogger(XmlDom2ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        resolver.run();
     }
 
     @Override
@@ -65,7 +82,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
             }
         }
     }
-    
+
     @Override
     public void visit(Relation<E> relation) {
         super.visit(relation);
@@ -82,7 +99,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         aRelation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
         aRelation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
         if (currentModel != null) {
-            ((ApplicationModel<E, ?, ?>)currentModel).getReferenceRelations().add(aRelation);
+            ((ApplicationModel<E, ?, ?>) currentModel).getReferenceRelations().add(aRelation);
         }
     }
 

@@ -4,11 +4,6 @@
  */
 package com.eas.designer;
 
-import com.eas.client.ClientFactory;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.Client;
-import com.eas.client.DbClient;
-
 /**
  *
  * @author mg

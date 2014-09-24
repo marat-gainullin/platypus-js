@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class ApplicationSourceIndexer {
+public class ApplicationSourceIndexer implements PlatypusIndexer{
 
     public interface ScanCallback {
 

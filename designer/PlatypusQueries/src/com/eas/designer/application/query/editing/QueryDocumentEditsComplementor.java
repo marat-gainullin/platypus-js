@@ -82,8 +82,8 @@ public class QueryDocumentEditsComplementor {
     }
 
     public String costructTablyName(QueryEntity qEntity) {
-        if (qEntity.getQueryId() != null) {
-            return ClientConstants.STORED_QUERY_REF_PREFIX + qEntity.getQueryId();
+        if (qEntity.getQueryName() != null) {
+            return ClientConstants.STORED_QUERY_REF_PREFIX + qEntity.getQueryName();
         } else {
             return qEntity.getTableName();
         }
@@ -137,7 +137,7 @@ public class QueryDocumentEditsComplementor {
             String factText = dataObject.getSqlTextDocument().getText(0, dataObject.getSqlTextDocument().getLength());
             factText = normalizeFactQueryText(factText);
             CCJSqlParserManager parserManager = new CCJSqlParserManager();
-            String aliasName = (edit.getEntity().getQueryId() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX) + "1"; //NOI18N
+            String aliasName = (edit.getEntity().getQueryName() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX) + "1"; //NOI18N
             assert edit.getEntity() instanceof QueryEntity;
             edit.getEntity().setAlias(aliasName);
             statement = parserManager.parse(new StringReader(factText + NEW_ENTITY_STATEMENT_SQL + costructTablyName(edit.getEntity()) + " " + aliasName)); //NOI18N
@@ -145,10 +145,10 @@ public class QueryDocumentEditsComplementor {
         } else {
             Map<String, Table> tables = TablesFinder.getTablesMap(TablesFinder.TO_CASE.LOWER, statement, true);
             // Take care of pretty queries alias names.
-            String aliasName = findFreeAliasName(tables, edit.getEntity().getQueryId() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX);
+            String aliasName = findFreeAliasName(tables, edit.getEntity().getQueryName() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX);
             QueryEntity qEntity = edit.getEntity();
             qEntity.setAlias(aliasName);
-            Table tbl = new Table(qEntity.getQueryId() == null ? qEntity.getTableSchemaName() : null, costructTablyName(qEntity));
+            Table tbl = new Table(qEntity.getQueryName() == null ? qEntity.getTableSchemaName() : null, costructTablyName(qEntity));
             if (tbl.getAlias() != null) {
                 tbl.getAlias().setName(qEntity.getAlias());
             } else {

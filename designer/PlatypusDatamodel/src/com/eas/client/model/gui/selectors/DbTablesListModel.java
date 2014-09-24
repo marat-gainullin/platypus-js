@@ -8,11 +8,10 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
-import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,19 +32,17 @@ public class DbTablesListModel implements ListModel<String> {
     protected Set<ListDataListener> listeners = new HashSet<>();
     protected int schemaColIndex = -1;
     protected int tableColIndex = -1;
-    protected String dbId;
-    protected DbClient client;
+    protected String datasourceName;
+    protected DatabasesClient basesProxy;
     protected String schema;
-    protected DbMetadataCache mdCache;
-    protected AppCache appCache;
+    protected DatabaseMdCache mdCache;
 
-    public DbTablesListModel(DbClient aClient, String aDbId) {
+    public DbTablesListModel(DatabasesClient aBasesProxy, String aDatasourceName) {
         super();
-        dbId = aDbId;
+        datasourceName = aDatasourceName;
         try {
-            client = aClient;
-            appCache = client.getAppCache();
-            mdCache = client.getDbMetadataCache(dbId);
+            basesProxy = aBasesProxy;
+            mdCache = basesProxy.getDbMetadataCache(datasourceName);
             schema = mdCache.getConnectionSchema();
             setTablesRowset(createRowset());
         } catch (Exception ex) {
@@ -58,8 +55,8 @@ public class DbTablesListModel implements ListModel<String> {
             try {
                 SqlDriver driver = mdCache.getConnectionDriver();
                 String sql4Tables = driver.getSql4TablesEnumeration(schema);
-                SqlCompiledQuery query = new SqlCompiledQuery(client, dbId, sql4Tables);
-                return query.executeQuery();
+                SqlCompiledQuery query = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
+                return query.executeQuery(null, null);
             } catch (Exception ex) {
                 Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -80,11 +77,7 @@ public class DbTablesListModel implements ListModel<String> {
         }
     }
 
-    public AppCache getAppCache() {
-        return appCache;
-    }
-
-    public DbMetadataCache getMdCache() {
+    public DatabaseMdCache getMdCache() {
         return mdCache;
     }
 

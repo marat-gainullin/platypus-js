@@ -10,7 +10,7 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.model.gui.IconCache;
 import com.eas.designer.application.project.PlatypusProject;
@@ -37,7 +37,7 @@ public class DbTablesView extends JPanel {
 
     protected FindAction findAction = new FindAction();
     protected FindAgainAction findAgainAction = new FindAgainAction();
-    protected DbClient client;
+    protected DatabasesClient client;
     protected String dialogTitle;
     protected String searchSubject;
     protected String datasourceName;
@@ -130,9 +130,8 @@ public class DbTablesView extends JPanel {
     /**
      * Creates DbTablesView
      *
-     * @param aClient
      * @param aProject
-     * @param aDatasoruceName
+     * @param aDatasourceName
      * @param aSchema
      * @param aDialogTitle
      * @param allowSchemaChange
@@ -146,7 +145,7 @@ public class DbTablesView extends JPanel {
             datasourceName = project.getSettings().getDefaultDataSourceName();
         }
         initComponents();
-        client = project.getClient();
+        client = project.getBasesProxy();
         dialogTitle = aDialogTitle;
         ActionMap am = lstTables.getActionMap();
         if (am != null) {
@@ -315,7 +314,7 @@ public class DbTablesView extends JPanel {
 
     private void btnDefaultSchemaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultSchemaActionPerformed
         try {
-            String schema = project.getClient().getConnectionSchema(datasourceName);
+            String schema = client.getConnectionSchema(datasourceName);
             comboSchema.setSelectedIndex(locateSchema(schema));
             comboSchema.invalidate();
             comboSchema.repaint();

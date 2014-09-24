@@ -5,7 +5,7 @@
 package com.eas.designer.application.dbdiagram;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.gui.DbSchemeEditorView;
 import com.eas.client.dbstructure.gui.RunQueryCallback;
 import com.eas.client.model.Relation;
@@ -264,20 +264,17 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                                 ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
                                 return true;
                             }
-                        }, new RunQueryCallback() {
-                            @Override
-                            public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName) {
-                                try {
-                                    QueryResultsView resultsView = new QueryResultsView(aClient, aDbId, aSchemaName, aTableName);
-                                    QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
-                                    window.openAtTabPosition(0);
-                                    window.addResultsView(resultsView);
-                                    window.requestActive();
-                                } catch (Exception ex) {
-                                    ErrorManager.getDefault().notify(ex);
-                                }
+                        }, (DatabasesClient aBasesProxy, String aDatasourceName, String aSchemaName, String aTableName) -> {
+                            try {
+                                QueryResultsView resultsView = new QueryResultsView(aBasesProxy, aDatasourceName, aSchemaName, aTableName);
+                                QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
+                                window.openAtTabPosition(0);
+                                window.addResultsView(resultsView);
+                                window.requestActive();
+                            } catch (Exception ex) {
+                                ErrorManager.getDefault().notify(ex);
                             }
-                        });
+                });
                 add(editor, BorderLayout.CENTER);
                 updateTitle();
                 dataObject.addPropertyChangeListener(dataObjectListener);
@@ -377,7 +374,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     @Override
     protected void componentActivated() {
         try {
-            if (dataObject.isValid() && dataObject.getClient() != null && dataObject.isModelValid()) {
+            if (dataObject.isValid() && dataObject.getBasesProxy()!= null && dataObject.isModelValid()) {
                 ModelInspector.getInstance().setNodesReflector(exlorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();

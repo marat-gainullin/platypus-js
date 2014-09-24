@@ -16,7 +16,6 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
-import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.ContextHost;
@@ -84,8 +83,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     protected QueriesProxy<SqlQuery> queries;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
-    private final ThreadLocal<Object> currentRequest = new ThreadLocal<>();
-    private final ThreadLocal<Object> currentResponse = new ThreadLocal<>();
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         super();
@@ -180,7 +177,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
             getSessionManager().setCurrentSession(oldSession);
         }
     }
-    
+
     public Set<String> getTasks() {
         return tasks;
     }
@@ -260,10 +257,12 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     @Override
     public String preparationContext() throws Exception {
         Session session = sessionManager.getCurrentSession();
-        if (session != null && session.getPrincipal() != null && session.getPrincipal() instanceof DbPlatypusPrincipal) {
-            return ((DbPlatypusPrincipal) session.getPrincipal()).getContext();
-        } else if (session != null && session.getContext() != null) {
-            return session.getContext();
+        if (session != null) {
+            if (session.getPrincipal() != null) {
+                return session.getPrincipal().getContext();
+            } else if (session.getContext() != null) {
+                return session.getContext();
+            }
         }
         return null;
     }
@@ -281,19 +280,5 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
             // Construct a dummy Principal for a debugger can discover inner Principal's structure
             return new AnonymousPlatypusPrincipal("No current session found");
         }
-    }
-
-    /**
-     * @return the currentRequest
-     */
-    public ThreadLocal<Object> getCurrentRequest() {
-        return currentRequest;
-    }
-
-    /**
-     * @return the currentResponse
-     */
-    public ThreadLocal<Object> getCurrentResponse() {
-        return currentResponse;
     }
 }

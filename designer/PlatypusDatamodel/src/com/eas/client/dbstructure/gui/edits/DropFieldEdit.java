@@ -6,7 +6,7 @@ package com.eas.client.dbstructure.gui.edits;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
@@ -132,10 +132,10 @@ public class DropFieldEdit extends DbStructureEdit {
     @Override
     protected void clearTablesCache() {
         try {
-            DbClient client = sqlController.getClient();
-            client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), tableName);
+            DatabasesClient client = sqlController.getBasesProxy();
+            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), tableName);
             for (ForeignKeySpec fk : inFks) {
-                client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), fk.getTable());
+                client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), fk.getTable());
             }
         } catch (Exception ex) {
             Logger.getLogger(DropFieldEdit.class.getName()).log(Level.SEVERE, null, ex);

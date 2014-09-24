@@ -2,9 +2,9 @@ package com.eas.client.model.gui.view;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
+import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
-import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import java.awt.Color;
 import java.awt.Component;
@@ -68,10 +68,10 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             */ 
             String fieldDescription = field.getDescription();
             if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
-                fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryId());
+                fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryName());
             }
             if (StoredQueryFactory.CONTENT_EMPTY_MSG.equals(fieldDescription)) {
-                fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.CONTENT_EMPTY_MSG), entity.getQueryId());
+                fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.CONTENT_EMPTY_MSG), entity.getQueryName());
             }
             String typeName = SQLUtils.getLocalizedTypeName(field.getTypeInfo().getSqlType());
             if (typeName == null) {

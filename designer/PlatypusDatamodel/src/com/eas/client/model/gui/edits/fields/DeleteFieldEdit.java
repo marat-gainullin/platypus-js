@@ -47,7 +47,7 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
     
     @Override
     protected void redoWork() {
-        Model<E, ?, ?, ?> model = fieldsEntity.getModel();
+        Model<E, ?, ?> model = fieldsEntity.getModel();
         Fields fields = model.getParameters();
         if (fields == null && fieldsEntity != null) {
             fields = fieldsEntity.getFields();
@@ -58,7 +58,7 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
     @Override
     protected void undoWork() {
         createFieldIfNeeded();
-        Model<E, ?, ?, ?> model = fieldsEntity.getModel();
+        Model<E, ?, ?> model = fieldsEntity.getModel();
         Fields fields = model.getParameters();
         if (fields == null && fieldsEntity != null) {
             fields = fieldsEntity.getFields();

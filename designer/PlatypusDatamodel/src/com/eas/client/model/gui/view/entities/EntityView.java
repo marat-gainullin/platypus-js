@@ -322,8 +322,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         absentQueryText.setEditable(false);
         absentQueryText.setOpaque(false);
         absentQueryText.setLineWrap(true);
-        if (entity != null && entity.getQueryId() != null) {
-            absentQueryText.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentQuery"), entity.getQueryId()));
+        if (entity != null && entity.getQueryName() != null) {
+            absentQueryText.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentQuery"), entity.getQueryName()));
         } else {
             String fullTableName = entity.getTableName();
             if (fullTableName == null) {
@@ -575,8 +575,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                         }
                     }
                 }
-                if (ent.getQueryId() != null) {
-                    info = String.format("%s %s", ent.getQueryId(), name);
+                if (ent.getQueryName() != null) {
+                    info = String.format("%s %s", ent.getQueryName(), name);
                 } else {
                     final String schema = ent.getTableSchemaName();
                     if (schema != null && !schema.isEmpty()) {

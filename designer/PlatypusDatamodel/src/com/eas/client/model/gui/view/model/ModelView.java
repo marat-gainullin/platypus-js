@@ -14,7 +14,7 @@ import com.bearsoft.routing.graph.Vertex;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
-import com.eas.client.DbClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.*;
 import com.eas.client.model.application.ReferenceRelation;
@@ -78,7 +78,7 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extends Model<E, P, DbClient, ?>> extends JPanel {
+public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M extends Model<E, P, SqlQuery>> extends JPanel {
 
     // settings
     public final static int slotWidth = 3;
@@ -2141,7 +2141,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         entity.setY(rect.y);
         entity.setWidth(rect.width);
         entity.setHeight(rect.height);
-        entity.setTableDbId(rSelected.dbId);
+        entity.setTableDatasourceName(rSelected.dbId);
         entity.setTableSchemaName(rSelected.schema);
         entity.setName(getEntiyName(rSelected.tableName));
         entity.setTableName(rSelected.tableName);
@@ -2151,16 +2151,16 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         return rect;
     }
 
-    public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
-        if (aApplicationElementId != null && model != null) {
+    public void doAddQuery(String aAppElementName, int aX, int aY) throws Exception {
+        if (aAppElementName != null && model != null) {
             Rectangle rect = findPlaceForEntityAdd(aX, aY);
             E entity = model.newGenericEntity();
             entity.setX(rect.x);
             entity.setY(rect.y);
             entity.setWidth(rect.width);
             entity.setHeight(rect.height);
-            entity.setQueryId(aApplicationElementId);
-            entity.setName(getEntiyName(aApplicationElementId));
+            entity.setQueryName(aAppElementName);
+            entity.setName(getEntiyName(aAppElementName));
             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
             edit.redo();
             undoSupport.postEdit(edit);
@@ -2389,7 +2389,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             if (isEnabled()) {
                 try {
                     M model = newModelInstance();
-                    model.setClient(model.getClient());
                     if (isParametersCopy()) {
                         for (EntityFieldTuple ef : selectedFields) {
                             model.getParameters().add(ef.field);

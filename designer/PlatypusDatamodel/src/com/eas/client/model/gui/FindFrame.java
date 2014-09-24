@@ -5,7 +5,7 @@
  */
 package com.eas.client.model.gui;
 
-import com.eas.client.DbClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.gui.view.model.ModelView;
@@ -18,8 +18,11 @@ import javax.swing.event.DocumentListener;
 /**
  *
  * @author mg
+ * @param <E>
+ * @param <P>
+ * @param <M>
  */
-public class FindFrame<E extends Entity<?, ?, E>, P extends E, M extends Model<E, P, DbClient, ?>> extends javax.swing.JDialog implements DocumentListener {
+public class FindFrame<E extends Entity<?, SqlQuery, E>, P extends E, M extends Model<E, P, SqlQuery>> extends javax.swing.JDialog implements DocumentListener {
 
     private List<ModelView<E, P, M>.FindResult> found = null;
     private int foundIndex = -1;

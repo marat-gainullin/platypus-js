@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.model.windows;
 
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.gui.view.EntityViewDoubleClickListener;
 import com.eas.client.model.gui.view.entities.EntityView;
@@ -20,7 +21,7 @@ import org.openide.loaders.DataObjectNotFoundException;
  *
  * @author vv
  */
-public class QueryDocumentJumper<E extends Entity<?, ?, E>> implements EntityViewDoubleClickListener<E> {
+public class QueryDocumentJumper<E extends Entity<?, SqlQuery, E>> implements EntityViewDoubleClickListener<E> {
 
     private PlatypusProject project;
 
@@ -32,7 +33,7 @@ public class QueryDocumentJumper<E extends Entity<?, ?, E>> implements EntityVie
     public void clicked(EntityView<E> aView, boolean fieldsClicked, boolean paramsClicked) {
         try {
             assert aView.getEntity() != null : "Entity in EntityView should not be null";
-            String appElementId = aView.getEntity().getQueryId();
+            String appElementId = aView.getEntity().getQueryName();
             if (appElementId != null) {
                 FileObject appElementFileObject = IndexerQuery.appElementId2File(project, appElementId);
                 if (appElementFileObject != null) {

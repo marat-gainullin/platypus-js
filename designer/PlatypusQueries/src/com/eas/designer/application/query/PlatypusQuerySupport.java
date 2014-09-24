@@ -134,7 +134,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
             @Override
             public void undoableEditHappened(UndoableEditEvent ue) {
                 try {
-                    if (ue.getSource() != dataObject && dataObject.getClient() != null && !queryDocumentEditsComplementor.isComplementing()
+                    if (ue.getSource() != dataObject && dataObject.getBasesProxy() != null && !queryDocumentEditsComplementor.isComplementing()
                             && ue.getEdit() != CloneableEditorSupport.BEGIN_COMMIT_GROUP
                             && ue.getEdit() != CloneableEditorSupport.END_COMMIT_GROUP) {
                         UndoableEdit anEdit = null;

@@ -9,9 +9,9 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
-import com.eas.client.queries.SqlQuery;
+import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
@@ -134,10 +134,10 @@ public class SqlCompletionProvider implements CompletionProvider {
 
     public void fillCompletionInsertFieldsZone(CompletionPoint point, PlatypusQueryDataObject dataObject, CompletionResultSet resultSet) throws Exception {
         if (dataObject.getStatement() instanceof Insert) {
-            DbClient client = dataObject.getClient();
-            if (client != null) {
+            DatabasesClient basesProxy = dataObject.getBasesProxy();
+            if (basesProxy != null) {
                 Insert iStatement = (Insert) dataObject.getStatement();
-                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
+                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
                 String schema = iStatement.getTable().getSchemaName();
                 String defaultSchema = mdCache.getConnectionSchema();
                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? iStatement.getTable().getName() : iStatement.getTable().getWholeTableName());
@@ -148,10 +148,10 @@ public class SqlCompletionProvider implements CompletionProvider {
 
     public void fillCompletionUpdateFieldsZone(CompletionPoint point, PlatypusQueryDataObject dataObject, CompletionResultSet resultSet) throws Exception {
         if (dataObject.getStatement() instanceof Update) {
-            DbClient client = dataObject.getClient();
-            if (client != null) {
+            DatabasesClient basesProxy = dataObject.getBasesProxy();
+            if (basesProxy != null) {
                 Update uStatement = (Update) dataObject.getStatement();
-                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
+                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
                 String schema = uStatement.getTable().getSchemaName();
                 String defaultSchema = mdCache.getConnectionSchema();
                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? uStatement.getTable().getName() : uStatement.getTable().getWholeTableName());
@@ -186,9 +186,9 @@ public class SqlCompletionProvider implements CompletionProvider {
 
     public void fillCompletionSelectZone(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         if (dataObject.getStatement() instanceof Select) {
-            DbClient client = dataObject.getClient();
-            if (client != null) {
-                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
+            DatabasesClient basesProxy = dataObject.getBasesProxy();
+            if (basesProxy != null) {
+                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
                 if (point.atDot) {
                     if (point.prevContext != null) {
                         Set<String> schemas = dataObject.achieveSchemas();
@@ -213,7 +213,7 @@ public class SqlCompletionProvider implements CompletionProvider {
                                     String parserTableName = table.getWholeTableName();
                                     Fields fields = null;
                                     if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
-                                        SqlQuery q = client.getAppQuery(parserTableName.substring(1));
+                                        SqlQuery q = basesProxy.getQueries().getQuery(parserTableName.substring(1), null, null);
                                         if (q != null) {
                                             fields = q.getFields();
                                         }
@@ -259,9 +259,9 @@ public class SqlCompletionProvider implements CompletionProvider {
     }
 
     public void fillCompletionWhereZone(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        DbClient client = dataObject.getClient();
-        if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
+        DatabasesClient basesProxy = dataObject.getBasesProxy();
+        if (basesProxy != null) {
+            DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
             if (point.atDot) {
                 if (point.prevContext != null) {
                     Set<String> schemas = dataObject.achieveSchemas();
@@ -285,7 +285,7 @@ public class SqlCompletionProvider implements CompletionProvider {
                                 String parserTableName = table.getWholeTableName();
                                 Fields fields = null;
                                 if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
-                                    SqlQuery q = client.getAppQuery(parserTableName.substring(1));
+                                    SqlQuery q = basesProxy.getQueries().getQuery(parserTableName.substring(1), null, null);
                                     if (q != null) {
                                         fields = q.getFields();
                                     }

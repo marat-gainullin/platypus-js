@@ -8,7 +8,6 @@ import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.queries.Query;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;

@@ -138,9 +138,8 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                 relationsResolvers.clear();
                 currentModel = null;
             }
-        }else{
-            return null;
         }
+        return null;
     }
 
     public void readEntity(E entity) {
@@ -193,92 +192,89 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                 }
             }
             final Model<E, ?, ?> model = currentModel;
-            relationsResolvers.add(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        E lEntity = model.getEntityById(leftEntityId);
-                        if (Model.PARAMETERS_ENTITY_ID == leftEntityId) {
-                            lEntity = model.getParametersEntity();
-                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                                Fields fields = lEntity.getFields();
-                                if (fields != null) {
-                                    relation.setLeftField(fields.get(leftParameterName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setLeftField(new Parameter(leftParameterName));
-                                }
-                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                                Fields fields = lEntity.getFields();
-                                if (fields != null) {
-                                    relation.setLeftField(fields.get(leftFieldName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setLeftField(new Parameter(leftFieldName));
-                                }
+            relationsResolvers.add((Runnable) () -> {
+                try {
+                    E lEntity = model.getEntityById(leftEntityId);
+                    if (Model.PARAMETERS_ENTITY_ID == leftEntityId) {
+                        lEntity = model.getParametersEntity();
+                        if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                            Fields fields = lEntity.getFields();
+                            if (fields != null) {
+                                relation.setLeftField(fields.get(leftParameterName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setLeftField(new Parameter(leftParameterName));
                             }
-                        } else if (lEntity != null) {
-                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                                Query query = lEntity.getQuery();
-                                if (query != null) {
-                                    relation.setLeftField(query.getParameters().get(leftParameterName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setLeftField(new Parameter(leftParameterName));
-                                }
-                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                                Fields fields = lEntity.getFields();
-                                if (fields != null) {
-                                    relation.setLeftField(fields.get(leftFieldName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setLeftField(new Field(leftFieldName));
-                                }
+                        } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                            Fields fields = lEntity.getFields();
+                            if (fields != null) {
+                                relation.setLeftField(fields.get(leftFieldName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setLeftField(new Parameter(leftFieldName));
                             }
                         }
-                        if (lEntity != null) {
-                            relation.setLeftEntity(lEntity);
-                            lEntity.addOutRelation(relation);
-                        }
-
-                        E rEntity = model.getEntityById(rightEntityId);
-                        if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
-                            rEntity = model.getParametersEntity();
-                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                                Fields fields = rEntity.getFields();
-                                if (fields != null) {
-                                    relation.setRightField(fields.get(rightParameterName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setRightField(new Parameter(rightParameterName));
-                                }
-                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                                Fields fields = rEntity.getFields();
-                                if (fields != null) {
-                                    relation.setRightField(fields.get(rightFieldName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setRightField(new Parameter(rightFieldName));
-                                }
+                    } else if (lEntity != null) {
+                        if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                            Query query = lEntity.getQuery();
+                            if (query != null) {
+                                relation.setLeftField(query.getParameters().get(leftParameterName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setLeftField(new Parameter(leftParameterName));
                             }
-                        } else if (rEntity != null) {
-                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                                Query query = rEntity.getQuery();
-                                if (query != null) {
-                                    relation.setRightField(query.getParameters().get(rightParameterName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setRightField(new Parameter(rightParameterName));
-                                }
-                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                                Fields fields = rEntity.getFields();
-                                if (fields != null) {
-                                    relation.setRightField(fields.get(rightFieldName));
-                                } else if (!model.isRelationsAgressiveCheck()) {
-                                    relation.setRightField(new Field(rightFieldName));
-                                }
+                        } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                            Fields fields = lEntity.getFields();
+                            if (fields != null) {
+                                relation.setLeftField(fields.get(leftFieldName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setLeftField(new Field(leftFieldName));
                             }
                         }
-                        if (rEntity != null) {
-                            relation.setRightEntity(rEntity);
-                            rEntity.addInRelation(relation);
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(XmlDom2Model.class.getName()).log(Level.WARNING, null, ex);
                     }
+                    if (lEntity != null) {
+                        relation.setLeftEntity(lEntity);
+                        lEntity.addOutRelation(relation);
+                    }
+                    
+                    E rEntity = model.getEntityById(rightEntityId);
+                    if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
+                        rEntity = model.getParametersEntity();
+                        if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                            Fields fields = rEntity.getFields();
+                            if (fields != null) {
+                                relation.setRightField(fields.get(rightParameterName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setRightField(new Parameter(rightParameterName));
+                            }
+                        } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                            Fields fields = rEntity.getFields();
+                            if (fields != null) {
+                                relation.setRightField(fields.get(rightFieldName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setRightField(new Parameter(rightFieldName));
+                            }
+                        }
+                    } else if (rEntity != null) {
+                        if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                            Query query = rEntity.getQuery();
+                            if (query != null) {
+                                relation.setRightField(query.getParameters().get(rightParameterName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setRightField(new Parameter(rightParameterName));
+                            }
+                        } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                            Fields fields = rEntity.getFields();
+                            if (fields != null) {
+                                relation.setRightField(fields.get(rightFieldName));
+                            } else if (!model.isRelationsAgressiveCheck()) {
+                                relation.setRightField(new Field(rightFieldName));
+                            }
+                        }
+                    }
+                    if (rEntity != null) {
+                        relation.setRightEntity(rEntity);
+                        rEntity.addInRelation(relation);
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(XmlDom2Model.class.getName()).log(Level.WARNING, null, ex);
                 }
             });
         }

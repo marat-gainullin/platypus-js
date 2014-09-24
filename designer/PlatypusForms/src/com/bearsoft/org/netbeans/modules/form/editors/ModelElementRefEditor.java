@@ -14,8 +14,8 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SQLUtils;
+import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.ModelElementRef;
-import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
@@ -68,7 +68,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
             element = lookupGridOrMapLayerRowsSource(element);
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
                 if (elementEntity != null && elementEntity.isQuery()) {
@@ -93,7 +93,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
             element = lookupGridOrMapLayerRowsSource(element);
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
                 if (elementEntity != null && elementEntity.isQuery()) {
@@ -121,7 +121,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
         try {
             assert value == null || value instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) value;
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
@@ -158,7 +158,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             renderer = new IconsListCellRenderer();
             renderer.setOpaque(false);
             ModelElementRef element = (ModelElementRef) getValue();
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity entity = model.getEntityById(element.getEntityId());
@@ -182,11 +182,11 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                             String fieldText = field.getName() != null && !field.getName().isEmpty() ? field.getName() : fieldDescription;
 
                             if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
-                                entityText = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryId());
+                                entityText = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryName());
                                 fieldText = "";
                             }
                             if (StoredQueryFactory.CONTENT_EMPTY_MSG.equals(fieldDescription)) {
-                                entityText = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.CONTENT_EMPTY_MSG), entity.getQueryId());
+                                entityText = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.CONTENT_EMPTY_MSG), entity.getQueryName());
                                 fieldText = "";
                             }
                             String typeName = SQLUtils.getLocalizedTypeName(field.getTypeInfo().getSqlType());
@@ -270,7 +270,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
     @Override
     public Component getCustomEditor() {
         try {
-            ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
+            ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (model != null) {
                 final ModelElementRef selected = new ModelElementRef();
                 return ModelElementSelector.prepareDialog(

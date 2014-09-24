@@ -17,7 +17,6 @@ import com.eas.client.ClientConstants;
 import com.eas.client.ModulesProxy;
 import com.eas.client.RemoteModulesProxy;
 import com.eas.client.ServerModulesProxy;
-import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
@@ -211,7 +210,7 @@ public class PlatypusClient implements Application<PlatypusQuery>{
                 conn.enqueueRequest(rq, (LoginRequest.Response aResponse) -> {
                     String sessionId = aResponse.getSessionId();
                     conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
-                    principal = new AppPlatypusPrincipal(aUserName, conn);
+                    principal = new PlatypusPrincipal(aUserName, null, null, null, null, Collections.emptySet());
                     onSuccess.accept(sessionId);
                 }, onFailure);
                 return null;
@@ -219,7 +218,7 @@ public class PlatypusClient implements Application<PlatypusQuery>{
                 LoginRequest.Response response = conn.executeRequest(rq);
                 String sessionId = response.getSessionId();
                 conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
-                principal = new AppPlatypusPrincipal(aUserName, conn);
+                principal = new PlatypusPrincipal(aUserName, null, null, null, null, Collections.emptySet());
                 return sessionId;
             }
         } catch (Exception ex) {

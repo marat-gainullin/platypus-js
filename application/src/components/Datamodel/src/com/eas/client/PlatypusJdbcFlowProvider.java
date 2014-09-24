@@ -91,7 +91,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
 
     @Override
     protected void unprepareConnection(Connection aConnection) throws Exception {
-        // In the folowing condition, _PR_eparation context is checked. It's right, because we need to cancel _PR_eparation
+        // In the following condition, _PR_eparation context is checked. It's right, because we need to cancel _PR_eparation
         // if it has been made. And so, condition checks a _PR_eparation context, but _UN_preparation context is applied.
         // If no preparation has been made, no unpreparation should occur!
         if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty()) {

@@ -7,6 +7,7 @@ package com.eas.client.model.gui.view;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SQLUtils;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.DummyRelation;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
@@ -47,12 +48,12 @@ import javax.swing.undo.UndoableEditSupport;
  *
  * @author mg
  */
-public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends TransferHandler {
+public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extends TransferHandler {
 
     protected static final String SCALABLE_COVER_DROP_LOCATION_TAG = "ScalableDropLocation";
     protected static final String SCALABLE_COVER_DROP_ACTION_TAG = "ScalableDropAction";
-    protected ModelView<E, ?, ?> modelView = null;
-    protected EntityView<E> entityView = null;
+    protected ModelView<E, ?, ?> modelView;
+    protected EntityView<E> entityView;
 
     public RelationsFieldsDragHandler(ModelView<E, ?, ?> aModelView, EntityView<E> aEntityView) {
         super();
@@ -320,7 +321,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
 
     private boolean willFormCycle(E leftEntity, E rightEntity) {
         if (modelView != null) {
-            Model<E, ?, ?, ?> model = modelView.getModel();
+            Model<E, ?, SqlQuery> model = modelView.getModel();
             if (model != null) {
                 Relation<E> dummyRel = new DummyRelation<>(leftEntity, null, rightEntity, null);
                 try {

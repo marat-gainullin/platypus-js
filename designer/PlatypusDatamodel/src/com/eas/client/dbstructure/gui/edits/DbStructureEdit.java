@@ -22,7 +22,7 @@ public abstract class DbStructureEdit implements UndoableEdit {
 
     protected void clearTablesCache() {
         try {
-            sqlController.getClient().dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), getChangingTableName());
+            sqlController.getBasesProxy().dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), getChangingTableName());
         } catch (Exception ex) {
             Logger.getLogger(DbStructureEdit.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -5,19 +5,20 @@
 package com.eas.server.handlers;
 
 import com.bearsoft.rowset.changes.*;
-import com.eas.client.AsyncProcess;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.server.PlatypusServerCore;
+import com.eas.server.Session;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author pk, mg refactoring
  */
-public class CommitRequestHandler extends CommonRequestHandler<CommitRequest, CommitRequest.Response> {
+public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, CommitRequest.Response> {
 
     protected static class ChangesSortProcess {
 
@@ -112,8 +113,9 @@ public class CommitRequestHandler extends CommonRequestHandler<CommitRequest, Co
     }
 
     @Override
-    public void handle(Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle2(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         DatabasesClient client = getServerCore().getDatabasesClient();
+        aSession.getPrincipal();
         List<Change> changes = getRequest().getChanges();
         ChangesSortProcess process = new ChangesSortProcess(changes.size(), (Map<String, List<Change>> changeLogs) -> {
             try {
@@ -135,7 +137,12 @@ public class CommitRequestHandler extends CommonRequestHandler<CommitRequest, Co
                 try {
                     ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityId, (SqlQuery aQuery) -> {
                         if (aQuery.isPublicAccess()) {
-                            process.complete(change, aQuery, null, null);
+                            AccessControlException aex = checkWritePrincipalPermission(aSession.getPrincipal(), change.entityId, aQuery.getWriteRoles());
+                            if (aex != null) {
+                                process.complete(null, null, aex, null);
+                            } else {
+                                process.complete(change, aQuery, null, null);
+                            }
                         } else {
                             process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityId)), null);
                         }
@@ -147,5 +154,14 @@ public class CommitRequestHandler extends CommonRequestHandler<CommitRequest, Co
                 }
             });
         }
+    }
+
+    private AccessControlException checkWritePrincipalPermission(PlatypusPrincipal aPrincipal, String aEntityId, Set<String> writeRoles) {
+        if (writeRoles != null && !writeRoles.isEmpty()) {
+            if (aPrincipal == null || !aPrincipal.hasAnyRole(writeRoles)) {
+                return new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", aPrincipal != null ? aPrincipal.getName() : null));
+            }
+        }
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 package com.eas.client.dbstructure.gui;
 
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+
 
 /**
  * A callback for table data query.
@@ -9,5 +10,5 @@ import com.eas.client.DbClient;
  */
 public interface RunQueryCallback {
 
-    public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName);
+    public void runQuery(DatabasesClient aClient, String aDbId, String aSchemaName, String aTableName);
 }

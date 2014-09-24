@@ -114,7 +114,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                 SqlQuery q = model.queries.getCachedQuery(queryName);
                 if (q != null) {                    
                     query = q.copy();
-                    query.clearRoles();
                 }
             } else if (tableName != null) {
                 query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());

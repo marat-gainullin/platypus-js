@@ -6,7 +6,6 @@ package com.eas.designer.application.query.completion;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.model.gui.IconCache;
-import com.eas.client.queries.SqlQuery;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor;

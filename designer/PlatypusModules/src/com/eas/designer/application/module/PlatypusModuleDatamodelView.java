@@ -213,7 +213,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     protected void initDbRelatedViews() throws Exception {
         removeAll();
         setLayout(new BorderLayout());
-        assert dataObject.getClient() != null;
+        assert dataObject.getBasesProxy() != null;
         if (dataObject.isModelValid()) {
             TablesSelector tablesSelector = new TablesSelector(dataObject.getProject(), true, true, NbBundle.getMessage(PlatypusModuleDatamodelView.class, "LBL_PlatypusModule_View_Name"), PlatypusModuleDatamodelView.this);
             QueriesSelector queriesSelector = new QueriesSelector(dataObject.getAppRoot()) {
@@ -227,7 +227,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 appModelEditor.setModel(null);
             }
             appModelEditor = new ApplicationModelEditorView(tablesSelector, queriesSelector);
-            appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>(dataObject.getProject()));
+            appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<>(dataObject.getProject()));
             ApplicationDbModel model = dataObject.getModel();
             appModelEditor.setModel(model);
             appModelEditor.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -254,7 +254,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                         // NetBeans' property sheet stay with a node from previous multi-view element.
                         // So, we need to simulate non-empty activated nodes and take this into account
                         // here.
-                        if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
+                        if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getBasesProxy() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
                             oldNodes = new Node[]{};
                         }
                         Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, oldSelected, newSelected);
@@ -276,7 +276,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                         // NetBeans' property sheet stay with a node from previous multi-view element.
                         // So, we need to simulate non-empty activated nodes and take this into account
                         // here.
-                        if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
+                        if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getBasesProxy() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
                             oldNodes = new Node[]{};
                         }
                         Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);
@@ -412,7 +412,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     @Override
     public void componentActivated() {
         try {
-            if (dataObject.isValid() && dataObject.getClient() != null) {
+            if (dataObject.isValid() && dataObject.getBasesProxy() != null) {
                 ModelInspector.getInstance().setNodesReflector(exlorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();
@@ -434,7 +434,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 // NetBeans' property sheet stay with a node from previous multi-view element.
                 // So, we need to simulate non-empty activated nodes.
                 if (activated == null || activated.length <= 0) {
-                    activated = new Node[]{dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate()};
+                    activated = new Node[]{dataObject.getBasesProxy() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate()};
                 }
                 explorerManager.setSelectedNodes(activated);
                 setActivatedNodes(activated);
@@ -453,7 +453,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     @Override
     public void componentHidden() {
         super.componentHidden();
-        if (dataObject.getClient() != null && ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
+        if (dataObject.getBasesProxy() != null && ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
             ModelInspector.getInstance().setNodesReflector(null);
             ModelInspector.getInstance().setViewData(null);
             WindowManager wm = WindowManager.getDefault();

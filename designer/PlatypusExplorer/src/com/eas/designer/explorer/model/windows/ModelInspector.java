@@ -6,13 +6,13 @@ package com.eas.designer.explorer.model.windows;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.selectors.SelectedField;
 import com.eas.client.model.gui.selectors.SelectedParameter;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.model.ModelView;
-import com.eas.client.queries.SqlQuery;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.designer.datamodel.nodes.ModelNode;
@@ -276,12 +276,12 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
             }
         }
     }
-    private transient ExplorerManager explorerManager;
-    private transient EmptyInspectorNode emptyInspectorNode;
-    private transient CopyCutActionPerformer copyActionPerformer = new CopyCutActionPerformer(true);
-    private transient CopyCutActionPerformer cutActionPerformer = new CopyCutActionPerformer(false);
-    private transient DeleteActionPerformer deleteActionPerformer = new DeleteActionPerformer();
-    private transient PasteActionPerformer pasteActionPerformer = new PasteActionPerformer();
+    private final transient ExplorerManager explorerManager;
+    private final transient EmptyInspectorNode emptyInspectorNode;
+    private final transient CopyCutActionPerformer copyActionPerformer = new CopyCutActionPerformer(true);
+    private final transient CopyCutActionPerformer cutActionPerformer = new CopyCutActionPerformer(false);
+    private final transient DeleteActionPerformer deleteActionPerformer = new DeleteActionPerformer();
+    private final transient PasteActionPerformer pasteActionPerformer = new PasteActionPerformer();
     private transient ClipboardListener clipboardListener;
     private transient PropertyChangeListener nodesReflector;
     private transient ViewData<?, ?> viewData;
@@ -398,7 +398,7 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
         }
     }
 
-    public static <E extends Entity<?, ?, E>> Node[] convertSelectedToNodes(ModelNode<E, ?> aRootNode, Node[] oldNodes, Set<E> oldSelected, Set<E> newSelected) {
+    public static <E extends Entity<?, SqlQuery, E>> Node[] convertSelectedToNodes(ModelNode<E, ?> aRootNode, Node[] oldNodes, Set<E> oldSelected, Set<E> newSelected) {
         List<Node> nodesToSelect = new ArrayList<>();
         nodesToSelect.addAll(Arrays.asList(aRootNode.entitiesToNodes(newSelected)));
         // changes were made to entities selection, and so no changes to fields selection should happen
@@ -412,7 +412,7 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
         return nodesToSelect.toArray(new Node[]{});
     }
 
-    public static <E extends Entity<?, ?, E>> Node[] convertSelectedToNodes(ModelNode<E, ?> aRootNode, Node[] oldNodes, List<SelectedParameter<E>> aParameters, List<SelectedField<E>> aFields) {
+    public static <E extends Entity<?, SqlQuery, E>> Node[] convertSelectedToNodes(ModelNode<E, ?> aRootNode, Node[] oldNodes, List<SelectedParameter<E>> aParameters, List<SelectedField<E>> aFields) {
         List<Node> nodesToSelect = new ArrayList<>();
         if (aParameters != null) {
             for (SelectedParameter<E> sp : aParameters) {

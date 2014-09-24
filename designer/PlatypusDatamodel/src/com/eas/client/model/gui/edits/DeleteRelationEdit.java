@@ -33,7 +33,7 @@ public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit
 
     @Override
     protected void redoWork() {
-        Model<E, ?, ?, ?> model = relation.getLeftEntity().getModel();
+        Model<E, ?, ?> model = relation.getLeftEntity().getModel();
         if (model != null) {
             model.removeRelation(relation);
         }
@@ -41,7 +41,7 @@ public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit
 
     @Override
     protected void undoWork() {
-        Model<E, ?, ?, ?> model = relation.getLeftEntity().getModel();
+        Model<E, ?, ?> model = relation.getLeftEntity().getModel();
         if (model != null) {
             model.addRelation(getRelation());
         }

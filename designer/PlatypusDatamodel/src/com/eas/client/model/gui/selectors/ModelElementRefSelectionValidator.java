@@ -37,7 +37,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
         validator = aValidator;
     }
 
-    protected E getEntityByField(Model<E, ?, ?, ?> aModel, Field aField) {
+    protected E getEntityByField(Model<E, ?, ?> aModel, Field aField) {
         try {
             for (E e : aModel.getAllEntities().values()) {
                 if (e.getFields().toCollection().contains(aField)) {
