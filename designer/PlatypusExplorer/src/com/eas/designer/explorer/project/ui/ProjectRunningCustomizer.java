@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * ProjectRunningCustomizer.java
  *
  * Created on 17.03.2011, 18:07:31
@@ -18,10 +13,9 @@ import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.application.utils.DatabaseConnectionRenderer;
 import com.eas.designer.application.utils.DatabaseConnections;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.db.explorer.ConnectionManager;
@@ -59,8 +52,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     protected final PlatypusProjectSettingsImpl projectSettings;
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit;
-    private DefaultComboBoxModel serversModel;
-    private ServerRegistryChangeListener serverRegistryLister = new ServerRegistryChangeListener();
+    private final DefaultComboBoxModel serversModel;
+    private final ServerRegistryChangeListener serverRegistryLister = new ServerRegistryChangeListener();
 
     /**
      * Creates new form ProjectRunningCustomizer
@@ -74,73 +67,59 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         setupConnectionsModel();
         cbConnections.setRenderer(new DatabaseConnectionRenderer(null));
         cbConnections.setSelectedItem(projectSettings.getDefaultDataSourceName() != null ? DatabaseConnections.lookup(projectSettings.getDefaultDataSourceName()) : null);
-        cbConnections.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
-                projectSettings.setDefaultDatasourceName(conn != null ? conn.getDisplayName() : null);
-            }
-
+        cbConnections.addActionListener((ActionEvent e) -> {
+            DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
+            projectSettings.setDefaultDatasourceName(conn != null ? conn.getDisplayName() : null);
         });
-        cbConnections.addItemListener(new ItemListener() {
-
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
-                projectSettings.setDefaultDatasourceName(conn != null ? conn.getDisplayName() : null);
-            }
+        cbConnections.addItemListener((ItemEvent e) -> {
+            DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
+            projectSettings.setDefaultDatasourceName(conn != null ? conn.getDisplayName() : null);
         });
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                isInit = true;
-                try {
-                    if (projectSettings.getRunElement() != null) {
-                        txtRunPath.setText(projectSettings.getRunElement());
-                    }
-                    chDbAppSources.setSelected(projectSettings.isDbAppSources());
-
-                    if (projectSettings.getRunUser() != null) {
-                        txtUserName.setText(projectSettings.getRunUser());
-                    }
-                    if (projectSettings.getRunPassword() != null) {
-                        txtPassword.setText(projectSettings.getRunPassword());
-                    }
-                    if (projectSettings.getRunClientOptions() != null) {
-                        txtClientOptions.setText(projectSettings.getRunClientOptions());
-                    }
-                    if (projectSettings.getRunClientVmOptions() != null) {
-                        txtClientVmOptions.setText(projectSettings.getRunClientVmOptions());
-                    }
-                    if (projectSettings.getClientUrl() != null) {
-                        txtClientUrl.setText(projectSettings.getClientUrl());
-                    }
-                    spServerPort.setValue(projectSettings.getServerPort());
-                    if (projectSettings.getRunServerOptions() != null) {
-                        txtServerOptions.setText(projectSettings.getRunServerOptions());
-                    }
-                    if (projectSettings.getRunServerVmOptions() != null) {
-                        txtServerVmOptions.setText(projectSettings.getRunServerVmOptions());
-                    }
-                    cbNotStartServer.setSelected(projectSettings.isNotStartServer());
-                    enablePlatypusClientCustomSettings();
-                    cbClientType.setSelectedItem(projectSettings.getRunClientType());
-                    cbAppServerType.setSelectedItem(projectSettings.getRunAppServerType());
-                    cbClientLogLevel.setSelectedItem(projectSettings.getClientLogLevel());
-                    cbServerLogLevel.setSelectedItem(projectSettings.getServerLogLevel());
-                    selectServerInstance();
-
-                    if (projectSettings.getServerContext() != null) {
-                        txtContext.setText(projectSettings.getServerContext());
-                    }
-                    cbEnableUserLogin.setSelected(projectSettings.isSecurityRealmEnabled());
-                    spClientDebugPort.setValue(projectSettings.getDebugClientPort());
-                    spServerDebugPort.setValue(projectSettings.getDebugServerPort());
-                    checkRunClientServerConfiguration();
-                } finally {
-                    isInit = false;
+        EventQueue.invokeLater(() -> {
+            isInit = true;
+            try {
+                if (projectSettings.getRunElement() != null) {
+                    txtRunPath.setText(projectSettings.getRunElement());
                 }
+                if (projectSettings.getRunUser() != null) {
+                    txtUserName.setText(projectSettings.getRunUser());
+                }
+                if (projectSettings.getRunPassword() != null) {
+                    txtPassword.setText(projectSettings.getRunPassword());
+                }
+                if (projectSettings.getRunClientOptions() != null) {
+                    txtClientOptions.setText(projectSettings.getRunClientOptions());
+                }
+                if (projectSettings.getRunClientVmOptions() != null) {
+                    txtClientVmOptions.setText(projectSettings.getRunClientVmOptions());
+                }
+                if (projectSettings.getClientUrl() != null) {
+                    txtClientUrl.setText(projectSettings.getClientUrl());
+                }
+                spServerPort.setValue(projectSettings.getServerPort());
+                if (projectSettings.getRunServerOptions() != null) {
+                    txtServerOptions.setText(projectSettings.getRunServerOptions());
+                }
+                if (projectSettings.getRunServerVmOptions() != null) {
+                    txtServerVmOptions.setText(projectSettings.getRunServerVmOptions());
+                }
+                cbNotStartServer.setSelected(projectSettings.isNotStartServer());
+                enablePlatypusClientCustomSettings();
+                cbClientType.setSelectedItem(projectSettings.getRunClientType());
+                cbAppServerType.setSelectedItem(projectSettings.getRunAppServerType());
+                cbClientLogLevel.setSelectedItem(projectSettings.getClientLogLevel());
+                cbServerLogLevel.setSelectedItem(projectSettings.getServerLogLevel());
+                selectServerInstance();
+                
+                if (projectSettings.getServerContext() != null) {
+                    txtContext.setText(projectSettings.getServerContext());
+                }
+                cbEnableUserLogin.setSelected(projectSettings.isSecurityRealmEnabled());
+                spClientDebugPort.setValue(projectSettings.getDebugClientPort());
+                spServerDebugPort.setValue(projectSettings.getDebugServerPort());
+                checkRunClientServerConfiguration();
+            } finally {
+                isInit = false;
             }
         });
     }
@@ -204,8 +183,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private static final class J2eePlatformAdapter {
 
         public static final J2eePlatformAdapter UNKNOWN_PLATFORM_ADAPRER = new J2eePlatformAdapter(null, null);
-        private J2eePlatform platform;
-        private String serverInstanceID;
+        private final J2eePlatform platform;
+        private final String serverInstanceID;
 
         public J2eePlatformAdapter(J2eePlatform platform, String serverInstanceID) {
             this.platform = platform;
@@ -288,7 +267,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         lblContext = new javax.swing.JLabel();
         txtContext = new javax.swing.JTextField();
         btnManageServers = new javax.swing.JButton();
-        chDbAppSources = new javax.swing.JCheckBox();
         cbClientType = new javax.swing.JComboBox();
         lblClientType = new javax.swing.JLabel();
         lblServeType = new javax.swing.JLabel();
@@ -568,7 +546,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblServerPort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServerVmOptions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblServerOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 76, Short.MAX_VALUE)
+                    .addComponent(lblServerOptions, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
                     .addComponent(lblServerLogLevel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServerDebugPort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(10, 10, 10)
@@ -679,14 +657,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.j2eeServerPanel.TabConstraints.tabTitle"), j2eeServerPanel); // NOI18N
 
-        chDbAppSources.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.chDbAppSources.text")); // NOI18N
-        chDbAppSources.setActionCommand("");
-        chDbAppSources.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chDbAppSourcesActionPerformed(evt);
-            }
-        });
-
         cbClientType.setModel(new javax.swing.DefaultComboBoxModel(ClientType.values()));
         cbClientType.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -736,6 +706,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(tabbedPane)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -760,14 +731,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                                     .addComponent(btnAddDatasource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cbNotStartServer)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(chDbAppSources)
-                                .addGap(38, 38, 38)
-                                .addComponent(cbEnableUserLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(cbEnableUserLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cbNotStartServer))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addComponent(tabbedPane)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -793,9 +760,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblClientServerMessage)
                 .addGap(7, 7, 7)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chDbAppSources)
-                    .addComponent(cbEnableUserLogin))
+                .addComponent(cbEnableUserLogin)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbNotStartServer)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -838,10 +803,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private void txtUserNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserNameFocusLost
         projectSettings.setRunUser(txtUserName.getText());
     }//GEN-LAST:event_txtUserNameFocusLost
-
-    private void chDbAppSourcesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chDbAppSourcesActionPerformed
-        projectSettings.setDbAppSources(chDbAppSources.isSelected());
-    }//GEN-LAST:event_chDbAppSourcesActionPerformed
 
     private void txtUserNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUserNameActionPerformed
         projectSettings.setRunUser(txtUserName.getText());
@@ -945,13 +906,13 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
     private void btnManageServersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageServersActionPerformed
         Lookup.Result<ServerInstanceProvider> result = Lookups.forPath(SERVERS_PATH).lookupResult(ServerInstanceProvider.class);
-        for (ServerInstanceProvider provider : result.allInstances()) {
+        result.allInstances().stream().forEach((provider) -> {
             provider.addChangeListener(serverRegistryLister);
-        }
+        });
         CommonServerUIs.showCustomizer(null);
-        for (ServerInstanceProvider provider : result.allInstances()) {
+        result.allInstances().stream().forEach((provider) -> {
             provider.removeChangeListener(serverRegistryLister);
-        }
+        });
     }//GEN-LAST:event_btnManageServersActionPerformed
 
     private void spClientDebugPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spClientDebugPortStateChanged
@@ -1007,7 +968,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JCheckBox cbNotStartServer;
     private javax.swing.JComboBox cbServerLogLevel;
     private javax.swing.JComboBox cbj2eeServer;
-    private javax.swing.JCheckBox chDbAppSources;
     private javax.swing.JPanel clientPanel;
     private javax.swing.JPanel j2eeServerPanel;
     private javax.swing.JPanel jPanel1;

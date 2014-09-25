@@ -9,6 +9,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.Set;
 import java.util.logging.Level;
@@ -21,28 +22,34 @@ import org.w3c.dom.Document;
  */
 public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQuery> {
 
+    protected QueriesProxy<SqlQuery> queries;
     protected DatabasesClient basesProxy;
     protected String datasourceName;
     private Set<Integer> supportedTypes;
 
-    public QueryModel() {
+    public QueryModel(QueriesProxy<SqlQuery> aQueries) {
         super();
+        queries = aQueries;
         parametersEntity = new QueryParametersEntity();
         parametersEntity.setModel(this);
     }
 
-    public QueryModel(DatabasesClient aBasesProxy) {
-        this();
+    public QueryModel(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueries) {
+        this(aQueries);
         basesProxy = aBasesProxy;
     }
 
-    public QueryModel(DatabasesClient aaBasesProxy, String aDatasourceName) {
-        this(aaBasesProxy);
+    public QueryModel(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueries, String aDatasourceName) {
+        this(aBasesProxy, aQueries);
         datasourceName = aDatasourceName;
     }
 
     public DatabasesClient getBasesProxy() {
         return basesProxy;
+    }
+
+    public QueriesProxy<SqlQuery> getQueries() {
+        return queries;
     }
 
     public String getDatasourceName() {
@@ -99,4 +106,18 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQue
             }
         }
     }
+    
+    /**
+     * Validates queries in force way. Such case is used in designer ONLY!
+     * @return
+     * @throws Exception 
+     */
+    @Override
+    protected boolean validateEntities() throws Exception {
+        for (QueryEntity e : entities.values()) {
+            queries.getQuery(e.getQueryName(), null, null);
+        }
+        return super.validateEntities();
+    }
+
 }

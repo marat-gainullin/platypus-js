@@ -48,7 +48,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
 
     @Override
     protected QueryModel transformDocToModel(Document aDoc) throws Exception {
-        return XmlDom2QueryModel.transform(model.getBasesProxy(), aDoc);
+        return XmlDom2QueryModel.transform(model.getBasesProxy(), model.getQueries(), aDoc);
     }
 
     @Override
@@ -58,7 +58,15 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
 
     @Override
     protected EntityView<QueryEntity> createGenericEntityView(QueryEntity aEntity) throws Exception {
-        return isParametersEntity(aEntity) ? new QueryParametersEntityView((QueryParametersEntity) aEntity, entitiesViewsMover) : new QueryEntityView(aEntity, entitiesViewsMover);
+        if (isParametersEntity(aEntity)) {
+            return new QueryParametersEntityView((QueryParametersEntity) aEntity, entitiesViewsMover);
+        } else {
+            if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
+                model.getQueries().getQuery(aEntity.getQueryName(), null, null);
+            }
+            aEntity.validateQuery();
+            return new QueryEntityView(aEntity, entitiesViewsMover);
+        }
     }
 
     @Override
@@ -70,7 +78,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
             entity.setY(rect.y);
             entity.setWidth(rect.width);
             entity.setHeight(rect.height);
-            entity.setQueryName(aAppElementName);            
+            entity.setQueryName(aAppElementName);
             NewEntityEdit edit = new NewEntityEdit(model, entity);
             edit.redo();
             undoSupport.postEdit(edit);
@@ -95,7 +103,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
 
     @Override
     protected QueryModel newModelInstance() {
-        return new QueryModel(model.getBasesProxy());
+        return new QueryModel(model.getBasesProxy(), model.getQueries());
     }
 
     protected final void putAddQueryAction() {

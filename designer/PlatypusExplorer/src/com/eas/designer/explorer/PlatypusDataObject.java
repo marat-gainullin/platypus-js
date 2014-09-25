@@ -31,7 +31,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     private static final RequestProcessor RP = new RequestProcessor(PlatypusDataObject.class.getName(), 10);
     private final Set<PlatypusProject.ClientChangeListener> clientListeners = new HashSet<>();
     protected ListenerRegistration projectClientListener;
-    
+
     public PlatypusDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException {
         super(pf, loader);
         if (getProject() != null) {
@@ -76,17 +76,19 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     public void startModelValidating() {
         if (!isModelValid() && !validationStarted) {
             validationStarted = true;
-            RP.execute(() -> {
-                try {
-                    validateModel();
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-                } finally {
-                    EventQueue.invokeLater(() -> {
-                        validationStarted = false;
-                        setModelValid(true);
-                    });
-                }
+            EventQueue.invokeLater(() -> {
+                RP.execute(() -> {
+                    try {
+                        validateModel();
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+                    } finally {
+                        EventQueue.invokeLater(() -> {
+                            validationStarted = false;
+                            setModelValid(true);
+                        });
+                    }
+                });
             });
         }
     }

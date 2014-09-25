@@ -125,7 +125,15 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) throws Exception {
-        return isParametersEntity(aEntity) ? new ApplicationParametersEntityView((ApplicationDbParametersEntity) aEntity, entitiesViewsMover) : new ApplicationEntityView(aEntity, entitiesViewsMover);
+        if (isParametersEntity(aEntity)) {
+            return new ApplicationParametersEntityView((ApplicationDbParametersEntity) aEntity, entitiesViewsMover);
+        } else {
+            if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
+                model.getQueries().getQuery(aEntity.getQueryName(), null, null);
+            }
+            aEntity.validateQuery();
+            return new ApplicationEntityView(aEntity, entitiesViewsMover);
+        }
     }
 
     @Override

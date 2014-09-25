@@ -166,6 +166,19 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return rootEntities;
     }
 
+    /**
+     * Validates queries in force way. Such case is used in designer ONLY!
+     * @return
+     * @throws Exception 
+     */
+    @Override
+    protected boolean validateEntities() throws Exception {
+        for (E e : entities.values()) {
+            queries.getQuery(e.getQueryName(), null, null);
+        }
+        return super.validateEntities();
+    }
+
     public void validateQueries() throws Exception {
         for (E entity : entities.values()) {
             entity.validateQuery();

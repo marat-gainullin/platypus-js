@@ -12,6 +12,7 @@ package com.eas.client.model.gui.edits;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
+import com.eas.client.queries.QueriesProxy;
 
 /**
  *

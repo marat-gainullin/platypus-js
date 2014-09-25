@@ -173,13 +173,6 @@ public interface PlatypusProjectSettings {
     int getServerPort();
 
     /**
-     * Checks if runtime to use application from database.
-     *
-     * @return true if run application from database
-     */
-    boolean isDbAppSources();
-
-    /**
      * Checks if NOT to start local development application server on
      * application run.
      *
@@ -220,13 +213,6 @@ public interface PlatypusProjectSettings {
      * @param aValue
      */
     void setClientVmOptions(String aValue);
-
-    /**
-     * Sets flag for runtime to use application from database.
-     *
-     * @param aValue true if run application from database
-     */
-    void setDbAppSources(boolean aValue);
 
     /**
      * Sets JMX debugging port for Platypus Client on local computer on

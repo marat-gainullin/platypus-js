@@ -5,11 +5,13 @@
 package com.eas.client.model.store;
 
 import com.eas.client.DatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.model.Relation;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.visitors.QueryModelVisitor;
+import com.eas.client.queries.QueriesProxy;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -29,14 +31,14 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements Quer
         modelElement = aModelElement;
     }
 
-    public static QueryModel transform(DatabasesClient aClient, Document aDoc) throws Exception {
-        QueryModel model = new QueryModel(aClient);
+    public static QueryModel transform(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueries, Document aDoc) throws Exception {
+        QueryModel model = new QueryModel(aBasesProxy, aQueries);
         model.accept(new XmlDom2QueryModel(aDoc));
         return model;
     }
 
-    public static QueryModel transform(DatabasesClient aClient, Element aModelElement) throws Exception {
-        QueryModel model = new QueryModel(aClient);
+    public static QueryModel transform(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueries, Element aModelElement) throws Exception {
+        QueryModel model = new QueryModel(aBasesProxy, aQueries);
         model.accept(new XmlDom2QueryModel(aModelElement));
         return model;
     }

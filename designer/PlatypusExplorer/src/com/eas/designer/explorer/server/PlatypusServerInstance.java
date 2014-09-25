@@ -187,20 +187,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
             io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
         }
 
-        if (project.getSettings().isDbAppSources()) {
-            if (defaultDatabaseConnection != null) {
-                arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
-                arguments.add("jndi://" + pps.getDefaultDataSourceName());
-                io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources_Database"));//NOI18N
-            } else {
-                io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
-            }
-        } else {
-            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
-            arguments.add(project.getProjectDirectory().toURI().toASCIIString());
-            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
-                    project.getProjectDirectory().toURI().toASCIIString()));
-        }
+        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
+        arguments.add(project.getProjectDirectory().toURI().toASCIIString());
+        io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
+                project.getProjectDirectory().toURI().toASCIIString()));
 
         if (!project.getSettings().isSecurityRealmEnabled()) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.ANONYMOUS_ON_CMD_SWITCH);

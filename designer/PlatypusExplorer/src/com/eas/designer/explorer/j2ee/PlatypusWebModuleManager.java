@@ -98,7 +98,7 @@ public class PlatypusWebModuleManager {
             + "         //throw 'Legacy API can not restore the global namespace.';\n"
             + "         //};\n"
             + "    }\n"
-            + "})();\n"            
+            + "})();\n"
             + "window.P.ready = function() {\n"//NOI18N
             + "    window.P.require(['%s'], function(){\n"//NOI18N
             + "        var f = new %s();\n"//NOI18N
@@ -119,6 +119,7 @@ public class PlatypusWebModuleManager {
 
     /**
      * Runs the web application.
+     *
      * @param appElementId id for starting element
      * @param isDebug true if debug mode to be activated
      * @return URL to open in browser
@@ -186,6 +187,7 @@ public class PlatypusWebModuleManager {
 
     /**
      * Creates an web application skeleton if not created yet.
+     *
      * @throws java.lang.Exception
      */
     protected void prepareWebApplication() throws Exception {
@@ -254,7 +256,7 @@ public class PlatypusWebModuleManager {
     /**
      * Recursively copies directory's content.
      *
-     * @param sourceDir 
+     * @param sourceDir
      * @param targetDir
      * @throws IOException if some I/O problem occurred.
      */
@@ -328,11 +330,7 @@ public class PlatypusWebModuleManager {
 
     private void configureParams(WebApplication wa) throws Exception {
         wa.addInitParam(new ContextParam(ServerMain.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
-        if (project.getSettings().isDbAppSources()) {
-            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, "jndi://" + project.getSettings().getDefaultDataSourceName()));
-        } else {
-            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
-        }
+        wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
     }
 
     private void configureServlet(WebApplication wa) {
@@ -413,7 +411,7 @@ public class PlatypusWebModuleManager {
             }
         }
     }
-    
+
     private void copyApiJs(FileObject clasessDir) throws IOException {
         try {
             copyContent(FileUtil.toFileObject(PlatypusPlatform.getPlatformApiDirectory()), clasessDir);

@@ -31,10 +31,15 @@ public interface PlatypusProject extends Project {
         public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName);
     }
 
+    public interface QueriesChangeListener {
+
+        public void changed();
+    }
+
     DatabasesClient getBasesProxy();
-    
+
     LocalQueriesProxy getQueries();
-    
+
     boolean isDbConnected(String aDatasourceId);
 
     void startConnecting2db(String aDatasourceId);
@@ -48,7 +53,13 @@ public interface PlatypusProject extends Project {
     Component generateDbValidatePlaceholder() throws Exception;
 
     ListenerRegistration addClientChangeListener(final ClientChangeListener onChange);
+    
+    ListenerRegistration addQueriesChangeListener(final QueriesChangeListener onChange);
 
+    public void fireQueriesChanged();
+        
+    public void fireQueryChanged(String aQueryName);
+    
     PlatypusProjectSettings getSettings();
 
     void save() throws Exception;
@@ -62,7 +73,7 @@ public interface PlatypusProject extends Project {
     ProjectState getState();
 
     FileObject getSrcRoot();
-    
+
     PlatypusProjectInformation getProjectInfo();
 
     SubTreeSearchOptions getSubTreeSearchOptions();

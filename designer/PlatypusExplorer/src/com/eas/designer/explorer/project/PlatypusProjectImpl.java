@@ -32,10 +32,7 @@ import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
@@ -81,7 +78,6 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
-import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -113,6 +109,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     private boolean autoDeployEnabled;
     private ClassPath sourceRoot;
     private final Set<PlatypusProject.ClientChangeListener> clientListeners = new HashSet<>();
+    private final Set<PlatypusProject.QueriesChangeListener> queriesListeners = new HashSet<>();
     private final SearchFilter searchFilter;
 
     public PlatypusProjectImpl(FileObject aProjectDir, ProjectState aState) throws Exception {
@@ -176,30 +173,30 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
             @Override
             protected JSObject createModule(String aModuleName) throws Exception {
-                String sourcePath = null;//basesProxy.getAppCache().translateScriptPath(aModuleName);
-                if (sourcePath != null) {
-                    URL sourceUrl;
-                    File test = new File(sourcePath);
-                    if (test.exists()) {
-                        sourceUrl = Utilities.toURI(test).toURL();
-                    } else {
-                        try {
-                            sourceUrl = new URL(sourcePath);
-                        } catch (MalformedURLException ex) {
-                            throw new FileNotFoundException(sourcePath);
-                        }
-                    }
-                    URLReader reader = new URLReader(sourceUrl, SettingsConstants.COMMON_ENCODING);
-                    jsEngine.eval(reader);
-                    return (JSObject) jsEngine.eval("new " + aModuleName + "()");
-                } else {
-                    return null;
-                }
+                return createLocalEngineModule(aModuleName);
             }
         };
-        queries = new LocalQueriesProxy(basesProxy, indexer);
+        queries = new LocalQueriesProxy(basesProxy, indexer) {
+
+            @Override
+            protected JSObject createModule(String aModuleName) throws Exception {
+                return createLocalEngineModule(aModuleName);
+            }
+
+        };
         jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
         jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
+    }
+
+    protected JSObject createLocalEngineModule(String aModuleName) throws Exception {
+        FileObject jsFo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aModuleName);
+        if (jsFo != null) {
+            URLReader reader = new URLReader(jsFo.toURL(), SettingsConstants.COMMON_ENCODING);
+            jsEngine.eval(reader);
+            return (JSObject) jsEngine.eval("new " + aModuleName + "()");
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -326,6 +323,22 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
+    public synchronized void fireQueriesChanged() {
+        queries.clearCachedQueries();
+        queriesListeners.stream().forEach((onChange) -> {
+            onChange.changed();
+        });
+    }
+
+    @Override
+    public synchronized void fireQueryChanged(String aQueryName) {
+        queries.clearCachedQuery(aQueryName);
+        queriesListeners.stream().forEach((onChange) -> {
+            onChange.changed();
+        });
+    }
+
+    @Override
     public InputOutput getOutputWindowIO() {
         return IOProvider.getDefault().getIO(getDisplayName(), false);
     }
@@ -431,12 +444,19 @@ public class PlatypusProjectImpl implements PlatypusProject {
     @Override
     public synchronized ListenerRegistration addClientChangeListener(final PlatypusProject.ClientChangeListener onChange) {
         clientListeners.add(onChange);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                synchronized (PlatypusProjectImpl.this) {
-                    clientListeners.remove(onChange);
-                }
+        return () -> {
+            synchronized (PlatypusProjectImpl.this) {
+                clientListeners.remove(onChange);
+            }
+        };
+    }
+
+    @Override
+    public synchronized ListenerRegistration addQueriesChangeListener(final PlatypusProject.QueriesChangeListener onChange) {
+        queriesListeners.add(onChange);
+        return () -> {
+            synchronized (PlatypusProjectImpl.this) {
+                queriesListeners.remove(onChange);
             }
         };
     }

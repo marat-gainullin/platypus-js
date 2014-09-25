@@ -39,6 +39,7 @@ import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.JsDoc;
+import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.beans.PropertyChangeEvent;
@@ -136,9 +137,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         @Override
         public void added(Fields c, Collection<Field> clctn) {
             setModelModified(true);
-            for (Field v : clctn) {
+            clctn.stream().forEach((v) -> {
                 v.getChangeSupport().addPropertyChangeListener(this);
-            }
+            });
         }
 
         @Override
@@ -150,9 +151,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         @Override
         public void removed(Fields c, Collection<Field> clctn) {
             setModelModified(true);
-            for (Field v : clctn) {
+            clctn.stream().forEach((v) -> {
                 v.getChangeSupport().removePropertyChangeListener(this);
-            }
+            });
         }
 
         @Override
@@ -206,6 +207,11 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected transient boolean sqlModified;
     protected transient boolean fullSqlModified;
     protected transient boolean outputFieldsHintsModified;
+    protected transient ListenerRegistration queriesReg;
+    protected transient PlatypusProject.QueriesChangeListener modelValidator = () -> {
+        setModelValid(false);
+        startModelValidating();
+    };
 
     public PlatypusQueryDataObject(FileObject aSqlFile, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(aSqlFile, loader);
@@ -220,8 +226,12 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         // dirty hack
         // NetBeans marks only primary file with appropriate script engine.
         // Though, parameters aren't inserted into secondary files in data objects.
-        modelEntry.getFile().setAttribute(javax.script.ScriptEngine.class.getName(), "freemarker");
-        // end of dirty hack    
+        aModelFile.setAttribute(javax.script.ScriptEngine.class.getName(), "freemarker");
+        // end of dirty hack
+        PlatypusProject project = getProject();
+        if (project != null) {
+            queriesReg = project.addQueriesChangeListener(modelValidator);
+        }
     }
 
     @Override
@@ -245,7 +255,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             dialectText = dialectEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
         }
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
-        model = XmlDom2QueryModel.transform(getBasesProxy(), modelDoc);
+        model = XmlDom2QueryModel.transform(getBasesProxy(), getProject().getQueries(), modelDoc);
 
         model.addEditingListener(modelChangesObserver);
         model.getParametersEntity().getChangeSupport().addPropertyChangeListener(modelChangesObserver);
@@ -590,6 +600,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     }
 
     public void saveQuery() throws Exception {
+        boolean contentModified = sqlModified || fullSqlModified || modelModified || outputFieldsHintsModified;
         if (sqlModified) {
             sqlText = sqlTextDocument.getText(0, sqlTextDocument.getLength());
             write2File(getPrimaryFile(), sqlText);
@@ -621,6 +632,15 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             write2File(outEntry.getFile(), XmlDom2String.transform(outHintsDocument));
             outputFieldsHintsModified = false;
         }
+        if (contentModified) {
+            PlatypusProject project = getProject();
+            String queryName = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.NAME_TAG);
+            if (project != null && project.getQueries().getCachedQuery(queryName) != null) {
+                queriesReg.remove();
+                project.fireQueriesChanged();
+                project.addQueriesChangeListener(modelValidator);
+            }
+        }
     }
 
     private void write2File(FileObject aFile, String aContent) throws Exception {
@@ -633,8 +653,16 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     @Override
     protected void handleDelete() throws IOException {
-        String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
+        queriesReg.remove();
+        if (sqlText == null) {
+            sqlText = getPrimaryFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
+        }
+        String queryName = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.NAME_TAG);
+        PlatypusProject project = getProject();
         super.handleDelete();
+        if (project != null && project.getQueries().getCachedQuery(queryName) != null) {
+            project.fireQueriesChanged();
+        }
     }
 
     public Statement getCommitedStatement() {

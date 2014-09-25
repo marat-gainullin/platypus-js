@@ -162,14 +162,11 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         associateLookup(new ProxyLookup(new Lookup[]{
             ExplorerUtils.createLookup(explorerManager, getActionMap())}));
         initDbRelatedViews();
-        modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    initDbRelatedViews();
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
-                }
+        modelValidChangeListener = dataObject.addModelValidChangeListener(() -> {
+            try {
+                initDbRelatedViews();
+            } catch (Exception ex) {
+                ErrorManager.getDefault().notify(ex);
             }
         });
         clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
@@ -295,20 +292,14 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 }
             });
             explorerManager.setRootContext(dataObject.getModelNode());
-            appModelEditor.getModelView().complementReferenceRelationsByKeys(new ApplicationModelView.ForeignKeyBindingTask() {
-                @Override
-                public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
-                    appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
-                }
+            appModelEditor.getModelView().complementReferenceRelationsByKeys((ReferenceRelation<ApplicationDbEntity> aRelation) -> {
+                appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
             });
-            getModelView().complementReferenceRelationsByKeys(new ForeignKeyBindingTask() {
-                @Override
-                public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
-                    try {
-                        dataObject.getModel().addReferenceRelation(aRelation);
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusModuleDatamodelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                    }
+            getModelView().complementReferenceRelationsByKeys((ReferenceRelation<ApplicationDbEntity> aRelation) -> {
+                try {
+                    dataObject.getModel().addReferenceRelation(aRelation);
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusModuleDatamodelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
             });
             UndoRedo ur = getUndoRedo();

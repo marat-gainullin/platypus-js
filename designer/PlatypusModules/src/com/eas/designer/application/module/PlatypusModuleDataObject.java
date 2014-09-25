@@ -7,6 +7,7 @@ package com.eas.designer.application.module;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.CollectionListener;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.ModelEditingListener;
@@ -22,6 +23,7 @@ import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.ScriptUtils;
+import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.beans.PropertyChangeEvent;
@@ -141,6 +143,11 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     private transient boolean astIsValid;
     private transient FunctionNode astRoot;
     private transient FunctionNode constructor;
+    private transient ListenerRegistration queriesReg;
+    protected transient PlatypusProject.QueriesChangeListener modelValidator = () -> {
+        setModelValid(false);
+        startModelValidating();
+    };
 
     public PlatypusModuleDataObject(FileObject aJsFile, MultiFileLoader loader) throws Exception {
         super(aJsFile, loader);
@@ -149,6 +156,10 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         CookieSet cookies = getCookieSet();
         for (Cookie service : createServices()) {
             cookies.add(service);
+        }
+        PlatypusProject project = getProject();
+        if (project != null) {
+            queriesReg = project.addQueriesChangeListener(modelValidator);
         }
     }
 
@@ -286,7 +297,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     protected ApplicationDbModel readModel() throws Exception {
         String modelContent = getModelFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
-        org.w3c.dom.Document doc = Source2XmlDom.transform(modelContent);        
+        org.w3c.dom.Document doc = Source2XmlDom.transform(modelContent);
         ApplicationDbModel modelRead = new ApplicationDbModel(getProject().getQueries());
         modelRead.accept(new XmlDom2ApplicationModel<>(doc));
         return modelRead;
@@ -312,7 +323,28 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     @Override
     protected void handleDelete() throws IOException {
+        queriesReg.remove();
+        FunctionNode constr = getConstructor();
+        PlatypusProject project = getProject();
+        if (project != null && constr != null && project.getQueries().getCachedQuery(constr.getName()) != null) {
+            project.fireQueryChanged(constr.getName());
+        }
         super.handleDelete();
+    }
+
+    public void notifyModuleQueryChanged() {
+        FunctionNode constr = getConstructor();
+        if (constr != null) {
+            PlatypusProject project = getProject();
+            if (project != null) {
+                SqlQuery moduleQuery = project.getQueries().getCachedQuery(constr.getName());
+                if (moduleQuery != null) {
+                    queriesReg.remove();
+                    project.fireQueryChanged(constr.getName());
+                    project.addQueriesChangeListener(modelValidator);
+                }
+            }
+        }
     }
 
     @Override
@@ -341,4 +373,5 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             return aJsContent;
         }
     }
+
 }

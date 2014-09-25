@@ -64,16 +64,15 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
     @Override
     public void validateQuery() throws Exception {
         if (query == null) {
-            try {
-                if (queryName != null) {
-                    query = null;//model.getClient().getAppQuery(queryName, null, null);
-                } else if (tableName != null) {
-                    query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
-                } else {
-                    assert false : "Query entity needs table name or a subquery name";
+            if (queryName != null) {
+                SqlQuery q = model.queries.getCachedQuery(queryName);
+                if (q != null) {                    
+                    query = q.copy();
                 }
-            } catch (Exception ex) {
-                query = null;
+            } else if (tableName != null) {
+                query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
+            } else {
+                assert false : "Entity must have queryName or tableName to validate it's query";
             }
         }
     }

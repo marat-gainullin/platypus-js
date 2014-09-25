@@ -55,25 +55,34 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     public SqlQuery getQuery(String aName, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<SqlQuery> doWork = () -> {
             SqlQuery query;
-            Date cachedTimeStamp = null;
-            ActualCacheEntry<SqlQuery> entry = entries.get(aName);
-            if (entry != null) {
-                cachedTimeStamp = entry.getTimeStamp();
-            }
-            AppElementFiles files = indexer.nameToFiles(aName);
-            Date filesTimeStamp = files.getLastModified();
-            if (cachedTimeStamp == null || filesTimeStamp.after(cachedTimeStamp)) {
-                if (files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                    query = queryFromModule(aName);
-                } else if (files.hasExtension(PlatypusFiles.SQL_EXTENSION)) {
-                    query = factory.loadQuery(aName);
-                } else {
-                    throw new IllegalStateException("Queries can be constructed with only platypus queries or platypus modules application elements.");
+            if (aName != null) {
+                Date cachedTimeStamp = null;
+                ActualCacheEntry<SqlQuery> entry = entries.get(aName);
+                if (entry != null) {
+                    cachedTimeStamp = entry.getTimeStamp();
                 }
-                entries.put(aName, new ActualCacheEntry<>(query, filesTimeStamp));
+                AppElementFiles files = indexer.nameToFiles(aName);
+                if (files != null) {
+                    Date filesTimeStamp = files.getLastModified();
+                    if (cachedTimeStamp == null || filesTimeStamp.after(cachedTimeStamp)) {
+                        if (files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                            query = queryFromModule(aName);
+                        } else if (files.hasExtension(PlatypusFiles.SQL_EXTENSION)) {
+                            query = factory.loadQuery(aName);
+                        } else {
+                            throw new IllegalStateException("Queries can be constructed with only platypus queries or platypus modules application elements.");
+                        }
+                        entries.put(aName, new ActualCacheEntry<>(query, filesTimeStamp));
+                    } else {
+                        assert entry != null : "Neither im memory, nor in files query found";
+                        query = entry.getValue();
+                    }
+                } else {
+                    entries.remove(aName);
+                    query = null;
+                }
             } else {
-                assert entry != null : "Neither im memory, nor in files query found";
-                query = entry.getValue();
+                query = null;
             }
             return query;
         };
@@ -203,15 +212,28 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             throw new IllegalStateException(" datasource module: " + aModuleName + " is not found");
         }
     }
-    
+
     @Override
     public SqlQuery getCachedQuery(String aName) {
-        ActualCacheEntry<SqlQuery> entry = entries.get(aName);
-        if (entry != null) {
-            return entry.getValue();
+        if (aName != null) {
+            ActualCacheEntry<SqlQuery> entry = entries.get(aName);
+            if (entry != null) {
+                return entry.getValue();
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
     }
 
+    public void clearCachedQueries() {
+        entries.clear();
+    }
+
+    public void clearCachedQuery(String aQueryName) {
+        if (aQueryName != null) {
+            entries.remove(aQueryName);
+        }
+    }
 }

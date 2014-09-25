@@ -39,7 +39,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String RUN_CLIENT_VM_OPTIONS_KEY = "runClientVmOptions"; //NOI18N
     public static final String RUN_SERVER_OPTIONS_KEY = "runServerOptions"; //NOI18N
     public static final String RUN_SERVER_VM_OPTIONS_KEY = "runServerVmOptions"; //NOI18N
-    public static final String DB_APP_SOURCES_KEY = "dbAppSources"; //NOI18N
     public static final String SERVER_PORT_KEY = "serverPort";//NOI18N
     public static final String CLIENT_URL_KEY = "clientUrl";//NOI18N
     public static final String NOT_START_SERVER_KEY = "notStartServer"; //NOI18N
@@ -317,29 +316,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     /**
-     * Checks if runtime to use application from database.
-     *
-     * @return true if run application from database
-     */
-    @Override
-    public boolean isDbAppSources() {
-        return Boolean.valueOf(projectPrivateProperties.get(DB_APP_SOURCES_KEY));
-    }
-
-    /**
-     * Sets flag for runtime to use application from database.
-     *
-     * @param aValue true if run application from database
-     */
-    @Override
-    public void setDbAppSources(boolean aValue) {
-        boolean oldValue = isDbAppSources();
-        projectPrivateProperties.setProperty(DB_APP_SOURCES_KEY, Boolean.valueOf(aValue).toString());
-        projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(DB_APP_SOURCES_KEY, oldValue, aValue);
-    }
-
-    /**
      * Gets application server's host.
      *
      * @return Url string
@@ -386,7 +362,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         int oldValue = getServerPort();
         projectPrivateProperties.setProperty(SERVER_PORT_KEY, String.valueOf(aValue));
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(SERVER_PORT_KEY, Integer.valueOf(oldValue), Integer.valueOf(aValue));
+        changeSupport.firePropertyChange(SERVER_PORT_KEY, oldValue, aValue);
     }
 
     /**
@@ -436,7 +412,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         int oldValue = getDebugClientPort();
         projectPrivateProperties.setProperty(DEBUG_CLIENT_PORT_KEY, String.valueOf(aValue));
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(DEBUG_CLIENT_PORT_KEY, Integer.valueOf(oldValue), Integer.valueOf(aValue));
+        changeSupport.firePropertyChange(DEBUG_CLIENT_PORT_KEY, oldValue, aValue);
     }
 
     /**
@@ -461,7 +437,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         int oldValue = getDebugServerPort();
         projectPrivateProperties.setProperty(DEBUG_SERVER_PORT_KEY, String.valueOf(aValue));
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(DEBUG_SERVER_PORT_KEY, Integer.valueOf(oldValue), Integer.valueOf(aValue));
+        changeSupport.firePropertyChange(DEBUG_SERVER_PORT_KEY, oldValue, aValue);
     }
 
     /**
@@ -536,7 +512,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     @Override
     public void setSecurityRealmEnabled(boolean aValue) {
         boolean oldValue = isSecurityRealmEnabled();
-        projectPrivateProperties.setProperty(ENABLE_SECURITY_REALM_KEY, Boolean.valueOf(aValue).toString());
+        projectPrivateProperties.setProperty(ENABLE_SECURITY_REALM_KEY, String.valueOf(aValue));
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(ENABLE_SECURITY_REALM_KEY, oldValue, aValue);
     }

@@ -98,18 +98,20 @@ public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extend
      * @throws Exception
      */
     public boolean validate() throws Exception {
-        boolean res = false;
         Q oldQuery = query;
-        Fields oldFields = oldQuery != null ? getFields() : null;
-        Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
+        Fields oldFields = oldQuery != null ? oldQuery.getFields() : null;
+        Parameters oldParams = oldQuery != null ? oldQuery.getParameters(): null;
         query = null;
+        validateQuery();
         Q newQuery = getQuery();
-        Fields newFields = getFields();
-        Parameters newParams = newQuery != null ? newQuery.getParameters() : null;
-        if (newFields == null ? oldFields != null : !newFields.isEqual(oldFields)) {
+        Fields newFields = newQuery != null ? newQuery.getFields() : null;
+        Parameters newParams = newQuery != null ? newQuery.getParameters(): null;
+        
+        boolean res = false;
+        if(oldFields == null ? newFields != null : !oldFields.isEqual(newFields)){
             res = true;
         }
-        if (newParams == null ? oldParams != null : !newParams.isEqual(oldParams)) {
+        if(oldParams == null ? newParams != null : !oldParams.isEqual(newParams)){
             res = true;
         }
         if (!res) {

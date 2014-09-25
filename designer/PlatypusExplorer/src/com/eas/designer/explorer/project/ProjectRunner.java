@@ -290,19 +290,9 @@ public class ProjectRunner {
                     } else if (pps.getDefaultDataSourceName() != null && !pps.getDefaultDataSourceName().isEmpty()) {
                         io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Missing_App_Database"));
                     }
-                    if (project.getSettings().isDbAppSources()) {
-                        if (defaultDatabaseConnection != null) {
-                            arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                            arguments.add("jndi://" + pps.getDefaultDataSourceName());
-                            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources_Database"));//NOI18N
-                        } else {
-                            io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Missing_App_Database"));
-                        }
-                    } else {
-                        arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                        arguments.add(project.getProjectDirectory().toURI().toASCIIString());
-                        io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().toURI().toASCIIString()));//NOI18N
-                    }
+                    arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                    arguments.add(project.getProjectDirectory().toURI().toASCIIString());
+                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().toURI().toASCIIString()));//NOI18N
                     if (!project.getSettings().isSecurityRealmEnabled()) {
                         arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.ANONYMOUS_ON_CMD_SWITCH);
                     }
@@ -474,7 +464,7 @@ public class ProjectRunner {
     private static String getServiceDisplayName(PlatypusProject project, boolean debug) {
         return String.format("%s (%s)", project.getDisplayName(), //NOI18N
                 debug ? NbBundle.getMessage(ProjectRunner.class, "LBL_DebugTab_Name") //NOI18N
-                : NbBundle.getMessage(ProjectRunner.class, "LBL_RunTab_Name")); //NOI18N
+                        : NbBundle.getMessage(ProjectRunner.class, "LBL_RunTab_Name")); //NOI18N
     }
 
     private static File getPlatformExtDirectory() {

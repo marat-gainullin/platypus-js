@@ -20,7 +20,6 @@ import com.eas.client.model.gui.view.model.QueryModelView;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
-import com.eas.client.utils.scalableui.ScaleListener;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.query.actions.QueryResultsAction;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
@@ -121,27 +120,27 @@ public class PlatypusQueryView extends CloneableTopComponent {
                                 FieldNode fieldNode = (FieldNode) node;
                                 if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof QueryParametersEntity)) {
                                     if (!toSelectParameters.containsKey(ev)) {
-                                        toSelectParameters.put(ev, new HashSet<Parameter>());
+                                        toSelectParameters.put(ev, new HashSet<>());
                                     }
                                     toSelectParameters.get(ev).add((Parameter) fieldNode.getField());
                                     //ev.addSelectedParameter((Parameter) fieldNode.getField());
                                 } else {
                                     if (!toSelectFields.containsKey(ev)) {
-                                        toSelectFields.put(ev, new HashSet<Field>());
+                                        toSelectFields.put(ev, new HashSet<>());
                                     }
                                     toSelectFields.get(ev).add(fieldNode.getField());
                                     //ev.addSelectedField(fieldNode.getField());
                                 }
                             }
                         }
-                        for (Map.Entry<EntityView<QueryEntity>, Set<Parameter>> pEntry : toSelectParameters.entrySet()) {
+                        toSelectParameters.entrySet().stream().forEach((pEntry) -> {
                             EntityView<QueryEntity> ev = pEntry.getKey();
                             ev.addSelectedParameters(pEntry.getValue());
-                        }
-                        for (Map.Entry<EntityView<QueryEntity>, Set<Field>> fEntry : toSelectFields.entrySet()) {
+                        });
+                        toSelectFields.entrySet().stream().forEach((fEntry) -> {
                             EntityView<QueryEntity> ev = fEntry.getKey();
                             ev.addSelectedFields(fEntry.getValue());
-                        }
+                        });
                         setActivatedNodes(nodes);
                     } finally {
                         processing = false;
@@ -169,7 +168,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
 
         @Override
         public boolean isEnabled() {
-            return dataObject.getBasesProxy()!= null;
+            return dataObject.getBasesProxy() != null;
         }
     }
     public static final String PLATYPUS_QUERIES_GROUP_NAME = "PlatypusModel";
@@ -242,17 +241,14 @@ public class PlatypusQueryView extends CloneableTopComponent {
         pnlSqlDialectSource.add(refinedComponent, BorderLayout.CENTER);
         initDbRelatedViews();
 
-        modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    initDbRelatedViews();
-                    if (dataObject.isModelValid()) {
-                        dataObject.refreshOutputFields();
-                    }
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
+        modelValidChangeListener = dataObject.addModelValidChangeListener(() -> {
+            try {
+                initDbRelatedViews();
+                if (dataObject.isModelValid()) {
+                    dataObject.refreshOutputFields();
                 }
+            } catch (Exception ex) {
+                ErrorManager.getDefault().notify(ex);
             }
         });
         clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
@@ -265,6 +261,8 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 }
                 if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                     try {
+                        dataObject.setModelValid(false);
+                        dataObject.startModelValidating();
                         initDbRelatedViews();
                         if (dataObject.isModelValid()) {
                             dataObject.refreshOutputFields();
@@ -315,7 +313,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                     modelView.setModel(null);
                 }
                 modelView = new QueryModelView(dataObject.getModel(), tablesSelector, new QueriesSelector(dataObject.getAppRoot()));
-                modelView.addEntityViewDoubleClickListener(new QueryDocumentJumper<QueryEntity>(dataObject.getProject()));
+                modelView.addEntityViewDoubleClickListener(new QueryDocumentJumper<>(dataObject.getProject()));
                 TransferHandler modelViewOriginalTrnadferHandler = modelView.getTransferHandler();
                 if (modelViewOriginalTrnadferHandler instanceof ModelViewDragHandler) {
                     modelView.setTransferHandler(new QueriesDragHandler((ModelViewDragHandler) modelViewOriginalTrnadferHandler, modelView));
@@ -343,16 +341,13 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 querySchemeScroll.setViewportView(modelView);
                 querySchemeScroll.getScalablePanel().getDrawWall().setComponentPopupMenu(popupFromNWhere);
 
-                querySchemeScroll.addScaleListener(new ScaleListener() {
-                    @Override
-                    public void scaleChanged(float oldScale, float newScale) {
-                        comboZoom.setModel(new DefaultComboBoxModel<>(zoomLevelsData));
-                        String newSelectedZoom = String.valueOf(Math.round(newScale * 100)) + "%";
-                        if (((DefaultComboBoxModel<String>) comboZoom.getModel()).getIndexOf(newSelectedZoom) == -1) {
-                            ((DefaultComboBoxModel<String>) comboZoom.getModel()).insertElementAt(newSelectedZoom, 0);
-                        }
-                        comboZoom.setSelectedItem(newSelectedZoom);
+                querySchemeScroll.addScaleListener((float oldScale, float newScale) -> {
+                    comboZoom.setModel(new DefaultComboBoxModel<>(zoomLevelsData));
+                    String newSelectedZoom = String.valueOf(Math.round(newScale * 100)) + "%";
+                    if (((DefaultComboBoxModel<String>) comboZoom.getModel()).getIndexOf(newSelectedZoom) == -1) {
+                        ((DefaultComboBoxModel<String>) comboZoom.getModel()).insertElementAt(newSelectedZoom, 0);
                     }
+                    comboZoom.setSelectedItem(newSelectedZoom);
                 });
                 tablesSelector.setBasesProxy(dataObject.getBasesProxy());
                 setupDiagramToolbar();
@@ -562,11 +557,8 @@ public class PlatypusQueryView extends CloneableTopComponent {
         if (EventQueue.isDispatchThread()) {
             setHtmlDisplayName(newTitle);
         } else {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    setHtmlDisplayName(newTitle);
-                }
+            EventQueue.invokeLater(() -> {
+                setHtmlDisplayName(newTitle);
             });
         }
     }

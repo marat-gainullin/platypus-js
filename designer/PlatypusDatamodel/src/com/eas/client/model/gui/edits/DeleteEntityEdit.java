@@ -12,6 +12,8 @@ package com.eas.client.model.gui.edits;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
+import com.eas.client.queries.QueriesProxy;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -19,7 +21,7 @@ import com.eas.client.model.Model;
  */
 public class DeleteEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends DatamodelEdit {
 
-    private M model;
+    private final M model;
     protected E entity;
 
     public DeleteEntityEdit(M aModel, E aEntity) {
@@ -35,7 +37,7 @@ public class DeleteEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<
     public void setEntity(E aValue) {
         entity = aValue;
     }
-                
+
     @Override
     public boolean isNeedConnectors2Reroute() {
         return true;
@@ -51,7 +53,11 @@ public class DeleteEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<
     @Override
     protected void undoWork() {
         if (entity != null && model != null) {
-            model.addEntity(entity);
+            try {
+                model.addEntity(entity);
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 }
