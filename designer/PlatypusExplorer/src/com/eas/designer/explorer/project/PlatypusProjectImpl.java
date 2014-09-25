@@ -46,7 +46,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.URLReader;
 import org.netbeans.api.db.explorer.ConnectionManager;
@@ -77,7 +76,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
-import org.openide.util.TaskListener;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -224,16 +222,13 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
-    public void startConnecting2db(final String aDatasourceName) {
+    public final void startConnecting2db(final String aDatasourceName) {
         if (connecting2Db == null) {
-            connecting2Db = RP.create(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        connect2db(aDatasourceName);
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            connecting2Db = RP.create(() -> {
+                try {
+                    connect2db(aDatasourceName);
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
             String datasourceId = aDatasourceName;
@@ -241,11 +236,8 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 datasourceId = settings.getDefaultDataSourceName();
             }
             final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress", datasourceId), connecting2Db); // NOI18N  
-            connecting2Db.addTaskListener(new TaskListener() {
-                @Override
-                public void taskFinished(org.openide.util.Task task) {
-                    ph.finish();
-                }
+            connecting2Db.addTaskListener((org.openide.util.Task task) -> {
+                ph.finish();
             });
             ph.start();
             connecting2Db.schedule(0);
@@ -253,32 +245,28 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     public void disconnectedFromDatasource(final String aDatasourceName) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    if (ModelInspector.isInstance()) {
-                        ModelInspector mi = ModelInspector.getInstance();
-                        mi.setNodesReflector(null);
-                        mi.setViewData(null);
-                    }
-                    DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aDatasourceName);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                if (ModelInspector.isInstance()) {
+                    ModelInspector mi = ModelInspector.getInstance();
+                    mi.setNodesReflector(null);
+                    mi.setViewData(null);
+                }
+                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aDatasourceName);
+                if (mdCache != null) {
+                    mdCache.clear();
+                }
+                if (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() == null : aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) {
+                    mdCache = basesProxy.getDbMetadataCache(null);
                     if (mdCache != null) {
                         mdCache.clear();
                     }
-                    if (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() == null : aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) {
-                        mdCache = basesProxy.getDbMetadataCache(null);
-                        if (mdCache != null) {
-                            mdCache.clear();
-                        }
-                    }
-                    GeneralResourceProvider.getInstance().unregisterDatasource(aDatasourceName);
-                    fireClientDisconnected(aDatasourceName);
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
-                } catch (Exception ex) {
-                    Exceptions.printStackTrace(ex);
                 }
+                GeneralResourceProvider.getInstance().unregisterDatasource(aDatasourceName);
+                fireClientDisconnected(aDatasourceName);
+                StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
     }
@@ -358,17 +346,12 @@ public class PlatypusProjectImpl implements PlatypusProject {
         String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete", aDatasourceName); // NOI18N
         StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
         getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    fireClientConnected(aDatasourceName);
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                fireClientConnected(aDatasourceName);
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         });
     }
 
@@ -417,12 +400,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
         }
         html = html.replaceAll("\\$\\{datasourceName\\}", datasourceId);
         JEditorPane htmlPage = new JEditorPane("text/html", html);
-        htmlPage.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getDescription().equals("platypus://start_connecting")) { // NOI18N   
-                    startConnecting2db(aDatasourceName);
-                }
+        htmlPage.addHyperlinkListener((HyperlinkEvent e) -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getDescription().equals("platypus://start_connecting")) { // NOI18N
+                startConnecting2db(aDatasourceName);
             }
         });
         htmlPage.setEditable(false);
@@ -657,8 +637,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
         private final URL[] roots;
 
-        public PathResourceImpl(URL[] roots) {
-            this.roots = roots;
+        public PathResourceImpl(URL[] aRoots) {
+            super();
+            roots = aRoots;
         }
 
         @Override
