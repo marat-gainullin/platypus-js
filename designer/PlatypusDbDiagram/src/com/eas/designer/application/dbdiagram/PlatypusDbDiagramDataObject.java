@@ -9,6 +9,7 @@ import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.dbdiagram.nodes.TableEntityNode;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.datamodel.nodes.ModelNodeChildren;
@@ -24,6 +25,7 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.CookieSet;
+import org.openide.util.Exceptions;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.w3c.dom.Document;
@@ -52,6 +54,30 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
         if (getModel() != null) {
             getModel().validate();
         }
+    }
+
+    public String getResolvedDatasourceName() {
+        String datasourceName = model.getDbId();
+        if (datasourceName == null) {
+            PlatypusProject pp = getProject();
+            if (pp != null) {
+                datasourceName = pp.getSettings().getDefaultDataSourceName();
+            }
+        }
+        return datasourceName != null ? datasourceName : "N/A";
+    }
+
+    public String getResolvedSchemaName() {
+        String schemName = model.getSchema();
+        if (schemName == null) {
+            try {
+                schemName = model.getBasesProxy().getConnectionSchema(model.getDbId());
+            } catch (Exception ex) {
+                schemName = null;
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        return schemName != null ? schemName : "N/A";
     }
 
     public void readModel() throws Exception {

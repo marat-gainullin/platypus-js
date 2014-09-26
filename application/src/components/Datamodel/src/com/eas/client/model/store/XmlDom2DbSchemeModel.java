@@ -54,7 +54,6 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity> implements 
             entity.setEntityId(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
             entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
-            readOldUserData(entity);
             DbSchemeModel model = entity.getModel();
             if (model != null) {
                 model.addEntity(entity);

@@ -6,6 +6,9 @@ package com.eas.designer.application.module.nodes;
 
 import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.client.model.application.ReferenceRelation;
+import com.eas.client.model.gui.edits.NewReferenceRelationEdit;
+import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.script.ScriptUtils;
 import java.beans.PropertyChangeEvent;
@@ -66,6 +69,12 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
             try {
                 entity.getModel().validate();
                 entity.getModel().fireAllQueriesChanged();
+                ApplicationModelView.complementReferenceRelations((ReferenceRelation<ApplicationDbEntity> aRelation) -> {
+                    NewReferenceRelationEdit edit = new NewReferenceRelationEdit(aRelation);
+                    edit.redo();
+                    undoReciever.addEdit(edit);
+                }, entity.getModel()
+                );
             } catch (Exception ex) {
                 Logger.getLogger(EntityNode.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }

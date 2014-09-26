@@ -57,7 +57,6 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements Quer
     @Override
     public void visit(QueryParametersEntity entity) {
         readEntityDesignAttributes(entity);
-        readOldUserData(entity);
     }
 
     @Override

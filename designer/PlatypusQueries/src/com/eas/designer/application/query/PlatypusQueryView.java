@@ -88,6 +88,17 @@ public class PlatypusQueryView extends CloneableTopComponent {
         public void propertyChange(PropertyChangeEvent evt) {
             if (PlatypusQueryDataObject.PROP_MODIFIED.equals(evt.getPropertyName())) {
                 updateTitle();
+            } else if (PlatypusQueryDataObject.CONN_PROP_NAME.equals(evt.getPropertyName())) {
+                try {
+                    dataObject.setModelValid(false);
+                    dataObject.startModelValidating();
+                    initDbRelatedViews();
+                    if (dataObject.isModelValid()) {
+                        dataObject.refreshOutputFields();
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
         }
     }

@@ -56,12 +56,14 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     protected E entity;
     protected Action[] actions;
     protected ShowEntityAction defaultAction;
+    protected UndoRedo.Manager undoReciever;
 
     public EntityNode(E aEntity, UndoRedo.Manager aUndoReciever, EntityNodeChildren children, Lookup aLookup) throws Exception {
         super(children, aLookup);
         entity = aEntity;
         entity.getChangeSupport().addPropertyChangeListener(this);
         defaultAction = SystemAction.get(ShowEntityAction.class);
+        undoReciever = aUndoReciever;
     }
 
     @Override

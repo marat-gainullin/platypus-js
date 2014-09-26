@@ -8,7 +8,6 @@ import com.bearsoft.rowset.metadata.*;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
-import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.xml.dom.XmlDomUtils;
@@ -75,8 +74,8 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         Element lcurrentNode = currentNode;
                         try {
                             Set<String> names = new HashSet<>();
-                            for (int i = 0; i < pnl.size(); i++) {
-                                currentNode = pnl.get(i);
+                            pnl.stream().forEach((Element pnl1) -> {
+                                currentNode = pnl1;
                                 Parameter param = new Parameter();
                                 visit(param);
                                 String paramName = param.getName();
@@ -84,7 +83,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                     names.add(paramName);
                                     parameters.add(param);
                                 }
-                            }
+                            });
                         } finally {
                             currentNode = lcurrentNode;
                         }
@@ -112,14 +111,14 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                 if (fnl != null) {
                     nl.addAll(fnl);
                 }
-                if (nl != null && !nl.isEmpty()) {
+                if (!nl.isEmpty()) {
                     Element lcurrentNode = currentNode;
                     try {
-                        for (int i = 0; i < nl.size(); i++) {
-                            currentNode = nl.get(i);
+                        nl.stream().forEach((Element nl1) -> {
+                            currentNode = nl1;
                             E entity = aModel.newGenericEntity();
                             entity.accept(this);
-                        }
+                        });
                     } finally {
                         currentNode = lcurrentNode;
                     }
@@ -160,7 +159,6 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
             entity.setTableSchemaName(currentNode.getAttribute(Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME));
             entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
-            readOldUserData(entity);
             Model<E, ?, ?> dm = entity.getModel();
             if (dm != null) {
                 dm.addEntity(entity);
@@ -489,85 +487,17 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
     protected Time readTimeAttribute(String attributeName, Time defaultValue) {
         return XmlDomUtils.readTimeAttribute(currentNode, attributeName, defaultValue);
     }
-    protected static final String UNKNOWN_TAGS_TAG_NAME = "userData";
-
-    protected void readOldUserData(E entity) {
-        Element tagsElement = getElementByTagName(currentNode, UNKNOWN_TAGS_TAG_NAME);
-        if (tagsElement != null) {
-            Element lcurrentNode = currentNode;
-            try {
-                currentNode = tagsElement;
-                Map<String, Object> unknownTags = new HashMap<>();
-                visit(unknownTags);
-                convertUnknownTags(entity, unknownTags);
-            } finally {
-                currentNode = lcurrentNode;
-            }
-        }
-    }
-
-    /**
-     * Converts old unknown tags into normal entity-related data.
-     *
-     * @param entity
-     * @param unknownTags
-     */
-    private void convertUnknownTags(E entity, Map<String, Object> unknownTags) {
-        if (unknownTags != null) {
-            for (String unknownTag : unknownTags.keySet()) {
-                Object value = unknownTags.get(unknownTag);
-                if (value != null) {
-                    int intValue = 0;
-                    if (value instanceof Number) {
-                        intValue = ((Number) value).intValue();
-                    }
-                    String stringValue = "";
-                    if (value instanceof String) {
-                        stringValue = (String) value;
-                    }
-                    if (Model.DATASOURCE_NAME_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        entity.setName(stringValue);
-                    } else if (Model.DATASOURCE_TITLE_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        entity.setTitle(stringValue);
-                    } else if (Model2XmlDom.ENTITY_LOCATION_X.equalsIgnoreCase(unknownTag)) {
-                        entity.setX(intValue);
-                    } else if (Model2XmlDom.ENTITY_LOCATION_Y.equalsIgnoreCase(unknownTag)) {
-                        entity.setY(intValue);
-                    } else if (Model2XmlDom.ENTITY_SIZE_WIDTH.equalsIgnoreCase(unknownTag)) {
-                        entity.setWidth(intValue);
-                    } else if (Model2XmlDom.ENTITY_SIZE_HEIGHT.equalsIgnoreCase(unknownTag)) {
-                        entity.setHeight(intValue);
-                    } else if (Model2XmlDom.ENTITY_ICONIFIED.equalsIgnoreCase(unknownTag)) {
-                        if (value instanceof Boolean) {
-                            Boolean boolValue = (Boolean) value;
-                            entity.setIconified(boolValue);
-                        }
-                    } else if (Model2XmlDom.ENTITY_TABLE_ALIAS.equalsIgnoreCase(unknownTag)) {
-                        if (entity instanceof QueryEntity) {
-                            ((QueryEntity) entity).setAlias(stringValue);
-                        }
-                    }
-                }
-            }
-        }
-        if (entity.getWidth() == 0) {
-            entity.setWidth(DEFAULT_ENTITY_WIDTH);
-        }
-        if (entity.getHeight() == 0) {
-            entity.setHeight(DEFAULT_ENTITY_HEIGHT);
-        }
-    }
 
     protected void readRelations() {
         List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.RELATION_TAG_NAME);
         if (nl != null) {
             Element lcurrentNode = currentNode;
             try {
-                for (int i = 0; i < nl.size(); i++) {
-                    currentNode = nl.get(i);
+                nl.stream().forEach((Element nl1) -> {
+                    currentNode = nl1;
                     Relation<E> relation = new Relation<>();
                     relation.accept(this);
-                }
+                });
             } finally {
                 currentNode = lcurrentNode;
             }

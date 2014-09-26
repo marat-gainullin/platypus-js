@@ -174,6 +174,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
 
     @Override
     protected EntityView<FieldsEntity> createGenericEntityView(FieldsEntity aEntity) throws Exception {
+        aEntity.validateQuery();
         return new TableEntityView(aEntity, entitiesViewsMover);
     }
 
@@ -731,7 +732,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     } else if (rCount > 0 && !inRels.isEmpty()) {
                         msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
                     }
-                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, tableEntity.getTableName() + ". " +  msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, tableEntity.getTableName() + ". " + msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                         tableEntities.add(tableEntity);
                     }
                 }
@@ -1088,19 +1089,19 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         DatabaseMdCache cache = model.getBasesProxy().getDbMetadataCache(sqlController.getDatasourceName());
         return cache.containsTableMetadata(fEntity.getFullTableName());
         /*
-        try {
-            DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
-            String schema = fEntity.getTableSchemaName();
-            if (schema == null) {
-                schema = cache.getConnectionSchema();
-            }
-            String qtn = schema + "." + fEntity.getTableName();
-            SqlCompiledQuery query = new SqlCompiledQuery(model.getClient(), sqlController.getDbId(), SQLUtils.makeTableNameMetadataQuery(qtn));
-            Rowset rs = query.executeQuery();
-            return rs != null;
-        } catch (Exception ex) {
-            return false;
-        }
-        */                
+         try {
+         DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
+         String schema = fEntity.getTableSchemaName();
+         if (schema == null) {
+         schema = cache.getConnectionSchema();
+         }
+         String qtn = schema + "." + fEntity.getTableName();
+         SqlCompiledQuery query = new SqlCompiledQuery(model.getClient(), sqlController.getDbId(), SQLUtils.makeTableNameMetadataQuery(qtn));
+         Rowset rs = query.executeQuery();
+         return rs != null;
+         } catch (Exception ex) {
+         return false;
+         }
+         */
     }
 }

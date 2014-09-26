@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> extends XmlDom2Model<E> implements ApplicationModelVisitor<E> {
 
@@ -72,11 +73,11 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         if (nl != null) {
             Element lcurrentNode = currentNode;
             try {
-                for (int i = 0; i < nl.size(); i++) {
-                    currentNode = nl.get(i);
+                nl.stream().forEach((Element nl1) -> {
+                    currentNode = nl1;
                     ReferenceRelation<E> relation = new ReferenceRelation<>();
                     relation.accept(this);
-                }
+                });
             } finally {
                 currentNode = lcurrentNode;
             }
@@ -109,6 +110,5 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         // ApplicationEntity descendants.
         E appEntity = (E) entity;
         readEntityDesignAttributes(appEntity);
-        readOldUserData(appEntity);
     }
 }

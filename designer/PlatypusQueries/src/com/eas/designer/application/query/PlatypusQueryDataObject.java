@@ -636,7 +636,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             PlatypusProject project = getProject();
             String queryName = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.NAME_TAG);
             if (project != null && project.getQueries().getCachedQuery(queryName) != null) {
-                queriesReg.remove();
+                if (queriesReg != null) {
+                    queriesReg.remove();
+                }
                 project.fireQueriesChanged();
                 project.addQueriesChangeListener(modelValidator);
             }
@@ -653,7 +655,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     @Override
     protected void handleDelete() throws IOException {
-        queriesReg.remove();
+        if (queriesReg != null) {
+            queriesReg.remove();
+        }
         if (sqlText == null) {
             sqlText = getPrimaryFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
         }

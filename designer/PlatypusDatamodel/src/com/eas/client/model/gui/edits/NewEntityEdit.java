@@ -12,11 +12,12 @@ package com.eas.client.model.gui.edits;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.eas.client.queries.QueriesProxy;
 
 /**
  *
  * @author mg
+ * @param <E>
+ * @param <M>
  */
 public class NewEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends DeleteEntityEdit<E, M> {
 

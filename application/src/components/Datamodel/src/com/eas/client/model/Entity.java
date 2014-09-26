@@ -21,6 +21,9 @@ import java.util.Set;
 /**
  *
  * @author mg
+ * @param <M>
+ * @param <Q>
+ * @param <E>
  */
 public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extends Entity<M, Q, E>> {
 
@@ -254,7 +257,7 @@ public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extend
         return queryName;
     }
 
-    public void setQueryName(String aValue) {
+    public final void setQueryName(String aValue) {
         String oldValue = queryName;
         queryName = aValue;
         changeSupport.firePropertyChange(QUERY_ID_PROPERTY, oldValue, aValue);

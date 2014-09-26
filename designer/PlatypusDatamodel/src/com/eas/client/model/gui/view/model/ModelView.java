@@ -60,7 +60,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
@@ -77,6 +76,9 @@ import org.w3c.dom.Document;
 /**
  *
  * @author mg
+ * @param <E>
+ * @param <P>
+ * @param <M>
  */
 public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M extends Model<E, P, SqlQuery>> extends JPanel {
 
@@ -207,12 +209,12 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     public void clearEntitiesSelection(EntityView<E> viewToRetain) {
         Set<E> oldSelection = new HashSet<>();
         oldSelection.addAll(selectedEntities);
-        for (E e : selectedEntities) {
+        selectedEntities.stream().forEach((E e) -> {
             EntityView<E> eView = entityViews.get(e.getEntityId());
             if (viewToRetain != eView) {
                 eView.setEntityViewUnselectedLook();
             }
-        }
+        });
         selectedEntities.clear();
         if (viewToRetain != null) {
             selectedEntities.add(viewToRetain.getEntity());
@@ -233,9 +235,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
 
     public void clearEntitiesFieldsSelection() {
         selectedFields.clear();
-        for (EntityView<E> eView : entityViews.values()) {
+        entityViews.values().stream().forEach((eView) -> {
             eView.clearListsSelection();
-        }
+        });
     }
 
     public void silentClearRelationsSelection() {
@@ -294,51 +296,32 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     }
 
     private boolean haveSameLeftTop(Set<EntityView<E>> aViews, Point aPoint) {
-        if (aViews != null) {
-            for (EntityView<E> eView : aViews) {
-                if (eView.getLocation().equals(aPoint)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return aViews != null && aViews.stream().anyMatch((eView) -> (eView.getLocation().equals(aPoint)));
     }
 
     public Set<EntityView<E>> hittestEntitiesViews(Point aPoint) {
         Set<EntityView<E>> filtered = new HashSet<>();
         List<EntityView<E>> hitted = entitiesIndex.query(aPoint);
-        for (EntityView<E> eView : hitted) {
+        hitted.stream().forEach((eView) -> {
             Rectangle rect = eView.getBounds();
             if (rect.x <= aPoint.x && aPoint.x <= rect.x + rect.width - 1
                     && rect.y <= aPoint.y && aPoint.y <= rect.y + rect.height - 1) {
                 filtered.add(eView);
             }
-        }
+        });
         return filtered;
     }
-    protected PropertyChangeListener relationPolylinePropagator = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if ("polyline".equals(evt.getPropertyName()) && evt.getSource() instanceof Relation<?>) {
-                calcConnector((Relation<E>) evt.getSource());
-                repaint();
-            }
+    protected PropertyChangeListener relationPolylinePropagator = (PropertyChangeEvent evt) -> {
+        if ("polyline".equals(evt.getPropertyName()) && evt.getSource() instanceof Relation<?>) {
+            calcConnector((Relation<E>) evt.getSource());
+            repaint();
         }
     };
 
     protected void paintRelations(Graphics2D g2d) {
-        paintConnectors(g2d, modelRelationsToBeRerouted(), connectorsStroke);
-        Color old2FieldColor = toFieldConnectorColor;
-        toFieldConnectorColor = toFieldConnectorColor.darker();
-        Color old2ParameterColor = toParameterConnectorColor;
-        toParameterConnectorColor = toParameterConnectorColor.darker();
-        try {
-            paintConnectors(g2d, selectedRelations, selectedConnectorsStroke);
-            paintConnectors(g2d, hittedRelations, hittedConnectorsStroke);
-        } finally {
-            toFieldConnectorColor = old2FieldColor;
-            toParameterConnectorColor = old2ParameterColor;
-        }
+        paintConnectors(g2d, modelRelationsToBeRerouted(), connectorsStroke, toFieldConnectorColor, toParameterConnectorColor);
+        paintConnectors(g2d, selectedRelations, selectedConnectorsStroke, toFieldConnectorColor, toParameterConnectorColor.darker());
+        paintConnectors(g2d, hittedRelations, hittedConnectorsStroke, toFieldConnectorColor, toParameterConnectorColor.darker());
     }
 
     protected class ModelChangesReflector implements ModelEditingListener<E> {
@@ -399,9 +382,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
 
     public void fireEntityViewDoubleClicked(EntityView<E> eView, boolean fieldsClicked, boolean paramsClicked) {
         if (entityViewDoubleClickListeners != null) {
-            for (EntityViewDoubleClickListener<E> l : entityViewDoubleClickListeners) {
+            entityViewDoubleClickListeners.stream().forEach((l) -> {
                 l.clicked(eView, fieldsClicked, paramsClicked);
-            }
+            });
         }
     }
 
@@ -415,18 +398,18 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
 
     public void fireRelationsSelectionChanged(Set<Relation<E>> oldSelection, Set<Relation<E>> newSelection) {
         if (entitySelectionListeners != null) {
-            for (ModelSelectionListener<E> l : entitySelectionListeners) {
+            entitySelectionListeners.stream().forEach((l) -> {
                 l.selectionChanged(oldSelection, newSelection);
-            }
+            });
         }
     }
 
     public void fireEntitiesSelectionChanged(Set<E> oldSelection, Set<E> newSelection) {
         if (!oldSelection.equals(newSelection)) {
             if (entitySelectionListeners != null) {
-                for (ModelSelectionListener<E> l : entitySelectionListeners) {
+                entitySelectionListeners.stream().forEach((l) -> {
                     l.selectionChanged(oldSelection, newSelection);
-                }
+                });
             }
         }
     }
@@ -456,7 +439,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                     return true;
                 }
             } else {
-                if (dataString.indexOf(mask) != -1) {
+                if (dataString.contains(mask)) {
                     return true;
                 }
             }
@@ -489,7 +472,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         if (aText != null && !aText.isEmpty()) {
             String mask = aText;
             Collection<EntityView<E>> eCol = entityViews.values();
-            if (eCol != null && mask != null) {
+            if (eCol != null) {
                 Iterator<EntityView<E>> eIt = eCol.iterator();
                 if (eIt != null) {
                     List<FindResult> lfound = new ArrayList<>();
@@ -505,7 +488,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                                     lfound.add(fr);
                                 }
                             } else if (subjects == SearchSubject.FIND_SUBJECT_FIELDS || subjects == SearchSubject.FIND_SUBJECT_PARAMS) {
-                                Fields fieldsToExamine = null;
+                                Fields fieldsToExamine;
                                 if (subjects == SearchSubject.FIND_SUBJECT_FIELDS) {
                                     fieldsToExamine = eView.getFields();
                                 } else {
@@ -550,9 +533,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
             return false;
         }
         Set<Entity> s = new HashSet<>();
-        for (EntityFieldTuple eft : selectedFields) {
+        selectedFields.stream().forEach((eft) -> {
             s.add(eft.entity);
-        }
+        });
         return s.size() == 1;
     }
 
@@ -583,10 +566,10 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         EntityView<E> rView = aViews.get(lrel.getRightEntity().getEntityId());
         if (lView != null && rView != null) {
 
-            Point lpt = null;
-            Point lpt1 = null;
-            Point rpt = null;
-            Point rpt1 = null;
+            Point lpt;
+            Point lpt1;
+            Point rpt;
+            Point rpt1;
 
             Rectangle lViewBounds = lView.getBounds();
             //lViewBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
@@ -653,9 +636,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
 
     protected void calcConnectors(Set<Relation<E>> rels) {
         if (rels != null) {
-            for (Relation<E> rel : rels) {
+            rels.stream().forEach((rel) -> {
                 calcConnector(rel);
-            }
+            });
         }
     }
 
@@ -743,12 +726,14 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                     E lEntity = rel.getLeftEntity();
                     EntityView<E> lView = getEntityView(lEntity);
                     Field lField = rel.getLeftField();
-                    if (rel.isLeftField()) {
-                        leftFieldLabel = lView.getFieldDisplayLabel(lField);
-                    } else {
-                        lField = rel.getLeftParameter();
-                        if (lField != null) {
-                            leftFieldLabel = lView.getParameterDisplayLabel(lField);
+                    if (lView != null) {
+                        if (rel.isLeftField()) {
+                            leftFieldLabel = lView.getFieldDisplayLabel(lField);
+                        } else {
+                            lField = rel.getLeftParameter();
+                            if (lField != null) {
+                                leftFieldLabel = lView.getParameterDisplayLabel(lField);
+                            }
                         }
                     }
                     if (leftFieldLabel != null && !leftFieldLabel.isEmpty()) {
@@ -780,19 +765,23 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                     if (lfirst) {
                         lhint += "<p>";
                     }
-                    String ltitle = lView.getEntity().getTitle();
-                    if (isParametersEntity(lView.getEntity())) {
-                        ltitle = DatamodelDesignUtils.getLocalizedString("Parameters");
+                    if (lView != null) {
+                        String ltitle = lView.getEntity().getTitle();
+                        if (isParametersEntity(lView.getEntity())) {
+                            ltitle = DatamodelDesignUtils.getLocalizedString("Parameters");
+                        }
+                        lhint += ltitle;
                     }
-                    lhint += ltitle;
                     if (leftFieldLabel != null && !leftFieldLabel.isEmpty()) {
                         lhint += "." + leftFieldLabel;
                     }
-                    String rtitle = rView.getEntity().getTitle();
-                    if (isParametersEntity(rView.getEntity())) {
-                        rtitle = DatamodelDesignUtils.getLocalizedString("Parameters");
+                    if (rView != null) {
+                        String rtitle = rView.getEntity().getTitle();
+                        if (isParametersEntity(rView.getEntity())) {
+                            rtitle = DatamodelDesignUtils.getLocalizedString("Parameters");
+                        }
+                        lhint += " -> " + rtitle;
                     }
-                    lhint += " -> " + rtitle;
                     if (rightFieldLabel != null && !rightFieldLabel.isEmpty()) {
                         lhint += "." + rightFieldLabel;
                     }
@@ -810,8 +799,8 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         if (!event.isConsumed()) {
             Object[] actions = getActionMap().allKeys();
             if (actions != null) {
-                for (int i = 0; i < actions.length; i++) {
-                    Action actn = getActionMap().get(actions[i]);
+                for (Object action : actions) {
+                    Action actn = getActionMap().get(action);
                     if (actn != null && actn.isEnabled()) {
                         KeyStroke ks = KeyStroke.getKeyStroke(event.getKeyCode(), event.getModifiers());
                         Object accO = actn.getValue(Action.ACCELERATOR_KEY);
@@ -932,17 +921,17 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
             try {
                 if (model != null) {
                     model.removeEditingListener(modelListener);
-                    for (Relation<E> rel : model.getRelations()) {
+                    model.getRelations().stream().forEach((rel) -> {
                         rel.getChangeSupport().removePropertyChangeListener(relationPolylinePropagator);
-                    }
+                    });
                 }
                 model = aModel;
                 recreateEntityViews();
                 if (model != null) {
                     model.addEditingListener(modelListener);
-                    for (Relation<E> rel : model.getRelations()) {
+                    model.getRelations().stream().forEach((rel) -> {
                         rel.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
-                    }
+                    });
                 }
             } catch (Exception ex) {
                 Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -977,31 +966,31 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         if (routingDebug) {
             Color oldColor = g.getColor();
             try {
-                for (EntityView<?> eView : entityViews.values()) {
+                entityViews.values().stream().forEach((EntityView<?> eView) -> {
                     Rectangle o = eView.getBounds();
                     g.setColor(obstaclesColor);
                     g.fillRect(o.x, o.y, o.width, o.height);
                     g.setColor(obstaclesColor.brighter());
                     g.drawRect(o.x, o.y, o.width, o.height);
-                }
+                });
                 if (graph != null) {
                     // paint vertices
-                    for (Vertex<PathFragment> vertex : graph) {
+                    graph.stream().forEach((Vertex<PathFragment> vertex) -> {
                         g.setColor(spaceColor);
                         g.fillRect(vertex.attribute.rect.x, vertex.attribute.rect.y, vertex.attribute.rect.width, vertex.attribute.rect.height);
                         g.setColor(spaceColor.brighter().brighter());
                         g.drawRect(vertex.attribute.rect.x, vertex.attribute.rect.y, vertex.attribute.rect.width, vertex.attribute.rect.height);
-                    }
+                    });
                     // paint there's edges
-                    for (Vertex<PathFragment> vertex : graph) {
-                        for (Vertex<PathFragment> ajacent : vertex.getAjacent()) {
+                    graph.stream().forEach((Vertex<PathFragment> vertex) -> {
+                        vertex.getAjacent().stream().forEach((Vertex<PathFragment> ajacent) -> {
                             g.setColor(edgeColor);
                             Rectangle startRect = vertex.attribute.rect;
                             Rectangle endRect = ajacent.attribute.rect;
                             g.drawLine(startRect.x + startRect.width / 2, startRect.y + startRect.height / 2,
                                     endRect.x + endRect.width / 2, endRect.y + endRect.height / 2);
-                        }
-                    }
+                        });
+                    });
                 }
             } finally {
                 g.setColor(oldColor);
@@ -1017,7 +1006,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
 
     protected void paintEntitiesBorders(Graphics2D g2d) {
         Rectangle rect = new Rectangle();
-        for (EntityView<E> eView : entityViews.values()) {
+        entityViews.values().stream().forEach((EntityView<E> eView) -> {
             eView.getBounds(rect);
             Color oldColor = g2d.getColor();
             Stroke oldStroke = g2d.getStroke();
@@ -1033,90 +1022,97 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                 g2d.setStroke(oldStroke);
                 g2d.setColor(oldColor);
             }
-        }
+        });
     }
 
-    protected void paintConnectors(Graphics2D g2d, Set<Relation<E>> aRels, Stroke aConnectorsStroke) {
+    protected void paintConnectors(Graphics2D g2d, Set<Relation<E>> aRels, Stroke aConnectorsStroke, Color aToFieldColor, Color aToParameterColor) {
         if (aRels != null && !aRels.isEmpty()) {
-            Color loldColor = g2d.getColor();
+            paintFirstSlots(g2d, aRels);
             Stroke loldStroke = g2d.getStroke();
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setStroke(slotsStroke);
-            g2d.setColor(Color.BLACK);
-            try {
-                for (Relation<E> lrel : aRels) {
-                    RelationDesignInfo designInfo = getRelationDesignInfo(lrel);
-                    Segment fslot = designInfo.getFirstSlot();
-                    if (fslot != null) {
-                        Point lpt = fslot.firstPoint;
-                        Point lpt1 = fslot.lastPoint;
-                        g2d.drawLine(lpt.x, lpt.y, lpt1.x, lpt1.y);
-                    }
-                }
-            } finally {
-                g2d.setStroke(loldStroke);
-                g2d.setColor(loldColor);
-            }
-            loldColor = g2d.getColor();
-            loldStroke = g2d.getStroke();
-            g2d.setColor(toFieldConnectorColor);
             g2d.setStroke(aConnectorsStroke);
             try {
-                for (Relation<E> lrel : aRels) {
+                aRels.stream().forEach((Relation<E> lrel) -> {
                     if (lrel.getRightEntity() != null && lrel.getRightField() != null) {
+                        Color loldColor = g2d.getColor();
                         if (lrel.getRightEntity().isQuery()) {
-                            Fields rFields = lrel.getRightEntity().getQuery().getFields();
+                            Fields rFields = lrel.getRightEntity().getFields();
                             assert rFields != null : "Fields are absent while query is present.";
                             Field toField = rFields.get(lrel.getRightField().getName());
                             if (toField == null || toField != lrel.getRightField()) {
-                                g2d.setColor(toParameterConnectorColor);
+                                g2d.setColor(aToParameterColor);
                             } else {
-                                g2d.setColor(toFieldConnectorColor);
+                                g2d.setColor(aToFieldColor);
                             }
                         } else {
-                            g2d.setColor(toFieldConnectorColor);
+                            g2d.setColor(aToFieldColor);
+                        }
+                        try {
+                            RelationDesignInfo designInfo = getRelationDesignInfo(lrel);
+                            if (designInfo.getConnector() != null) {
+                                paintConnector(g2d, lrel, designInfo.getConnector(), aConnectorsStroke);
+                            }
+                            if (designInfo.getLastSlot() != null) {
+                                paintLastSlot(g2d, designInfo.getLastSlot(), 0);
+                            }
+                        } finally {
+                            g2d.setColor(loldColor);
                         }
                     }
-                    RelationDesignInfo designInfo = getRelationDesignInfo(lrel);
-                    if (designInfo.getConnector() != null) {
-                        paintConnector(g2d, lrel, designInfo.getConnector(), aConnectorsStroke);
-                    }
-                    if (designInfo.getLastSlot() != null) {
-                        paintLastSlot(g2d, designInfo.getLastSlot(), 0);
-                    }
-                }
+                });
             } finally {
                 g2d.setStroke(loldStroke);
-                g2d.setColor(loldColor);
             }
+        }
+    }
+
+    protected void paintFirstSlots(Graphics2D g2d, Set<Relation<E>> aRels) {
+        Color loldColor = g2d.getColor();
+        Stroke loldStroke = g2d.getStroke();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setStroke(slotsStroke);
+        g2d.setColor(Color.BLACK);
+        try {
+            aRels.stream().forEach((Relation<E> lrel) -> {
+                RelationDesignInfo designInfo = getRelationDesignInfo(lrel);
+                Segment fslot = designInfo.getFirstSlot();
+                if (fslot != null) {
+                    Point lpt = fslot.firstPoint;
+                    Point lpt1 = fslot.lastPoint;
+                    g2d.drawLine(lpt.x, lpt.y, lpt1.x, lpt1.y);
+                }
+            });
+        } finally {
+            g2d.setStroke(loldStroke);
+            g2d.setColor(loldColor);
         }
     }
 
     protected void paintConnector(Graphics2D g2d, Relation<E> aRel, Connector aConnector, Stroke aConnectorsStroke) {
         g2d.drawPolyline(aConnector.getX(), aConnector.getY(), aConnector.getSize());
     }
-
-    protected void paintLastSlots(Graphics2D g2d, Set<Relation<E>> aRels, Stroke aConnectorsStroke, int aWide) {
-        if (aRels != null && !aRels.isEmpty()) {
-            Color loldColor = g2d.getColor();
-            Stroke loldStroke = g2d.getStroke();
-            g2d.setStroke(aConnectorsStroke);
-            try {
-                for (Relation<E> rel : aRels) {
-                    if (rel.isRightField()) {
-                        g2d.setColor(toFieldConnectorColor);
-                    } else {
-                        g2d.setColor(toParameterConnectorColor);
-                    }
-                    RelationDesignInfo designInfo = getRelationDesignInfo(rel);
-                    paintLastSlot(g2d, designInfo.getLastSlot(), aWide);
-                }
-            } finally {
-                g2d.setStroke(loldStroke);
-                g2d.setColor(loldColor);
-            }
-        }
-    }
+    /*
+     protected void paintLastSlots(Graphics2D g2d, Set<Relation<E>> aRels, Stroke aConnectorsStroke, int aWide) {
+     if (aRels != null && !aRels.isEmpty()) {
+     Color loldColor = g2d.getColor();
+     Stroke loldStroke = g2d.getStroke();
+     g2d.setStroke(aConnectorsStroke);
+     try {
+     aRels.stream().forEach((Relation<E> rel) -> {
+     if (rel.isRightField()) {
+     g2d.setColor(toFieldConnectorColor);
+     } else {
+     g2d.setColor(toParameterConnectorColor);
+     }
+     RelationDesignInfo designInfo = getRelationDesignInfo(rel);
+     paintLastSlot(g2d, designInfo.getLastSlot(), aWide);
+     });
+     } finally {
+     g2d.setStroke(loldStroke);
+     g2d.setColor(loldColor);
+     }
+     }
+     }
+     */
 
     protected void paintLastSlot(Graphics2D g2d, Segment aSlot, int aWide) {
         if (aSlot != null) {
@@ -1252,12 +1248,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         });
         if (eView.getFieldsList().getParent().getParent() instanceof JViewport) {
             JViewport viewport = (JViewport) eView.getFieldsList().getParent().getParent();
-            viewport.addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    if (paths != null) {
-                        rerouteConnectors();
-                    }
+            viewport.addChangeListener((ChangeEvent e) -> {
+                if (paths != null) {
+                    rerouteConnectors();
                 }
             });
         }
@@ -1310,11 +1303,8 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     @Override
     public void addNotify() {
         super.addNotify();
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                refreshView();
-            }
+        EventQueue.invokeLater(() -> {
+            refreshView();
         });
     }
 
@@ -1354,9 +1344,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     protected void preparePaths() {
         if (needRerouteConnectors) {
             Set<Rectangle> obstacles = new HashSet<>();
-            for (EntityView<E> eView : entityViews.values()) {
+            entityViews.values().stream().forEach((eView) -> {
                 obstacles.add(eView.getBounds());
-            }
+            });
             QuadTree<Vertex<PathFragment>> verticesIndex = new QuadTree<>();
             graph = Sweeper.build(getWidth(), getHeight(), obstacles, verticesIndex);
             paths = new Paths(graph, verticesIndex);
@@ -1375,12 +1365,12 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
             Set<Relation<E>> modelRels = modelRelationsToBeRerouted();
             Set<Relation<E>> filteredRels = new HashSet<>();
             if (modelRels != null) {
-                for (Relation<E> rel : modelRels) {
+                modelRels.stream().forEach((Relation<E> rel) -> {
                     if (rel != null && getEntityView(rel.getLeftEntity()) != null
                             && getEntityView(rel.getRightEntity()) != null) {
                         filteredRels.add(rel);
                     }
-                }
+                });
             }
             // Calc connectors
             calcConnectors(filteredRels);
@@ -1481,7 +1471,8 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                     }
                     if (oldHittedRelations == null ? hittedRelations != null : !oldHittedRelations.equals(hittedRelations)) {
                         repaint();
-                    }                }
+                    }
+                }
                 if (hittedRelations != null && !hittedRelations.isEmpty()) {
                     setToolTipText(generateHintFromRelations(hittedRelations));
                 } else {
@@ -1493,7 +1484,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         private Set<Relation<E>> hittestRelationsConnectors(Point aPoint, int aEpsilon) {
             Set<Relation<E>> hitted = new HashSet<>();
             List<Relation<E>> res = connectorsIndex.query(new Rectangle(aPoint.x, aPoint.y, aEpsilon, aEpsilon));
-            for (Relation rel : res) {
+            res.stream().forEach((rel) -> {
                 RelationDesignInfo rdesign = getRelationDesignInfo(rel);
                 if (rdesign != null) {
                     Connector connector = rdesign.getConnector();
@@ -1501,7 +1492,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                         hitted.add(rel);
                     }
                 }
-            }
+            });
             return hitted;
         }
 
@@ -1636,30 +1627,30 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         public void selected(EntityView<E> aView, List<Parameter> aParameters, List<Field> aFields) {
             List<SelectedParameter<E>> parameters = new ArrayList<>();
             List<SelectedField<E>> fields = new ArrayList<>();
-            for (EntityView<E> ev : entityViews.values()) {
+            entityViews.values().stream().forEach((EntityView<E> ev) -> {
                 if (ev != aView) {
                     List<Parameter> pl = ev.getSelectedParameters();
-                    for (Parameter p : pl) {
+                    pl.stream().forEach((p) -> {
                         parameters.add(new SelectedParameter<>(ev.getEntity(), p));
-                    }
+                    });
                     List<Field> fl = ev.getSelectedFields();
-                    for (Field f : fl) {
+                    fl.stream().forEach((f) -> {
                         fields.add(new SelectedField<>(ev.getEntity(), f));
-                    }
+                    });
                 }
-            }
-            for (Parameter p : aParameters) {
+            });
+            aParameters.stream().forEach((p) -> {
                 parameters.add(new SelectedParameter<>(aView.getEntity(), p));
-            }
-            for (Field f : aFields) {
+            });
+            aFields.stream().forEach((f) -> {
                 fields.add(new SelectedField<>(aView.getEntity(), f));
-            }
-            for (Field f : aParameters) {
+            });
+            aParameters.stream().forEach((f) -> {
                 selectedFields.add(new EntityFieldTuple(aView.getEntity(), f));
-            }
-            for (Field f : aFields) {
+            });
+            aFields.stream().forEach((f) -> {
                 selectedFields.add(new EntityFieldTuple(aView.getEntity(), f));
-            }
+            });
             checkActions();
             fireFieldParamSelected(parameters, fields);
         }
@@ -1878,7 +1869,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                         if (zS.length() > 1) {
                             zS = zS.substring(0, zS.length() - 1);
                             zS = zS.replace(',', '.');
-                            float scaleFactor = 1;
+                            float scaleFactor;
                             try {
                                 scaleFactor = Float.valueOf(zS);
                             } catch (NumberFormatException nfe) {
@@ -2199,13 +2190,13 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
             try {
                 Set<E> toDelete = new HashSet<>();
                 toDelete.addAll(aEntities);
-                for (E entity : toDelete) {
+                toDelete.stream().forEach((E entity) -> {
                     if (!isParametersEntity(entity)) {
                         if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
                             doDeleteEntity(entity);
                         }
                     }
-                }
+                });
             } finally {
                 undoSupport.endUpdate();
             }
@@ -2233,11 +2224,11 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                             }
                         } else {
                             List<DeleteRelationEdit> ledits = new ArrayList<>();
-                            for (Relation<E> rel : rels) {
+                            rels.stream().forEach((Relation<E> rel) -> {
                                 if (!(rel instanceof ReferenceRelation<?>)) {
                                     ledits.add(new DeleteRelationEdit<>(rel));
                                 }
-                            }
+                            });
                             if (!ledits.isEmpty()) {
                                 undoSupport.beginUpdate();
                                 try {
@@ -2390,15 +2381,15 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                 try {
                     M model = newModelInstance();
                     if (isParametersCopy()) {
-                        for (EntityFieldTuple ef : selectedFields) {
+                        selectedFields.stream().forEach((ef) -> {
                             model.getParameters().add(ef.field);
-                        }
+                        });
                     } else {
-                        for (E ent : selectedEntities) {
+                        selectedEntities.stream().forEach((E ent) -> {
                             if (ent != null && !isParametersEntity(ent)) {
                                 model.addEntity(ent);
                             }
-                        }
+                        });
                     }
                     try {
                         Document doc = model.toXML();
@@ -2535,7 +2526,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                 try {
                     Set<Map.Entry<Long, E>> entSet = entities.entrySet();
                     if (entSet != null) {
-                        for (Map.Entry<Long, E> entEntry : entSet) {
+                        entSet.stream().forEach((Map.Entry<Long, E> entEntry) -> {
                             E toPaste = entEntry.getValue();
                             if (isPasteable(toPaste)) {
                                 prepareEntityForPaste(toPaste);
@@ -2545,7 +2536,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                                     entitiesPasted.add(toPaste);
                                 }
                             }
-                        }
+                        });
                     }
                 } finally {
                     undoSupport.endUpdate();

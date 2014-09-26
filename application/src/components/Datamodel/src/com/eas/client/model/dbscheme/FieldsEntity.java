@@ -80,8 +80,8 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     
     public String getFullTableName() {
         String fullTableName = tableName;
-        if (tableSchemaName != null && !tableSchemaName.isEmpty()) {
-            fullTableName = tableSchemaName + "." + fullTableName;
+        if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {
+            fullTableName = getTableSchemaName() + "." + fullTableName;
         }
         return fullTableName;
     }

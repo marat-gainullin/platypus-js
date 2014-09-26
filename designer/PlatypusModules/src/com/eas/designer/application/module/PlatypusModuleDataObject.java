@@ -323,7 +323,9 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     @Override
     protected void handleDelete() throws IOException {
-        queriesReg.remove();
+        if (queriesReg != null) {
+            queriesReg.remove();
+        }
         FunctionNode constr = getConstructor();
         PlatypusProject project = getProject();
         if (project != null && constr != null && project.getQueries().getCachedQuery(constr.getName()) != null) {
@@ -339,7 +341,9 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             if (project != null) {
                 SqlQuery moduleQuery = project.getQueries().getCachedQuery(constr.getName());
                 if (moduleQuery != null) {
-                    queriesReg.remove();
+                    if (queriesReg != null) {
+                        queriesReg.remove();
+                    }
                     project.fireQueryChanged(constr.getName());
                     project.addQueriesChangeListener(modelValidator);
                 }

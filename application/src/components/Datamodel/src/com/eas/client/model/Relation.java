@@ -18,6 +18,7 @@ import java.beans.PropertyChangeSupport;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public class Relation<E extends Entity<?, ?, E>> {
 

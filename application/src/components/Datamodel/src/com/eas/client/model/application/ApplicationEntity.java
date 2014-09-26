@@ -1160,7 +1160,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             silentUnpend();
             refreshRowset(aOnSuccess, aOnFailure);
             assert rowset != null;
-            assert pending != null;
+            assert pending != null || (aOnSuccess == null && model.process == null);
             // filtering will be done while processing onRequeried event in ApplicationEntity code
         }
     }
@@ -1233,48 +1233,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                 model.executeEntities(refresh, toExecute);
             }
         }
-    }
-
-    @Override
-    public void setQueryName(String aValue) {
-        if ((queryName == null && aValue != null)
-                || (queryName != null && aValue == null)
-                || (queryName != null && !queryName.equals(aValue))) {
-            query = null;
-            rowset = null;
-            rowsetFilter = null;
-        }
-        if (aValue != null) {
-            tableName = null;
-        }
-        super.setQueryName(aValue);
-    }
-
-    @Override
-    public void setTableName(String aValue) {
-        if ((tableName == null && aValue != null)
-                || (tableName != null && aValue == null)
-                || (tableName != null && !tableName.equals(aValue))) {
-            query = null;
-            rowset = null;
-            rowsetFilter = null;
-        }
-        if (aValue != null && !aValue.isEmpty()) {
-            queryName = null;
-        }
-        super.setTableName(aValue);
-    }
-
-    @Override
-    public void setTableSchemaName(String aValue) {
-        if ((tableSchemaName == null && aValue != null)
-                || (tableSchemaName != null && aValue == null)
-                || (tableSchemaName != null && !tableSchemaName.equals(aValue))) {
-            query = null;
-            rowset = null;
-            rowsetFilter = null;
-        }
-        super.setTableSchemaName(aValue);
     }
 
     /**

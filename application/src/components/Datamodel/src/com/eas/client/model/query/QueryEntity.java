@@ -9,6 +9,8 @@ import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -54,6 +56,14 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
         changeSupport.firePropertyChange(ALIAS_PROPERTY, oldValue, aValue);
     }
 
+    public String getFullTableName() {
+        String fullTableName = tableName;
+        if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {
+            fullTableName = getTableSchemaName() + "." + fullTableName;
+        }
+        return fullTableName;
+    }
+
     @Override
     public void accept(ModelVisitor<QueryEntity> visitor) {
         if (visitor instanceof QueryModelVisitor) {
@@ -66,11 +76,16 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
         if (query == null) {
             if (queryName != null) {
                 SqlQuery q = model.queries.getCachedQuery(queryName);
-                if (q != null) {                    
+                if (q != null) {
                     query = q.copy();
                 }
             } else if (tableName != null) {
-                query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
+                try {
+                    query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
+                } catch (Exception ex) {
+                    query = null;
+                    Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, null, ex);
+                }
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";
             }

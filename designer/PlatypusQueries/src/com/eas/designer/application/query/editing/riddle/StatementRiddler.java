@@ -1,13 +1,11 @@
 package com.eas.designer.application.query.editing.riddle;
 
-import java.util.Iterator;
 import net.sf.jsqlparser.statement.StatementVisitor;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.replace.Replace;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.Union;
 import net.sf.jsqlparser.statement.select.WithItem;
@@ -66,8 +64,8 @@ public class StatementRiddler implements StatementVisitor {
         ExpressionRiddler expressionRiddler = new ExpressionRiddler(selectRiddler, riddleTask);
         selectRiddler.setExpressionVisitor(expressionRiddler);
         if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
-            for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter.hasNext();) {
-                WithItem withItem = iter.next();
+            for (WithItem withItem : select.getWithItemsList()) {
+                //
             }
         }
         select.getSelectBody().accept(selectRiddler);

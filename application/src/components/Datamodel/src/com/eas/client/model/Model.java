@@ -443,7 +443,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
                 } else {
                     Fields rFields = aRelation.getRightEntity().getFields();
                     if (rFields != null) {
-                        aRelation.setRightField(rFields.get(aRelation.getRightField().getName()));
+                        aRelation.setRightField(rFields.get(targetName));
                     } else if (relationsAgressiveCheck) {
                         aRelation.setRightField(null);
                     } else {

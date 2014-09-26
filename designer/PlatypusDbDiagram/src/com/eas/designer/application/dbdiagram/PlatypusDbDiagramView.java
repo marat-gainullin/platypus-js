@@ -7,7 +7,6 @@ package com.eas.designer.application.dbdiagram;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.gui.DbSchemeEditorView;
-import com.eas.client.dbstructure.gui.RunQueryCallback;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.selectors.SelectedField;
@@ -101,16 +100,16 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                                 ev = getModelView().getEntityView(((EntityNode<FieldsEntity>) node.getParentNode()).getEntity());
                                 FieldNode fieldNode = (FieldNode) node;
                                 if (!toSelectFields.containsKey(ev)) {
-                                    toSelectFields.put(ev, new HashSet<Field>());
+                                    toSelectFields.put(ev, new HashSet<>());
                                 }
                                 toSelectFields.get(ev).add(fieldNode.getField());
                                 //ev.addSelectedField(fieldNode.getField());
                             }
                         }
-                        for (Map.Entry<EntityView<FieldsEntity>, Set<Field>> fEntry : toSelectFields.entrySet()) {
+                        toSelectFields.entrySet().stream().forEach((fEntry) -> {
                             EntityView<FieldsEntity> ev = fEntry.getKey();
                             ev.addSelectedFields(fEntry.getValue());
-                        }
+                        });
                         setActivatedNodes(nodes);
                     } finally {
                         processing = false;
@@ -155,14 +154,11 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         setToolTipText(NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getPath()));
         initDbRelatedViews();
 
-        modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    initDbRelatedViews();
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
-                }
+        modelValidChangeListener = dataObject.addModelValidChangeListener(() -> {
+            try {
+                initDbRelatedViews();
+            } catch (Exception ex) {
+                ErrorManager.getDefault().notify(ex);
             }
         });
         clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
@@ -228,21 +224,18 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     }
 
     public void updateTitle() {
-        String boldTitleMask = "<html><b>%s</b>";
-        String plainTitleMask = "<html>%s";
+        String boldTitleMask = "<html><b>%s [%s.%s]</b>";
+        String plainTitleMask = "<html>%s [%s.%s]";
         String titleMask = plainTitleMask;
         if (dataObject.isModified()) {
             titleMask = boldTitleMask;
-        }
-        final String newTitle = String.format(titleMask, getName());
+        }        
+        final String newTitle = String.format(titleMask, getName(), dataObject.getResolvedDatasourceName(), dataObject.getResolvedSchemaName());
         if (EventQueue.isDispatchThread()) {
             setHtmlDisplayName(newTitle);
         } else {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    setHtmlDisplayName(newTitle);
-                }
+            EventQueue.invokeLater(() -> {
+                setHtmlDisplayName(newTitle);
             });
         }
     }

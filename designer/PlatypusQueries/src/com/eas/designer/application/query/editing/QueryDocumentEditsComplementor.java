@@ -85,7 +85,7 @@ public class QueryDocumentEditsComplementor {
         if (qEntity.getQueryName() != null) {
             return ClientConstants.STORED_QUERY_REF_PREFIX + qEntity.getQueryName();
         } else {
-            return qEntity.getTableName();
+            return qEntity.getFullTableName();
         }
     }
 
@@ -167,7 +167,7 @@ public class QueryDocumentEditsComplementor {
                         join.setRightItem(tbl);
                         join.setOnExpression(null);// Cross join without any on condition.
                         if (pSelect.getJoins() == null) {
-                            pSelect.setJoins(new ArrayList<Join>());
+                            pSelect.setJoins(new ArrayList<>());
                         }
                         pSelect.getJoins().add(join);
                     }

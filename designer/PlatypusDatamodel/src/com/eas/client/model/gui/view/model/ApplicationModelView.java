@@ -34,7 +34,6 @@ import static com.eas.client.model.gui.view.model.ModelView.connectorsStroke;
 import static com.eas.client.model.gui.view.model.ModelView.hittedConnectorsStroke;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -99,7 +98,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     @Override
     protected ApplicationDbModel transformDocToModel(Document aDoc) throws Exception {
         ApplicationDbModel lmodel = newModelInstance();
-        lmodel.accept(new XmlDom2ApplicationModel<ApplicationDbEntity>(aDoc));
+        lmodel.accept(new XmlDom2ApplicationModel<>(aDoc));
         return lmodel;
     }
 
@@ -110,17 +109,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected boolean isAnyDeletableEntities() {
-        if (isAnySelectedEntities()) {
-            boolean res = false;
-            for (ApplicationDbEntity sEntity : selectedEntities) {
-                if (!isParametersEntity(sEntity)) {
-                    return true;
-                }
-            }
-            return res;
-        } else {
-            return false;
-        }
+        return isAnySelectedEntities() && selectedEntities.stream().anyMatch((sEntity) -> (!isParametersEntity(sEntity)));
     }
 
     @Override
@@ -149,7 +138,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
         findPlaceForEntityPaste(aEntity);
     }
 
-    protected String generateRelationId(Relation<ApplicationDbEntity> rel) {
+    protected static String generateRelationId(Relation<ApplicationDbEntity> rel) {
         String relId = rel.getLeftEntity().getName() != null && !rel.getLeftEntity().getName().isEmpty() ? rel.getLeftEntity().getName() : String.valueOf(rel.getLeftEntity().getEntityId());
         relId += "." + rel.getLeftField().getName();
         relId += " -> ";
@@ -167,36 +156,42 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
      * ORM designer implementation. Finds all primary keys and binds them with
      * foreign keys. Binding process is different for runtime and design and so,
      * binding task parameter is accepted.
+     *
+     * @param aTask
      */
     public void complementReferenceRelationsByKeys(ForeignKeyBindingTask aTask) {
+        complementReferenceRelations(aTask, model);
+    }
+    
+    public static void complementReferenceRelations(ForeignKeyBindingTask aTask, ApplicationDbModel model) {
         Set<String> alreadyRels = new HashSet<>();
-        for (ReferenceRelation rel : model.getReferenceRelations()) {
+        model.getReferenceRelations().stream().forEach((rel) -> {
             alreadyRels.add(generateRelationId(rel));
-        }
+        });
         Map<String, Set<EntityFieldRef<ApplicationDbEntity>>> pksByTable = new HashMap<>();
-        for (ApplicationDbEntity entity : model.getEntities().values()) {
+        model.getEntities().values().stream().forEach((entity) -> {
             Fields fields = entity.getFields();
             if (fields != null) {
-                for (Field field : fields.getPrimaryKeys()) {
+                fields.getPrimaryKeys().stream().forEach((field) -> {
                     Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(field.getTableName());
                     if (pks == null) {
                         pks = new HashSet<>();
                         pksByTable.put(field.getTableName(), pks);
                     }
                     pks.add(new EntityFieldRef(entity, field));
-                }
+                });
             }
-        }
-        for (ApplicationDbEntity entity : model.getEntities().values()) {
+        });
+        model.getEntities().values().stream().forEach((entity) -> {
             Fields fields = entity.getFields();
             if (fields != null) {
-                for (Field field : fields.getForeinKeys()) {
+                fields.getForeinKeys().stream().forEach((Field field) -> {
                     assert field.getFk() != null;
                     String tableName = field.getFk().getReferee().getTable();
                     String fieldName = field.getFk().getReferee().getField();
                     Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(tableName);
                     if (pks != null) {
-                        for (EntityFieldRef<ApplicationDbEntity> pk : pks) {
+                        pks.stream().forEach((EntityFieldRef<ApplicationDbEntity> pk) -> {
                             if (pk.field.getOriginalName().equalsIgnoreCase(fieldName)) {
                                 ReferenceRelation<ApplicationDbEntity> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
                                 String relId = generateRelationId(relation);
@@ -205,31 +200,21 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
                                     aTask.run(relation);
                                 }
                             }
-                        }
+                        });
                     }
-                }
+                });
             }
-        }
+        });
     }
-    protected ForeignKeyBindingTask referenceRelaionEditsGenerator = new ForeignKeyBindingTask() {
-        @Override
-        public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
-            NewReferenceRelationEdit edit = new NewReferenceRelationEdit(aRelation);
-            edit.redo();
-            undoSupport.postEdit(edit);
-        }
+    protected ForeignKeyBindingTask referenceRelaionEditsGenerator = (ReferenceRelation<ApplicationDbEntity> aRelation) -> {
+        NewReferenceRelationEdit edit = new NewReferenceRelationEdit(aRelation);
+        edit.redo();
+        undoSupport.postEdit(edit);
     };
 
     @Override
     public boolean isSelectedDeletableRelations() {
-        if (super.isSelectedDeletableRelations()) {
-            for (Relation<ApplicationDbEntity> rel : selectedRelations) {
-                if (!(rel instanceof ReferenceRelation<?>)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return super.isSelectedDeletableRelations() && selectedRelations.stream().anyMatch((rel) -> (!(rel instanceof ReferenceRelation<?>)));
     }
 
     @Override
@@ -285,15 +270,15 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     @Override
     public void setModel(ApplicationDbModel aModel) {
         if (model != null) {
-            for (ReferenceRelation<ApplicationDbEntity> rel : model.getReferenceRelations()) {
+            model.getReferenceRelations().stream().forEach((rel) -> {
                 rel.getChangeSupport().removePropertyChangeListener(relationPolylinePropagator);
-            }
+            });
         }
         super.setModel(aModel); //To change body of generated methods, choose Tools | Templates.
         if (model != null) {
-            for (ReferenceRelation<ApplicationDbEntity> rel : model.getReferenceRelations()) {
+            model.getReferenceRelations().stream().forEach((rel) -> {
                 rel.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
-            }
+            });
         }
     }
 
@@ -307,21 +292,12 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected boolean isSelectedDeletableFields() {
-        if (selectedFields != null && !selectedFields.isEmpty()) {
-            for (EntityFieldTuple t : selectedFields) {
-                if (!(t.entity instanceof ApplicationParametersEntity)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
+        return selectedFields != null && !selectedFields.isEmpty() && selectedFields.stream().allMatch((t) -> (t.entity instanceof ApplicationParametersEntity));
     }
 
     @Override
     protected void paintConnector(Graphics2D g2d, Relation<ApplicationDbEntity> aRel, Connector aConnector, Stroke aConnectorsStroke) {
         if (aRel instanceof ReferenceRelation<?>) {
-            Color oldColor = g2d.getColor();
             Stroke oldStroke = g2d.getStroke();
             if (oldStroke == connectorsStroke) {
                 g2d.setStroke(fkConnectorsStroke);
@@ -330,12 +306,10 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
             } else if (oldStroke == selectedConnectorsStroke) {
                 g2d.setStroke(fkSelectedConnectorsStroke);
             }
-            g2d.setColor(toFieldConnectorColor);
             try {
                 super.paintConnector(g2d, aRel, aConnector, aConnectorsStroke);
             } finally {
                 g2d.setStroke(oldStroke);
-                g2d.setColor(oldColor);
             }
         } else {
             super.paintConnector(g2d, aRel, aConnector, aConnectorsStroke);

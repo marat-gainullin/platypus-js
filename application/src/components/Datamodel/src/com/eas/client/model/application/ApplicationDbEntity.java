@@ -6,7 +6,6 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabaseMdCache;
@@ -20,6 +19,8 @@ import java.sql.ParameterMetaData;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -112,11 +113,16 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         if (query == null) {
             if (queryName != null) {
                 SqlQuery q = model.queries.getCachedQuery(queryName);
-                if (q != null) {                    
+                if (q != null) {
                     query = q.copy();
                 }
             } else if (tableName != null) {
-                query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
+                try {
+                    query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
+                } catch (Exception ex) {
+                    query = null;
+                    Logger.getLogger(ApplicationDbEntity.class.getName()).log(Level.WARNING, null, ex);
+                }
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";
             }
@@ -138,9 +144,9 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                 DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDbId());
                 SqlDriver driver = mdCache.getConnectionDriver();
                 TypesResolver resolver = driver.getTypesResolver();
-                for (Field field : rowset.getFields().toCollection()) {
+                rowset.getFields().toCollection().stream().forEach((field) -> {
                     resolver.resolve2Application(field);
-                }
+                });
             }
             forwardChangeLog();
             rowset.addRowsetListener(this);

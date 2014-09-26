@@ -18,7 +18,6 @@ import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
-import com.eas.client.model.gui.view.model.ApplicationModelView.ForeignKeyBindingTask;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.EntityNode;
@@ -103,13 +102,13 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                                     FieldNode fieldNode = (FieldNode) node;
                                     if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof ApplicationParametersEntity)) {
                                         if (!toSelectParameters.containsKey(ev)) {
-                                            toSelectParameters.put(ev, new HashSet<Parameter>());
+                                            toSelectParameters.put(ev, new HashSet<>());
                                         }
                                         toSelectParameters.get(ev).add((Parameter) fieldNode.getField());
                                         //ev.addSelectedParameter((Parameter) fieldNode.getField());
                                     } else {
                                         if (!toSelectFields.containsKey(ev)) {
-                                            toSelectFields.put(ev, new HashSet<Field>());
+                                            toSelectFields.put(ev, new HashSet<>());
                                         }
                                         toSelectFields.get(ev).add(fieldNode.getField());
                                         //ev.addSelectedField(fieldNode.getField());
@@ -117,14 +116,14 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                                 }
                             }
                         }
-                        for (Map.Entry<EntityView<ApplicationDbEntity>, Set<Parameter>> pEntry : toSelectParameters.entrySet()) {
+                        toSelectParameters.entrySet().stream().forEach((pEntry) -> {
                             EntityView<ApplicationDbEntity> ev = pEntry.getKey();
                             ev.addSelectedParameters(pEntry.getValue());
-                        }
-                        for (Map.Entry<EntityView<ApplicationDbEntity>, Set<Field>> fEntry : toSelectFields.entrySet()) {
+                        });
+                        toSelectFields.entrySet().stream().forEach((fEntry) -> {
                             EntityView<ApplicationDbEntity> ev = fEntry.getKey();
                             ev.addSelectedFields(fEntry.getValue());
-                        }
+                        });
                         setActivatedNodes(nodes);
                     } finally {
                         processing = false;
