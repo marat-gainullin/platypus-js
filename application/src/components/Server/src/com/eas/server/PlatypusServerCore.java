@@ -74,7 +74,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     }
 
     protected String defaultAppElement;
-    protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient databasesClient;
     protected ApplicationSourceIndexer indexer;
@@ -132,17 +131,9 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
         return forms;
     }
 
-    public boolean isAnonymousEnabled() {
-        return anonymousEnabled;
-    }
-
     @Override
     public ServerModulesProxy getServerModules() {
         return null;
-    }
-
-    public void setAnonymousEnabled(boolean aValue) {
-        anonymousEnabled = aValue;
     }
 
     public SessionManager getSessionManager() {

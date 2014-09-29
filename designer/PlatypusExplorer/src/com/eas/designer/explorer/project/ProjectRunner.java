@@ -6,6 +6,7 @@ package com.eas.designer.explorer.project;
 
 import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
+import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.AppServerType;
@@ -19,8 +20,10 @@ import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
 import com.eas.designer.explorer.server.ServerState;
 import com.eas.designer.explorer.server.ServerSupport;
 import com.eas.server.PlatypusServer;
+import com.eas.util.FileUtils;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,6 +46,9 @@ import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.actions.SaveAllAction;
 import org.openide.awt.HtmlBrowser;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.SystemAction;
 import org.openide.windows.IOProvider;
@@ -130,14 +136,18 @@ public class ProjectRunner {
      * Starts an application in run mode.
      *
      * @param project Application's project.
-     * @param appElementId Application element's name OR relative path to the
+     * @param appElementName Application element's name OR relative path to the
      * executable file.
      * @throws Exception If something goes wrong.
      */
-    public static void run(final PlatypusProject project, final String appElementId) throws Exception {
+    public static void run(final PlatypusProject project, final String appElementName) throws Exception {
         saveAll();
         project.getRequestProcessor().post(() -> {
-            start(project, appElementId, false);
+            try {
+                start(project, appElementName, false);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         });
     }
 
@@ -145,18 +155,33 @@ public class ProjectRunner {
      * Starts an application in debug mode.
      *
      * @param project Application's project.
-     * @param appElementId Application element's name OR relative path to the
+     * @param appElementName Application element's name OR relative path to the
      * executable file.
      * @throws Exception If something goes wrong.
      */
-    public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
+    public static void debug(final PlatypusProject project, final String appElementName) throws Exception {
         saveAll();
         project.getRequestProcessor().post(() -> {
-            start(project, appElementId, true);
+            try {
+                start(project, appElementName, true);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         });
     }
 
-    private static void start(PlatypusProject project, String appElementId, boolean debug) {
+    private static void start(PlatypusProject project, String appElementName, boolean debug) throws IOException {
+        if (appElementName != null && !appElementName.isEmpty()) {
+            FileObject appSrcDir = project.getSrcRoot();
+            FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
+            if (startJs == null) {
+                startJs = appSrcDir.createData(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
+            }
+            String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName);
+            FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+        } else {
+            throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set"));
+        }
         InputOutput io = IOProvider.getDefault().getIO(project.getDisplayName(), false);
         try {
             File binDir;
@@ -169,8 +194,8 @@ public class ProjectRunner {
                     throw ex;
                 }
             }
-            PlatypusProjectSettings pps = project.getSettings();
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
+            PlatypusProjectSettings pps = project.getSettings();
             String appUrl = null;
             boolean startServer = !pps.isNotStartServer();
             if (startServer) {
@@ -215,7 +240,7 @@ public class ProjectRunner {
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
                     PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
                     if (webManager != null) {
-                        appUrl = webManager.run(appElementId, debug);
+                        appUrl = webManager.start(debug);
                     } else {
                         throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
                     }
@@ -243,21 +268,10 @@ public class ProjectRunner {
 
                 arguments.add(PlatypusClientApplication.class.getName());
 
-                String runElementId = null;
-
-                if (appElementId != null && !appElementId.isEmpty()) {
-                    runElementId = appElementId;
-                } else if (pps.getRunElement() != null && !pps.getRunElement().isEmpty()) {
-                    runElementId = pps.getRunElement();
-                }
-                if (runElementId != null && !runElementId.isEmpty()) {
-                    arguments.add(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
-                    arguments.add(runElementId);
-                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + runElementId); //NOI18N
-                } else {
-                    throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set"));
-                }
                 if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
+                    arguments.add(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
+                    arguments.add(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
+                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + PlatypusProjectSettingsImpl.START_JS_FILE_NAME); //NOI18N
                     // Iterate through all datasources, registered in the designer.
                     // Apply them as datasources in considered server.
                     DatabaseConnection defaultDatabaseConnection = null;
@@ -293,15 +307,12 @@ public class ProjectRunner {
                     arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
                     arguments.add(project.getProjectDirectory().toURI().toASCIIString());
                     io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().toURI().toASCIIString()));//NOI18N
-                    if (!project.getSettings().isSecurityRealmEnabled()) {
-                        arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.ANONYMOUS_ON_CMD_SWITCH);
-                    }
                 } else {
                     if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
                         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
                         PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
                         if (webManager != null) {
-                            appUrl = webManager.run(appElementId, debug);
+                            appUrl = webManager.start(debug);
                         } else {
                             throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
                         }

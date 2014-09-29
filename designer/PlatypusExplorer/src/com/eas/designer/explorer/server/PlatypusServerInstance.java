@@ -7,6 +7,7 @@ package com.eas.designer.explorer.server;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.explorer.project.ProjectRunner;
 import static com.eas.designer.explorer.project.ProjectRunner.getCommandLineStr;
 import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
@@ -119,19 +120,13 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         ExecutionDescriptor descriptor = new ExecutionDescriptor()
                 .frontWindow(true)
                 .controllable(true)
-                .preExecution(new Runnable() {
-                    @Override
-                    public void run() {
-                    }
+                .preExecution(() -> {
                 })
-                .postExecution(new Runnable() {
-                    @Override
-                    public void run() {
-                        setServerState(ServerState.STOPPED);
-                        serverRunTask = null;
-                        io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Stopped"));//NOI18N
-                        io.getOut().println();
-                    }
+                .postExecution(() -> {
+                    setServerState(ServerState.STOPPED);
+                    serverRunTask = null;
+                    io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Stopped"));//NOI18N
+                    io.getOut().println();
                 });
         //ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
         List<String> arguments = new ArrayList<>();
@@ -186,15 +181,13 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         } else if (pps.getDefaultDataSourceName() != null && !pps.getDefaultDataSourceName().isEmpty()) {
             io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
         }
+        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_ELEMENT_CONF_PARAM);
+        arguments.add(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
 
         arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
         arguments.add(project.getProjectDirectory().toURI().toASCIIString());
         io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
                 project.getProjectDirectory().toURI().toASCIIString()));
-
-        if (!project.getSettings().isSecurityRealmEnabled()) {
-            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.ANONYMOUS_ON_CMD_SWITCH);
-        }
 
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
@@ -220,7 +213,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;
-        return runTask != null;
+        return true;
     }
 
     public void stop() {

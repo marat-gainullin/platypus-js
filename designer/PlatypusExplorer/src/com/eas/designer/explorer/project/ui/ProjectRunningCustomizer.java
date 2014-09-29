@@ -114,7 +114,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 if (projectSettings.getServerContext() != null) {
                     txtContext.setText(projectSettings.getServerContext());
                 }
-                cbEnableUserLogin.setSelected(projectSettings.isSecurityRealmEnabled());
                 spClientDebugPort.setValue(projectSettings.getDebugClientPort());
                 spServerDebugPort.setValue(projectSettings.getDebugServerPort());
                 checkRunClientServerConfiguration();
@@ -276,7 +275,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         cbConnections = new javax.swing.JComboBox();
         lblDefDatasource = new javax.swing.JLabel();
         btnAddDatasource = new javax.swing.JButton();
-        cbEnableUserLogin = new javax.swing.JCheckBox();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -695,13 +693,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
-        cbEnableUserLogin.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbEnableUserLogin.text")); // NOI18N
-        cbEnableUserLogin.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbEnableUserLoginActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -730,9 +721,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                                     .addComponent(btnBrowse, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
                                     .addComponent(btnAddDatasource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cbEnableUserLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(cbNotStartServer))
+                        .addComponent(cbNotStartServer)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -759,9 +748,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(btnAddDatasource))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblClientServerMessage)
-                .addGap(7, 7, 7)
-                .addComponent(cbEnableUserLogin)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(30, 30, 30)
                 .addComponent(cbNotStartServer)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(tabbedPane))
@@ -769,7 +756,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtRunPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRunPathActionPerformed
-        projectSettings.setRunElement(txtRunPath.getText());
+        try {
+            projectSettings.setRunElement(txtRunPath.getText());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }//GEN-LAST:event_txtRunPathActionPerformed
 
     private void btnBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBrowseActionPerformed
@@ -779,9 +770,9 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             allowedTypes.add("text/javascript");//NOI18N
             FileObject newSelectedFile = FileChooser.selectAppElement(appRoot, selectedFile, allowedTypes);
             if (newSelectedFile != null && newSelectedFile != selectedFile) {
-                String appElementId = IndexerQuery.file2AppElementId(newSelectedFile);
-                projectSettings.setRunElement(appElementId);
-                txtRunPath.setText(appElementId);
+                String appElementName = IndexerQuery.file2AppElementId(newSelectedFile);
+                projectSettings.setRunElement(appElementName);
+                txtRunPath.setText(appElementName);
             }
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -789,7 +780,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_btnBrowseActionPerformed
 
     private void txtRunPathFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRunPathFocusLost
-        projectSettings.setRunElement(txtRunPath.getText());
+        try {
+            projectSettings.setRunElement(txtRunPath.getText());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }//GEN-LAST:event_txtRunPathFocusLost
 
     private void txtClientOptionsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtClientOptionsFocusLost
@@ -952,10 +947,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         setupConnectionsModel();
     }//GEN-LAST:event_btnAddDatasourceActionPerformed
 
-    private void cbEnableUserLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbEnableUserLoginActionPerformed
-        projectSettings.setSecurityRealmEnabled(cbEnableUserLogin.isSelected());
-    }//GEN-LAST:event_cbEnableUserLoginActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddDatasource;
     private javax.swing.JButton btnBrowse;
@@ -964,7 +955,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JComboBox cbClientLogLevel;
     private javax.swing.JComboBox cbClientType;
     private javax.swing.JComboBox cbConnections;
-    private javax.swing.JCheckBox cbEnableUserLogin;
     private javax.swing.JCheckBox cbNotStartServer;
     private javax.swing.JComboBox cbServerLogLevel;
     private javax.swing.JComboBox cbj2eeServer;

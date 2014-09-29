@@ -63,10 +63,7 @@
                       </Group>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="cbEnableUserLogin" min="-2" pref="195" max="-2" attributes="0"/>
-                          <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -101,9 +98,7 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
-              <Component id="cbEnableUserLogin" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
               <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="tabbedPane" max="32767" attributes="0"/>
@@ -659,16 +654,6 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAddDatasourceActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="cbEnableUserLogin">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableUserLogin.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableUserLoginActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

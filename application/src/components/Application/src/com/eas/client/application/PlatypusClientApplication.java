@@ -39,8 +39,6 @@ public class PlatypusClientApplication {
     // login switchs
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
-    // security switches
-    public static final String ANONYMOUS_ON_CMD_SWITCH = "enable-anonymous";
 
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";

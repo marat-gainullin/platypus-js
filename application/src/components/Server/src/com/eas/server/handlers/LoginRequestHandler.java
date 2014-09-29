@@ -68,11 +68,13 @@ public class LoginRequestHandler extends CommonRequestHandler<LoginRequest, Logi
                         onFailure.accept(new FailedLoginException(BAD_SESSION_ID_MSG));
                     }
                 }
+            /*    
             } else if (getServerCore().isAnonymousEnabled()) {
                 PlatypusPrincipal principal = new AnonymousPlatypusPrincipal("anonymous-" + IDGenerator.genID());
                 String sessionId = String.valueOf(IDGenerator.genID());
                 getServerCore().getSessionManager().createSession(principal, sessionId);
                 onSuccess.accept(new LoginRequest.Response(sessionId));
+            */        
             } else {
                 throw new FailedLoginException(CREDENTIALS_MISSING_MSG);
             }

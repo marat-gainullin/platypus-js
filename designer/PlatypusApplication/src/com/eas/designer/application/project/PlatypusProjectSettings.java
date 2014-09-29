@@ -26,21 +26,24 @@ public interface PlatypusProjectSettings {
      * Sets default application element to run.
      *
      * @param aValue application element name
+     * @throws java.lang.Exception
      */
-    void setRunElement(String aValue);
+    void setRunElement(String aValue) throws Exception;
 
     /**
      * Get the default data source name
+     *
      * @return string of the default data source name
      */
     String getDefaultDataSourceName();
 
     /**
      * Sets the default data source name for a project
+     *
      * @param aValue a default data source name
      */
     void setDefaultDatasourceName(String aValue);
-    
+
     /**
      * Gets the application server's host.
      *
@@ -50,28 +53,46 @@ public interface PlatypusProjectSettings {
 
     /**
      * Gets the log level for Platypus Client.
+     *
      * @return Log level value
      */
-     Level getClientLogLevel();
-     
-     /**
-      * Sets a log level for Platypus Client.
-      * @param aValue Log level value
-      */
-     void setClientLogLevel(Level aValue);
-     
-     /**
+    Level getClientLogLevel();
+
+    /**
+     * Sets a log level for Platypus Client.
+     *
+     * @param aValue Log level value
+     */
+    void setClientLogLevel(Level aValue);
+
+    /**
+     * Checks if security realm is enabled.
+     *
+     * @return true to enable configure security realm
+     */
+    boolean isSecurityRealmEnabled();
+
+    /**
+     * Sets if security realm is enabled.
+     *
+     * @param aValue true to enable configure security realm
+     */
+    void setSecurityRealmEnabled(boolean aValue);
+
+    /**
      * Gets the log level for Platypus Server.
+     *
      * @return Log level value
      */
-     Level getServerLogLevel();
-     
-     /**
-      * Sets a log level for Platypus Server.
-      * @param aValue Log level value
-      */
-     void setServerLogLevel(Level aValue);
-    
+    Level getServerLogLevel();
+
+    /**
+     * Sets a log level for Platypus Server.
+     *
+     * @param aValue Log level value
+     */
+    void setServerLogLevel(Level aValue);
+
     /**
      * Gets JMX debugging port for Platypus Client on local computer on
      * development if null or empty, use default value.
@@ -87,7 +108,7 @@ public interface PlatypusProjectSettings {
      * @return JMX debugging port
      */
     int getDebugServerPort();
-    
+
     /**
      * Gets the project's display name.
      *
@@ -181,14 +202,8 @@ public interface PlatypusProjectSettings {
     boolean isNotStartServer();
 
     /**
-     * Checks if security realm is enabled.
-     *
-     * @return true to enable configure security realm
-     */
-    boolean isSecurityRealmEnabled();
-    
-    /**
      * Saves the project settings.
+     *
      * @throws Exception if something goes wrong
      */
     void save() throws Exception;
@@ -281,13 +296,6 @@ public interface PlatypusProjectSettings {
     void setRunUser(String aValue);
 
     /**
-     * Sets if security realm is enabled.
-     *
-     * @param aValue true to enable configure security realm
-     */
-    void setSecurityRealmEnabled(boolean aValue);
-
-    /**
      * Sets application's context name.
      *
      * @param aValue The name of the context string
@@ -314,5 +322,5 @@ public interface PlatypusProjectSettings {
      * @param aValue
      */
     void setServerVmOptions(String aValue);
-    
+
 }

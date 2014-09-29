@@ -11,7 +11,9 @@ function ${appElementName}(){
         form.show();
     };
     
-    model.requery(/*function(){}*/);
+    model.requery(/*function(){
+            // TODO : place your code here
+        }*/);
     
     // TODO : place your code here
 }

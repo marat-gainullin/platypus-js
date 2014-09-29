@@ -22,7 +22,7 @@ public class ServerConfig {
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     //
-    protected String appElementId;
+    protected String appElementName;
     protected String url;
     protected String defaultDatasourceName;
     protected Set<String> tasks = new HashSet<>();
@@ -46,7 +46,7 @@ public class ServerConfig {
                     } else if (DEF_DATASOURCE_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         defaultDatasourceName = paramValue;
                     } else if (APPELEMENT_CONF_PARAM.equalsIgnoreCase(paramName)) {
-                        appElementId = paramValue;
+                        appElementName = paramValue;
                     }
                 }
             }
@@ -58,8 +58,8 @@ public class ServerConfig {
         }
     }
 
-    public String getAppElementId() {
-        return appElementId;
+    public String getAppElementName() {
+        return appElementName;
     }
 
     public String getUrl() {
