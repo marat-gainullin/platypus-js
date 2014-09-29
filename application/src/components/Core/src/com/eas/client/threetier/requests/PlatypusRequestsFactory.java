@@ -39,9 +39,7 @@ public class PlatypusRequestsFactory {
                 return new LogoutRequest();
             case Requests.rqKeepAlive:
                 return new KeepAliveRequest();
-            case Requests.rqIsUserInRole:
-                return new IsUserInRoleRequest();
-            case Requests.rqStartAppElement:
+            case Requests.rqCredential:
                 return new CredentialRequest();
             default:
                 return null;

@@ -219,7 +219,6 @@ public class ServerMain {
                         , appElement);
                 server.setAnonymousEnabled(anonymousEnabled);
                 serverCoreDbClient.setContextHost(server);
-                serverCoreDbClient.setPrincipalHost(server);
                 ScriptedResource.init(server);
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());

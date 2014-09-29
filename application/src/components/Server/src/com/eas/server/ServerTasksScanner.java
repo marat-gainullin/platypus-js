@@ -6,7 +6,7 @@ package com.eas.server;
 
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.scripts.ScriptDocument;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import java.io.File;
@@ -30,7 +30,7 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
     }
 
     @Override
-    public void fileScanned(String aAppElementId, File file) {
+    public void fileScanned(String aAppElementName, File file) {
         if (PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(FileUtils.getFileExtension(file))) {
             try {
                 ScriptDocument doc = ScriptDocument.parse(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING));
@@ -42,7 +42,7 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
                                 || JsDoc.Tag.RESIDENT_TAG.equals(tag.getName())
                                 || JsDoc.Tag.VALIDATOR_TAG.equals(tag.getName())
                                 ) {
-                            tasks.add(aAppElementId);
+                            tasks.add(aAppElementName);
                         }
                     }
                 }

@@ -5,15 +5,14 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.ModuleStructure;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.settings.SettingsConstants;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
-import com.eas.util.FileUtils;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.Set;
@@ -36,18 +35,22 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
     @Override
     public void handle2(Session aSession, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
+            String moduleOrResourceName = getRequest().getModuleOrResourceName();
+            if (moduleOrResourceName == null || moduleOrResourceName.isEmpty()) {
+                moduleOrResourceName = serverCore.getDefaultAppElement();
+            }
             // Security check
-            checkModuleRoles(aSession, serverCore.getIndexer().nameToFiles(getRequest().getModuleOrResourceName()));
+            checkModuleRoles(aSession, moduleOrResourceName, serverCore.getIndexer().nameToFiles(moduleOrResourceName));
             // Actual work
-            serverCore.getModules().getModule(getRequest().getModuleOrResourceName(), (ModuleStructure aStructure) -> {
+            serverCore.getModules().getModule(moduleOrResourceName, (ModuleStructure aStructure) -> {
                 ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response();
                 if (aStructure.getParts().getFiles().size() > 1) {// If there is a single file, the request is about a plain resource
                     String localPath = serverCore.getModules().getLocalPath();
-                    for (File f : aStructure.getParts().getFiles()) {
+                    aStructure.getParts().getFiles().stream().forEach((File f) -> {
                         String resourceName = f.getPath().substring(localPath.length());
                         resourceName = resourceName.replace("\\", "/");
                         resp.getStructure().add(resourceName);
-                    }
+                    });
                     resp.getClientDependencies().addAll(aStructure.getClientDependencies());
                     resp.getServerDependencies().addAll(aStructure.getServerDependencies());
                     resp.getQueryDependencies().addAll(aStructure.getQueryDependencies());
@@ -60,14 +63,12 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
         }
     }
 
-    private void checkModuleRoles(Session aSession, AppElementFiles aAppElementFiles) throws Exception {
+    private void checkModuleRoles(Session aSession, String aModuleName, AppElementFiles aAppElementFiles) throws Exception {
         if (aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-            File jsFile = aAppElementFiles.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-            String jsContent = FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING);
-            ScriptDocument jsDoc = ScriptDocument.parse(jsContent);
+            ScriptDocument jsDoc = serverCore.getSecurityConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
             if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {
-                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, jsFile.getName(), getRequest().getModuleOrResourceName(), aSession.getPrincipal().getName()));
+                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), aSession.getPrincipal().getName()));
             }
         }
     }

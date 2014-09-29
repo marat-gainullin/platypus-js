@@ -14,7 +14,6 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -75,11 +74,6 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor{
 
     @Override
     public void visit(KeepAliveRequest.Response rsp) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest.Response rsp) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -19,7 +19,6 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -86,8 +85,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
-            rsp.setAppElementName(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
+        if (dom.containsChild(RequestsTags.TAG_LOGIN)) {
+            rsp.setName(dom.getChild(RequestsTags.TAG_LOGIN).getString());
         }
     }
 
@@ -122,12 +121,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(KeepAliveRequest.Response rsp) throws Exception {
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest.Response rsp) throws Exception {
-        ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        rsp.setRole(dom.containsChild(RequestsTags.TAG_ROLE));
     }
 
     @Override

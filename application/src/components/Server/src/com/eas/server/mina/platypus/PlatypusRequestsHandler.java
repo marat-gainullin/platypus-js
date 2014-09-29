@@ -13,7 +13,7 @@ import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
 import com.eas.server.handlers.LoginRequestHandler;
 import com.eas.server.handlers.LogoutRequestHandler;
-import com.eas.server.handlers.SessionRequestHandler;
+import com.eas.server.SessionRequestHandler;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 import java.util.function.Consumer;

@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.server.SessionRequestHandler;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;

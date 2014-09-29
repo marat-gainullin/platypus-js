@@ -105,11 +105,6 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(IsUserInRoleRequest rq) throws Exception {
-        handler = new IsUserInRoleRequestHandler(serverCore, rq);
-    }
-
-    @Override
     public void visit(ModuleStructureRequest rq) throws Exception {
         handler = new ModuleStructureRequestHandler(serverCore, rq);
     }

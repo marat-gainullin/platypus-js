@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
 import com.eas.client.queries.LocalQueriesProxy;

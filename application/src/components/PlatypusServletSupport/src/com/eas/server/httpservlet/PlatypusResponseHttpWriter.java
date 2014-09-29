@@ -21,7 +21,6 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -77,11 +76,9 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(CredentialRequest.Response resp) throws Exception {
-        String appElementName = ((CredentialRequest.Response) resp).getAppElementName();
         String name = ((CredentialRequest.Response) resp).getName();
         StringBuilder sb = new StringBuilder();
         JSONUtils.o(sb,
-                "appElementName", JSONUtils.s(appElementName),
                 "userName", JSONUtils.s(name));
         writeJsonResponse(sb.toString(), servletResponse);
     }
@@ -105,11 +102,6 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(KeepAliveRequest.Response resp) throws Exception {
         // http keep alive is processed out of this class by servlet container
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest.Response resp) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

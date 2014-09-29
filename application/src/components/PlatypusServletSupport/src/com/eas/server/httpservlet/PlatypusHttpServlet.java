@@ -10,7 +10,7 @@ import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
 import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
-import com.eas.server.handlers.SessionRequestHandler;
+import com.eas.server.SessionRequestHandler;
 import java.io.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -132,27 +132,23 @@ public class PlatypusHttpServlet extends HttpServlet {
                 if (httpSession != null) {
                     SessionManager sessionManager = serverCore.getSessionManager();
                     Session session;
+                    PlatypusPrincipal principal = servletRequestPrincipal(request);
                     synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is on the same point
                         String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
                         if (platypusSessionId == null) {
                             platypusSessionId = httpSession.getId();
                         }
-                        session = sessionManager.getOrCreateSession(getPrincipal(request), platypusSessionId);
+                        session = sessionManager.getOrCreateSession(principal, platypusSessionId);
                         httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
                         httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, serverCore);
                     }
                     assert session != null : "Platypus session missing";
-                    session.setPrincipal(getPrincipal(request));
-                    // Thread-local current session setting. 
-                    // Thus, all code, executed under current principal (java or js code) can be authorized.
+                    session.setPrincipal(principal);
                     currentRequest.set(request);
-                    currentResponse.set(response);
-                    sessionManager.setCurrentSession(session);
+                    currentResponse.set(response);                    
                     try {
                         processPlatypusRequest(request, response, session, httpSession);
                     } finally {
-                        // Revoke current session to avoid ANY session/memory leak.
-                        sessionManager.setCurrentSession(null);
                         currentRequest.remove();
                         currentResponse.remove();
                     }
@@ -163,7 +159,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
     }
 
-    private PlatypusPrincipal getPrincipal(final HttpServletRequest aRequest) {
+    private static PlatypusPrincipal servletRequestPrincipal(final HttpServletRequest aRequest) {
         if (aRequest.getUserPrincipal() != null) {
             return new WebPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aRequest);
         } else {

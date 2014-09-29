@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.server.SessionRequestHandler;
 import com.bearsoft.rowset.changes.*;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;

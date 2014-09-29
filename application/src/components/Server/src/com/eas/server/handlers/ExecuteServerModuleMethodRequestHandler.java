@@ -4,8 +4,10 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.AppElementFiles;
+import com.eas.client.cache.ScriptDocument;
+import com.eas.server.SessionRequestHandler;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.client.scripts.SecuredJSConstructor;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
@@ -52,22 +54,22 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
             } else {
                 try {
                     ScriptedResource.require(new String[]{moduleName}, (Void v) -> {
-                        JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
-                        if (jsConstr != null) {
-                            if (jsConstr instanceof SecuredJSConstructor) {
-                                SecuredJSConstructor sjsConstr = (SecuredJSConstructor) jsConstr;
+                        try {
+                            AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
+                            JSObject constr = ScriptUtils.lookupInGlobal(moduleName);
+                            if (files != null && files.isModule() && constr != null) {
+                                ScriptDocument config = serverCore.getSecurityConfigs().get(moduleName, files);
+                                // Let's perform security checks
+                                CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
                                 // Let's check the if module is resident
                                 JSObject moduleInstance = serverCore.getSessionManager().getSystemSession().getModule(moduleName);
-                                if (moduleInstance != null) {
-                                    // Resident module roles need to be checked against a current user.
-                                    CreateServerModuleRequestHandler.checkPrincipalPermission(serverCore, sjsConstr.getModuleAllowedRoles(), moduleName);
-                                } else {
+                                if (moduleInstance == null) {
                                     if (aSession.containsModule(moduleName)) {
                                         moduleInstance = aSession.getModule(moduleName);
                                     } else {
-                                        if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
-                                            if (sjsConstr.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                                                moduleInstance = (JSObject) sjsConstr.newObject(new Object[]{});
+                                        if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                                            if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
+                                                moduleInstance = (JSObject) constr.newObject(new Object[]{});
                                                 Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
                                             } else {
                                                 throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", moduleName));
@@ -113,17 +115,20 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                     onFailure.accept(new Exception(String.format(MODULE_MISSING_MSG, getRequest().getModuleName())));
                                 }
                             } else {
-                                onFailure.accept(new AccessControlException(String.format("Access to unsecured module %s is denied.", moduleName)));//NOI18N
+                                onFailure.accept(new IllegalArgumentException(String.format(MODULE_MISSING_OR_NOT_A_MODULE, moduleName)));
                             }
-                        } else {
-                            onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
+                        } catch (Exception ex) {
+                            Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+                            onFailure.accept(ex);
                         }
                     }, onFailure);
                 } catch (Exception ex) {
                     Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    onFailure.accept(ex);
                 }
             }
         }
     }
+    protected static final String MODULE_MISSING_OR_NOT_A_MODULE = "No module: %s, or it is not a module";
     protected static final String BOTH_IO_MODELS_MSG = "Method {0} in module {1} attempts to return value and call a callback. Sync and async io models both are not allowed. You should make a choice.";
 }

@@ -22,19 +22,27 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     protected Object published;
 
     private final String context;
-    private final String email;
-    private final String phone;
-    private final String startAppElement;
     private final Set<String> roles;
     private final String name;
 
-    public PlatypusPrincipal(String aUserName, String aContext, String aEmail, String aPhone, String aStartAppElement, Set<String> aRoles) {
+    private static final ThreadLocal<PlatypusPrincipal> current = new ThreadLocal<>();
+
+    public static PlatypusPrincipal getInstance() {
+        return current.get();
+    }
+
+    public static void setInstance(PlatypusPrincipal aValue) {
+        if (aValue != null) {
+            current.set(aValue);
+        } else {
+            current.remove();
+        }
+    }
+
+    public PlatypusPrincipal(String aUserName, String aContext, Set<String> aRoles) {
         super();
         name = aUserName;
         context = aContext;
-        email = aEmail;
-        phone = aPhone;
-        startAppElement = aStartAppElement;
         roles = aRoles;
     }
 
@@ -52,14 +60,12 @@ public class PlatypusPrincipal implements Principal, HasPublished {
             + "/**\n"
             + "* Checks if a user have a specified role.\n"
             + "* @param role a role's name to test.\n"
-            + "* @param onSuccess A success callback. Optional."
-            + "* @param onFailure A failure callback. Optional."
-            + "* @return <code>true</code> if the user has the provided role\n"
+            + "* @return <code>true</code> if the user has the role.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = HAS_ROLE_JS_DOC)
     public boolean hasRole(String aRole) {
-        return roles != null ? roles.contains(aRole) : false;
+        return roles != null ? roles.contains(aRole) : true;
     }
 
     public Set<String> getRoles() {
@@ -69,19 +75,6 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     public String getContext() {
         return context;
     }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getStartAppElement() {
-        return startAppElement;
-    }
-
 
     public boolean hasAnyRole(Set<String> aRoles) {
         if (aRoles != null && !aRoles.isEmpty()) {

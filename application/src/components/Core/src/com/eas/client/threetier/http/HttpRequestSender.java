@@ -316,11 +316,4 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         executeRequest(rq);
     }
-
-    @Override
-    public void visit(IsUserInRoleRequest rq) throws Exception {
-        method = PlatypusHttpConstants.HTTP_METHOD_GET;
-        params.put(PlatypusHttpRequestParams.ROLE_NAME, rq.getRoleName());
-        executeRequest(rq);
-    }
 }

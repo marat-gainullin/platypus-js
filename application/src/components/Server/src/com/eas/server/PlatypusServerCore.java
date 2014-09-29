@@ -13,20 +13,20 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
-import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.login.AnonymousPlatypusPrincipal;
+import com.eas.client.cache.ReportsConfigs;
+import com.eas.client.cache.ScriptDocument;
+import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
+import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
-import com.eas.util.FileUtils;
 import java.io.File;
 import java.net.URI;
 import java.util.HashSet;
@@ -57,7 +57,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
                     serverCoreDbClient = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true);
                     instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments()), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, aStartAppElementId);
                     serverCoreDbClient.setContextHost(instance);
-                    serverCoreDbClient.setPrincipalHost(instance);
                     ScriptedResource.init(instance);
                     instance.startServerTasks();
                 } else {
@@ -83,6 +82,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     protected QueriesProxy<SqlQuery> queries;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
+    protected ScriptSecurityConfigs securityConfigs;
+    protected FormsDocuments forms;
+    protected ReportsConfigs reports;
+    protected ModelsDocuments models;
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         super();
@@ -107,6 +110,26 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     @Override
     public QueriesProxy<SqlQuery> getQueries() {
         return queries;
+    }
+
+    @Override
+    public ScriptSecurityConfigs getSecurityConfigs() {
+        return securityConfigs;
+    }
+
+    @Override
+    public ModelsDocuments getModels() {
+        return models;
+    }
+
+    @Override
+    public ReportsConfigs getReports() {
+        return reports;
+    }
+
+    @Override
+    public FormsDocuments getForms() {
+        return forms;
     }
 
     public boolean isAnonymousEnabled() {
@@ -156,8 +179,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
      */
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs) throws Exception {
         JSObject module = getSessionManager().getSystemSession().getModule(aModuleName);
-        Session oldSession = getSessionManager().getCurrentSession();
-        getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+        PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
+        PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
         try {
             if (module == null) {
                 ScriptedResource.require(new String[]{aModuleName});
@@ -174,7 +197,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
                 throw new Exception(String.format("Module %s is not found.", aModuleName));
             }
         } finally {
-            getSessionManager().setCurrentSession(oldSession);
+            PlatypusPrincipal.setInstance(oldPrincipal);
         }
     }
 
@@ -183,9 +206,9 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     }
 
     public int startServerTasks() throws Exception {
-        Session oldSession = getSessionManager().getCurrentSession();
+        PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
+        PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
         try {
-            getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
             int startedTasks = 0;
             for (String moduleId : tasks) {
                 if (startServerTask(moduleId)) {
@@ -194,7 +217,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
             }
             return startedTasks;
         } finally {
-            getSessionManager().setCurrentSession(oldSession);
+            PlatypusPrincipal.setInstance(oldPrincipal);
         }
     }
     public static final String STARTING_RESIDENT_TASK_MSG = "Starting resident task \"%s\"";
@@ -212,8 +235,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
         ScriptedResource.require(new String[]{aModuleName});
         AppElementFiles files = modules.nameToFiles(aModuleName);
         if (files != null && files.isModule()) {
-            File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-            ScriptDocument sDoc = ScriptDocument.parse(FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING));
+            ScriptDocument sDoc = securityConfigs.get(aModuleName, files);
             boolean stateless = false;
             for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
                 switch (tag.getName()) {
@@ -256,15 +278,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
 
     @Override
     public String preparationContext() throws Exception {
-        Session session = sessionManager.getCurrentSession();
-        if (session != null) {
-            if (session.getPrincipal() != null) {
-                return session.getPrincipal().getContext();
-            } else if (session.getContext() != null) {
-                return session.getContext();
-            }
-        }
-        return null;
+        PlatypusPrincipal principal = PlatypusPrincipal.getInstance();
+        return principal != null ? principal.getContext() : null;
     }
 
     @Override
@@ -274,11 +289,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
 
     @Override
     public PlatypusPrincipal getPrincipal() {
-        if (sessionManager.getCurrentSession() != null) {
-            return sessionManager.getCurrentSession().getPrincipal();
-        } else {
-            // Construct a dummy Principal for a debugger can discover inner Principal's structure
-            return new AnonymousPlatypusPrincipal("No current session found");
-        }
+        return PlatypusPrincipal.getInstance();
     }
 }

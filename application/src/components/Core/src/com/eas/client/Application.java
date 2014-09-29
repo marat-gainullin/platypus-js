@@ -5,6 +5,10 @@
  */
 package com.eas.client;
 
+import com.eas.client.cache.FormsDocuments;
+import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ReportsConfigs;
+import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 
@@ -20,4 +24,12 @@ public interface Application<Q extends Query> {
     public ModulesProxy getModules();
 
     public ServerModulesProxy getServerModules();
+    
+    public ModelsDocuments getModels();
+    
+    public FormsDocuments getForms();
+    
+    public ReportsConfigs getReports();
+    
+    public ScriptSecurityConfigs getSecurityConfigs();
 }

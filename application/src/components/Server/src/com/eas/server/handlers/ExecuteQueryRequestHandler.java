@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.server.SessionRequestHandler;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameters;

@@ -20,7 +20,6 @@ import com.bearsoft.rowset.jdbc.StatementsGenerator;
 import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
 import com.bearsoft.rowset.metadata.*;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
@@ -28,7 +27,6 @@ import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
-import java.security.AccessControlException;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -63,8 +61,6 @@ public class DatabasesClient {
     protected boolean autoFillMetadata = true;
     // callback interface for context
     protected ContextHost contextHost;
-    // callback interface for principal
-    protected PrincipalHost principalHost;
     // transactions
     protected final Set<TransactionListener> transactionListeners = new CopyOnWriteArraySet<>();
     // datasource name used by default. E.g. in queries with null datasource name
@@ -236,9 +232,6 @@ public class DatabasesClient {
             if (roles != null && props != null) {
                 return new PlatypusPrincipal(aUserName,
                         props.get(ClientConstants.F_USR_CONTEXT),
-                        props.get(ClientConstants.F_USR_EMAIL),
-                        props.get(ClientConstants.F_USR_PHONE),
-                        props.get(ClientConstants.F_USR_FORM),
                         roles);
             } else {
                 return null;
@@ -515,6 +508,7 @@ public class DatabasesClient {
         }
     }
 
+    /*
     private void checkWritePrincipalPermission(String aEntityId, Set<String> writeRoles) throws Exception {
         if (getPrincipalHost() != null && writeRoles != null && !writeRoles.isEmpty()) {
             PlatypusPrincipal principal = getPrincipalHost().getPrincipal();
@@ -524,6 +518,7 @@ public class DatabasesClient {
             throw new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", principal != null ? principal.getName() : null));
         }
     }
+    */
 
     public void rollback() {
         TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
@@ -562,14 +557,6 @@ public class DatabasesClient {
         }
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
-    }
-
-    public PrincipalHost getPrincipalHost() {
-        return principalHost;
-    }
-
-    public void setPrincipalHost(PrincipalHost aPrincipalHost) {
-        principalHost = aPrincipalHost;
     }
 
     public String getConnectionSchema(String aDatasourceId) throws Exception {

@@ -29,7 +29,7 @@ public class FormsDocuments extends ActualCache<Document> {
         if (aFiles.hasExtension(PlatypusFiles.FORM_EXTENSION)) {
             files.addFile(aFiles.findFileByExtension(PlatypusFiles.FORM_EXTENSION));
         } else {
-            throw new IllegalStateException("Application element " + aName + " has no form layout file (" + PlatypusFiles.FORM_EXTENSION + ")");
+            throw new IllegalStateException("Application element " + aName + " has no form layout file (*." + PlatypusFiles.FORM_EXTENSION + ")");
         }
         return super.get(aName, files);
     }

@@ -9,19 +9,15 @@ import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
-import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
 import com.eas.server.mina.platypus.RequestDecoder;
 import com.eas.server.mina.platypus.ResponseEncoder;
-import com.eas.util.FileUtils;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -93,12 +89,11 @@ public class PlatypusServer extends PlatypusServerCore {
     
     private String findAcceptorModule(String aProtocol) throws Exception {
         String lastAcceptor = null;
-        for (String taskModuleId : tasks) {
-            ScriptedResource.require(new String[]{taskModuleId});
-            AppElementFiles files = modules.nameToFiles(taskModuleId);
+        for (String taskModuleName : tasks) {
+            ScriptedResource.require(new String[]{taskModuleName});
+            AppElementFiles files = modules.nameToFiles(taskModuleName);
             if (files != null && files.isModule()) {
-                File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-                ScriptDocument sDoc = ScriptDocument.parse(FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING));
+                ScriptDocument sDoc = securityConfigs.get(taskModuleName, files);
                 boolean isAcceptor = false;
                 Set<String> protocols = new HashSet<>();
                 for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
@@ -112,10 +107,10 @@ public class PlatypusServer extends PlatypusServerCore {
                 if (isAcceptor) {
                     if (!protocols.isEmpty()) {// specific protocol acceptor
                         if (protocols.contains(aProtocol)) {
-                            return taskModuleId;
+                            return taskModuleName;
                         }
                     } else {
-                        lastAcceptor = taskModuleId;
+                        lastAcceptor = taskModuleName;
                     }
                 }
             }

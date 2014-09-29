@@ -24,7 +24,7 @@ public class SessionManager {
 
     private final PlatypusServerCore serverCore;
     private final Map<String, Session> sessions = new HashMap<>();
-    protected ThreadLocal<Session> currentSession = new ThreadLocal<>();
+//    protected ThreadLocal<Session> currentSession = new ThreadLocal<>();
 
     /**
      * Creates a new session manager.
@@ -116,17 +116,5 @@ public class SessionManager {
      */
     public synchronized Set<Entry<String, Session>> entrySet() {
         return sessions.entrySet();
-    }
-
-    public Session getCurrentSession() {
-        return currentSession.get();
-    }
-
-    public void setCurrentSession(Session aSession) {
-        if (aSession == null) {
-            currentSession.remove();
-        } else {
-            currentSession.set(aSession);
-        }
     }
 }

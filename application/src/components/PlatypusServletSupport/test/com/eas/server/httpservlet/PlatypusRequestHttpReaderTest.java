@@ -8,7 +8,6 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
@@ -43,48 +42,41 @@ public class PlatypusRequestHttpReaderTest {
     public void changesJsonReadTest() throws Exception {
         System.out.println("changesJsonReadTest");
         ScriptUtils.init();
-        List<Change> changes = ChangeJsonReader.parse(WRITTEN_CHANGES, new EntitiesHost() {
-            @Override
-            public Field resolveField(String aEntityId, String aFieldName) throws Exception {
-                assertEquals("testEntity", aEntityId);
-                switch (aFieldName) {
-                    case "key1": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.FLOAT);
-                        return field;
-                    }
-                    case "key2": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.CHAR);
-                        return field;
-                    }
-                    case "data\"\"1": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.INTEGER);
-                        return field;
-                    }
-                    case "data2": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.VARCHAR);
-                        return field;
-                    }
-                    case "da\"ta3": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.BOOLEAN);
-                        return field;
-                    }
-                    case "data4": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.BIT);
-                        return field;
-                    }
-                    case "data5": {
-                        Field field = new Field(aFieldName, "", DataTypeInfo.TIMESTAMP);
-                        return field;
-                    }
-                    default: {
-                        fail("Unknown field name ocured while testing");
-                        return null;
-                    }
+        List<Change> changes = ChangeJsonReader.parse(WRITTEN_CHANGES, (String aEntityId, String aFieldName) -> {
+            assertEquals("testEntity", aEntityId);
+            switch (aFieldName) {
+                case "key1": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.FLOAT);
+                    return field;
                 }
-            }
-
-            @Override
-            public void checkRights(String aEntityId) throws Exception {
+                case "key2": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.CHAR);
+                    return field;
+                }
+                case "data\"\"1": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.INTEGER);
+                    return field;
+                }
+                case "data2": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.VARCHAR);
+                    return field;
+                }
+                case "da\"ta3": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.BOOLEAN);
+                    return field;
+                }
+                case "data4": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.BIT);
+                    return field;
+                }
+                case "data5": {
+                    Field field = new Field(aFieldName, "", DataTypeInfo.TIMESTAMP);
+                    return field;
+                }
+                default: {
+                    fail("Unknown field name ocured while testing");
+                    return null;
+                }
             }
         });
 

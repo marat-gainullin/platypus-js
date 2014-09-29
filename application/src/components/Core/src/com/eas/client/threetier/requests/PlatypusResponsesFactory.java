@@ -74,12 +74,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(CredentialRequest rq) throws Exception {
-        response = new CredentialRequest.Response(null, null);
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest rq) throws Exception {
-        response = new IsUserInRoleRequest.Response(false);
+        response = new CredentialRequest.Response(null);
     }
 
     @Override

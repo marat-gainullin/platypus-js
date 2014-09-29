@@ -57,8 +57,10 @@ public class ResourceRequest extends Request {
             super();
         }
 
-        public Response(byte[] content, Date timeStamp) {
+        public Response(byte[] aContent, Date aTimeStamp) {
             super();
+            content = aContent;
+            timeStamp = aTimeStamp;
         }
 
         public byte[] getContent() {

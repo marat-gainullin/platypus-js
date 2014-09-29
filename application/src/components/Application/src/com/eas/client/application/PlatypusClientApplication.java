@@ -2,7 +2,10 @@ package com.eas.client.application;
 
 import com.eas.client.*;
 import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ReportsConfigs;
+import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
@@ -157,6 +160,10 @@ public class PlatypusClientApplication {
                         twoTierCore.setQueries(qp);
                         app = new Application() {
 
+                            protected ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
+                            protected FormsDocuments forms = new FormsDocuments();
+                            protected ReportsConfigs reports = new ReportsConfigs();
+
                             @Override
                             public QueriesProxy getQueries() {
                                 return qp;
@@ -171,6 +178,27 @@ public class PlatypusClientApplication {
                             public ServerModulesProxy getServerModules() {
                                 throw new UnsupportedOperationException("Not supported in two-tier architecture.");
                             }
+
+                            @Override
+                            public ModelsDocuments getModels() {
+                                return models;
+                            }
+
+                            @Override
+                            public FormsDocuments getForms() {
+                                return forms;
+                            }
+
+                            @Override
+                            public ReportsConfigs getReports() {
+                                return reports;
+                            }
+
+                            @Override
+                            public ScriptSecurityConfigs getSecurityConfigs() {
+                                return securityConfigs;
+                            }
+
                         };
                     } else {
                         throw new IllegalArgumentException("applicationUrl: " + config.url + " doesn't point to existent directory or JNDI resource.");
@@ -179,6 +207,7 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
+                ScriptedResource.require(new String[]{""}, null, null);
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
             }

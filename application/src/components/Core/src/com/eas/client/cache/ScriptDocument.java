@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.scripts;
+package com.eas.client.cache;
 
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.script.JsDoc;
@@ -38,13 +38,13 @@ public class ScriptDocument {
     protected ScriptDocument() {
         super();
     }
-    
-    public static ScriptDocument parse(String aSource){
+
+    public static ScriptDocument parse(String aSource) {
         ScriptDocument doc = new ScriptDocument();
         doc.readScriptAnnotations(aSource);
         return doc;
     }
-    
+
     public Set<String> getModuleAllowedRoles() {
         return moduleAllowedRoles;
     }
@@ -73,6 +73,7 @@ public class ScriptDocument {
 
     /**
      * Reads script annotations. Annotations, accompanied with
+     *
      * @name annotation are the 'module annotations'. Annotations, followed by
      * any property assignment are the 'property annotations'. Property
      * annotations will be taken into account while accessing through modules.
@@ -115,7 +116,7 @@ public class ScriptDocument {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
             jsDoc.parseAnnotations();
-            for (Tag tag : jsDoc.getAnnotations()) {
+            jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
                 if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
                     Set<String> roles = propertyAllowedRoles.get(aPropertyName);
                     if (roles == null) {
@@ -126,7 +127,7 @@ public class ScriptDocument {
                     }
                     propertyAllowedRoles.put(aPropertyName, roles);
                 }
-            }
+            });
         }
     }
 }

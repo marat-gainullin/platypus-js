@@ -14,7 +14,7 @@ import com.eas.client.threetier.Requests;
 public class CredentialRequest extends Request {
 
     public CredentialRequest() {
-        super(Requests.rqStartAppElement);
+        super(Requests.rqCredential);
     }
     
     @Override
@@ -24,12 +24,10 @@ public class CredentialRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        private String startAppElementName;
         private String name;
 
-        public Response(String aAppElementName, String aName) {
+        public Response(String aName) {
             super();
-            startAppElementName = aAppElementName;
             name = aName;
         }
 
@@ -39,14 +37,6 @@ public class CredentialRequest extends Request {
 
         public void setName(String aValue) {
             name = aValue;
-        }
-
-        public String getAppElementName() {
-            return startAppElementName;
-        }
-
-        public void setAppElementName(String aValue) {
-            startAppElementName = aValue;
         }
 
         @Override

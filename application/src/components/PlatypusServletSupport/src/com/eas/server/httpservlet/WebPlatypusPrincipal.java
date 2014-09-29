@@ -19,7 +19,7 @@ public class WebPlatypusPrincipal extends PlatypusPrincipal {
     protected HttpServletRequest servletRequest;
 
     public WebPlatypusPrincipal(String aUserName, HttpServletRequest aServletRequest) {
-        super(aUserName, null, null, null, null, Collections.emptySet());
+        super(aUserName, null, Collections.emptySet());
         servletRequest = aServletRequest;
     }
 

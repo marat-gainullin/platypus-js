@@ -18,7 +18,6 @@ import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -209,12 +208,5 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
 
     @Override
     public void visit(CredentialRequest rq) throws Exception {
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_ROLE_NAME, rq.getRoleName());
-        writer.flush();
     }
 }

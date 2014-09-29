@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
 
     public AnonymousPlatypusPrincipal(String aName) {
-        super(aName, null, null, null, null, Collections.emptySet());
+        super(aName, null, Collections.emptySet());
     }
 
     @Override

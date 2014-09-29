@@ -7,7 +7,6 @@ package com.eas.client.login;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.script.NoPublisherException;
 import java.util.Collections;
-import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -17,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SystemPlatypusPrincipal extends PlatypusPrincipal {
 
     public SystemPlatypusPrincipal() {
-        super("system-" + IDGenerator.genID(), null, null, null, null, Collections.emptySet());
+        super("system-" + IDGenerator.genID(), null, Collections.emptySet());
     }
 
     @Override

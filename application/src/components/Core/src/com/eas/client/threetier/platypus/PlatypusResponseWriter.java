@@ -19,7 +19,6 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -106,8 +105,8 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getAppElementName() != null) {
-            writer.put(RequestsTags.TAG_MODULE_NAME, rsp.getAppElementName());
+        if (rsp.getName() != null) {
+            writer.put(RequestsTags.TAG_LOGIN, rsp.getName());
         }
         writer.flush();
     }
@@ -148,15 +147,6 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(KeepAliveRequest.Response rsp) throws Exception {
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.isRole()) {
-            writer.put(RequestsTags.TAG_ROLE);
-        }
-        writer.flush();
     }
 
     @Override

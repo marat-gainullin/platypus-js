@@ -18,7 +18,6 @@ import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -281,14 +280,5 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
 
     @Override
     public void visit(CredentialRequest rq) throws Exception {
-    }
-
-    @Override
-    public void visit(IsUserInRoleRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_ROLE_NAME)) {
-            throw new ProtoReaderException("No user name");
-        }
-        rq.setRoleName(input.getChild(RequestsTags.TAG_ROLE_NAME).getString());
     }
 }

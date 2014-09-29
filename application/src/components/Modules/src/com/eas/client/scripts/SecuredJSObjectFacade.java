@@ -1,5 +1,6 @@
 package com.eas.client.scripts;
 
+import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.script.ScriptUtils;

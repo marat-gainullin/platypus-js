@@ -10,10 +10,8 @@ import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
 import com.eas.util.ListenerRegistration;
-import java.security.AccessControlException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,9 +74,6 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     
     @Override
     public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (client.getPrincipalHost() != null) {
-            checkReadPrincipalPermission();
-        }
         return super.refresh(aParams, onSuccess, onFailure);
     }
 
@@ -96,21 +91,6 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         // If no preparation has been made, no unpreparation should occur!
         if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty()) {
             cache.getConnectionDriver().applyContextToConnection(aConnection, contextHost.unpreparationContext());
-        }
-    }
-    
-    private PlatypusPrincipal getPrincipal() {
-        assert client.getPrincipalHost() != null : "PrincipalHost is null";
-        return client.getPrincipalHost().getPrincipal();
-    }
-
-    private void checkReadPrincipalPermission() throws Exception {
-        if (readRoles != null && !readRoles.isEmpty()) {
-            PlatypusPrincipal principal = getPrincipal();
-            if (principal != null && principal.hasAnyRole(readRoles)) {
-                return;
-            }
-            throw new AccessControlException(String.format("Access denied for read (entity: %s) for user '%s'.", entityId != null ? entityId : "", principal != null ? principal.getName() : null));
         }
     }
 }

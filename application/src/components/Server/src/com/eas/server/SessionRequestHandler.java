@@ -2,15 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server.handlers;
+package com.eas.server;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.server.PlatypusServerCore;
-import com.eas.server.RequestHandler;
-import com.eas.server.Session;
-import com.eas.server.SessionManager;
-import com.eas.server.UnauthorizedRequestException;
 import java.util.function.Consumer;
 
 /**
@@ -37,7 +33,13 @@ public abstract class SessionRequestHandler<T extends Request, R extends Respons
             }
         } else {
             aSession.accessed();
-            handle2(aSession, onSuccess, onFailure);
+            PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
+            PlatypusPrincipal.setInstance(aSession.getPrincipal());
+            try {
+                handle2(aSession, onSuccess, onFailure);
+            } finally {
+                PlatypusPrincipal.setInstance(oldPrincipal);
+            }
         }
     }
 

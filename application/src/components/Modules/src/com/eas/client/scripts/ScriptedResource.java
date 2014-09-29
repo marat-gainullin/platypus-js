@@ -32,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -255,9 +254,9 @@ public class ScriptedResource {
                 return new String[aLength];
             });
             RequireProcess scriptsProceses = new RequireProcess(aScriptsNames.length, onSuccess, onFailure);
-            for (String scriptName : aScriptsNames) {
-                required.add(scriptName);
-                app.getModules().getModule(scriptName, (ModuleStructure structure) -> {
+            for (String scriptOrModuleName : aScriptsNames) {
+                required.add(scriptOrModuleName);
+                app.getModules().getModule(scriptOrModuleName, (ModuleStructure structure) -> {
                     AppElementFiles files = structure.getParts();
                     File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
 
@@ -265,14 +264,6 @@ public class ScriptedResource {
                         try {
                             URL sourceUrl = sourceFile.toURI().toURL();
                             ScriptUtils.exec(sourceUrl);
-                            String source = FileUtils.readString(sourceFile, SettingsConstants.COMMON_ENCODING);
-                            ScriptDocument config = ScriptDocument.parse(source);
-                            JSObject nativeConstr = ScriptUtils.lookupInGlobal(scriptName);
-                            if (nativeConstr instanceof JSObjectFacade) {
-                                nativeConstr = ((JSObjectFacade) nativeConstr).getDelegate();
-                            }
-                            SecuredJSConstructor securedConstr = new SecuredJSConstructor(nativeConstr, scriptName, null, config);
-                            ScriptUtils.putInGlobal(scriptName, securedConstr);
                             try {
                                 scriptsProceses.complete(null, null);
                             } catch (Exception ex) {
@@ -284,7 +275,6 @@ public class ScriptedResource {
                     }, (Exception ex) -> {
                         scriptsProceses.complete(null, ex);
                     });
-
                     if (files.isModule()) {
                         try {
                             qRequire(structure.getQueryDependencies().toArray(new String[]{}), (Void v) -> {
@@ -339,14 +329,6 @@ public class ScriptedResource {
                 File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
                 URL sourceUrl = sourceFile.toURI().toURL();
                 if (files.isModule()) {
-                    String source = FileUtils.readString(sourceFile, SettingsConstants.COMMON_ENCODING);
-                    ScriptDocument config = ScriptDocument.parse(source);
-                    JSObject nativeConstr = ScriptUtils.lookupInGlobal(aScriptName);
-                    if (nativeConstr instanceof JSObjectFacade) {
-                        nativeConstr = ((JSObjectFacade) nativeConstr).getDelegate();
-                    }
-                    SecuredJSConstructor securedContr = new SecuredJSConstructor(nativeConstr, aScriptName, null, config);
-                    ScriptUtils.putInGlobal(aScriptName, securedContr);
                     qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null);
                     sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
                 }

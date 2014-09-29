@@ -35,7 +35,5 @@ public interface PlatypusRequestVisitor {
     public void visit(KeepAliveRequest rq) throws Exception;
     
     public void visit(CredentialRequest rq) throws Exception;
-
-    public void visit(IsUserInRoleRequest rq) throws Exception;
     
 }

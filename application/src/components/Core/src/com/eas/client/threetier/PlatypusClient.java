@@ -17,6 +17,10 @@ import com.eas.client.ClientConstants;
 import com.eas.client.ModulesProxy;
 import com.eas.client.RemoteModulesProxy;
 import com.eas.client.ServerModulesProxy;
+import com.eas.client.cache.FormsDocuments;
+import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ReportsConfigs;
+import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
@@ -90,6 +94,10 @@ public class PlatypusClient implements Application<PlatypusQuery>{
     protected QueriesProxy<PlatypusQuery> queries;
     protected ModulesProxy modules;
     protected ServerModulesProxy serverModulesProxy;
+    protected ScriptSecurityConfigs securityConfigs;
+    protected FormsDocuments forms;
+    protected ReportsConfigs reports;
+    protected ModelsDocuments models;
     protected List<Change> changeLog = new ArrayList<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
@@ -100,6 +108,10 @@ public class PlatypusClient implements Application<PlatypusQuery>{
         queries = new RemoteQueriesProxy(aConn, this);
         modules = new RemoteModulesProxy(aConn);
         serverModulesProxy = new ServerModulesProxy(aConn);
+        securityConfigs = new ScriptSecurityConfigs();
+        forms = new FormsDocuments();
+        reports = new ReportsConfigs();
+        models = new ModelsDocuments();
     }
 
     @Override
@@ -115,6 +127,26 @@ public class PlatypusClient implements Application<PlatypusQuery>{
     @Override
     public ServerModulesProxy getServerModules() {
         return serverModulesProxy;
+    }
+    
+    @Override
+    public ScriptSecurityConfigs getSecurityConfigs() {
+        return securityConfigs;
+    }
+
+    @Override
+    public ModelsDocuments getModels() {
+        return models;
+    }
+
+    @Override
+    public ReportsConfigs getReports() {
+        return reports;
+    }
+
+    @Override
+    public FormsDocuments getForms() {
+        return forms;
     }
 
     public URL getUrl() {
@@ -210,7 +242,7 @@ public class PlatypusClient implements Application<PlatypusQuery>{
                 conn.enqueueRequest(rq, (LoginRequest.Response aResponse) -> {
                     String sessionId = aResponse.getSessionId();
                     conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
-                    principal = new PlatypusPrincipal(aUserName, null, null, null, null, Collections.emptySet());
+                    principal = new PlatypusPrincipal(aUserName, null, null);
                     onSuccess.accept(sessionId);
                 }, onFailure);
                 return null;
@@ -218,7 +250,7 @@ public class PlatypusClient implements Application<PlatypusQuery>{
                 LoginRequest.Response response = conn.executeRequest(rq);
                 String sessionId = response.getSessionId();
                 conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
-                principal = new PlatypusPrincipal(aUserName, null, null, null, null, Collections.emptySet());
+                principal = new PlatypusPrincipal(aUserName, null, null);
                 return sessionId;
             }
         } catch (Exception ex) {
