@@ -77,7 +77,7 @@ public class ScriptDocument {
         assert aSource != null : "JavaScript source can't be null";
         moduleAnnotations = new ArrayList<>();
         propertyAllowedRoles.clear();
-        Source source = new Source("", aSource);
+        Source source = Source.sourceFor("", aSource);
         FunctionNode ast = ScriptUtils.parseJs(aSource);
         FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast);
         ast.accept(new PropertiesAnnotationsMiner(source, ScriptUtils.getThisAliases(moduleConstructor)) {

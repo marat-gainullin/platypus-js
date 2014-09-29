@@ -79,7 +79,7 @@ public class ScriptUtils {
     }
 
     public static FunctionNode parseJs(String aJsContent) {
-        Source source = new Source("", aJsContent);//NOI18N
+        Source source = Source.sourceFor("", aJsContent);//NOI18N
         Options options = new Options(null);
         ScriptEnvironment env = new ScriptEnvironment(options, null, null);
         ErrorManager errors = new ErrorManager();
@@ -202,7 +202,7 @@ public class ScriptUtils {
      */
     public static List<Long> getCommentsTokens(String aSource) {
         TokenStream tokens = new TokenStream();
-        Lexer lexer = new Lexer(new Source("", aSource), tokens);//NOI18N
+        Lexer lexer = new Lexer(Source.sourceFor("", aSource), tokens);//NOI18N
         long t;
         TokenType tt = TokenType.EOL;
         int i = 0;
