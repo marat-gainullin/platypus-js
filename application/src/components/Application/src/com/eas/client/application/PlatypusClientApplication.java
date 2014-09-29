@@ -22,6 +22,7 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.logging.*;
 import javax.swing.UIManager;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -207,7 +208,21 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                ScriptedResource.require(new String[]{""}, null, null);
+                ScriptedResource.require(new String[]{""}, (Void v) -> {
+                    JSObject p = ScriptUtils.lookupInGlobal("P");
+                    if (p != null) {
+                        Object ready = p.getMember("ready");
+                        if (ready instanceof JSObject && ((JSObject)ready).isFunction()) {
+                            ((JSObject)ready).call(null, new Object[]{});
+                        } else {
+                            throw new IllegalStateException("P.ready is missing or is not a function. Nothing to do :-(");
+                        }
+                    } else {
+                        throw new IllegalStateException("Platypus js API is not initialized (global.P is missing).");
+                    }
+                }, (Exception ex) -> {
+                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                });
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
             }

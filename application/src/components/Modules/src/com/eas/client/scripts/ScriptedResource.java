@@ -135,19 +135,19 @@ public class ScriptedResource {
     /**
      * Loads a resource as text.
      *
-     * @param aResourceId An relative path to the resource
+     * @param aResourceName An relative path to the resource
      * @param aEncodingName Encoding name
      * @return Resource's text
      * @throws Exception If some error occurs when reading the resource
      */
-    public static String loadText(String aResourceId, String aEncodingName) throws Exception {
+    public static String loadText(String aResourceName, String aEncodingName) throws Exception {
         if (aEncodingName == null) {
             aEncodingName = SettingsConstants.COMMON_ENCODING;
         }
         byte[] data = null;
-        Matcher htppMatcher = pattern.matcher(aResourceId);
+        Matcher htppMatcher = pattern.matcher(aResourceName);
         if (htppMatcher.matches()) {
-            URL url = new URL(aResourceId);
+            URL url = new URL(aResourceName);
             URLConnection conn = null;
             InputStream is = null;
             try {
@@ -189,7 +189,7 @@ public class ScriptedResource {
                 }
             }
         } else {
-            data = load(aResourceId);
+            data = load(aResourceName);
         }
         if (!Charset.isSupported(aEncodingName)) {
             throw new IllegalStateException("Encoding: " + aEncodingName + " is not supported.");
