@@ -5,7 +5,6 @@
 package com.eas.client.threetier.requests;
 
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 

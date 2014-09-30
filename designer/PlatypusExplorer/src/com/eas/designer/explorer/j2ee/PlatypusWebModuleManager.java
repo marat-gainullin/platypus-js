@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.j2ee;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.dd.AppListener;
@@ -23,6 +22,7 @@ import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
+import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.ServerConfig;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
@@ -39,7 +39,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
@@ -289,7 +288,7 @@ public class PlatypusWebModuleManager {
     private void configureParams(WebApplication wa) throws Exception {
         wa.addInitParam(new ContextParam(ServerConfig.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
         wa.addInitParam(new ContextParam(ServerConfig.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
-        wa.addInitParam(new ContextParam(ServerConfig.APPELEMENT_CONF_PARAM, PlatypusProjectSettingsImpl.START_JS_FILE_NAME));
+        wa.addInitParam(new ContextParam(ServerConfig.APPELEMENT_CONF_PARAM, PlatypusProjectSettings.START_JS_FILE_NAME));
     }
 
     private void configureServlet(WebApplication wa) {
@@ -313,20 +312,33 @@ public class PlatypusWebModuleManager {
         }
     }
 
-    private void configureSecurity(WebApplication wa) {
-        SecurityConstraint sc = new SecurityConstraint();
-        WebResourceCollection wrc = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME);
-
-        sc.addWebResourceCollection(wrc);
-        AuthConstraint ac = new AuthConstraint(ANY_SIGNED_USER_ROLE);
-        LoginConfig lc = new LoginConfig();
-        sc.setAuthConstraint(ac);
-        wa.setSecurityConstraint(sc);
-        wrc.setUrlPattern("/" + PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT + "/*"); //NOI18N
-        lc.setAuthMethod(FORM_AUTH_METHOD);
-        lc.setFormLoginConfig(new FormLoginConfig("/" + LOGIN_PAGE_FILE_NAME, "/" + LOGIN_FAIL_PAGE_FILE_NAME));//NOI18N
-        wa.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
-        wa.setLoginConfig(lc);
+    private void configureSecurity(WebApplication aWebApplication) {
+        // Protect all web application resources
+        SecurityConstraint scWholeResources = new SecurityConstraint();
+        WebResourceCollection wrcWholeResources = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME);
+        wrcWholeResources.setUrlPattern("/*"); //NOI18N
+        scWholeResources.addWebResourceCollection(wrcWholeResources);
+        scWholeResources.setAuthConstraint(new AuthConstraint(ANY_SIGNED_USER_ROLE));
+        aWebApplication.addSecurityConstraint(scWholeResources);
+        // Unprotect login page
+        SecurityConstraint scLogin = new SecurityConstraint();
+        WebResourceCollection wrcLogin = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME + "-login");
+        wrcLogin.setUrlPattern("/" + LOGIN_PAGE_FILE_NAME); //NOI18N
+        scLogin.addWebResourceCollection(wrcLogin);
+        aWebApplication.addSecurityConstraint(scLogin);
+        // Unprotect login failed page
+        SecurityConstraint scLoginFailed = new SecurityConstraint();
+        WebResourceCollection wrcLoginFailed = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME + "-login-failed");
+        wrcLoginFailed.setUrlPattern("/" + LOGIN_FAIL_PAGE_FILE_NAME); //NOI18N
+        scLoginFailed.addWebResourceCollection(wrcLoginFailed);
+        aWebApplication.addSecurityConstraint(scLoginFailed);
+        //
+        LoginConfig loginConfig = new LoginConfig();
+        loginConfig.setAuthMethod(FORM_AUTH_METHOD);
+        loginConfig.setFormLoginConfig(new FormLoginConfig("/" + LOGIN_PAGE_FILE_NAME, "/" + LOGIN_FAIL_PAGE_FILE_NAME));//NOI18N
+        //
+        aWebApplication.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
+        aWebApplication.setLoginConfig(loginConfig);
 
     }
 

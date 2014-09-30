@@ -5,15 +5,13 @@
 package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.Request;
-import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
+import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.requests.ErrorResponse;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
-import com.eas.server.handlers.LoginRequestHandler;
-import com.eas.server.handlers.LogoutRequestHandler;
 import com.eas.server.SessionRequestHandler;
+import com.eas.server.DatabaseAuthorizer;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 import java.util.function.Consumer;
@@ -30,7 +28,6 @@ import org.apache.mina.core.session.IoSession;
 public class PlatypusRequestsHandler extends IoHandlerAdapter {
 
     public static final String BAD_PROTOCOL_MSG = "The message is not Platypus protocol request.";
-    public static final String BAD_SESSION_ID_MSG = "Bad session id, login first.";
     public static final String GOT_SIGNATURE_MSG = "Got signature from client.";
     public static final String SESSION_ID = "sessionID";
     private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s.";
@@ -90,56 +87,51 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
      */
     @Override
     public void messageReceived(IoSession ioSession, Object msg) throws Exception {
-        if (msg instanceof RequestDecoder.RequestEnvelope) {
+        if (msg instanceof RequestEnvelope) {
+            RequestEnvelope requestEnv = (RequestEnvelope)msg;
             try {
-                final Request request = ((RequestDecoder.RequestEnvelope) msg).request;
                 Consumer<Exception> onError = (Exception ex) -> {
                     if (ex instanceof SQLException) {
                         SQLException sex = (SQLException) ex;
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, request.getType(), request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()), sex);
-                        ioSession.write(new ErrorResponse(sex));
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()), sex);
+                        ioSession.write(new ResponseEnvelope(new ErrorResponse(sex), requestEnv.ticket));
                     } else if (ex instanceof AccessControlException) {
                         AccessControlException aex = (AccessControlException) ex;
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, request.getType(), request.getClass().getSimpleName(), aex.getMessage()), aex);
-                        ioSession.write(new ErrorResponse(aex));
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()), aex);
+                        ioSession.write(new ResponseEnvelope(new ErrorResponse(aex), requestEnv.ticket));
                     } else {
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, request.getType(), request.getClass().getSimpleName()), ex);
-                        ioSession.write(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.getClass().getSimpleName()));
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName()), ex);
+                        ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.getClass().getSimpleName()), requestEnv.ticket));
                     }
                 };
-                String sessionTicket = ((RequestDecoder.RequestEnvelope) msg).ticket;
-                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", request.toString());
-                if (sessionTicket != null) {
-                    assert request.getType() != Requests.rqLogin;
-                    Session session = server.getSessionManager().get(sessionTicket);
-                    assert session != null;
-                    final RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(server, session, request);
-                    if (handler != null) {
-                        Consumer<Response> onSuccess = (Response aResponse) -> {
-                            if (!(handler instanceof LogoutRequestHandler)) {
-                                ioSession.write(aResponse);
-                            }
-                        };
-                        if (handler instanceof SessionRequestHandler<?, ?>) {
-                            ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());
+                final RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(server, requestEnv.request);
+                if (handler != null) {
+                    Consumer<Response> onSuccess = (Response aResponse) -> {
+                        ioSession.write(new ResponseEnvelope(aResponse, requestEnv.ticket));
+                    };
+                    if (handler instanceof SessionRequestHandler<?, ?>) {
+                        if (requestEnv.ticket == null) {
+                            DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session session) -> {
+                                requestEnv.ticket = session.getId();
+                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                            }, onError);
                         } else {
-                            ((CommonRequestHandler<Request, Response>) handler).handle(onSuccess, onError);
+                            Session session = server.getSessionManager().get(requestEnv.ticket);
+                            if (session != null) {
+                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                            } else {
+                                onError.accept(new AccessControlException("Bad session ticket."));
+                            }
                         }
                     } else {
-                        throw new IllegalStateException("Unknown request type " + request.getType());
+                        ((CommonRequestHandler<Request, Response>) handler).handle(onSuccess, onError);
                     }
                 } else {
-                    assert request instanceof LoginRequest : "Unauthorized. Login first.";
-                    LoginRequestHandler loginHandler = new LoginRequestHandler(server, (LoginRequest) request);
-                    loginHandler.handle((LoginRequest.Response response) -> {
-                        Session session = server.getSessionManager().get(response.getSessionId());
-                        assert session != null : "Session had to be created by login request handler.";
-                        ioSession.setAttribute(SESSION_ID, response.getSessionId());
-                        ioSession.write(response);
-                    }, onError);
+                    throw new IllegalStateException("Unknown request type " + requestEnv.request.getType());
                 }
             } catch (Exception ex) {
-                ioSession.write(new ErrorResponse(ex.getMessage()));
+                ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage()), requestEnv.ticket));
             }
         } else {
             throw new IllegalArgumentException(BAD_PROTOCOL_MSG);

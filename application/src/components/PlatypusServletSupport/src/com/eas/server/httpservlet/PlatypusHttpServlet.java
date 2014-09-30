@@ -200,7 +200,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             aHttpRequest.logout();
             aHttpSession.invalidate();
         } else {
-            RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(serverCore, aPlatypusSession, platypusRequest);
+            RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(serverCore, platypusRequest);
             if (handler != null) {
                 Consumer<Exception> onFailure = (Exception ex) -> {
                     try {

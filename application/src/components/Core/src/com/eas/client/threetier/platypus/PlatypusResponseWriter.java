@@ -18,9 +18,6 @@ import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.KeepAliveRequest;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -96,31 +93,14 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(HelloRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(1, "Hello, world!");
-        writer.flush();
-    }
-
-    @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getName() != null) {
-            writer.put(RequestsTags.TAG_LOGIN, rsp.getName());
+            writer.put(CoreTags.TAG_USER_NAME, rsp.getName());
         }
         writer.flush();
     }
 
-    /*
-     protected void writeParameters(OutputStream aOut) throws IOException {
-     ProtoWriter writer = new ProtoWriter(aOut);
-     for (Field param : parameters.toCollection()) {
-     writer.put(ExecuteQueryRequest.TAG_SQL_PARAMETER);
-     writer.put(CoreTags.TAG_STREAM, ExecuteQueryRequest.writeParameter((Parameter) param));
-     }
-     writer.flush();
-     }
-     */
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
@@ -136,17 +116,6 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(LogoutRequest.Response rsp) throws Exception {
-    }
-
-    @Override
-    public void visit(LoginRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_SESSION_ID, rsp.getSessionId());
-        writer.flush();
-    }
-
-    @Override
-    public void visit(KeepAliveRequest.Response rsp) throws Exception {
     }
 
     @Override

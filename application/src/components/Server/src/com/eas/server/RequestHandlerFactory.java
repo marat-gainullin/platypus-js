@@ -18,12 +18,10 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
 
     protected RequestHandler<?, ?> handler;
     protected PlatypusServerCore serverCore;
-    protected Session session;
 
-    public RequestHandlerFactory(PlatypusServerCore aServerCore, Session aSession) {
+    public RequestHandlerFactory(PlatypusServerCore aServerCore) {
         super();
         serverCore = aServerCore;
-        session = aSession;
     }
 
     public RequestHandler<?, ?> getHandler() {
@@ -34,7 +32,6 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
      * Creates appropriate request handler.
      *
      * @param serverCore PlatypusServerCore instance.
-     * @param session Session instance.
      * @param rq Request instance (wraped or unwrapped)
      * @return appropriate request handler instance.
      * @throws IOException
@@ -43,8 +40,8 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
      * @see Session
      * @see UnknownRequest
      */
-    public static RequestHandler<?, ?> getHandler(PlatypusServerCore serverCore, Session session, Request rq) throws Exception {
-        RequestHandlerFactory factory = new RequestHandlerFactory(serverCore, session);
+    public static RequestHandler<?, ?> getHandler(PlatypusServerCore serverCore, Request rq) throws Exception {
+        RequestHandlerFactory factory = new RequestHandlerFactory(serverCore);
         rq.accept(factory);
         return factory.getHandler();
     }
@@ -52,11 +49,6 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     @Override
     public void visit(AppQueryRequest rq) throws Exception {
         handler = new AppQueryRequestHandler(serverCore, rq);
-    }
-
-    @Override
-    public void visit(LoginRequest rq) throws Exception {
-        handler = new LoginRequestHandler(serverCore, rq);
     }
 
     @Override
@@ -85,18 +77,8 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(HelloRequest rq) throws Exception {
-        handler = new HelloRequestHandler(serverCore, rq);
-    }
-
-    @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
         handler = new ExecuteQueryRequestHandler(serverCore, rq);
-    }
-
-    @Override
-    public void visit(KeepAliveRequest rq) throws Exception {
-        handler = new KeepAliveRequestHandler(serverCore, rq);
     }
 
     @Override

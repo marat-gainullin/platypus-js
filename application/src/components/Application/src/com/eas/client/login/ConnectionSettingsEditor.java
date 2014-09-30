@@ -10,19 +10,17 @@
  */
 package com.eas.client.login;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.util.ResourceBundle;
 import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 
 /**
  *
- * @author pk
+ * @author pk, mg
  */
-public class ConnectionSettingsDialog extends javax.swing.JDialog {
+public class ConnectionSettingsEditor extends javax.swing.JDialog {
 
     /**
      * A return status code - returned if Cancel button has been pressed
@@ -39,11 +37,9 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
     /**
      * Creates new form ConnectionSettingsDialog
      *
-     * @param parent
-     * @param modal
      */
-    public ConnectionSettingsDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public ConnectionSettingsEditor() {
+        super((Frame)null, true);
         initComponents();
         tfConnectionUrl.requestFocus();
         getRootPane().setDefaultButton(btnOk);
@@ -75,7 +71,6 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         tfConnectionUrl = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        btnSelectH2File = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(bundle.getString("ConnectionSettingsDialog.title")); // NOI18N
@@ -97,37 +92,25 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
         jLabel1.setLabelFor(tfConnectionUrl);
         jLabel1.setText(bundle.getString("ConnectionSettingsDialog.lblConnectionUrl.text")); // NOI18N
 
-        btnSelectH2File.setText("...");
-        btnSelectH2File.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSelectH2FileActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(tfName, javax.swing.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+                    .addComponent(tfConnectionUrl))
+                .addGap(10, 10, 10))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(284, Short.MAX_VALUE)
+                .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCancel))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(tfName, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(tfConnectionUrl, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnSelectH2File, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addComponent(btnCancel)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -140,12 +123,12 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tfConnectionUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1)
-                    .addComponent(btnSelectH2File))
-                .addGap(33, 33, 33)
+                    .addComponent(jLabel1))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
-                    .addComponent(btnOk)))
+                    .addComponent(btnOk))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -156,35 +139,9 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
         doClose(RET_CANCEL);
     }//GEN-LAST:event_btnCancelActionPerformed
 
-    private void btnSelectH2FileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectH2FileActionPerformed
-        JFileChooser chooser = new JFileChooser();
-        for (FileFilter ff : chooser.getChoosableFileFilters()) {
-            chooser.removeChoosableFileFilter(ff);
-        }
-        chooser.addChoosableFileFilter(new FileFilter() {
-
-            @Override
-            public boolean accept(File f) {
-                return f.getName().endsWith(".h2.db");
-            }
-
-            @Override
-            public String getDescription() {
-                return bundle.getString("h2DatabaseFile");
-            }
-        });
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.setMultiSelectionEnabled(false);
-        chooser.setDialogTitle(bundle.getString("h2DatabaseFileSelector"));
-        if (JFileChooser.APPROVE_OPTION == chooser.showOpenDialog(null) && chooser.getSelectedFile() != null) {
-            tfConnectionUrl.setText(chooser.getSelectedFile().getPath());
-        }
-    }//GEN-LAST:event_btnSelectH2FileActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;
-    private javax.swing.JButton btnSelectH2File;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField tfConnectionUrl;
@@ -223,7 +180,7 @@ public class ConnectionSettingsDialog extends javax.swing.JDialog {
                 url = url.trim();
             }
             if (url.isEmpty()) {
-                JOptionPane.showMessageDialog(ConnectionSettingsDialog.this, bundle.getString("ConnectionSettingsDialog.EmptyUrlMessage"), bundle.getString("ConnectionSettingsDialog.BadSettingsMessage"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ConnectionSettingsEditor.this, bundle.getString("ConnectionSettingsDialog.EmptyUrlMessage"), bundle.getString("ConnectionSettingsDialog.BadSettingsMessage"), JOptionPane.ERROR_MESSAGE);
                 tfConnectionUrl.requestFocus();
             } else {
                 doClose(RET_OK);

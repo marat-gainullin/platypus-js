@@ -43,10 +43,10 @@ public class ProtoReader {
     /**
      * Creates a new instance of ProtoReader
      *
-     * @param dataStream the tag stream from which to read tags.
+     * @param aStream the tag stream from which to read tags.
      */
-    public ProtoReader(InputStream dataStream) {
-        stream = new DataInputStream(dataStream);
+    public ProtoReader(InputStream aStream) {
+        stream = new DataInputStream(aStream);
     }
 
     /**
@@ -582,7 +582,7 @@ public class ProtoReader {
         }
         byte[] data = new byte[currentSize];
         get(data, currentSize);
-        String val = new String(data, "UTF-16LE");
+        String val = new String(data, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
         isTagReady = false;
         return val;
     }
@@ -603,7 +603,7 @@ public class ProtoReader {
         }
         byte[] data = new byte[currentSize];
         get(data, currentSize);
-        String val = new String(data, "UTF-16LE");
+        String val = new String(data, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
         isTagReady = false;
         return val;
     }

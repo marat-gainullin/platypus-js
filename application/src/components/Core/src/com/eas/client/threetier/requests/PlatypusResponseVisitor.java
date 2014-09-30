@@ -12,17 +12,11 @@ public interface PlatypusResponseVisitor {
 
     public void visit(ErrorResponse rsp) throws Exception;
 
-    public void visit(HelloRequest.Response rsp) throws Exception;
-
     public void visit(CredentialRequest.Response rsp) throws Exception;
 
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception;
 
     public void visit(LogoutRequest.Response rsp) throws Exception;
-
-    public void visit(LoginRequest.Response rsp) throws Exception;
-
-    public void visit(KeepAliveRequest.Response rsp) throws Exception;
 
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception;
 

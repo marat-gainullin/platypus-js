@@ -6,9 +6,11 @@ package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.platypus.PlatypusRequestReader;
+import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.platypus.RequestsTags;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
+import com.eas.proto.ProtoUtil;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
@@ -20,17 +22,6 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
  */
 public class RequestDecoder extends CumulativeProtocolDecoder {
 
-    public static class RequestEnvelope {
-
-        public Request request;
-        public String ticket;
-
-        public RequestEnvelope(Request aRequest, String aTicket) {
-            request = aRequest;
-            ticket = aTicket;
-        }
-    }
-
     public RequestDecoder() {
         super();
     }
@@ -38,6 +29,8 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         String ticket = null;
+        String userName = null;
+        String password = null;
         int start = in.position();
         int tag = 0, tagSize = 0;
         do {
@@ -54,7 +47,15 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
             if (tag == CoreTags.TAG_SESSION_TICKET) {
                 byte[] ticketBuf = new byte[tagSize];
                 in.get(ticketBuf);
-                ticket = new String(ticketBuf, "UTF-16LE");
+                ticket = new String(ticketBuf, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
+            }else if (tag == CoreTags.TAG_USER_NAME) {
+                byte[] userNameBuf = new byte[tagSize];
+                in.get(userNameBuf);
+                userName = new String(userNameBuf, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
+            }else if (tag == CoreTags.TAG_PASSWORD) {
+                byte[] passwordBuf = new byte[tagSize];
+                in.get(passwordBuf);
+                password = new String(passwordBuf, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
             } else {
                 in.skip(tagSize);
             }
@@ -67,7 +68,7 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
             in.limit(position);
             final ProtoReader requestReader = new ProtoReader(in.slice().asInputStream());
             Request request = PlatypusRequestReader.read(requestReader);
-            out.write(new RequestEnvelope(request, ticket));
+            out.write(new RequestEnvelope(request, userName, password, ticket));
             return true;
         } finally {
             in.position(position);

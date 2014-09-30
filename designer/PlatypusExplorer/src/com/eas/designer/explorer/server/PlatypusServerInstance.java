@@ -7,7 +7,6 @@ package com.eas.designer.explorer.server;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.explorer.project.ProjectRunner;
 import static com.eas.designer.explorer.project.ProjectRunner.getCommandLineStr;
 import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
@@ -182,7 +181,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
             io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
         }
         arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_ELEMENT_CONF_PARAM);
-        arguments.add(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
+        arguments.add(PlatypusProjectSettings.START_JS_FILE_NAME);
 
         arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
         arguments.add(project.getProjectDirectory().toURI().toASCIIString());

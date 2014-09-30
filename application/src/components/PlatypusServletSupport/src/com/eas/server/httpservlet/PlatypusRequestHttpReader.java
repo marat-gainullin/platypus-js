@@ -20,8 +20,6 @@ import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.KeepAliveRequest;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.script.ScriptUtils;
@@ -29,7 +27,6 @@ import com.eas.server.PlatypusServerCore;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.client.threetier.requests.CredentialRequest;
-import com.eas.client.threetier.requests.HelloRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.util.BinaryUtils;
@@ -71,10 +68,6 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     public void visit(AppQueryRequest rq) throws Exception {
         String queryName = httpRequest.getParameter(PlatypusHttpRequestParams.QUERY_ID);
         rq.setQueryName(queryName);
-    }
-
-    @Override
-    public void visit(LoginRequest rq) throws Exception {
     }
 
     @Override
@@ -143,10 +136,6 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(HelloRequest rq) throws Exception {
-    }
-
-    @Override
     public void visit(ResourceRequest rq) throws Exception {
     }
 
@@ -165,10 +154,6 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
         String queryName = httpRequest.getParameter(PlatypusHttpRequestParams.QUERY_ID);
         rq.setQueryId(queryName);
         rq.setParams(decodeQueryParams(queryName, httpRequest));
-    }
-
-    @Override
-    public void visit(KeepAliveRequest rq) throws Exception {
     }
 
     private Parameters decodeQueryParams(String aQueryId, HttpServletRequest aRequest) throws RowsetException, IOException, UnsupportedEncodingException, Exception {

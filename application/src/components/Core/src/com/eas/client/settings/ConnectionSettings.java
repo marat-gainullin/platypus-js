@@ -8,21 +8,17 @@
  */
 package com.eas.client.settings;
 
-import com.eas.client.ConnectionSettingsVisitor;
-
 /**
  *
  * @author mg
  */
-public abstract class ConnectionSettings {
+public class ConnectionSettings {
 
     protected String name;
     protected String url = "";
-    protected String user;
-    protected String password;
     protected boolean editable = true;
 
-    protected ConnectionSettings() {
+    public ConnectionSettings() {
         super();
     }
 
@@ -46,22 +42,6 @@ public abstract class ConnectionSettings {
         name = aValue;
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public boolean isEditable() {
         return editable;
     }
@@ -70,5 +50,4 @@ public abstract class ConnectionSettings {
         editable = aValue;
     }
 
-    public abstract void accept(ConnectionSettingsVisitor v);
 }

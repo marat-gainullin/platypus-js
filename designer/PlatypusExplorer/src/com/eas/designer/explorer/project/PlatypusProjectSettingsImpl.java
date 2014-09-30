@@ -66,7 +66,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + "        f.show();\n"//NOI18N
             + "    });\n"//NOI18N
             + "};\n";//NOI18N
-    public static final String START_JS_FILE_NAME = "start.js"; //NOI18N
 
     protected final FileObject projectDir;
     protected final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);

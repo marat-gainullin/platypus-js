@@ -9,12 +9,7 @@
 package com.eas.client.settings;
 
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.eas.client.ConnectionSettingsVisitor;
-import com.eas.xml.dom.Source2XmlDom;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Properties;
-import org.w3c.dom.Document;
 
 /**
  *
@@ -22,6 +17,8 @@ import org.w3c.dom.Document;
  */
 public class DbConnectionSettings extends ConnectionSettings {
 
+    protected String user;
+    protected String password;
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
     protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
@@ -83,37 +80,19 @@ public class DbConnectionSettings extends ConnectionSettings {
         resourceTimeout = aResourceTimeout;
     }
 
-    @Override
-    public void accept(ConnectionSettingsVisitor v) {
-        v.visit(this);
+    public String getUser() {
+        return user;
     }
 
-    public static DbConnectionSettings read(Document doc) throws Exception {
-        if (doc != null) {
-            ConnectionSettings lsettings = XmlDom2ConnectionSettings.document2Settings(doc);
-            if (lsettings instanceof DbConnectionSettings) {
-                return (DbConnectionSettings) lsettings;
-            }
-        }
-        return null;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public static DbConnectionSettings read(String aContent) throws Exception {
-        if (aContent != null && !aContent.isEmpty()) {
-            return read(Source2XmlDom.transform(aContent));
-        } else {
-            return null;
-        }
+    public String getPassword() {
+        return password;
     }
 
-    public static DbConnectionSettings read(Reader aContentReader) throws IOException, Exception {
-        if (aContentReader != null && aContentReader.ready()) {
-            Document doc = Source2XmlDom.transform(aContentReader);
-            ConnectionSettings lsettings = XmlDom2ConnectionSettings.document2Settings(doc);
-            if (lsettings instanceof DbConnectionSettings) {
-                return (DbConnectionSettings) lsettings;
-            }
-        }
-        return null;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

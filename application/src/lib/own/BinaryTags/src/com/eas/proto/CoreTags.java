@@ -37,6 +37,14 @@ public class CoreTags {
      */
     public static final int TAG_SESSION_TICKET = 204;
     /**
+     * This tag contains user name.
+     */
+    public static final int TAG_USER_NAME = 205;
+    /**
+     * This tag contains password.
+     */
+    public static final int TAG_PASSWORD = 206;
+    /**
      * Indicates that the tag contains long value, which size is greater than
      * 255 bytes.
      */

@@ -4,7 +4,7 @@
  */
 package com.eas.client.threetier;
 
-import com.eas.client.threetier.platypus.PlatypusNativeConnection;
+import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.threetier.platypus.PlatypusRequestReader;
 import com.eas.client.threetier.platypus.RequestsTags;
@@ -32,7 +32,7 @@ public class RequestsSenderTest {
     private RequestsSender sender;
     private Thread senderThread;
 
-    private class PlatypusTestConnection extends PlatypusNativeConnection {
+    private class PlatypusTestConnection extends PlatypusPlatypusConnection {
 
         protected OutputStream outputStream;
 

@@ -16,41 +16,56 @@ import javax.swing.KeyStroke;
  *
  * @author mg
  */
-public class LoginDialog extends javax.swing.JDialog {
+public class CredentialsDialog extends javax.swing.JDialog {
 
+    /**
+     * A return status code - returned if Cancel button has been pressed
+     */
+    public static final int RET_CANCEL = 0;
+    /**
+     * A return status code - returned if OK button has been pressed
+     */
+    public static final int RET_OK = 1;
     private static final String CANCEL_ACTION_ID = "cancel";
     private static final String OK_ACTION_ID = "ok";
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
-    private final Action loginAction = new AbstractAction() {
+
+    private int returnStatus = RET_CANCEL;
+
+    private final Action okAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            returnStatus = RET_OK;
+            CredentialsDialog.this.dispose();
         }
     };
     private final Action cancelAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            returnStatus = RET_CANCEL;
+            CredentialsDialog.this.dispose();
         }
     };
 
     /**
      * Creates new form LoginDialog
      *
-     * @param parent
-     * @param modal
      */
-    public LoginDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public CredentialsDialog() {
+        super((java.awt.Frame)null, true);
         initComponents();
-        tfUserName.getActionMap().put(OK_ACTION_ID, loginAction);
+        tfUserName.getActionMap().put(OK_ACTION_ID, okAction);
         tfUserName.getActionMap().put(CANCEL_ACTION_ID, cancelAction);
-        tfPassword.getActionMap().put(OK_ACTION_ID, loginAction);
+        tfPassword.getActionMap().put(OK_ACTION_ID, okAction);
         tfPassword.getActionMap().put(CANCEL_ACTION_ID, cancelAction);
         tfUserName.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), OK_ACTION_ID);
         tfUserName.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
         tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), OK_ACTION_ID);
         tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
+    }
+
+    public int getReturnStatus() {
+        return returnStatus;
     }
 
     /**
@@ -152,53 +167,11 @@ public class LoginDialog extends javax.swing.JDialog {
 
     private void formKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyTyped
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            loginAction.actionPerformed(new ActionEvent(this, 0, null));
+            okAction.actionPerformed(new ActionEvent(this, 0, null));
         } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
             cancelAction.actionPerformed(new ActionEvent(this, 0, null));
         }
     }//GEN-LAST:event_formKeyTyped
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                LoginDialog dialog = new LoginDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;

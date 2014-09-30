@@ -17,9 +17,6 @@ import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.KeepAliveRequest;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
@@ -129,26 +126,6 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(LoginRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (input.containsChild(RequestsTags.TAG_LOGIN)) {
-            rq.setLogin(input.getChild(RequestsTags.TAG_LOGIN).getString());
-        } else {
-            rq.setLogin(null);
-        }
-        if (input.containsChild(RequestsTags.TAG_PASSWORD)) {
-            rq.setPassword(input.getChild(RequestsTags.TAG_PASSWORD).getString());
-        } else {
-            rq.setPassword(null);
-        }
-        if (input.containsChild(RequestsTags.TAG_SESSION_TO_RESTORE)) {
-            rq.setSession2restore(input.getChild(RequestsTags.TAG_SESSION_TO_RESTORE).getString());
-        } else {
-            rq.setSession2restore(null);
-        }
-    }
-
-    @Override
     public void visit(LogoutRequest rq) throws Exception {
     }
 
@@ -197,9 +174,6 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         rq.setArguments(args.toArray());
     }
 
-    @Override
-    public void visit(HelloRequest rq) throws Exception {
-    }
     private static final PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader(null);
 
     public static Parameter readParameter(ProtoNode node) throws ProtoReaderException {
@@ -272,10 +246,6 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                 rq.getParams().add(param);
             }
         }
-    }
-
-    @Override
-    public void visit(KeepAliveRequest rq) throws Exception {
     }
 
     @Override

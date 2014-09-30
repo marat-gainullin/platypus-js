@@ -13,9 +13,6 @@ import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.KeepAliveRequest;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -48,11 +45,6 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor{
     }
 
     @Override
-    public void visit(HelloRequest.Response rsp) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -64,16 +56,6 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor{
 
     @Override
     public void visit(LogoutRequest.Response rsp) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void visit(LoginRequest.Response rsp) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void visit(KeepAliveRequest.Response rsp) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

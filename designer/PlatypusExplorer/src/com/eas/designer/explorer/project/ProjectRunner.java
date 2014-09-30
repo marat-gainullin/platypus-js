@@ -173,9 +173,9 @@ public class ProjectRunner {
     private static void start(PlatypusProject project, String appElementName, boolean debug) throws IOException {
         if (appElementName != null && !appElementName.isEmpty()) {
             FileObject appSrcDir = project.getSrcRoot();
-            FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
+            FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettings.START_JS_FILE_NAME);
             if (startJs == null) {
-                startJs = appSrcDir.createData(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
+                startJs = appSrcDir.createData(PlatypusProjectSettings.START_JS_FILE_NAME);
             }
             String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName);
             FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
@@ -270,8 +270,8 @@ public class ProjectRunner {
 
                 if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
                     arguments.add(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
-                    arguments.add(PlatypusProjectSettingsImpl.START_JS_FILE_NAME);
-                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + PlatypusProjectSettingsImpl.START_JS_FILE_NAME); //NOI18N
+                    arguments.add(PlatypusProjectSettings.START_JS_FILE_NAME);
+                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + PlatypusProjectSettings.START_JS_FILE_NAME); //NOI18N
                     // Iterate through all datasources, registered in the designer.
                     // Apply them as datasources in considered server.
                     DatabaseConnection defaultDatabaseConnection = null;

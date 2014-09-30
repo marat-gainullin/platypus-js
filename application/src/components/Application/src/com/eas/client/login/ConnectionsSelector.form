@@ -162,9 +162,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnToggleConnections" min="-2" pref="68" max="-2" attributes="0"/>
-                  <EmptySpace pref="162" max="32767" attributes="0"/>
+                  <EmptySpace pref="240" max="32767" attributes="0"/>
                   <Component id="btnOk" min="-2" pref="74" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="btnCancel" min="-2" pref="89" max="-2" attributes="0"/>
@@ -178,7 +176,6 @@
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="btnCancel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnToggleConnections" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnOk" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -202,14 +199,6 @@
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="com/eas/client/login/Bundle.properties" key="Dialog.CancelButton.text" replaceFormat="bundle.getString(&quot;{key}&quot;)"/>
             </Property>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnToggleConnections">
-          <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="toggleConnectionsVisibilityAction" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="&gt;&gt;&gt;"/>
           </Properties>
         </Component>
       </SubComponents>

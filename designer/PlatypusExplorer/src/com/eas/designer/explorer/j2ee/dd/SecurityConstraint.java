@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
 public class SecurityConstraint implements ElementConvertable {
 
     public static final String TAG_NAME = "security-constraint"; //NOI18N
-    private List<WebResourceCollection> webResourceCollections = new ArrayList<>();
+    private final List<WebResourceCollection> webResourceCollections = new ArrayList<>();
     private AuthConstraint authConstraint;
     
     public void addWebResourceCollection(WebResourceCollection aWebResourceCollection) {

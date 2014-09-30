@@ -20,9 +20,6 @@ import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.KeepAliveRequest;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -70,11 +67,6 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(HelloRequest.Response resp) throws Exception {
-        // simple OK response is needed
-    }
-
-    @Override
     public void visit(CredentialRequest.Response resp) throws Exception {
         String name = ((CredentialRequest.Response) resp).getName();
         StringBuilder sb = new StringBuilder();
@@ -92,16 +84,6 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(LogoutRequest.Response resp) throws Exception {
         // logout is processed out of this class
-    }
-
-    @Override
-    public void visit(LoginRequest.Response resp) throws Exception {
-        // login is processed out of this class by servlet container
-    }
-
-    @Override
-    public void visit(KeepAliveRequest.Response resp) throws Exception {
-        // http keep alive is processed out of this class by servlet container
     }
 
     @Override

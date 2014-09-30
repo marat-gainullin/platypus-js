@@ -18,9 +18,6 @@ import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
-import com.eas.client.threetier.requests.HelloRequest;
-import com.eas.client.threetier.requests.KeepAliveRequest;
-import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -35,7 +32,6 @@ import com.eas.script.ScriptUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,14 +75,10 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(HelloRequest.Response rsp) throws Exception {
-    }
-
-    @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (dom.containsChild(RequestsTags.TAG_LOGIN)) {
-            rsp.setName(dom.getChild(RequestsTags.TAG_LOGIN).getString());
+        if (dom.containsChild(CoreTags.TAG_USER_NAME)) {
+            rsp.setName(dom.getChild(CoreTags.TAG_USER_NAME).getString());
         }
     }
 
@@ -111,16 +103,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(LogoutRequest.Response rsp) throws Exception {
-    }
-
-    @Override
-    public void visit(LoginRequest.Response rsp) throws Exception {
-        ProtoReader reader = new ProtoReader((new ByteArrayInputStream(bytes)));
-        rsp.setSessionId(reader.getString(RequestsTags.TAG_SESSION_ID));
-    }
-
-    @Override
-    public void visit(KeepAliveRequest.Response rsp) throws Exception {
     }
 
     @Override

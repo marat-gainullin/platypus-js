@@ -6,14 +6,17 @@ import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.login.ConnectionSettingsEditor;
+import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.ScriptedResource;
+import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
-import com.eas.client.threetier.platypus.PlatypusNativeConnection;
+import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +42,7 @@ public class PlatypusClientApplication {
     // login switchs
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
+    public static final String MAX_AUTH_ATTEMPTS_CMD_SWITCH = "maximum-auth-attempts";
 
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
@@ -64,11 +68,12 @@ public class PlatypusClientApplication {
         protected String startScriptPath;
         protected String userName;
         protected char[] password;
+        protected int maximumAuthenticateAttempts = Integer.MAX_VALUE;
         protected URL url;
         protected String defDatasource;
         protected DatasourcesArgsConsumer datasourcesArgs;
 
-        private static Config parseArgs(String[] args) throws Exception {
+        private static Config parse(String[] args) throws Exception {
             Config commonArgs = new Config();
             DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
             int i = 0;
@@ -98,14 +103,21 @@ public class PlatypusClientApplication {
                         commonArgs.userName = args[i + 1];
                         i += 2;
                     } else {
-                        throw new IllegalArgumentException("User syntax: -user <value>");
+                        throw new IllegalArgumentException("syntax: -user <value>");
                     }
                 } else if ((CMD_SWITCHS_PREFIX + PASSWORD_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                     if (i < args.length - 1) {
                         commonArgs.password = args[i + 1].toCharArray();
                         i += 2;
                     } else {
-                        throw new IllegalArgumentException("Password syntax: -password <value>");
+                        throw new IllegalArgumentException("syntax: -password <value>");
+                    }
+                } else if ((CMD_SWITCHS_PREFIX + MAX_AUTH_ATTEMPTS_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                    if (i < args.length - 1) {
+                        commonArgs.maximumAuthenticateAttempts = Integer.valueOf(args[i + 1]);
+                        i += 2;
+                    } else {
+                        throw new IllegalArgumentException("syntax: -maximum-auth-attempts <value>");
                     }
                 } else if ((CMD_SWITCHS_PREFIX + APPELEMENT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                     if (i < args.length - 1) {
@@ -134,20 +146,35 @@ public class PlatypusClientApplication {
      */
     public static void main(String[] args) throws Exception {
         try {
-            checkUserHome();
             UIManager.put("swing.boldMetal", Boolean.FALSE);
             System.setProperty("java.awt.Window.locationByPlatform", "true");
-            Config config = Config.parseArgs(args);
-            config.datasourcesArgs.registerDatasources();
-            ScriptUtils.init();
+            Config config = Config.parse(args);
+            if (config.url == null) {
+                ConnectionsSelector connectionsSelector = new ConnectionsSelector(null);
+                connectionsSelector.setVisible(true);
+                if (connectionsSelector.getReturnStatus() == ConnectionsSelector.RET_OK) {
+                    ConnectionSettings settings = ConnectionsSelector.getDefaultSettings();
+                    config.url = new URL(null, settings.getUrl(), new URLStreamHandler() {
+
+                        @Override
+                        protected URLConnection openConnection(URL u) throws IOException {
+                            throw new UnsupportedOperationException("Not supported yet.");
+                        }
+
+                    });
+                }
+            }
             if (config.url != null) {
+                checkUserHome();
+                config.datasourcesArgs.registerDatasources();
+                ScriptUtils.init();
                 Application app;
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, null, config.maximumAuthenticateAttempts));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, null, config.maximumAuthenticateAttempts));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
-                    app = new PlatypusClient(new PlatypusNativeConnection(config.url));
+                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, null, config.maximumAuthenticateAttempts));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
@@ -210,8 +237,8 @@ public class PlatypusClientApplication {
                     JSObject p = ScriptUtils.lookupInGlobal("P");
                     if (p != null) {
                         Object ready = p.getMember("ready");
-                        if (ready instanceof JSObject && ((JSObject)ready).isFunction()) {
-                            ((JSObject)ready).call(null, new Object[]{});
+                        if (ready instanceof JSObject && ((JSObject) ready).isFunction()) {
+                            ((JSObject) ready).call(null, new Object[]{});
                         } else {
                             throw new IllegalStateException("P.ready is missing or is not a function. Nothing to do :-(");
                         }
@@ -234,74 +261,6 @@ public class PlatypusClientApplication {
         super();
     }
 
-    /*
-     private boolean guiLogin() throws Exception {
-     LoginFrame frame = new LoginFrame(url, user, password, new LoginCallback() {
-     @Override
-     public boolean tryToLogin(String aUrl, String aAppUserName, char[] aAppPassword) throws Exception {
-     url = aUrl;
-     user = aAppUserName;
-     password = aAppPassword;
-     return consoleLogin();
-     }
-     });
-     Preferences settingsNode = Preferences.userRoot().node(ClientFactory.SETTINGS_NODE);
-     frame.addExceptionListener(this);
-     frame.applyDefaults();
-     frame.pack();
-     frame.setVisible(true);
-     int retValue = frame.getReturnStatus();
-     frame.dispose();
-     settingsNode.putInt(ClientFactory.DEFAULT_CONNECTION_INDEX_SETTING, frame.getSelectedConnectionIndex());
-     return retValue == LoginFrame.RET_OK;
-     }
-
-     private boolean appLogin(Client aClient, String aUserName, char[] aPassword) throws Exception {
-     if (aClient instanceof AppClient) {
-     AppClient appClient = (AppClient) aClient;
-     String sessionId = appClient.login(aUserName, aPassword);
-     if (sessionId != null && !sessionId.isEmpty()) {
-     principal = appClient.getPrincipal();
-     client = appClient;
-     return true;
-     } else {
-     throw new FailedLoginException("A session is expected from server");
-     }
-     } else if (aClient instanceof DatabasesClient) {
-     DatabasesClient dbClient = (DatabasesClient) aClient;
-     try {
-     if (aUserName != null && !aUserName.isEmpty() && aPassword != null) {
-     String passwordMd5 = MD5Generator.generate(String.valueOf(aPassword));
-     try {
-     principal = DatabasesClient.credentialsToPrincipalWithBasicAuthentication(dbClient, aUserName, passwordMd5);
-     } catch (Exception ex) {
-     throw new FailedLoginException(ex.getMessage());
-     }
-     if (principal == null) {
-     throw new FailedLoginException("User name or password is incorrect");
-     }
-     } else {
-     throw new FailedLoginException("Missing user name and/or password");
-     }
-     } catch (FailedLoginException ex) {
-     if (anonymousEnabled) {
-     principal = new AnonymousPlatypusPrincipal("anonymous-" + IDGenerator.genID());
-     } else {
-     throw ex;
-     }
-     }
-     dbClient.setPrincipalHost(this);
-     dbClient.setContextHost(this);
-     client = dbClient;
-     return true;
-     }
-     return false;
-     }
-     @Override
-     public PlatypusPrincipal getPrincipal() {
-     return null;
-     }
-     */
     private static void checkUserHome() {
         String home = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (home == null || home.isEmpty()) {
@@ -314,63 +273,4 @@ public class PlatypusClientApplication {
             throw new IllegalArgumentException(USER_HOME_NOT_A_DIRECTORY_MSG);
         }
     }
-
-    /*
-     protected void runStartScript() throws Exception {
-     if (startScriptPath != null) {
-     ApplicationElement appElement = client.getAppCache().get(startScriptPath);
-     if (appElement != null) {
-     PlatypusScriptedResource.executeScriptResource(appElement.getId());
-     if (appElement.getType() == ClientConstants.ET_FORM
-     || appElement.getType() == ClientConstants.ET_REPORT
-     || appElement.getType() == ClientConstants.ET_COMPONENT) {
-     final JSObject instance = ScriptUtils.createModule(appElement.getId());
-     if (appElement.getType() == ClientConstants.ET_FORM) {
-     EventQueue.invokeLater(() -> {
-     Object oShow = instance.getMember("show");
-     if (oShow instanceof JSObject && ((JSObject) oShow).isFunction()) {
-     ((JSObject) oShow).call(instance, new Object[]{});
-     } else {
-     Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(SHOW_FUNC_MISSING_MSG, appElement.getId()));
-     System.exit(0);
-     }
-     });
-     } else {
-     Object oShow = instance.getMember("execute");
-     if (oShow instanceof JSObject && ((JSObject) oShow).isFunction()) {
-     ((JSObject) oShow).call(instance, new Object[]{});
-     } else {
-     Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(EXECUTE_FUNC_MISSING_MSG, appElement.getId()));
-     System.exit(0);
-     }
-     }
-     }
-     } else {
-     Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(MISSING_SUCH_APP_ELEMENT_MSG, startScriptPath));
-     System.exit(0);
-     }
-     } else {
-     Logger.getLogger(PlatypusClientApplication.class.getName()).severe(APP_ELEMENT_MISSING_MSG);
-     System.exit(0);
-     }
-     }
-     
-     @Override
-     public String preparationContext() throws Exception {
-     if (principal instanceof DbPlatypusPrincipal) {
-     assert client instanceof DbClient : "DbPlatypusPrincipal should only be used with two-tier client of DbClient class.";
-     return ((DbPlatypusPrincipal) principal).getContext();
-     }
-     return null;
-     }
-
-     @Override
-     public String unpreparationContext() throws Exception {
-     if (client instanceof DbClient) {
-     DbClient dbClient = (DbClient) client;
-     return dbClient.getDbMetadataCache(null).getConnectionSchema();
-     }
-     return null;
-     }
-     */
 }

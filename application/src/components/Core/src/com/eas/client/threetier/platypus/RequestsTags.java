@@ -23,10 +23,6 @@ public class RequestsTags extends CoreTags{
     //AppQueryRequest
     //ExecuteQueryRequest
     public static final int TAG_QUERY_ID = 5;
-    //LoginRequest
-    public static final int TAG_LOGIN = 6;
-    public static final int TAG_PASSWORD = 7;
-    public static final int TAG_SESSION_TO_RESTORE = 8;
     //CommitRequest
     public static final int TAG_CHANGES = 9;
     //CreateServerModuleRequest
@@ -41,14 +37,6 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_ARGUMENT_VALUE = 13;
     public static final int TAG_NULL_ARGUMENT = 14;
     public static final int TAG_UNDEFINED_ARGUMENT = 15;
-    //SetServerModulePropertyRequest
-    //GetServerModulePropertyRequest
-    public static final int TAG_PROPERTY_NAME = 16;
-    //DbTableChangedRequest
-    //AppElementChangedRequest
-    public static final int DATABASE_TAG = 17;
-    //AppElementChangedRequest
-    public static final int ENTITY_ID_TAG = 18;
     //
     public static final int SCHEMA_NAME_TAG = 19;
     public static final int TABLE_NAME_TAG = 20;
@@ -60,8 +48,6 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_SQL_PARAMETER_MODE = 26;
     public static final int TAG_SQL_PARAMETER_NAME = 27;
     public static final int TAG_SQL_PARAMETER_DESCRIPTION = 28;
-    //IsUserInRoleRequest
-    public static final int TAG_ROLE_NAME = 30;
     /**
      * ******************* responses tags *************************************
      */
@@ -82,15 +68,7 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_ROWSET = 46;
     public static final int TAG_PARAMETERS = 47;
     public static final int TAG_UPDATE_COUNT = 48;
-    //OutHashRequest.Response
-    public static final int TAG_RESULT_CODE = 49;
-    public static final int TAG_RESULT_ERROR_STR = 50;
-    //LoginRequest.Response
-    public static final int TAG_SESSION_ID = 51;
-    //IsUserInRoleRequest.Response
-    public static final int TAG_ROLE = 52;
-    //IsAppElementActualRequest.Response
-    public static final int TAG_ACTUAL = 53;
+    //CreateServerModuleResuest.Reponse
     public static final int TAG_MODULE_PERMITTED = 56;
     public static final int TAG_MODULE_FUNCTION_NAMES = 57;
     public static final int TAG_MODULE_FUNCTION_NAME = 58;

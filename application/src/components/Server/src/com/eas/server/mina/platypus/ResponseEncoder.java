@@ -6,6 +6,7 @@ package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.PlatypusResponseWriter;
+import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayOutputStream;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -24,13 +25,15 @@ public class ResponseEncoder implements ProtocolEncoder {
     }
 
     @Override
-    public void encode(IoSession aSession, Object aResponse, ProtocolEncoderOutput output) throws Exception {
-        if (aResponse instanceof Response) {
-            Response rsp = (Response) aResponse;
+    public void encode(IoSession aSession, Object o, ProtocolEncoderOutput output) throws Exception {
+        if (o instanceof ResponseEnvelope) {
+            ResponseEnvelope respEnv = (ResponseEnvelope)o;
+            Response response = respEnv.response;
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             ProtoWriter writer = new ProtoWriter(outStream);
             try {
-                PlatypusResponseWriter.write(rsp, writer);
+                PlatypusResponseWriter.write(response, writer);
+                writer.put(CoreTags.TAG_SESSION_TICKET, respEnv.ticket);
             } finally {
                 writer.flush();
             }

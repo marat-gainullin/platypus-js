@@ -39,24 +39,24 @@ public class WebResourceCollection implements ElementConvertable {
         return description;
     }
 
-    public void setDescription(String aDescription) {
-        description = aDescription;
+    public void setDescription(String aValue) {
+        description = aValue;
     }
 
     public String getUrlPattern() {
         return urlPattern;
     }
 
-    public void setUrlPattern(String anUrlPattern) {
-        urlPattern = anUrlPattern;
+    public void setUrlPattern(String aValue) {
+        urlPattern = aValue;
     }
 
     public String getHttpMethod() {
         return httpMethod;
     }
 
-    public void setHttpMethod(String aHttpMethod) {
-        httpMethod = aHttpMethod;
+    public void setHttpMethod(String aValue) {
+        httpMethod = aValue;
     }
     
     @Override

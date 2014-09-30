@@ -19,7 +19,7 @@ import com.eas.client.queries.Query;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.platypus.PlatypusNativeClient;
 import com.eas.client.threetier.PlatypusFlowProvider;
-import com.eas.client.threetier.platypus.PlatypusNativeConnection;
+import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
@@ -51,7 +51,7 @@ public class PlatypusClientTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         String aUrl = "platypus://localhost:8500/";
-        client = new PlatypusClient(new PlatypusNativeConnection(createSSLContext(), new URI(aUrl).getHost(), new URI(aUrl).getPort()));
+        client = new PlatypusClient(new PlatypusPlatypusConnection(createSSLContext(), new URI(aUrl).getHost(), new URI(aUrl).getPort()));
         client.login("test", "test".toCharArray());
     }
 

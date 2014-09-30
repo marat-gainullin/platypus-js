@@ -4,11 +4,12 @@
  */
 package com.eas.designer.explorer.j2ee.dd;
 
-import com.eas.xml.dom.XmlDomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,14 +26,14 @@ public class WebApplication {
     public static final String TAG_NAME = "web-app";//NOI18N
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     protected DocumentBuilder builder;
-    private List<ContextParam> contextParams = new ArrayList<>();
-    private List<AppListener> appListeners = new ArrayList<>();
-    private List<Servlet> servlets = new ArrayList<>();
-    private List<ServletMapping> servletMappings = new ArrayList<>();
-    private List<ResourceRef> resourceRefs = new ArrayList<>();
-    private SecurityConstraint securityConstraint;
+    private final List<ContextParam> contextParams = new ArrayList<>();
+    private final List<AppListener> appListeners = new ArrayList<>();
+    private final List<Servlet> servlets = new ArrayList<>();
+    private final List<ServletMapping> servletMappings = new ArrayList<>();
+    private final List<ResourceRef> resourceRefs = new ArrayList<>();
+    private final Set<SecurityConstraint> securityConstraints = new HashSet<>();
     private LoginConfig loginConfig;
-    private List<SecurityRole> securityRoles = new ArrayList<>();
+    private final List<SecurityRole> securityRoles = new ArrayList<>();
 
     public WebApplication() throws ParserConfigurationException {
         factory.setNamespaceAware(true);
@@ -63,8 +64,8 @@ public class WebApplication {
         for (ResourceRef resourceRef : resourceRefs) {
             webApp.appendChild(resourceRef.getElement(doc));
         }
-        if (securityConstraint != null) {
-            webApp.appendChild(securityConstraint.getElement(doc));
+        for (SecurityConstraint constraint : securityConstraints) {
+            webApp.appendChild(constraint.getElement(doc));
         }
         if (loginConfig != null) {
             webApp.appendChild(loginConfig.getElement(doc));
@@ -175,12 +176,12 @@ public class WebApplication {
         }
     }
 
-    public SecurityConstraint getSecurityConstraint() {
-        return securityConstraint;
+    public Set<SecurityConstraint> getSecurityConstraints() {
+        return Collections.unmodifiableSet(securityConstraints);
     }
 
-    public void setSecurityConstraint(SecurityConstraint aSecurityConstraint) {
-        securityConstraint = aSecurityConstraint;
+    public void addSecurityConstraint(SecurityConstraint aSecurityConstraint) {
+        securityConstraints.add(aSecurityConstraint);
     }
 
     public LoginConfig getLoginConfig() {

@@ -12,6 +12,8 @@ import java.util.logging.Level;
  * @author vv
  */
 public interface PlatypusProjectSettings {
+    
+    public static final String START_JS_FILE_NAME = "start.js"; //NOI18N
 
     PropertyChangeSupport getChangeSupport();
 

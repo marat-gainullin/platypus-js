@@ -28,11 +28,6 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(LoginRequest rq) throws Exception {
-        response = new LoginRequest.Response(null);
-    }
-
-    @Override
     public void visit(LogoutRequest rq) throws Exception {
         response = new LogoutRequest.Response();
     }
@@ -58,18 +53,8 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(HelloRequest rq) throws Exception {
-        response = new HelloRequest.Response();
-    }
-
-    @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
         response = new ExecuteQueryRequest.Response(null, 0, rq.getExpectedFields());
-    }
-
-    @Override
-    public void visit(KeepAliveRequest rq) throws Exception {
-        response = new KeepAliveRequest.Response();
     }
 
     @Override

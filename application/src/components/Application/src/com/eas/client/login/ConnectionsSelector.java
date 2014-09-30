@@ -6,7 +6,6 @@
 package com.eas.client.login;
 
 import com.eas.client.settings.ConnectionSettings;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.Map;
@@ -31,12 +30,8 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     public static final String SETTINGS_NODE = "/com/eas/client";
     public static final String CONNECTIONS_SETTINGS_NODE = SETTINGS_NODE + "/connections";
     public static final String DEFAULT_CONNECTION_INDEX_SETTING = "defaultConnectionIndex";
-    public static final String DEFAULT_USERNAME_SETTING = "defaultUserName";
-    public static final String DEFAULT_PASSWORD_SETTING = "defaultPassword";
     public static final String CONNECTION_TITLE_SETTING = "title";
     public static final String CONNECTION_URL_SETTING = "url";
-    public static final String CONNECTION_USER_SETTING = "user";
-    public static final String CONNECTION_PASSWORD_SETTING = "password";
     private static ConnectionSettings[] settings;
     private static ConnectionSettings defaultSettings;
     /**
@@ -53,11 +48,9 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private final Action cancelAction = new CancelAction();
     private final Action newConnectionAction = new NewConnectionAction();
     private final Action modifyConnectionAction = new ModifyConnectionAction();
-    private final ToggleConnectionsVisibility toggleConnectionsVisibilityAction = new ToggleConnectionsVisibility();
     private final DeleteConnectionAction deleteConnectionAction = new DeleteConnectionAction();
     private final ConnectionsSelectionListener connectionsSelectionListener = new ConnectionsSelectionListener();
     private final ConnectionsListModel connectionsListModel;
-    private int connectionsPanelHeight;
     protected String defaultUrl;
 
     /**
@@ -72,19 +65,9 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         connectionsListModel = new ConnectionsListModel();
         initComponents();
         getRootPane().setDefaultButton(btnOk);
-        if (isFullModeConnect()) {
-            lstConnections.setCellRenderer(connectionsListModel.getCellRenderer());
-            lstConnections.clearSelection();
-            lstConnections.addListSelectionListener(connectionsSelectionListener);
-            toggleConnectionsVisibilityAction.actionPerformed(null);
-        } else {
-            hideConnectionUI();
-        }
-    }
-
-    private void hideConnectionUI() {
-        btnToggleConnections.setVisible(false);
-        pnlConnectionInfo.setVisible(false);
+        lstConnections.setCellRenderer(connectionsListModel.getCellRenderer());
+        lstConnections.clearSelection();
+        lstConnections.addListSelectionListener(connectionsSelectionListener);
     }
 
     private void doClose(int retStatus) {
@@ -92,10 +75,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         returnStatus = retStatus;
         setVisible(false);
         dispose();
-    }
-
-    private boolean isFullModeConnect() {
-        return defaultUrl == null || defaultUrl.isEmpty();
     }
 
     /**
@@ -117,7 +96,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         pnlBottom = new javax.swing.JPanel();
         btnOk = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        btnToggleConnections = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(bundle.getString("LoginDialog.title")); // NOI18N
@@ -189,17 +167,12 @@ public class ConnectionsSelector extends javax.swing.JDialog {
 
         btnCancel.setText(bundle.getString("Dialog.CancelButton.text")); // NOI18N
 
-        btnToggleConnections.setAction(toggleConnectionsVisibilityAction);
-        btnToggleConnections.setText(">>>");
-
         javax.swing.GroupLayout pnlBottomLayout = new javax.swing.GroupLayout(pnlBottom);
         pnlBottom.setLayout(pnlBottomLayout);
         pnlBottomLayout.setHorizontalGroup(
             pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBottomLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(btnToggleConnections, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 162, Short.MAX_VALUE)
+                .addContainerGap(240, Short.MAX_VALUE)
                 .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -211,7 +184,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
-                    .addComponent(btnToggleConnections)
                     .addComponent(btnOk))
                 .addContainerGap())
         );
@@ -236,7 +208,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private javax.swing.JButton btnModifyConnection;
     private javax.swing.JButton btnNewConnection;
     private javax.swing.JButton btnOk;
-    private javax.swing.JButton btnToggleConnections;
     private javax.swing.JLabel lblConnections;
     private javax.swing.JList lstConnections;
     private javax.swing.JPanel pnlBottom;
@@ -265,8 +236,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
                 String strIndex = String.valueOf(i);
                 connectionsPref.node(strIndex).put(CONNECTION_TITLE_SETTING, currentSettings.getName() != null ? currentSettings.getName() : "");
                 connectionsPref.node(strIndex).put(CONNECTION_URL_SETTING, currentSettings.getUrl() != null ? currentSettings.getUrl() : "");
-                connectionsPref.node(strIndex).put(CONNECTION_USER_SETTING, currentSettings.getUser() != null ? currentSettings.getUser() : "");
-                connectionsPref.node(strIndex).put(CONNECTION_PASSWORD_SETTING, currentSettings.getPassword() != null ? currentSettings.getPassword() : "");
             }
         }
         if (defaultSettingsIndex != -1) {
@@ -274,25 +243,13 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         }
     }
 
-    public void updateDefaultCredentialsPreferences(String aUserName, String aPassword) {
-        Preferences.userRoot().node(SETTINGS_NODE).put(DEFAULT_USERNAME_SETTING, aUserName);
-        Preferences.userRoot().node(SETTINGS_NODE).put(DEFAULT_PASSWORD_SETTING, aPassword);
-    }
-
-    /*
-     public void setSelectedConnectionIndex(int aIndex) {
-     lstConnections.setSelectedIndex(aIndex);
-     }
-     */
     public int getSelectedConnectionIndex() {
         return lstConnections.getSelectedIndex();
     }
 
     public void applyDefaults() {
-        if (isFullModeConnect()) {
-            if (getDefaultSettings() != null) {
-                lstConnections.setSelectedValue(getDefaultSettings(), true);
-            }
+        if (getDefaultSettings() != null) {
+            lstConnections.setSelectedValue(getDefaultSettings(), true);
         }
     }
 
@@ -301,13 +258,11 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                if (isFullModeConnect()) {
-                    ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
-                    if (settings != null) {
-                        setDefaultSettings(settings);
-                    }
-                    updateConnectionsPreferences();
+                ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
+                if (settings != null) {
+                    setDefaultSettings(settings);
                 }
+                updateConnectionsPreferences();
                 doClose(RET_OK);
             } catch (Exception ex) {
                 Logger.getLogger(ConnectionsSelector.class.getName()).log(Level.SEVERE, "{0} ({1})", new Object[]{bundle.getString("ConnectionsSelector.CannotConnectMessage"), ex.getLocalizedMessage()});
@@ -333,10 +288,10 @@ public class ConnectionsSelector extends javax.swing.JDialog {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
+            ConnectionSettingsEditor dlg = new ConnectionSettingsEditor();
             dlg.setUrl("platypus://<host>:<port>");
             dlg.setVisible(true);
-            if (dlg.getReturnStatus() == ConnectionSettingsDialog.RET_OK) {
+            if (dlg.getReturnStatus() == ConnectionSettingsEditor.RET_OK) {
                 try {
                     int saveIndex = lstConnections.getSelectedIndex();
                     if (saveIndex < 0) {
@@ -344,7 +299,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
                     }
                     String url = dlg.getUrl();
                     String name = dlg.getConnectionName();
-                    ConnectionSettings settings = new PlatypusConnectionSettings();
+                    ConnectionSettings settings = new ConnectionSettings();
                     settings.setUrl(url);
                     if (name != null && !name.isEmpty()) {
                         settings.setName(name);
@@ -367,12 +322,12 @@ public class ConnectionsSelector extends javax.swing.JDialog {
             int selectedIndex = lstConnections.getSelectedIndex();
             assert selectedIndex >= 0; //we won't be enabled otherwise
             ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(selectedIndex);
-            ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
+            ConnectionSettingsEditor dlg = new ConnectionSettingsEditor();
             dlg.setUrl(settings.getUrl());
             dlg.setConnectionName(settings.getName());
             dlg.setVisible(true);
             int retVal = dlg.getReturnStatus();
-            if (retVal == ConnectionSettingsDialog.RET_OK) {
+            if (retVal == ConnectionSettingsEditor.RET_OK) {
                 try {
                     settings.setUrl(dlg.getUrl());
                     settings.setName(dlg.getConnectionName());
@@ -411,7 +366,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if (!e.getValueIsAdjusting() && isFullModeConnect()) {
+            if (!e.getValueIsAdjusting()) {
                 ConnectionSettings selectedSettings = (ConnectionSettings) lstConnections.getSelectedValue();
                 boolean modificationsEnabled = selectedSettings != null && selectedSettings.isEditable();
                 modifyConnectionAction.setEnabled(modificationsEnabled);
@@ -421,24 +376,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         }
     }
 
-    private class ToggleConnectionsVisibility extends AbstractAction {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (pnlConnectionInfo.isVisible()) {
-                // make it invisible and shrink frame bounds.
-                connectionsPanelHeight = pnlConnectionInfo.getSize().height;
-                pnlConnectionInfo.setVisible(false);
-                setSize(getSize().width, getSize().height - connectionsPanelHeight);
-                btnToggleConnections.setText(">>>");
-            } else {
-                // make it visible and enlarge frame bounds.
-                pnlConnectionInfo.setVisible(true);
-                setSize(getSize().width, getSize().height + connectionsPanelHeight);
-                btnToggleConnections.setText("<<<");
-            }
-        }
-    }
     public static ConnectionSettings[] getSettings() throws Exception {
         if (settings == null) {
             try {
@@ -509,12 +446,10 @@ public class ConnectionsSelector extends javax.swing.JDialog {
             Preferences connectionPrefs = connectionsPrefs.node(settingsNodesName);
             String connUrl = connectionPrefs.get(CONNECTION_URL_SETTING, "jdbc");
             connUrl = connUrl.replaceAll("[\\s\\r\\n\\t]", "");
-            ConnectionSettings connectionsettings = new PlatypusConnectionSettings();
+            ConnectionSettings connectionsettings = new ConnectionSettings();
             settingsMap.put(Integer.valueOf(settingsNodesName), connectionsettings);
             connectionsettings.setUrl(connUrl);
             connectionsettings.setName(connectionPrefs.get(CONNECTION_TITLE_SETTING, ""));
-            connectionsettings.setUser(connectionPrefs.get(CONNECTION_USER_SETTING, ""));
-            connectionsettings.setPassword(connectionPrefs.get(CONNECTION_PASSWORD_SETTING, ""));
             connectionsettings.setEditable(aEditable);
         }
     }

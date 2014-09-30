@@ -20,16 +20,19 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
  */
 public class RequestEncoder implements ProtocolEncoder {
 
-    protected String sessionTicket;
-
     @Override
     public void encode(IoSession is, Object o, ProtocolEncoderOutput peo) throws Exception {
-        assert o instanceof Request;
-        Request request = (Request) o;
+        assert o instanceof RequestEnvelope;
+        RequestEnvelope env = (RequestEnvelope) o;
+        Request request = env.request;
         ByteArrayOutputStream bufOutStream = new ByteArrayOutputStream();
         ProtoWriter writer = new ProtoWriter(bufOutStream);
-        if (sessionTicket != null) {
-            writer.put(CoreTags.TAG_SESSION_TICKET, sessionTicket);
+        if (env.ticket != null) {
+            writer.put(CoreTags.TAG_SESSION_TICKET, env.ticket);
+        }
+        if (env.userName != null) {
+            writer.put(CoreTags.TAG_USER_NAME, env.userName);
+            writer.put(CoreTags.TAG_PASSWORD, env.password != null ? env.password : "");
         }
         PlatypusRequestWriter.write(request, writer);
         writer.flush();
@@ -39,9 +42,4 @@ public class RequestEncoder implements ProtocolEncoder {
     @Override
     public void dispose(IoSession is) throws Exception {
     }
-
-    void setSessionTicket(String aTicket) {
-        sessionTicket = aTicket;
-    }
-
 }
