@@ -123,6 +123,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             try {
                 IoSession session = sessionsPool.achieveResource();
                 Callable<Void> performer = () -> {
+                    rqc.response = null;
+                    rqc.requestEnv.request.setDone(false);
                     rqc.requestEnv.ticket = sessionTicket;
                     // enqueue network work
                     session.write(rqc.requestEnv);
@@ -139,23 +141,29 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                 performer.call();
                 if (rqc.response instanceof ErrorResponse
                         && ((ErrorResponse) rqc.response).isAccessControl()) {
-                    authenticate(() -> {
-                        int authenticateAttempts = 0;
-                        // Try to authenticate
-                        while (rqc.response instanceof ErrorResponse
-                                && ((ErrorResponse) rqc.response).isAccessControl()
-                                && authenticateAttempts++ < maximumAuthenticateAttempts) {
-                            rqc.response = null;
-                            rqc.requestEnv.ticket = null;
-                            rqc.requestEnv.request.setDone(false);
-                            Credentials credentials = onCredentials.call();
-                            rqc.requestEnv.userName = credentials.userName;
-                            rqc.requestEnv.password = credentials.password;
-                            performer.call();
-                        }
-                        return null;
-                    }, () -> {
+                    sequence.in(() -> {
+                        // probably new ticket from another thread...
+                        rqc.requestEnv.userName = null;
+                        rqc.requestEnv.password = null;
                         performer.call();
+                        if (rqc.response instanceof ErrorResponse
+                                && ((ErrorResponse) rqc.response).isAccessControl()) {
+                            // nice try :-)
+                            int authenticateAttempts = 0;
+                            // Try to authenticate
+                            while (rqc.response instanceof ErrorResponse
+                                    && ((ErrorResponse) rqc.response).isAccessControl()
+                                    && authenticateAttempts++ < maximumAuthenticateAttempts) {
+                                Credentials credentials = onCredentials.call();
+                                if (credentials != null) {
+                                    rqc.requestEnv.userName = credentials.userName;
+                                    rqc.requestEnv.password = credentials.password;
+                                    performer.call();
+                                } else {// Credentials are inaccessible, so leave things as is...
+                                    authenticateAttempts = Integer.MAX_VALUE;
+                                }
+                            }
+                        }
                         return null;
                     });
                 }

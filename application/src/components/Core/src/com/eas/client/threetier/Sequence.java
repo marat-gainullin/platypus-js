@@ -11,8 +11,8 @@ import java.util.concurrent.Callable;
  *
  * @author mg
  */
-public interface Authenticator {
+public interface Sequence {
 
-    public void authenticate(Callable<Void> onAuthenticate, Callable<Void> onAuthenticated) throws Exception;
+    public void in(Callable<Void> onAuthenticate) throws Exception;
     
 }

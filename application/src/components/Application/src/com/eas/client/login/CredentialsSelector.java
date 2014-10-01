@@ -16,7 +16,7 @@ import javax.swing.KeyStroke;
  *
  * @author mg
  */
-public class CredentialsDialog extends javax.swing.JDialog {
+public class CredentialsSelector extends javax.swing.JDialog {
 
     /**
      * A return status code - returned if Cancel button has been pressed
@@ -36,14 +36,14 @@ public class CredentialsDialog extends javax.swing.JDialog {
         @Override
         public void actionPerformed(ActionEvent e) {
             returnStatus = RET_OK;
-            CredentialsDialog.this.dispose();
+            CredentialsSelector.this.dispose();
         }
     };
     private final Action cancelAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             returnStatus = RET_CANCEL;
-            CredentialsDialog.this.dispose();
+            CredentialsSelector.this.dispose();
         }
     };
 
@@ -51,8 +51,8 @@ public class CredentialsDialog extends javax.swing.JDialog {
      * Creates new form LoginDialog
      *
      */
-    public CredentialsDialog() {
-        super((java.awt.Frame)null, true);
+    public CredentialsSelector() {
+        super((java.awt.Frame) null, true);
         initComponents();
         tfUserName.getActionMap().put(OK_ACTION_ID, okAction);
         tfUserName.getActionMap().put(CANCEL_ACTION_ID, cancelAction);
@@ -62,6 +62,14 @@ public class CredentialsDialog extends javax.swing.JDialog {
         tfUserName.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
         tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), OK_ACTION_ID);
         tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
+    }
+
+    public String getUserName() {
+        return tfUserName.getText();
+    }
+
+    public String getPassword() {
+        return new String(tfPassword.getPassword());
     }
 
     public int getReturnStatus() {

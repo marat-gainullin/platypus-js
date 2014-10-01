@@ -6,8 +6,9 @@ import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
-import com.eas.client.login.ConnectionSettingsEditor;
 import com.eas.client.login.ConnectionsSelector;
+import com.eas.client.login.Credentials;
+import com.eas.client.login.CredentialsSelector;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
@@ -18,11 +19,13 @@ import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.concurrent.Callable;
 import java.util.logging.*;
 import javax.swing.UIManager;
 import jdk.nashorn.api.scripting.JSObject;
@@ -42,7 +45,7 @@ public class PlatypusClientApplication {
     // login switchs
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
-    public static final String MAX_AUTH_ATTEMPTS_CMD_SWITCH = "maximum-auth-attempts";
+    public static final String MAX_LOGIN_ATTEMPTS_CMD_SWITCH = "max-login-attempts";
 
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
@@ -112,12 +115,12 @@ public class PlatypusClientApplication {
                     } else {
                         throw new IllegalArgumentException("syntax: -password <value>");
                     }
-                } else if ((CMD_SWITCHS_PREFIX + MAX_AUTH_ATTEMPTS_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                } else if ((CMD_SWITCHS_PREFIX + MAX_LOGIN_ATTEMPTS_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                     if (i < args.length - 1) {
                         commonArgs.maximumAuthenticateAttempts = Integer.valueOf(args[i + 1]);
                         i += 2;
                     } else {
-                        throw new IllegalArgumentException("syntax: -maximum-auth-attempts <value>");
+                        throw new IllegalArgumentException("syntax: -max-login-attempts <value>");
                     }
                 } else if ((CMD_SWITCHS_PREFIX + APPELEMENT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                     if (i < args.length - 1) {
@@ -140,6 +143,50 @@ public class PlatypusClientApplication {
         }
     }
 
+    protected static class UIOnCredentials implements Callable<Credentials> {
+
+        protected Config config;
+
+        public UIOnCredentials(Config aConfig) {
+            super();
+            config = aConfig;
+        }
+
+        @Override
+        public Credentials call() throws Exception {
+            if (config.userName != null) {
+                return new Credentials(config.userName, new String(config.password));
+            } else {
+                Callable<Credentials> selector = () -> {
+                    CredentialsSelector credentialsSelector = new CredentialsSelector();
+                    credentialsSelector.setVisible(true);
+                    if (credentialsSelector.getReturnStatus() == CredentialsSelector.RET_OK) {
+                        return new Credentials(credentialsSelector.getUserName(), credentialsSelector.getPassword());
+                    } else {
+                        return null;
+                    }
+                };
+                if (EventQueue.isDispatchThread()) {
+                    return selector.call();
+                } else {
+                    Credentials res = new Credentials(null, null);
+                    EventQueue.invokeAndWait(() -> {
+                        try {
+                            Credentials cr = selector.call();
+                            if (cr != null) {
+                                res.userName = cr.userName;
+                                res.password = cr.password;
+                            }
+                        } catch (Exception ex) {
+                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    });
+                    return res.userName != null ? res : null;
+                }
+            }
+        }
+    }
+
     /**
      * @param args the command line arguments
      * @throws Exception
@@ -150,19 +197,29 @@ public class PlatypusClientApplication {
             System.setProperty("java.awt.Window.locationByPlatform", "true");
             Config config = Config.parse(args);
             if (config.url == null) {
-                ConnectionsSelector connectionsSelector = new ConnectionsSelector(null);
-                connectionsSelector.setVisible(true);
-                if (connectionsSelector.getReturnStatus() == ConnectionsSelector.RET_OK) {
-                    ConnectionSettings settings = ConnectionsSelector.getDefaultSettings();
-                    config.url = new URL(null, settings.getUrl(), new URLStreamHandler() {
+                Callable<URL> urlSelector = () -> {
+                    ConnectionsSelector connectionsSelector = new ConnectionsSelector(null);
+                    connectionsSelector.setVisible(true);
+                    if (connectionsSelector.getReturnStatus() == ConnectionsSelector.RET_OK) {
+                        ConnectionSettings settings = ConnectionsSelector.getDefaultSettings();
+                        return new URL(null, settings.getUrl(), new URLStreamHandler() {
 
-                        @Override
-                        protected URLConnection openConnection(URL u) throws IOException {
-                            throw new UnsupportedOperationException("Not supported yet.");
-                        }
+                            @Override
+                            protected URLConnection openConnection(URL u) throws IOException {
+                                throw new UnsupportedOperationException("Not supported yet.");
+                            }
 
-                    });
-                }
+                        });
+                    }
+                    return null;
+                };
+                EventQueue.invokeAndWait(() -> {
+                    try {
+                        config.url = urlSelector.call();
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
             }
             if (config.url != null) {
                 checkUserHome();
@@ -170,11 +227,11 @@ public class PlatypusClientApplication {
                 ScriptUtils.init();
                 Application app;
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, null, config.maximumAuthenticateAttempts));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, null, config.maximumAuthenticateAttempts));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
-                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, null, config.maximumAuthenticateAttempts));
+                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {

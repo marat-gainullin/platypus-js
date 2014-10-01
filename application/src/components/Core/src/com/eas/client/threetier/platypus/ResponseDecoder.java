@@ -40,29 +40,26 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
             if (in.remaining() < tagSize) {
                 in.position(start);
                 return false;
-            }
-            if(tag == RequestsTags.TAG_RESPONSE){
+            } else if (tag == RequestsTags.TAG_RESPONSE) {
                 ordinaryResponse = true;
-            }
-            if (tag == RequestsTags.TAG_ERROR_RESPONSE) {
+            } else if (tag == RequestsTags.TAG_ERROR_RESPONSE) {
                 errorResponse = true;
-            }
-            if(tag == CoreTags.TAG_SESSION_TICKET){
+            } else if (tag == CoreTags.TAG_SESSION_TICKET) {
                 byte[] ticketBuf = new byte[tagSize];
                 in.get(ticketBuf);
                 ticket = new String(ticketBuf, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
-            }
-            if (tag == RequestsTags.TAG_RESPONSE_DATA) {
+            } else if (tag == RequestsTags.TAG_RESPONSE_DATA) {
                 data = true;
                 dataStart = in.position();
                 dataSize = tagSize;
+            } else {
+                in.skip(tagSize);
             }
-            in.skip(tagSize);
         } while (tag != RequestsTags.TAG_RESPONSE_END);
-        if(!ordinaryResponse && !errorResponse){
+        if (!ordinaryResponse && !errorResponse) {
             throw new IllegalStateException("Responses should contain ordinary response marker or error response marker tag");
         }
-        if(!data){
+        if (!data) {
             throw new IllegalStateException("Responses should contain response data tag");
         }
         PlatypusPlatypusConnection.RequestCallback rqc = (PlatypusPlatypusConnection.RequestCallback) session.getAttribute(PlatypusPlatypusConnection.RequestCallback.class.getSimpleName());

@@ -27,16 +27,15 @@ public class ResponseEncoder implements ProtocolEncoder {
     @Override
     public void encode(IoSession aSession, Object o, ProtocolEncoderOutput output) throws Exception {
         if (o instanceof ResponseEnvelope) {
-            ResponseEnvelope respEnv = (ResponseEnvelope)o;
+            ResponseEnvelope respEnv = (ResponseEnvelope) o;
             Response response = respEnv.response;
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             ProtoWriter writer = new ProtoWriter(outStream);
-            try {
-                PlatypusResponseWriter.write(response, writer);
+            if (respEnv.ticket != null) {
                 writer.put(CoreTags.TAG_SESSION_TICKET, respEnv.ticket);
-            } finally {
-                writer.flush();
             }
+            PlatypusResponseWriter.write(response, writer);
+            writer.flush();
             output.write(IoBuffer.wrap(outStream.toByteArray()));
         }
     }

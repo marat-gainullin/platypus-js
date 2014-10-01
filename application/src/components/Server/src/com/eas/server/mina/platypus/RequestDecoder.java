@@ -31,15 +31,15 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
         String ticket = null;
         String userName = null;
         String password = null;
+        int tag;
         int start = in.position();
-        int tag = 0, tagSize = 0;
         do {
             if (in.remaining() < 5) {
                 in.position(start);
                 return false;
             }
             tag = in.get() & 0xff;
-            tagSize = in.getInt();
+            int tagSize = in.getInt();
             if (in.remaining() < tagSize) {
                 in.position(start);
                 return false;

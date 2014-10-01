@@ -12,6 +12,7 @@ import com.eas.client.login.Credentials;
 import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,7 +53,7 @@ import javax.swing.JOptionPane;
  *
  * @author kl, mg refactoring
  */
-public abstract class PlatypusConnection implements AppConnection, Authenticator {
+public abstract class PlatypusConnection implements AppConnection {
 
     public static final ResourceBundle clientLocalizations = ResourceBundle.getBundle("com/eas/client/threetier/clientlocalizations");
     // local disk paths
@@ -102,18 +103,22 @@ public abstract class PlatypusConnection implements AppConnection, Authenticator
         }
     }
 
-    private boolean authenticated;
     protected final URL url;
+    protected Sequence sequence = (Callable<Void> aCallable) -> {
+        synchronized (this) {
+            aCallable.call();
+        }
+    };
     protected Callable<Credentials> onCredentials;
     protected int maximumAuthenticateAttempts = 1;
 
-    public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts){
+    public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
         super();
         url = aUrl;
         onCredentials = aOnCredentials;
         maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
     }
-    
+
     public URL getUrl() {
         return url;
     }
@@ -198,6 +203,11 @@ public abstract class PlatypusConnection implements AppConnection, Authenticator
 
     private static class PlatypusTrustManager implements X509TrustManager {
 
+        private static class Choice {
+
+            public int choice;
+        }
+
         protected KeyStore keyStore;
         protected TrustManager[] defaultTrustManagers;
 
@@ -213,7 +223,7 @@ public abstract class PlatypusConnection implements AppConnection, Authenticator
         }
 
         @Override
-        public void checkServerTrusted(X509Certificate[] aCertsChain, String aAlgotithm) throws CertificateException {
+        public synchronized void checkServerTrusted(X509Certificate[] aCertsChain, String aAlgotithm) throws CertificateException {
             try {
                 for (TrustManager tm : defaultTrustManagers) {
                     if (tm instanceof X509TrustManager) {
@@ -221,21 +231,41 @@ public abstract class PlatypusConnection implements AppConnection, Authenticator
                     }
                 }
             } catch (Exception ex) {
-                int userChoice = JOptionPane.showOptionDialog(
-                        null,
-                        clientLocalizations.getString("ssl.server.certificate.bad"),
-                        clientLocalizations.getString("ssl.dialog.title"),
-                        JOptionPane.YES_NO_CANCEL_OPTION,
-                        JOptionPane.WARNING_MESSAGE,
-                        null,
-                        new Object[]{
-                            clientLocalizations.getString("ssl.server.certificate.accept"),
-                            clientLocalizations.getString("ssl.server.certificate.acceptsave"),
-                            clientLocalizations.getString("ssl.server.certificate.reject")
-                        },
-                        clientLocalizations.getString("ssl.server.certificate.accept"));
-                if (userChoice == JOptionPane.CANCEL_OPTION)// Reject
-                {
+                Callable<Integer> uiChoicer = () -> {
+                    return JOptionPane.showOptionDialog(
+                            null,
+                            clientLocalizations.getString("ssl.server.certificate.bad"),
+                            clientLocalizations.getString("ssl.dialog.title"),
+                            JOptionPane.YES_NO_CANCEL_OPTION,
+                            JOptionPane.WARNING_MESSAGE,
+                            null,
+                            new Object[]{
+                                clientLocalizations.getString("ssl.server.certificate.accept"),
+                                clientLocalizations.getString("ssl.server.certificate.acceptsave"),
+                                clientLocalizations.getString("ssl.server.certificate.reject")
+                            },
+                            clientLocalizations.getString("ssl.server.certificate.accept"));
+                };
+                int userChoice = JOptionPane.CANCEL_OPTION;
+                try {
+                    if (EventQueue.isDispatchThread()) {
+                        userChoice = uiChoicer.call();
+                    } else {
+                        Choice ch = new Choice();
+                        ch.choice = userChoice;
+                        EventQueue.invokeAndWait(() -> {
+                            try {
+                                ch.choice = uiChoicer.call();
+                            } catch (Exception _ex) {
+                                // no op
+                            }
+                        });
+                        userChoice = ch.choice;
+                    }
+                } catch (Exception _ex) {
+                    // no op
+                }
+                if (userChoice == JOptionPane.CANCEL_OPTION) {// Reject
                     throw ex;
                 } else {
                     try {
@@ -282,15 +312,4 @@ public abstract class PlatypusConnection implements AppConnection, Authenticator
             return generated;
         }
     }
-
-    @Override
-    public synchronized void authenticate(Callable<Void> onAuthenticate, Callable<Void> onAuthenticated) throws Exception {
-        if (!authenticated) {
-            onAuthenticate.call();
-            authenticated = true;
-        } else {
-            onAuthenticated.call();
-        }
-    }
-
 }

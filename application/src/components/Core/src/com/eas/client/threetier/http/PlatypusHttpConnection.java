@@ -71,7 +71,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
         requestsSender.submit(() -> {
             try {
-                HttpRequestSender httpSender = new HttpRequestSender(url, cookies, onCredentials, this, maximumAuthenticateAttempts);
+                HttpRequestSender httpSender = new HttpRequestSender(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts);
                 rqc.requestEnv.request.accept(httpSender);// wait completion analog
                 rqc.requestEnv.request.setDone(true);
                 if (rqc.onComplete != null) {
