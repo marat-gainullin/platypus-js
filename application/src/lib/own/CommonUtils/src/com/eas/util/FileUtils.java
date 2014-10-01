@@ -17,8 +17,8 @@ public class FileUtils {
     private static final char WINDOWS_SEPARATOR = '\\';
     
     public static String getFileExtension(String fileName) {
-        int k = fileName.lastIndexOf(EXTENSION_SEPARATOR); // NOI18N
         String ext = null;
+        int k = fileName.lastIndexOf(EXTENSION_SEPARATOR); // NOI18N
         if (k != -1) {
             ext = fileName.substring(k + 1, fileName.length());
         }

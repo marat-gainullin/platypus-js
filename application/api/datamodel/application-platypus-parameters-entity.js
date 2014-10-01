@@ -82,7 +82,7 @@
         });
         if(!P.ApplicationPlatypusParametersEntity){
             /**
-             * The handler function for the event occured after the entity's data have been required.
+             * The handler function for the event occured after the entity's data have been requeried.
              * @property onRequeried
              * @memberOf ApplicationPlatypusParametersEntity
              */
@@ -330,14 +330,14 @@
 
         /**
          * Refreshes rowset, only if any of its parameters has changed.
-         * @param onSuccessCallback the handler function for refresh data on success event (optional).
-         * @param onFailureCallback the handler function for refresh data on failure event (optional).
+         * @param onSuccess The handler function for refresh data on success event (optional).
+         * @param onFailure The handler function for refresh data on failure event (optional).
          * @method execute
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.execute = function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationPlatypusParametersEntity.prototype.execute = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 
@@ -403,18 +403,6 @@
         };
 
         /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
-         * @method deleteRow
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
-            var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Checks if cursor in the position before the first row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method eof
@@ -439,6 +427,19 @@
         };
 
         /**
+         * Inserts new row in the rowset and sets cursor on this row. @see push.
+         * @param index The new row will be inserted at. 1 - based.
+         * @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
+         * @method insertAt
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.insertAt = function(index, pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Gets the row at specified index.
          * @param index the row index, starting form <code>1</code>.
          * @return the row object or <code>null</code> if no row object have found at the specified index.
@@ -452,15 +453,24 @@
         };
 
         /**
-         * Inserts new row in the rowset and sets cursor on this row. @see push.
-         * @param index The new row will be inserted at. 1 - based.
-         * @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.
-         * @method insertAt
+         * Moves the rowset cursor to the position before the first row.
+         * @method beforeFirst
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.insertAt = function(index, pairs) {
+        P.ApplicationPlatypusParametersEntity.prototype.beforeFirst = function() {
             var delegate = this.unwrap();
-            var value = delegate.insertAt(P.boxAsJava(index), P.boxAsJava(pairs));
+            var value = delegate.beforeFirst();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Moves the rowset cursor to the position after the last row.
+         * @method afterLast
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.afterLast = function() {
+            var delegate = this.unwrap();
+            var value = delegate.afterLast();
             return P.boxAsJs(value);
         };
 
@@ -489,37 +499,14 @@
         };
 
         /**
-         * Moves the rowset cursor to the position before the first row.
-         * @method beforeFirst
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
+         * @method bof
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.beforeFirst = function() {
+        P.ApplicationPlatypusParametersEntity.prototype.bof = function() {
             var delegate = this.unwrap();
-            var value = delegate.beforeFirst();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Moves the rowset cursor to the position after the last row.
-         * @method afterLast
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.afterLast = function() {
-            var delegate = this.unwrap();
-            var value = delegate.afterLast();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
-         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.createSorting = function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
+            var value = delegate.bof();
             return P.boxAsJs(value);
         };
 
@@ -550,27 +537,40 @@
         };
 
         /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
-         * @method bof
+         * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccess The callback function for refresh data on success event (optional).
+         * @param onFailure The callback function for refresh data on failure event (optional).
+         * @method requery
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.bof = function() {
+        P.ApplicationPlatypusParametersEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.bof();
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 
         /**
-         * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
-         * @param onSuccessCallback the handler function for refresh data on success event (optional).
-         * @param onFailureCallback the handler function for refresh data on failure event (optional).
-         * @method requery
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.requery = function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationPlatypusParametersEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.createSorting(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
+         * @method deleteRow
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
             return P.boxAsJs(value);
         };
 

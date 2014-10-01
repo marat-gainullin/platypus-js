@@ -44,7 +44,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
 
     protected static PlatypusServerCore instance;
 
-    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementId) throws Exception {
+    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementName) throws Exception {
         ScriptUtils.init();
         if (instance == null) {
             final Set<String> tasks = new HashSet<>();
@@ -55,7 +55,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
                     ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks));
                     indexer.watch();
                     serverCoreDbClient = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true);
-                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments()), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, aStartAppElementId);
+                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, aStartAppElementName);
                     serverCoreDbClient.setContextHost(instance);
                     ScriptedResource.init(instance);
                     instance.startServerTasks();

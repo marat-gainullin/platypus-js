@@ -39,9 +39,10 @@
     };
         /**
          * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.
+         * @param values Values for keys in createFilter() call.
          * @method apply
          * @memberOf Filter
-         * @param values Values for keys in createFilter() call. */
+         */
         P.Filter.prototype.apply = function(values) {
             var delegate = this.unwrap();
             var value = delegate.apply(P.boxAsJava(values));

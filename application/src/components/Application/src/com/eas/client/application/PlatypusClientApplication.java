@@ -26,6 +26,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.*;
 import javax.swing.UIManager;
 import jdk.nashorn.api.scripting.JSObject;
@@ -239,7 +240,7 @@ public class PlatypusClientApplication {
                         ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath());
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true);
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
-                        ModulesProxy mp = new LocalModulesProxy(indexer, models);
+                        ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
                         twoTierCore.setQueries(qp);
                         app = new Application() {
 
@@ -290,7 +291,7 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                ScriptedResource.require(new String[]{""}, (Void v) -> {
+                ScriptedResource._require(new String[]{""}, new ConcurrentSkipListSet<>(), (Void v) -> {
                     JSObject p = ScriptUtils.lookupInGlobal("P");
                     if (p != null) {
                         Object ready = p.getMember("ready");

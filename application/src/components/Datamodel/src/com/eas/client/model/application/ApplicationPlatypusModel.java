@@ -5,9 +5,9 @@
 package com.eas.client.model.application;
 
 import com.bearsoft.rowset.changes.Change;
+import com.eas.client.cache.ServerDataStorage;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.threetier.PlatypusClient;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
@@ -22,19 +22,19 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatypusEntity, ApplicationPlatypusParametersEntity, PlatypusQuery> {
 
     protected List<Change> changeLog = new ArrayList<>();
-    protected PlatypusClient serverProxy;
+    protected ServerDataStorage serverProxy;
 
-    public ApplicationPlatypusModel(QueriesProxy<PlatypusQuery> aQueries) {
+    protected ApplicationPlatypusModel(QueriesProxy<PlatypusQuery> aQueries) {
         super(aQueries);
         parametersEntity = new ApplicationPlatypusParametersEntity(this);
     }
 
-    public ApplicationPlatypusModel(PlatypusClient aServerProxy, QueriesProxy<PlatypusQuery> aQueries) {
+    public ApplicationPlatypusModel(ServerDataStorage aServerProxy, QueriesProxy<PlatypusQuery> aQueries) {
         this(aQueries);
         serverProxy = aServerProxy;
     }
 
-    public PlatypusClient getServerProxy() {
+    public ServerDataStorage getServerProxy() {
         return serverProxy;
     }
 
@@ -64,7 +64,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             + " * @param onSuccess Success callback.\n"
             + " * @param onFailure Failure callback.\n")
     @Override
-    public void save(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+    public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         serverProxy.getChangeLog().addAll(changeLog);
         super.save(aOnSuccess, aOnFailure);
     }
@@ -92,7 +92,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
-    public void requery(Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         changeLog.clear();
         super.requery(aOnSuccess, aOnFailure);
     }

@@ -47,8 +47,19 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
-    public int executeUpdate(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        return model.getBasesProxy().executeUpdate(getQuery().compile(), onSuccess, onFailure);
+    public int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception {
+        if (onSuccess != null) {
+            model.getBasesProxy().executeUpdate(getQuery().compile(), (Integer aUpdated) -> {
+                onSuccess.call(null, new Object[]{aUpdated});
+            }, (Exception ex) -> {
+                if (onFailure != null) {
+                    onFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            });
+            return 0;
+        } else {
+            return model.getBasesProxy().executeUpdate(getQuery().compile(), null, null);
+        }
     }
 
     @Override

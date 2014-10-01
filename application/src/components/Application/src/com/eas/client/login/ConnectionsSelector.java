@@ -44,7 +44,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     public static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
     public static final int RET_OK = 1;
     private int returnStatus = RET_CANCEL;
-    private final Action connectAction = new ConnectAction();
+    private final Action selectAction = new ConnectAction();
     private final Action cancelAction = new CancelAction();
     private final Action newConnectionAction = new NewConnectionAction();
     private final Action modifyConnectionAction = new ModifyConnectionAction();
@@ -100,7 +100,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(bundle.getString("LoginDialog.title")); // NOI18N
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/eas/client/login/key.png")).getImage());
+        setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/eas/client/login/socket.png")).getImage());
         setLocationByPlatform(true);
         setName("loginFrame"); // NOI18N
         addKeyListener(new java.awt.event.KeyAdapter() {
@@ -162,9 +162,10 @@ public class ConnectionsSelector extends javax.swing.JDialog {
 
         getContentPane().add(pnlConnectionInfo, java.awt.BorderLayout.CENTER);
 
-        btnOk.setAction(connectAction);
+        btnOk.setAction(selectAction);
         btnOk.setText(bundle.getString("Dialog.OKButton.text")); // NOI18N
 
+        btnCancel.setAction(cancelAction);
         btnCancel.setText(bundle.getString("Dialog.CancelButton.text")); // NOI18N
 
         javax.swing.GroupLayout pnlBottomLayout = new javax.swing.GroupLayout(pnlBottom);
@@ -196,7 +197,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private void formKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_formKeyTyped
     {//GEN-HEADEREND:event_formKeyTyped
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            connectAction.actionPerformed(new ActionEvent(this, 0, null));
+            selectAction.actionPerformed(new ActionEvent(this, 0, null));
         } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
             cancelAction.actionPerformed(new ActionEvent(this, 0, null));
         }

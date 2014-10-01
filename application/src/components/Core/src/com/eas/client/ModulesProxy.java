@@ -6,17 +6,17 @@
 
 package com.eas.client;
 
+import com.eas.client.cache.PlatypusIndexer;
 import java.util.function.Consumer;
 
 /**
  *
  * @author mg
  */
-public interface ModulesProxy {
+public interface ModulesProxy extends PlatypusIndexer{
     
     public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     public String getLocalPath();
     
-    public AppElementFiles nameToFiles(String aName) throws Exception;
 }

@@ -29,6 +29,12 @@ public class ReportTemplate implements HasPublished{
     private static JSObject publisher;
     protected Object published;
     
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Constructs new report template object.\n"
+            + " * @param config Config of report template.\n"
+            + " * @param data Object, containing data to be printed in report.\n"
+            + " */", params = {"config", "data"})
     public ReportTemplate(ReportConfig aConfig, JSObject aData) {
         super();
         config = aConfig;
@@ -83,6 +89,16 @@ public class ReportTemplate implements HasPublished{
         publisher = aPublisher;
     }
 
+    private static final String NAME_JSDOC = ""
+            + "/**\n"
+            + " * Name of the generated report's file.\n"
+            + " */";
+    @ScriptFunction(jsDoc = NAME_JSDOC)
+    public String getName() {
+        return name;
+    }
+
+    @ScriptFunction()
     public void setName(String aName) {
         name = aName;
     }

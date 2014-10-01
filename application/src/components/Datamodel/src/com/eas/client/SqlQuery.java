@@ -94,6 +94,7 @@ public class SqlQuery extends Query {
         }
         publicAccess = aSource.isPublicAccess();
         command = aSource.isCommand();
+        basesProxy = aSource.getBasesProxy();
     }
 
     @Override

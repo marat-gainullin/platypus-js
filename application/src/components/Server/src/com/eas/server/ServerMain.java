@@ -198,7 +198,7 @@ public class ServerMain {
                 indexer.watch();
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true);
                 PlatypusServer server = new PlatypusServer(indexer
-                        , new LocalModulesProxy(indexer, new ModelsDocuments())
+                        , new LocalModulesProxy(indexer, new ModelsDocuments(), appElement)
                         , new LocalQueriesProxy(serverCoreDbClient, indexer)
                         , serverCoreDbClient
                         , ctx

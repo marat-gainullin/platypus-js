@@ -20,6 +20,7 @@ import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ServerDataStorage;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
@@ -36,7 +37,7 @@ import java.util.logging.Logger;
  *
  * @author kl, mg refactoring
  */
-public class PlatypusClient implements Application<PlatypusQuery>{
+public class PlatypusClient implements Application<PlatypusQuery>, ServerDataStorage{
 
     // error messages
     public static final String ENQUEUEING_UPDATES_THREE_TIER_MSG = "Enqueueing updates are not allowed in three tier mode.";
@@ -44,7 +45,6 @@ public class PlatypusClient implements Application<PlatypusQuery>{
     public static final String SQL_TEXT_PROVIDERS_ARE_NOT_ALLOWED_MSG = "Sql query text based flow providers are not allowed in three tier mode.";
     //
     protected URL url;
-    protected PlatypusPrincipal principal;
     protected PlatypusConnection conn;
     protected QueriesProxy<PlatypusQuery> queries;
     protected ModulesProxy modules;
@@ -136,10 +136,6 @@ public class PlatypusClient implements Application<PlatypusQuery>{
         }
     }
 
-    public PlatypusPrincipal getPrincipal() {
-        return principal;
-    }
-
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Runnable doWork = () -> {
             changeLog.clear();
@@ -212,8 +208,8 @@ public class PlatypusClient implements Application<PlatypusQuery>{
         }
     }
 
-    public void enqueueUpdate(String aQueryId, Parameters aParams) throws Exception {
-        Command command = new Command(aQueryId);
+    public void enqueueUpdate(String aQueryName, Parameters aParams) throws Exception {
+        Command command = new Command(aQueryName);
         command.parameters = new ChangeValue[aParams.getParametersCount()];
         for (int i = 0; i < command.parameters.length; i++) {
             Parameter p = aParams.get(i + 1);

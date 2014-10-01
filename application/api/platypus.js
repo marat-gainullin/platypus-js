@@ -23,6 +23,7 @@
     var Lock = Java.type("java.util.concurrent.locks.ReentrantLock");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
+    var JavaStringArrayClass = Java.type("java.lang.String[]");
     var JavaCollectionClass = Java.type("java.util.Collection");
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
@@ -34,20 +35,20 @@
     var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
-    var ScriptedResourceClass = Java.type("com.eas.client.scripts.PlatypusScriptedResource");
+    var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
     var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
-    var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
-    var TemplateLoaderClass = Java.type('com.eas.client.reports.store.Dom2ReportDocument');
-    var ModelLoaderClass = Java.type('com.eas.client.scripts.store.Dom2ModelDocument');
+    var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");   
+    
+    var ModelLoaderClass = Java.type('com.eas.client.scripts.ApplicationModelLoader');
     var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
     var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
-    var CreateRequestClass = Java.type('com.eas.client.threetier.requests.CreateServerModuleRequest');
+    var TemplateClass = Java.type('com.eas.client.reports.ReportTemplate');
 
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
-    Object.defineProperty(P, "J2SE", {value: "Java SE client/server environment"});
+    Object.defineProperty(P, "J2SE", {value: "Java SE environment"});
     Object.defineProperty(P, "agent", {value: P.J2SE});
 
     var fixedThreadPool = null;
@@ -138,7 +139,7 @@
         var OptionPaneClass = Java.type("javax.swing.JOptionPane");
         var ColorClass = Java.type("com.eas.gui.ScriptColor");
         var FormClass = Java.type("com.eas.client.forms.Form");
-        var FormLoaderClass = Java.type('com.eas.client.forms.store.Dom2FormDocument');
+        var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
         var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
         var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
         var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
@@ -585,7 +586,9 @@
          * @returns {P.loadForm.publishTo}
          */
         function loadForm(aName, aModel, aTarget) {
-            var designInfo = FormLoaderClass.load(ScriptedResourceClass.getClient(), aName);
+            var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
+            var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
+            var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
             var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null);
             if (aTarget) {
                 P.Form.call(aTarget, form);
@@ -621,24 +624,15 @@
      * @returns {undefined}
      */
     function require(deps, aOnSuccess, aOnFailure) {
-        try {
-            if (deps) {
-                if (Array.isArray(deps)) {
-                    for (var i = 0; i < deps.length; i++) {
-                        ScriptedResourceClass.executeScriptResource(deps[i]);
-                    }
-                } else {
-                    ScriptedResourceClass.executeScriptResource(deps);
-                }
-            }
-            if (aOnSuccess) {
-                aOnSuccess();
-            }
-        } catch (e) {
-            if (aOnFailure)
-                aOnFailure(e);
-            else
-                throw e;
+        if (!Array.isArray(deps))
+            deps = [deps];
+        var strArray = new JavaStringArrayClass(deps.length);
+        for(var i = 0; i < deps.length; i++)
+            strArray[i] = deps[i] ? deps[i] + '' : null;
+        if(aOnSuccess){
+            ScriptedResourceClass.require(strArray, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
+        }else{
+            ScriptedResourceClass.require(strArray);            
         }
     }
     Object.defineProperty(P, "require", {value: require});
@@ -1023,7 +1017,9 @@
      * @returns {P.loadModel.publishTo}
      */
     function loadModel(aName, aTarget) {
-        var model = ModelLoaderClass.load(ScriptedResourceClass.getClient(), aName);
+        var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
+        var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
+        var model = ModelLoaderClass.load(modelDocument, ScriptedResourceClass.getApp());
         var modelCTor;
         if (model instanceof TwoTierModelClass) {
             modelCTor = P.ApplicationDbModel;
@@ -1142,18 +1138,20 @@
     /**
      * @static
      * @param {type} aName
-     * @param {type} aObject data
+     * @param {type} aData data
      * @param {type} aTarget
      * @returns {P.loadTemplate.publishTo}
      */
     function loadTemplate(aName, aData, aTarget) {
-        var publishTo = aTarget ? aTarget : {};
-        var template = TemplateLoaderClass.load(ScriptedResourceClass.getClient(), aName, aData);
-        // publish
-        publishTo.generateReport = function() {
-            return template.generateReport();
-        };
-        return publishTo;
+        var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
+        var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
+        var template = new TemplateClass(reportConfig, aData);        
+        if (aTarget) {
+            P.ReportTemplate.call(aTarget, template);
+        } else {
+            aTarget = new P.ReportTemplate(template);
+        }
+        return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
     /**

@@ -335,7 +335,8 @@ public class ScriptUtils {
 
     public static JSObject lookupInGlobal(String aName) {
         assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-        return (JSObject) lookupInGlobalFunc.call(null, new Object[]{aName});
+        Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
+        return res instanceof JSObject ? (JSObject) res : null;
     }
 
     public static void putInGlobal(String aName, JSObject aValue) {

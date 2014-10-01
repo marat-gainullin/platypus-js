@@ -28,8 +28,8 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
         super(aModel);
     }
 
-    public ApplicationPlatypusEntity(String aQueryId) {
-        super(aQueryId);
+    public ApplicationPlatypusEntity(String aQueryName) {
+        super(aQueryName);
     }
 
     @Override
@@ -38,10 +38,10 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     }
 
     @Override
-    public int executeUpdate(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception {
         model.getServerProxy().enqueueUpdate(getQueryName(), getQuery().getParameters());
         if (onSuccess != null) {
-            onSuccess.accept(0);
+            onSuccess.call(null, new Object[]{});
         }
         return 0;
     }

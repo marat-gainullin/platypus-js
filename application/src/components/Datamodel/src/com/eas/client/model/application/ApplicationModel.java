@@ -168,8 +168,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     /**
      * Validates queries in force way. Such case is used in designer ONLY!
+     *
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     @Override
     protected boolean validateEntities() throws Exception {
@@ -358,15 +359,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
-    public void save(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+    public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {
             commit((Integer aResult) -> {
                 saved();
-                aOnSuccess.accept(null);
+                aOnSuccess.call(null, new Object[]{});
             }, (Exception ex) -> {
                 rolledback();
                 if (aOnFailure != null) {
-                    aOnFailure.accept(ex);
+                    aOnFailure.call(null, new Object[]{ex.getMessage()});
                 }
             });
         } else {
@@ -380,7 +381,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    public void save(final Consumer<Void> aOnSuccess) throws Exception {
+    public void save(JSObject aOnSuccess) throws Exception {
         save(aOnSuccess, null);
     }
 
@@ -427,7 +428,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         requery(null, null);
     }
 
-    public void requery(Consumer<Void> onSuccess) throws Exception {
+    public void requery(JSObject onSuccess) throws Exception {
         requery(onSuccess, null);
     }
 
@@ -439,12 +440,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
-    public void requery(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public void requery(JSObject onSuccess, JSObject onFailure) throws Exception {
         if (process != null) {
             process.cancel();
         }
         if (onSuccess != null) {
-            process = new RequeryProcess(entities.values(), onSuccess, onFailure);
+            process = new RequeryProcess<>(entities.values(), (Rowset v) -> {
+                onSuccess.call(null, new Object[]{});
+            }, (Exception ex) -> {
+                if (onFailure != null) {
+                    onFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            });
         }
         revert();
         executeEntities(true, rootEntities());

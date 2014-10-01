@@ -102,17 +102,17 @@ public class StoredQueryFactory {
         return uniqueTables;
     }
 
-    public synchronized SqlQuery loadQuery(String aAppElementId) throws Exception {
-        if (aAppElementId == null) {
+    public synchronized SqlQuery loadQuery(String aAppElementName) throws Exception {
+        if (aAppElementName == null) {
             throw new NullPointerException(CANT_LOAD_NULL_MSG);
         }
-        Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
-        AppElementFiles queryFiles = indexer.nameToFiles(aAppElementId);
-        return queryFiles != null ? filesToSqlQuery(aAppElementId, queryFiles) : null;
+        Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementName));
+        AppElementFiles queryFiles = indexer.nameToFiles(aAppElementName);
+        return queryFiles != null ? filesToSqlQuery(aAppElementName, queryFiles) : null;
     }
 
     protected SqlQuery filesToSqlQuery(String aName, AppElementFiles aFiles) throws Exception {
-        QueryDocument queryDoc = QueryDocument.parse(aName, aFiles);
+        QueryDocument queryDoc = QueryDocument.parse(aName, aFiles, basesProxy);
         QueryModel model = queryDoc.getModel();
         SqlQuery query = queryDoc.getQuery();
         putRolesMutatables(query);

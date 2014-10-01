@@ -227,6 +227,10 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
         }
     }
 
+    public DatabasesClient getCore() {
+        return core;
+    }
+
     public void clearCachedQueries() {
         entries.clear();
     }

@@ -7,6 +7,7 @@ package com.eas.client;
 
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.queries.QueriesProxy;

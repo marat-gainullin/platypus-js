@@ -85,25 +85,20 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void rolledback() {
     }
 
-    @Override
-    public void requery(Consumer<Void> aOnSuccess) throws Exception {
-        requery(aOnSuccess, null);
-    }
-
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
-    public void requery(Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
         });
         super.requery(aOnSuccess, aOnFailure);
     }
 
-    public List<Change> getChangeLog(String aDbId) {
-        List<Change> changeLog = changeLogs.get(aDbId);
+    public List<Change> getChangeLog(String aDatasourceName) {
+        List<Change> changeLog = changeLogs.get(aDatasourceName);
         if (changeLog == null) {
             changeLog = new ArrayList<>();
-            changeLogs.put(aDbId, changeLog);
+            changeLogs.put(aDatasourceName, changeLog);
         }
         return changeLog;
     }
@@ -152,15 +147,25 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "datasourceName"})
-    public void executeSql(String aSqlClause, String aDatasourceName, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public void executeSql(String aSqlClause, String aDatasourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (basesProxy == null) {
             throw new NullPointerException("Null basesProxy detected while creating a query");
         }
         SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, aDatasourceName, aSqlClause);
-        basesProxy.executeUpdate(compiled, onSuccess, onFailure);
+        if (onSuccess != null) {
+            basesProxy.executeUpdate(compiled, (Integer updated) -> {
+                onSuccess.call(null, new Object[]{updated});
+            }, (Exception ex) -> {
+                if (onFailure != null) {
+                    onFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            });
+        } else {
+            basesProxy.executeUpdate(compiled, null, null);
+        }
     }
 
-    public void executeSql(String aSqlClause, String aDatasourceName, Consumer<Integer> onSuccess) throws Exception {
+    public void executeSql(String aSqlClause, String aDatasourceName, JSObject onSuccess) throws Exception {
         executeSql(aSqlClause, aDatasourceName, onSuccess, null);
     }
 

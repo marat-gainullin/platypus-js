@@ -1,17 +1,21 @@
 (function() {
     var javaClass = Java.type("com.eas.client.reports.ReportTemplate");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.ReportTemplate(aDelegate);
+        return new P.ReportTemplate(null, null, aDelegate);
     });
     
     /**
-     * Generated constructor.
+     * Constructs new report template object.
+     * @param config Config of report template.
+     * @param data Object, containing data to be printed in report.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function () {
-        var maxArgs = 0;
+    P.ReportTemplate = function (config, data) {
+        var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(config), P.boxAsJava(data))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(config))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -22,6 +26,23 @@
         if(P.ReportTemplate.superclass)
             P.ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.name = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ReportTemplate){
+            /**
+             * Name of the generated report's file.
+             * @property name
+             * @memberOf ReportTemplate
+             */
+            P.ReportTemplate.prototype.name = '';
+        }
     };
         /**
          * Generate report from template.

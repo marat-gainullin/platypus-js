@@ -32,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -51,6 +52,10 @@ public class ScriptedResource {
     public static void init(Application aApp) throws Exception {
         assert app == null : "Platypus application resource may be initialized only once.";
         app = aApp;
+    }
+
+    public static Application<Query> getApp() {
+        return app;
     }
 
     /**
@@ -242,11 +247,19 @@ public class ScriptedResource {
 
     }
 
-    public static void require(String[] aScriptsNames, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        jsRequire(aScriptsNames, new ConcurrentSkipListSet<>(), onSuccess, onFailure);
+    public static void require(String[] aScriptsNames, JSObject onSuccess, JSObject onFailure) throws Exception {
+        _require(aScriptsNames, new ConcurrentSkipListSet<>(), (Void v) -> {
+            if (onSuccess != null) {
+                onSuccess.call(null, new Object[]{});
+            }
+        }, (Exception ex) -> {
+            if (onFailure != null) {
+                onFailure.call(null, new Object[]{ex.getMessage()});
+            }
+        });
     }
 
-    protected static void jsRequire(String[] aScriptsNames, Set<String> required, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static void _require(String[] aScriptsNames, Set<String> required, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
             aScriptsNames = Arrays.asList(aScriptsNames).stream().filter((String aScriptName) -> {
                 return !required.contains(aScriptName);
@@ -299,7 +312,7 @@ public class ScriptedResource {
                         scriptProcess.complete(null, null);// instead of sRequire
                     }
                     try {
-                        jsRequire(structure.getClientDependencies().toArray(new String[]{}), required, (Void v) -> {
+                        _require(structure.getClientDependencies().toArray(new String[]{}), required, (Void v) -> {
                             scriptProcess.complete(null, null);
                         }, (Exception ex) -> {
                             scriptProcess.complete(null, ex);
@@ -317,10 +330,10 @@ public class ScriptedResource {
     }
 
     public static void require(String[] aScriptsNames) throws Exception {
-        jsRequire(aScriptsNames, new ConcurrentSkipListSet<>());
+        _require(aScriptsNames, new ConcurrentSkipListSet<>());
     }
 
-    protected static void jsRequire(String[] aScriptsNames, Set<String> required) throws Exception {
+    public static void _require(String[] aScriptsNames, Set<String> required) throws Exception {
         for (String aScriptName : aScriptsNames) {
             if (!required.contains(aScriptName)) {
                 required.add(aScriptName);
@@ -332,7 +345,7 @@ public class ScriptedResource {
                     qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null);
                     sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
                 }
-                jsRequire(structure.getClientDependencies().toArray(new String[]{}), required, null, null);
+                _require(structure.getClientDependencies().toArray(new String[]{}), required, null, null);
                 ScriptUtils.exec(sourceUrl);
             }
         }

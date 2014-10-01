@@ -96,7 +96,7 @@ public class QueryDocument {
         return model;
     }
 
-    public static QueryDocument parse(String aName, AppElementFiles aFiles) throws Exception {
+    public static QueryDocument parse(String aName, AppElementFiles aFiles, DatabasesClient aBasesProxy) throws Exception {
         // sql source
         File sqlFile = aFiles.findFileByExtension(PlatypusFiles.SQL_EXTENSION);
         String sqlContent = FileUtils.readString(sqlFile, SettingsConstants.COMMON_ENCODING);
@@ -114,7 +114,7 @@ public class QueryDocument {
         Document outDoc = Source2XmlDom.transform(outContent);
         List<QueryDocument.StoredFieldMetadata> additionalFields = parseFieldsHintsTag(outDoc.getDocumentElement());
         //
-        SqlQuery query = new SqlQuery((DatabasesClient)null);
+        SqlQuery query = new SqlQuery(aBasesProxy);
         query.setEntityId(aName);
         query.setSqlText(sqlContent);
         query.setFullSqlText(dialectContent);

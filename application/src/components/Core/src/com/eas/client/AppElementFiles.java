@@ -79,9 +79,10 @@ public class AppElementFiles {
         return filesExtensions.contains(ext);
     }
 
-    public File findFileByExtension(String ext) {
+    public File findFileByExtension(String aExt) {
         for (File file : files) {
-            if (FileUtils.getFileExtension(file).equalsIgnoreCase(ext)) {
+            String ext = FileUtils.getFileExtension(file);
+            if (ext != null && ext.equalsIgnoreCase(aExt)) {
                 return file;
             }
         }

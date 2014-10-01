@@ -24,20 +24,24 @@
         delegate.setPublished(this);
     };
         /**
-         * Saves model data changes. Calls aCallback when done.
+         * Saves model data changes. Calls onSuccess when done.
          * If model can't apply the changed, than exception is thrown.
          * In this case, application can call model.save() another time to save the changes.
+         * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().
+         * @param onSuccess Success callback.
          * @method save
          * @memberOf ApplicationPlatypusModel
-         * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().
-        P.ApplicationPlatypusModel.prototype.save = function(arg0) {
+         * @param onFailure Failure callback.
+        P.ApplicationPlatypusModel.prototype.save = function(arg0, arg1) {
             var delegate = this.unwrap();
-            var value = delegate.save(P.boxAsJava(arg0));
+            var value = delegate.save(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 
         /**
-         * Requeries model data. Calls onSuccess callback when complete and onError callback if error occured.
+         * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
+         * @param onSuccess The handler function for refresh data on success event (optional).
+         * @param onFailure The handler function for refresh data on failure event (optional).
          * @method requery
          * @memberOf ApplicationPlatypusModel
          */
@@ -49,14 +53,14 @@
 
         /**
          * Refreshes the model, only if any of its parameters has changed.
-         * @param onSuccessCallback the handler function for refresh data on success event (optional).
-         * @param onFailureCallback the handler function for refresh data on failure event (optional).
+         * @param onSuccess The handler function for refresh data on success event (optional).
+         * @param onFailure The handler function for refresh data on failure event (optional).
          * @method execute
          * @memberOf ApplicationPlatypusModel
          */
-        P.ApplicationPlatypusModel.prototype.execute = function(onSuccessCallback, onFailureCallback) {
+        P.ApplicationPlatypusModel.prototype.execute = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.execute(P.boxAsJava(onSuccessCallback), P.boxAsJava(onFailureCallback));
+            var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

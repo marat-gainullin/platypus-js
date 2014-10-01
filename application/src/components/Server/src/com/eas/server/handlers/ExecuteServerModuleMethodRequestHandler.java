@@ -16,6 +16,7 @@ import com.eas.server.Session;
 import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +54,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                 onFailure.accept(new Exception("Module's method name is missing."));
             } else {
                 try {
-                    ScriptedResource.require(new String[]{moduleName}, (Void v) -> {
+                    ScriptedResource._require(new String[]{moduleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
                         try {
                             AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                             JSObject constr = ScriptUtils.lookupInGlobal(moduleName);

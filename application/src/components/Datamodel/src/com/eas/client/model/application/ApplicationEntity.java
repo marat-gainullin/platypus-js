@@ -651,14 +651,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
-    public abstract int executeUpdate(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public abstract int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception;
 
     // Requery interface
     public void requery() throws Exception {
         requery(null, null);
     }
 
-    public void requery(Consumer<Void> aOnSuccess) throws Exception {
+    public void requery(JSObject aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
     private static final String REQUERY_JSDOC = ""
@@ -669,8 +669,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
-    public void requery(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        internalExecute(aOnSuccess, aOnFailure);
+    public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        internalExecute(aOnSuccess != null ? (Void v) -> {
+            aOnSuccess.call(null, new Object[]{});
+        } : null, aOnFailure != null ? (Exception ex) -> {
+            aOnFailure.call(null, new Object[]{ex.getMessage()});
+        } : null);
     }
 
     // modify interface

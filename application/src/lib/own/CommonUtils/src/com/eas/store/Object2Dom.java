@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -98,7 +99,7 @@ public class Object2Dom {
                                     if (mName != null && !mName.isEmpty()
                                             && ((mName.length() > BEANY_GETTER_PREFIX.length() && mName.startsWith(BEANY_GETTER_PREFIX))
                                             || (mName.length() > BEANY_IS_PREFIX.length() && mName.startsWith(BEANY_IS_PREFIX)))) {
-                                        String mNameTail = mName;
+                                        String mNameTail;
                                         if (mName.startsWith(BEANY_GETTER_PREFIX)) {
                                             mNameTail = mName.substring(BEANY_GETTER_PREFIX.length());
                                         } else {
@@ -111,7 +112,7 @@ public class Object2Dom {
                                         }
                                         try {
                                             Object value = method.invoke(o);
-                                            if (defaultInstance == null || !isOfPrimitiveType(value) || !isValuesEqual(value, method.invoke(defaultInstance))) {
+                                            if (defaultInstance == null || !isOfPrimitiveType(value) || !Objects.equals(value, method.invoke(defaultInstance))) {
                                                 generateAttributeOrTag(doc, currentNode, tagName, value, serCollAnn, serMapAnn, serClassedAnn, serClassedCollAnn, serClassedMapAnn, saveDefaultValues);
                                             }
                                         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -242,7 +243,7 @@ public class Object2Dom {
                     }
                 } else {
                     Element nestedElement = doc.createElement(tagName);
-                    if (classedTagDefinition != null && tagValue != null) {
+                    if (classedTagDefinition != null) {
                         nestedElement.setAttribute(classedTagDefinition.propertyClassHint(), tagValue.getClass().getSimpleName());
                     }
                     currentNode.appendChild(nestedElement);
@@ -494,7 +495,7 @@ public class Object2Dom {
                 List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, tagName);
                 if (nl != null && !nl.isEmpty()) {
                     try {
-                        Object tagValue = null;
+                        Object tagValue;
                         if (serCollDefinition != null) {
                             tagValue = serCollDefinition.deserializeAs().newInstance();
                         } else if (serCollClassedDefinition != null) {
@@ -544,7 +545,7 @@ public class Object2Dom {
 
                             }
                         } else if (tagValue != null && Map.class.isAssignableFrom(tagType) && (serMapDefinition != null || serMapClassedDefinition != null)) {
-                            Class<?> keyType = null;
+                            Class<?> keyType;
                             if (serMapDefinition != null) {
                                 keyType = serMapDefinition.keyType();
                             } else {
@@ -561,7 +562,7 @@ public class Object2Dom {
                                     List<Element> valEls = XmlDomUtils.elementsByTagName(node, MAP_VALUE_TAG_NAME);
                                     if (keyEls != null && keyEls.size() == 1
                                             && valEls != null && valEls.size() == 1) {
-                                        Object key = null;
+                                        Object key;
                                         Object val = null;
                                         Element keyEl = keyEls.get(0);
                                         Element valEl = valEls.get(0);
@@ -626,18 +627,5 @@ public class Object2Dom {
             }
         }
         return null;
-    }
-
-    public static boolean isValuesEqual(Object value1, Object value2) {
-        if (value1 == null && value2 != null) {
-            return false;
-        }
-        if (value2 == null && value1 != null) {
-            return false;
-        }
-        if (value1 != null && value2 != null && !value1.equals(value2)) {
-            return false;
-        }
-        return true;
     }
 }

@@ -18,6 +18,7 @@ import java.security.AccessControlException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +41,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
             onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
         } else {
             try {
-                ScriptedResource.require(new String[]{moduleName}, (Void v) -> {
+                ScriptedResource._require(new String[]{moduleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
                     try {
                         AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                         JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);

@@ -30,11 +30,13 @@ public class LocalModulesProxy implements ModulesProxy {
 
     protected ApplicationSourceIndexer indexer;
     protected ModelsDocuments modelsDocs;
+    protected String defaultModuleName;
 
-    public LocalModulesProxy(ApplicationSourceIndexer aIndexer, ModelsDocuments aModelsDocs) throws Exception {
+    public LocalModulesProxy(ApplicationSourceIndexer aIndexer, ModelsDocuments aModelsDocs, String aDefaultModuleName) throws Exception {
         super();
         indexer = aIndexer;
         modelsDocs = aModelsDocs;
+        defaultModuleName = aDefaultModuleName;
     }
 
     @Override
@@ -45,8 +47,12 @@ public class LocalModulesProxy implements ModulesProxy {
     @Override
     public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ModuleStructure> doWork = () -> {
-            if (aName != null) {
-                AppElementFiles files = indexer.nameToFiles(aName);
+            String name = aName;
+            if (name == null || name.isEmpty()) {
+                name = defaultModuleName;
+            }
+            if (name != null) {
+                AppElementFiles files = indexer.nameToFiles(name);
                 if (files != null) {
                     File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
                     if (jsFile != null) {
@@ -69,18 +75,20 @@ public class LocalModulesProxy implements ModulesProxy {
                         });
                         structure.getClientDependencies().addAll(walker.getDependencies());
                         structure.getServerDependencies().addAll(walker.getServerDependencies());
-                        //Query dependencies from loadEntity() calls
-                        structure.getQueryDependencies().addAll(walker.getQueryDependencies());
-                        //Query dependencies from model's xml
-                        Document modelDoc = modelsDocs.get(aName, structure.getParts());
-                        Element rootNode = modelDoc.getDocumentElement();
-                        NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
-                        for (int i = docNodes.getLength() - 1; i >= 0; i--) {
-                            Node entityNode = docNodes.item(i);
-                            Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
-                            if (queryIdAttribute != null) {
-                                String sQueryName = queryIdAttribute.getNodeValue();
-                                structure.getQueryDependencies().add(sQueryName);
+                        if (files.isModule()) {
+                            //Query dependencies from loadEntity() calls
+                            structure.getQueryDependencies().addAll(walker.getQueryDependencies());
+                            //Query dependencies from model's xml
+                            Document modelDoc = modelsDocs.get(name, structure.getParts());
+                            Element rootNode = modelDoc.getDocumentElement();
+                            NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
+                            for (int i = docNodes.getLength() - 1; i >= 0; i--) {
+                                Node entityNode = docNodes.item(i);
+                                Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
+                                if (queryIdAttribute != null) {
+                                    String sQueryName = queryIdAttribute.getNodeValue();
+                                    structure.getQueryDependencies().add(sQueryName);
+                                }
                             }
                         }
                         return structure;
