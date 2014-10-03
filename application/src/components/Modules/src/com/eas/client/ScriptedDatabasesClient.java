@@ -117,7 +117,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                     aLog.remove(i);
                 }
             }
-            int affectedInBase = super.commit(aDatasourceName, aLog, null, null);
+            int affectedInBase = super.apply(aDatasourceName, aLog, null, null);
             return affectedInModules + affectedInBase;
         }
     }

@@ -344,7 +344,7 @@ public class DatabasesClient {
         return mdCaches.get(aDatasourceName);
     }
 
-    protected static class CommitProcess extends AsyncProcess<Integer> {
+    protected static class CommitProcess extends AsyncProcess<Integer, Integer> {
 
         public int rowsAffected;
 
@@ -352,14 +352,9 @@ public class DatabasesClient {
             super(aExpected, aOnSuccess, aOnFailure);
         }
 
-        /**
-         *
-         * @param aRowsAffected
-         * @param aFailureCause
-         */
         @Override
         public synchronized void complete(Integer aRowsAffected, Exception aFailureCause) {
-            rowsAffected += aRowsAffected;
+            rowsAffected += aRowsAffected != null ? aRowsAffected : 0;
             if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
             }
@@ -369,37 +364,120 @@ public class DatabasesClient {
         }
     }
 
+    protected static class ApplyProcess extends AsyncProcess<ApplyResult, List<ApplyResult>> {
+
+        public List<ApplyResult> results = new ArrayList<>();
+
+        public ApplyProcess(int aExpected, Consumer<List<ApplyResult>> aOnSuccess, Consumer<Exception> aOnFailure) {
+            super(aExpected, aOnSuccess, aOnFailure);
+        }
+
+        /**
+         *
+         * @param aApplyResult
+         * @param aFailureCause
+         */
+        @Override
+        public synchronized void complete(ApplyResult aApplyResult, Exception aFailureCause) {
+            if (aApplyResult != null) {
+                results.add(aApplyResult);
+            }
+            if (aFailureCause != null) {
+                exceptions.add(aFailureCause);
+            }
+            if (++completed == expected) {
+                doComplete(results);
+            }
+        }
+    }
+
     public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             if (!aDatasourcesChangeLogs.isEmpty()) {
-                final CommitProcess ci = new CommitProcess(aDatasourcesChangeLogs.size(), (Integer rowsAffected) -> {
-                    commited();
-                    onSuccess.accept(rowsAffected != null ? rowsAffected : 0);
-                }, onFailure);
-                for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
-                    List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
-                    commit(datasourceName, dbLog, (Integer rowsAffected) -> {
-                        ci.complete(rowsAffected != null ? rowsAffected : 0, null);
-                    }, (Exception ex) -> {
-                        ci.complete(0, ex);
+                ApplyProcess applyProcess = new ApplyProcess(aDatasourcesChangeLogs.size(), (List<ApplyResult> aApplyResults) -> {
+                    assert aDatasourcesChangeLogs.size() == aApplyResults.size();
+                    CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
+                        commited();
+                        onSuccess.accept(aRowsAffected);
+                    }, (Exception aFailureCause) -> {
+                        rolledback();
+                        if (onFailure != null) {
+                            onFailure.accept(aFailureCause);
+                        }
                     });
-                }
+                    aApplyResults.stream().forEach((ApplyResult aResult) -> {
+                        commitProcessor.submit(() -> {
+                            try {
+                                try {
+                                    aResult.connection.commit();
+                                    commitProcess.complete(aResult.rowsAffected, null);
+                                } catch (SQLException ex) {
+                                    aResult.connection.rollback();
+                                    commitProcess.complete(null, ex);
+                                } finally {
+                                    aResult.connection.close();
+                                }
+                            } catch (Exception ex) {
+                                Logger.getLogger(CommitProcess.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        });
+                    });
+                }, null);
+                applyProcess.onFailure = (Exception aFailureCause) -> {
+                    applyProcess.results.stream().forEach((ApplyResult aResult) -> {
+                        try {
+                            try {
+                                aResult.connection.rollback();
+                            } finally {
+                                aResult.connection.close();
+                            }
+                        } catch (SQLException ex1) {
+                            Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex1);
+                        }
+                    });
+                    rolledback();
+                    if (onFailure != null) {
+                        onFailure.accept(aFailureCause);
+                    }
+                };
+                aDatasourcesChangeLogs.entrySet().stream().forEach((Map.Entry<String, List<Change>> aLogEntry) -> {
+                    try {
+                        apply(aLogEntry.getKey(), aLogEntry.getValue(), (ApplyResult aResult) -> {
+                            applyProcess.complete(aResult, null);
+                        }, (Exception ex) -> {
+                            applyProcess.complete(null, ex);
+                        });
+                    } catch (Exception ex) {
+                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
             } else {
                 onSuccess.accept(0);
             }
             return 0;
         } else {
             int rowsAffected = 0;
+            List<ApplyResult> results = new ArrayList<>();
             try {
-                for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
-                    List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
-                    rowsAffected += commit(datasourceName, dbLog, null, null);
+                for (Map.Entry<String, List<Change>> logEntry : aDatasourcesChangeLogs.entrySet()) {
+                    results.add(apply(logEntry.getKey(), logEntry.getValue(), null, null));
+                }
+                for (ApplyResult r : results) {
+                    r.connection.commit();
+                    rowsAffected += r.rowsAffected;
                 }
                 commited();
                 return rowsAffected;
             } catch (Exception ex) {
-                rollback();
+                for (ApplyResult r : results) {
+                    r.connection.rollback();
+                }
+                rolledback();
                 throw ex;
+            } finally {
+                for (ApplyResult r : results) {
+                    r.connection.close();
+                }
             }
         }
     }
@@ -415,84 +493,92 @@ public class DatabasesClient {
         }
     }
 
-    protected int commit(final String aDatasourceName, List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Callable<Integer> doWork = () -> {
+    protected static class ApplyResult {
+
+        public int rowsAffected;
+        public Connection connection;
+
+        public ApplyResult(int rowsAffected, Connection connection) {
+            this.rowsAffected = rowsAffected;
+            this.connection = connection;
+        }
+    }
+
+    protected ApplyResult apply(final String aDatasourceName, List<Change> aLog, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Callable<ApplyResult> doWork = () -> {
             int rowsAffected = 0;
             SqlDriver driver = getDbMetadataCache(aDatasourceName).getConnectionDriver();
-            if (driver != null) {
-                Converter converter = driver.getConverter();
-                assert aLog != null;
-                DataSource dataSource = obtainDataSource(aDatasourceName);
-                try (Connection connection = dataSource.getConnection()) {
-                    connection.setAutoCommit(false);
-                    try {
-                        List<StatementsLogEntry> statements = new ArrayList<>();
-                        // This structure helps us to avoid actuality check for queries while
-                        // processing each statement in transaction. Thus, we can avoid speed degradation.
-                        // It doesn't break security, because such "unactual" lookup takes place ONLY
-                        // while transaction processing.
-                        final Map<String, SqlQuery> entityQueries = new HashMap<>();
-                        for (Change change : aLog) {
-                            StatementsGenerator generator = new StatementsGenerator(converter, (String aEntityName, String aFieldName) -> {
-                                if (aEntityName != null) {
-                                    SqlQuery query;
-                                    if (queries != null) {
-                                        query = entityQueries.get(aEntityName);
-                                        if (query == null) {
-                                            query = queries.getQuery(aEntityName, null, null);
-                                            if (query != null) {
-                                                entityQueries.put(aEntityName, query);
-                                            }
-                                        }
-                                    } else {
-                                        query = null;
+            if (driver == null) {
+                throw new IllegalStateException(String.format("Unknown datasource: %s. Can't commit to it", aDatasourceName));
+            }
+            Converter converter = driver.getConverter();
+            assert aLog != null;
+            DataSource dataSource = obtainDataSource(aDatasourceName);
+            Connection connection = dataSource.getConnection();
+            try {
+                connection.setAutoCommit(false);
+                List<StatementsLogEntry> statements = new ArrayList<>();
+                // This structure helps us to avoid actuality check for queries while
+                // processing each statement in transaction. Thus, we can avoid speed degradation.
+                // It doesn't break security, because such "unactual" lookup takes place ONLY
+                // while transaction processing.
+                final Map<String, SqlQuery> entityQueries = new HashMap<>();
+                for (Change change : aLog) {
+                    StatementsGenerator generator = new StatementsGenerator(converter, (String aEntityName, String aFieldName) -> {
+                        if (aEntityName != null) {
+                            SqlQuery query;
+                            if (queries != null) {
+                                query = entityQueries.get(aEntityName);
+                                if (query == null) {
+                                    query = queries.getQuery(aEntityName, null, null);
+                                    if (query != null) {
+                                        entityQueries.put(aEntityName, query);
                                     }
-                                    Fields fields;
-                                    if (query != null && query.getEntityId() != null) {
-                                        fields = query.getFields();
-                                    } else {// It seems, that aEntityId is a table name...
-                                        fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityName);
-                                    }
-                                    if (fields != null) {
-                                        Field resolved = fields.get(aFieldName);
-                                        String resolvedTableName = resolved != null ? resolved.getTableName() : null;
-                                        resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
-                                        if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
-                                            return null;
-                                        } else {
-                                            return resolved;
-                                        }
-                                    } else {
-                                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityName);
-                                        return null;
-                                    }
-                                } else {
-                                    return null;
                                 }
-                            }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
-                            change.accept(generator);
-                            statements.addAll(generator.getLogEntries());
+                            } else {
+                                query = null;
+                            }
+                            Fields fields;
+                            if (query != null && query.getEntityId() != null) {
+                                fields = query.getFields();
+                            } else {// It seems, that aEntityId is a table name...
+                                fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityName);
+                            }
+                            if (fields != null) {
+                                Field resolved = fields.get(aFieldName);
+                                String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
+                                if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
+                                    return null;
+                                } else {
+                                    return resolved;
+                                }
+                            } else {
+                                Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityName);
+                                return null;
+                            }
+                        } else {
+                            return null;
                         }
-                        rowsAffected = riddleStatements(statements, connection);
-                        connection.commit();
-                    } catch (Exception ex) {
-                        connection.rollback();
-                        throw ex;
-                    }
+                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
+                    change.accept(generator);
+                    statements.addAll(generator.getLogEntries());
                 }
+                rowsAffected = riddleStatements(statements, connection);
                 aLog.clear();
-                return rowsAffected;
-            } else {
-                Logger.getLogger(DatabasesClient.class.getName()).log(Level.INFO, "Unknown datasource: {0}. Can't commit to it", aDatasourceName);
-                return 0;
+                return new ApplyResult(rowsAffected, connection);
+            } catch (Exception ex) {
+                connection.rollback();
+                connection.close();
+                throw ex;
             }
         };
         if (onSuccess != null) {
             commitProcessor.submit(() -> {
                 try {
-                    int rowsAffected = doWork.call();
+                    ApplyResult applyResult = doWork.call();
                     try {// We have to handle commit exceptions and onSuccess.accept() exceptions separatly.
-                        onSuccess.accept(rowsAffected);
+                        onSuccess.accept(applyResult);
                     } catch (Exception ex) {
                         Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -502,25 +588,13 @@ public class DatabasesClient {
                     }
                 }
             });
-            return 0;
+            return null;
         } else {
             return doWork.call();
         }
     }
 
-    /*
-    private void checkWritePrincipalPermission(String aEntityId, Set<String> writeRoles) throws Exception {
-        if (getPrincipalHost() != null && writeRoles != null && !writeRoles.isEmpty()) {
-            PlatypusPrincipal principal = getPrincipalHost().getPrincipal();
-            if (principal != null && principal.hasAnyRole(writeRoles)) {
-                return;
-            }
-            throw new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", principal != null ? principal.getName() : null));
-        }
-    }
-    */
-
-    public void rollback() {
+    public void rolledback() {
         TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
         for (TransactionListener l : listeners) {
             try {

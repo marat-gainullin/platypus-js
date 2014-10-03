@@ -229,7 +229,7 @@ public class ScriptedResource {
         return url;
     }
 
-    protected static class RequireProcess extends AsyncProcess<Void> {
+    protected static class RequireProcess extends AsyncProcess<Void, Void> {
 
         public RequireProcess(int aExpected, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
             super(aExpected, aOnSuccess, aOnFailure);

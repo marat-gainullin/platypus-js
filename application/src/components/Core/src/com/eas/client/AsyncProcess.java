@@ -12,23 +12,25 @@ import java.util.function.Consumer;
 /**
  *
  * @author mg
+ * @param <T> Type of complete success argument
+ * @param <F> Type of callback argument
  */
-public abstract class AsyncProcess<T> {
+public abstract class AsyncProcess<T, F> {
 
     protected int expected;
     protected int completed;
     protected Set<Exception> exceptions = new HashSet<>();
-    protected Consumer<T> onSuccess;
+    protected Consumer<F> onSuccess;
     protected Consumer<Exception> onFailure;
 
-    public AsyncProcess(int aExpected, Consumer<T> aOnSuccess, Consumer<Exception> aOnFailure) {
+    public AsyncProcess(int aExpected, Consumer<F> aOnSuccess, Consumer<Exception> aOnFailure) {
         super();
         expected = aExpected;
         onSuccess = aOnSuccess;
         onFailure = aOnFailure;
     }
 
-    protected void doComplete(T aResult) {
+    protected void doComplete(F aResult) {
         if (exceptions.isEmpty()) {
             if (onSuccess != null) {
                 onSuccess.accept(aResult);
