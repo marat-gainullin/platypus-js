@@ -69,16 +69,16 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public FlowProvider createFlowProvider(String aDatasource, final String aEntityName, String aSqlClause, final Fields aExpectedFields) throws Exception {
+    public FlowProvider createFlowProvider(String aDatasourceName, final String aEntityName, String aSqlClause, final Fields aExpectedFields) throws Exception {
         if (ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
-            JSObject dataFeeder = createModule(aEntityName);
+            JSObject dataFeeder = createModule(aDatasourceName);
             if (dataFeeder != null) {
                 return new ScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
             } else {
-                throw new IllegalStateException(" datasource module: " + aEntityName + " is not found");
+                throw new IllegalStateException("Datasource module: " + aDatasourceName + " is not found");
             }
         } else {
-            return super.createFlowProvider(aDatasource, aEntityName, aSqlClause, aExpectedFields);
+            return super.createFlowProvider(aDatasourceName, aEntityName, aSqlClause, aExpectedFields);
         }
     }
 

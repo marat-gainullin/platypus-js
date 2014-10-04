@@ -1078,7 +1078,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                 if (fslot != null) {
                     Point lpt = fslot.firstPoint;
                     Point lpt1 = fslot.lastPoint;
-                    g2d.drawLine(lpt.x, lpt.y, lpt1.x, lpt1.y);
+                    if (lpt != null && lpt1 != null) {
+                        g2d.drawLine(lpt.x, lpt.y, lpt1.x, lpt1.y);
+                    }
                 }
             });
         } finally {
@@ -1120,31 +1122,33 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
             int[] yDirectionPoints = new int[3];
             Point lpt = aSlot.firstPoint;
             Point lpt1 = aSlot.lastPoint;
-            int dx = EntityView.HALF_INSET_ZONE / 2 + 1;
-            if (lpt.x > lpt1.x) {
-                dx = -dx;
+            if (lpt != null && lpt1 != null) {
+                int dx = EntityView.HALF_INSET_ZONE / 2 + 1;
+                if (lpt.x > lpt1.x) {
+                    dx = -dx;
+                }
+                xDirectionPoints[0] = lpt.x - 2 * dx;
+                yDirectionPoints[0] = lpt.y;
+                xDirectionPoints[1] = lpt1.x - dx + 2;
+                yDirectionPoints[1] = lpt1.y - EntityView.HALF_INSET_ZONE - aWide;
+                xDirectionPoints[2] = lpt1.x - dx + 2;
+                yDirectionPoints[2] = lpt1.y + EntityView.HALF_INSET_ZONE + aWide;
+                if (lpt.x > lpt1.x) {
+                    xDirectionPoints[0] += aWide;
+                    xDirectionPoints[1] -= aWide;
+                    xDirectionPoints[2] -= aWide;
+                } else {
+                    xDirectionPoints[0] -= aWide;
+                    xDirectionPoints[1] += aWide;
+                    xDirectionPoints[2] += aWide;
+                }
+                g2d.drawLine(lpt1.x, lpt.y, lpt.x, lpt.y);
+                Color oldColor = g2d.getColor();
+                g2d.setColor(getBackground());
+                g2d.fillPolygon(xDirectionPoints, yDirectionPoints, xDirectionPoints.length);
+                g2d.setColor(oldColor);
+                g2d.drawPolygon(xDirectionPoints, yDirectionPoints, xDirectionPoints.length);
             }
-            xDirectionPoints[0] = lpt.x - 2 * dx;
-            yDirectionPoints[0] = lpt.y;
-            xDirectionPoints[1] = lpt1.x - dx + 2;
-            yDirectionPoints[1] = lpt1.y - EntityView.HALF_INSET_ZONE - aWide;
-            xDirectionPoints[2] = lpt1.x - dx + 2;
-            yDirectionPoints[2] = lpt1.y + EntityView.HALF_INSET_ZONE + aWide;
-            if (lpt.x > lpt1.x) {
-                xDirectionPoints[0] += aWide;
-                xDirectionPoints[1] -= aWide;
-                xDirectionPoints[2] -= aWide;
-            } else {
-                xDirectionPoints[0] -= aWide;
-                xDirectionPoints[1] += aWide;
-                xDirectionPoints[2] += aWide;
-            }
-            g2d.drawLine(lpt1.x, lpt.y, lpt.x, lpt.y);
-            Color oldColor = g2d.getColor();
-            g2d.setColor(getBackground());
-            g2d.fillPolygon(xDirectionPoints, yDirectionPoints, xDirectionPoints.length);
-            g2d.setColor(oldColor);
-            g2d.drawPolygon(xDirectionPoints, yDirectionPoints, xDirectionPoints.length);
         }
     }
 

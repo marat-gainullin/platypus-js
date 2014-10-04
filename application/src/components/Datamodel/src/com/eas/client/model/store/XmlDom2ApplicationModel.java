@@ -49,7 +49,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
                 }
                 entity.validateQuery();
             } catch (Exception ex) {
-                Logger.getLogger(XmlDom2ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(XmlDom2ApplicationModel.class.getName()).log(Level.WARNING, null, ex);
             }
         });
         resolver.run();

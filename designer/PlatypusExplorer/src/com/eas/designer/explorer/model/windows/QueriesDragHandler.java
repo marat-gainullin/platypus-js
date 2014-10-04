@@ -7,6 +7,7 @@ package com.eas.designer.explorer.model.windows;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.model.ModelView;
+import com.eas.client.model.gui.view.model.QueryModelView;
 import com.eas.designer.application.indexer.IndexerQuery;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -50,8 +51,8 @@ public class QueriesDragHandler extends TransferHandler {
         try {
             DataObject dObject = extractDataObject(support);
             if (dObject != null) {
-                return PlatypusFiles.SQL_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt()) ||
-                       PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt());
+                return PlatypusFiles.SQL_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt())
+                        || (PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt()) && !(modelView instanceof QueryModelView));
             } else {
                 return delegate.canImport(support);
             }
