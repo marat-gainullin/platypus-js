@@ -49,6 +49,7 @@ public class SqlQuery extends Query {
     /**
      * Creates an instance of Query with empty SQL query text and parameters
      * map.
+     * @param aBasesProxy
      */
     public SqlQuery(DatabasesClient aBasesProxy) {
         super();
@@ -59,10 +60,11 @@ public class SqlQuery extends Query {
      * Creates an instance of Query with given SQL query text. Leaves the
      * parameters map empty.
      *
+     * @param aBasesProxy
      * @param aSqlText the SQL query text.
      */
-    public SqlQuery(DatabasesClient aBase, String aSqlText) {
-        this(aBase);
+    public SqlQuery(DatabasesClient aBasesProxy, String aSqlText) {
+        this(aBasesProxy);
         sqlText = aSqlText;
     }
 
@@ -70,11 +72,12 @@ public class SqlQuery extends Query {
      * Creates an instance of Query with given SQL query text. Leaves the
      * parameters map empty.
      *
+     * @param aBasesProxy
      * @param aDatasourceName A database identifier.
      * @param aSqlText the SQL query text.
      */
-    public SqlQuery(DatabasesClient aBase, String aDatasourceName, String aSqlText) {
-        this(aBase, aSqlText);
+    public SqlQuery(DatabasesClient aBasesProxy, String aDatasourceName, String aSqlText) {
+        this(aBasesProxy, aSqlText);
         datasourceName = aDatasourceName;
     }
 
@@ -253,7 +256,7 @@ public class SqlQuery extends Query {
                 compiledSb.append(sm.group(0));
             }
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), ps, fields, readRoles, writeRoles);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), ps, fields);
         compiled.setEntityId(entityId);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);

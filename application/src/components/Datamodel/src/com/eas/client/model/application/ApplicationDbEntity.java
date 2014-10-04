@@ -6,6 +6,7 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabaseMdCache;
@@ -15,6 +16,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
 import java.sql.ParameterMetaData;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -41,12 +43,14 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         super(aEntityId);
     }
 
-    @Override
-    public void enqueueUpdate() throws Exception {
-        getQuery().compile().enqueueUpdate();
-    }
+    private static final String EXECUTE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Applies the updates into the database and commits the transaction.\n"
+            + "* @param onSuccess Success callback. It has an argument, - updates rows count.\n"
+            + "* @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
+            + "*/";
 
-    @Override
+    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
     public int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
             model.getBasesProxy().executeUpdate(getQuery().compile(), (Integer aUpdated) -> {
@@ -62,11 +66,23 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         }
     }
 
+    private static final String ENQUEUE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Adds the updates into the change log as a command.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
+    public void enqueueUpdate() throws Exception {
+        List<Change> log = getChangeLog();
+        Command command = getQuery().compile().prepareCommand();
+        log.add(command);
+    }
+
     @Override
     protected List<Change> getChangeLog() throws Exception {
         validateQuery();
-        String dbId = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDbId() : null;
-        return model.getChangeLog(dbId);
+        String datasourceName = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDbId() : null;
+        return model.getChangeLog(datasourceName);
     }
 
     @Override

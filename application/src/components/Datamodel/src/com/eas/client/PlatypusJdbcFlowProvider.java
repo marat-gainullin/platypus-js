@@ -14,10 +14,7 @@ import com.eas.client.queries.ContextHost;
 import com.eas.util.ListenerRegistration;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
@@ -31,22 +28,18 @@ import javax.sql.DataSource;
  */
 public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
 
-    protected String entityId;
+    protected String entityName;
     protected DatabasesClient client;
     protected DatabaseMdCache cache;
     protected ContextHost contextHost;
     protected List<Change> changeLog = new ArrayList<>();
-    protected Set<String> readRoles = new HashSet<>();
-    protected Set<String> writeRoles = new HashSet<>();
 
-    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aJdbcSourceId, String aEntityId, DataSource aDataSource, ExecutorService aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aJdbcSourceId, String aEntityName, DataSource aDataSource, ExecutorService aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
         super(aJdbcSourceId, aDataSource, aDataPuller, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
-        entityId = aEntityId;
+        entityName = aEntityName;
         client = aClient;
         cache = aCache;
         contextHost = aContextHost;
-        readRoles = aReadRoles;
-        writeRoles = aWriteRoles;
     }
 
     @Override
@@ -56,15 +49,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
 
     @Override
     public String getEntityId() {
-        return entityId;
-    }
-
-    public Set<String> getReadRoles() {
-        return readRoles != null ? Collections.unmodifiableSet(readRoles) : null;
-    }
-    
-    public Set<String> getWriteRoles() {
-        return writeRoles != null ? Collections.unmodifiableSet(writeRoles) : null;
+        return entityName;
     }
 
     @Override

@@ -24,8 +24,8 @@ import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1079,10 +1079,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                         if (sqlModel.isChoiced(i)) {
                             try {
                                 SqlCompiledQuery query = new SqlCompiledQuery(client, null, sqlModel.getSql(i));
-                                query.enqueueUpdate();
-                                Map<String, List<Change>> changeLogs = new HashMap<>();
-                                changeLogs.put(null, query.getFlow().getChangeLog());
-                                client.commit(changeLogs, null, null);
+                                client.commit(Collections.singletonMap((String)null, Collections.singletonList((Change)query.prepareCommand())), null, null);
                                 sqlModel.setChoice(i, false);
                                 sqlModel.setResult(i, "Ok");
                                 final int row = i;
@@ -1097,7 +1094,6 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                             } catch (Exception ex) {
                                 sqlModel.setResult(i, "Error: " + ex.getMessage());
                                 tblSqls.repaint();
-                                client.rollback();
                                 break;
                             }
                         }

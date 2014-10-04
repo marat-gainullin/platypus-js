@@ -117,23 +117,23 @@ public class DatabasesClient {
         return autoFillMetadata;
     }
 
-    public DataSource obtainDataSource(String aDataSourceId) throws Exception {
-        if (aDataSourceId == null) {
-            aDataSourceId = defaultDatasourceName;
+    public DataSource obtainDataSource(String aDataSourceName) throws Exception {
+        if (aDataSourceName == null) {
+            aDataSourceName = defaultDatasourceName;
         }
-        if (aDataSourceId != null) {
+        if (aDataSourceName != null) {
             Context initContext = new InitialContext();
             try {
                 // J2EE servers
-                return (DataSource) initContext.lookup(aDataSourceId);
+                return (DataSource) initContext.lookup(aDataSourceName);
             } catch (NamingException ex) {
                 try {
                     // Apache Tomcat component's JNDI context 
                     Context envContext = (Context) initContext.lookup("java:/comp/env"); //NOI18N
-                    return (DataSource) envContext.lookup(aDataSourceId);
+                    return (DataSource) envContext.lookup(aDataSourceName);
                 } catch (NamingException ex1) {
                     // Platypus standalone server or client
-                    return GeneralResourceProvider.getInstance().getPooledDataSource(aDataSourceId);
+                    return GeneralResourceProvider.getInstance().getPooledDataSource(aDataSourceName);
                 }
             }
         } else {
@@ -160,8 +160,8 @@ public class DatabasesClient {
      * Factory method for DatabaseFlowProvider. Intended to incapsulate flow
      * provider creation in two tier or three tier applications.
      *
-     * @param aDatasourceId
-     * @param aEntityId
+     * @param aDatasourceName
+     * @param aEntityName
      * @param aSqlClause
      * @param aExpectedFields
      * @param aReadRoles
@@ -169,8 +169,8 @@ public class DatabasesClient {
      * @return FlowProvider created.
      * @throws Exception
      */
-    public FlowProvider createFlowProvider(String aDatasourceId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDatasourceId, aEntityId, obtainDataSource(aDatasourceId), commitProcessor, getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
+    public FlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
+        return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), commitProcessor, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
@@ -306,27 +306,44 @@ public class DatabasesClient {
     }
 
     public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        int rowsAffected = 0;
-        Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
-        DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
-        if (dataSource != null) {
-            try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
-                connection.setAutoCommit(false);
-                Parameters params = aQuery.getParameters();
-                for (int i = 1; i <= params.getParametersCount(); i++) {
-                    Parameter param = params.get(i);
-                    converter.convert2JdbcAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
-                }
-                try {
-                    rowsAffected += stmt.executeUpdate();
-                    connection.commit();
-                } catch (SQLException ex) {
-                    connection.rollback();
-                    throw ex;
+        Callable<Integer> doWork = () -> {
+            int rowsAffected = 0;
+            Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
+            DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
+            if (dataSource != null) {
+                try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
+                    connection.setAutoCommit(false);
+                    Parameters params = aQuery.getParameters();
+                    for (int i = 1; i <= params.getParametersCount(); i++) {
+                        Parameter param = params.get(i);
+                        converter.convert2JdbcAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
+                    }
+                    try {
+                        rowsAffected += stmt.executeUpdate();
+                        connection.commit();
+                    } catch (SQLException ex) {
+                        connection.rollback();
+                        throw ex;
+                    }
                 }
             }
+            return rowsAffected;
+        };
+        if (onSuccess != null) {
+            commitProcessor.submit(() -> {
+                try {
+                    Integer affected = doWork.call();
+                    onSuccess.accept(affected);
+                } catch (Exception ex) {
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
+                }
+            });
+            return 0;
+        } else {
+            return doWork.call();
         }
-        return rowsAffected;
     }
 
     public synchronized DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
@@ -507,9 +524,13 @@ public class DatabasesClient {
     protected ApplyResult apply(final String aDatasourceName, List<Change> aLog, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ApplyResult> doWork = () -> {
             int rowsAffected = 0;
-            SqlDriver driver = getDbMetadataCache(aDatasourceName).getConnectionDriver();
+            DatabaseMdCache mdCache = getDbMetadataCache(aDatasourceName);
+            if (mdCache == null) {
+                throw new IllegalStateException(String.format(UNKNOWN_DATASOURCE_IN_COMMIT, aDatasourceName));
+            }
+            SqlDriver driver = mdCache.getConnectionDriver();
             if (driver == null) {
-                throw new IllegalStateException(String.format("Unknown datasource: %s. Can't commit to it", aDatasourceName));
+                throw new IllegalStateException(String.format(UNSUPPORTED_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
             Converter converter = driver.getConverter();
             assert aLog != null;
@@ -593,6 +614,8 @@ public class DatabasesClient {
             return doWork.call();
         }
     }
+    protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
+    protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
     public void rolledback() {
         TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});

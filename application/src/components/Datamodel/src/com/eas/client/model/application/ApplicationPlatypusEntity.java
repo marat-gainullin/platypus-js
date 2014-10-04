@@ -9,6 +9,7 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -32,18 +33,14 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
         super(aQueryName);
     }
 
-    @Override
+    private static final String ENQUEUE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Adds the updates into the change log as a command.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
     public void enqueueUpdate() throws Exception {
         model.getServerProxy().enqueueUpdate(getQueryName(), getQuery().getParameters());
-    }
-
-    @Override
-    public int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception {
-        model.getServerProxy().enqueueUpdate(getQueryName(), getQuery().getParameters());
-        if (onSuccess != null) {
-            onSuccess.call(null, new Object[]{});
-        }
-        return 0;
     }
 
     @Override

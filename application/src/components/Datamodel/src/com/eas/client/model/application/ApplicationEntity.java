@@ -633,25 +633,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     public void execute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         internalExecute(aOnSuccess, aOnFailure);
     }
-    private static final String ENQEUE_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Enqueues DML SQL clause (e.g. UPDATE, DELETE) provided in this entity query.\n"
-            + "* Provide query parameters if required. To commit the transaction invoke @see executeUpdate.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ENQEUE_UPDATE_JSDOC)
-    public abstract void enqueueUpdate() throws Exception;
-
-    private static final String EXECUTE_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Applies the updates into the database and commits the transaction.\n"
-            + "* To apply updates with no commit, use enqueueUpdate() method.\n"
-            + "* @param onSuccess Success callback. It has an argument, - updates rows count.\n"
-            + "* @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
-    public abstract int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception;
 
     // Requery interface
     public void requery() throws Exception {
@@ -1111,6 +1092,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         }
     }
 
+    public abstract void enqueueUpdate() throws Exception;
+    
     private static final String BEGIN_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Disables automatic model update on parameters change, @see endUpdate method.\n"

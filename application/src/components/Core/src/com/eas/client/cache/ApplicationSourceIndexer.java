@@ -316,6 +316,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
      * @return
      * @throws Exception
      */
+    @Override
     public synchronized AppElementFiles nameToFiles(String aName) throws Exception {
         if (aName != null) {
             File resource = new File(calcSrcPath() + File.separator + aName.replace('/', File.separatorChar));

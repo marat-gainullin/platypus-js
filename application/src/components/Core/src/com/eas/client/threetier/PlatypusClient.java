@@ -208,6 +208,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         }
     }
 
+    @Override
     public void enqueueUpdate(String aQueryName, Parameters aParams) throws Exception {
         Command command = new Command(aQueryName);
         command.parameters = new ChangeValue[aParams.getParametersCount()];

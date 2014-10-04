@@ -788,15 +788,7 @@ public class MetadataMerger {
                     sqlsList.add(aSql);
                 }
                 if (!noExecuteSQL) {
-                    q.enqueueUpdate();
-                    try {
-                        Map<String, List<Change>> changeLogs = new HashMap<>();
-                        changeLogs.put(null, q.getFlow().getChangeLog());
-                        client.commit(changeLogs, null, null);
-                    } catch (Exception e) {
-                        client.rollback();
-                        throw e;
-                    }
+                    client.commit(Collections.singletonMap((String)null, Collections.singletonList((Change)q.prepareCommand())), null, null);
                 }
                 if (sqlLogger != null) {
                     sqlLogger.log(Level.CONFIG, new StringBuilder().append(sqlCommentChars).append(numSql++).append(": ").toString());

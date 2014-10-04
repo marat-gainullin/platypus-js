@@ -250,7 +250,6 @@ public class DbMigrator {
             changeLogs.put(null, rs.getFlowProvider().getChangeLog());
             client.commit(changeLogs, null, null);
         } catch (Exception ex) {
-            client.rollback();
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

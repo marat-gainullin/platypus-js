@@ -52,6 +52,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
      * exception.
      *
      * @param aModuleName
+     * @param aDatasources
      */
     public void addValidator(String aModuleName, Collection<String> aDatasources) {
         validators.put(aModuleName, aDatasources);
@@ -68,111 +69,83 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public FlowProvider createFlowProvider(String aDbId, final String aEntityId, String aSqlClause, final Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public FlowProvider createFlowProvider(String aDatasource, final String aEntityName, String aSqlClause, final Fields aExpectedFields) throws Exception {
         if (ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
-            JSObject dataFeeder = createModule(aEntityId);
+            JSObject dataFeeder = createModule(aEntityName);
             if (dataFeeder != null) {
                 return new ScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
             } else {
-                throw new IllegalStateException(" datasource module: " + aEntityId + " is not found");
+                throw new IllegalStateException(" datasource module: " + aEntityName + " is not found");
             }
         } else {
-            return super.createFlowProvider(aDbId, aEntityId, aSqlClause, aExpectedFields, aReadRoles, aWriteRoles);
+            return super.createFlowProvider(aDatasource, aEntityName, aSqlClause, aExpectedFields);
         }
     }
 
     @Override
-    protected int commit(final String aDatasourceName, final List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected ApplyResult apply(final String aDatasourceName, final List<Change> aLog, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             validate(aDatasourceName, aLog, (Void v) -> {
                 try {
-                    scriptApply(aDatasourceName, aLog, (Integer affectedInModules) -> {
-                        for (int i = aLog.size() - 1; i >= 0; i--) {
-                            if (aLog.get(i).consumed) {
-                                aLog.remove(i);
+                    AppElementFiles files = indexer.nameToFiles(aDatasourceName);
+                    if (files != null && files.isModule()) {
+                        JSObject module = createModule(aDatasourceName);
+                        if (module != null) {
+                            Object oApply = module.getMember("apply");
+                            if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
+                                JSObject applyFunction = (JSObject) oApply;
+                                ScriptUtils.toJava(applyFunction.call(module, new Object[]{ScriptUtils.toJs(aLog.toArray()), new Consumer<Integer>() {
+                                    
+                                    @Override
+                                    public void accept(Integer affected) {
+                                        aLog.clear();
+                                        onSuccess.accept(new ApplyResult(affected != null ? affected : 0, new DummySqlConnection()));
+                                    }
+                                    
+                                }, onFailure}));
+                            } else {
+                                onFailure.accept(new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName)));
                             }
+                        } else {
+                            onFailure.accept(new IllegalStateException(String.format(CANT_CREATE_MODULE_MSG, aDatasourceName)));
                         }
-                        try {
-                            super.commit(aDatasourceName, aLog, (Integer affectedInBase) -> {
-                                onSuccess.accept((affectedInBase != null ? affectedInBase : 0) + (affectedInModules != null ? affectedInModules : 0));
-                            }, onFailure);
-                        } catch (Exception ex) {
-                            if (onFailure != null) {
-                                onFailure.accept(ex);
-                            }
-                        }
-                    }, onFailure);
-                } catch (Exception ex) {
-                    if (onFailure != null) {
-                        onFailure.accept(ex);
+                    } else {
+                        super.apply(aDatasourceName, aLog, onSuccess, onFailure);
                     }
+                } catch (Exception ex) {
+                    onFailure.accept(ex);
                 }
             }, onFailure);
-            return 0;
+            return null;
         } else {
             validate(aDatasourceName, aLog, null, null);
-            int affectedInModules = scriptApply(aDatasourceName, aLog, null, null);
-            for (int i = aLog.size() - 1; i >= 0; i--) {
-                if (aLog.get(i).consumed) {
-                    aLog.remove(i);
-                }
-            }
-            int affectedInBase = super.apply(aDatasourceName, aLog, null, null);
-            return affectedInModules + affectedInBase;
-        }
-    }
-
-    private int scriptApply(final String aDatasourceName, final List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        List<CallPoint> toBeCalled = new ArrayList<>();
-        if (aDatasourceName != null) {
             AppElementFiles files = indexer.nameToFiles(aDatasourceName);
-            if (files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+            if (files != null && files.isModule()) {
                 JSObject module = createModule(aDatasourceName);
                 if (module != null) {
                     Object oApply = module.getMember("apply");
                     if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
                         JSObject applyFunction = (JSObject) oApply;
-                        toBeCalled.add(new CallPoint(module, applyFunction));
-                    }
-                }
-            }
-        }
-        if (onSuccess != null) {
-            if (toBeCalled.isEmpty()) {
-                onSuccess.accept(0);
-            } else {
-                CommitProcess process = new CommitProcess(toBeCalled.size(), onSuccess, onFailure);
-                toBeCalled.stream().forEach((v) -> {
-                    v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()),
-                        new Consumer<Integer>() {
-
-                            @Override
-                            public void accept(Integer t) {
-                                process.complete(t != null ? t : 0, null);
-                            }
-                        },
-                        new Consumer<Exception>() {
-
-                            @Override
-                            public void accept(Exception ex) {
-                                process.complete(0, ex);
-                            }
+                        int affectedInModules = 0;
+                        Object oAffected = ScriptUtils.toJava(applyFunction.call(module, new Object[]{ScriptUtils.toJs(aLog.toArray())}));
+                        if (oAffected instanceof Number) {
+                            affectedInModules = ((Number) oAffected).intValue();
                         }
-                    });
-                });
-            }
-            return 0;
-        } else {
-            int affected = 0;
-            for (CallPoint v : toBeCalled) {
-                Object oAffected = ScriptUtils.toJava(v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray())}));
-                if (oAffected instanceof Number) {
-                    affected += ((Number) oAffected).intValue();
+                        aLog.clear();
+                        return new ApplyResult(affectedInModules, new DummySqlConnection());
+                    } else {
+                        throw new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName));
+                    }
+                } else {
+                    throw new IllegalStateException(String.format(CANT_CREATE_MODULE_MSG, aDatasourceName));
                 }
+            } else {
+                return super.apply(aDatasourceName, aLog, null, null);
             }
-            return affected;
         }
     }
+    protected static final String CANT_CREATE_MODULE_MSG = "Can't create module %s";
+    protected static final String APPLY_MISSING_MSG = "Can't find apply function in module %s";
 
     private static class CallPoint {
 

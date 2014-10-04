@@ -12,8 +12,6 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -26,16 +24,14 @@ import java.util.function.Consumer;
  */
 public class SqlCompiledQuery {
 
-    protected DatabasesClient client;
+    protected DatabasesClient basesProxy;
     protected String datasourceName;
-    protected String entityId;
+    protected String entityName;
     protected String sqlClause;
     protected Parameters parameters;// 1 - Based    
     protected Fields expectedFields;// 1 - Based
     protected FlowProvider flow;
     protected boolean procedure;
-    protected Set<String> readRoles = new HashSet<>();
-    protected Set<String> writeRoles = new HashSet<>();
     private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
 
     /**
@@ -49,7 +45,7 @@ public class SqlCompiledQuery {
         super();
         sqlClause = aSqlClause;
         parameters = new Parameters();
-        client = aClient;
+        basesProxy = aClient;
         createFlow();
     }
 
@@ -66,41 +62,37 @@ public class SqlCompiledQuery {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        client = aClient;
+        basesProxy = aClient;
         createFlow();
     }
 
-    SqlCompiledQuery(DatabasesClient aClient, String aDbId, String aSqlClause, Parameters aParams) throws Exception {
+    SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aSqlClause, Parameters aParams) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        datasourceName = aDbId;
-        client = aClient;
+        datasourceName = aDatasourceName;
+        basesProxy = aClient;
         createFlow();
     }
 
-    public SqlCompiledQuery(DatabasesClient aClient, String aDbId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aSqlClause, Parameters aParams, Fields aExpectedFields) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        datasourceName = aDbId;
+        datasourceName = aDatasourceName;
         expectedFields = aExpectedFields;
-        client = aClient;
-        readRoles = aReadRoles;
-        writeRoles = aWriteRoles;
+        basesProxy = aClient;
         createFlow();
     }
 
-    public SqlCompiledQuery(DatabasesClient aClient, String aDbId, String aEntityId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+    public SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aEntityName, String aSqlClause, Parameters aParams, Fields aExpectedFields) throws Exception {
         super();
         sqlClause = aSqlClause;
         parameters = aParams;
-        datasourceName = aDbId;
-        entityId = aEntityId;
+        datasourceName = aDatasourceName;
+        entityName = aEntityName;
         expectedFields = aExpectedFields;
-        client = aClient;
-        readRoles = aReadRoles;
-        writeRoles = aWriteRoles;
+        basesProxy = aClient;
         createFlow();
     }
     /**
@@ -116,7 +108,7 @@ public class SqlCompiledQuery {
         datasourceName = aDatasourceName;
         sqlClause = aSqlClause;
         parameters = new Parameters();
-        client = aClient;
+        basesProxy = aClient;
         createFlow();
     }
 
@@ -129,14 +121,6 @@ public class SqlCompiledQuery {
         if (flow != null) {
             flow.setProcedure(procedure);
         }
-    }
-
-    public Set<String> getReadRoles() {
-        return readRoles;
-    }
-
-    public Set<String> getWriteRoles() {
-        return writeRoles;
     }
 
     public void setParameters(Parameters aValue) {
@@ -153,8 +137,8 @@ public class SqlCompiledQuery {
     }
 
     private void createFlow() throws Exception {
-        if (client != null) {
-            flow = client.createFlowProvider(datasourceName, entityId, sqlClause, expectedFields, readRoles, writeRoles);
+        if (basesProxy != null) {
+            flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
         }
@@ -185,24 +169,15 @@ public class SqlCompiledQuery {
         return rowset;
     }
 
-    /**
-     * Enqueues an update to database or platypus server. Enqueueing
-     * occurs when procedure flag is false and when it is true direct executing
-     * is performed and commit is called. If procedure flag is not setted and so
-     * enqueueing is performed, affected rows count is returned in subsequent
-     * call to commit().
-     *
-     * @throws Exception
-     */
-    public void enqueueUpdate() throws Exception {
-        Command command = new Command(entityId);
+    public Command prepareCommand() {
+        Command command = new Command(entityName);
         command.command = sqlClause;
         command.parameters = new ChangeValue[parameters.getParametersCount()];
         for (int i = 0; i < command.parameters.length; i++) {
             Parameter param = parameters.get(i + 1);
             command.parameters[i] = new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo());
         }
-        flow.getChangeLog().add(command);
+        return command;
     }
 
     public FlowProvider getFlow() {
@@ -245,11 +220,11 @@ public class SqlCompiledQuery {
     }
 
     public String getEntityId() {
-        return entityId;
+        return entityName;
     }
 
     public void setEntityId(String aEntityId) throws Exception {
-        entityId = aEntityId;
+        entityName = aEntityId;
         createFlow();
     }
 

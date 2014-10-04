@@ -14,6 +14,7 @@ import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,6 @@ public class SqlActionsController {
                 logs.put(datasourceName, doSqlWork());
                 basesProxy.commit(logs, null, null);
             } catch (Exception ex) {
-                basesProxy.rollback();
                 parseException(ex);
                 return false;
             }
@@ -169,8 +169,7 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateConstraintClause = driver.getSql4CreateFkConstraint(schema, fk);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateConstraintClause);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -185,8 +184,7 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropConstraintClause = driver.getSql4DropFkConstraint(schema, fk);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlDropConstraintClause);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -206,8 +204,7 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateTableClause = driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateTableClause);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -227,8 +224,7 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateIndexClause = driver.getSql4CreateIndex(schema, tableName, index);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateIndexClause);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -248,8 +244,7 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropIndexClause = driver.getSql4DropIndex(schema, tableName, index.getName());
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlDropIndexClause);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -282,8 +277,7 @@ public class SqlActionsController {
             }
             sqlCreateTableClause += " )";
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlCreateTableClause);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -301,8 +295,7 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropTable = driver.getSql4DropTable(schema, tableName);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlDropTable);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 
@@ -329,10 +322,9 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls = driver.getSqls4AddingField(schema, tableName, fieldMd);
             List<Change> commonLog = new ArrayList<>();
-            for (int i = 0; i < sqls.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls[i]);
-                q.enqueueUpdate();
-                commonLog.addAll(q.getFlow().getChangeLog());
+            for (String sql : sqls) {
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sql);
+                commonLog.add(q.prepareCommand());
             }
             return commonLog;
         }
@@ -351,8 +343,7 @@ public class SqlActionsController {
             List<Change> commonLog = new ArrayList<>();
             for (String sql : sql4DropField) {
                 SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sql);
-                q.enqueueUpdate();
-                commonLog.addAll(q.getFlow().getChangeLog());
+                commonLog.add(q.prepareCommand());
             }
             return commonLog;
         }
@@ -372,10 +363,9 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls4ModifyField = driver.getSqls4ModifyingField(schema, tableName, fieldMd, newFieldMd);
             List<Change> commonLog = new ArrayList<>();
-            for (int i = 0; i < sqls4ModifyField.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls4ModifyField[i]);
-                q.enqueueUpdate();
-                commonLog.addAll(q.getFlow().getChangeLog());
+            for (String sqls4ModifyField1 : sqls4ModifyField) {
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls4ModifyField1);
+                commonLog.add(q.prepareCommand());
             }
             return commonLog;
         }
@@ -399,10 +389,9 @@ public class SqlActionsController {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls4RenamingField = driver.getSqls4RenamingField(schema, tableName, oldFieldName, newField);
             List<Change> commonLog = new ArrayList<>();
-            for (int i = 0; i < sqls4RenamingField.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls4RenamingField[i]);
-                q.enqueueUpdate();
-                commonLog.addAll(q.getFlow().getChangeLog());
+            for (String sqls4RenamingField1 : sqls4RenamingField) {
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqls4RenamingField1);
+                commonLog.add(q.prepareCommand());
             }
             return commonLog;
         }
@@ -427,10 +416,9 @@ public class SqlActionsController {
             String lschema = basesProxy.getDbMetadataCache(datasourceName).getConnectionSchema();
             String[] sqlsText = driver.getSql4CreateColumnComment(schema != null ? schema : lschema, tableName, fieldName, newDescription);
             List<Change> commonLog = new ArrayList<>();
-            for (int i = 0; i < sqlsText.length; i++) {
-                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlsText[i]);
-                q.enqueueUpdate();
-                commonLog.addAll(q.getFlow().getChangeLog());
+            for (String sqlsText1 : sqlsText) {
+                SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlsText1);
+                commonLog.add(q.prepareCommand());
             }
             return commonLog;
         }
@@ -454,8 +442,7 @@ public class SqlActionsController {
 
             String sqlText = driver.getSql4CreateTableComment(schema != null ? schema : lschema, tableName, newDescription);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlText);
-            q.enqueueUpdate();
-            return q.getFlow().getChangeLog();
+            return Collections.singletonList(q.prepareCommand());
         }
     }
 }
