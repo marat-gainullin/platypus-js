@@ -31,6 +31,7 @@ import com.eas.dbcontrols.combo.rt.SemiBorderTextField;
 import com.eas.design.Designable;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -175,37 +176,31 @@ public class DbCombo extends DbControlPanel implements DbControl {
 
         @Override
         public void rowsetFiltered(RowsetFilterEvent event) {
-            fireComboContentsChanged();
+            EventQueue.invokeLater(() -> {
+                fireComboContentsChanged();
+            });
         }
 
         @Override
         public void rowsetRequeried(RowsetRequeryEvent event) {
-            try {
-                recreateLocator();
-                fireComboContentsChanged();
-            } catch (Exception ex) {
-                Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            EventQueue.invokeLater(() -> {
+                try {
+                    recreateLocator();
+                    fireComboContentsChanged();
+                } catch (Exception ex) {
+                    Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
         }
 
         @Override
         public void rowsetRolledback(RowsetRollbackEvent event) {
-            try {
-                recreateLocator();
-                fireComboContentsChanged();
-            } catch (Exception ex) {
-                Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            rowsetRequeried(null);
         }
 
         @Override
         public void rowsetNextPageFetched(RowsetNextPageEvent event) {
-            try {
-                recreateLocator();
-                fireComboContentsChanged();
-            } catch (Exception ex) {
-                Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            rowsetRequeried(null);
         }
 
         @Override
@@ -218,12 +213,12 @@ public class DbCombo extends DbControlPanel implements DbControl {
 
         @Override
         public void rowsetSorted(RowsetSortEvent event) {
-            fireComboContentsChanged();
+            rowsetFiltered(null);
         }
 
         @Override
         public void rowInserted(RowsetInsertEvent event) {
-            fireComboContentsChanged();
+            rowsetFiltered(null);
         }
 
         @Override
@@ -232,7 +227,7 @@ public class DbCombo extends DbControlPanel implements DbControl {
 
         @Override
         public void rowDeleted(RowsetDeleteEvent event) {
-            fireComboContentsChanged();
+            rowsetFiltered(null);
         }
     }
 
@@ -514,8 +509,8 @@ public class DbCombo extends DbControlPanel implements DbControl {
 
     public void fireComboContentsChanged() {
         if (listEditor != null && listEditor.getModel() instanceof DbComboBoxModel) {
-            DbComboBoxModel model = (DbComboBoxModel) listEditor.getModel();
-            model.fireContentsChanged();
+            DbComboBoxModel cbModel = (DbComboBoxModel) listEditor.getModel();
+            cbModel.fireContentsChanged();
         } else if (nonListRendererEditor != null) {
             setupEditor(null);
         }

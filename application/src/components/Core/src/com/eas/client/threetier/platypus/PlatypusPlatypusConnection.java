@@ -7,10 +7,13 @@ package com.eas.client.threetier.platypus;
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.bearsoft.rowset.resourcepool.ResourcePool;
 import com.eas.client.login.Credentials;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.script.ScriptUtils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -42,7 +45,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     private String sessionTicket;
     private final SocketConnector connector;
     private final RequestEncoder requestEncoder = new RequestEncoder();
-    private final ExecutorService requestsSender = Executors.newCachedThreadPool();
+    private final ExecutorService requestsSender = Executors.newCachedThreadPool(new DeamonThreadFactory("platypus-client-"));
     private final ResourcePool<IoSession> sessionsPool = new BearResourcePool<IoSession>(10) {
 
         @Override
@@ -106,20 +109,44 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     @Override
     public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
         enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
-            if (aResponse instanceof ErrorResponse) {
-                if (onFailure != null) {
-                    onFailure.accept(handleErrorResponse((ErrorResponse) aResponse));
-                }
-            } else {
-                if (onSuccess != null) {
-                    onSuccess.accept((R) aResponse);
+            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+            synchronized (lock) {
+                if (aResponse instanceof ErrorResponse) {
+                    if (onFailure != null) {
+                        onFailure.accept(handleErrorResponse((ErrorResponse) aResponse));
+                    }
+                } else {
+                    if (onSuccess != null) {
+                        onSuccess.accept((R) aResponse);
+                    }
                 }
             }
         }), onFailure);
     }
 
-    private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
+    private void startRequestTask(Runnable aTask){
+        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
+        Object closureRequest = ScriptUtils.getRequest();
+        Object closureResponse = ScriptUtils.getResponse();
+        Object closureLock = ScriptUtils.getLock();
         requestsSender.submit(() -> {
+            ScriptUtils.setLock(closureLock);
+            ScriptUtils.setRequest(closureRequest);
+            ScriptUtils.setResponse(closureResponse);
+            PlatypusPrincipal.setInstance(closurePrincipal);
+            try {
+                aTask.run();
+            } finally {
+                ScriptUtils.setLock(null);
+                ScriptUtils.setRequest(null);
+                ScriptUtils.setResponse(null);
+                PlatypusPrincipal.setInstance(null);
+            }
+        });
+    }
+    
+    private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
+        startRequestTask(() -> {
             try {
                 IoSession session = sessionsPool.achieveResource();
                 Callable<Void> performer = () -> {
@@ -128,7 +155,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     rqc.requestEnv.ticket = sessionTicket;
                     // enqueue network work
                     session.write(rqc.requestEnv);
-                    // wait completion
+                    // wait completion from the network subsystem
                     synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
                         while (!rqc.requestEnv.request.isDone()) {
                             rqc.requestEnv.request.wait();
@@ -148,7 +175,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                         performer.call();
                         if (rqc.response instanceof ErrorResponse
                                 && ((ErrorResponse) rqc.response).isAccessControl()) {
-                            // nice try :-)
+                            // nice try :(
                             int authenticateAttempts = 0;
                             // Try to authenticate
                             while (rqc.response instanceof ErrorResponse

@@ -4,6 +4,7 @@
  */
 package com.eas.server.mina.platypus;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
@@ -88,7 +89,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
     @Override
     public void messageReceived(IoSession ioSession, Object msg) throws Exception {
         if (msg instanceof RequestEnvelope) {
-            RequestEnvelope requestEnv = (RequestEnvelope)msg;
+            RequestEnvelope requestEnv = (RequestEnvelope) msg;
             try {
                 Consumer<Exception> onError = (Exception ex) -> {
                     if (ex instanceof SQLException) {
@@ -114,12 +115,22 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                         if (requestEnv.ticket == null) {
                             DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session session) -> {
                                 requestEnv.ticket = session.getId();
-                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                                PlatypusPrincipal.setInstance(session.getPrincipal());
+                                try {
+                                    ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                                } finally {
+                                    PlatypusPrincipal.setInstance(null);
+                                }
                             }, onError);
                         } else {
                             Session session = server.getSessionManager().get(requestEnv.ticket);
                             if (session != null) {
-                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                                PlatypusPrincipal.setInstance(session.getPrincipal());
+                                try {
+                                    ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                                } finally {
+                                    PlatypusPrincipal.setInstance(null);
+                                }
                             } else {
                                 onError.accept(new AccessControlException("Bad session ticket."));
                             }

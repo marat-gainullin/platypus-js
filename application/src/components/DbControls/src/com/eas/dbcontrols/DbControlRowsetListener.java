@@ -10,6 +10,7 @@ import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
+import java.awt.EventQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,124 +37,12 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
-        if (control.getModel() != null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
+        acceptValue();
     }
 
-    @Override
-    public void rowsetRequeried(RowsetRequeryEvent event) {
-        if (control.getModel()!= null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
-    }
-
-    @Override
-    public void rowsetNextPageFetched(RowsetNextPageEvent event) {
-        if (control.getModel() != null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
-    }
-
-    @Override
-    public void rowsetSaved(RowsetSaveEvent event) {
-    }
-
-    @Override
-    public void rowsetRolledback(RowsetRollbackEvent event) {
-        if (control.getModel() != null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
-    }
-
-    @Override
-    public void rowsetScrolled(RowsetScrollEvent event) {
-        if (control.getModel() != null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
-    }
-
-    @Override
-    public void rowsetSorted(RowsetSortEvent event) {
-        if (control.getModel() != null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
-    }
-
-    @Override
-    public void rowInserted(RowsetInsertEvent event) {
-        if (control.getModel() != null) {
-            control.beginUpdate();
-            try {
-                try {
-                    control.setEditingValue(control.getValueFromRowset());
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } finally {
-                control.endUpdate();
-            }
-        }
-    }
-
-    @Override
-    public void rowChanged(RowChangeEvent event) {
-        if (control.getModel() != null) {
-            if (control.getColIndex() == event.getFieldIndex()) {
+    protected void acceptValue() {
+        EventQueue.invokeLater(() -> {
+            if (control.getModel() != null) {
                 control.beginUpdate();
                 try {
                     try {
@@ -165,6 +54,60 @@ public class DbControlRowsetListener extends RowsetAdapter {
                     control.endUpdate();
                 }
             }
-        }
+        });
+    }
+
+    @Override
+    public void rowsetRequeried(RowsetRequeryEvent event) {
+        acceptValue();
+    }
+
+    @Override
+    public void rowsetNextPageFetched(RowsetNextPageEvent event) {
+        acceptValue();
+    }
+
+    @Override
+    public void rowsetSaved(RowsetSaveEvent event) {
+    }
+
+    @Override
+    public void rowsetRolledback(RowsetRollbackEvent event) {
+        acceptValue();
+    }
+
+    @Override
+    public void rowsetScrolled(RowsetScrollEvent event) {
+        acceptValue();
+    }
+
+    @Override
+    public void rowsetSorted(RowsetSortEvent event) {
+        acceptValue();
+    }
+
+    @Override
+    public void rowInserted(RowsetInsertEvent event) {
+        acceptValue();
+    }
+
+    @Override
+    public void rowChanged(RowChangeEvent event) {
+        EventQueue.invokeLater(() -> {
+            if (control.getModel() != null) {
+                if (control.getColIndex() == event.getFieldIndex()) {
+                    control.beginUpdate();
+                    try {
+                        try {
+                            control.setEditingValue(control.getValueFromRowset());
+                        } catch (Exception ex) {
+                            Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } finally {
+                        control.endUpdate();
+                    }
+                }
+            }
+        });
     }
 }

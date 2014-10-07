@@ -104,6 +104,7 @@ public abstract class PlatypusConnection implements AppConnection {
     }
 
     protected final URL url;
+    // Parallel login avoid
     protected Sequence sequence = (Callable<Void> aCallable) -> {
         synchronized (this) {
             aCallable.call();

@@ -19,10 +19,14 @@ public class DeamonThreadFactory implements ThreadFactory {
     private final String namePrefix;
 
     public DeamonThreadFactory() {
+        this("");
+    }
+    
+    public DeamonThreadFactory(String aNamePrefix) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup()
                 : Thread.currentThread().getThreadGroup();
-        namePrefix = "pool-"
+        namePrefix = aNamePrefix + "pool-"
                 + poolNumber.getAndIncrement()
                 + "-thread-";
     }

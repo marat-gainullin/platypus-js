@@ -4,6 +4,7 @@ import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.client.forms.api.FormWindowEventsIProxy;
 import com.eas.client.forms.api.components.DesktopPane;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
@@ -18,6 +19,7 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
+import com.eas.script.ScriptUtils;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
@@ -45,6 +47,8 @@ public class Form implements HasPublished {
 
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
+    public static final String PRINCIPAL_KEY = "creatorPrincipal";
+    public static final String LOCK_KEY = "creatorLock";
     public static final String VIEW_SCRIPT_NAME = "view";
     protected static final Map<String, Form> showingForms = new HashMap<>();
     protected static JSObject onChange;
@@ -356,6 +360,8 @@ public class Form implements HasPublished {
                 }
             };
 
+            frame.getRootPane().putClientProperty(PRINCIPAL_KEY, PlatypusPrincipal.getInstance());
+            frame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             frame.addWindowListener(new WindowClosingReflector());
             frame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -432,6 +438,8 @@ public class Form implements HasPublished {
                     }
                 }
             };
+            internalFrame.getRootPane().putClientProperty(PRINCIPAL_KEY, PlatypusPrincipal.getInstance());
+            internalFrame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             internalFrame.addInternalFrameListener(new WindowClosingReflector());
             internalFrame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -544,6 +552,8 @@ public class Form implements HasPublished {
                 }
             };
             //dialog.addWindowListener(new WindowClosingReflector());
+            dialog.getRootPane().putClientProperty(PRINCIPAL_KEY, PlatypusPrincipal.getInstance());
+            dialog.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             dialog.getContentPane().setLayout(new BorderLayout());
             // configure dialog
             dialog.setDefaultCloseOperation(defaultCloseOperation);

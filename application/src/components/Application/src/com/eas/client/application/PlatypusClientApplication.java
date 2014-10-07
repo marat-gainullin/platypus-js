@@ -19,9 +19,12 @@ import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
+import com.sun.awt.AWTUtilities;
 import java.awt.EventQueue;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -197,34 +200,11 @@ public class PlatypusClientApplication {
             UIManager.put("swing.boldMetal", Boolean.FALSE);
             System.setProperty("java.awt.Window.locationByPlatform", "true");
             Config config = Config.parse(args);
-            if (config.url == null) {
-                Callable<URL> urlSelector = () -> {
-                    ConnectionsSelector connectionsSelector = new ConnectionsSelector(null);
-                    connectionsSelector.setVisible(true);
-                    if (connectionsSelector.getReturnStatus() == ConnectionsSelector.RET_OK) {
-                        ConnectionSettings settings = ConnectionsSelector.getDefaultSettings();
-                        return new URL(null, settings.getUrl(), new URLStreamHandler() {
-
-                            @Override
-                            protected URLConnection openConnection(URL u) throws IOException {
-                                throw new UnsupportedOperationException("Not supported yet.");
-                            }
-
-                        });
-                    }
-                    return null;
-                };
-                EventQueue.invokeAndWait(() -> {
-                    try {
-                        config.url = urlSelector.call();
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
-            }
+            checkUrl(config);
             if (config.url != null) {
                 checkUserHome();
                 config.datasourcesArgs.registerDatasources();
+                Toolkit.getDefaultToolkit().getSystemEventQueue().push(new LockableEventQueue());
                 ScriptUtils.init();
                 Application app;
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
@@ -312,6 +292,34 @@ public class PlatypusClientApplication {
         } catch (Throwable t) {
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, t);
             System.exit(0xff);
+        }
+    }
+
+    protected static void checkUrl(Config config) throws InvocationTargetException, InterruptedException {
+        if (config.url == null) {
+            Callable<URL> urlSelector = () -> {
+                ConnectionsSelector connectionsSelector = new ConnectionsSelector(null);
+                connectionsSelector.setVisible(true);
+                if (connectionsSelector.getReturnStatus() == ConnectionsSelector.RET_OK) {
+                    ConnectionSettings settings = ConnectionsSelector.getDefaultSettings();
+                    return new URL(null, settings.getUrl(), new URLStreamHandler() {
+                        
+                        @Override
+                        protected URLConnection openConnection(URL u) throws IOException {
+                            throw new UnsupportedOperationException("Not supported yet.");
+                        }
+                        
+                    });
+                }
+                return null;
+            };
+            EventQueue.invokeAndWait(() -> {
+                try {
+                    config.url = urlSelector.call();
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
         }
     }
 

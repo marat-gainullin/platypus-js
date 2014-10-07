@@ -8,7 +8,6 @@ import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
-import com.bearsoft.rowset.exceptions.FlowProviderPagedException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -16,9 +15,9 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.script.ScriptUtils;
 import java.sql.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +39,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
     protected DataSource dataSource;
     protected Converter converter;
     protected Fields expectedFields;
-    protected ExecutorService dataPuller;
+    protected Consumer<Runnable> dataPuller;
     protected boolean procedure;
 
     protected ResultSet lowLevelResults;
@@ -63,7 +62,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * a jdbc datasource.
      * @see DataSource
      */
-    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, ExecutorService aDataPuller, Converter aConverter, String aClause, Fields aExpectedFields) {
+    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, Consumer<Runnable> aDataPuller, Converter aConverter, String aClause, Fields aExpectedFields) {
         super(aJdbcSourceTag, aClause);
         dataSource = aDataSource;
         dataPuller = aDataPuller;
@@ -104,11 +103,14 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 }
             };
             if (onSuccess != null) {
-                dataPuller.submit(() -> {
+                dataPuller.accept(() -> {
                     try {
                         Rowset rs = doWork.call();
                         try {
-                            onSuccess.accept(rs);
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
+                                onSuccess.accept(rs);
+                            }
                         } catch (Exception ex) {
                             Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -277,11 +279,14 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 return null;
             };
             if (onSuccess != null) {
-                dataPuller.submit(() -> {
+                dataPuller.accept(() -> {
                     try {
                         Rowset rs = doWork.call();
                         try {
-                            onSuccess.accept(rs);
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
+                                onSuccess.accept(rs);
+                            }
                         } catch (Exception ex) {
                             Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                         }

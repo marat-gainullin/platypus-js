@@ -19,7 +19,6 @@ import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.PrincipalHost;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.LocalQueriesProxy;
@@ -40,7 +39,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PlatypusServerCore implements ContextHost, PrincipalHost, Application<SqlQuery> {
+public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     protected static PlatypusServerCore instance;
 
@@ -276,10 +275,5 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, Applicati
     @Override
     public String unpreparationContext() throws Exception {
         return databasesClient.getDbMetadataCache(null).getConnectionSchema();
-    }
-
-    @Override
-    public PlatypusPrincipal getPrincipal() {
-        return PlatypusPrincipal.getInstance();
     }
 }

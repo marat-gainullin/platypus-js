@@ -34,8 +34,8 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected ContextHost contextHost;
     protected List<Change> changeLog = new ArrayList<>();
 
-    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aJdbcSourceId, String aEntityName, DataSource aDataSource, ExecutorService aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
-        super(aJdbcSourceId, aDataSource, aDataPuller, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
+    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aDataSourceName, String aEntityName, DataSource aDataSource, Consumer<Runnable> aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
+        super(aDataSourceName, aDataSource, aDataPuller, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
         entityName = aEntityName;
         client = aClient;
         cache = aCache;

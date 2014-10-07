@@ -54,6 +54,10 @@ public class ScriptUtils {
     protected static JSObject collectionDefFunc;
     protected static JSObject isArrayFunc;
     protected static ScriptEngine engine;
+    // Thread locals
+    protected static ThreadLocal<Object> lock = new ThreadLocal<>();
+    protected static ThreadLocal<Object> request = new ThreadLocal();
+    protected static ThreadLocal<Object> response = new ThreadLocal();
 
     public static void init() {
         if (engine == null) {
@@ -63,6 +67,52 @@ public class ScriptUtils {
             } catch (ScriptException ex) {
                 Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+
+    /**
+     * Intended for frequent usse in try-finally idiom.
+     *
+     * @return JSObject to lock against.
+     */
+    public static Object getLock() {
+        return lock.get();
+    }
+
+    /**
+     * Intended for frequent usse in try-finally idiom.
+     *
+     * @param aLock
+     */
+    public static void setLock(Object aLock) {
+        if (aLock != null) {
+            lock.set(aLock);
+        } else {
+            lock.remove();
+        }
+    }
+
+    public static Object getRequest() {
+        return request.get();
+    }
+
+    public static void setRequest(Object aRequest) {
+        if (aRequest != null) {
+            request.set(aRequest);
+        } else {
+            request.remove();
+        }
+    }
+
+    public static Object getResponse() {
+        return response.get();
+    }
+
+    public static void setResponse(Object aResponse) {
+        if (aResponse != null) {
+            response.set(aResponse);
+        } else {
+            response.remove();
         }
     }
 

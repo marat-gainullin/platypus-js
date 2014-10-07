@@ -8,6 +8,7 @@ import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
+import com.eas.script.ScriptUtils;
 import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
 import com.eas.server.SessionRequestHandler;
@@ -144,13 +145,16 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                     assert session != null : "Platypus session missing";
                     session.setPrincipal(principal);
-                    currentRequest.set(request);
-                    currentResponse.set(response);                    
+
+                    PlatypusPrincipal.setInstance(session.getPrincipal());
+                    ScriptUtils.setRequest(request);
+                    ScriptUtils.setResponse(response);
                     try {
                         processPlatypusRequest(request, response, session, httpSession);
                     } finally {
-                        currentRequest.remove();
-                        currentResponse.remove();
+                        ScriptUtils.setRequest(null);
+                        ScriptUtils.setResponse(null);
+                        PlatypusPrincipal.setInstance(null);
                     }
                 }
             } else {

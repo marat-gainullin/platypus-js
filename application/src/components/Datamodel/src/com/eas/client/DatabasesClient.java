@@ -25,6 +25,8 @@ import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
+import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
 import java.sql.*;
@@ -66,7 +68,7 @@ public class DatabasesClient {
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
     protected QueriesProxy<SqlQuery> queries;
-    protected ExecutorService commitProcessor = Executors.newCachedThreadPool();
+    protected ExecutorService jdbcProcessor = Executors.newCachedThreadPool(new DeamonThreadFactory("jdbc-"));
 
     /**
      *
@@ -164,13 +166,13 @@ public class DatabasesClient {
      * @param aEntityName
      * @param aSqlClause
      * @param aExpectedFields
-     * @param aReadRoles
-     * @param aWriteRoles
      * @return FlowProvider created.
      * @throws Exception
      */
     public FlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), commitProcessor, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
+        return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), (Runnable aTask) -> {
+            startJdbcTask(aTask);
+        }, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
@@ -330,10 +332,13 @@ public class DatabasesClient {
             return rowsAffected;
         };
         if (onSuccess != null) {
-            commitProcessor.submit(() -> {
+            startJdbcTask(() -> {
                 try {
                     Integer affected = doWork.call();
-                    onSuccess.accept(affected);
+                    final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                    synchronized (lock) {
+                        onSuccess.accept(affected);
+                    }
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);
@@ -359,6 +364,27 @@ public class DatabasesClient {
             }
         }
         return mdCaches.get(aDatasourceName);
+    }
+
+    protected void startJdbcTask(Runnable aTask) {
+        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
+        Object closureRequest = ScriptUtils.getRequest();
+        Object closureResponse = ScriptUtils.getResponse();
+        Object closureLock = ScriptUtils.getLock();
+        jdbcProcessor.submit(() -> {
+            ScriptUtils.setLock(closureLock);
+            ScriptUtils.setRequest(closureRequest);
+            ScriptUtils.setResponse(closureResponse);
+            PlatypusPrincipal.setInstance(closurePrincipal);
+            try {
+                aTask.run();
+            } finally {
+                ScriptUtils.setLock(null);
+                ScriptUtils.setRequest(null);
+                ScriptUtils.setResponse(null);
+                PlatypusPrincipal.setInstance(null);
+            }
+        });
     }
 
     protected static class CommitProcess extends AsyncProcess<Integer, Integer> {
@@ -414,16 +440,23 @@ public class DatabasesClient {
                 ApplyProcess applyProcess = new ApplyProcess(aDatasourcesChangeLogs.size(), (List<ApplyResult> aApplyResults) -> {
                     assert aDatasourcesChangeLogs.size() == aApplyResults.size();
                     CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
-                        commited();
-                        onSuccess.accept(aRowsAffected);
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            commited();
+                            onSuccess.accept(aRowsAffected);
+                        }
+
                     }, (Exception aFailureCause) -> {
-                        rolledback();
-                        if (onFailure != null) {
-                            onFailure.accept(aFailureCause);
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            rolledback();
+                            if (onFailure != null) {
+                                onFailure.accept(aFailureCause);
+                            }
                         }
                     });
                     aApplyResults.stream().forEach((ApplyResult aResult) -> {
-                        commitProcessor.submit(() -> {
+                        startJdbcTask(() -> {
                             try {
                                 try {
                                     aResult.connection.commit();
@@ -469,6 +502,7 @@ public class DatabasesClient {
                     }
                 });
             } else {
+                commited();
                 onSuccess.accept(0);
             }
             return 0;
@@ -595,7 +629,7 @@ public class DatabasesClient {
             }
         };
         if (onSuccess != null) {
-            commitProcessor.submit(() -> {
+            startJdbcTask(() -> {
                 try {
                     ApplyResult applyResult = doWork.call();
                     try {// We have to handle commit exceptions and onSuccess.accept() exceptions separatly.

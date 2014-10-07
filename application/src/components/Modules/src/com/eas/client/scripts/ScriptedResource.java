@@ -277,6 +277,13 @@ public class ScriptedResource {
                         try {
                             URL sourceUrl = sourceFile.toURI().toURL();
                             ScriptUtils.exec(sourceUrl);
+                            if (files.isModule()) {
+                                JSObject jsConstr = ScriptUtils.lookupInGlobal(scriptOrModuleName);
+                                if (jsConstr instanceof JSObjectFacade) {
+                                    jsConstr = ((JSObjectFacade) jsConstr).getDelegate();
+                                }
+                                ScriptUtils.putInGlobal(scriptOrModuleName, new LockProviderConstructor(jsConstr));
+                            }
                             try {
                                 scriptsProceses.complete(null, null);
                             } catch (Exception ex) {

@@ -7,7 +7,6 @@ package com.eas.server;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.PrincipalHost;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -27,7 +26,7 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author pk, mg refactoring
  */
-public class Session implements PrincipalHost {
+public class Session {
 
     private final PlatypusServerCore serverCore;
     private final String sessionId;
@@ -116,7 +115,6 @@ public class Session implements PrincipalHost {
         return principal.getName();
     }
 
-    @Override
     public PlatypusPrincipal getPrincipal() {
         return principal;
     }
