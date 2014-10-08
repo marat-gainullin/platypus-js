@@ -446,7 +446,16 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 setCurrent(rows);
                                 currentToOriginal();
                                 invalidateFilters();
+                                // silent first
+                                if (!current.isEmpty()) {
+                                    currentRowPos = 1;
+                                }
                                 rowsetChangeSupport.fireRequeriedEvent();
+                                try {
+                                    onSuccess.accept(aRowset);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                             } catch (Exception ex) {
                                 if (onFailure != null) {
                                     onFailure.accept(ex);
@@ -473,6 +482,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                         setCurrent(rows);
                         currentToOriginal();
                         invalidateFilters();
+                        // silent first
+                        if (!current.isEmpty()) {
+                            currentRowPos = 1;
+                        }
                         rowsetChangeSupport.fireRequeriedEvent();
                     } else {
                         throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);

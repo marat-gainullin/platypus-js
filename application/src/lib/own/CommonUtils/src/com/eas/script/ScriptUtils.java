@@ -244,6 +244,12 @@ public class ScriptUtils {
         return publishedArgs;
     }
 
+    public static void locked(JSObject aFunction, final Object aLock) {
+        synchronized (aLock) {
+            aFunction.call(null, new Object[]{});
+        }
+    }
+
     /**
      * Extracts the comments tokens from a JavaScript source.
      *

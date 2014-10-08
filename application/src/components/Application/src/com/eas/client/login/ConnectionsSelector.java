@@ -44,7 +44,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     public static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
     public static final int RET_OK = 1;
     private int returnStatus = RET_CANCEL;
-    private final Action selectAction = new ConnectAction();
+    private final Action connectAction = new ConnectAction();
     private final Action cancelAction = new CancelAction();
     private final Action newConnectionAction = new NewConnectionAction();
     private final Action modifyConnectionAction = new ModifyConnectionAction();
@@ -87,7 +87,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private void initComponents() {
 
         pnlConnectionInfo = new javax.swing.JPanel();
-        lblConnections = new javax.swing.JLabel();
         scrollConnections = new javax.swing.JScrollPane();
         lstConnections = new javax.swing.JList();
         btnNewConnection = new javax.swing.JButton();
@@ -109,9 +108,12 @@ public class ConnectionsSelector extends javax.swing.JDialog {
             }
         });
 
-        lblConnections.setText(bundle.getString("LoginDialog.lblConnections.text")); // NOI18N
-
         lstConnections.setModel(connectionsListModel);
+        lstConnections.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lstConnectionsMouseClicked(evt);
+            }
+        });
         scrollConnections.setViewportView(lstConnections);
 
         btnNewConnection.setAction(newConnectionAction);
@@ -132,9 +134,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
             pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlConnectionInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblConnections)
-                    .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE))
+                .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnNewConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -145,24 +145,21 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         pnlConnectionInfoLayout.setVerticalGroup(
             pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
-                .addComponent(lblConnections)
-                .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(btnNewConnection)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnModifyConnection)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteConnection))
-                    .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addGap(16, 16, 16)
+                .addComponent(btnNewConnection)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnModifyConnection)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDeleteConnection)
+                .addContainerGap(140, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlConnectionInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrollConnections))
         );
 
         getContentPane().add(pnlConnectionInfo, java.awt.BorderLayout.CENTER);
 
-        btnOk.setAction(selectAction);
+        btnOk.setAction(connectAction);
         btnOk.setText(bundle.getString("Dialog.OKButton.text")); // NOI18N
 
         btnCancel.setAction(cancelAction);
@@ -197,11 +194,17 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private void formKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_formKeyTyped
     {//GEN-HEADEREND:event_formKeyTyped
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            selectAction.actionPerformed(new ActionEvent(this, 0, null));
+            connectAction.actionPerformed(new ActionEvent(this, 0, null));
         } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
             cancelAction.actionPerformed(new ActionEvent(this, 0, null));
         }
     }//GEN-LAST:event_formKeyTyped
+
+    private void lstConnectionsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstConnectionsMouseClicked
+        if (evt.getClickCount() > 1) {
+            connectAction.actionPerformed(null);
+        }
+    }//GEN-LAST:event_lstConnectionsMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
@@ -209,7 +212,6 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private javax.swing.JButton btnModifyConnection;
     private javax.swing.JButton btnNewConnection;
     private javax.swing.JButton btnOk;
-    private javax.swing.JLabel lblConnections;
     private javax.swing.JList lstConnections;
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlConnectionInfo;
@@ -257,14 +259,14 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     private class ConnectAction extends AbstractAction {
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent evt) {
             try {
                 ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
                 if (settings != null) {
                     setDefaultSettings(settings);
+                    updateConnectionsPreferences();
+                    doClose(RET_OK);
                 }
-                updateConnectionsPreferences();
-                doClose(RET_OK);
             } catch (Exception ex) {
                 Logger.getLogger(ConnectionsSelector.class.getName()).log(Level.SEVERE, "{0} ({1})", new Object[]{bundle.getString("ConnectionsSelector.CannotConnectMessage"), ex.getLocalizedMessage()});
                 JOptionPane.showMessageDialog(ConnectionsSelector.this, bundle.getString("ConnectionsSelector.CannotConnectMessage") + String.format(" (%s)", ex.getLocalizedMessage()), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);

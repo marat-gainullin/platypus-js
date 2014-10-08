@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.Undefined;
 
@@ -85,24 +86,35 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                     Object oFun = moduleInstance.getMember(methodName);
                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                                         List<Object> args = Arrays.asList(getRequest().getArguments());
-                                        args.add((Consumer<Object>) (Object t) -> {
-                                            if (!args.isEmpty()) {
-                                                onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(ScriptUtils.toJava(t)));
-                                            } else {
-                                                Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, BOTH_IO_MODELS_MSG, new Object[]{methodName, moduleName});
-                                            }
-                                        });
-                                        args.add((Consumer<Object>) (Object reason) -> {
-                                            if (!args.isEmpty()) {
-                                                reason = ScriptUtils.toJava(reason);
-                                                if (reason instanceof Exception) {
-                                                    onFailure.accept((Exception) reason);
+                                        args.add(new AbstractJSObject() {
+                                            @Override
+                                            public Object call(final Object thiz, final Object... largs) {
+                                                if (!args.isEmpty()) {
+                                                    Object returned = largs.length > 0 ? largs[0] : null;
+                                                    onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(ScriptUtils.toJava(returned)));
                                                 } else {
-                                                    onFailure.accept(new Exception(String.valueOf(reason)));
+                                                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, BOTH_IO_MODELS_MSG, new Object[]{methodName, moduleName});
                                                 }
-                                            } else {
-                                                Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, BOTH_IO_MODELS_MSG, new Object[]{methodName, moduleName});
+                                                return null;
                                             }
+
+                                        });
+                                        args.add(new AbstractJSObject() {
+                                            @Override
+                                            public Object call(final Object thiz, final Object... largs) {
+                                                if (!args.isEmpty()) {
+                                                    Object reason = largs.length > 0 ? ScriptUtils.toJava(largs[0]) : null;
+                                                    if (reason instanceof Exception) {
+                                                        onFailure.accept((Exception) reason);
+                                                    } else {
+                                                        onFailure.accept(new Exception(String.valueOf(reason)));
+                                                    }
+                                                } else {
+                                                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, BOTH_IO_MODELS_MSG, new Object[]{methodName, moduleName});
+                                                }
+                                                return null;
+                                            }
+
                                         });
                                         Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
                                         if (!(result instanceof Undefined)) {

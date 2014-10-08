@@ -38,7 +38,6 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
-import com.eas.util.ListenerRegistration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -650,6 +649,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        invalidate();
         internalExecute(aOnSuccess != null ? (Void v) -> {
             aOnSuccess.call(null, new Object[]{});
         } : null, aOnFailure != null ? (Exception ex) -> {

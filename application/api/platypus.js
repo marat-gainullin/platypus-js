@@ -36,6 +36,7 @@
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
+    var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
     var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
     var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
@@ -61,8 +62,31 @@
         }
         var func = this;
         var args = arguments;
+        //
+        var lock = ScriptUtilsClass.getLock();
+        var req = ScriptUtilsClass.getRequest();
+        var resp = ScriptUtilsClass.getResponse();
+        var principal = PlatypusPrincipalClass.getInstance();
+        //
         fixedThreadPool.execute(function() {
-            func.apply(func, args);
+            var oldLock = ScriptUtilsClass.getLock();
+            var oldReq = ScriptUtilsClass.getRequest();
+            var oldResp = ScriptUtilsClass.getResponse();
+            var oldPrincipal = PlatypusPrincipalClass.getInstance();
+            ScriptUtilsClass.setLock(lock);
+            ScriptUtilsClass.setRequest(req);
+            ScriptUtilsClass.setResponse(resp);
+            PlatypusPrincipalClass.setInstance(principal);
+            try{
+                ScriptUtilsClass.locked(function(){
+                    func.apply(func, args);
+                }, lock);
+            }finally{
+                ScriptUtilsClass.setLock(oldLock);
+                ScriptUtilsClass.setRequest(oldReq);
+                ScriptUtilsClass.setResponse(oldResp);
+                PlatypusPrincipalClass.setInstance(oldPrincipal);
+            }
         });
     };
     var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
@@ -151,8 +175,29 @@
         Function.prototype.invokeAndWait = function() {
             var func = this;
             var args = arguments;
+            //
+            var lock = ScriptUtilsClass.getLock();
+            var req = ScriptUtilsClass.getRequest();
+            var resp = ScriptUtilsClass.getResponse();
+            var principal = PlatypusPrincipalClass.getInstance();
+            //
             SwingUtilitiesClass.invokeAndWait(function() {
-                func.apply(func, args);
+                var oldLock = ScriptUtilsClass.getLock();
+                var oldReq = ScriptUtilsClass.getRequest();
+                var oldResp = ScriptUtilsClass.getResponse();
+                var oldPrincipal = PlatypusPrincipalClass.getInstance();
+                ScriptUtilsClass.setLock(lock);
+                ScriptUtilsClass.setRequest(req);
+                ScriptUtilsClass.setResponse(resp);
+                PlatypusPrincipalClass.setInstance(principal);
+                try{
+                    func.apply(func, args);
+                }finally{
+                    ScriptUtilsClass.setLock(oldLock);
+                    ScriptUtilsClass.setRequest(oldReq);
+                    ScriptUtilsClass.setResponse(oldResp);
+                    PlatypusPrincipalClass.setInstance(oldPrincipal);
+                }
             });
         };
         /** 
@@ -161,8 +206,29 @@
         Function.prototype.invokeLater = function() {
             var func = this;
             var args = arguments;
+            //
+            var lock = ScriptUtilsClass.getLock();
+            var req = ScriptUtilsClass.getRequest();
+            var resp = ScriptUtilsClass.getResponse();
+            var principal = PlatypusPrincipalClass.getInstance();
+            //
             SwingUtilitiesClass.invokeLater(function() {
-                func.apply(func, args);
+                var oldLock = ScriptUtilsClass.getLock();
+                var oldReq = ScriptUtilsClass.getRequest();
+                var oldResp = ScriptUtilsClass.getResponse();
+                var oldPrincipal = PlatypusPrincipalClass.getInstance();
+                ScriptUtilsClass.setLock(lock);
+                ScriptUtilsClass.setRequest(req);
+                ScriptUtilsClass.setResponse(resp);
+                PlatypusPrincipalClass.setInstance(principal);
+                try{
+                    func.apply(func, args);
+                }finally{
+                    ScriptUtilsClass.setLock(oldLock);
+                    ScriptUtilsClass.setRequest(oldReq);
+                    ScriptUtilsClass.setResponse(oldResp);
+                    PlatypusPrincipalClass.setInstance(oldPrincipal);
+                }
             });
         };
         /** 
@@ -177,10 +243,31 @@
             for (var i = 1; i < args.length; i++) {
                 userArgs.push(args[i]);
             }
+            //
+            var lock = ScriptUtilsClass.getLock();
+            var req = ScriptUtilsClass.getRequest();
+            var resp = ScriptUtilsClass.getResponse();
+            var principal = PlatypusPrincipalClass.getInstance();
+            //
             ScriptTimerTaskClass.schedule(function() {
                 SwingUtilitiesClass.invokeLater(function() {
                     try {
-                        func.apply(func, userArgs);
+                        var oldLock = ScriptUtilsClass.getLock();
+                        var oldReq = ScriptUtilsClass.getRequest();
+                        var oldResp = ScriptUtilsClass.getResponse();
+                        var oldPrincipal = PlatypusPrincipalClass.getInstance();
+                        ScriptUtilsClass.setLock(lock);
+                        ScriptUtilsClass.setRequest(req);
+                        ScriptUtilsClass.setResponse(resp);
+                        PlatypusPrincipalClass.setInstance(principal);
+                        try{
+                            func.apply(func, userArgs);
+                        }finally{
+                            ScriptUtilsClass.setLock(oldLock);
+                            ScriptUtilsClass.setRequest(oldReq);
+                            ScriptUtilsClass.setResponse(oldResp);
+                            PlatypusPrincipalClass.setInstance(oldPrincipal);
+                        }
                     } catch (e) {
                         P.Logger.severe(e);
                     }
@@ -737,11 +824,9 @@
         adapter.rowsetFiltered = function() {
             Array.prototype.splice.call(target, 0, target.length);
             var rows = rowset.current;
-            var publishedRows = [];
             for each (var aRow in rows) {
-                publishedRows.push(EngineUtilsClass.unwrap(aRow.getPublished()));
+                Array.prototype.push.call(target, EngineUtilsClass.unwrap(aRow.getPublished()));
             }
-            Array.prototype.push.apply(target, publishedRows);
         };
         adapter.rowsetRequeried = function(event) {
             adapter.rowsetFiltered(null);
