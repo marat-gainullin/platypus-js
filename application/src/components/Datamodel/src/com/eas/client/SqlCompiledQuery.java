@@ -17,7 +17,8 @@ import java.util.function.Consumer;
 /**
  * A compiled SQL query.
  *
- * <p>An instance of this class contains JDBC-compliant SQL query text with "?"
+ * <p>
+ * An instance of this class contains JDBC-compliant SQL query text with "?"
  * placeholders for parameters and all parameters values.</p>
  *
  * @author pk, mg
@@ -30,7 +31,6 @@ public class SqlCompiledQuery {
     protected String sqlClause;
     protected Parameters parameters;// 1 - Based    
     protected Fields expectedFields;// 1 - Based
-    protected FlowProvider flow;
     protected boolean procedure;
     private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
 
@@ -52,8 +52,9 @@ public class SqlCompiledQuery {
     /**
      * Creates an instance of compiled SQL query.
      *
-     * <p>This constructor is used when creating a compiled query out of
-     * SqlQuery, providing parameters values.</p>
+     * <p>
+     * This constructor is used when creating a compiled query out of SqlQuery,
+     * providing parameters values.</p>
      *
      * @param sql the SQL query text.
      * @param params parameters' values vector.
@@ -95,6 +96,7 @@ public class SqlCompiledQuery {
         basesProxy = aClient;
         createFlow();
     }
+
     /**
      * Creates an instance of compiled query.
      *
@@ -118,9 +120,6 @@ public class SqlCompiledQuery {
 
     public void setProcedure(boolean aValue) {
         procedure = aValue;
-        if (flow != null) {
-            flow.setProcedure(procedure);
-        }
     }
 
     public void setParameters(Parameters aValue) {
@@ -136,11 +135,14 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
-    private void createFlow() throws Exception {
+    private FlowProvider createFlow() throws Exception {
         if (basesProxy != null) {
-            flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
+            FlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
+            return flow;
+        } else {
+            return null;
         }
     }
 
@@ -154,17 +156,17 @@ public class SqlCompiledQuery {
      * @see Rowset
      */
     public Rowset executeQuery(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Rowset rs = new Rowset(flow);
+        Rowset rs = new Rowset(createFlow());
         rs.refresh(parameters, onSuccess, onFailure);
         /*
-        if(expectedFields != rs.getFields())
-            refineFields(rs);
-            */ 
+         if(expectedFields != rs.getFields())
+         refineFields(rs);
+         */
         return rs;
     }
-    
+
     public Rowset prepareRowset() throws Exception {
-        Rowset rowset = new Rowset(flow);
+        Rowset rowset = new Rowset(createFlow());
         rowset.setFields(expectedFields);
         return rowset;
     }
@@ -178,10 +180,6 @@ public class SqlCompiledQuery {
             command.parameters[i] = new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo());
         }
         return command;
-    }
-
-    public FlowProvider getFlow() {
-        return flow;
     }
 
     /**
