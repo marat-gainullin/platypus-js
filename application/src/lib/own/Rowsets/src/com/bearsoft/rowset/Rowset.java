@@ -12,7 +12,6 @@ import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.dataflow.DatabaseFlowProvider;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.events.RowsetChangeSupport;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.*;
@@ -26,7 +25,6 @@ import com.bearsoft.rowset.ordering.DefaultOrderersFactory;
 import com.bearsoft.rowset.ordering.OrderersFactory;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.util.ListenerRegistration;
 import java.beans.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -42,12 +40,11 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class Rowset implements PropertyChangeListener, VetoableChangeListener, TransactionListener {
+public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 
     public static final String BAD_FLOW_PROVIDER_RESULT_MSG = "Flow Provider must return at least an empty rowset";
     // support for data flows.
     protected FlowProvider flow;
-    protected ListenerRegistration transactionRegistration;
     // rowset's metadata
     protected Fields fields;
     protected Class<? extends Row> rowsClass = Row.class;
@@ -149,12 +146,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     // multi-tier transactions support
-    @Override
     public void commited() throws Exception {
-        if (transactionRegistration != null) {
-            transactionRegistration.remove();
-            transactionRegistration = null;
-        }
         final Set<RowsetListener> lrowsetListeners = rowsetChangeSupport.getRowsetListeners();
         rowsetChangeSupport.setRowsetListeners(null);
         try {
@@ -165,12 +157,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
         rowsetChangeSupport.fireSavedEvent();
     }
 
-    @Override
     public void rolledback() throws Exception {
-        if (transactionRegistration != null) {
-            transactionRegistration.remove();
-            transactionRegistration = null;
-        }
         final Set<RowsetListener> lrowsetListeners = rowsetChangeSupport.getRowsetListeners();
         rowsetChangeSupport.setRowsetListeners(null);
         try {
@@ -504,6 +491,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * will uninstall any installed filter and invalidate other filters, have
      * been created on this rowset.
      *
+     * @param onSuccess
+     * @param onFailure
      * @return Status of the next page fetching. True if some data have been
      * fetched, false otherwise.
      * @throws java.lang.Exception
@@ -1982,9 +1971,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
     protected void generateInsert(Row aRow) {
         if (flow != null && flow.getChangeLog() != null) {
-            if (transactionRegistration == null) {
-                transactionRegistration = flow.addTransactionListener(this);
-            }
             List<Change> changesLog = flow.getChangeLog();
             Insert insert = new Insert(flow.getEntityId());
             List<ChangeValue> data = new ArrayList<>();
@@ -2023,9 +2009,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
     protected void generateUpdate(int colIndex, Row aRow, Object oldValue, Object newValue) {
         if (fields != null && flow != null && flow.getChangeLog() != null) {
-            if (transactionRegistration == null) {
-                transactionRegistration = flow.addTransactionListener(this);
-            }
             List<Change> changesLog = flow.getChangeLog();
             Field field = fields.get(colIndex);
             boolean insertComplemented = tryToComplementInsert(aRow, field, newValue);
@@ -2040,9 +2023,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
     protected void generateDelete(Row aRow) {
         if (flow != null && flow.getChangeLog() != null) {
-            if (transactionRegistration == null) {
-                transactionRegistration = flow.addTransactionListener(this);
-            }
             List<Change> changesLog = flow.getChangeLog();
             Delete delete = new Delete(flow.getEntityId());
             delete.keys = generateChangeLogKeys(-1, aRow, null);

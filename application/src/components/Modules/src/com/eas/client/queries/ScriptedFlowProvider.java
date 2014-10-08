@@ -8,7 +8,6 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -16,7 +15,6 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.script.ScriptUtils;
-import com.eas.util.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -205,10 +203,5 @@ public class ScriptedFlowProvider implements FlowProvider {
     @Override
     public List<Change> getChangeLog() {
         return changeLog;
-    }
-
-    @Override
-    public ListenerRegistration addTransactionListener(TransactionListener tl) {
-        return client.addTransactionListener(tl);
     }
 }

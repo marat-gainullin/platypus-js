@@ -90,10 +90,4 @@ public interface FlowProvider {
      */
     public List<Change> getChangeLog();
 
-    /**
-     * Allows any client code to be informed about success or failure of a transaction.
-     * @param aListener
-     * @return 
-     */
-    public ListenerRegistration addTransactionListener(TransactionListener aListener);
 }

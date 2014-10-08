@@ -7,14 +7,12 @@ package com.eas.client.threetier;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.AppConnection;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.util.ListenerRegistration;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -43,11 +41,6 @@ public class PlatypusFlowProvider implements FlowProvider {
     @Override
     public List<Change> getChangeLog() {
         return client.getChangeLog();
-    }
-
-    @Override
-    public ListenerRegistration addTransactionListener(TransactionListener tl) {
-        return client.addTransactionListener(tl);
     }
 
     @Override

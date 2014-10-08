@@ -116,7 +116,10 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         }
                     } catch (Exception ex) {
                         if (onFailure != null) {
-                            onFailure.accept(ex);
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
+                                onFailure.accept(ex);
+                            }
                         }
                     }
                 });
@@ -292,7 +295,10 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         }
                     } catch (Exception ex) {
                         if (onFailure != null) {
-                            onFailure.accept(ex);
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
+                                onFailure.accept(ex);
+                            }
                         }
                     }
                 });

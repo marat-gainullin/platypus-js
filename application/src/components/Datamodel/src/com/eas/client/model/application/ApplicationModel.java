@@ -7,7 +7,6 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
@@ -22,7 +21,6 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
-import com.eas.util.ListenerRegistration;
 import java.io.*;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     protected Object published;
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
-    protected Set<TransactionListener> transactionListeners = new HashSet<>();
     protected QueriesProxy<Q> queries;
     protected RequeryProcess process;
 
@@ -184,13 +181,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         for (E entity : entities.values()) {
             entity.validateQuery();
         }
-    }
-
-    public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
-        transactionListeners.add(aListener);
-        return () -> {
-            transactionListeners.remove(aListener);
-        };
     }
 
     public Collection<E> entities() {
@@ -362,10 +352,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {
             commit((Integer aResult) -> {
-                saved();
+                commited();
                 aOnSuccess.call(null, new Object[]{});
             }, (Exception ex) -> {
-                rolledback();
+                rolledback(ex);
                 if (aOnFailure != null) {
                     aOnFailure.call(null, new Object[]{ex.getMessage()});
                 }
@@ -373,12 +363,16 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         } else {
             try {
                 commit(null, null);
-                saved();
+                commited();
             } catch (Exception ex) {
-                rolledback();
+                rolledback(ex);
                 throw ex;
             }
         }
+    }
+
+    protected void rolledback(Exception ex) {
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
     }
 
     public void save(JSObject aOnSuccess) throws Exception {
@@ -389,8 +383,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         save(null, null);
     }
 
-    public abstract int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
     private static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
@@ -398,30 +390,32 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)
-    public abstract void revert() throws Exception;
-
-    public abstract void saved();
-
-    public abstract void rolledback();
-
-    protected void fireCommited() {
-        try {
-            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                l.commited();
+    public void revert() {
+        entities.values().stream().forEach((E aEntity) -> {
+            try {
+                Rowset rowset = aEntity.getRowset();
+                if (rowset != null) {
+                    rowset.rolledback();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        });
     }
 
-    protected void fireReverted() {
-        try {
-            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                l.rolledback();
+    public abstract int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
+
+    public void commited() {
+        entities.values().stream().forEach((E aEntity) -> {
+            try {
+                Rowset rowset = aEntity.getRowset();
+                if (rowset != null) {
+                    rowset.commited();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        });
     }
 
     public final void requery() throws Exception {

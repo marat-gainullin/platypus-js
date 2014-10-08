@@ -75,19 +75,15 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     }
 
     @Override
-    public void saved() {
+    public void commited() {
         changeLog.clear();
-        fireCommited();
+        super.commited();
     }
 
     @Override
-    public void revert() throws Exception {
+    public void revert() {
         changeLog.clear();
-        fireReverted();
-    }
-
-    @Override
-    public void rolledback() {
+        super.revert();
     }
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})

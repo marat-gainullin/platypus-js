@@ -68,8 +68,4 @@ public class DelegatingFlowProvider implements FlowProvider {
         return delegate.getChangeLog();
     }
 
-    @Override
-    public ListenerRegistration addTransactionListener(TransactionListener aListener) {
-        return delegate.addTransactionListener(aListener);
-    }
 }

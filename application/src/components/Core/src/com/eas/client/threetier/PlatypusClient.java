@@ -8,7 +8,6 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
@@ -21,12 +20,10 @@ import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.cache.ServerDataStorage;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.RemoteQueriesProxy;
 import com.eas.client.threetier.requests.*;
-import com.eas.util.ListenerRegistration;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
@@ -54,7 +51,6 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     protected ReportsConfigs reports;
     protected ModelsDocuments models;
     protected List<Change> changeLog = new ArrayList<>();
-    protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
     public PlatypusClient(PlatypusConnection aConn) throws Exception {
         super();
@@ -108,13 +104,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         return url;
     }
 
-    public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
-        transactionListeners.add(aListener);
-        return () -> {
-            transactionListeners.remove(aListener);
-        };
-    }
-
+    @Override
     public List<Change> getChangeLog() {
         return changeLog;
     }
@@ -136,16 +126,10 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         }
     }
 
+    @Override
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Runnable doWork = () -> {
             changeLog.clear();
-            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                try {
-                    l.commited();
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         };
         CommitRequest request = new CommitRequest(changeLog);
         if (onSuccess != null) {
@@ -174,13 +158,6 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     protected void rollback() {
         try {
             changeLog.clear();
-            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                try {
-                    l.rolledback();
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
         }

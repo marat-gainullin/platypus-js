@@ -7,15 +7,12 @@ package com.eas.client;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
-import com.eas.util.ListenerRegistration;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
 
@@ -40,11 +37,6 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         client = aClient;
         cache = aCache;
         contextHost = aContextHost;
-    }
-
-    @Override
-    public ListenerRegistration addTransactionListener(TransactionListener tl) {
-        return client.addTransactionListener(tl);
     }
 
     @Override

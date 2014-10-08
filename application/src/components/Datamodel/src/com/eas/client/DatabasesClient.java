@@ -13,7 +13,6 @@ import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.jdbc.StatementsGenerator;
@@ -27,12 +26,10 @@ import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.ScriptUtils;
-import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -63,8 +60,6 @@ public class DatabasesClient {
     protected boolean autoFillMetadata = true;
     // callback interface for context
     protected ContextHost contextHost;
-    // transactions
-    protected final Set<TransactionListener> transactionListeners = new CopyOnWriteArraySet<>();
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
     protected QueriesProxy<SqlQuery> queries;
@@ -141,13 +136,6 @@ public class DatabasesClient {
         } else {
             throw new NamingException("Null datasource name is not allowed (Default datasource name is null also).");
         }
-    }
-
-    public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
-        transactionListeners.add(aListener);
-        return () -> {
-            transactionListeners.remove(aListener);
-        };
     }
 
     /**
@@ -341,7 +329,10 @@ public class DatabasesClient {
                     }
                 } catch (Exception ex) {
                     if (onFailure != null) {
-                        onFailure.accept(ex);
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            onFailure.accept(ex);
+                        }
                     }
                 }
             });
@@ -442,15 +433,13 @@ public class DatabasesClient {
                     CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
                         final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
                         synchronized (lock) {
-                            commited();
                             onSuccess.accept(aRowsAffected);
                         }
 
                     }, (Exception aFailureCause) -> {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            rolledback();
-                            if (onFailure != null) {
+                        if (onFailure != null) {
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
                                 onFailure.accept(aFailureCause);
                             }
                         }
@@ -485,7 +474,6 @@ public class DatabasesClient {
                             Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex1);
                         }
                     });
-                    rolledback();
                     if (onFailure != null) {
                         onFailure.accept(aFailureCause);
                     }
@@ -502,7 +490,6 @@ public class DatabasesClient {
                     }
                 });
             } else {
-                commited();
                 onSuccess.accept(0);
             }
             return 0;
@@ -517,29 +504,16 @@ public class DatabasesClient {
                     r.connection.commit();
                     rowsAffected += r.rowsAffected;
                 }
-                commited();
                 return rowsAffected;
             } catch (Exception ex) {
                 for (ApplyResult r : results) {
                     r.connection.rollback();
                 }
-                rolledback();
                 throw ex;
             } finally {
                 for (ApplyResult r : results) {
                     r.connection.close();
                 }
-            }
-        }
-    }
-
-    private void commited() {
-        TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
-        for (TransactionListener l : listeners) {
-            try {
-                l.commited();
-            } catch (Exception ex) {
-                Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -650,17 +624,6 @@ public class DatabasesClient {
     }
     protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
-
-    public void rolledback() {
-        TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
-        for (TransactionListener l : listeners) {
-            try {
-                l.rolledback();
-            } catch (Exception ex) {
-                Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
 
     public Rowset getDbTypesInfo(String aDatasourceId) throws Exception {
         Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceId));

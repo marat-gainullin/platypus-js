@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DatabasesClient;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -66,23 +69,19 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     }
 
     @Override
-    public void saved() {
+    public void commited() {
         changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
         });
-        fireCommited();
+        super.commited();
     }
 
     @Override
-    public void revert() throws Exception {
-        for (List<Change> changeLog : changeLogs.values()) {
+    public void revert() {
+        changeLogs.values().stream().forEach((changeLog) -> {
             changeLog.clear();
-        }
-        fireReverted();
-    }
-
-    @Override
-    public void rolledback() {
+        });
+        super.revert();
     }
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
