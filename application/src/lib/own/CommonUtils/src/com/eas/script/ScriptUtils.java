@@ -58,6 +58,7 @@ public class ScriptUtils {
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
     protected static ThreadLocal<Object> request = new ThreadLocal();
     protected static ThreadLocal<Object> response = new ThreadLocal();
+    protected static ThreadLocal<Object> session = new ThreadLocal();
 
     public static void init() {
         if (engine == null) {
@@ -113,6 +114,18 @@ public class ScriptUtils {
             response.set(aResponse);
         } else {
             response.remove();
+        }
+    }
+
+    public static Object getSession() {
+        return session.get();
+    }
+
+    public static void setSession(Object aSession) {
+        if (aSession != null) {
+            session.set(aSession);
+        } else {
+            session.remove();
         }
     }
 

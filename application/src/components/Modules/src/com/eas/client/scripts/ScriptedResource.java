@@ -352,7 +352,7 @@ public class ScriptedResource {
                     qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null);
                     sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
                 }
-                _require(structure.getClientDependencies().toArray(new String[]{}), required, null, null);
+                _require(structure.getClientDependencies().toArray(new String[]{}), required);
                 ScriptUtils.exec(sourceUrl);
             }
         }

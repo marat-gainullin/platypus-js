@@ -7,6 +7,7 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.ScriptedQuery;
 import com.eas.client.queries.ScriptedFlowProvider;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -41,6 +43,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     protected JSObject createModule(String aModuleName) throws Exception {
+        ScriptedResource.require(new String[]{aModuleName});
         return ScriptUtils.createModule(aModuleName);
     }
 
@@ -94,15 +97,43 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             Object oApply = module.getMember("apply");
                             if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
                                 JSObject applyFunction = (JSObject) oApply;
-                                ScriptUtils.toJava(applyFunction.call(module, new Object[]{ScriptUtils.toJs(aLog.toArray()), new Consumer<Integer>() {
-                                    
-                                    @Override
-                                    public void accept(Integer affected) {
-                                        aLog.clear();
-                                        onSuccess.accept(new ApplyResult(affected != null ? affected : 0, new DummySqlConnection()));
+                                ScriptUtils.toJava(applyFunction.call(module, new Object[]{ScriptUtils.toJs(aLog.toArray()),
+                                    new AbstractJSObject() {
+
+                                        @Override
+                                        public Object call(final Object thiz, final Object... args) {
+                                            int affected = 0;
+                                            if (args.length > 0) {
+                                                Object oAffected = ScriptUtils.toJava(args[0]);
+                                                if (oAffected instanceof Number) {
+                                                    affected = ((Number) oAffected).intValue();
+                                                }
+                                            }
+                                            aLog.clear();
+                                            onSuccess.accept(new ApplyResult(affected, new DummySqlConnection()));
+                                            return null;
+                                        }
+
+                                    },
+                                    new AbstractJSObject() {
+
+                                        @Override
+                                        public Object call(final Object thiz, final Object... args) {
+                                            if (onFailure != null) {
+                                                if (args.length > 0) {
+                                                    if (args[0] instanceof Exception) {
+                                                        onFailure.accept((Exception) args[0]);
+                                                    } else {
+                                                        onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                    }
+                                                } else {
+                                                    onFailure.accept(new Exception("No error information from apply method"));
+                                                }
+                                            }
+                                            return null;
+                                        }
                                     }
-                                    
-                                }, onFailure}));
+                                }));
                             } else {
                                 onFailure.accept(new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName)));
                             }
@@ -204,17 +235,21 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         validators.keySet().stream().forEach((validatorName) -> {
             Collection<String> datasourcesUnderControl = validators.get(validatorName);
             if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && aDatasourceName == null) || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
-                JSObject module = ScriptUtils.createModule(validatorName);
-                if (module != null) {
-                    Object oValidate = module.getMember("validate");
-                    if (oValidate instanceof JSObject) {
-                        JSObject validateFunction = (JSObject) oValidate;
-                        toBeCalled.add(new CallPoint(module, validateFunction));
+                try {
+                    JSObject module = createModule(validatorName);
+                    if (module != null) {
+                        Object oValidate = module.getMember("validate");
+                        if (oValidate instanceof JSObject) {
+                            JSObject validateFunction = (JSObject) oValidate;
+                            toBeCalled.add(new CallPoint(module, validateFunction));
+                        } else {
+                            Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
+                        }
                     } else {
-                        Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
+                        Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
                     }
-                } else {
-                    Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
+                } catch (Exception ex) {
+                    Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -225,18 +260,28 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                 ValidateProcess process = new ValidateProcess(toBeCalled.size(), onSuccess, onFailure);
                 toBeCalled.stream().forEach((v) -> {
                     v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()), aDatasourceName,
-                        new Consumer<Void>() {
+                        new AbstractJSObject() {
 
                             @Override
-                            public void accept(Void t) {
+                            public Object call(final Object thiz, final Object... args) {
                                 process.complete(null);
+                                return null;
                             }
                         },
-                        new Consumer<Exception>() {
+                        new AbstractJSObject() {
 
                             @Override
-                            public void accept(Exception ex) {
-                                process.complete(ex);
+                            public Object call(final Object thiz, final Object... args) {
+                                if (args.length > 0) {
+                                    if (args[0] instanceof Exception) {
+                                        process.complete((Exception) args[0]);
+                                    } else {
+                                        process.complete(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                    }
+                                } else {
+                                    process.complete(new Exception("No error information from validate method"));
+                                }
+                                return null;
                             }
                         }
                     });

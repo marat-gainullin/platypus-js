@@ -4,7 +4,6 @@
  */
 package com.eas.server.mina.platypus;
 
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
@@ -115,22 +114,12 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                         if (requestEnv.ticket == null) {
                             DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session session) -> {
                                 requestEnv.ticket = session.getId();
-                                PlatypusPrincipal.setInstance(session.getPrincipal());
-                                try {
-                                    ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
-                                } finally {
-                                    PlatypusPrincipal.setInstance(null);
-                                }
+                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
                             }, onError);
                         } else {
                             Session session = server.getSessionManager().get(requestEnv.ticket);
                             if (session != null) {
-                                PlatypusPrincipal.setInstance(session.getPrincipal());
-                                try {
-                                    ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
-                                } finally {
-                                    PlatypusPrincipal.setInstance(null);
-                                }
+                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
                             } else {
                                 onError.accept(new AccessControlException("Bad session ticket."));
                             }

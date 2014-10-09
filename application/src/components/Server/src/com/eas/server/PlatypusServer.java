@@ -10,6 +10,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ScriptDocument;
+import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.JsDoc;
@@ -58,8 +59,8 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
-        super(aIndexer, aModules, aQueries, aDatabasesClient, aTasks, aDefaultAppElement);
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
+        super(aIndexer, aModules, aQueries, aDatabasesClient, aTasks, aSecurityConfigs, aDefaultAppElement);
 
         if (aAddresses == null) {
             throw new NullPointerException("listenAddresses");
@@ -212,7 +213,7 @@ public class PlatypusServer extends PlatypusServerCore {
             Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.AcceptorsFactory");
             recieveFactory = acceptorsFactoryClass.newInstance();
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found (acceptors lookup).");
         } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -225,7 +226,7 @@ public class PlatypusServer extends PlatypusServerCore {
             Class<RetranslateFactory> retranslateFactoryClass = (Class<RetranslateFactory>) Class.forName("com.eas.sensors.ConnectorsFactory");
             factory = retranslateFactoryClass.getConstructor(new Class<?>[]{Map.class}).newInstance(portsNumWorkerThreads);
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found.");
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found (retranslators lookup).");
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -28,9 +28,14 @@ import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -51,10 +56,11 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             if (aApplicationUrl.toLowerCase().startsWith("file")) {
                 File f = new File(new URI(aApplicationUrl));
                 if (f.exists() && f.isDirectory()) {
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks));
+                    ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks, securityConfigs));
                     indexer.watch();
                     serverCoreDbClient = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true);
-                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, aStartAppElementName);
+                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, securityConfigs, aStartAppElementName);
                     serverCoreDbClient.setContextHost(instance);
                     ScriptedResource.init(instance);
                     instance.startServerTasks();
@@ -74,26 +80,27 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     protected String defaultAppElement;
     protected SessionManager sessionManager;
-    protected ScriptedDatabasesClient databasesClient;
+    protected ScriptedDatabasesClient basesProxy;
     protected ApplicationSourceIndexer indexer;
     protected ModulesProxy modules;
     protected QueriesProxy<SqlQuery> queries;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
     protected ScriptSecurityConfigs securityConfigs;
-    protected FormsDocuments forms;
-    protected ReportsConfigs reports;
-    protected ModelsDocuments models;
+    protected FormsDocuments forms = new FormsDocuments();
+    protected ReportsConfigs reports = new ReportsConfigs();
+    protected ModelsDocuments models = new ModelsDocuments();
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
         queries = aQueries;
-        databasesClient = aDatabasesClient;
+        basesProxy = aDatabasesClient;
         sessionManager = new SessionManager(this);
         defaultAppElement = aDefaultAppElement;
         tasks = aTasks;
+        securityConfigs = aSecurityConfigs;
     }
 
     public ApplicationSourceIndexer getIndexer() {
@@ -140,7 +147,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     }
 
     public DatabasesClient getDatabasesClient() {
-        return databasesClient;
+        return basesProxy;
     }
 
     public String getDefaultAppElement() {
@@ -149,7 +156,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     public boolean isUserInApplicationRole(String aUser, String aRole) throws Exception {
         for (String moduleName : extraAuthorizers) {
-            Object result = executeServerModuleMethod(moduleName, "isUserInRole", new Object[]{aUser, aRole});
+            Object result = executeServerModuleMethod(moduleName, "isUserInRole", new Object[]{aUser, aRole}, null, null);
             if (Boolean.TRUE.equals(result)) {
                 return true;
             }
@@ -164,10 +171,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @param aModuleName
      * @param aMethodName
      * @param aArgs
+     * @param onSuccess
+     * @param onFailure
      * @return
      * @throws Exception
      */
-    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs) throws Exception {
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
         JSObject module = getSessionManager().getSystemSession().getModule(aModuleName);
         PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
         PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
@@ -179,7 +188,45 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             if (module != null) {
                 Object oFunction = module.getMember(aMethodName);
                 if (oFunction instanceof JSObject && ((JSObject) oFunction).isFunction()) {
-                    return ScriptUtils.toJava(((JSObject) oFunction).call(module, ScriptUtils.toJs(aArgs)));
+                    if (onSuccess != null) {
+                        Object[] args = ScriptUtils.toJs(aArgs);
+                        List<Object> listArgs = Arrays.asList(args);
+                        listArgs.add(new AbstractJSObject() {
+
+                            @Override
+                            public Object call(final Object thiz, final Object... args) {
+                                Object result = null;
+                                if (args.length > 0) {
+                                    result = ScriptUtils.toJava(args[0]);
+                                }
+                                onSuccess.accept(result);
+                                return null;
+                            }
+
+                        });
+                        listArgs.add(new AbstractJSObject() {
+
+                            @Override
+                            public Object call(final Object thiz, final Object... args) {
+                                if (onFailure != null) {
+                                    if (args.length > 0) {
+                                        if (args[0] instanceof Exception) {
+                                            onFailure.accept((Exception) args[0]);
+                                        } else {
+                                            onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                        }
+                                    } else {
+                                        onFailure.accept(new Exception("No error information from " + aMethodName + " method"));
+                                    }
+                                }
+                                return null;
+                            }
+                        });
+                        ((JSObject) oFunction).call(module, listArgs.toArray());
+                        return null;
+                    } else {
+                        return ScriptUtils.toJava(((JSObject) oFunction).call(module, ScriptUtils.toJs(aArgs)));
+                    }
                 } else {
                     throw new Exception(String.format("Module %s has no function %s", aModuleName, aMethodName));
                 }
@@ -200,9 +247,29 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
         try {
             int startedTasks = 0;
-            for (String moduleId : tasks) {
-                if (startServerTask(moduleId)) {
-                    startedTasks++;
+            for (String moduleName : tasks) {
+                AppElementFiles files = modules.nameToFiles(moduleName);
+                if (files != null && files.isModule()) {
+                    ScriptDocument sDoc = securityConfigs.get(moduleName, files);
+                    for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
+                        switch (tag.getName()) {
+                            case JsDoc.Tag.AUTHORIZER_TAG:
+                                extraAuthorizers.add(moduleName);
+                                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Authorizer \"{0}\" registered", moduleName);
+                                break;
+                            case JsDoc.Tag.VALIDATOR_TAG:
+                                basesProxy.addValidator(moduleName, tag.getParams());
+                                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Validator \"{0}\" registered", moduleName);
+                                break;
+                            case JsDoc.Tag.RESIDENT_TAG:
+                                if (startResidentModule(moduleName)) {
+                                    startedTasks++;
+                                }
+                                break;
+                        }
+                    }
+                } else {
+                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Server task \"{0}\" is illegal (no module). Skipping it.", moduleName);
                 }
             }
             return startedTasks;
@@ -210,8 +277,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             PlatypusPrincipal.setInstance(oldPrincipal);
         }
     }
-    public static final String STARTING_RESIDENT_TASK_MSG = "Starting resident task \"%s\"";
-    public static final String STARTED_RESIDENT_TASK_MSG = "Resident task \"%s\" started successfully";
 
     /**
      * Starts a server task, initializing it with supplied module annotations.
@@ -220,48 +285,21 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @return Success status
      * @throws java.lang.Exception
      */
-    public boolean startServerTask(String aModuleName) throws Exception {
-        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleName));
+    public boolean startResidentModule(String aModuleName) throws Exception {
         ScriptedResource.require(new String[]{aModuleName});
-        AppElementFiles files = modules.nameToFiles(aModuleName);
-        if (files != null && files.isModule()) {
-            ScriptDocument sDoc = securityConfigs.get(aModuleName, files);
-            boolean stateless = false;
-            for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
-                switch (tag.getName()) {
-                    case JsDoc.Tag.STATELESS_TAG:
-                        stateless = true;
-                        break;
-                    case JsDoc.Tag.AUTHORIZER_TAG:
-                        extraAuthorizers.add(aModuleName);
-                        break;
-                    case JsDoc.Tag.VALIDATOR_TAG:
-                        stateless = true;
-                        databasesClient.addValidator(aModuleName, tag.getParams());
-                        break;
-                }
-            }
-            if (!stateless) {
-                try {
-                    JSObject module = ScriptUtils.getCachedModule(aModuleName);
-                    if (module != null) {
-                        sessionManager.getSystemSession().registerModule(module);
-                        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleName));
-                        return true;
-                    } else {
-                        Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (may be bad class name). Skipping it.", aModuleName));
-                        return false;
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Resident task \"%s\" caused an error: %s. Skipping it.", aModuleName, ex.getMessage()));
-                    return false;
-                }
+        Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Starting resident module \"{0}\"", aModuleName);
+        try {
+            JSObject module = ScriptUtils.getCachedModule(aModuleName);
+            if (module != null) {
+                sessionManager.getSystemSession().registerModule(module);
+                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Resident module \"{0}\" started successfully", aModuleName);
+                return true;
             } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer, validator or as an acceptor.", aModuleName));
+                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Resident module \"{0}\" is illegal (may be bad name). Skipping it.", aModuleName);
                 return false;
             }
-        } else {
-            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (no module). Skipping it.", aModuleName));
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, "Resident module \"{0}\" caused an error: {1}. Skipping it.", new Object[]{aModuleName, ex.getMessage()});
             return false;
         }
     }
@@ -274,6 +312,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     @Override
     public String unpreparationContext() throws Exception {
-        return databasesClient.getDbMetadataCache(null).getConnectionSchema();
+        return basesProxy.getDbMetadataCache(null).getConnectionSchema();
     }
 }

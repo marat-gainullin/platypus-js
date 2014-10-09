@@ -50,8 +50,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String EXCELX_CONTENT_TYPE = "application/xlsx";
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
-    private static final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
-    private static final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<>();
     private PlatypusServerCore serverCore;
 
     @Override
@@ -173,20 +171,6 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     public PlatypusServerCore getServerCore() {
         return serverCore;
-    }
-
-    /**
-     * @return The currentRequest
-     */
-    public static HttpServletRequest getCurrentRequest() {
-        return currentRequest.get();
-    }
-
-    /**
-     * @return The currentResponse
-     */
-    public static HttpServletResponse getCurrentResponse() {
-        return currentResponse.get();
     }
 
     /**

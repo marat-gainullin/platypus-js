@@ -17,12 +17,15 @@ public class DeamonThreadFactory implements ThreadFactory {
     private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
+    private final boolean defaultDeamon;
 
     public DeamonThreadFactory() {
-        this("");
+        this("", true);
     }
     
-    public DeamonThreadFactory(String aNamePrefix) {
+    public DeamonThreadFactory(String aNamePrefix, boolean aDefaultDeamon) {
+        super();
+        defaultDeamon = aDefaultDeamon;
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup()
                 : Thread.currentThread().getThreadGroup();
@@ -36,9 +39,7 @@ public class DeamonThreadFactory implements ThreadFactory {
         Thread t = new Thread(group, r,
                 namePrefix + threadNumber.getAndIncrement(),
                 0);
-        if (!t.isDaemon()) {
-            t.setDaemon(true);
-        }
+        t.setDaemon(defaultDeamon);
         if (t.getPriority() != Thread.NORM_PRIORITY) {
             t.setPriority(Thread.NORM_PRIORITY);
         }

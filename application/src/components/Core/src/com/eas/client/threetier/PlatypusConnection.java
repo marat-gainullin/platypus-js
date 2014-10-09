@@ -145,7 +145,7 @@ public abstract class PlatypusConnection implements AppConnection {
             File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
             keyPath.mkdirs();
             keyStoreFile.createNewFile();
-            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusClient.class.getResourceAsStream("emptyKeystore")) {
+            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
                 byte[] resData = BinaryUtils.readStream(keyIn, -1);
                 keyOut.write(resData);
             }
@@ -170,7 +170,7 @@ public abstract class PlatypusConnection implements AppConnection {
             File trustPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
             trustPath.mkdirs();
             trustStore.createNewFile();
-            try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusClient.class.getResourceAsStream("emptyTruststore")) {
+            try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusConnection.class.getResourceAsStream("emptyTruststore")) {
                 byte[] resData = BinaryUtils.readStream(trustIn, -1);
                 trustOut.write(resData);
             }

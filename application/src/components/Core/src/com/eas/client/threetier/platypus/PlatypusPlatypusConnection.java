@@ -21,8 +21,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,8 +45,10 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     private final int port;
     private String sessionTicket;
     private final SocketConnector connector;
-    private final RequestEncoder requestEncoder = new RequestEncoder();
-    private final ExecutorService requestsSender = Executors.newCachedThreadPool(new DeamonThreadFactory("platypus-client-"));
+    private final ThreadPoolExecutor requestsSender = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      10L, TimeUnit.SECONDS,
+                                      new SynchronousQueue<>(),
+                                      new DeamonThreadFactory("platypus-client-", false));
     private final ResourcePool<IoSession> sessionsPool = new BearResourcePool<IoSession>(10) {
 
         @Override
@@ -60,6 +63,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+        requestsSender.allowCoreThreadTimeOut(true);
         host = aUrl.getHost();
         port = aUrl.getPort();
         connector = new NioSocketConnector();
@@ -79,21 +83,25 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             }
 
             @Override
+            public void messageSent(IoSession session, Object message) throws Exception {
+                super.messageSent(session, message);
+            }
+
+            @Override
             public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
                 Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, cause);
                 session.close(true);
             }
 
         });
-        connector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(requestEncoder, new ResponseDecoder()));
-        final SslFilter sslFilter = new SslFilter(createSSLContext());
-        connector.getFilterChain().addLast("encryption", sslFilter);
+        connector.getFilterChain().addLast("encryption", new SslFilter(createSSLContext()));
+        connector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
     }
 
     @Override
     public URL getUrl() {
         try {
-            return new URL("platypus", host, port, null, new URLStreamHandler() {
+            return new URL("platypus", host, port, "", new URLStreamHandler() {
 
                 @Override
                 protected URLConnection openConnection(URL u) throws IOException {
@@ -125,14 +133,16 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     }
 
     private void startRequestTask(Runnable aTask){
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
+        Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
-        Object closureLock = ScriptUtils.getLock();
+        Object closureSession = ScriptUtils.getSession();
+        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
         requestsSender.submit(() -> {
             ScriptUtils.setLock(closureLock);
             ScriptUtils.setRequest(closureRequest);
             ScriptUtils.setResponse(closureResponse);
+            ScriptUtils.setSession(closureSession);
             PlatypusPrincipal.setInstance(closurePrincipal);
             try {
                 aTask.run();
@@ -140,6 +150,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                 ScriptUtils.setLock(null);
                 ScriptUtils.setRequest(null);
                 ScriptUtils.setResponse(null);
+                ScriptUtils.setSession(null);
                 PlatypusPrincipal.setInstance(null);
             }
         });

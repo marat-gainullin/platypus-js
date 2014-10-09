@@ -9,12 +9,15 @@ import com.eas.client.LocalModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.ScriptedResource;
+import com.eas.client.threetier.PlatypusConnection;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
+import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -187,27 +190,29 @@ public class ServerMain {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url (-url parameter) is required.");
         }
-        SSLContext ctx = createSSLContext();
+        SSLContext sslContext = createSSLContext();
 
         final Set<String> tasks = new HashSet<>();
         ScriptedDatabasesClient serverCoreDbClient;
         if (url.toLowerCase().startsWith("file")) {
             File f = new File(new URI(url));
             if (f.exists() && f.isDirectory()) {
-                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks));
+                ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks, securityConfigs));
                 indexer.watch();
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true);
                 PlatypusServer server = new PlatypusServer(indexer
                         , new LocalModulesProxy(indexer, new ModelsDocuments(), appElement)
                         , new LocalQueriesProxy(serverCoreDbClient, indexer)
                         , serverCoreDbClient
-                        , ctx
+                        , sslContext
                         , parseListenAddresses()
                         , parsePortsProtocols()
                         , parsePortsSessionIdleTimeouts()
                         , parsePortsSessionIdleCheckIntervals()
                         , parsePortsNumWorkerThreads()
                         , tasks
+                        , securityConfigs
                         , appElement);
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
@@ -313,9 +318,18 @@ public class ServerMain {
         KeyStore ks = KeyStore.getInstance("JKS");
         // get user password and file input stream
         char[] sslPassword = "keyword".toCharArray();
-        File keyStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
-        if (keyStore.exists()) {
-            try (InputStream is = new FileInputStream(keyStore)) {
+        File keyStoreFile = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
+        if (!keyStoreFile.exists()) {
+            File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
+            keyPath.mkdirs();
+            keyStoreFile.createNewFile();
+            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
+                byte[] resData = BinaryUtils.readStream(keyIn, -1);
+                keyOut.write(resData);
+            }
+        }
+        if (keyStoreFile.exists()) {
+            try (InputStream is = new FileInputStream(keyStoreFile)) {
                 ks.load(is, sslPassword);
             }
             final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
@@ -330,6 +344,15 @@ public class ServerMain {
         KeyStore ks = KeyStore.getInstance("JKS");
         char[] ksPassword = "trustword".toCharArray();
         File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
+        if (!trustStore.exists()) {
+            File trustPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
+            trustPath.mkdirs();
+            trustStore.createNewFile();
+            try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusConnection.class.getResourceAsStream("emptyTruststore")) {
+                byte[] resData = BinaryUtils.readStream(trustIn, -1);
+                trustOut.write(resData);
+            }
+        }
         if (trustStore.exists()) {
             try (InputStream is = new FileInputStream(trustStore)) {
                 ks.load(is, ksPassword);

@@ -31,7 +31,9 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +65,10 @@ public class DatabasesClient {
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
     protected QueriesProxy<SqlQuery> queries;
-    protected ExecutorService jdbcProcessor = Executors.newCachedThreadPool(new DeamonThreadFactory("jdbc-"));
+    protected ThreadPoolExecutor jdbcProcessor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      10L, TimeUnit.SECONDS,
+                                      new SynchronousQueue<>(),
+                                      new DeamonThreadFactory("jdbc-", false));
 
     /**
      *
@@ -75,6 +80,7 @@ public class DatabasesClient {
      */
     public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
         super();
+        jdbcProcessor.allowCoreThreadTimeOut(true);
         defaultDatasourceName = aDefaultDatasourceName;
         autoFillMetadata = aAutoFillMetadata;
     }
@@ -358,14 +364,16 @@ public class DatabasesClient {
     }
 
     protected void startJdbcTask(Runnable aTask) {
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
+        Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
-        Object closureLock = ScriptUtils.getLock();
+        Object closureSession = ScriptUtils.getSession();
+        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
         jdbcProcessor.submit(() -> {
             ScriptUtils.setLock(closureLock);
             ScriptUtils.setRequest(closureRequest);
             ScriptUtils.setResponse(closureResponse);
+            ScriptUtils.setSession(closureSession);
             PlatypusPrincipal.setInstance(closurePrincipal);
             try {
                 aTask.run();
@@ -373,6 +381,7 @@ public class DatabasesClient {
                 ScriptUtils.setLock(null);
                 ScriptUtils.setRequest(null);
                 ScriptUtils.setResponse(null);
+                ScriptUtils.setSession(null);
                 PlatypusPrincipal.setInstance(null);
             }
         });

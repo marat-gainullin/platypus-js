@@ -26,8 +26,9 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,10 +51,14 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     protected Map<String, Cookie> cookies = new ConcurrentHashMap<>();
-    private final ExecutorService requestsSender = Executors.newCachedThreadPool(new DeamonThreadFactory("http-client-"));
+    private final ThreadPoolExecutor requestsSender = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      10L, TimeUnit.SECONDS,
+                                      new SynchronousQueue<>(),
+                                      new DeamonThreadFactory("http-client-", false));
 
     public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+        requestsSender.allowCoreThreadTimeOut(true);
     }
 
     @Override
@@ -75,14 +80,16 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
     
     private void startRequestTask(Runnable aTask){
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
+        Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
-        Object closureLock = ScriptUtils.getLock();
+        Object closureSession = ScriptUtils.getSession();
+        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
         requestsSender.submit(() -> {
             ScriptUtils.setLock(closureLock);
             ScriptUtils.setRequest(closureRequest);
             ScriptUtils.setResponse(closureResponse);
+            ScriptUtils.setSession(closureSession);
             PlatypusPrincipal.setInstance(closurePrincipal);
             try {
                 aTask.run();
@@ -90,6 +97,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 ScriptUtils.setLock(null);
                 ScriptUtils.setRequest(null);
                 ScriptUtils.setResponse(null);
+                ScriptUtils.setSession(null);
                 PlatypusPrincipal.setInstance(null);
             }
         });

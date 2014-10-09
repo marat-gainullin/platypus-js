@@ -107,11 +107,11 @@ public class JsDoc {
         public static final String ACCEPTOR_TAG = "@acceptor";
         public static final String ACCEPTED_PROTOCOL_TAG = "@protocol";
         /**
-         * Annotation marks a module as en extra rols mapper
+         * Annotation marks a module as an extra rols mapper
          */
         public static final String AUTHORIZER_TAG = "@authorizer";
         /**
-         * Annotation marks a module as en extra rols mapper
+         * Annotation marks a module as an extra rols mapper
          */
         public static final String VALIDATOR_TAG = "@validator";
         /**

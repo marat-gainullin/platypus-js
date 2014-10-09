@@ -30,7 +30,7 @@ public class PositioningPacketReciever implements PacketReciever {
 
     @Override
     public Object received(Packet aPacket) throws Exception {
-        Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
+        Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket}, null, null);
         result = ScriptUtils.toJava(result);
         if (result != null) {
             assert result instanceof String;

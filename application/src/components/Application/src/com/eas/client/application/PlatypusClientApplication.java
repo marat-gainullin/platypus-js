@@ -19,7 +19,6 @@ import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
-import com.sun.awt.AWTUtilities;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.io.File;
@@ -64,9 +63,6 @@ public class PlatypusClientApplication {
     public static final String NON_RUNNABLE_APP_ELEMENT_MSG = "Application element specified (%s) is of non-runnable type. Nothing to do, so exit.";
     public static final String SHOW_FUNC_MISSING_MSG = "'show' function missing in %s instance";
     public static final String EXECUTE_FUNC_MISSING_MSG = "'execute' function missing in %s instance";
-    public static final String BAD_APPLICATION_PATH_MSG = "Application path must follow applicationpath (ap) parameter";
-    public static final String APPLICATION_PATH_NOT_EXISTS_MSG = "Application path does not exist.";
-    public static final String APPLICATION_PATH_NOT_DIRECTORY_MSG = "Application path must point to a directory.";
     public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application is located at: {0}";
     //
 

@@ -20,7 +20,7 @@
 
     // core imports
     var ExecutorsClass = Java.type("java.util.concurrent.Executors");
-    var Lock = Java.type("java.util.concurrent.locks.ReentrantLock");
+    var LockClass = Java.type("java.util.concurrent.locks.ReentrantLock");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
@@ -67,24 +67,26 @@
         var req = ScriptUtilsClass.getRequest();
         var resp = ScriptUtilsClass.getResponse();
         var principal = PlatypusPrincipalClass.getInstance();
+        var session = ScriptUtilsClass.getSession();
         //
         fixedThreadPool.execute(function() {
             var oldLock = ScriptUtilsClass.getLock();
             var oldReq = ScriptUtilsClass.getRequest();
             var oldResp = ScriptUtilsClass.getResponse();
+            var oldSession = ScriptUtilsClass.getSession();
             var oldPrincipal = PlatypusPrincipalClass.getInstance();
             ScriptUtilsClass.setLock(lock);
             ScriptUtilsClass.setRequest(req);
             ScriptUtilsClass.setResponse(resp);
+            ScriptUtilsClass.setSession(session);
             PlatypusPrincipalClass.setInstance(principal);
             try{
-                ScriptUtilsClass.locked(function(){
-                    func.apply(func, args);
-                }, lock);
+                func.apply(func, args);
             }finally{
                 ScriptUtilsClass.setLock(oldLock);
                 ScriptUtilsClass.setRequest(oldReq);
                 ScriptUtilsClass.setResponse(oldResp);
+                ScriptUtilsClass.setSession(oldSession);
                 PlatypusPrincipalClass.setInstance(oldPrincipal);
             }
         });
@@ -169,38 +171,6 @@
         var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
         var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
         /** 
-         * Swing invokeAndWait - invokes given function in AWT event thread
-         * and waits for it's completion
-         */
-        Function.prototype.invokeAndWait = function() {
-            var func = this;
-            var args = arguments;
-            //
-            var lock = ScriptUtilsClass.getLock();
-            var req = ScriptUtilsClass.getRequest();
-            var resp = ScriptUtilsClass.getResponse();
-            var principal = PlatypusPrincipalClass.getInstance();
-            //
-            SwingUtilitiesClass.invokeAndWait(function() {
-                var oldLock = ScriptUtilsClass.getLock();
-                var oldReq = ScriptUtilsClass.getRequest();
-                var oldResp = ScriptUtilsClass.getResponse();
-                var oldPrincipal = PlatypusPrincipalClass.getInstance();
-                ScriptUtilsClass.setLock(lock);
-                ScriptUtilsClass.setRequest(req);
-                ScriptUtilsClass.setResponse(resp);
-                PlatypusPrincipalClass.setInstance(principal);
-                try{
-                    func.apply(func, args);
-                }finally{
-                    ScriptUtilsClass.setLock(oldLock);
-                    ScriptUtilsClass.setRequest(oldReq);
-                    ScriptUtilsClass.setResponse(oldResp);
-                    PlatypusPrincipalClass.setInstance(oldPrincipal);
-                }
-            });
-        };
-        /** 
          * invokeLater - invokes given function in AWT event thread
          */
         Function.prototype.invokeLater = function() {
@@ -210,23 +180,29 @@
             var lock = ScriptUtilsClass.getLock();
             var req = ScriptUtilsClass.getRequest();
             var resp = ScriptUtilsClass.getResponse();
+            var session = ScriptUtilsClass.getSession();
             var principal = PlatypusPrincipalClass.getInstance();
             //
             SwingUtilitiesClass.invokeLater(function() {
                 var oldLock = ScriptUtilsClass.getLock();
                 var oldReq = ScriptUtilsClass.getRequest();
                 var oldResp = ScriptUtilsClass.getResponse();
+                var oldSession = ScriptUtilsClass.getSession();
                 var oldPrincipal = PlatypusPrincipalClass.getInstance();
                 ScriptUtilsClass.setLock(lock);
                 ScriptUtilsClass.setRequest(req);
                 ScriptUtilsClass.setResponse(resp);
+                ScriptUtilsClass.setSession(session);
                 PlatypusPrincipalClass.setInstance(principal);
                 try{
-                    func.apply(func, args);
+                    ScriptUtilsClass.locked(function(){
+                        func.apply(func, args);
+                    }, lock);
                 }finally{
                     ScriptUtilsClass.setLock(oldLock);
                     ScriptUtilsClass.setRequest(oldReq);
                     ScriptUtilsClass.setResponse(oldResp);
+                    ScriptUtilsClass.setSession(oldSession);
                     PlatypusPrincipalClass.setInstance(oldPrincipal);
                 }
             });
@@ -247,6 +223,7 @@
             var lock = ScriptUtilsClass.getLock();
             var req = ScriptUtilsClass.getRequest();
             var resp = ScriptUtilsClass.getResponse();
+            var session = ScriptUtilsClass.getSession();
             var principal = PlatypusPrincipalClass.getInstance();
             //
             ScriptTimerTaskClass.schedule(function() {
@@ -255,10 +232,12 @@
                         var oldLock = ScriptUtilsClass.getLock();
                         var oldReq = ScriptUtilsClass.getRequest();
                         var oldResp = ScriptUtilsClass.getResponse();
+                        var oldSession = ScriptUtilsClass.getSession();
                         var oldPrincipal = PlatypusPrincipalClass.getInstance();
                         ScriptUtilsClass.setLock(lock);
                         ScriptUtilsClass.setRequest(req);
                         ScriptUtilsClass.setResponse(resp);
+                        ScriptUtilsClass.setSession(session);
                         PlatypusPrincipalClass.setInstance(principal);
                         try{
                             func.apply(func, userArgs);
@@ -266,6 +245,7 @@
                             ScriptUtilsClass.setLock(oldLock);
                             ScriptUtilsClass.setRequest(oldReq);
                             ScriptUtilsClass.setResponse(oldResp);
+                            ScriptUtilsClass.setSession(oldSession);
                             PlatypusPrincipalClass.setInstance(oldPrincipal);
                         }
                     } catch (e) {
@@ -745,8 +725,14 @@
     var cached = {};
     function getModule(aName) {
         if (serverCoreClass) {
+            var session = ScriptUtilsClass.getSession();
+            if (session !== null) {
+                var sessionModule = session.getModule(aName);
+                if (sessionModule)
+                    return sessionModule;
+            }
             var core = serverCoreClass.getInstance();
-            var session = core.getSessionManager().getCurrentSession();
+            session = core.getSessionManager().getSystemSession();
             if (session !== null) {
                 var sessionModule = session.getModule(aName);
                 if (sessionModule)
@@ -758,7 +744,7 @@
             if (c) {
                 cached[aName] = new c();
             } else {
-                ScriptedResourceClass.executeScriptResource(aName);
+                P.require(aName);
                 c = global[aName];
                 if (c) {
                     cached[aName] = new c();
@@ -774,7 +760,7 @@
         if (c) {
             return new c();
         } else {
-            ScriptedResourceClass.executeScriptResource(aName);
+            P.require(aName);
             c = global[aName];
             if (c) {
                 return new c();

@@ -323,22 +323,23 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         @Override
         public void actionPerformed(ActionEvent e) {
             int selectedIndex = lstConnections.getSelectedIndex();
-            assert selectedIndex >= 0; //we won't be enabled otherwise
-            ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(selectedIndex);
-            ConnectionSettingsEditor dlg = new ConnectionSettingsEditor();
-            dlg.setUrl(settings.getUrl());
-            dlg.setConnectionName(settings.getName());
-            dlg.setVisible(true);
-            int retVal = dlg.getReturnStatus();
-            if (retVal == ConnectionSettingsEditor.RET_OK) {
-                try {
-                    settings.setUrl(dlg.getUrl());
-                    settings.setName(dlg.getConnectionName());
-                    connectionsListModel.fireContentsChanged(selectedIndex);
-                    updateConnectionsPreferences();
-                    lstConnections.requestFocus();
-                } catch (Exception ex) {
-                    Logger.getLogger(ConnectionsSelector.class.getName()).log(Level.SEVERE, null, ex);
+            if (selectedIndex >= 0) {
+                ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(selectedIndex);
+                ConnectionSettingsEditor dlg = new ConnectionSettingsEditor();
+                dlg.setUrl(settings.getUrl());
+                dlg.setConnectionName(settings.getName());
+                dlg.setVisible(true);
+                int retVal = dlg.getReturnStatus();
+                if (retVal == ConnectionSettingsEditor.RET_OK) {
+                    try {
+                        settings.setUrl(dlg.getUrl());
+                        settings.setName(dlg.getConnectionName());
+                        connectionsListModel.fireContentsChanged(selectedIndex);
+                        updateConnectionsPreferences();
+                        lstConnections.requestFocus();
+                    } catch (Exception ex) {
+                        Logger.getLogger(ConnectionsSelector.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
