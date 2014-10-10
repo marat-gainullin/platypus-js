@@ -44,17 +44,18 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
             // Actual work
             serverCore.getModules().getModule(moduleOrResourceName, (ModuleStructure aStructure) -> {
                 ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response();
-                if (aStructure.getParts().getFiles().size() > 1) {// If there is a single file, the request is about a plain resource
-                    String localPath = serverCore.getModules().getLocalPath();
-                    aStructure.getParts().getFiles().stream().forEach((File f) -> {
-                        String resourceName = f.getPath().substring(localPath.length());
-                        resourceName = resourceName.replace("\\", "/");
-                        resp.getStructure().add(resourceName);
-                    });
-                    resp.getClientDependencies().addAll(aStructure.getClientDependencies());
-                    resp.getServerDependencies().addAll(aStructure.getServerDependencies());
-                    resp.getQueryDependencies().addAll(aStructure.getQueryDependencies());
-                }
+                String localPath = serverCore.getModules().getLocalPath();
+                aStructure.getParts().getFiles().stream().forEach((File f) -> {
+                    String resourceName = f.getPath().substring(localPath.length());
+                    resourceName = resourceName.replace("\\", "/");
+                    if (resourceName.startsWith("/")) {
+                        resourceName = resourceName.substring(1);
+                    }
+                    resp.getStructure().add(resourceName);
+                });
+                resp.getClientDependencies().addAll(aStructure.getClientDependencies());
+                resp.getServerDependencies().addAll(aStructure.getServerDependencies());
+                resp.getQueryDependencies().addAll(aStructure.getQueryDependencies());
                 onSuccess.accept(resp);
             }, onFailure);
         } catch (Exception ex) {

@@ -5,9 +5,9 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.eas.client.threetier.requests.ErrorResponse;
-import com.eas.client.threetier.requests.PlatypusResponsesFactory;
+import com.eas.client.threetier.Response;
 import com.eas.proto.CoreTags;
+import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoUtil;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -25,8 +25,6 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
         boolean ordinaryResponse = false;
         boolean errorResponse = false;
         boolean data = false;
-        int dataStart = -1;
-        int dataSize = -1;
         int start = in.position();
         int tag, tagSize;
         String ticket = null;
@@ -50,12 +48,11 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
                 ticket = new String(ticketBuf, ProtoUtil.CHARSET_4_STRING_SERIALIZATION_NAME);
             } else if (tag == RequestsTags.TAG_RESPONSE_DATA) {
                 data = true;
-                dataStart = in.position();
-                dataSize = tagSize;
             } else {
                 in.skip(tagSize);
             }
         } while (tag != RequestsTags.TAG_RESPONSE_END);
+        
         if (!ordinaryResponse && !errorResponse) {
             throw new IllegalStateException("Responses should contain ordinary response marker or error response marker tag");
         }
@@ -64,17 +61,19 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
         }
         PlatypusPlatypusConnection.RequestCallback rqc = (PlatypusPlatypusConnection.RequestCallback) session.getAttribute(PlatypusPlatypusConnection.RequestCallback.class.getSimpleName());
         rqc.requestEnv.ticket = ticket;
-        if (errorResponse) {
-            rqc.response = new ErrorResponse();
-        } else {
-            PlatypusResponsesFactory respFactory = new PlatypusResponsesFactory();
-            rqc.requestEnv.request.accept(respFactory);
-            rqc.response = respFactory.getResponse();
+        int position = in.position();
+        int limit = in.limit();
+        try {
+            in.position(start);
+            in.limit(position);
+            final ProtoReader responseReader = new ProtoReader(in.slice().asInputStream());
+            Response response = PlatypusResponseReader.read(responseReader, rqc.requestEnv.request);
+            out.write(response);
+            return true;
+        } finally {
+            in.position(position);
+            in.limit(limit);
         }
-        PlatypusResponseReader respReader = new PlatypusResponseReader(in.array(), dataStart + in.arrayOffset(), dataSize);
-        rqc.response.accept(respReader);
-        out.write(rqc.response);
-        return true;
     }
 
 }

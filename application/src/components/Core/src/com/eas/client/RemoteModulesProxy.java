@@ -34,7 +34,7 @@ public class RemoteModulesProxy implements ModulesProxy {
     public RemoteModulesProxy(PlatypusConnection aConn) {
         super();
         conn = aConn;
-        basePath = makePathInUserProfile(conn.getUrl().hashCode() + "");
+        basePath = makePathInUserProfile(Math.abs(conn.getUrl().hashCode()) + "");
     }
 
     @Override
@@ -51,30 +51,18 @@ public class RemoteModulesProxy implements ModulesProxy {
                     structure.getClientDependencies().addAll(structureResp.getClientDependencies());
                     structure.getServerDependencies().addAll(structureResp.getServerDependencies());
                     structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
-                    boolean resource = structureResp.getStructure().isEmpty();
-                    if (resource) {
-                        // aName is the same with resource name
-                        String cachePathName = constructResourcePath(aName);
+                    for (String resourceName : structureResp.getStructure()) {
+                        String cachePathName = constructResourcePath(resourceName);
                         File cachePath = new File(cachePathName);
-                        syncResource(cachePath, aName, (Void aVoid) -> {
-                            structure.getParts().addFile(cachePath);
-                            id2files.put(aName, structure.getParts());
-                            onSuccess.accept(structure);
-                        }, onFailure);
-                    } else {
-                        for (String resourceName : structureResp.getStructure()) {
-                            String cachePathName = constructResourcePath(resourceName);
-                            File cachePath = new File(cachePathName);
-                            syncResource(cachePath, resourceName, (Void aVoid) -> {
-                                synchronized (structure) {
-                                    structure.getParts().addFile(cachePath);
-                                    if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
-                                        id2files.put(aName, structure.getParts());
-                                        onSuccess.accept(structure);
-                                    }
+                        syncResource(cachePath, resourceName, (Void aVoid) -> {
+                            synchronized (structure) {
+                                structure.getParts().addFile(cachePath);
+                                if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
+                                    id2files.put(aName, structure.getParts());
+                                    onSuccess.accept(structure);
                                 }
-                            }, onFailure);
-                        }
+                            }
+                        }, onFailure);
                     }
                 } catch (Exception ex) {
                     if (onFailure != null) {
@@ -126,6 +114,7 @@ public class RemoteModulesProxy implements ModulesProxy {
                 cachePath.createNewFile();
                 try (OutputStream out = new BufferedOutputStream(new FileOutputStream(cachePath))) {
                     out.write(resourceResp.getContent());
+                    out.flush();
                 }
                 cachePath.setLastModified(resourceResp.getTimeStamp().getTime());
             }

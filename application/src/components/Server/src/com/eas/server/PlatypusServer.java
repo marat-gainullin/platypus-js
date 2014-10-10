@@ -87,7 +87,7 @@ public class PlatypusServer extends PlatypusServerCore {
         assert listenAddresses != null : "listenAddresses != null";
         assert listenAddresses.length > 0 : "listenAddresses.length > 0";
     }
-    
+
     private String findAcceptorModule(String aProtocol) throws Exception {
         String lastAcceptor = null;
         for (String taskModuleName : tasks) {

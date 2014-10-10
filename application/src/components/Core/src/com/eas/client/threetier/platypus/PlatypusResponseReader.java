@@ -11,6 +11,8 @@ import com.eas.client.ServerModuleInfo;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.PlatypusRowsetReader;
+import com.eas.client.threetier.Request;
+import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
@@ -23,6 +25,7 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
+import com.eas.client.threetier.requests.PlatypusResponsesFactory;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
@@ -43,35 +46,62 @@ import java.util.Set;
 public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     protected byte[] bytes;
-    protected int offset;
-    protected int size;
 
     public PlatypusResponseReader(byte[] aBytes) {
-        this(aBytes, 0, aBytes.length);
-    }
-
-    public PlatypusResponseReader(byte[] aBytes, int aOffset, int aSize) {
         super();
         bytes = aBytes;
-        offset = aOffset;
-        size = aSize;
+    }
+
+    public static Response read(ProtoReader reader, Request aRequest) throws Exception {
+        boolean ordinaryReponse = false;
+        boolean errorResponse = false;
+        byte[] data = null;
+        do {
+            switch (reader.getNextTag()) {
+                case RequestsTags.TAG_RESPONSE:
+                    ordinaryReponse = true;
+                    break;
+                case RequestsTags.TAG_ERROR_RESPONSE:
+                    errorResponse = true;
+                    break;
+                case RequestsTags.TAG_RESPONSE_DATA:
+                    data = reader.getSubStreamData();
+                    break;
+                case RequestsTags.TAG_RESPONSE_END:
+                    if (data != null) {
+                        Response rsp;
+                        if (errorResponse) {
+                            rsp = new ErrorResponse();
+                        } else {
+                            assert ordinaryReponse;
+                            PlatypusResponsesFactory factory = new PlatypusResponsesFactory();
+                            aRequest.accept(factory);
+                            rsp = factory.getResponse();
+                        }
+                        PlatypusResponseReader requestReader = new PlatypusResponseReader(data);
+                        rsp.accept(requestReader);
+                        return rsp;
+                    } else {
+                        throw new NullPointerException("Response data must present");
+                    }
+            }
+        } while (reader.getCurrentTag() != CoreTags.TAG_EOF && reader.getCurrentTag() != RequestsTags.TAG_REQUEST_END);
+        return null;
     }
 
     @Override
     public void visit(ErrorResponse rsp) throws Exception {
-        if (bytes != null) {
-            final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes, offset, size);
-            if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
-                rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
-            }
-            if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE)) {
-                rsp.setSqlErrorCode(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE).getInt());
-            }
-            if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE)) {
-                rsp.setSqlState(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE).getString());
-            }
-            rsp.setAccessControl(input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL));
+        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
+            rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
         }
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE)) {
+            rsp.setSqlErrorCode(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE).getInt());
+        }
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE)) {
+            rsp.setSqlState(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE).getString());
+        }
+        rsp.setAccessControl(input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL));
     }
 
     @Override

@@ -17,15 +17,10 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
-import com.eas.util.BinaryUtils;
-import com.eas.util.StringUtils;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.*;
-import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -155,8 +150,8 @@ public class ServerMain {
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_ELEMENT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
-                    i += 2;
                     appElement = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(BAD_DEFAULT_APPLICATION_ELEMENT_MSG);
                 }
@@ -190,7 +185,7 @@ public class ServerMain {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url (-url parameter) is required.");
         }
-        SSLContext sslContext = createSSLContext();
+        SSLContext sslContext = PlatypusConnection.createSSLContext();
 
         final Set<String> tasks = new HashSet<>();
         ScriptedDatabasesClient serverCoreDbClient;
@@ -313,7 +308,7 @@ public class ServerMain {
         }
         return sessionIdleCheckIntervalsMap;
     }
-
+/*
     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
         KeyStore ks = KeyStore.getInstance("JKS");
         // get user password and file input stream
@@ -370,4 +365,5 @@ public class ServerMain {
         context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
         return context;
     }
+    */
 }

@@ -27,7 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.SSLContext;
 import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -53,10 +55,10 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
         @Override
         protected IoSession createResource() throws Exception {
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "Connecting to {0}:{1}.", new Object[]{host, port});
-            ConnectFuture onConnect = connector.connect(new InetSocketAddress(host, port));
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+            ConnectFuture onConnect = connector.connect();
             onConnect.awaitUninterruptibly();
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "Connected to  {0}:{1}.", new Object[]{host, port});
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connected to  {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
             return onConnect.getSession();
         }
     };
@@ -67,6 +69,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         host = aUrl.getHost();
         port = aUrl.getPort();
         connector = new NioSocketConnector();
+        connector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
         connector.setHandler(new IoHandlerAdapter() {
 
             @Override
@@ -74,8 +77,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                 RequestCallback rqc = (RequestCallback) session.getAttribute(RequestCallback.class.getSimpleName());
                 session.removeAttribute(RequestCallback.class.getSimpleName());
                 sessionsPool.returnResource(session);
-                Response response = (Response) message;
-                rqc.response = response;
+                rqc.response = (Response) message;
                 rqc.requestEnv.request.setDone(true);
                 synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
                     rqc.requestEnv.request.notifyAll();
@@ -94,7 +96,10 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             }
 
         });
-        connector.getFilterChain().addLast("encryption", new SslFilter(createSSLContext()));
+        SSLContext sslContext = createSSLContext();
+        SslFilter sslFilter = new SslFilter(sslContext);
+        sslFilter.setUseClientMode(true);
+        connector.getFilterChain().addLast("encryption", sslFilter);
         connector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
     }
 
@@ -165,6 +170,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     rqc.requestEnv.request.setDone(false);
                     rqc.requestEnv.ticket = sessionTicket;
                     // enqueue network work
+                    session.setAttribute(RequestCallback.class.getSimpleName(), rqc);
                     session.write(rqc.requestEnv);
                     // wait completion from the network subsystem
                     synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods

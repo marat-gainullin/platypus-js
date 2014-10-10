@@ -137,6 +137,13 @@ public abstract class PlatypusConnection implements AppConnection {
     }
 
     protected static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
+        /*
+         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);     
+         ks.load(null, null);
+         final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+         keyManagerFactory.init(ks, "changeit".toCharArray());
+         return keyManagerFactory.getKeyManagers();
+         */
         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         // get user password and file input stream
         char[] password = DEFAULT_KEYSTORE_PASSWORD.toCharArray();
@@ -145,7 +152,7 @@ public abstract class PlatypusConnection implements AppConnection {
             File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
             keyPath.mkdirs();
             keyStoreFile.createNewFile();
-            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
+            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("defaultKeystore")) {
                 byte[] resData = BinaryUtils.readStream(keyIn, -1);
                 keyOut.write(resData);
             }
@@ -163,6 +170,13 @@ public abstract class PlatypusConnection implements AppConnection {
     }
 
     protected static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
+        /*
+         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
+         ks.load(null, null);
+         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(DEFAULT_TRUST_ALGORITHM);
+         trustManagerFactory.init(ks);
+         return trustManagerFactory.getTrustManagers();
+         */
         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         char[] password = getTrustStorePassword();
         File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
@@ -188,6 +202,7 @@ public abstract class PlatypusConnection implements AppConnection {
     }
 
     public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
+        //return SSLContext.getDefault();
         SSLContext context = SSLContext.getInstance(DEFAULT_SSL_PROTOCOL);
         context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance(DEFAULT_SECURE_RANDOM_ALGORITHM));
         return context;

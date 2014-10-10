@@ -68,13 +68,14 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     data = reader.getSubStreamData();
                     break;
                 case RequestsTags.TAG_REQUEST_END:
-                    if (type == null) {
-                        throw new NullPointerException("type");
+                    if (type != null) {
+                        rq = PlatypusRequestsFactory.create(type);
+                        PlatypusRequestReader requestReader = new PlatypusRequestReader(data);
+                        rq.accept(requestReader);
+                        break;
+                    } else {
+                        throw new NullPointerException("Request type must present");
                     }
-                    rq = PlatypusRequestsFactory.create(type);
-                    PlatypusRequestReader requestReader = new PlatypusRequestReader(data);
-                    rq.accept(requestReader);
-                    break;
             }
         } while (reader.getCurrentTag() != CoreTags.TAG_EOF && reader.getCurrentTag() != RequestsTags.TAG_REQUEST_END);
         return rq;

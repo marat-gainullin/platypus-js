@@ -17,6 +17,9 @@ public class PlatypusRequestsFactory {
 
     public static Request create(int aType) throws IOException, ProtoReaderException {
         switch (aType) {
+            // Resources request
+            case Requests.rqResource:
+                return new ResourceRequest();
             // Data access requests
             case Requests.rqAppQuery:
                 return new AppQueryRequest();
@@ -24,6 +27,9 @@ public class PlatypusRequestsFactory {
                 return new ExecuteQueryRequest();
             case Requests.rqCommit:
                 return new CommitRequest();
+            // Modules requests
+            case Requests.rqModuleStructure:
+                return new ModuleStructureRequest();
             // Server modules requests
             case Requests.rqCreateServerModule:
                 return new CreateServerModuleRequest();
@@ -31,6 +37,7 @@ public class PlatypusRequestsFactory {
                 return new DisposeServerModuleRequest();
             case Requests.rqExecuteServerModuleMethod:
                 return new ExecuteServerModuleMethodRequest();
+            // User sessions requests
             case Requests.rqLogout:
                 return new LogoutRequest();
             case Requests.rqCredential:

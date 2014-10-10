@@ -101,7 +101,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                         ioSession.write(new ResponseEnvelope(new ErrorResponse(aex), requestEnv.ticket));
                     } else {
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName()), ex);
-                        ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.getClass().getSimpleName()), requestEnv.ticket));
+                        ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()), requestEnv.ticket));
                     }
                 };
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());

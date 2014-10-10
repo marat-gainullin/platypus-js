@@ -258,6 +258,11 @@ public class ConnectionsSelector extends javax.swing.JDialog {
 
     private class ConnectAction extends AbstractAction {
 
+        public ConnectAction() {
+            super();
+            setEnabled(false);
+        }
+
         @Override
         public void actionPerformed(ActionEvent evt) {
             try {
@@ -320,6 +325,11 @@ public class ConnectionsSelector extends javax.swing.JDialog {
 
     private class ModifyConnectionAction extends AbstractAction {
 
+        public ModifyConnectionAction() {
+            super();
+            setEnabled(false);
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             int selectedIndex = lstConnections.getSelectedIndex();
@@ -346,6 +356,11 @@ public class ConnectionsSelector extends javax.swing.JDialog {
     }
 
     private class DeleteConnectionAction extends AbstractAction {
+
+        public DeleteConnectionAction() {
+            super();
+            setEnabled(false);
+        }
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -375,6 +390,7 @@ public class ConnectionsSelector extends javax.swing.JDialog {
                 boolean modificationsEnabled = selectedSettings != null && selectedSettings.isEditable();
                 modifyConnectionAction.setEnabled(modificationsEnabled);
                 deleteConnectionAction.setEnabled(modificationsEnabled);
+                connectAction.setEnabled(modificationsEnabled);
                 lstConnections.requestFocus();
             }
         }

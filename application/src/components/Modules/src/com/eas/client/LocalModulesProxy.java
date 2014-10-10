@@ -49,6 +49,8 @@ public class LocalModulesProxy implements ModulesProxy {
         Callable<ModuleStructure> doWork = () -> {
             String name = aName;
             if (name == null || name.isEmpty()) {
+                if(defaultModuleName == null || defaultModuleName.isEmpty())
+                    throw new IllegalStateException("Default application element must present if you whant to resolve empty string names.");
                 name = defaultModuleName;
             }
             if (name != null) {

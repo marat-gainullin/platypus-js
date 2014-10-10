@@ -221,7 +221,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             if (eMessagesSum.length() > 0) {
                                 eMessagesSum.append("\n");
                             }
-                            eMessagesSum.append(ex.getMessage());
+                            eMessagesSum.append(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString());
                         });
                         onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
                     }

@@ -6,6 +6,7 @@ package com.eas.server;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DatabasesClient;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
 import java.security.AccessControlException;
@@ -24,8 +25,8 @@ public class DatabaseAuthorizer {
     public static void authorize(PlatypusServerCore aServerCore, String aUserName, String aPassword, Consumer<Session> onSuccess, Consumer<Exception> onFailure) {
         try {
             Thread.sleep(LOGIN_DELAY);
-            if (aUserName != null && !aUserName.isEmpty() && aPassword != null) {
-                String passwordMd5 = MD5Generator.generate(aPassword);
+            if (aUserName != null && !aUserName.isEmpty()) {
+                String passwordMd5 = MD5Generator.generate(aPassword != null ? aPassword : "");
                 DatabasesClient.credentialsToPrincipalWithBasicAuthentication(aServerCore.getDatabasesClient(), aUserName, passwordMd5, (PlatypusPrincipal principal) -> {
                     if (principal != null) {
                         Session created = aServerCore.getSessionManager().createSession(principal, String.valueOf(IDGenerator.genID()));
@@ -35,7 +36,8 @@ public class DatabaseAuthorizer {
                     }
                 }, onFailure);
             } else {
-                onFailure.accept(new AccessControlException(CREDENTIALS_MISSING_MSG));
+                Session created = aServerCore.getSessionManager().createSession(new AnonymousPlatypusPrincipal("anonyumous-" + String.valueOf(IDGenerator.genID())), String.valueOf(IDGenerator.genID()));
+                onSuccess.accept(created);
             }
         } catch (Exception ex) {
             onFailure.accept(ex);
