@@ -20,6 +20,7 @@ import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.cache.ServerDataStorage;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.RemoteQueriesProxy;
@@ -160,21 +161,6 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
             changeLog.clear();
         } catch (Exception ex) {
             Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public void logout(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        LogoutRequest request = new LogoutRequest();
-        if (onSuccess != null) {
-            conn.<LogoutRequest.Response>enqueueRequest(request, (LogoutRequest.Response aResponse) -> {
-                onSuccess.accept(null);
-            }, (Exception aException) -> {
-                if (onFailure != null) {
-                    onFailure.accept(aException);
-                }
-            });
-        } else {
-            conn.executeRequest(request);
         }
     }
 

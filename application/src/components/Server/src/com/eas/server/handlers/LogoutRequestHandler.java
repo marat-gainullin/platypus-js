@@ -5,7 +5,6 @@
 package com.eas.server.handlers;
 
 import com.eas.server.SessionRequestHandler;
-import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;

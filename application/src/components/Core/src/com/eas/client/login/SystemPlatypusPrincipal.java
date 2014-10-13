@@ -16,12 +16,21 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SystemPlatypusPrincipal extends PlatypusPrincipal {
 
     public SystemPlatypusPrincipal() {
-        super("system-" + IDGenerator.genID(), null, Collections.emptySet());
+        super("system-" + IDGenerator.genID(), null, Collections.emptySet(), null);
     }
 
     @Override
     public boolean hasRole(String aRole) {
         return true;
+    }
+
+    @Override
+    public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        if (aOnSuccess != null) {
+            // async style
+            aOnSuccess.call(null, new Object[]{});
+        }
+        // sync style
     }
 
     @Override

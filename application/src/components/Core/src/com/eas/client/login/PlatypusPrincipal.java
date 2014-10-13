@@ -4,6 +4,8 @@
  */
 package com.eas.client.login;
 
+import com.eas.client.threetier.PlatypusConnection;
+import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -24,6 +26,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     private final String context;
     private final Set<String> roles;
     private final String name;
+    private final PlatypusConnection conn;
 
     private static final ThreadLocal<PlatypusPrincipal> current = new ThreadLocal<>();
 
@@ -39,11 +42,12 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         }
     }
 
-    public PlatypusPrincipal(String aUserName, String aContext, Set<String> aRoles) {
+    public PlatypusPrincipal(String aUserName, String aContext, Set<String> aRoles, PlatypusConnection aConn) {
         super();
         name = aUserName;
         context = aContext;
         roles = aRoles;
+        conn = aConn;
     }
 
     private static final String NAME_JS_DOC = "/**\n"
@@ -66,6 +70,43 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     @ScriptFunction(jsDoc = HAS_ROLE_JS_DOC)
     public boolean hasRole(String aRole) {
         return roles != null ? roles.contains(aRole) : true;
+    }
+
+    private static final String LOGOUT_JS_DOC = ""
+            + "/**\n"
+            + " * Logs out from  user's session on a server.\n"
+            + " * @param onSuccess The function to be invoked after the logout (optional).\n"
+            + " * @param onFailure The function to be invoked when exception raised while logout process (optional).\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = LOGOUT_JS_DOC, params = {"onSuccess", "onFailure"})
+    public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        LogoutRequest req = new LogoutRequest();
+        if (aOnSuccess != null) {
+            if (conn != null) {
+                conn.enqueueRequest(req, (LogoutRequest.Response res) -> {
+                    aOnSuccess.call(null, new Object[]{});
+                }, (Exception ex) -> {
+                    if (aOnFailure != null) {
+                        aOnFailure.call(null, new Object[]{ex.getMessage()});
+                    }
+                });
+            } else {
+                aOnSuccess.call(null, new Object[]{});
+            }
+        } else {
+            if (conn != null) {
+                conn.executeRequest(req);
+            }
+        }
+    }
+
+    public void logout(JSObject aOnSuccess) throws Exception {
+        logout(aOnSuccess, null);
+    }
+
+    public void logout() throws Exception {
+        logout(null, null);
     }
 
     public Set<String> getRoles() {

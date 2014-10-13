@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
 
     public AnonymousPlatypusPrincipal(String aName) {
-        super(aName, null, Collections.emptySet());
+        super(aName, null, Collections.emptySet(), null);
     }
 
     @Override
@@ -23,6 +23,15 @@ public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
         return false;
     }
     
+    @Override
+    public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        if (aOnSuccess != null) {
+            // async style
+            aOnSuccess.call(null, new Object[]{});
+        }
+        // sync style
+    }
+
     @Override
     public Object getPublished() {
         if (published == null) {

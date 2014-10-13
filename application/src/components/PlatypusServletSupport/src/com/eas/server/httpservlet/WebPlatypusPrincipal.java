@@ -19,13 +19,22 @@ public class WebPlatypusPrincipal extends PlatypusPrincipal {
     protected HttpServletRequest servletRequest;
 
     public WebPlatypusPrincipal(String aUserName, HttpServletRequest aServletRequest) {
-        super(aUserName, null, Collections.emptySet());
+        super(aUserName, null, Collections.emptySet(), null);
         servletRequest = aServletRequest;
     }
 
     @Override
     public boolean hasRole(String aRole) {
         return servletRequest.isUserInRole(aRole);
+    }
+
+    @Override
+    public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        if (aOnSuccess != null) {
+            // async style
+            aOnSuccess.call(null, new Object[]{});
+        }
+        // sync style
     }
 
     @Override

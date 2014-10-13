@@ -229,7 +229,7 @@ public class DatabasesClient {
             if (roles != null && props != null) {
                 return new PlatypusPrincipal(aUserName,
                         props.get(ClientConstants.F_USR_CONTEXT),
-                        roles);
+                        roles, null);
             } else {
                 return null;
             }
