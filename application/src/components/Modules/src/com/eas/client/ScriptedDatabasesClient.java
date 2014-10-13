@@ -35,10 +35,29 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     protected Map<String, Collection<String>> validators = new HashMap<>();
 
     /**
-     * @inheritDoc
+     * 
+     * @param aDefaultDatasourceName
+     * @param aIndexer
+     * @param aAutoFillMetadata
+     * @param aValidators
+     * @param aMaxJdbcThreads
+     * @throws Exception 
      */
-    public ScriptedDatabasesClient(String aDefaultDatasourceName, PlatypusIndexer aIndexer, boolean aAutoFillMetadata) throws Exception {
-        super(aDefaultDatasourceName, aAutoFillMetadata);
+    public ScriptedDatabasesClient(String aDefaultDatasourceName, PlatypusIndexer aIndexer, boolean aAutoFillMetadata, Map<String, Collection<String>> aValidators, int aMaxJdbcThreads) throws Exception {
+        this(aDefaultDatasourceName, aIndexer, aAutoFillMetadata, aMaxJdbcThreads);
+        validators.putAll(aValidators);
+    }
+
+    /**
+     * 
+     * @param aDefaultDatasourceName
+     * @param aIndexer
+     * @param aAutoFillMetadata
+     * @param aMaxJdbcThreads
+     * @throws Exception 
+     */
+    public ScriptedDatabasesClient(String aDefaultDatasourceName, PlatypusIndexer aIndexer, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
+        super(aDefaultDatasourceName, aAutoFillMetadata, aMaxJdbcThreads);
         indexer = aIndexer;
     }
 

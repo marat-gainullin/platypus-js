@@ -18,20 +18,16 @@ public class BearDatabaseConnection implements Connection {
     protected final Map<String, PreparedStatement> stmts = new HashMap<>();
     protected final Map<String, CallableStatement> calls = new HashMap<>();
     protected ResourcePool<BearDatabaseConnection> connectionsPool;
+    private final Object callsWaitPoint = new Object();
+    private final Object stmtsWaitPoint = new Object();
     protected Connection delegate;
     protected int maxStatements = Integer.MAX_VALUE;
-    protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
 
     public BearDatabaseConnection(int aMaxStatetments, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
-        this(aMaxStatetments, BearResourcePool.WAIT_TIMEOUT, aDelegate, aPool);
-    }
-
-    public BearDatabaseConnection(int aMaxStatetments, int aResourceTimeout, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
         super();
         delegate = aDelegate;
         connectionsPool = aPool;
         maxStatements = aMaxStatetments;
-        resourceTimeout = aResourceTimeout;
     }
 
     @Override
@@ -59,12 +55,22 @@ public class BearDatabaseConnection implements Connection {
         delegate.setSchema(schema);
     }
 
-    public synchronized void returnPreparedStatement(String aSqlClause, PreparedStatement aStatement) {
-        stmts.put(aSqlClause, aStatement);
+    public void returnPreparedStatement(String aSqlClause, PreparedStatement aStatement) {
+        synchronized (this) {
+            stmts.put(aSqlClause, aStatement);
+        }
+        synchronized (stmtsWaitPoint) {
+            stmtsWaitPoint.notifyAll();
+        }
     }
 
-    public synchronized void returnCallableStatement(String aSqlClause, CallableStatement aStatement) {
-        calls.put(aSqlClause, aStatement);
+    public void returnCallableStatement(String aSqlClause, CallableStatement aStatement) {
+        synchronized (this) {
+            calls.put(aSqlClause, aStatement);
+        }
+        synchronized (callsWaitPoint) {
+            callsWaitPoint.notifyAll();
+        }
     }
 
     protected static <S extends PreparedStatement> int riddleStatements(Map<String, S> aStmts) throws SQLException {
@@ -75,9 +81,9 @@ public class BearDatabaseConnection implements Connection {
                 toRemove.add(stmt.getKey());
             }
         }
-        for (String callKey : toRemove) {
+        toRemove.stream().forEach((callKey) -> {
             aStmts.remove(callKey);
-        }
+        });
         return toRemove.size();
     }
 
@@ -108,12 +114,22 @@ public class BearDatabaseConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement stmt = tryPrepareStatement(sql);
-        while (stmt == null && Thread.currentThread().isAlive()) {
-            waitSome(resourceTimeout);
-            stmt = tryPrepareStatement(sql);
+        try {
+            PreparedStatement stmt = tryPrepareStatement(sql);
+            if (stmt == null) {// May become wrong during further execution in parallel threads...
+                synchronized (stmtsWaitPoint) {
+                    // stmt == null - is very old information, so let's begin another solid logic block... 
+                    stmt = tryPrepareStatement(sql);
+                    while (stmt == null && Thread.currentThread().isAlive()) {
+                        stmtsWaitPoint.wait(1000l);// Unlimited waiting is dangerous and limit is nevermind here.
+                        stmt = tryPrepareStatement(sql);
+                    }
+                }
+            }
+            return stmt;
+        } catch (InterruptedException ex) {
+            throw new SQLException(ex);
         }
-        return stmt;
     }
 
     public synchronized PreparedStatement tryPrepareStatement(String sql) throws SQLException {
@@ -164,19 +180,20 @@ public class BearDatabaseConnection implements Connection {
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        CallableStatement stmt = tryPrepareCall(sql);
-        while (stmt == null && Thread.currentThread().isAlive()) {
-            waitSome(15);
-            stmt = tryPrepareCall(sql);
-        }
-        return stmt;
-    }
-
-    private void waitSome(int aTimeout) throws SQLException {
         try {
-            Thread.sleep(aTimeout);
-        } catch (Exception ex) {
-            Thread.currentThread().interrupt();
+            CallableStatement stmt = tryPrepareCall(sql);
+            if (stmt == null) {// May become wrong during further execution in parallel threads...
+                synchronized (callsWaitPoint) {
+                    // stmt == null - is very old information, so let's begin another solid logic block...
+                    stmt = tryPrepareCall(sql);
+                    while (stmt == null && Thread.currentThread().isAlive()) {
+                        callsWaitPoint.wait(1000l);// Unlimited waiting is dangerous and limit is nevermind here.
+                        stmt = tryPrepareCall(sql);
+                    }
+                }
+            }
+            return stmt;
+        } catch (InterruptedException ex) {
             throw new SQLException(ex);
         }
     }

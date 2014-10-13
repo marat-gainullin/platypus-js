@@ -133,7 +133,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
     public void fireFieldSelectionChanged(java.util.List<Parameter> aParameters, java.util.List<Field> aFields) {
         for (FieldSelectionListener<E> l : fieldsSelectionListeners) {
-            l.selected((EntityView<E>) this, aParameters, aFields);
+            l.selected(this, aParameters, aFields);
         }
     }
 
@@ -545,7 +545,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (fieldsList.hasFocus() && fieldsList.getSelectedValue() != null && fieldsList.getSelectedValue() instanceof Field) {
-                Field fmd = (Field) fieldsList.getSelectedValue();
+                Field fmd = fieldsList.getSelectedValue();
                 String fieldName = fmd.getName();
 
                 assert (fieldName != null && !fieldName.isEmpty());

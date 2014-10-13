@@ -73,10 +73,13 @@ public abstract class PlatypusConnection implements AppConnection {
     // configuration paths
     public static final String CLIENT_PREFS_PATH = "/com/eas/client";
     public static final String SSL_PREFS_PATH = "/com/eas/net/ssl";
+    // error messages
     public static final String ACCESSCONTROL_EXCEPTION_LOG_MSG = "AccessControl in response {0}}";
     public static final String SQL_EXCEPTION_LOG_MSG = "SQLException in response {0} {1} {2}";
     public static final String KEYSTORE_MISING_MSG = "Can't locate key store file. May be bad installation.";
     public static final String TRUSTSTORE_MISSING_MSG = "Can't locate trust store file. May be bad installation.";
+    // misc
+    public static final int DEFAULT_MAX_THREADS = 25;
 
     public static class RequestCallback {
 

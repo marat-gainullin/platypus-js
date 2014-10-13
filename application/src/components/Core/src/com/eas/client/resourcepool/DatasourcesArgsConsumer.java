@@ -6,6 +6,7 @@
 package com.eas.client.resourcepool;
 
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
 public class DatasourcesArgsConsumer {
 
     public static final String CMD_SWITCHS_PREFIX = "-";
-    // param eters names
+    // parameters names
     public static final String DB_RESOURCE_CONF_PARAM = "datasource";
     public static final String DB_URL_CONF_PARAM = "dburl";
     public static final String DB_USERNAME_CONF_PARAM = "dbuser";
@@ -28,7 +29,6 @@ public class DatasourcesArgsConsumer {
     public static final String DB_SCHEMA_CONF_PARAM = "dbschema";
     public static final String DB_MAX_CONNECTIONS_CONF_PARAM = "maxconnections";
     public static final String DB_MAX_STATEMENTS_CONF_PARAM = "maxstatements";
-    public static final String DB_RESOURCE_TIMEOUT_CONF_PARAM = "resourcetimeout";
     // error messages
     public static final String BAD_DB_RESOURCE_MSG = "Datasource name not specified";
     public static final String BAD_DB_USERNAME_MSG = "dbuser value not specified";
@@ -47,7 +47,6 @@ public class DatasourcesArgsConsumer {
                 DbConnectionSettings settings = new DbConnectionSettings();
                 settings.setMaxConnections(BearResourcePool.DEFAULT_MAXIMUM_SIZE);
                 settings.setMaxStatements(BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5);
-                settings.setResourceTimeout(BearResourcePool.WAIT_TIMEOUT);
                 settings.setName(datasourcename);
                 parsedDatasources.add(settings);
             } else {
@@ -112,16 +111,6 @@ public class DatasourcesArgsConsumer {
                 }
             } else {
                 throw new IllegalArgumentException(BAD_DB_MAX_STATEMENTS_MSG);
-            }
-        } else if ((CMD_SWITCHS_PREFIX + DB_RESOURCE_TIMEOUT_CONF_PARAM).equalsIgnoreCase(args[i])) {
-            if (i + 1 < args.length) {
-                if (!parsedDatasources.isEmpty()) {
-                    parsedDatasources.get(parsedDatasources.size() - 1).setResourceTimeout(Integer.valueOf(args[i + 1]));
-                } else {
-                    throw new IllegalArgumentException(DB_RESOURCE_TIMEOUT_CONF_PARAM + WITHOUT_DATASOURCE_MSG);
-                }
-            } else {
-                throw new IllegalArgumentException(BAD_DB_RESOURCE_TIMEOUT_MSG);
             }
         } else {
             return 0;

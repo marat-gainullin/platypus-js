@@ -5,6 +5,7 @@
  */
 package com.eas.client;
 
+import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
@@ -23,7 +24,7 @@ public class DatabasesClientWithResource implements AutoCloseable {
         super();
         resourceName = "TestDb-" + String.valueOf(IDGenerator.genID());
         GeneralResourceProvider.getInstance().registerDatasource(resourceName, aSettings);
-        client = new DatabasesClient(resourceName, true);
+        client = new DatabasesClient(resourceName, true, BearResourcePool.DEFAULT_MAXIMUM_SIZE);
     }
 
     public DatabasesClient getClient() {

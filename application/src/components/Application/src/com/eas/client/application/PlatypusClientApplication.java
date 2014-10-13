@@ -19,6 +19,7 @@ import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
+import com.eas.util.args.ThreadsArgsConsumer;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.io.File;
@@ -75,10 +76,12 @@ public class PlatypusClientApplication {
         protected URL url;
         protected String defDatasource;
         protected DatasourcesArgsConsumer datasourcesArgs;
+        protected ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
 
         private static Config parse(String[] args) throws Exception {
             Config commonArgs = new Config();
             DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
+            ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
             int i = 0;
             while (i < args.length) {
                 if ((CMD_SWITCHS_PREFIX + URL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
@@ -134,11 +137,17 @@ public class PlatypusClientApplication {
                     if (consumed > 0) {
                         i += consumed;
                     } else {
-                        throw new IllegalArgumentException("unknown argument: " + args[i]);
+                        consumed = threadsArgs.consume(args, i);
+                        if (consumed > 0) {
+                            i += consumed;
+                        } else {
+                            throw new IllegalArgumentException("unknown argument: " + args[i]);
+                        }
                     }
                 }
             }
             commonArgs.datasourcesArgs = dsArgs;
+            commonArgs.threadsArgs = threadsArgs;
             return commonArgs;
         }
     }
@@ -204,17 +213,17 @@ public class PlatypusClientApplication {
                 ScriptUtils.init();
                 Application app;
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
-                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts));
+                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxPlatypusTreads(), config.threadsArgs.getMaxPlatypusTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
                         ModelsDocuments models = new ModelsDocuments();
                         ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath());
-                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true);
+                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, config.threadsArgs.getMaxJdbcTreads());
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
                         ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
                         twoTierCore.setQueries(qp);
@@ -299,12 +308,12 @@ public class PlatypusClientApplication {
                 if (connectionsSelector.getReturnStatus() == ConnectionsSelector.RET_OK) {
                     ConnectionSettings settings = ConnectionsSelector.getDefaultSettings();
                     return new URL(null, settings.getUrl(), new URLStreamHandler() {
-                        
+
                         @Override
                         protected URLConnection openConnection(URL u) throws IOException {
                             throw new UnsupportedOperationException("Not supported yet.");
                         }
-                        
+
                     });
                 }
                 return null;

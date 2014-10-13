@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.AppElementFiles;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
@@ -167,7 +168,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             }
             return null;
         };
-        basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false) {
+        basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE) {
 
             @Override
             protected JSObject createModule(String aModuleName) throws Exception {

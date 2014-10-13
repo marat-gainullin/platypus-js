@@ -78,19 +78,11 @@ public class RemoteModulesProxy implements ModulesProxy {
             structure.getClientDependencies().addAll(structureResp.getClientDependencies());
             structure.getServerDependencies().addAll(structureResp.getServerDependencies());
             structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
-            boolean resource = structureResp.getStructure().isEmpty();
-            if (resource) {
-                String cachePathName = constructResourcePath(aName);
+            for (String resourceName : structureResp.getStructure()) {
+                String cachePathName = constructResourcePath(resourceName);
                 File cachePath = new File(cachePathName);
-                syncResource(cachePath, aName, null, null);
+                syncResource(cachePath, resourceName, null, null);
                 structure.getParts().addFile(cachePath);
-            } else {
-                for (String resourceName : structureResp.getStructure()) {
-                    String cachePathName = constructResourcePath(resourceName);
-                    File cachePath = new File(cachePathName);
-                    syncResource(cachePath, resourceName, null, null);
-                    structure.getParts().addFile(cachePath);
-                }
             }
             return structure;
         }

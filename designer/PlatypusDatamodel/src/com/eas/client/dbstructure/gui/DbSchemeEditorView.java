@@ -239,7 +239,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
     public DbSchemeEditorView(DbSchemeModel aModel, TablesSelectorCallback aSelectorCallback) throws Exception {
         super();
         schemeModel = aModel;
-        sqlController = new SqlActionsController((DbSchemeModel) schemeModel);
+        sqlController = new SqlActionsController(schemeModel);
 
         // fill actions
         fillActions();

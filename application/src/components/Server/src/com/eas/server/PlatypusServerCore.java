@@ -4,6 +4,7 @@
  */
 package com.eas.server;
 
+import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.AppElementFiles;
 import com.eas.client.Application;
 import com.eas.client.DatabasesClient;
@@ -16,7 +17,6 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
@@ -24,7 +24,6 @@ import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import java.io.File;
 import java.net.URI;
@@ -48,22 +47,22 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     protected static PlatypusServerCore instance;
 
-    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementName) throws Exception {
+    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementName, int aMaximumJdbcThreads) throws Exception {
         ScriptUtils.init();
         if (instance == null) {
-            final Set<String> tasks = new HashSet<>();
-            ScriptedDatabasesClient serverCoreDbClient;
+            ScriptedDatabasesClient basesProxy;
             if (aApplicationUrl.toLowerCase().startsWith("file")) {
                 File f = new File(new URI(aApplicationUrl));
                 if (f.exists() && f.isDirectory()) {
-                    ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks, securityConfigs));
+                    ScriptSecurityConfigs lsecurityConfigs = new ScriptSecurityConfigs();
+                    ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                     indexer.watch();
-                    serverCoreDbClient = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true);
-                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, tasks, securityConfigs, aStartAppElementName);
-                    serverCoreDbClient.setContextHost(instance);
+                    basesProxy = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true, tasksScanner.getValidators(), aMaximumJdbcThreads);
+                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), new LocalQueriesProxy(basesProxy, indexer), basesProxy, lsecurityConfigs, aStartAppElementName, tasksScanner.getAuthorizers());
+                    basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
-                    instance.startServerTasks();
+                    instance.startResidents(tasksScanner.getResidents());
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
                 }
@@ -84,14 +83,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ApplicationSourceIndexer indexer;
     protected ModulesProxy modules;
     protected QueriesProxy<SqlQuery> queries;
-    protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
     protected ScriptSecurityConfigs securityConfigs;
     protected FormsDocuments forms = new FormsDocuments();
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
@@ -99,8 +97,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         basesProxy = aDatabasesClient;
         sessionManager = new SessionManager(this);
         defaultAppElement = aDefaultAppElement;
-        tasks = aTasks;
         securityConfigs = aSecurityConfigs;
+        extraAuthorizers.addAll(aAuthorizers);
     }
 
     public ApplicationSourceIndexer getIndexer() {
@@ -238,38 +236,19 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         }
     }
 
-    public Set<String> getTasks() {
-        return tasks;
-    }
-
-    public int startServerTasks() throws Exception {
+    public int startResidents(Set<String> aRezidents) throws Exception {
         PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
         PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
         try {
             int startedTasks = 0;
-            for (String moduleName : tasks) {
+            for (String moduleName : aRezidents) {
                 AppElementFiles files = modules.nameToFiles(moduleName);
                 if (files != null && files.isModule()) {
-                    ScriptDocument sDoc = securityConfigs.get(moduleName, files);
-                    for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
-                        switch (tag.getName()) {
-                            case JsDoc.Tag.AUTHORIZER_TAG:
-                                extraAuthorizers.add(moduleName);
-                                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Authorizer \"{0}\" registered", moduleName);
-                                break;
-                            case JsDoc.Tag.VALIDATOR_TAG:
-                                basesProxy.addValidator(moduleName, tag.getParams());
-                                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Validator \"{0}\" registered", moduleName);
-                                break;
-                            case JsDoc.Tag.RESIDENT_TAG:
-                                if (startResidentModule(moduleName)) {
-                                    startedTasks++;
-                                }
-                                break;
-                        }
+                    if (startResidentModule(moduleName)) {
+                        startedTasks++;
                     }
                 } else {
-                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Server task \"{0}\" is illegal (no module). Skipping it.", moduleName);
+                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Rezident task \"{0}\" is illegal (no module). Skipping it.", moduleName);
                 }
             }
             return startedTasks;

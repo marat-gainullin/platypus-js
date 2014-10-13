@@ -99,7 +99,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                             if (dbFks != null) {
                                 for (Field fkField : dbFks) {
                                     if (fkField != null && fkField.getFk() != null && fkField.getFk() instanceof ForeignKeySpec) {
-                                        ForeignKeySpec fkSpec = (ForeignKeySpec) fkField.getFk();
+                                        ForeignKeySpec fkSpec = fkField.getFk();
                                         String refereeTableName = fkSpec.getReferee().getTable();
                                         if (refereeTableName != null
                                                 && (only4Table == null || only4Table.equalsIgnoreCase(refereeTableName) || only4Table.equalsIgnoreCase(leftTableName))
@@ -164,7 +164,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
 
     @Override
     protected DbSchemeModel transformDocToModel(Document aDoc) throws Exception {
-        return (DbSchemeModel) XmlDom2DbSchemeModel.transform(model.getBasesProxy(), aDoc);
+        return XmlDom2DbSchemeModel.transform(model.getBasesProxy(), aDoc);
     }
 
     @Override
@@ -302,7 +302,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
             if (!getSelectedEntities().isEmpty()) {
                 return getSelectedEntities().iterator().next();
             } else if (!getSelectedFields().isEmpty()) {
-                return (FieldsEntity) getSelectedFields().iterator().next().entity;
+                return getSelectedFields().iterator().next().entity;
             }
             throw new IllegalStateException();
         }
@@ -595,7 +595,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         private void dropFields(ActionEvent e) {
             if (isEnabled()) {
                 // Remove fields from database and the diagram
-                FieldsEntity entity = (FieldsEntity) getSelectedFields().iterator().next().entity;
+                FieldsEntity entity = getSelectedFields().iterator().next().entity;
                 Set<Relation<FieldsEntity>> toConfirm = new HashSet<>();
                 for (EntityFieldTuple etf : getSelectedFields()) {
                     Set<Relation<FieldsEntity>> toDel = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField(entity, etf.field);

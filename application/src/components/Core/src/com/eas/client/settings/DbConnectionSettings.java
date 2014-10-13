@@ -21,7 +21,6 @@ public class DbConnectionSettings extends ConnectionSettings {
     protected String password;
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
-    protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
     protected String schema;
     protected Properties props = new Properties();
 
@@ -70,14 +69,6 @@ public class DbConnectionSettings extends ConnectionSettings {
 
     public void setMaxStatements(int aMaxStatements) {
         maxStatements = aMaxStatements;
-    }
-
-    public int getResourceTimeout() {
-        return resourceTimeout;
-    }
-
-    public void setResourceTimeout(int aResourceTimeout) {
-        resourceTimeout = aResourceTimeout;
     }
 
     public String getUser() {

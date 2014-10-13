@@ -94,7 +94,7 @@ public class GeneralResourceProvider {
 
     static void registerDrivers(Collection<String> aDrivers) throws SQLException {
         if (aDrivers != null) {
-            for (String driverClassName : aDrivers) {
+            aDrivers.stream().forEach((String driverClassName) -> {
                 try {
                     Class<?> clazz = Class.forName(driverClassName);
                     if (clazz != null) {
@@ -112,7 +112,7 @@ public class GeneralResourceProvider {
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.WARNING, "JDBC driver class not found: {0}", driverClassName);
                 }
-            }
+            });
         }
     }
 
@@ -144,7 +144,7 @@ public class GeneralResourceProvider {
     }
 
     private PlatypusNativeDataSource constructDataSource(DbConnectionSettings aSettings) throws Exception {
-        return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword(), aSettings.getSchema(), aSettings.getProperties());
+        return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword(), aSettings.getSchema(), aSettings.getProperties());
     }
 
     public synchronized DataSource getPooledDataSource(String aDatasourceName) throws Exception {

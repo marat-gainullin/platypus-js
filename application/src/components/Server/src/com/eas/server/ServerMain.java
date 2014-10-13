@@ -17,14 +17,15 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
+import com.eas.util.args.ThreadsArgsConsumer;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.ObjectName;
 import javax.net.ssl.*;
 
@@ -77,8 +78,9 @@ public class ServerMain {
     private static String numWorkerThreads;
     private static String sessionIdleTimeout;
     private static String sessionIdleCheckInterval;
+    private static ThreadsArgsConsumer threadsConfig;
     private static String appElement;
-    
+
     private static void checkUserHome() {
         String home = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (home == null || home.isEmpty()) {
@@ -97,6 +99,7 @@ public class ServerMain {
 
     private static void parseArgs(String[] args) throws Exception {
         DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
+        ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
         int i = 0;
         while (i < args.length) {
             if ((CMD_SWITCHS_PREFIX + APP_URL_CONF_PARAM).equalsIgnoreCase(args[i])) {
@@ -160,11 +163,17 @@ public class ServerMain {
                 if (consumed > 0) {
                     i += consumed;
                 } else {
-                    throw new IllegalArgumentException("unknown argument: " + args[i]);
+                    consumed = threadsArgs.consume(args, i);
+                    if (consumed > 0) {
+                        i += consumed;
+                    } else {
+                        throw new IllegalArgumentException("unknown argument: " + args[i]);
+                    }
                 }
             }
         }
         dsArgs.registerDatasources();
+        threadsConfig = threadsArgs;
     }
 
     protected static void registerMBean(String aName, Object aBean) throws Exception {
@@ -187,34 +196,23 @@ public class ServerMain {
         }
         SSLContext sslContext = PlatypusConnection.createSSLContext();
 
-        final Set<String> tasks = new HashSet<>();
         ScriptedDatabasesClient serverCoreDbClient;
         if (url.toLowerCase().startsWith("file")) {
             File f = new File(new URI(url));
             if (f.exists() && f.isDirectory()) {
+                Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Application is located at: {0}", f.getPath());
                 ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
-                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), new ServerTasksScanner(tasks, securityConfigs));
+                ServerTasksScanner tasksScanner = new ServerTasksScanner(securityConfigs);
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                 indexer.watch();
-                serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true);
-                PlatypusServer server = new PlatypusServer(indexer
-                        , new LocalModulesProxy(indexer, new ModelsDocuments(), appElement)
-                        , new LocalQueriesProxy(serverCoreDbClient, indexer)
-                        , serverCoreDbClient
-                        , sslContext
-                        , parseListenAddresses()
-                        , parsePortsProtocols()
-                        , parsePortsSessionIdleTimeouts()
-                        , parsePortsSessionIdleCheckIntervals()
-                        , parsePortsNumWorkerThreads()
-                        , tasks
-                        , securityConfigs
-                        , appElement);
+                serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
+                PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), securityConfigs, appElement, tasksScanner.getAuthorizers());
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //
-                server.start();
+                server.start(tasksScanner.getResidents(), tasksScanner.getAcceptors());
             } else {
                 throw new IllegalArgumentException("applicationUrl: " + url + " doesn't point to existent directory.");
             }
@@ -308,62 +306,62 @@ public class ServerMain {
         }
         return sessionIdleCheckIntervalsMap;
     }
-/*
-    private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        KeyStore ks = KeyStore.getInstance("JKS");
-        // get user password and file input stream
-        char[] sslPassword = "keyword".toCharArray();
-        File keyStoreFile = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
-        if (!keyStoreFile.exists()) {
-            File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
-            keyPath.mkdirs();
-            keyStoreFile.createNewFile();
-            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
-                byte[] resData = BinaryUtils.readStream(keyIn, -1);
-                keyOut.write(resData);
-            }
-        }
-        if (keyStoreFile.exists()) {
-            try (InputStream is = new FileInputStream(keyStoreFile)) {
-                ks.load(is, sslPassword);
-            }
-            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-            keyManagerFactory.init(ks, sslPassword);
-            return keyManagerFactory.getKeyManagers();
-        } else {
-            throw new FileNotFoundException(KEYSTORE_MISING_MSG);
-        }
-    }
+    /*
+     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
+     KeyStore ks = KeyStore.getInstance("JKS");
+     // get user password and file input stream
+     char[] sslPassword = "keyword".toCharArray();
+     File keyStoreFile = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
+     if (!keyStoreFile.exists()) {
+     File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
+     keyPath.mkdirs();
+     keyStoreFile.createNewFile();
+     try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
+     byte[] resData = BinaryUtils.readStream(keyIn, -1);
+     keyOut.write(resData);
+     }
+     }
+     if (keyStoreFile.exists()) {
+     try (InputStream is = new FileInputStream(keyStoreFile)) {
+     ks.load(is, sslPassword);
+     }
+     final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+     keyManagerFactory.init(ks, sslPassword);
+     return keyManagerFactory.getKeyManagers();
+     } else {
+     throw new FileNotFoundException(KEYSTORE_MISING_MSG);
+     }
+     }
 
-    private static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
-        KeyStore ks = KeyStore.getInstance("JKS");
-        char[] ksPassword = "trustword".toCharArray();
-        File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
-        if (!trustStore.exists()) {
-            File trustPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
-            trustPath.mkdirs();
-            trustStore.createNewFile();
-            try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusConnection.class.getResourceAsStream("emptyTruststore")) {
-                byte[] resData = BinaryUtils.readStream(trustIn, -1);
-                trustOut.write(resData);
-            }
-        }
-        if (trustStore.exists()) {
-            try (InputStream is = new FileInputStream(trustStore)) {
-                ks.load(is, ksPassword);
-            }
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("PKIX");
-            trustManagerFactory.init(ks);
-            return trustManagerFactory.getTrustManagers();
-        } else {
-            throw new FileNotFoundException(TRUSTSTORE_MISSING_MSG);
-        }
-    }
+     private static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
+     KeyStore ks = KeyStore.getInstance("JKS");
+     char[] ksPassword = "trustword".toCharArray();
+     File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
+     if (!trustStore.exists()) {
+     File trustPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
+     trustPath.mkdirs();
+     trustStore.createNewFile();
+     try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusConnection.class.getResourceAsStream("emptyTruststore")) {
+     byte[] resData = BinaryUtils.readStream(trustIn, -1);
+     trustOut.write(resData);
+     }
+     }
+     if (trustStore.exists()) {
+     try (InputStream is = new FileInputStream(trustStore)) {
+     ks.load(is, ksPassword);
+     }
+     final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("PKIX");
+     trustManagerFactory.init(ks);
+     return trustManagerFactory.getTrustManagers();
+     } else {
+     throw new FileNotFoundException(TRUSTSTORE_MISSING_MSG);
+     }
+     }
 
-    public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
-        return context;
-    }
-    */
+     public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
+     SSLContext context = SSLContext.getInstance("TLS");
+     context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
+     return context;
+     }
+     */
 }

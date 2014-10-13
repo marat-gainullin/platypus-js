@@ -30,7 +30,6 @@ import com.eas.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -65,10 +64,7 @@ public class DatabasesClient {
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
     protected QueriesProxy<SqlQuery> queries;
-    protected ThreadPoolExecutor jdbcProcessor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                                      10L, TimeUnit.SECONDS,
-                                      new SynchronousQueue<>(),
-                                      new DeamonThreadFactory("jdbc-", false));
+    protected final ThreadPoolExecutor jdbcProcessor;
 
     /**
      *
@@ -76,10 +72,15 @@ public class DatabasesClient {
      * @param aAutoFillMetadata If true, metadatacache will be filled with
      * tables, keys and other metadata in schema automatically. Otherwise it
      * will query metadata table by table in each case. Default is true.
+     * @param aMaxJdbcThreads
      * @throws Exception
      */
-    public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
+    public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
         super();
+        jdbcProcessor = new ThreadPoolExecutor(0, aMaxJdbcThreads,
+                10L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                new DeamonThreadFactory("jdbc-", false));
         jdbcProcessor.allowCoreThreadTimeOut(true);
         defaultDatasourceName = aDefaultDatasourceName;
         autoFillMetadata = aAutoFillMetadata;

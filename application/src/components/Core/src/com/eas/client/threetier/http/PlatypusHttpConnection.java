@@ -51,13 +51,14 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     protected Map<String, Cookie> cookies = new ConcurrentHashMap<>();
-    private final ThreadPoolExecutor requestsSender = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                                      10L, TimeUnit.SECONDS,
-                                      new SynchronousQueue<>(),
-                                      new DeamonThreadFactory("http-client-", false));
+    private final ThreadPoolExecutor requestsSender;
 
-    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) throws Exception {
+    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
+                10L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                new DeamonThreadFactory("http-client-", false));
         requestsSender.allowCoreThreadTimeOut(true);
     }
 
@@ -78,8 +79,8 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             }
         }), onFailure);
     }
-    
-    private void startRequestTask(Runnable aTask){
+
+    private void startRequestTask(Runnable aTask) {
         Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
@@ -102,7 +103,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             }
         });
     }
-    
+
     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
         startRequestTask(() -> {
             try {

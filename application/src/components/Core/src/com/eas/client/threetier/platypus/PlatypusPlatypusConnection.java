@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -47,24 +46,26 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     private final int port;
     private String sessionTicket;
     private final SocketConnector connector;
-    private final ThreadPoolExecutor requestsSender = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                                      10L, TimeUnit.SECONDS,
-                                      new SynchronousQueue<>(),
-                                      new DeamonThreadFactory("platypus-client-", false));
-    private final ResourcePool<IoSession> sessionsPool = new BearResourcePool<IoSession>(10) {
+    private final ThreadPoolExecutor requestsSender;
+    private final ResourcePool<IoSession> sessionsPool;
 
-        @Override
-        protected IoSession createResource() throws Exception {
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
-            ConnectFuture onConnect = connector.connect();
-            onConnect.awaitUninterruptibly();
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connected to  {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
-            return onConnect.getSession();
-        }
-    };
-
-    public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) throws Exception {
+    public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads, int aMaximumConnections) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
+                10L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                new DeamonThreadFactory("platypus-client-", false));
+        sessionsPool = new BearResourcePool<IoSession>(aMaximumConnections) {
+
+            @Override
+            protected IoSession createResource() throws Exception {
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+                ConnectFuture onConnect = connector.connect();
+                onConnect.awaitUninterruptibly();
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connected to  {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+                return onConnect.getSession();
+            }
+        };
         requestsSender.allowCoreThreadTimeOut(true);
         host = aUrl.getHost();
         port = aUrl.getPort();
@@ -137,7 +138,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         }), onFailure);
     }
 
-    private void startRequestTask(Runnable aTask){
+    private void startRequestTask(Runnable aTask) {
         Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
@@ -160,7 +161,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             }
         });
     }
-    
+
     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
         startRequestTask(() -> {
             try {

@@ -112,7 +112,7 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         try {
             String oldVal = getDescription();
             UndoableEdit edit = null;
-            String newDescription = (String) val;
+            String newDescription = val;
             if (newDescription != null && newDescription.isEmpty()) {
                 newDescription = null;
             }

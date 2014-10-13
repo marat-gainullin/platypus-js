@@ -4,16 +4,12 @@
  */
 package com.eas.server;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
-import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptSecurityConfigs;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.scripts.ScriptedResource;
-import com.eas.script.JsDoc;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
@@ -22,7 +18,6 @@ import com.eas.server.mina.platypus.ResponseEncoder;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -59,11 +54,10 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
-        super(aIndexer, aModules, aQueries, aDatabasesClient, aTasks, aSecurityConfigs, aDefaultAppElement);
-
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
+        super(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, aAuthorizers);
         if (aAddresses == null) {
-            throw new NullPointerException("listenAddresses");
+            throw new NullPointerException("listenAddresses is null");
         } else if (aAddresses.length == 0) {
             throw new IllegalArgumentException("listenAddresses is empty");
         }
@@ -77,53 +71,23 @@ public class PlatypusServer extends PlatypusServerCore {
         retranslateFactory = obtainRetranslateFactory();
     }
 
-    public void start() throws Exception {
-        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application is located at: {0}", modules.getLocalPath());
+    public void start(Set<String> aResidents, Map<String, String> aAcceptors) throws Exception {
         instance = this;// Hack, but server is natural singleton and so it is ok.
-        startServerTasks();
+        startResidents(aResidents);
         for (InetSocketAddress s : listenAddresses) {
-            initializeAndBindAcceptor(s);
+            initializeAndBindAcceptor(s, aAcceptors);
         }
         assert listenAddresses != null : "listenAddresses != null";
         assert listenAddresses.length > 0 : "listenAddresses.length > 0";
     }
 
-    private String findAcceptorModule(String aProtocol) throws Exception {
-        String lastAcceptor = null;
-        for (String taskModuleName : tasks) {
-            ScriptedResource.require(new String[]{taskModuleName});
-            AppElementFiles files = modules.nameToFiles(taskModuleName);
-            if (files != null && files.isModule()) {
-                ScriptDocument sDoc = securityConfigs.get(taskModuleName, files);
-                boolean isAcceptor = false;
-                Set<String> protocols = new HashSet<>();
-                for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
-                    if (JsDoc.Tag.ACCEPTOR_TAG.equals(tag.getName())) {
-                        isAcceptor = true;
-                    }
-                    if (JsDoc.Tag.ACCEPTED_PROTOCOL_TAG.equals(tag.getName()) && tag.getParams() != null && !tag.getParams().isEmpty()) {
-                        protocols.addAll(tag.getParams());
-                    }
-                }
-                if (isAcceptor) {
-                    if (!protocols.isEmpty()) {// specific protocol acceptor
-                        if (protocols.contains(aProtocol)) {
-                            return taskModuleName;
-                        }
-                    } else {
-                        lastAcceptor = taskModuleName;
-                    }
-                }
-            }
-        }
-        return lastAcceptor;
-    }
-
-    private void tryToInitializeAndBindSensorAcceptor(String protocol, InetSocketAddress s) throws IOException, Exception {
-        Logger logger = Logger.getLogger(ServerMain.class.getName());
+    private void tryToInitializeAndBindSensorAcceptor(String protocol, InetSocketAddress s, Map<String, String> aAcceptors) throws IOException, Exception {
         if (acceptorsFactory != null && acceptorsFactory.isSupported(protocol)) {
-            String acceptorModuleId = findAcceptorModule(protocol);
-            if (acceptorModuleId != null) {
+            String acceptorModuleName = aAcceptors.get(protocol);
+            if (acceptorModuleName == null) {
+                acceptorModuleName = aAcceptors.get(null);
+            }
+            if (acceptorModuleName != null) {
                 Integer numWorkerThreads = portsNumWorkerThreads != null ? portsNumWorkerThreads.get(s.getPort()) : null;
                 if (numWorkerThreads == null || numWorkerThreads == 0) {
                     numWorkerThreads = DEFAULT_EXECUTOR_POOL_SIZE;
@@ -137,20 +101,20 @@ public class PlatypusServer extends PlatypusServerCore {
                     sessionIdleCheckInterval = 360;
                 }
 
-                IoAcceptor sensorAcceptor = acceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId, retranslateFactory));
+                IoAcceptor sensorAcceptor = acceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleName, retranslateFactory));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
-                    logger.info(String.format("Listening on %s; protocol: %s", s.toString(), protocol));
+                    Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Listening {0} protocol on {1}", new Object[]{protocol, s.toString()});
                 }
             } else {
-                logger.info(String.format("Acceptor server module was not found for protocol \"%s\"", protocol));
+                Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Acceptor module was not found for {0} protocol", protocol);
             }
         } else {
-            logger.info(String.format("Protocol \"%s\" is not supported", protocol));
+            Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "{0} protocol is not supported", protocol);
         }
     }
 
-    private void initializeAndBindAcceptor(InetSocketAddress s) throws IOException, Exception {
+    private void initializeAndBindAcceptor(InetSocketAddress s, Map<String, String> aAcceptors) throws IOException, Exception {
         // archive protocol for address
         String protocol = DEFAULT_PROTOCOL;
         if (portsProtocols.containsKey(s.getPort())) {
@@ -160,7 +124,7 @@ public class PlatypusServer extends PlatypusServerCore {
         if (DEFAULT_PROTOCOL.equalsIgnoreCase(protocol)) {
             initializeAndBindPlatypusAcceptor(s);
         } else {
-            tryToInitializeAndBindSensorAcceptor(protocol, s);
+            tryToInitializeAndBindSensorAcceptor(protocol, s, aAcceptors);
         }
     }
 
@@ -189,22 +153,10 @@ public class PlatypusServer extends PlatypusServerCore {
         if (sessionIdleCheckInterval == null || sessionIdleCheckInterval == 0) {
             sessionIdleCheckInterval = PlatypusRequestsHandler.IDLE_TIME_EVENT;
         }
-
         handler.setSessionIdleCheckInterval(sessionIdleCheckInterval);
         handler.setSessionIdleTime(sessionIdleTime);
-
         acceptor.bind(s);
-
-        Logger logger = Logger.getLogger(ServerMain.class.getName());
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("\nListening on %s; protocol: platypus\n", s.toString()));
-        if (sslFilter.getEnabledCipherSuites() != null) {
-            sb.append("Enabled cipher suites: ").append(sslFilter.getEnabledCipherSuites()).append("\n");
-        }
-        if (sslFilter.getEnabledProtocols() != null) {
-            sb.append("Enabled protocols: ").append(sslFilter.getEnabledProtocols()).append("\n");
-        }
-        logger.info(sb.toString());
+        Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Listening platypus protocol on {0}", s.toString());
     }
 
     private SensorsFactory obtainAcceptorsFactory() {

@@ -24,7 +24,7 @@ import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
-import com.eas.server.ServerConfig;
+import com.eas.server.httpservlet.PlatypusServerConfig;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
 import com.eas.server.httpservlet.PlatypusSessionsSynchronizer;
 import com.eas.util.FileUtils;
@@ -286,9 +286,9 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureParams(WebApplication wa) throws Exception {
-        wa.addInitParam(new ContextParam(ServerConfig.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
-        wa.addInitParam(new ContextParam(ServerConfig.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
-        wa.addInitParam(new ContextParam(ServerConfig.APPELEMENT_CONF_PARAM, PlatypusProjectSettings.START_JS_FILE_NAME));
+        wa.addInitParam(new ContextParam(PlatypusServerConfig.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
+        wa.addInitParam(new ContextParam(PlatypusServerConfig.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
+        wa.addInitParam(new ContextParam(PlatypusServerConfig.APPELEMENT_CONF_PARAM, PlatypusProjectSettings.START_JS_FILE_NAME));
     }
 
     private void configureServlet(WebApplication wa) {

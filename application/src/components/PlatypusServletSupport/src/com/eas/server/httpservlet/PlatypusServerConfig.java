@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server;
+package com.eas.server.httpservlet;
 
 import com.eas.util.StringUtils;
 import java.util.*;
@@ -14,33 +14,32 @@ import javax.servlet.ServletConfig;
  *
  * @author ml
  */
-public class ServerConfig {
+public class PlatypusServerConfig {
 
     // configuration parameters
     public static final String APPELEMENT_CONF_PARAM = "appelement";
-    public static final String TASKS_PARAM = "tasks";
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    public static final String MAX_JDBC_THREADS_CONF_PARAM = "max-jdbc-threads";
     //
     protected String appElementName;
     protected String url;
     protected String defaultDatasourceName;
-    protected Set<String> tasks = new HashSet<>();
+    protected int maximumJdbcThreads = 25;
 
-    public static ServerConfig parse(ServletConfig aConfig) throws Exception {
-        return new ServerConfig(aConfig);
+    public static PlatypusServerConfig parse(ServletConfig aConfig) throws Exception {
+        return new PlatypusServerConfig(aConfig);
     }
 
-    private ServerConfig(ServletConfig aConfig) throws Exception {
+    private PlatypusServerConfig(ServletConfig aConfig) throws Exception {
         Enumeration<String> paramNames = aConfig.getServletContext().getInitParameterNames();
         if (paramNames != null && paramNames.hasMoreElements()) {
             while (paramNames.hasMoreElements()) {
                 String paramName = paramNames.nextElement();
                 if (paramName != null) {
                     String paramValue = aConfig.getServletContext().getInitParameter(paramName);
-                    if (TASKS_PARAM.equals(paramName)) {
-                        paramValue = paramValue.replaceAll(",", " ");
-                        tasks.addAll(StringUtils.split(paramValue, " "));
+                    if (MAX_JDBC_THREADS_CONF_PARAM.equals(paramName)) {
+                        maximumJdbcThreads = Double.valueOf(paramValue).intValue();
                     } else if (APP_URL_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         url = paramValue;
                     } else if (DEF_DATASOURCE_CONF_PARAM.equalsIgnoreCase(paramName)) {
@@ -52,7 +51,7 @@ public class ServerConfig {
             }
             if (url == null) {
                 String msg = String.format("Required settings missing. %s is required", APP_URL_CONF_PARAM);
-                Logger.getLogger(ServerConfig.class.getName()).severe(msg);
+                Logger.getLogger(PlatypusServerConfig.class.getName()).severe(msg);
                 throw new Exception(msg);
             }
         }
@@ -70,7 +69,7 @@ public class ServerConfig {
         return defaultDatasourceName;
     }
 
-    public Set<String> getTasks() {
-        return tasks;
+    public int getMaximumJdbcThreads() {
+        return maximumJdbcThreads;
     }
 }

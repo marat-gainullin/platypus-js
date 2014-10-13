@@ -4,6 +4,7 @@
  */
 package com.eas.deploy;
 
+import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.DatabasesClient;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
@@ -65,6 +66,7 @@ public class DeployApplication {
 
     /**
      * @param args the command line arguments
+     * @throws java.lang.Exception
      */
     public static void main(String[] args) throws Exception {
         DeployApplication da = new DeployApplication();
@@ -192,7 +194,7 @@ public class DeployApplication {
                     migrator.cleanup();
                     break;
                 case INITUSERS: {
-                    DatabasesClient client = new DatabasesClient(TARGET_DATASOURCE, false);
+                    DatabasesClient client = new DatabasesClient(TARGET_DATASOURCE, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE);
                     DatabasesClient.initUsersSpace(client.obtainDataSource(null));
                 }
                 break;
@@ -219,7 +221,7 @@ public class DeployApplication {
 
     private void initMigrator() throws Exception {
         if (isDbParamsSetExplicitly()) {
-            migrator = new DbMigrator(migrationsDir, new DatabasesClient(TARGET_DATASOURCE, false));
+            migrator = new DbMigrator(migrationsDir, new DatabasesClient(TARGET_DATASOURCE, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE));
         } else {
             throw new IllegalArgumentException("Database connection arguments are not set properly");
         }
