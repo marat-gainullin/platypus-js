@@ -83,6 +83,7 @@ public abstract class PlatypusConnection implements AppConnection {
         public final RequestEnvelope requestEnv;
         public Response response;
         public Consumer<Response> onComplete;
+        public boolean completed;
 
         public RequestCallback(RequestEnvelope aRequest, Consumer<Response> aOnSuccess) {
             super();
@@ -97,7 +98,7 @@ public abstract class PlatypusConnection implements AppConnection {
          * @throws InterruptedException
          */
         public synchronized void waitCompletion() throws InterruptedException {
-            while (!requestEnv.request.isDone()) {
+            while (!completed) {
                 wait();
             }
         }

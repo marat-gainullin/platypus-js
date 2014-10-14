@@ -5,9 +5,11 @@
  */
 package com.eas.client.login;
 
+import static com.eas.client.login.ConnectionsSelector.SETTINGS_NODE;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ResourceBundle;
+import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -26,6 +28,10 @@ public class CredentialsSelector extends javax.swing.JDialog {
      * A return status code - returned if OK button has been pressed
      */
     public static final int RET_OK = 1;
+    //
+    private static final String LOGIN_SETTING = "login";
+    private static final String PASSWORD_SETTING = "password";
+    //
     private static final String CANCEL_ACTION_ID = "cancel";
     private static final String OK_ACTION_ID = "ok";
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
@@ -37,6 +43,10 @@ public class CredentialsSelector extends javax.swing.JDialog {
         public void actionPerformed(ActionEvent e) {
             returnStatus = RET_OK;
             CredentialsSelector.this.dispose();
+            if (checkRememberPassword.isSelected()) {
+                Preferences.userRoot().node(SETTINGS_NODE).put(LOGIN_SETTING, String.valueOf(tfUserName.getText()));
+                Preferences.userRoot().node(SETTINGS_NODE).put(PASSWORD_SETTING, String.valueOf(tfPassword.getPassword()));
+            }
         }
     };
     private final Action cancelAction = new AbstractAction() {
@@ -62,6 +72,14 @@ public class CredentialsSelector extends javax.swing.JDialog {
         tfUserName.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
         tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), OK_ACTION_ID);
         tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
+
+        String userName = Preferences.userRoot().node(SETTINGS_NODE).get(LOGIN_SETTING, "");
+        if (userName != null && !userName.isEmpty()) {
+            tfUserName.setText(userName);
+            String password = Preferences.userRoot().node(SETTINGS_NODE).get(PASSWORD_SETTING, "");
+            tfPassword.setText(password);
+            checkRememberPassword.setSelected(true);
+        }
     }
 
     public String getUserName() {

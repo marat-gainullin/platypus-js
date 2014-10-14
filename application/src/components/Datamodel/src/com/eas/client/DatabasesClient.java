@@ -222,8 +222,20 @@ public class DatabasesClient {
 
     private static class UserInfo {
 
-        public Map<String, String> props;
-        public Set<String> roles;
+        protected boolean strict = true;
+        protected String userName;
+        protected String password;
+        protected Map<String, String> props;
+        protected Set<String> roles;
+        protected Consumer<PlatypusPrincipal> onSuccess;
+
+        public UserInfo(String aUserName, String aPassword, Consumer<PlatypusPrincipal> aOnSuccess, boolean aStrict) {
+            super();
+            userName = aUserName;
+            password = aPassword;
+            onSuccess = aOnSuccess;
+            strict = aStrict;
+        }
 
         public PlatypusPrincipal principal(String aUserName) {
             if (roles != null && props != null) {
@@ -234,40 +246,38 @@ public class DatabasesClient {
                 return null;
             }
         }
+
+        public synchronized void complete(Map<String, String> aProps, Set<String> aRoles) {
+            if (aProps != null) {
+                props = aProps;
+            }
+            if (aRoles != null) {
+                roles = aRoles;
+            }
+            if (props != null && roles != null) {
+                if (!strict || password.equals(props.get(ClientConstants.F_USR_PASSWD))) {
+                    onSuccess.accept(principal(userName));
+                } else {
+                    onSuccess.accept(null);
+                }
+            }
+        }
     }
 
-    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<PlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserInfo ui = new UserInfo();
-        if (onSuccess != null) {
+    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String aPassword, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+        final UserInfo ui = new UserInfo(aUserName, aPassword, aOnSuccess, true);
+        if (aOnSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
-                synchronized (ui) {
-                    ui.props = userProperties;
-                    if (ui.roles != null) {
-                        if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
-                            onSuccess.accept(ui.principal(aUserName));
-                        } else {
-                            onSuccess.accept(null);
-                        }
-                    }
-                }
-            }, onFailure);
+                ui.complete(userProperties, null);
+            }, aOnFailure);
             getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
-                synchronized (ui) {
-                    ui.roles = aRoles;
-                    if (ui.props != null) {
-                        if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
-                            onSuccess.accept(ui.principal(aUserName));
-                        } else {
-                            onSuccess.accept(null);
-                        }
-                    }
-                }
-            }, onFailure);
+                ui.complete(null, aRoles);
+            }, aOnFailure);
             return null;
         } else {
             ui.props = getUserProperties(aClient, aUserName, null, null);
             ui.roles = getUserRoles(aClient, aUserName, null, null);
-            if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+            if (aPassword.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
                 return ui.principal(aUserName);
             } else {
                 return null;
@@ -275,25 +285,15 @@ public class DatabasesClient {
         }
     }
 
-    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<PlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserInfo ui = new UserInfo();
-        if (onSuccess != null) {
+    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+        final UserInfo ui = new UserInfo(aUserName, null, aOnSuccess, false);
+        if (aOnSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
-                synchronized (ui) {
-                    ui.props = userProperties;
-                    if (ui.roles != null) {
-                        onSuccess.accept(ui.principal(aUserName));
-                    }
-                }
-            }, onFailure);
+                ui.complete(userProperties, null);
+            }, aOnFailure);
             getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
-                synchronized (ui) {
-                    ui.roles = aRoles;
-                    if (ui.props != null) {
-                        onSuccess.accept(ui.principal(aUserName));
-                    }
-                }
-            }, onFailure);
+                ui.complete(null, aRoles);
+            }, aOnFailure);
             return null;
         } else {
             ui.props = getUserProperties(aClient, aUserName, null, null);

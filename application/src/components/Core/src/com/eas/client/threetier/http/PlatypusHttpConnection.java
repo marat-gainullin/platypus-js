@@ -109,12 +109,15 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             try {
                 HttpRequestSender httpSender = new HttpRequestSender(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
                 rqc.requestEnv.request.accept(httpSender);// wait completion analog
-                rqc.requestEnv.request.setDone(true);
                 if (rqc.onComplete != null) {
+                    rqc.requestEnv.request.setDone(true);
+                    rqc.completed = true;
                     rqc.onComplete.accept(httpSender.getResponse());
                 } else {
-                    rqc.response = httpSender.getResponse();
-                    synchronized(rqc){
+                    synchronized (rqc) {
+                        rqc.requestEnv.request.setDone(true);
+                        rqc.response = httpSender.getResponse();
+                        rqc.completed = true;
                         rqc.notifyAll();
                     }
                 }

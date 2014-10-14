@@ -443,6 +443,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 }
                                 List<Row> rows = aRowset.getCurrent();
                                 aRowset.setCurrent(new ArrayList<>());
+                                aRowset.currentToOriginal();
                                 setCurrent(rows);
                                 currentToOriginal();
                                 invalidateFilters();
@@ -452,7 +453,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 }
                                 rowsetChangeSupport.fireRequeriedEvent();
                                 try {
-                                    onSuccess.accept(aRowset);
+                                    onSuccess.accept(this);
                                 } catch (Exception ex) {
                                     Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
                                 }
