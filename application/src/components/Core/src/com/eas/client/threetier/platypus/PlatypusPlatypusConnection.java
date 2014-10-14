@@ -34,6 +34,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.SocketConnector;
+import org.apache.mina.transport.socket.nio.NioProcessor;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 /**
@@ -52,7 +53,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads, int aMaximumConnections) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
         requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
-                10L, TimeUnit.SECONDS,
+                1L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 new DeamonThreadFactory("platypus-client-", false));
         sessionsPool = new BearResourcePool<IoSession>(aMaximumConnections) {
@@ -69,7 +70,19 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         requestsSender.allowCoreThreadTimeOut(true);
         host = aUrl.getHost();
         port = aUrl.getPort();
-        connector = new NioSocketConnector();
+        ThreadPoolExecutor connectorExecutor = new ThreadPoolExecutor(0, aMaximumThreads,
+                1L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                new DeamonThreadFactory("nio-connector-", true));
+        connectorExecutor.allowCoreThreadTimeOut(true);
+        ThreadPoolExecutor processorExecutor = new ThreadPoolExecutor(0, aMaximumThreads,
+                1L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                new DeamonThreadFactory("nio-processor-", true));
+        processorExecutor.allowCoreThreadTimeOut(true);
+        connector = new NioSocketConnector(connectorExecutor, new NioProcessor(processorExecutor));
+        //connector = new NioSocketConnector(null, new SimpleIoProcessorPool(NioProcessor.class, connectorExecutor, Runtime.getRuntime().availableProcessors() + 1));
+        //connector = new NioSocketConnector();
         connector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
         connector.setHandler(new IoHandlerAdapter() {
 
@@ -193,7 +206,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                         performer.call();
                         if (rqc.response instanceof ErrorResponse
                                 && ((ErrorResponse) rqc.response).isAccessControl()) {
-                            // nice try :(
+                            // nice try :-(
                             int authenticateAttempts = 0;
                             // Try to authenticate
                             while (rqc.response instanceof ErrorResponse
@@ -204,6 +217,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                                     rqc.requestEnv.userName = credentials.userName;
                                     rqc.requestEnv.password = credentials.password;
                                     performer.call();
+                                    if(!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()){
+                                        PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
+                                    }
                                 } else {// Credentials are inaccessible, so leave things as is...
                                     authenticateAttempts = Integer.MAX_VALUE;
                                 }

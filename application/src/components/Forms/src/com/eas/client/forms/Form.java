@@ -47,7 +47,6 @@ public class Form implements HasPublished {
 
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
-    public static final String PRINCIPAL_KEY = "creatorPrincipal";
     public static final String LOCK_KEY = "creatorLock";
     public static final String VIEW_SCRIPT_NAME = "view";
     protected static final Map<String, Form> showingForms = new HashMap<>();
@@ -360,7 +359,6 @@ public class Form implements HasPublished {
                 }
             };
 
-            frame.getRootPane().putClientProperty(PRINCIPAL_KEY, PlatypusPrincipal.getInstance());
             frame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             frame.addWindowListener(new WindowClosingReflector());
             frame.getContentPane().setLayout(new BorderLayout());
@@ -438,7 +436,6 @@ public class Form implements HasPublished {
                     }
                 }
             };
-            internalFrame.getRootPane().putClientProperty(PRINCIPAL_KEY, PlatypusPrincipal.getInstance());
             internalFrame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             internalFrame.addInternalFrameListener(new WindowClosingReflector());
             internalFrame.getContentPane().setLayout(new BorderLayout());
@@ -552,7 +549,6 @@ public class Form implements HasPublished {
                 }
             };
             //dialog.addWindowListener(new WindowClosingReflector());
-            dialog.getRootPane().putClientProperty(PRINCIPAL_KEY, PlatypusPrincipal.getInstance());
             dialog.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             dialog.getContentPane().setLayout(new BorderLayout());
             // configure dialog

@@ -131,12 +131,10 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                 onFailure.accept(new IllegalArgumentException(String.format(MODULE_MISSING_OR_NOT_A_MODULE, moduleName)));
                             }
                         } catch (Exception ex) {
-                            Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                             onFailure.accept(ex);
                         }
                     }, onFailure);
                 } catch (Exception ex) {
-                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                     onFailure.accept(ex);
                 }
             }

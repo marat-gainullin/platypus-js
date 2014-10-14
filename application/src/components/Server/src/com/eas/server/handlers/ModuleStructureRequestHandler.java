@@ -59,7 +59,6 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
                 onSuccess.accept(resp);
             }, onFailure);
         } catch (Exception ex) {
-            Logger.getLogger(ModuleStructureRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
             onFailure.accept(ex);
         }
     }

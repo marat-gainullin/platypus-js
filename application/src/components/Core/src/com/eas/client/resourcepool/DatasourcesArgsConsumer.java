@@ -121,7 +121,7 @@ public class DatasourcesArgsConsumer {
     public void registerDatasources() throws SQLException {
         for (DbConnectionSettings settings : parsedDatasources) {
             GeneralResourceProvider.getInstance().registerDatasource(settings.getName(), settings);
-            Logger.getLogger(DatasourcesArgsConsumer.class.getName()).log(Level.INFO, "Datasource registered: {0}", settings.getName());
+            Logger.getLogger(DatasourcesArgsConsumer.class.getName()).log(Level.INFO, "Datasource \"{0}\" has been registered", settings.getName());
         }
     }
 

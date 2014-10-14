@@ -70,12 +70,9 @@ public abstract class PlatypusConnection implements AppConnection {
     public static final String DEFAULT_SSL_PROTOCOL = "TLS";
     //
     public static final String DEFAULT_TRUST_ALGORITHM = "PKIX";
-    // configuration paths
-    public static final String CLIENT_PREFS_PATH = "/com/eas/client";
-    public static final String SSL_PREFS_PATH = "/com/eas/net/ssl";
     // error messages
-    public static final String ACCESSCONTROL_EXCEPTION_LOG_MSG = "AccessControl in response {0}}";
-    public static final String SQL_EXCEPTION_LOG_MSG = "SQLException in response {0} {1} {2}";
+    public static final String ACCESSCONTROL_EXCEPTION_LOG_MSG = "AccessControlException from server. {0}";
+    public static final String SQL_EXCEPTION_LOG_MSG = "SQLException from server. Message: {0}. SqlState: {1}. SqlError code: {2}.";
     public static final String KEYSTORE_MISING_MSG = "Can't locate key store file. May be bad installation.";
     public static final String TRUSTSTORE_MISSING_MSG = "Can't locate trust store file. May be bad installation.";
     // misc
@@ -129,13 +126,15 @@ public abstract class PlatypusConnection implements AppConnection {
 
     public Exception handleErrorResponse(ErrorResponse aResponse) {
         if (aResponse.getSqlErrorCode() != null || aResponse.getSqlState() != null) {
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINEST, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode()});
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode()});
             return new SQLException(aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode());
         } else if (aResponse.isAccessControl()) {
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINEST, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage()});
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage()});
             return new AccessControlException(((ErrorResponse) aResponse).getErrorMessage());
         } else {
-            return new Exception("Error from server: " + ((ErrorResponse) aResponse).getErrorMessage());
+            String msg = "Exception from server. " + ((ErrorResponse) aResponse).getErrorMessage();
+            Logger.getLogger(PlatypusConnection.class.getName()).log(Level.WARNING, msg);
+            return new Exception(msg);
         }
     }
 

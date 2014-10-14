@@ -227,31 +227,27 @@
             var principal = PlatypusPrincipalClass.getInstance();
             //
             ScriptTimerTaskClass.schedule(function() {
-                SwingUtilitiesClass.invokeLater(function() {
-                    try {
-                        var oldLock = ScriptUtilsClass.getLock();
-                        var oldReq = ScriptUtilsClass.getRequest();
-                        var oldResp = ScriptUtilsClass.getResponse();
-                        var oldSession = ScriptUtilsClass.getSession();
-                        var oldPrincipal = PlatypusPrincipalClass.getInstance();
-                        ScriptUtilsClass.setLock(lock);
-                        ScriptUtilsClass.setRequest(req);
-                        ScriptUtilsClass.setResponse(resp);
-                        ScriptUtilsClass.setSession(session);
-                        PlatypusPrincipalClass.setInstance(principal);
-                        try{
-                            func.apply(func, userArgs);
-                        }finally{
-                            ScriptUtilsClass.setLock(oldLock);
-                            ScriptUtilsClass.setRequest(oldReq);
-                            ScriptUtilsClass.setResponse(oldResp);
-                            ScriptUtilsClass.setSession(oldSession);
-                            PlatypusPrincipalClass.setInstance(oldPrincipal);
-                        }
-                    } catch (e) {
-                        P.Logger.severe(e);
-                    }
-                });
+                var oldLock = ScriptUtilsClass.getLock();
+                var oldReq = ScriptUtilsClass.getRequest();
+                var oldResp = ScriptUtilsClass.getResponse();
+                var oldSession = ScriptUtilsClass.getSession();
+                var oldPrincipal = PlatypusPrincipalClass.getInstance();
+                ScriptUtilsClass.setLock(lock);
+                ScriptUtilsClass.setRequest(req);
+                ScriptUtilsClass.setResponse(resp);
+                ScriptUtilsClass.setSession(session);
+                PlatypusPrincipalClass.setInstance(principal);
+                try{
+                    ScriptUtilsClass.locked(function(){
+                        func.apply(func, userArgs);
+                    }, lock);
+                }finally{
+                    ScriptUtilsClass.setLock(oldLock);
+                    ScriptUtilsClass.setRequest(oldReq);
+                    ScriptUtilsClass.setResponse(oldResp);
+                    ScriptUtilsClass.setSession(oldSession);
+                    PlatypusPrincipalClass.setInstance(oldPrincipal);
+                }
             }, args[0]);
             // HTML5 client doesn't support cancel feature and so, we don't support it too.
         };
@@ -783,8 +779,9 @@
 
     Object.defineProperty(P, "principal", {
         get: function(){
-            var principalHost = ScriptedResourceClass.getPrincipalHost();
-            return principalHost !== null ? boxAsJs(principalHost.getPrincipal()) : null;
+            var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
+            var tlsPrincipal = PlatypusPrincipalClass.getInstance();
+            return boxAsJs(clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal);
         }
     });
 
@@ -1356,7 +1353,7 @@
     });
     Object.defineProperty(P, "logout", {
         value: function(onSuccess, onFailure) {
-            printf("logout() is not implemented for J2SE");
+            return P.principal.logout(onSuccess, onFailure);
         }
     });
 

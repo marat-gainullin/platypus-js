@@ -81,7 +81,6 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                     } catch (AccessControlException ex) {
                         onSuccess.accept(new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false)));
                     } catch (Exception ex) {
-                        Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                         onFailure.accept(ex);
                     }
                 }, onFailure);

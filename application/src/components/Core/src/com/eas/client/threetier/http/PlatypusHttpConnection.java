@@ -56,7 +56,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
         requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
-                10L, TimeUnit.SECONDS,
+                1L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 new DeamonThreadFactory("http-client-", false));
         requestsSender.allowCoreThreadTimeOut(true);
@@ -104,17 +104,19 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         });
     }
 
-    private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
+    private void enqueue(final RequestCallback rqc, Consumer<Exception> onFailure) {
         startRequestTask(() -> {
             try {
-                HttpRequestSender httpSender = new HttpRequestSender(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts);
+                HttpRequestSender httpSender = new HttpRequestSender(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
                 rqc.requestEnv.request.accept(httpSender);// wait completion analog
                 rqc.requestEnv.request.setDone(true);
                 if (rqc.onComplete != null) {
                     rqc.onComplete.accept(httpSender.getResponse());
                 } else {
                     rqc.response = httpSender.getResponse();
-                    rqc.notifyAll();
+                    synchronized(rqc){
+                        rqc.notifyAll();
+                    }
                 }
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);

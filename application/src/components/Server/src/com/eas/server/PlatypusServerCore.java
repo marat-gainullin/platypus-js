@@ -4,7 +4,6 @@
  */
 package com.eas.server;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.AppElementFiles;
 import com.eas.client.Application;
 import com.eas.client.DatabasesClient;
@@ -271,7 +270,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             JSObject module = ScriptUtils.getCachedModule(aModuleName);
             if (module != null) {
                 sessionManager.getSystemSession().registerModule(module);
-                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Resident module \"{0}\" started successfully", aModuleName);
+                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Resident module \"{0}\" has been started successfully", aModuleName);
                 return true;
             } else {
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Resident module \"{0}\" is illegal (may be bad name). Skipping it.", aModuleName);

@@ -36,7 +36,7 @@ public class DatabaseAuthorizer {
                     }
                 }, onFailure);
             } else {
-                Session created = aServerCore.getSessionManager().createSession(new AnonymousPlatypusPrincipal("anonyumous-" + String.valueOf(IDGenerator.genID())), String.valueOf(IDGenerator.genID()));
+                Session created = aServerCore.getSessionManager().createSession(new AnonymousPlatypusPrincipal("anonymous-" + String.valueOf(IDGenerator.genID())), String.valueOf(IDGenerator.genID()));
                 onSuccess.accept(created);
             }
         } catch (Exception ex) {

@@ -6,9 +6,11 @@ import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.login.Credentials;
 import com.eas.client.login.CredentialsSelector;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
@@ -212,6 +214,7 @@ public class PlatypusClientApplication {
                 Toolkit.getDefaultToolkit().getSystemEventQueue().push(new LockableEventQueue());
                 ScriptUtils.init();
                 Application app;
+                PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
                     app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {

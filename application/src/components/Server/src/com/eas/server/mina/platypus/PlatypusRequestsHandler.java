@@ -93,11 +93,11 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                 Consumer<Exception> onError = (Exception ex) -> {
                     if (ex instanceof SQLException) {
                         SQLException sex = (SQLException) ex;
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()), sex);
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()));
                         ioSession.write(new ResponseEnvelope(new ErrorResponse(sex), requestEnv.ticket));
                     } else if (ex instanceof AccessControlException) {
                         AccessControlException aex = (AccessControlException) ex;
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()), aex);
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()));
                         ioSession.write(new ResponseEnvelope(new ErrorResponse(aex), requestEnv.ticket));
                     } else {
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName()), ex);

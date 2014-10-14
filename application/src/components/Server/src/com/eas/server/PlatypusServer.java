@@ -165,7 +165,7 @@ public class PlatypusServer extends PlatypusServerCore {
             Class<SensorsFactory> acceptorsFactoryClass = (Class<SensorsFactory>) Class.forName("com.eas.sensors.AcceptorsFactory");
             recieveFactory = acceptorsFactoryClass.newInstance();
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found (acceptors lookup).");
+            Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Sensors acceptors are not on the classpath.");
         } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -178,7 +178,7 @@ public class PlatypusServer extends PlatypusServerCore {
             Class<RetranslateFactory> retranslateFactoryClass = (Class<RetranslateFactory>) Class.forName("com.eas.sensors.ConnectorsFactory");
             factory = retranslateFactoryClass.getConstructor(new Class<?>[]{Map.class}).newInstance(portsNumWorkerThreads);
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors is not found (retranslators lookup).");
+            Logger.getLogger(PlatypusServer.class.getName()).info("Sensors retranslators are not on the classpath.");
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(PlatypusServer.class.getName()).log(Level.SEVERE, null, ex);
         }

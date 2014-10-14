@@ -95,6 +95,7 @@ public class CredentialsSelector extends javax.swing.JDialog {
         btnCancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(bundle.getString("LoginDialog.authenticationRequired")); // NOI18N
         setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/eas/client/login/key.png")).getImage());
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -144,8 +145,10 @@ public class CredentialsSelector extends javax.swing.JDialog {
                 .addGap(10, 10, 10))
         );
 
+        btnOk.setAction(okAction);
         btnOk.setText(bundle.getString("Dialog.OKButton.text")); // NOI18N
 
+        btnCancel.setAction(cancelAction);
         btnCancel.setText(bundle.getString("Dialog.CancelButton.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

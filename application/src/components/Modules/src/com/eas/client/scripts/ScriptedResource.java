@@ -83,11 +83,9 @@ public class ScriptedResource {
      * avaliable
      * @throws java.lang.Exception
      */
-    /*
      public static String getApplicationPath() throws Exception {
-     return client.getAppCache().getApplicationPath();
+        return app.getModules().getLocalPath();
      }
-     */
     /**
      * Loads a resource's bytes either from disk or from datatbase.
      *

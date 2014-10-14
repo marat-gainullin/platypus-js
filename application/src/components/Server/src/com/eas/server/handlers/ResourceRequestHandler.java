@@ -50,7 +50,6 @@ public class ResourceRequestHandler extends SessionRequestHandler<ResourceReques
                     Logger.getLogger(ResourceRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(ResourceRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                 if (ex instanceof FileNotFoundException) {
                     onFailure.accept(new FileNotFoundException(fileRelativeName));
                 } else {

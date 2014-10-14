@@ -6,7 +6,6 @@
 package com.eas.client.application;
 
 import com.eas.client.forms.Form;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.ScriptUtils;
 import java.awt.AWTEvent;
 import java.awt.Component;
@@ -32,16 +31,13 @@ class LockableEventQueue extends EventQueue {
             Component window = SwingUtilities.getRoot(source);
             if (window instanceof RootPaneContainer) {
                 JRootPane root = ((RootPaneContainer) window).getRootPane();
-                Object principal = root.getClientProperty(Form.PRINCIPAL_KEY);
                 Object lock = root.getClientProperty(Form.LOCK_KEY) != null ? root.getClientProperty(Form.LOCK_KEY) : this;
                 ScriptUtils.setLock(lock);
-                PlatypusPrincipal.setInstance((PlatypusPrincipal) principal);
                 try {
                     synchronized (lock) {
                         super.dispatchEvent(aEvent);
                     }
                 } finally {
-                    PlatypusPrincipal.setInstance(null);
                     ScriptUtils.setLock(null);
                 }
             } else {

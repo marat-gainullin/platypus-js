@@ -5,7 +5,9 @@
 package com.eas.client.threetier.http;
 
 import com.eas.client.login.Credentials;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Sequence;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
@@ -48,14 +50,16 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     protected HttpURLConnection conn;
     protected Response response;
     protected Callable<Credentials> onCredentials;
+    protected PlatypusConnection pConn;
 
-    public HttpRequestSender(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts) {
+    public HttpRequestSender(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusConnection aPConn) {
         super();
         url = aUrl;
         cookies = aCookies;
         sequence = aSequence;
         maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
         onCredentials = aOnCredentials;
+        pConn = aPConn;
     }
 
     public Response getResponse() {
@@ -111,14 +115,14 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
             return res;
         };
         HttpResult res = performer.call(onHeaders);
-        if (!res.isUnauthorized()) {
+        if (res.isUnauthorized()) {
             sequence.in(() -> {
                 // Probably new cookies from another thread...
                 res.assign(performer.call(onHeaders));
-                if (!res.isUnauthorized()) {
-                    // nice try :-)
+                if (res.isUnauthorized()) {
+                    // nice try :-(
                     int authenticateAttempts = 0;
-                    while (!res.isUnauthorized() && authenticateAttempts++ < maximumAuthenticateAttempts) {
+                    while (res.isUnauthorized() && authenticateAttempts++ < maximumAuthenticateAttempts) {
                         Credentials credentials = onCredentials.call();
                         if (credentials != null) {
                             if (res.authScheme.toLowerCase().contains(PlatypusHttpConstants.BASIC_AUTH_NAME.toLowerCase())) {
@@ -132,6 +136,9 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
                                         Logger.getLogger(HttpRequestSender.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 }));
+                                if (!res.isUnauthorized()) {
+                                    PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
+                                }
                                 return null;
                                 //} else if (authScheme.toLowerCase().contains(PlatypusHttpConstants.DIGEST_AUTH_NAME.toLowerCase())) {
                             } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equals(res.authScheme)) {
@@ -144,6 +151,9 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
                                 securityFormConn.getResponseCode();
                                 acceptCookies(securityFormConn);
                                 res.assign(performer.call(onHeaders));
+                                if (!res.isUnauthorized()) {
+                                    PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
+                                }
                                 return null;
                             } else {
                                 Logger.getLogger(HttpRequestSender.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", res.authScheme);

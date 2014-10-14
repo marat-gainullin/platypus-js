@@ -29,6 +29,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     private final PlatypusConnection conn;
 
     private static final ThreadLocal<PlatypusPrincipal> current = new ThreadLocal<>();
+    private static PlatypusPrincipal clientSpacePrincipal = null;
 
     public static PlatypusPrincipal getInstance() {
         return current.get();
@@ -40,6 +41,14 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         } else {
             current.remove();
         }
+    }
+
+    public static PlatypusPrincipal getClientSpacePrincipal() {
+        return clientSpacePrincipal;
+    }
+
+    public static void setClientSpacePrincipal(PlatypusPrincipal aValue) {
+        clientSpacePrincipal = aValue;
     }
 
     public PlatypusPrincipal(String aUserName, String aContext, Set<String> aRoles, PlatypusConnection aConn) {
@@ -85,6 +94,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         if (aOnSuccess != null) {
             if (conn != null) {
                 conn.enqueueRequest(req, (LogoutRequest.Response res) -> {
+                    clientSpacePrincipal = new AnonymousPlatypusPrincipal();
                     aOnSuccess.call(null, new Object[]{});
                 }, (Exception ex) -> {
                     if (aOnFailure != null) {
@@ -97,6 +107,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         } else {
             if (conn != null) {
                 conn.executeRequest(req);
+                clientSpacePrincipal = new AnonymousPlatypusPrincipal();
             }
         }
     }

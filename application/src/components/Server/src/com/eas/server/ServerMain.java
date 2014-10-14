@@ -19,14 +19,12 @@ import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.util.args.ThreadsArgsConsumer;
 import java.io.*;
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.ObjectName;
 import javax.net.ssl.*;
 
 /**
@@ -46,9 +44,6 @@ public class ServerMain {
     public static final String SESSION_IDLE_TIMEOUT_CONF_PARAM = "sessionidletimeout";
     public static final String SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM = "sessionidlecheckinterval";
     public static final String APP_ELEMENT_CONF_PARAM = "appelement";
-    // configuration paths
-    public static final String SERVER_PREFS_PATH = "/com/eas/server";
-    public static final String SSL_PREFS_PATH = "/com/eas/net/ssl";
     // local disk paths
     public static final String LOGS_PATH = "logs";
     public static final String SECURITY_SUBDIRECTORY = "security";
@@ -174,12 +169,6 @@ public class ServerMain {
         }
         dsArgs.registerDatasources();
         threadsConfig = threadsArgs;
-    }
-
-    protected static void registerMBean(String aName, Object aBean) throws Exception {
-        // Get the platform MBeanServer
-        // Uniquely identify the MBeans and register them with the platform MBeanServer
-        ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
     }
 
     /**

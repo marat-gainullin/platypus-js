@@ -4,6 +4,7 @@
  */
 package com.eas.client.login;
 
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.script.NoPublisherException;
 import java.util.Collections;
 import jdk.nashorn.api.scripting.JSObject;
@@ -14,15 +15,19 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
 
+    public AnonymousPlatypusPrincipal() {
+        this("anonymous-" + String.valueOf(IDGenerator.genID()));
+    }
+
     public AnonymousPlatypusPrincipal(String aName) {
         super(aName, null, Collections.emptySet(), null);
     }
 
     @Override
-    public boolean hasRole(String aRole){
+    public boolean hasRole(String aRole) {
         return false;
     }
-    
+
     @Override
     public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {
