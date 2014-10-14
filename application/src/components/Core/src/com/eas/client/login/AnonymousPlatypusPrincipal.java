@@ -5,7 +5,9 @@
 package com.eas.client.login;
 
 import com.bearsoft.rowset.utils.IDGenerator;
+import static com.eas.client.login.PlatypusPrincipal.HAS_ROLE_JS_DOC;
 import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
 import java.util.Collections;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -23,11 +25,13 @@ public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
         super(aName, null, Collections.emptySet(), null);
     }
 
+    @ScriptFunction(jsDoc = HAS_ROLE_JS_DOC)
     @Override
     public boolean hasRole(String aRole) {
         return false;
     }
 
+    @ScriptFunction(jsDoc = LOGOUT_JS_DOC, params = {"onSuccess", "onFailure"})
     @Override
     public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {

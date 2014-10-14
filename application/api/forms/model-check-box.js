@@ -355,20 +355,6 @@
              */
             P.ModelCheckBox.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -385,6 +371,20 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {

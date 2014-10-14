@@ -69,7 +69,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         return name;
     }
 
-    private static final String HAS_ROLE_JS_DOC = ""
+    protected static final String HAS_ROLE_JS_DOC = ""
             + "/**\n"
             + "* Checks if a user have a specified role.\n"
             + "* @param role a role's name to test.\n"
@@ -81,7 +81,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         return roles != null ? roles.contains(aRole) : true;
     }
 
-    private static final String LOGOUT_JS_DOC = ""
+    protected static final String LOGOUT_JS_DOC = ""
             + "/**\n"
             + " * Logs out from  user's session on a server.\n"
             + " * @param onSuccess The function to be invoked after the logout (optional).\n"

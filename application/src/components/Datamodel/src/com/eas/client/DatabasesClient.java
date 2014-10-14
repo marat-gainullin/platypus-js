@@ -30,7 +30,7 @@ import com.eas.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -77,9 +77,9 @@ public class DatabasesClient {
      */
     public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
         super();
-        jdbcProcessor = new ThreadPoolExecutor(0, aMaxJdbcThreads,
+        jdbcProcessor = new ThreadPoolExecutor(aMaxJdbcThreads, aMaxJdbcThreads,
                 10L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("jdbc-", false));
         jdbcProcessor.allowCoreThreadTimeOut(true);
         defaultDatasourceName = aDefaultDatasourceName;

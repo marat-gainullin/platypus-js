@@ -26,6 +26,7 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +58,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
         requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("http-client-", false));
         requestsSender.allowCoreThreadTimeOut(true);
     }

@@ -21,7 +21,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.concurrent.Callable;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -52,33 +52,33 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads, int aMaximumConnections) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
+        requestsSender = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("platypus-client-", false));
+        requestsSender.allowCoreThreadTimeOut(true);
         sessionsPool = new BearResourcePool<IoSession>(aMaximumConnections) {
 
             @Override
             protected IoSession createResource() throws Exception {
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
                 ConnectFuture onConnect = connector.connect();
                 onConnect.awaitUninterruptibly();
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
                 return onConnect.getSession();
             }
         };
-        requestsSender.allowCoreThreadTimeOut(true);
         host = aUrl.getHost();
         port = aUrl.getPort();
 
-        ThreadPoolExecutor connectorExecutor = new ThreadPoolExecutor(0, aMaximumThreads,
+        ThreadPoolExecutor connectorExecutor = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-connector-", true));
         connectorExecutor.allowCoreThreadTimeOut(true);
-        ThreadPoolExecutor processorExecutor = new ThreadPoolExecutor(0, aMaximumThreads,
+        ThreadPoolExecutor processorExecutor = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-processor-", true));
         processorExecutor.allowCoreThreadTimeOut(true);
         connector = new NioSocketConnector(connectorExecutor, new NioProcessor(processorExecutor));
