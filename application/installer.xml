@@ -87,9 +87,9 @@
 	  <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
 	    <include name="*.jar" />
 	    <exclude name="Server.jar" />
-		<exclude name="PlatypusServletSupport.jar"/>
+		<exclude name="ServletSupport.jar"/>
 		<exclude name="MetaSync.jar"/>
-		<exclude name="PlatypusDeploy.jar"/>
+		<exclude name="Deploy.jar"/>
 	  </fileset>
 	  
 	  <executable targetfile="$INSTALL_PATH/run/startupdate.sh" stage="never" keep="true" condition="izpack.linuxinstall" failure="warn"/>
@@ -111,7 +111,7 @@
           </fileset>
 	  <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
 		<include name="Server.jar"/> 
-		<include name="PlatypusServletSupport.jar"/>
+		<include name="ServletSupport.jar"/>
 	  </fileset>
 	  <fileset dir="run" targetdir="$INSTALL_PATH/run" condition="izpack.windowsinstall">
 		<include name="Server.bat" />
@@ -142,7 +142,7 @@
         <description/> 
 	    <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
 	        <include name="MetaSync.jar"/>
-		    <include name="PlatypusDeploy.jar"/>
+		    <include name="Deploy.jar"/>
       	</fileset>
     </pack>
   </packs>

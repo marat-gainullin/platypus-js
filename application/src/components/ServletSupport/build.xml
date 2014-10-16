@@ -7,8 +7,8 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="PlatypusDeploy" default="default" basedir=".">
-    <description>Builds, tests, and runs the project PlatypusDeploy.</description>
+<project name="ServletSupport" default="default" basedir=".">
+    <description>Builds, tests, and runs the project ServletSupport.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
 
@@ -59,7 +59,7 @@
 
     An example of overriding the target for project execution could look like this:
 
-        <target name="run" depends="PlatypusDeploy-impl.jar">
+        <target name="run" depends="ServletSupport-impl.jar">
             <exec dir="bin" executable="launcher.exe">
                 <arg file="${dist.jar}"/>
             </exec>
@@ -74,27 +74,5 @@
     <target depends="init" name="-do-clean">
         <delete dir="${build.dir}"/>
         <delete file="${dist.jar}"/>
-    </target>
-    <target depends="init,compile,-pre-pre-jar,-pre-jar" if="manifest.available" name="-do-jar-with-libraries">
-        <property location="${build.classes.dir}" name="build.classes.dir.resolved"/>
-        <pathconvert property="run.classpath.without.build.classes.dir" dirsep="/">
-            <path path="${run.classpath}"/>
-            <map from="${build.classes.dir.resolved}" to=""/>
-        </pathconvert>
-	<property location="${dist.dir}/.." name="bin.dir.resolved"/>
-        <pathconvert pathsep=" " property="jar.classpath" dirsep="/">
-            <path path="${run.classpath.without.build.classes.dir}"/>
-	    <map from="${bin.dir.resolved}" to=".."/>
-        </pathconvert>
-	<jar destfile="${dist.jar}" basedir="${build.classes.dir}" compress="${jar.compress}"
-	manifest="${manifest.file}">
-	  <manifest>
-	      <attribute name="Main-Class" value="${main.class}"/>
-	      <attribute name="Class-Path" value="${jar.classpath}"/>
-	  </manifest>
-	</jar>
-        <echo>To run this application from the command line without Ant, try:</echo>
-        <property location="${dist.jar}" name="dist.jar.resolved"/>
-        <echo>java -jar "${dist.jar.resolved}"</echo>
     </target>
 </project>
