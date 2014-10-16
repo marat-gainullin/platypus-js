@@ -4,7 +4,6 @@ import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.client.forms.api.FormWindowEventsIProxy;
 import com.eas.client.forms.api.components.DesktopPane;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
@@ -348,7 +347,28 @@ public class Form implements HasPublished {
     public void displayAsFrame() throws Exception {
         if (surface == null) {
             close(null);
+            final Object formLock = ScriptUtils.getLock();
             final JFrame frame = new JFrame() {
+
+                @Override
+                public void paint(Graphics g) {
+                    if (ScriptUtils.getLock() != null) {
+                        final Object l = ScriptUtils.getLock();
+                        synchronized (l) {
+                            super.paint(g);
+                        }
+                    } else {
+                        synchronized (formLock) {
+                            ScriptUtils.setLock(formLock);
+                            try {
+                                super.paint(g);
+                            } finally {
+                                ScriptUtils.setLock(null);
+                            }
+                        }
+                    }
+                }
+
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
                     try {
@@ -359,7 +379,7 @@ public class Form implements HasPublished {
                 }
             };
 
-            frame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
+            frame.getRootPane().putClientProperty(LOCK_KEY, formLock);
             frame.addWindowListener(new WindowClosingReflector());
             frame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -426,7 +446,27 @@ public class Form implements HasPublished {
     public void displayAsInternalFrame(DesktopPane aDesktop) throws Exception {
         if (surface == null) {
             close(null);
+            final Object formLock = ScriptUtils.getLock();
             JInternalFrame internalFrame = new PlatypusInternalFrame(this) {
+                @Override
+                public void paint(Graphics g) {
+                    if (ScriptUtils.getLock() != null) {
+                        final Object l = ScriptUtils.getLock();
+                        synchronized (l) {
+                            super.paint(g);
+                        }
+                    } else {
+                        synchronized (formLock) {
+                            ScriptUtils.setLock(formLock);
+                            try {
+                                super.paint(g);
+                            } finally {
+                                ScriptUtils.setLock(null);
+                            }
+                        }
+                    }
+                }
+
                 @Override
                 public void doDefaultCloseAction() {
                     try {
@@ -436,7 +476,7 @@ public class Form implements HasPublished {
                     }
                 }
             };
-            internalFrame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
+            internalFrame.getRootPane().putClientProperty(LOCK_KEY, formLock);
             internalFrame.addInternalFrameListener(new WindowClosingReflector());
             internalFrame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -501,7 +541,28 @@ public class Form implements HasPublished {
     public Object displayAsDialog(final JSObject onOkModalResult) throws Exception {
         if (surface == null) {
             close(null);
+            Object formLock = ScriptUtils.getLock();
             JDialog dialog = new JDialog() {
+
+                @Override
+                public void paint(Graphics g) {
+                    if (ScriptUtils.getLock() != null) {
+                        final Object l = ScriptUtils.getLock();
+                        synchronized (l) {
+                            super.paint(g);
+                        }
+                    } else {
+                        synchronized (formLock) {
+                            ScriptUtils.setLock(formLock);
+                            try {
+                                super.paint(g);
+                            } finally {
+                                ScriptUtils.setLock(null);
+                            }
+                        }
+                    }
+                }
+
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
                     try {
@@ -548,8 +609,8 @@ public class Form implements HasPublished {
                     }
                 }
             };
-            //dialog.addWindowListener(new WindowClosingReflector());
-            dialog.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
+//dialog.addWindowListener(new WindowClosingReflector());
+            dialog.getRootPane().putClientProperty(LOCK_KEY, formLock);
             dialog.getContentPane().setLayout(new BorderLayout());
             // configure dialog
             dialog.setDefaultCloseOperation(defaultCloseOperation);
@@ -575,13 +636,13 @@ public class Form implements HasPublished {
             surface = null;
             closeCallbackParameter = null;
             if (onOkModalResult != null) {
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        onOkModalResult.call(published, new Object[]{selected});
-                    } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
+                try {
+                    onOkModalResult.call(published, new Object[]{selected});
+
+                } catch (Exception ex) {
+                    Logger.getLogger(Form.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
             }
             return selected;
         } else {

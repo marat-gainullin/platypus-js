@@ -12,6 +12,7 @@ import com.eas.client.model.ParametersEntity;
 import com.google.gwt.xml.client.Element;
 
 public class ModelElementRef {
+
 	protected Model model;
 	public String entityId;
 	public Entity entity;
@@ -71,7 +72,8 @@ public class ModelElementRef {
 				colIndex = entity.getRowset().getFields().find(field.getName());
 			}
 			return colIndex;
-		} else
+		} else {
 			return 0;
+		}
 	}
 }

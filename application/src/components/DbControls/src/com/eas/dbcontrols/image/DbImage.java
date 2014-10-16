@@ -18,6 +18,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -272,18 +272,15 @@ public class DbImage extends DbControlPanel implements DbControl {
                     && imagePanel.getImage().getHeight(null) != -1
                     && imagePanel.getImage().getWidth(null) != -1) {
                 if (kind == InitializingMethod.EDITOR) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            Dimension d = getSize();
-                            if (extraTools.isVisible()) {
-                                Dimension sd = extraTools.getSize();
-                                d.width -= sd.width * 2;
-                            }
-                            setupScalable(d);
-                            cards.show(cardsPanel, imagePanel.getClass().getSimpleName());
-                            applyBackground();
+                    EventQueue.invokeLater(() -> {
+                        Dimension d = getSize();
+                        if (extraTools.isVisible()) {
+                            Dimension sd = extraTools.getSize();
+                            d.width -= sd.width * 2;
                         }
+                        setupScalable(d);
+                        cards.show(cardsPanel, imagePanel.getClass().getSimpleName());
+                        applyBackground();
                     });
                 } else {
                     cards.show(cardsPanel, imagePanel.getClass().getSimpleName());

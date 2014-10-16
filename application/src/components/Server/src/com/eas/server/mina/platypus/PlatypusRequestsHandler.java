@@ -140,7 +140,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, cause);
+        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, cause.toString());
     }
 
     @Override

@@ -41,20 +41,18 @@ public class DbControlRowsetListener extends RowsetAdapter {
     }
 
     protected void acceptValue() {
-        EventQueue.invokeLater(() -> {
-            if (control.getModel() != null) {
-                control.beginUpdate();
+        if (control.getModel() != null) {
+            control.beginUpdate();
+            try {
                 try {
-                    try {
-                        control.setEditingValue(control.getValueFromRowset());
-                    } catch (Exception ex) {
-                        Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } finally {
-                    control.endUpdate();
+                    control.setEditingValue(control.getValueFromRowset());
+                } catch (Exception ex) {
+                    Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            } finally {
+                control.endUpdate();
             }
-        });
+        }
     }
 
     @Override
@@ -93,21 +91,19 @@ public class DbControlRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowChanged(RowChangeEvent event) {
-        EventQueue.invokeLater(() -> {
-            if (control.getModel() != null) {
-                if (control.getColIndex() == event.getFieldIndex()) {
-                    control.beginUpdate();
+        if (control.getModel() != null) {
+            if (control.getColIndex() == event.getFieldIndex()) {
+                control.beginUpdate();
+                try {
                     try {
-                        try {
-                            control.setEditingValue(control.getValueFromRowset());
-                        } catch (Exception ex) {
-                            Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } finally {
-                        control.endUpdate();
+                        control.setEditingValue(control.getValueFromRowset());
+                    } catch (Exception ex) {
+                        Logger.getLogger(DbControlRowsetListener.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                } finally {
+                    control.endUpdate();
                 }
             }
-        });
+        }
     }
 }

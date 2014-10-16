@@ -20,6 +20,7 @@ import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -213,9 +214,9 @@ public class AppClient {
 		return null;
 	}
 
-	public static JavaScriptObject jsUpload(PublishedFile aFile, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
+	public static JavaScriptObject jsUpload(PublishedFile aFile, String aName, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
 		if (aFile != null) {
-			Cancellable cancellable = requestUpload(aFile, new Callback<ProgressEvent, String>() {
+			Cancellable cancellable = requestUpload(aFile, aName, new Callback<ProgressEvent, String>() {
 
 				protected boolean completed;
 
@@ -253,7 +254,7 @@ public class AppClient {
 			return null;
 	}
 
-	public static Cancellable requestUpload(final PublishedFile aFile, final Callback<ProgressEvent, String> aCallback) {
+	public static Cancellable requestUpload(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
 		req.open("post", AppClient.getInstance().getBaseUrl());
 		final ProgressHandler handler = new ProgressHandlerAdapter() {
@@ -318,7 +319,7 @@ public class AppClient {
 			req.getUpload().setOnTimeOut(handler);
 		}
 		FormData fd = FormData.create();
-		fd.append(aFile.getName(), aFile);
+		fd.append(aFile.getName(), aFile, aName);
 		req.overrideMimeType("multipart/form-data");
 		// Must set the onreadystatechange handler before calling send().
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
@@ -664,8 +665,11 @@ public class AppClient {
 			protected void doWork(XMLHttpRequest aResponse) throws Exception {
 				String respText = aResponse.getResponseText();
 				Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
-				assert oResult == null || oResult instanceof String : "Credential request expects null or string value as a response.";
-				principal = (String) oResult;
+				assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
+				JavaScriptObject jsObject = (JavaScriptObject) oResult;
+				Object oUserName = jsObject.<JsObject>cast().getJava("userName");
+				assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";				
+				principal = (String)oUserName;
 				if(principal == null)
 					principal = "anonymous" + String.valueOf(IDGenerator.genId());
 				if (aCallback != null) {
@@ -695,9 +699,10 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure)));
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure))
+					,param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
 			query = Loader.URL_PROCESSOR.process(query);
-			return startRequest(aModuleName, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {

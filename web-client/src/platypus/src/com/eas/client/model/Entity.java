@@ -128,8 +128,9 @@ public class Entity implements RowsetListener, HasPublished{
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormDefinitions.containsKey(aName)) {
                 ormDefinitions.put(aName, aDefinition);
-            }else
-                Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
+            }else{
+                Logger.getLogger(Entity.class.getName()).log(Level.FINE, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
+            }
         }
     }
 

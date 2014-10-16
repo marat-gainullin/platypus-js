@@ -20,7 +20,6 @@ import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.DbControl;
@@ -31,7 +30,6 @@ import com.eas.dbcontrols.combo.rt.SemiBorderTextField;
 import com.eas.design.Designable;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -176,21 +174,17 @@ public class DbCombo extends DbControlPanel implements DbControl {
 
         @Override
         public void rowsetFiltered(RowsetFilterEvent event) {
-            EventQueue.invokeLater(() -> {
-                fireComboContentsChanged();
-            });
+            fireComboContentsChanged();
         }
 
         @Override
         public void rowsetRequeried(RowsetRequeryEvent event) {
-            EventQueue.invokeLater(() -> {
-                try {
-                    recreateLocator();
-                    fireComboContentsChanged();
-                } catch (Exception ex) {
-                    Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
+            try {
+                recreateLocator();
+                fireComboContentsChanged();
+            } catch (Exception ex) {
+                Logger.getLogger(DbCombo.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         @Override
@@ -567,40 +561,9 @@ public class DbCombo extends DbControlPanel implements DbControl {
             } else {
                 if (byValueLocator.find(aKey)) {
                     // display and value rowsets are the same
-                    if (displayRsEntity.getEntityId().equals(valueRsEntity.getEntityId())) {
+                    if (displayRsEntity == valueRsEntity) {
                         Row br = byValueLocator.getRow(0);
                         return br.getColumnObject(displayColIndex);
-                    } else {
-                        Object alreadyKey = RowsetUtils.UNDEFINED_SQL_VALUE;
-                        if (!valueRs.isAfterLast() && !valueRs.isBeforeFirst()) {
-                            alreadyKey = valueRs.getObject(valueColIndex);
-                        }
-                        if (alreadyKey == RowsetUtils.UNDEFINED_SQL_VALUE
-                                || (alreadyKey != null && aKey == null)
-                                || (alreadyKey == null && aKey != null)
-                                || (aKey != null && !aKey.equals(alreadyKey))) {
-                            Rowset valueCrs = valueRsEntity.getRowset();
-                            int valueCrsPos = valueCrs.getCursorPos();
-                            boolean isBeforeFirst = valueRs.isBeforeFirst();
-                            boolean isAfterLast = valueRs.isAfterLast();
-                            try {
-                                if (byValueLocator.first()) {
-                                    Rowset displayRs = displayRsEntity.getRowset();
-                                    return displayRs.getObject(displayColIndex);
-                                }
-                            } finally {
-                                if (isBeforeFirst) {
-                                    valueRs.beforeFirst();
-                                } else if (isAfterLast) {
-                                    valueRs.isAfterLast();
-                                } else {
-                                    valueCrs.absolute(valueCrsPos);
-                                }
-                            }
-                        } else {
-                            Rowset displayRs = displayRsEntity.getRowset();
-                            return displayRs.getObject(displayColIndex);
-                        }
                     }
                 }
             }

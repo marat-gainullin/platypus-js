@@ -6,7 +6,6 @@ package com.eas.client.application;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Formatter;
@@ -14,12 +13,10 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
-import com.eas.client.RunnableAdapter;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
@@ -29,7 +26,6 @@ import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.logging.client.LogConfiguration;
 
 /**
@@ -80,6 +76,7 @@ public class Application {
 		return new $wnd.P.Report(reportLocation);
 	}-*/;
 
+	/*
 	protected static class ExecuteApplicationCallback extends RunnableAdapter {
 
 		protected String startForm;
@@ -98,16 +95,10 @@ public class Application {
 			}
 			loaderHandlerRegistration.removeHandler();
 			onReady();
-			showForm(startForm);
-		}
-		
-		protected native void showForm(String aModuleId)/*-{
-			var m = $wnd.P.Modules.get(aModuleId);
-			if(m.show){
-				m.show();
-			}
-		}-*/;
+		}		
 	}
+	*/
+	
 	/**
 	 * This method is publicONLY because of tests!
 	 * 
@@ -155,7 +146,7 @@ public class Application {
 			});
 		}
 		
-	     // this === global;
+	    // this === global;
 	    var global = $wnd;
 	    if(!global.P){
 	        var oldP = global.P;
@@ -165,10 +156,10 @@ public class Application {
 	            global.P = oldP;
 	            return ns;
 	        };
-	         //global.P = this; // global scope of api - for legacy applications
-	         //global.P.restore = function() {
-	         //throw 'Legacy API can not restore the global namespace.';
-	         //};
+	        //global.P = this; // global scope of api - for legacy applications
+	        //global.P.restore = function() {
+	        //throw 'Legacy API can not restore the global namespace.';
+	        //};
 	    }
 		
 		$wnd.P.selectFile = function(aCallback) {
@@ -181,8 +172,8 @@ public class Application {
 		
 		$wnd.P.Resource = {};
 		Object.defineProperty($wnd.P.Resource, "upload", {get : function(){
-				return function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
-					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aCompleteCallback, aProgressCallback, aAbortCallback);
+				return function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
+					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback);
 				}
 		}});
 		Object.defineProperty($wnd.P.Resource, "load", {get : function(){
@@ -1040,14 +1031,28 @@ public class Application {
 		JsModelWidgets.init();
 		JsEvents.init();
 		loader = new Loader(client);
+		/*
 		Set<Element> indicators = extractPlatypusProgressIndicators();
 		for (Element el : indicators) {
 			el.<XElement> cast().loadMask();
 		}
+		*/
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
-		startAppElements(client, indicators);
+		client.requestLoggedInUser(new CallbackAdapter<String, String>() {
+
+			@Override
+			protected void doWork(String aResult) throws Exception {
+				onReady();
+			}
+
+			@Override
+			public void onFailure(String reason) {	
+				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
+			}
+		});
 	}
 
+	/*
 	private static Set<Element> extractPlatypusProgressIndicators() {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
@@ -1065,26 +1070,12 @@ public class Application {
 		}
 		return platypusIndicators;
 	}
+	*/
 
 	protected static native void onReady()/*-{
 		if ($wnd.P.ready)
 			$wnd.P.ready();
 	}-*/;
-
-	protected static void startAppElements(AppClient client, final Set<Element> aIndicators) throws Exception {
-		client.requestLoggedInUser(new CallbackAdapter<String, String>() {
-
-			@Override
-			protected void doWork(String aResult) throws Exception {
-				onReady();
-			}
-
-			@Override
-			public void onFailure(String reason) {	
-				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
-			}
-		});
-	}
 
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		final Set<String> deps = new HashSet<String>();

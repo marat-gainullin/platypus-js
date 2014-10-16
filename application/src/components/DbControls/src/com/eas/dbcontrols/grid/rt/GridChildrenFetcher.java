@@ -14,6 +14,7 @@ import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.queries.Query;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.dbcontrols.RowsetDbControl;
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -125,7 +125,7 @@ public class GridChildrenFetcher implements ChildrenFetcher<Row> {
                     }
                 };
                 if (asynchronous) {
-                    SwingUtilities.invokeLater(guiThreadTask);
+                    EventQueue.invokeLater(guiThreadTask);
                 } else {
                     guiThreadTask.run();
                 }

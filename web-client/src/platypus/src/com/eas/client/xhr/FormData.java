@@ -14,6 +14,10 @@ public class FormData extends JavaScriptObject {
 		this.append(name, value);
 	}-*/;
 
+	public final native void append(String name, JavaScriptObject value, String filename) /*-{
+		this.append(name, value, filename);
+	}-*/;
+	
 	public static native FormData create() /*-{
 		return new FormData();
 	}-*/;

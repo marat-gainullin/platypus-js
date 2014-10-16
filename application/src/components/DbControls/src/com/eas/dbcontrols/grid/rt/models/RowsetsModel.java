@@ -172,13 +172,8 @@ public abstract class RowsetsModel {
         if (aColumn != null) {
             assert aColumn instanceof FieldModelColumn;
             if (aColumn.getRowset() != null) {
-                Object value = null;
                 FieldModelColumn fieldColumn = (FieldModelColumn) aColumn;
-                if (fieldColumn.getRowset() != rowsRowset) {
-                    value = fieldColumn.getRowset().getObject(fieldColumn.getRowsetField());
-                } else {
-                    value = aRow.getColumnObject(fieldColumn.getRowsetField());
-                }
+                Object value = aRow.getColumnObject(fieldColumn.getRowsetField());
                 return complementCellData(new CellData(new CascadedStyle(aColumn.getStyle()), value, aColumn.getView() != null ? aColumn.getView().achiveDisplayValue(value) : value), aRow, aColumn);
             } else {
                 return complementCellData(new CellData(new CascadedStyle(aColumn.getStyle()), null, null), aRow, aColumn);
@@ -298,25 +293,14 @@ public abstract class RowsetsModel {
                 cellsLocator.getRowset().insert(cellInitingValues);
             }
             if (cellsLocator.find(cellsKeys)) {
-                if (rCol.getCellsValuesRowset() != cellsLocator.getRowset()) {
-                    int cursorPos = cellsLocator.getRowset().getCursorPos();
-                    try {
-                        boolean positioned = cellsLocator.first();
-                        assert positioned;
-                        return rCol.getCellsValuesRowset().getCurrentRow();
-                    } finally {
-                        restoreRowsRowsetCursorPos(cellsLocator.getRowset(), cursorPos);
-                    }
-                } else {
                     return cellsLocator.getRow(0);
-                }
             }
         }
         return null;
     }
 
     protected void severe(String aMsg) {
-        Logger.getLogger(RowsetsTableModel.class.getName()).severe(aMsg);
+        Logger.getLogger(RowsetsTableModel.class.getName()).log(Level.SEVERE, aMsg);
     }
 
     public static Object getRowPkValue4Script(Row aRow) {

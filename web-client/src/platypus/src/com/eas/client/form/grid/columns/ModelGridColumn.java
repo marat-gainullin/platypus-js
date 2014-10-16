@@ -193,11 +193,6 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			try {
 				if (rowsEntity == columnModelRef.entity) {
 					return converter.convert(aRow.getColumnObject(columnModelRef.getColIndex()));
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						Object value = columnModelRef.entity.getRowset().getObject(columnModelRef.getColIndex());
-						return converter.convert(value);
-					}
 				}
 			} catch (Exception e) {
 				Logger.getLogger(ModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
@@ -212,10 +207,6 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			try {
 				if (rowsEntity == columnModelRef.entity) {
 					aRow.setColumnObject(columnModelRef.getColIndex(), value);
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						columnModelRef.entity.getRowset().updateObject(columnModelRef.getColIndex(), value);
-					}
 				}
 			} catch (Exception e) {
 				Logger.getLogger(ModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
@@ -233,10 +224,11 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		if (visible != aValue) {
 			visible = aValue;
 			if (grid != null) {
-				if (visible)
+				if (visible){
 					grid.showColumn(this);
-				else
+				}else{
 					grid.hideColumn(this);
+				}
 			}
 		}
 	}
@@ -280,8 +272,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	@Override
 	public void setTitle(String aValue) {
-		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>){
 			((DraggableHeader<T>) headerNode.getHeader()).setTitle(aValue);
+		}
 	}
 
 	@Override
@@ -292,8 +285,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setResizable(boolean aValue) {
 		resizable = aValue;
-		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>){
 			((DraggableHeader<T>) headerNode.getHeader()).setResizable(resizable && !fixed);
+		}
 	}
 
 	public boolean isMoveable() {
@@ -302,8 +296,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public void setMoveable(boolean aValue) {
 		moveable = aValue;
-		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>){
 			((DraggableHeader<T>) headerNode.getHeader()).setMoveable(moveable && !fixed);
+		}
 	}
 
 	@Override
@@ -371,8 +366,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setOnSelect(JavaScriptObject aValue) {
 		onSelect = aValue;
-		if (editor != null)
+		if (editor != null){
 			editor.setOnSelect(onSelect);
+		}
 	}
 
 	public String getName() {
@@ -474,8 +470,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {
 			published = aValue;
-			if (published != null)
+			if (published != null){
 				publish(this, published);
+			}
 		}
 	}
 
