@@ -5,6 +5,7 @@
 package com.eas.client.application;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,10 +21,10 @@ import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.Requests;
@@ -47,12 +48,13 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.shared.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
@@ -70,18 +72,52 @@ public class AppClient {
 	//
 	private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
 	public static final String APPLICATION_URI = "/application";
-	public static final String RESOURCES_URI = "/resources";
-	public static final String API_URI = "/api";
-    public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
-	
-	protected static Set<String> attachedCss = new HashSet<String>();
+	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
+	//
+	public static final String DEPENDENCY_TAG_NAME = "dependency";
+	public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
+	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
+
 	//
 	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
 	private static AppClient appClient;
 	private String baseUrl;
-	private Map<String, Document> appElements = new HashMap<String, Document>();
+	private String principal;
+	private Map<String, Document> documents = new HashMap<String, Document>();
+	private Map<String, ModuleStructure> modulesStructures = new HashMap<String, ModuleStructure>();
 	private Map<String, PlatypusImageResource> iconsCache = new HashMap<String, PlatypusImageResource>();
-	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
+
+	public static class ModuleStructure {
+
+		protected Set<String> structure = new HashSet<>();
+		protected Set<String> clientDependencies = new HashSet<>();
+		protected Set<String> serverDependencies = new HashSet<>();
+		protected Set<String> queriesDependencies = new HashSet<>();
+
+		public ModuleStructure(Set<String> aStructure, Set<String> aClientDependencies, Set<String> aServerDependencies, Set<String> aQueriesDependencies) {
+			super();
+			structure.addAll(aStructure);
+			clientDependencies.addAll(aClientDependencies);
+			serverDependencies.addAll(aServerDependencies);
+			queriesDependencies.addAll(aQueriesDependencies);
+		}
+
+		public Set<String> getStructure() {
+			return Collections.unmodifiableSet(structure);
+		}
+
+		public Set<String> getClientDependencies() {
+			return Collections.unmodifiableSet(clientDependencies);
+		}
+
+		public Set<String> getQueriesDependencies() {
+			return Collections.unmodifiableSet(queriesDependencies);
+		}
+
+		public Set<String> getServerDependencies() {
+			return Collections.unmodifiableSet(serverDependencies);
+		}
+	}
 
 	public static String relativeUri() {
 		String pageUrl = GWT.getHostPageBaseURL();
@@ -116,8 +152,9 @@ public class AppClient {
 				MatchResult htppMatch = httpPrefixPattern.exec(imageName);
 				if (htppMatch != null) {
 					return imageName;
-				} else
-					return resourceUrl(imageName);
+				} else {
+					return imageName;
+				}
 			}
 		};
 	}
@@ -146,26 +183,27 @@ public class AppClient {
 							Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
 					}
 				}
-				
+
 				@Override
 				public void onFailure(XMLHttpRequest aResult) {
-					if (onFailure != null){
-						try{
-							Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatus() != 0 ? aResult.getStatusText() : "Request has been cancelled. See browser's console for more details."));
-						}catch(Exception ex){
+					if (onFailure != null) {
+						try {
+							Utils.executeScriptEventVoid(onFailure, onFailure,
+							        Utils.toJs(aResult.getStatus() != 0 ? aResult.getStatusText() : "Request has been cancelled. See browser's console for more details."));
+						} catch (Exception ex) {
 							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 				}
-				
+
 			});
 		} else {
 			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), text ? ResponseType.Default : ResponseType.ArrayBuffer);
 			if (executed != null) {
 				if (executed.getStatus() == Response.SC_OK)
-					if(text)
+					if (text)
 						return Utils.toJs(executed.getResponseText());
-					else{
+					else {
 						return Utils.stringToArrayBuffer(executed.getResponseText());
 					}
 				else
@@ -177,52 +215,52 @@ public class AppClient {
 
 	public static JavaScriptObject jsUpload(PublishedFile aFile, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
 		if (aFile != null) {
-			Cancellable cancellable = upload(aFile, new Callback<ProgressEvent, String>(){
-				
+			Cancellable cancellable = requestUpload(aFile, new Callback<ProgressEvent, String>() {
+
 				protected boolean completed;
-				
+
 				public void onSuccess(ProgressEvent aResult) {
-					try{
-						if(!completed){
-							if(aProgresssCallback != null){
+					try {
+						if (!completed) {
+							if (aProgresssCallback != null) {
 								Utils.executeScriptEventVoid(aProgresssCallback, aProgresssCallback, aResult);
 							}
-							if(aResult.isComplete()){
+							if (aResult.isComplete()) {
 								completed = true;
-								if(aCompleteCallback != null){
+								if (aCompleteCallback != null) {
 									Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, Utils.toJs("uploaded"));
 								}
 							}
 						}
-					}catch(Exception ex){
+					} catch (Exception ex) {
 						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
-				
+
 				public void onFailure(String reason) {
-					if(aErrorCallback != null){
-						try{
+					if (aErrorCallback != null) {
+						try {
 							Utils.executeScriptEventVoid(aErrorCallback, aErrorCallback, Utils.toJs(reason));
-						}catch(Exception ex){
+						} catch (Exception ex) {
 							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
-				}				
-				
-			} );
+				}
+
+			});
 			return Utils.publishCancellable(cancellable);
 		} else
 			return null;
 	}
 
-	public static Cancellable upload(final PublishedFile aFile, final Callback<ProgressEvent, String> aCallback) {
+	public static Cancellable requestUpload(final PublishedFile aFile, final Callback<ProgressEvent, String> aCallback) {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
 		req.open("post", AppClient.getInstance().getBaseUrl());
 		final ProgressHandler handler = new ProgressHandlerAdapter() {
 			@Override
 			public void onProgress(ProgressEvent aEvent) {
 				try {
-					if(aCallback != null)
+					if (aCallback != null)
 						aCallback.onSuccess(aEvent);
 				} catch (Exception ex) {
 					Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
@@ -231,7 +269,7 @@ public class AppClient {
 
 			public void onLoadEnd(XMLHttpRequest xhr) {
 				try {
-					if(aCallback != null)
+					if (aCallback != null)
 						aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize()));
 				} catch (Exception ex) {
 					Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
@@ -248,7 +286,7 @@ public class AppClient {
 					}
 				}
 			}
-			
+
 			@Override
 			public void onAbort(XMLHttpRequest xhr) {
 				if (aCallback != null) {
@@ -289,7 +327,7 @@ public class AppClient {
 					xhr.clearOnReadyStateChange();
 					if (xhr.getStatus() == Response.SC_OK) {
 						try {
-							if(aCallback != null)
+							if (aCallback != null)
 								aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize()));
 						} catch (Exception ex) {
 							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
@@ -371,19 +409,29 @@ public class AppClient {
 	public String getBaseUrl() {
 		return baseUrl;
 	}
-
-	public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
-		transactionListeners.add(aListener);
-		return new TransactionListener.Registration() {
-			@Override
-			public void remove() {
-				transactionListeners.remove(aListener);
-			}
-		};
+	
+	public String getPrincipal() {
+		return principal;
 	}
 
-	public Document getCachedAppElement(String aAppElementName) {
-		return appElements.get(aAppElementName);
+	public Document getModelDocument(String aModuleName) {
+		ModuleStructure structure = modulesStructures.get(aModuleName);
+		for(String part : structure.getStructure()){
+			if(part.toLowerCase().endsWith(".model")){
+				return documents.get(part);
+			}
+		}
+		return null;
+	}
+
+	public Document getFormDocument(String aModuleName) {
+		ModuleStructure structure = modulesStructures.get(aModuleName);
+		for(String part : structure.getStructure()){
+			if(part.toLowerCase().endsWith(".form")){
+				return documents.get(part);
+			}
+		}
+		return null;
 	}
 
 	private String params(Parameters parameters) {
@@ -404,37 +452,45 @@ public class AppClient {
 		return params(res);
 	}
 
-	public static JavaScriptObject jsLogout(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		return Utils.publishCancellable(AppClient.getInstance().logout(new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+	public JavaScriptObject jsLogout(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+		return Utils.publishCancellable(requestLogout(new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			protected void doWork(XMLHttpRequest aResult) throws Exception {
 				Utils.invokeJsFunction(onSuccess);
-				Location.reload();
 			}
+
 			@Override
 			public void onFailure(XMLHttpRequest reason) {
-				try{
+				try {
 					Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(reason.getStatusText()));
-				}catch(Exception ex){
+				} catch (Exception ex) {
 					Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 				}
-			}			
+			}
 		}));
 	}
 
-	public Cancellable hello(Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
-		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqHello));
-		return startRequest(API_URI, query, null, RequestBuilder.GET, aCallback);
-	}
-
-	public Cancellable logout(Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
+	public Cancellable requestLogout(final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqLogout));
-		return startRequest(API_URI, query, null, RequestBuilder.GET, aCallback);
+		return startRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>(){
+
+			@Override
+            public void onFailure(XMLHttpRequest reason) {
+				aCallback.onFailure(reason);
+            }
+
+			@Override
+            protected void doWork(XMLHttpRequest aResult) throws Exception {
+				principal = "anonymous-"+String.valueOf(IDGenerator.genId());
+				aCallback.onSuccess(aResult);
+            }
+
+		});
 	}
 
 	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
-		String url = baseUrl + aUrlPrefix + (aUrlQuery != null ? "?" + aUrlQuery : "");
+		String url = baseUrl + (aUrlPrefix != null ? aUrlPrefix : "") + (aUrlQuery != null ? "?" + aUrlQuery : "");
 		final XMLHttpRequest req = XMLHttpRequest.create();
 		req.open(aMethod.toString(), url);
 		if (RequestBuilder.POST.equals(aMethod)) {
@@ -514,19 +570,19 @@ public class AppClient {
 	public void startDownloadRequest(String aUrlPrefix, final int aRequestType, Map<String, String> aParams, RequestBuilder.Method aMethod) throws Exception {
 		final Frame frame = new Frame();
 		frame.setVisible(false);
-		
+
 		frame.addLoadHandler(new LoadHandler() {
-			
+
 			@Override
 			public void onLoad(LoadEvent event) {
-					Timer timer = new Timer() {
-						
-						@Override
-						public void run() {
-							frame.removeFromParent();
-						}
-					};
-					timer.schedule(2000);
+				Timer timer = new Timer() {
+
+					@Override
+					public void run() {
+						frame.removeFromParent();
+					}
+				};
+				timer.schedule(2000);
 			}
 		});
 		String query = "";
@@ -560,10 +616,11 @@ public class AppClient {
 		aUrl = Loader.URL_PROCESSOR.process(aUrl);
 		req.open(aMethod.toString(), aUrl, false);
 		interceptRequest(req);
-		/* Since W3C standard about sync XmlHttpRequest and response type.
-		if (aResponseType != null && aResponseType != ResponseType.Default)
-			req.setResponseType(aResponseType);
-		*/	
+		/*
+		 * Since W3C standard about sync XmlHttpRequest and response type. if
+		 * (aResponseType != null && aResponseType != ResponseType.Default)
+		 * req.setResponseType(aResponseType);
+		 */
 		req.setRequestHeader("Pragma", "no-cache");
 		if (aBody != null)
 			req.send(aBody);
@@ -581,76 +638,142 @@ public class AppClient {
 
 	public Cancellable commit(final List<Change> changeLog, final Callback<Void, String> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCommit));
-		return startRequest(API_URI, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startRequest(null, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
 				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded: " + aResponse.getStatus() + " " + aResponse.getStatusText());
-				changeLog.clear();
-				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
-					try {
-						l.commited();
-					} catch (Exception ex) {
-						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
 				if (aCallback != null)
 					aCallback.onSuccess(null);
 			}
-			
+
 			@Override
 			public void onFailure(XMLHttpRequest aResponse) {
 				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit failed: " + aResponse.getStatus() + " " + aResponse.getStatusText());
-				changeLog.clear();
-				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
-					try {
-						l.rolledback();
-					} catch (Exception ex) {
-						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
 				if (aCallback != null)
 					aCallback.onFailure(aResponse.getStatusText());
 			}
 		});
 	}
 
-	public String resourceUri(String aResourceName) {
-		return RESOURCES_URI + "/" + aResourceName;
-	}
-
-	public String resourceUrl(String aResourceName) {
-		return baseUrl + RESOURCES_URI + "/" + aResourceName;
-	}
-
-	public Cancellable getStartElement(final Callback<String, Void> aCallback) throws Exception {
-		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqStartAppElement));
-		return startRequest(API_URI, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+	public Cancellable requestLoggedInUser(final Callback<String, String> aCallback) throws Exception {
+		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCredential));
+		return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			protected void doWork(XMLHttpRequest aResponse) throws Exception {
-				if(aCallback != null){
-					String respText = aResponse.getResponseText();
-					Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
-					assert oResult == null || oResult instanceof String : "getStartElement request expects null or string value as a response.";
-					aCallback.onSuccess((String)oResult);
+				String respText = aResponse.getResponseText();
+				Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
+				assert oResult == null || oResult instanceof String : "Credential request expects null or string value as a response.";
+				principal = (String) oResult;
+				if(principal == null)
+					principal = "anonymous" + String.valueOf(IDGenerator.genId());
+				if (aCallback != null) {
+					aCallback.onSuccess(principal);
 				}
 			}
-			
+
 			@Override
 			public void onFailure(XMLHttpRequest reason) {
-				if(aCallback != null)
-					aCallback.onFailure(null);
+				if (aCallback != null)
+					aCallback.onFailure(reason.getStatus() + " : " + reason.getStatusText());
 			}
 		});
 	}
 
-	public Cancellable getAppElementXml(final String appElementName, final Callback<Document, XMLHttpRequest> aCallback) throws Exception {
-		if (appElements.containsKey(appElementName)) {
-			Document doc = appElements.get(appElementName);
-			// doc may be null, because of application elements without a xml-dom, plain scripts for example.
-			if(aCallback != null)
+	public ModuleStructure getModuleStructure(String aModuleName) {
+		return modulesStructures.get(aModuleName);
+	}
+
+	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
+		if (modulesStructures.containsKey(aModuleName)) {
+			if (aCallback != null)
+				aCallback.onSuccess(modulesStructures.get(aModuleName));
+			return new Cancellable() {
+				@Override
+				public void cancel() {
+				}
+			};
+		} else {
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure)));
+			query = Loader.URL_PROCESSOR.process(query);
+			return startRequest(aModuleName, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+
+				@Override
+				public void doWork(XMLHttpRequest aResponse) throws Exception {
+					// Some post processing
+					String text = aResponse.getResponseText();
+					JSONValue doc = text != null && !text.isEmpty() ? JSONParser.parseStrict(text) : null;
+					//
+					Set<String> structure = new HashSet<String>();
+					Set<String> clientDependencies = new HashSet<String>();
+					Set<String> queryDependencies = new HashSet<String>();
+					Set<String> serverModuleDependencies = new HashSet<String>();
+					JSONArray jsStructure = doc.isObject().get("structure").isArray();
+					JSONArray jsClientDependencies = doc.isObject().get("clientDependencies").isArray();
+					JSONArray jsQueryDependencies = doc.isObject().get("queryDependencies").isArray();
+					JSONArray jsServerDependencies = doc.isObject().get("serverDependencies").isArray();
+					for (int i = 0; i < jsStructure.size(); i++) {
+						structure.add(jsStructure.get(i).isString().stringValue());
+					}
+					for (int i = 0; i < jsClientDependencies.size(); i++) {
+						clientDependencies.add(jsClientDependencies.get(i).isString().stringValue());
+					}
+					for (int i = 0; i < jsQueryDependencies.size(); i++) {
+						queryDependencies.add(jsQueryDependencies.get(i).isString().stringValue());
+					}
+					for (int i = 0; i < jsServerDependencies.size(); i++) {
+						serverModuleDependencies.add(jsServerDependencies.get(i).isString().stringValue());
+					}
+					/*
+					 * Element rootNode = doc.getDocumentElement(); NodeList
+					 * docNodes = rootNode.getChildNodes(); for (int i = 0; i <
+					 * docNodes.getLength(); i++) { Node docNode =
+					 * docNodes.item(i); // Don't refactor to switch, since
+					 * GWT2.4 // doesn't support it, applied to strings. // In
+					 * further versions it seems to be, but // unfortunately not
+					 * yet. if
+					 * (DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
+					 * String dependency =
+					 * docNode.getFirstChild().getNodeValue(); if (dependency !=
+					 * null && !dependency.isEmpty() && !isTouched(dependency))
+					 * clientDependencies.add(dependency); } else if
+					 * (SERVER_DEPENDENCY_TAG_NAME
+					 * .equals(docNode.getNodeName())) { String dependency =
+					 * docNode.getFirstChild().getNodeValue(); if (dependency !=
+					 * null && !dependency.isEmpty() &&
+					 * !isTouched(SERVER_MODULE_TOUCHED_NAME + dependency))
+					 * serverModuleDependencies.add(dependency); } else if
+					 * (QUERY_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName()))
+					 * { String dependency =
+					 * docNode.getFirstChild().getNodeValue(); if (dependency !=
+					 * null && !dependency.isEmpty() && !isTouched(dependency))
+					 * queryDependencies.add(dependency); } }
+					 */
+					ModuleStructure moduleStructure = new ModuleStructure(structure, clientDependencies, serverModuleDependencies, queryDependencies);
+					modulesStructures.put(aModuleName, moduleStructure);
+					if (aCallback != null) {
+						aCallback.onSuccess(moduleStructure);
+					}
+				}
+
+				@Override
+				public void onFailure(XMLHttpRequest reason) {
+					if (aCallback != null)
+						aCallback.onFailure(reason);
+				}
+			});
+		}
+	}
+
+	public Cancellable requestDocument(final String aResourceUri, final Callback<Document, XMLHttpRequest> aCallback) throws Exception {
+		if (documents.containsKey(aResourceUri)) {
+			Document doc = documents.get(aResourceUri);
+			// doc may be null, because of application elements without a
+			// xml-dom, plain scripts for example.
+			if (aCallback != null) {
 				aCallback.onSuccess(doc);
+			}
 			return new Cancellable() {
 
 				@Override
@@ -659,24 +782,24 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)));
+			String query = "";
 			query = Loader.URL_PROCESSOR.process(query);
-			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			return startRequest(aResourceUri, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
 					String text = aResponse.getResponseText();
 					Document doc = text != null && !text.isEmpty() ? XMLParser.parse(text) : null;
-					appElements.put(appElementName, doc);
+					documents.put(aResourceUri, doc);
 					//
-					if(aCallback != null)
+					if (aCallback != null)
 						aCallback.onSuccess(doc);
 				}
-				
+
 				@Override
 				public void onFailure(XMLHttpRequest reason) {
-					if(aCallback != null)
+					if (aCallback != null)
 						aCallback.onFailure(reason);
 				}
 			});
@@ -685,7 +808,7 @@ public class AppClient {
 
 	public Cancellable createServerModule(final String aModuleName, final Callback<Void, String> aCallback) throws Exception {
 		if (isServerModule(aModuleName)) {
-			if(aCallback != null)
+			if (aCallback != null)
 				aCallback.onSuccess(null);
 			return new Cancellable() {
 
@@ -696,23 +819,23 @@ public class AppClient {
 			};
 		} else {
 			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCreateServerModule)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
-			return startRequest(API_URI, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
 					String appElementName = aModuleName;
 					addServerModule(appElementName, aResponse.getResponseText());
-					if(aCallback != null)
+					if (aCallback != null)
 						aCallback.onSuccess(null);
 				}
-				
+
 				@Override
 				public void onFailure(XMLHttpRequest aResponse) {
-					if(aCallback != null)
+					if (aCallback != null)
 						aCallback.onFailure(aResponse.getResponseText() != null ? aResponse.getResponseText() : aResponse.getStatusText());
 				}
-				
+
 			});
 		}
 	}
@@ -727,15 +850,16 @@ public class AppClient {
 	public static native boolean isServerModule(String aModuleName) throws Exception /*-{
 		return !!($wnd.P && $wnd.P.serverModules && $wnd.P.serverModules[aModuleName]);
 	}-*/;
-	
-	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+
+	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure)
+	        throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
 			convertedParams[i] = param(PlatypusHttpRequestParams.PARAMS_ARRAY, aParams.get(i));
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteServerModuleMethod)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName),
 		        param(PlatypusHttpRequestParams.METHOD_NAME, aMethodName), params(convertedParams));
 		if (onSuccess != null) {
-			startRequest(API_URI, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			startRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -744,7 +868,7 @@ public class AppClient {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
-						} else if(responseType.contains(REPORT_LOCATION_CONTENT_TYPE)){
+						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Application.createReport(aResponse.getResponseText()));
 						} else {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
@@ -753,22 +877,22 @@ public class AppClient {
 						Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 					}
 				}
-				
+
 				@Override
 				public void onFailure(XMLHttpRequest aResponse) {
-					if(onFailure != null){
-						try{
+					if (onFailure != null) {
+						try {
 							Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(aResponse.getStatusText()));
-						}catch(Exception ex){
+						} catch (Exception ex) {
 							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 				}
-				
+
 			});
 			return null;
 		} else {
-			XMLHttpRequest2 executed = syncRequest(API_URI, query, ResponseType.Default);
+			XMLHttpRequest2 executed = syncRequest(null, query, ResponseType.Default);
 			if (executed != null) {
 				if (executed.getStatus() == Response.SC_OK) {
 					String responseType = executed.getResponseHeader("content-type");
@@ -776,7 +900,7 @@ public class AppClient {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
 							return Utils.toJs(executed.getResponseText());
-						} else if(responseType.contains(REPORT_LOCATION_CONTENT_TYPE)){
+						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							return Application.createReport(executed.getResponseText());
 						} else {
 							return Utils.toJs(executed.getResponseText());
@@ -794,7 +918,7 @@ public class AppClient {
 
 	public Cancellable getAppQuery(String queryId, final Callback<Query, String> aCallback) throws Exception {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppQuery)), param(PlatypusHttpRequestParams.QUERY_ID, queryId));
-		return startRequest(API_URI, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -802,14 +926,14 @@ public class AppClient {
 				Query query = readQuery(aResponse);
 				query.setClient(AppClient.this);
 				//
-				if(aCallback != null)
+				if (aCallback != null)
 					aCallback.onSuccess(query);
 			}
 
 			private Query readQuery(XMLHttpRequest aResponse) throws Exception {
 				return QueryReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
 			}
-			
+
 			@Override
 			public void onFailure(XMLHttpRequest aResponse) {
 				if (aCallback != null) {
@@ -819,16 +943,16 @@ public class AppClient {
 		});
 	}
 
-	public Cancellable pollData(String aQueryId, Parameters aParams, final Fields aExpectedFields, final Callback<Rowset, String> aCallback) throws Exception {
-		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteQuery)), param(PlatypusHttpRequestParams.QUERY_ID, aQueryId), params(aParams));
-		return startRequest(API_URI, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+	public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<Rowset, String> aCallback) throws Exception {
+		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteQuery)), param(PlatypusHttpRequestParams.QUERY_ID, aQueryName), params(aParams));
+		return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
 				// Some post processing
 				Rowset rowset = readRowset(aResponse);
 				//
-				if(aCallback != null)
+				if (aCallback != null)
 					aCallback.onSuccess(rowset);
 			}
 
@@ -841,7 +965,7 @@ public class AppClient {
 					throw ex;
 				}
 			}
-			
+
 			@Override
 			public void onFailure(XMLHttpRequest aResponse) {
 				if (aCallback != null) {

@@ -377,23 +377,6 @@
              */
             P.MenuItem.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuItem){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf MenuItem
-             */
-            P.MenuItem.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -410,6 +393,23 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuItem){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf MenuItem
+             */
+            P.MenuItem.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -445,23 +445,6 @@
              */
             P.MenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuItem){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf MenuItem
-             */
-            P.MenuItem.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -478,6 +461,23 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuItem){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf MenuItem
+             */
+            P.MenuItem.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -694,23 +694,6 @@
              */
             P.MenuItem.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuItem){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf MenuItem
-             */
-            P.MenuItem.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -727,6 +710,23 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuItem){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf MenuItem
+             */
+            P.MenuItem.prototype.font = {};
         }
     };
         /**

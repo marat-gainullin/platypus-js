@@ -13,7 +13,7 @@ import com.eas.util.JSONUtils;
  *
  * @author mg
  */
-public class JsonWriter {
+public class FieldsJsonWriter {
 
     // Field props
     private static final String NAME_PROP_NAME = "name";
@@ -26,28 +26,25 @@ public class JsonWriter {
     private static final String TYPE_ID_PROP_NAME = "typeid";
     private static final String TYPE_NAME_PROP_NAME = "typename";
 
-    public static String fields2a(Fields aFields) {
-        StringBuilder sb = new StringBuilder();
+    public static StringBuilder fields2a(Fields aFields) {
         String[] res = new String[aFields.getFieldsCount()];
         for (int i = 1; i <= aFields.getFieldsCount(); i++) {
             res[i-1] = writeField(aFields.get(i));
         }
-        return JSONUtils.a(sb, res);
+        return JSONUtils.a(res);
     }
 
     private static String writeTypeInfo(DataTypeInfo aTypeInfo) {
-        StringBuilder sb = new StringBuilder();
-        JSONUtils.o(sb,
+        StringBuilder sb = JSONUtils.o(
                 TYPE_ID_PROP_NAME, String.valueOf(aTypeInfo.getSqlType()),
-                TYPE_NAME_PROP_NAME, JSONUtils.s(aTypeInfo.getSqlTypeName()));
+                TYPE_NAME_PROP_NAME, JSONUtils.s(aTypeInfo.getSqlTypeName()).toString());
         return sb.toString();
     }
 
     private static String writeField(Field aField) {
-        StringBuilder sb = new StringBuilder();
-        JSONUtils.o(sb,
-                NAME_PROP_NAME, JSONUtils.s(aField.getName()),
-                DESCRIPTION_PROP_NAME, JSONUtils.s(aField.getDescription()),
+        StringBuilder sb = JSONUtils.o(
+                NAME_PROP_NAME, JSONUtils.s(aField.getName()).toString(),
+                DESCRIPTION_PROP_NAME, JSONUtils.s(aField.getDescription()).toString(),
                 SIZE_PROP_NAME, String.valueOf(aField.getSize()),
                 TYPE_PROP_NAME, writeTypeInfo(aField.getTypeInfo()),
                 PK_PROP_NAME, String.valueOf(aField.isPk()),

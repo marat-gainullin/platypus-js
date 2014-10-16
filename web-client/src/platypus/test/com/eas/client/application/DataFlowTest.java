@@ -100,7 +100,7 @@ public class DataFlowTest extends GWTTestCase {
 								Query command = aQuery;
 								command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
 								command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
-								Change enqueued = command.enqueueUpdate();
+								Change enqueued = command.prepareCommand();
 								commonLog.add(enqueued);
 								// rowset.updateObject(fiedls.find("gname"),
 								// NEW_RECORD_NAME_G);

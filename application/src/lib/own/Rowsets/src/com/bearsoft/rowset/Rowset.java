@@ -431,6 +431,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         if (flow != null) {
             if (rowsetChangeSupport.fireWillRequeryEvent()) {
                 if (onSuccess != null) {
+                    rowsetChangeSupport.fireBeforeRequeryEvent();
                     flow.refresh(aParams, (Rowset aRowset) -> {
                         if (aRowset != null) {
                             try {
@@ -458,6 +459,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                     Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             } catch (Exception ex) {
+                                rowsetChangeSupport.fireNetErrorEvent(ex);
                                 if (onFailure != null) {
                                     onFailure.accept(ex);
                                 }
@@ -467,7 +469,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 onFailure.accept(new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG));
                             }
                         }
-                    }, onFailure);
+                    }, (Exception ex) -> {
+                        rowsetChangeSupport.fireNetErrorEvent(ex);
+                        if (onFailure != null) {
+                            onFailure.accept(ex);
+                        }
+                    });
                 } else {
                     Rowset rowset = flow.refresh(aParams, null, null);
                     if (rowset != null) {

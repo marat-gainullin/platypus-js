@@ -47,7 +47,7 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
     public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
-    
+
     protected HttpServletResponse servletResponse;
     protected HttpServletRequest servletRequest;
 
@@ -69,10 +69,8 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(CredentialRequest.Response resp) throws Exception {
         String name = ((CredentialRequest.Response) resp).getName();
-        StringBuilder sb = new StringBuilder();
-        JSONUtils.o(sb,
-                "userName", JSONUtils.s(name));
-        writeJsonResponse(sb.toString(), servletResponse);
+        StringBuilder content = JSONUtils.o(new String[]{"userName"}, new StringBuilder[]{JSONUtils.s(name)});
+        writeJsonResponse(content.toString(), servletResponse);
     }
 
     @Override
@@ -141,7 +139,19 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(ModuleStructureRequest.Response resp) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        StringBuilder content = JSONUtils.o(new String[]{
+            "structure",
+            "clientDependencies",
+            "queryDependencies",
+            "serverDependencies"
+        }, new StringBuilder[]{
+            JSONUtils.as(resp.getStructure().toArray(new String[]{})),
+            JSONUtils.as(resp.getClientDependencies().toArray(new String[]{})),
+            JSONUtils.as(resp.getQueryDependencies().toArray(new String[]{})),
+            JSONUtils.as(resp.getServerDependencies().toArray(new String[]{}))
+        });
+        makeResponseNotCacheable(servletResponse);
+        writeJsonResponse(content.toString(), servletResponse);
     }
 
     @Override
@@ -156,19 +166,12 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
         writeResponse(query, servletResponse);
     }
 
-    private void writeResponse(byte[] aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
-        if (aContentType != null) {
-            aHttpResponse.setContentType(aContentType);
-        }
-        aHttpResponse.setContentLength(aResponse.length);
-        aHttpResponse.getOutputStream().write(aResponse);
-    }
-
-    private void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
+    private static void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
         aHttpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
         aHttpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
         aHttpResponse.setDateHeader("Expires", 0);// Proxies
     }
+
     private static String moduleResponseToJson(Set<String> functionsNames, boolean isPermitted) {
         return (new StringBuilder())
                 .append("{")
@@ -183,13 +186,13 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
                 .toString();
     }
 
-    private void writeResponse(Rowset aRowset, HttpServletResponse aResponse) throws Exception {
+    private static void writeResponse(Rowset aRowset, HttpServletResponse aResponse) throws Exception {
         RowsetJsonWriter writer = new RowsetJsonWriter(aRowset);
         String json = writer.write();
         writeJsonResponse(json, aResponse);
     }
 
-    private void writeResponse(Query query, HttpServletResponse aHttpResponse) throws Exception {
+    private static void writeResponse(Query query, HttpServletResponse aHttpResponse) throws Exception {
         QueryJsonWriter writer = new QueryJsonWriter(query);
         writeJsonResponse(writer.write(), aHttpResponse);
     }

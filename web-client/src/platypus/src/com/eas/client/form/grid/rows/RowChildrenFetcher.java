@@ -41,7 +41,7 @@ public class RowChildrenFetcher implements ChildrenFetcher<Row> {
 			query.setClient(targetEntity.getQuery().getClient());
 			Parameter param2Init = query.getParameters().get(param2GetChildren.getName());
 			param2Init.setValue(aParent.getColumnObject(rowset.getFields().find(paramSource.getName())));
-			query.execute(new Callback<Rowset, String>() {
+			query.prepareRowset().refresh(new Callback<Rowset, String>() {
 
 				@Override
 				public void onSuccess(Rowset aRowset) {

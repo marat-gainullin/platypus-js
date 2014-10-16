@@ -372,23 +372,6 @@
              */
             P.ButtonGroup.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -405,6 +388,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -454,23 +454,6 @@
              */
             P.ButtonGroup.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -487,6 +470,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -703,23 +703,6 @@
              */
             P.ButtonGroup.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -736,6 +719,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.font = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {

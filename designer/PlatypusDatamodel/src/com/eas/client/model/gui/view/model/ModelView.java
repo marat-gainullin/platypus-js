@@ -934,7 +934,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                     });
                 }
             } catch (Exception ex) {
-                Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                Logger.getLogger(ModelView.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
             }
         }
     }

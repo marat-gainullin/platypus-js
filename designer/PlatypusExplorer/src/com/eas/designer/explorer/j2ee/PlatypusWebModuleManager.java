@@ -21,7 +21,6 @@ import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
-import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.httpservlet.PlatypusServerConfig;
@@ -56,8 +55,7 @@ import org.openide.util.NbBundle;
 public class PlatypusWebModuleManager {
 
     public static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
-    public static final String PLATYPUS_SERVLET_URL = "application"; //NOI18N
-    public static final String PLATYPUS_SERVLET_URL_PATTERN = "/" + PLATYPUS_SERVLET_URL + "/*"; //NOI18N
+    public static final String PLATYPUS_SERVLET_URL_PATTERN = "/application/*"; //NOI18N
     public static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
     public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
     public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
@@ -110,8 +108,17 @@ public class PlatypusWebModuleManager {
             webAppRunUrl = Deployment.getDefault().deploy(webModule,
                     debug ? Deployment.Mode.DEBUG : Deployment.Mode.RUN,
                     webModule.getUrl(),
-                    ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? PLATYPUS_SERVLET_URL : START_PAGE_FILE_NAME,
-                    false);
+                    START_PAGE_FILE_NAME,
+                    true,
+                    (String message) -> {
+                        if (message != null) {
+                            if (message.contains("FAIL")) {
+                                project.getOutputWindowIO().getErr().println(message);
+                            } else {
+                                project.getOutputWindowIO().getOut().println(message);
+                            }
+                        }
+                    }, null);
             String deployResultMessage = NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Deployed");//NOI18N
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
             project.getOutputWindowIO().getOut().println(deployResultMessage);

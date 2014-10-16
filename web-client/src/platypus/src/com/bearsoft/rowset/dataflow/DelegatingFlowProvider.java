@@ -5,7 +5,6 @@ import java.util.List;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.google.gwt.core.client.Callback;
@@ -42,10 +41,4 @@ public class DelegatingFlowProvider implements FlowProvider {
 	public List<Change> getChangeLog() {
 		return delegate.getChangeLog();
 	}
-
-	@Override
-	public Registration addTransactionListener(TransactionListener aListener) {
-		return delegate.addTransactionListener(aListener);
-	}
-
 }

@@ -9,19 +9,24 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Cancellable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.*;
+import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
+import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameter;
+import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
-import com.google.gwt.core.client.Callback;
-
-import java.util.Map.Entry;
-import java.util.*;
 
 /**
  * Abstract platypus query with parameters.
@@ -30,14 +35,13 @@ import java.util.*;
  */
 public class Query {
 
-    protected FlowProvider flow;
     protected AppClient client;
     // parameters propagation. ParamName - DsName, ParamName
     protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected Fields fields = new Fields();
     protected Parameters params = new Parameters();
     protected String title = null;
-    protected String appElementId;
+    protected String entityName;
     protected boolean procedure = false;
     protected boolean manual = false;
     protected Set<String> readRoles = new HashSet<>();
@@ -68,7 +72,7 @@ public class Query {
         if (aSource != null) {
             procedure = aSource.isProcedure();
             manual = aSource.isManual();
-            appElementId = aSource.getEntityId();
+            entityName = aSource.getEntityId();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
                 title = new String(aTitle.toCharArray());
@@ -124,39 +128,18 @@ public class Query {
     }
 
     public void setEntityId(String aValue) {
-        appElementId = aValue;
+        entityName = aValue;
         createFlow();
     }
 
-    public Cancellable execute(final Callback<Rowset, String> aCallback) throws Exception {
-        return flow.refresh(params, new CallbackAdapter<Rowset, String>() {
-
-            @Override
-            public void doWork(Rowset aRowset) throws Exception {
-                aRowset.setTransacted(true);
-                aRowset.setFlowProvider(flow);
-                if(aCallback != null)
-                	aCallback.onSuccess(aRowset);
-            }
-            
-            @Override
-            public void onFailure(String reason) {
-                if(aCallback != null)
-                	aCallback.onFailure(reason);
-            }
-        });
-    }
-
-    public Rowset prepareRowset(){
-    	assert flow != null : "Flow provider is expected to be.";
-    	Rowset rowset = new Rowset(flow.getExpectedFields());
-        rowset.setTransacted(true);
-        rowset.setFlowProvider(flow);
+    public Rowset prepareRowset() throws InvalidFieldsExceptionException{
+    	Rowset rowset = new Rowset(createFlow());
+        rowset.setFields(fields);
         return rowset;
     }
     
-    public Change enqueueUpdate() throws Exception {
-		Command command = new Command(appElementId);
+    public Change prepareCommand() throws Exception {
+		Command command = new Command(entityName);
 		command.parameters = new Change.Value[params.getParametersCount()];
 		for (int i = 0; i < command.parameters.length; i++) {
 			Parameter p = params.get(i + 1);
@@ -189,15 +172,13 @@ public class Query {
     }
     */
 
-    private void createFlow() {
-        if (client != null) {
-            flow = new WebFlowProvider(client, appElementId, fields);
-        }
+    private FlowProvider createFlow() {
+    	assert client != null : "A client must be specified";
+        return new WebFlowProvider(client, entityName, fields);
     }
 
     public void setClient(AppClient aClient) {
         client = aClient;
-        createFlow();
     }
 
     public AppClient getClient() {
@@ -300,7 +281,7 @@ public class Query {
      * @return The application element identifier;
      */
     public String getEntityId() {
-        return appElementId;
+        return entityName;
     }
 
     public void setParameters(Parameters aParameters) {

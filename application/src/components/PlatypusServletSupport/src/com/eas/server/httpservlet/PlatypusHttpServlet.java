@@ -206,24 +206,24 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                 };
                 if (handler instanceof CommonRequestHandler<?, ?>) {
-                    AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
                     CommonRequestHandler<?, Response> crh = (CommonRequestHandler<?, Response>) handler;
+                    AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
                     crh.handle((Response resp) -> {
-                        async.complete();
                         onSuccess.accept(resp);
-                    }, (Exception ex) -> {
                         async.complete();
+                    }, (Exception ex) -> {
                         onFailure.accept(ex);
+                        async.complete();
                     });
                 } else if (handler instanceof SessionRequestHandler<?, ?>) {
-                    AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
                     SessionRequestHandler<?, Response> srh = (SessionRequestHandler<?, Response>) handler;
+                    AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
                     srh.handle(aPlatypusSession, (Response resp) -> {
-                        async.complete();
                         onSuccess.accept(resp);
-                    }, (Exception ex) -> {
                         async.complete();
+                    }, (Exception ex) -> {
                         onFailure.accept(ex);
+                        async.complete();
                     });
                 } else {
                     throw new IllegalStateException("Bad request handler detected");

@@ -541,7 +541,7 @@ public class DatabasesClient {
 
     protected ApplyResult apply(final String aDatasourceName, List<Change> aLog, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ApplyResult> doWork = () -> {
-            int rowsAffected = 0;
+            int rowsAffected;
             DatabaseMdCache mdCache = getDbMetadataCache(aDatasourceName);
             if (mdCache == null) {
                 throw new IllegalStateException(String.format(UNKNOWN_DATASOURCE_IN_COMMIT, aDatasourceName));

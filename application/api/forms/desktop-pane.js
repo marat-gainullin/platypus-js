@@ -338,23 +338,6 @@
              */
             P.DesktopPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -371,6 +354,23 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -406,23 +406,6 @@
              */
             P.DesktopPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -439,6 +422,23 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -635,23 +635,6 @@
              */
             P.DesktopPane.prototype.forms = [];
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -668,6 +651,23 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.font = {};
         }
     };
         /**

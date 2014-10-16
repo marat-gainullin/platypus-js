@@ -4,6 +4,9 @@
  */
 package com.eas.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.bearsoft.rowset.CallbackAdapter;
 
 /**
@@ -12,17 +15,27 @@ import com.bearsoft.rowset.CallbackAdapter;
  */
 public abstract class CumulativeCallbackAdapter<T, F> extends CallbackAdapter<T, F> {
 
-	protected int exepectedExecutesCount;
-	protected int executed;
+	protected List<F> reasons = new ArrayList<>();
+	protected int exepectedCallsCount;
+	protected int calls;
 
-	public CumulativeCallbackAdapter(int aExecutesCount) {
+	public CumulativeCallbackAdapter(int aExpectedCallsCount) {
 		super();
-		exepectedExecutesCount = aExecutesCount;
+		exepectedCallsCount = aExpectedCallsCount;
 	}
 
 	public void onSuccess(T result) {
-		if (++executed == exepectedExecutesCount) {
+		if (++calls == exepectedCallsCount) {
 			super.onSuccess(result);
 		}
 	}
+	
+	public void onFailure(F reason) {
+		reasons.add(reason);
+		if (++calls == exepectedCallsCount) {
+			failed(reasons);
+		}		
+	}
+	
+	protected abstract void failed(List<F> aReasons);
 }

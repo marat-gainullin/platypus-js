@@ -45,6 +45,15 @@ public interface RowsetListener {
     public boolean willRequery(RowsetRequeryEvent event);
 
     /**
+     * Rowset before requering event handler. The rowset fires this
+     * event when requery has to be called and nothing can prevent this.
+     *
+     * @param event of the rowset.
+     */
+    @Undesignable
+    public void beforeRequery(RowsetRequeryEvent event);
+    
+    /**
      * Rowset before paging event handler/validator. The rowset fires this event
      * when nextPage has been called. Returning false will restrict saving
      * process.
@@ -99,6 +108,8 @@ public interface RowsetListener {
     @Designable(displayName="onFiltered", description="After filter event")
     public void rowsetFiltered(RowsetFilterEvent event);
 
+    public void rowsetNetError(RowsetNetErrorEvent event);
+    
     /**
      * Rowset after queried event handler.
      *

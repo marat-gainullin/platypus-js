@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DatabasesClient;
@@ -19,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -59,8 +56,13 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @Override
     public void setParametersEntity(ApplicationDbParametersEntity aParamsEntity) {
+        if (parametersEntity != null) {
+            parametersEntity.setModel(null);
+        }
         super.setParametersEntity(aParamsEntity);
-        parametersEntity.setModel(this);
+        if (parametersEntity != null) {
+            parametersEntity.setModel(this);
+        }
     }
 
     @Override

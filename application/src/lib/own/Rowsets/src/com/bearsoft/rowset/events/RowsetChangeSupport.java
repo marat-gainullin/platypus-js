@@ -483,6 +483,23 @@ public class RowsetChangeSupport {
         }
     }
 
+    public void fireNetErrorEvent(Exception anErrorCause) {
+        if (rowsetListeners != null) {
+            RowsetNetErrorEvent event = new RowsetNetErrorEvent(source, anErrorCause);
+            notifyListeners((RowsetListener l) -> {
+                l.rowsetNetError(event);
+            });
+        }
+    }
+
+    public void fireBeforeRequeryEvent() {
+        if (rowsetListeners != null) {
+            RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.BEFORE);
+            notifyListeners((RowsetListener l) -> {
+                l.beforeRequery(event);
+            });
+        }
+    }
     /**
      * Fires rowInsertedEvent event to all registered listeners.
      *

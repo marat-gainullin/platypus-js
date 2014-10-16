@@ -24,7 +24,7 @@ public class ScriptedQuery extends SqlQuery {
         publicAccess = true;
         sqlText = JAVASCRIPT_QUERY_CONTENTS;
         datasourceName = aModuleName;
-        entityId = aModuleName;
+        entityName = aModuleName;
         readRoles = Collections.<String>emptySet();
         writeRoles = Collections.<String>emptySet();
         procedure = false;
@@ -32,7 +32,7 @@ public class ScriptedQuery extends SqlQuery {
 
     @Override
     public SqlCompiledQuery compile() throws Exception {
-        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, entityId, sqlText, params, fields);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, entityName, sqlText, params, fields);
         return compiled;
     }
 

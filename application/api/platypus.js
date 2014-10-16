@@ -70,11 +70,6 @@
         var session = ScriptUtilsClass.getSession();
         //
         fixedThreadPool.execute(function() {
-            var oldLock = ScriptUtilsClass.getLock();
-            var oldReq = ScriptUtilsClass.getRequest();
-            var oldResp = ScriptUtilsClass.getResponse();
-            var oldSession = ScriptUtilsClass.getSession();
-            var oldPrincipal = PlatypusPrincipalClass.getInstance();
             ScriptUtilsClass.setLock(lock);
             ScriptUtilsClass.setRequest(req);
             ScriptUtilsClass.setResponse(resp);
@@ -83,11 +78,11 @@
             try{
                 func.apply(func, args);
             }finally{
-                ScriptUtilsClass.setLock(oldLock);
-                ScriptUtilsClass.setRequest(oldReq);
-                ScriptUtilsClass.setResponse(oldResp);
-                ScriptUtilsClass.setSession(oldSession);
-                PlatypusPrincipalClass.setInstance(oldPrincipal);
+                ScriptUtilsClass.setLock(null);
+                ScriptUtilsClass.setRequest(null);
+                ScriptUtilsClass.setResponse(null);
+                ScriptUtilsClass.setSession(null);
+                PlatypusPrincipalClass.setInstance(null);
             }
         });
     };
@@ -184,11 +179,6 @@
             var principal = PlatypusPrincipalClass.getInstance();
             //
             SwingUtilitiesClass.invokeLater(function() {
-                var oldLock = ScriptUtilsClass.getLock();
-                var oldReq = ScriptUtilsClass.getRequest();
-                var oldResp = ScriptUtilsClass.getResponse();
-                var oldSession = ScriptUtilsClass.getSession();
-                var oldPrincipal = PlatypusPrincipalClass.getInstance();
                 ScriptUtilsClass.setLock(lock);
                 ScriptUtilsClass.setRequest(req);
                 ScriptUtilsClass.setResponse(resp);
@@ -199,11 +189,11 @@
                         func.apply(func, args);
                     }, lock);
                 }finally{
-                    ScriptUtilsClass.setLock(oldLock);
-                    ScriptUtilsClass.setRequest(oldReq);
-                    ScriptUtilsClass.setResponse(oldResp);
-                    ScriptUtilsClass.setSession(oldSession);
-                    PlatypusPrincipalClass.setInstance(oldPrincipal);
+                    ScriptUtilsClass.setLock(null);
+                    ScriptUtilsClass.setRequest(null);
+                    ScriptUtilsClass.setResponse(null);
+                    ScriptUtilsClass.setSession(null);
+                    PlatypusPrincipalClass.setInstance(null);
                 }
             });
         };
@@ -227,11 +217,6 @@
             var principal = PlatypusPrincipalClass.getInstance();
             //
             ScriptTimerTaskClass.schedule(function() {
-                var oldLock = ScriptUtilsClass.getLock();
-                var oldReq = ScriptUtilsClass.getRequest();
-                var oldResp = ScriptUtilsClass.getResponse();
-                var oldSession = ScriptUtilsClass.getSession();
-                var oldPrincipal = PlatypusPrincipalClass.getInstance();
                 ScriptUtilsClass.setLock(lock);
                 ScriptUtilsClass.setRequest(req);
                 ScriptUtilsClass.setResponse(resp);
@@ -242,11 +227,11 @@
                         func.apply(func, userArgs);
                     }, lock);
                 }finally{
-                    ScriptUtilsClass.setLock(oldLock);
-                    ScriptUtilsClass.setRequest(oldReq);
-                    ScriptUtilsClass.setResponse(oldResp);
-                    ScriptUtilsClass.setSession(oldSession);
-                    PlatypusPrincipalClass.setInstance(oldPrincipal);
+                    ScriptUtilsClass.setLock(null);
+                    ScriptUtilsClass.setRequest(null);
+                    ScriptUtilsClass.setResponse(null);
+                    ScriptUtilsClass.setSession(null);
+                    PlatypusPrincipalClass.setInstance(null);
                 }
             }, args[0]);
             // HTML5 client doesn't support cancel feature and so, we don't support it too.

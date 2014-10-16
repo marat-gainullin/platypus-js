@@ -51,8 +51,13 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @Override
     public void setParametersEntity(ApplicationPlatypusParametersEntity aParamsEntity) {
+        if (parametersEntity != null) {
+            parametersEntity.setModel(null);
+        }
         super.setParametersEntity(aParamsEntity);
-        parametersEntity.setModel(this);
+        if (parametersEntity != null) {
+            parametersEntity.setModel(this);
+        }
     }
 
     @ScriptFunction(jsDoc = ""
@@ -65,13 +70,12 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             + " * @param onFailure Failure callback.\n")
     @Override
     public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
-        serverProxy.getChangeLog().addAll(changeLog);
         super.save(aOnSuccess, aOnFailure);
     }
 
     @Override
     public int commit(final Consumer<Integer> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        return serverProxy.commit(aOnSuccess, aOnFailure);
+        return serverProxy.commit(changeLog, aOnSuccess, aOnFailure);
     }
 
     @Override

@@ -11,34 +11,36 @@ import java.text.SimpleDateFormat;
 
 /**
  *
- * @author kl, mg refactoring
+ * @author mg
  */
 public class RowsetJsonWriter {
 
-    private Rowset rowset;
+    private final Rowset rowset;
 
     public RowsetJsonWriter(Rowset aRowset) {
+        super();
         rowset = aRowset;
     }
 
     public String write() throws Exception {
-        return writeRows();
+        return writeRows().toString();
     }
 
-    private String writeRows() throws Exception {
+    private StringBuilder writeRows() throws Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int rowIndex = 1; rowIndex <= rowset.size(); rowIndex++) {
             if (rowIndex > 1) {
                 sb.append(", ");
             }
-            writeRow(sb, rowset.getRow(rowIndex));
+            sb.append(writeRow(rowset.getRow(rowIndex)));
         }
         sb.append("]");
-        return sb.toString();
+        return sb;
     }
 
-    private void writeRow(StringBuilder sb, Row aRow) throws Exception {
+    private StringBuilder writeRow(Row aRow) throws Exception {
+        StringBuilder sb = new StringBuilder();
         Object[] values = aRow.getCurrentValues();
         Fields fields = rowset.getFields();
         sb.append("{");
@@ -46,12 +48,13 @@ public class RowsetJsonWriter {
             if (i > 0) {
                 sb.append(", ");
             }
-            writeValue(sb, values[i], fields.get(i + 1));
+            sb.append(writeValue(values[i], fields.get(i + 1)));
         }
         sb.append("}");
+        return sb;
     }
 
-    private void writeValue(StringBuilder sb, Object aValue, Field aField) throws Exception {
+    private StringBuilder writeValue(Object aValue, Field aField) throws Exception {
         String sValue = "null";
         if (aValue != null) {
             sValue = String.valueOf(rowset.getConverter().convert2RowsetCompatible(aValue, DataTypeInfo.VARCHAR));
@@ -59,7 +62,7 @@ public class RowsetJsonWriter {
                 case Types.TIME:
                 case Types.DATE:
                 case Types.TIMESTAMP:
-                    sValue = JSONUtils.s((new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT)).format(aValue));
+                    sValue = JSONUtils.s((new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT)).format(aValue)).toString();
                     break;
                 case Types.CHAR:
                 case Types.NCHAR:
@@ -71,7 +74,7 @@ public class RowsetJsonWriter {
                 case Types.NCLOB:
                 case Types.OTHER:
                 case Types.STRUCT:
-                    sValue = JSONUtils.s(sValue);
+                    sValue = JSONUtils.s(sValue).toString();
                     break;
                 case Types.BIT:
                 case Types.BOOLEAN:
@@ -81,6 +84,6 @@ public class RowsetJsonWriter {
                     break;
             }
         }
-        JSONUtils.p(sb, aField.getName(), sValue);
+        return JSONUtils.p(aField.getName(), sValue);
     }
 }

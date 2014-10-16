@@ -387,23 +387,6 @@
              */
             P.ScrollPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -420,6 +403,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -469,23 +469,6 @@
              */
             P.ScrollPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -502,6 +485,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -701,23 +701,6 @@
              */
             P.ScrollPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -734,6 +717,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.font = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {

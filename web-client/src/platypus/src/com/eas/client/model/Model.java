@@ -28,7 +28,6 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
@@ -49,8 +48,6 @@ public class Model implements HasPublished {
 	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
 	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
 
-	protected Set<String> savedRowIndexEntities = new HashSet<String>();
-	protected List<Entry<Entity, Integer>> savedEntitiesRowIndexes = new ArrayList<Entry<Entity, Integer>>();
 	protected AppClient client;
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
@@ -59,19 +56,20 @@ public class Model implements HasPublished {
 	protected Parameters parameters = new Parameters();
 	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	protected List<Change> changeLog = new ArrayList<Change>();
-	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
 	//
-	protected NetworkProcess process;
-	protected int ajustingCounter;
+	protected RequeryProcess process;
 	protected JavaScriptObject jsPublished;
 
-	public static class NetworkProcess {
+	public static class RequeryProcess {
+        public Collection<Entity> entities;
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
 		public Callback<Rowset, String> callback;
 
-		public NetworkProcess(Callback<Rowset, String> aCallback) {
+		public RequeryProcess(Collection<Entity> aEntities, Callback<Rowset, String> aCallback) {
 			super();
+			entities = aEntities;
 			callback = aCallback;
+            assert callback != null : "aCallback argument is required.";
 		}
 
 		protected String assembleErrors() {
@@ -88,25 +86,23 @@ public class Model implements HasPublished {
 		}
 
 		public void cancel() throws Exception {
-			if (callback != null)
-				callback.onFailure("Canceled");
+			callback.onFailure("Canceled");
 		}
 
-		public void success() throws Exception {
-			if (callback != null)
-				callback.onSuccess(null);
+		public void success(){
+			callback.onSuccess(null);
 		}
 
-		public void failure() throws Exception {
-			if (callback != null)
-				callback.onFailure(assembleErrors());
+		public void failure() {
+			callback.onFailure(assembleErrors());
 		}
 
-		public void end() throws Exception {
-			if (errors.isEmpty())
+		public void end() {
+			if (errors.isEmpty()){
 				success();
-			else
+			}else{
 				failure();
+			}
 		}
 	}
 
@@ -148,9 +144,7 @@ public class Model implements HasPublished {
 			copied.setParameters(parameters.copy());
 		}
 		if (getParametersEntity() != null) {
-			Entity pEntity = copied.getEntityById(getParametersEntity().getEntityId());
-			assert pEntity instanceof ParametersEntity;
-			copied.setParametersEntity((ParametersEntity) pEntity);
+			copied.setParametersEntity((ParametersEntity) getParametersEntity().copy());
 		}
 		for (Relation relation : relations) {
 			Relation rcopied = relation.copy();
@@ -174,7 +168,7 @@ public class Model implements HasPublished {
 		}
 		if (aRelation.getLeftField() != null) {
 			if (aRelation.getLeftEntity() != null) {
-				if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
+				if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryName() != null) {
 					aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
 				} else {
 					aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
@@ -185,7 +179,7 @@ public class Model implements HasPublished {
 		}
 		if (aRelation.getRightField() != null) {
 			if (aRelation.getRightEntity() != null) {
-				if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
+				if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryName() != null) {
 					aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
 				} else {
 					aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
@@ -230,7 +224,6 @@ public class Model implements HasPublished {
 		super();
 		parametersEntity = new ParametersEntity();
 		parametersEntity.setModel(this);
-		entities.put(parametersEntity.getEntityId(), parametersEntity);
 	}
 
 	/**
@@ -325,7 +318,7 @@ public class Model implements HasPublished {
 			if (entity instanceof ParametersEntity) {
 				ParametersEntity.publishTopLevelFacade(publishedEntity);
 				jsPublished.<JsObject> cast().inject("params", publishedEntity);
-			}else{
+			} else {
 				Entity.publishRows(publishedEntity);
 				if (entity.getName() != null && !entity.getName().isEmpty()) {
 					jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
@@ -459,23 +452,6 @@ public class Model implements HasPublished {
 		});
 	}-*/;
 
-	public int getAjustingCounter() {
-		return ajustingCounter;
-	}
-
-	public boolean isAjusting() {
-		return ajustingCounter > 0;
-	}
-
-	public void beginAjusting() {
-		ajustingCounter++;
-	}
-
-	public void endAjusting() {
-		ajustingCounter--;
-		assert (ajustingCounter >= 0);
-	}
-
 	public void removeRelation(Relation aRelation) {
 		relations.remove(aRelation);
 		Entity lEntity = aRelation.getLeftEntity();
@@ -510,8 +486,21 @@ public class Model implements HasPublished {
 		return entities;
 	}
 
+	public Map<String, Entity> getAllEntities() {
+		Map<String, Entity> allEntities = new HashMap<>();
+		allEntities.putAll(entities);
+		if (parametersEntity != null) {
+			allEntities.put(parametersEntity.getEntityId(), parametersEntity);
+		}
+		return allEntities;
+	}
+
 	public Entity getEntityById(String aId) {
-		return entities.get(aId);
+		if (aId != null && ParametersEntity.PARAMETERS_ENTITY_ID == aId) {
+			return parametersEntity;
+		} else {
+			return entities.get(aId);
+		}
 	}
 
 	public void setEntities(Map<String, Entity> aValue) {
@@ -527,6 +516,8 @@ public class Model implements HasPublished {
 	}
 
 	public void setParametersEntity(ParametersEntity aParamsEntity) {
+		if (parametersEntity != null)
+			parametersEntity.setModel(null);
 		parametersEntity = aParamsEntity;
 		if (parametersEntity != null)
 			parametersEntity.setModel(this);
@@ -536,21 +527,50 @@ public class Model implements HasPublished {
 		relations = aRelations;
 	}
 
-	public NetworkProcess getProcess() {
+    public void executeEntities(boolean refresh, Set<Entity> toExecute) throws Exception {
+        if (refresh) {
+            for(Entity entity : toExecute) {
+                entity.invalidate();
+            };
+        }
+        for (Entity entity : toExecute) {
+            if (!entity.getQuery().isManual()) {
+                entity.internalExecute(null);
+            }
+        }
+    }
+
+	private Set<Entity> rootEntities() {
+		final Set<Entity> rootEntities = new HashSet<>();
+		for (Entity entity : entities.values()) {
+			Set<Relation> dependanceRels = new HashSet<>();
+			for (Relation inRel : entity.getInRelations()) {
+				if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
+					dependanceRels.add(inRel);
+				}
+			}
+			if (dependanceRels.isEmpty()) {
+				rootEntities.add(entity);
+			}
+		}
+		return rootEntities;
+	}
+
+	public RequeryProcess getProcess() {
 		return process;
 	}
 
-	public void setProcess(NetworkProcess aValue) {
+	public void setProcess(RequeryProcess aValue) {
 		process = aValue;
 	}
 
-	public void terminateProcess(Entity aSource, String aErrorMessage) throws Exception {
+	public void terminateProcess(Entity aSource, String aErrorMessage) {
 		if (process != null) {
 			if (aErrorMessage != null) {
 				process.errors.put(aSource, aErrorMessage);
 			}
 			if (!isPending()) {
-				NetworkProcess pr = process;
+				RequeryProcess pr = process;
 				process = null;
 				pr.end();
 			}
@@ -585,27 +605,8 @@ public class Model implements HasPublished {
 		return changeLog;
 	}
 
-	public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
-		transactionListeners.add(aListener);
-		return new TransactionListener.Registration() {
-			@Override
-			public void remove() {
-				transactionListeners.remove(aListener);
-			}
-		};
-	}
-
 	public void accept(ModelVisitor visitor) {
 		visitor.visit(this);
-	}
-
-	public void beginSavingCurrentRowIndexes() {
-		boolean res = isAjusting();
-		assert res;
-		if (ajustingCounter == 1) {
-			savedRowIndexEntities.clear();
-			savedEntitiesRowIndexes.clear();
-		}
 	}
 
 	public boolean isModified() throws Exception {
@@ -626,7 +627,7 @@ public class Model implements HasPublished {
 
 			@Override
 			protected void doWork(Void aVoid) throws Exception {
-				saved();
+				commited();
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
@@ -645,29 +646,36 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void saved() throws Exception {
+	public void commited() throws Exception {
 		changeLog.clear();
-		for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
+		for (Entity aEntity : entities.values()) {
 			try {
-				l.commited();
+				Rowset rowset = aEntity.getRowset();
+				if (rowset != null) {
+					rowset.commited();
+				}
 			} catch (Exception ex) {
-				Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}
 
 	public void revert() throws Exception {
 		changeLog.clear();
-		for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
+		for (Entity aEntity : entities.values()) {
 			try {
-				l.rolledback();
+				Rowset rowset = aEntity.getRowset();
+				if (rowset != null) {
+					rowset.rolledback();
+				}
 			} catch (Exception ex) {
-				Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}
 
 	public void rolledback() throws Exception {
+		Logger.getLogger(Model.class.getName()).log(Level.SEVERE, "rolled back");
 	}
 
 	public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -692,9 +700,19 @@ public class Model implements HasPublished {
 	}
 
 	public void requery(Callback<Rowset, String> aCallback) throws Exception {
-		validateQueries();
-		revert();
-		executeRootEntities(true, aCallback);
+        changeLog.clear();
+        if (process != null) {
+            process.cancel();
+        }
+        if (aCallback != null) {
+            process = new RequeryProcess(entities.values(), aCallback);
+        }
+        revert();
+        executeEntities(true, rootEntities());
+        if (!isPending() && process != null) {
+            process.end();
+            process = null;
+        }
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -719,60 +737,16 @@ public class Model implements HasPublished {
 	}
 
 	public void execute(Callback<Rowset, String> aCallback) throws Exception {
-		executeRootEntities(false, aCallback);
-	}
-
-	public static Set<Entity> gatherNextLayer(Collection<Entity> aLayer) throws Exception {
-		Set<Entity> nextLayer = new HashSet<Entity>();
-		for (Entity entity : aLayer) {
-			Set<Relation> rels = entity.getOutRelations();
-			if (rels != null) {
-				for (Relation outRel : rels) {
-					if (outRel != null) {
-						Entity ent = outRel.getRightEntity();
-						if (ent != null) {
-							nextLayer.add(ent);
-						}
-					}
-				}
-			}
-		}
-		return nextLayer;
-	}
-
-	public void executeEntities(Set<Entity> toExecute) throws Exception {
-		for (Entity entity : toExecute) {
-			entity.internalExecute(null);
-		}
-	}
-
-	private void executeRootEntities(boolean refresh, Callback<Rowset, String> aCallback) throws Exception {
-		final Set<Entity> toExecute = new HashSet<Entity>();
-		for (Entity entity : entities.values()) {
-			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is
-				                                        // in the entities, so
-				                                        // we have to filter it
-				                                        // out
-				if (refresh)
-					entity.invalidate();
-				Set<Relation> dependanceRels = new HashSet<Relation>();
-				for (Relation inRel : entity.getInRelations()) {
-					if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
-						dependanceRels.add(inRel);
-					}
-				}
-				if (dependanceRels.isEmpty()) {
-					toExecute.add(entity);
-				}
-			}
-		}
-		if (process != null){
-			process.cancel();
-		}
-		process = new NetworkProcess(aCallback);
-		executeEntities(toExecute);
+        if (process != null) {
+            process.cancel();
+        }
+        if (aCallback != null) {
+            process = new RequeryProcess(entities.values(), aCallback);
+        }
+        executeEntities(false, rootEntities());
         if (!isPending() && process != null) {
             process.end();
+            process = null;
         }
 	}
 
@@ -782,51 +756,15 @@ public class Model implements HasPublished {
 		}
 	}
 
-	public boolean isEntityRowIndexStateSaved(Entity entity) {
-		return savedRowIndexEntities.contains(entity.getEntityId());
-	}
-
-	public void addSavedRowIndex(Entity entity, int aIndex) {
-		boolean res = isAjusting();
-		assert res;
-		assert (entity != null);
-		if (!isEntityRowIndexStateSaved(entity)) {
-			Entry<Entity, Integer> entry = new SimpleEntry(entity, aIndex);
-			savedEntitiesRowIndexes.add(entry);
-			savedRowIndexEntities.add(entity.getEntityId());
-		}
-	}
-
-	public void restoreRowIndexes() {
-		boolean res = isAjusting();
-		assert res;
-		if (ajustingCounter == 1 && savedEntitiesRowIndexes != null && savedRowIndexEntities != null) {
-			for (Entry<Entity, Integer> entr : savedEntitiesRowIndexes) {
-				if (entr != null) {
-					try {
-						Entity ent = entr.getKey();
-						if (ent != null && ent.getRowset() != null) {
-							ent.getRowset().absolute(entr.getValue());
-						}
-					} catch (Exception ex) {
-						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			}
-			savedRowIndexEntities.clear();
-			savedEntitiesRowIndexes.clear();
-		}
-	}
-
 	protected static final String USER_DATASOURCE_NAME = "userEntity";
 
-	public synchronized Object jsLoadEntity(String aQueryId) throws Exception {
+	public synchronized Object jsLoadEntity(String aQueryName) throws Exception {
 		if (client == null) {
 			throw new NullPointerException("Null client detected while creating an entity");
 		}
 		Entity entity = new Entity(this);
 		entity.setName(USER_DATASOURCE_NAME);
-		entity.setQueryId(aQueryId);
+		entity.setQueryName(aQueryName);
 		entity.validateQuery();
 		// addEntity(entity); To avoid memory leaks you should not add the
 		// entity to the model!

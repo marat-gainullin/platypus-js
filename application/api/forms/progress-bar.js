@@ -375,23 +375,6 @@
              */
             P.ProgressBar.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -408,6 +391,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -443,23 +443,6 @@
              */
             P.ProgressBar.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -476,6 +459,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -692,23 +692,6 @@
              */
             P.ProgressBar.prototype.minimum = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -725,6 +708,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.font = {};
         }
     };
         /**

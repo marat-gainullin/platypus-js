@@ -80,8 +80,13 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQue
 
     @Override
     public void setParametersEntity(QueryParametersEntity aParamsEntity) {
+        if (parametersEntity != null) {
+            parametersEntity.setModel(null);
+        }
         super.setParametersEntity(aParamsEntity);
-        parametersEntity.setModel(this);
+        if (parametersEntity != null) {
+            parametersEntity.setModel(this);
+        }
     }
     
     @Override

@@ -4,7 +4,6 @@
  */
 package com.eas.client.application;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -204,8 +203,23 @@ public class Application {
 		        };
 		}});
 		
+		var principal = {};
+		
+		Object.defineProperty(principal, "name", {get: function(){
+			var appClient = @com.eas.client.application.AppClient::getInstance()();
+			return '' + appClient.@com.eas.client.application.AppClient::getPrincipal();
+		}});
+		Object.defineProperty(principal, "hasRole", {value: function(){
+			return true;
+		}});
+		Object.defineProperty(principal, "logout", {value: function(onSuccess, onFailure){
+			var appClient = @com.eas.client.application.AppClient::getInstance()();
+			return appClient.@com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+		}});
+		Object.defineProperty($wnd.P, "principal", {value: principal});
+		// legacy API
 		$wnd.P.logout = function(onSuccess, onFailure) {
-			return @com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+			return principal.logout(onSuccess, onFailure);
 		}
 		
 		$wnd.P.getElementComputedStyle = function(_elem) {
@@ -588,7 +602,7 @@ public class Application {
 		$wnd.P.loadModel = function(appElementName, aTarget) {
 			if(!aTarget)
 				aTarget = {};
-			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
 			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			return aTarget;
@@ -596,7 +610,7 @@ public class Application {
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
 			if(!aTarget)
 				aTarget = {};
-			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = !!aModel ? aModel.unwrap() : null;
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
@@ -1058,96 +1072,53 @@ public class Application {
 	}-*/;
 
 	protected static void startAppElements(AppClient client, final Set<Element> aIndicators) throws Exception {
-		client.getStartElement(new CallbackAdapter<String, Void>() {
+		client.requestLoggedInUser(new CallbackAdapter<String, String>() {
 
 			@Override
 			protected void doWork(String aResult) throws Exception {
-				if (aResult != null && !aResult.isEmpty()) {
-					List<String> toLoad= new ArrayList<>();
-					toLoad.add(aResult);
-					loader.load(toLoad, new ExecuteApplicationCallback(aResult, aIndicators));
-				} else {
-					for (Element el : aIndicators) {
-						el.<XElement> cast().unmask();
-					}
-					onReady();
-				}
+				onReady();
 			}
 
 			@Override
-			public void onFailure(Void reason) {
-				for (Element el : aIndicators) {
-					el.<XElement> cast().unmask();
-				}
+			public void onFailure(String reason) {	
+				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
 			}
 		});
 	}
-
-	/**
-	 * Avoiding parallel Loader.load() calls like this: require(["Module1",
-	 * "Module2", "Module3", "Module4"], function(){}); require(["Module0",
-	 * "Module2", "Module5", "Module7"], function(){}); Here, loader will be
-	 * called twice form "Module2" in parallel.
-	 */
-	protected static boolean requiring;
-
-	protected static class RequireProcess {
-		public JavaScriptObject deps;
-		public JavaScriptObject onSuccess;
-		public JavaScriptObject onFailure;
-
-		public RequireProcess(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
-			deps = aDeps;
-			onSuccess = aOnSuccess;
-			onFailure = aOnFailure;
-		}
-	}
-
-	protected static List<RequireProcess> requireProcesses = new ArrayList<RequireProcess>();
 
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
-			if (!loader.isLoaded(dep))
-				deps.add(dep);
+			deps.add(dep);
 		}
-		if (!requiring) {
-			requiring = true;
-			try {
-				loader.prepareOptimistic();
-				loader.load(deps, new RunnableAdapter() {
-
-					@Override
-					protected void doWork() throws Exception {
-						requiring = false;
+		try {
+			loader.load(deps, new CallbackAdapter<Void, String>() {
+				
+				@Override
+				public void onFailure(String reason) {
+					if (aOnFailure != null){
 						try {
-							if (deps.isEmpty() || loader.isLoaded(deps)) {
-								if (aOnSuccess != null)
-									Utils.invokeJsFunction(aOnSuccess);
-								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
-							} else {
-								if (aOnFailure != null)
-									Utils.invokeJsFunction(aOnFailure);
-								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
-							}
-						} finally {
-							if (!requireProcesses.isEmpty()) {
-								RequireProcess p = requireProcesses.remove(0);
-								assert p != null;
-								require(p.deps, p.onSuccess, p.onFailure);
-							}
-						}
+	                        Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
+                        } catch (Exception ex) {
+    						Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+					}else{
+						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 					}
-				});
-			} catch (Exception ex) {
-				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		} else {
-			requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
+				}
+				
+				@Override
+                protected void doWork(Void aResult) throws Exception {
+					if (aOnSuccess != null)
+						Utils.invokeJsFunction(aOnSuccess);
+					else
+						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
+                }
+			});
+		} catch (Exception ex) {
+			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 }

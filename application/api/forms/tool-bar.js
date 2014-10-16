@@ -373,23 +373,6 @@
              */
             P.ToolBar.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -406,6 +389,23 @@
              * @memberOf ToolBar
              */
             P.ToolBar.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToolBar){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ToolBar
+             */
+            P.ToolBar.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -455,23 +455,6 @@
              */
             P.ToolBar.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -488,6 +471,23 @@
              * @memberOf ToolBar
              */
             P.ToolBar.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToolBar){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ToolBar
+             */
+            P.ToolBar.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -687,23 +687,6 @@
              */
             P.ToolBar.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -720,6 +703,23 @@
              * @memberOf ToolBar
              */
             P.ToolBar.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToolBar){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ToolBar
+             */
+            P.ToolBar.prototype.font = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
