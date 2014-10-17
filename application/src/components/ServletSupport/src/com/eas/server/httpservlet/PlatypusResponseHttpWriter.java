@@ -74,9 +74,14 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteQueryRequest.Response resp) throws Exception {
+    public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         makeResponseNotCacheable(servletResponse);
-        writeResponse(((ExecuteQueryRequest.Response) resp).getRowset(), servletResponse);
+        ExecuteQueryRequest.Response resp = (ExecuteQueryRequest.Response) rsp;
+        if (resp.getRowset() != null) {
+            writeResponse(resp.getRowset(), servletResponse);
+        } else {
+            writeJsonResponse(resp.getUpdateCount() + "", servletResponse);
+        }
     }
 
     @Override
@@ -134,7 +139,7 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(CommitRequest.Response resp) throws Exception {
-        // simple OK response is needed
+        writeJsonResponse(resp.getUpdated() + "", servletResponse);
     }
 
     @Override

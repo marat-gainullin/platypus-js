@@ -623,7 +623,7 @@ public class Model implements HasPublished {
 	}
 
 	public Cancellable save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		return client.commit(changeLog, new CallbackAdapter<Void, String>() {
+		return client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
 
 			@Override
 			protected void doWork(Void aVoid) throws Exception {

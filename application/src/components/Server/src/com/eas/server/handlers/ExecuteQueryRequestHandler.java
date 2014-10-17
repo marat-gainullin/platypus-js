@@ -35,13 +35,13 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
     @Override
     protected void handle2(Session aSession, Consumer<ExecuteQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            ((LocalQueriesProxy)getServerCore().getQueries()).getQuery(getRequest().getQueryId(), (SqlQuery query) -> {
+            ((LocalQueriesProxy)getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityId() == null) {
-                        throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryId()));
+                        throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
                     }
                     if (!query.isPublicAccess()) {
-                        throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryId()));//NOI18N
+                        throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryName()));//NOI18N
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
                     if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {

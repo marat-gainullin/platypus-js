@@ -26,7 +26,7 @@ import com.google.gwt.json.client.JSONValue;
  * 
  * @author mg
  */
-public class ChangesWriter implements ChangeVisitor {
+public class ChangeWriter implements ChangeVisitor {
 
 	private static final String CHANGE_KIND_NAME = "kind";
 	private static final String CHANGE_ENTITY_NAME = "entity";
@@ -56,7 +56,7 @@ public class ChangesWriter implements ChangeVisitor {
 	public static String writeLog(List<Change> aLog) throws Exception {
 		JSONArray changes = new JSONArray();
 		for (int i = 0; i < aLog.size(); i++) {
-			ChangesWriter writer = new ChangesWriter();
+			ChangeWriter writer = new ChangeWriter();
 			aLog.get(i).accept(writer);
 			changes.set(changes.size(), writer.jsoned);
 		}

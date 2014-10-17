@@ -16,7 +16,7 @@ import com.eas.client.threetier.Requests;
  */
 public class ExecuteQueryRequest extends Request {
 
-    protected String queryId;
+    protected String queryName;
     protected Parameters params;
     protected Fields expectedFields;
 
@@ -24,19 +24,19 @@ public class ExecuteQueryRequest extends Request {
         super(Requests.rqExecuteQuery);
     }
 
-    public ExecuteQueryRequest(String aQueryId, Parameters aParams, Fields aExpectedFields) {
+    public ExecuteQueryRequest(String aQueryName, Parameters aParams, Fields aExpectedFields) {
         this();
-        queryId = aQueryId;
+        queryName = aQueryName;
         params = aParams;
         expectedFields = aExpectedFields;
     }
 
-    public String getQueryId() {
-        return queryId;
+    public String getQueryName() {
+        return queryName;
     }
 
-    public void setQueryId(String aValue) {
-        queryId = aValue;
+    public void setQueryName(String aValue) {
+        queryName = aValue;
     }
 
     public Parameters getParams() {

@@ -12,14 +12,12 @@ import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.queries.Query;
-import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.dbcontrols.RowsetDbControl;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +27,6 @@ import java.util.logging.Logger;
  */
 public class GridChildrenFetcher implements ChildrenFetcher<Row> {
 
-    protected static ExecutorService executor = Executors.newCachedThreadPool(new DeamonThreadFactory());
     //
     protected RowsetDbControl hostControl;
     protected ApplicationEntity<?, ?, ?> fetchWith;
@@ -49,26 +46,23 @@ public class GridChildrenFetcher implements ChildrenFetcher<Row> {
      *
      * @param aParentRow Row the children will be fetched of.
      * @param aFetchCompleter Completer, wich will be asked to send proper
-     * events to db-controls, such a grid.
+     * events to model controls, such a grid.
+     * @param aAsynchronous
      */
     @Override
     public void fetch(Row aParentRow, Runnable aFetchCompleter, boolean aAsynchronous) {
         hostControl.addProcessedRow(aParentRow);
-        Runnable r = new FetcherRunnable(aParentRow, aFetchCompleter, aAsynchronous);
-        if (aAsynchronous) {
-            executor.execute(r);
-        } else {
-            r.run();
-        }
+        Runnable r = new Fetcher(aParentRow, aFetchCompleter, aAsynchronous);
+        r.run();
     }
 
-    private class FetcherRunnable implements Runnable {
+    private class Fetcher implements Runnable {
 
         private final Row parentRow;
         private final Runnable fetchCompleter;
         private final boolean asynchronous;
 
-        public FetcherRunnable(Row aParentRow, Runnable aFetchCompleter, boolean aAsynchronous) {
+        public Fetcher(Row aParentRow, Runnable aFetchCompleter, boolean aAsynchronous) {
             parentRow = aParentRow;
             fetchCompleter = aFetchCompleter;
             asynchronous = aAsynchronous;
@@ -77,13 +71,13 @@ public class GridChildrenFetcher implements ChildrenFetcher<Row> {
         @Override
         public void run() {
             try {
+                // setup parameters
                 fetchWith.bindQueryParameters();
                 Query query = fetchWith.getQuery().copy();
                 Parameter param2Init = query.getParameters().get(fetchingParameter.getName());
                 param2Init.setValue(parentRow.getColumnObject(parameterSourceColIndex));
-                final Rowset childrenRowset = query.execute(null, null);
-
-                Runnable guiThreadTask = () -> {
+                // execute and accept results
+                Consumer<Rowset> fetchedAcceptor = (Rowset childrenRowset) -> {
                     try {
                         List<Integer> pkFields = childrenRowset.getFields().getPrimaryKeysIndicies();
                         childrenRowset.beforeFirst();
@@ -107,7 +101,8 @@ public class GridChildrenFetcher implements ChildrenFetcher<Row> {
                                 row.clearInserted();
                                 row.clearUpdated();
                             }
-                            childrenRowset.setCurrent(new ArrayList<Row>());
+                            childrenRowset.setCurrent(new ArrayList<>());
+                            childrenRowset.currentToOriginal();
                         } finally {
                             generalRowset.setModified(oldModified);
                             generalRowset.setFlowProvider(generalRowsetFlow);
@@ -117,17 +112,28 @@ public class GridChildrenFetcher implements ChildrenFetcher<Row> {
                             generalRowset.absolute(preservedCursorPos);
                         } finally {
                             fetchCompleter.run();
-                            hostControl.removeProcessedRow(parentRow);
-                            hostControl.makeVisible(generalRowset.getCurrentRow(), true);
+                            EventQueue.invokeLater(() -> {
+                                try {
+                                    hostControl.removeProcessedRow(parentRow);
+                                    hostControl.makeVisible(generalRowset.getCurrentRow(), true);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(GridChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            });
                         }
                     } catch (Exception ex) {
                         Logger.getLogger(GridChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 };
                 if (asynchronous) {
-                    EventQueue.invokeLater(guiThreadTask);
+                    query.execute((Rowset aRowset) -> {
+                        fetchedAcceptor.accept(aRowset);
+                    }, (Exception ex) -> {
+                        Logger.getLogger(GridChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);
+                    });
                 } else {
-                    guiThreadTask.run();
+                    Rowset fetched = query.execute(null, null);
+                    fetchedAcceptor.accept(fetched);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(GridChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);

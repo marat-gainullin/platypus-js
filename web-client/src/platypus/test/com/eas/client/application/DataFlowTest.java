@@ -106,7 +106,7 @@ public class DataFlowTest extends GWTTestCase {
 								// NEW_RECORD_NAME_G);
 								rowset.updateObject(fields.find("tname"), NEW_RECORD_NAME_T);
 								rowset.updateObject(fields.find("kname"), NEW_RECORD_NAME_K);
-								client.commit(commonLog, new CallbackAdapter<Void, String>() {
+								client.requestCommit(commonLog, new CallbackAdapter<Void, String>() {
 
 									@Override
 									public void doWork(Void aVoid) throws Exception {
@@ -135,7 +135,7 @@ public class DataFlowTest extends GWTTestCase {
 												assertEquals(newRow.getColumnObject(fields.find("kname")), NEW_RECORD_NAME_K);
 												// Delete operation
 												rowset.delete();
-												client.commit(commonLog, new CallbackAdapter<Void, String>() {
+												client.requestCommit(commonLog, new CallbackAdapter<Void, String>() {
 
 													@Override
 													public void doWork(Void aVoid) throws Exception {

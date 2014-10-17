@@ -63,6 +63,8 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + "    P.require(['%s'], function(){\n"//NOI18N
             + "        var f = new %s();\n"//NOI18N
             + "        f.show();\n"//NOI18N
+            + "    }, function(e){\n"
+            + "        P.Logger.severe(e);\n"
             + "    });\n"//NOI18N
             + "};\n";//NOI18N
 

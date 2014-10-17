@@ -693,7 +693,7 @@ public class Application {
 				}
 				var nativeClient = @com.eas.client.application.AppClient::getInstance()();
 				if(onSuccess) {
-					nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
+					nativeClient.@com.eas.client.application.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
 						function(aResult){
 							if(typeof aResult === 'object' && aResult instanceof Report)
 								onSuccess(aResult);
@@ -701,7 +701,7 @@ public class Application {
 								onSuccess(parseDates(JSON.parse(aResult)));
 						}, onFailure);
 				} else {
-					var result = nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
+					var result = nativeClient.@com.eas.client.application.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
 					return typeof result === 'object' && result instanceof Report ? result : parseDates(JSON.parse(result)); 
 				}
 			};

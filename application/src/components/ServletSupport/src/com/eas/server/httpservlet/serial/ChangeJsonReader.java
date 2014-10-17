@@ -37,13 +37,13 @@ public class ChangeJsonReader implements ChangeVisitor {
     private static final String CHANGE_PARAMETERS_NAME = "parameters";
     protected static Converter converter = new RowsetConverter();
     protected JSObject sChange;
-    protected String entityId;
+    protected String entityName;
     protected EntitiesHost fieldsResolver;
 
-    public ChangeJsonReader(JSObject aSChange, String aEntityId, EntitiesHost aFieldsResolver) throws Exception {
+    public ChangeJsonReader(JSObject aSChange, String aEntityName, EntitiesHost aFieldsResolver) throws Exception {
         super();
         sChange = aSChange;
-        entityId = aEntityId;
+        entityName = aEntityName;
         fieldsResolver = aFieldsResolver;
     }
 
@@ -53,7 +53,7 @@ public class ChangeJsonReader implements ChangeVisitor {
             JSObject sValue = (JSObject) oData;
             for (String sValueName : sValue.keySet()) {
                 Object oValueValue = sValue.getMember(sValueName);
-                Field field = fieldsResolver.resolveField(entityId, sValueName);
+                Field field = fieldsResolver.resolveField(entityName, sValueName);
                 if (field != null) {
                     if (oValueValue instanceof String && (field.getTypeInfo().getSqlType() == java.sql.Types.DATE || field.getTypeInfo().getSqlType() == java.sql.Types.TIME || field.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP)) {
                         try {
@@ -69,7 +69,7 @@ public class ChangeJsonReader implements ChangeVisitor {
                     Object convertedValueValue = converter.convert2RowsetCompatible(oValueValue, field.getTypeInfo());
                     data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
                 } else {
-                    Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityId, sValueName));
+                    Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityName, sValueName));
                 }
             }
         }

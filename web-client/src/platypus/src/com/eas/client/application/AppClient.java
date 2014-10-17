@@ -31,7 +31,7 @@ import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.Requests;
 import com.eas.client.published.PublishedFile;
 import com.eas.client.queries.Query;
-import com.eas.client.serial.ChangesWriter;
+import com.eas.client.serial.ChangeWriter;
 import com.eas.client.serial.QueryReader;
 import com.eas.client.serial.RowsetReader;
 import com.eas.client.xhr.FormData;
@@ -639,9 +639,9 @@ public class AppClient {
 		// No-op here. Some implementation is in the tests.
 	}
 
-	public Cancellable commit(final List<Change> changeLog, final Callback<Void, String> aCallback) throws Exception {
+	public Cancellable requestCommit(final List<Change> changeLog, final Callback<Void, String> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCommit));
-		return startApiRequest(null, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startApiRequest(null, query, ChangeWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -864,7 +864,7 @@ public class AppClient {
 		return !!($wnd.P && $wnd.P.serverModules && $wnd.P.serverModules[aModuleName]);
 	}-*/;
 
-	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure)
+	public Object requestServerMethodExecution(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure)
 	        throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)

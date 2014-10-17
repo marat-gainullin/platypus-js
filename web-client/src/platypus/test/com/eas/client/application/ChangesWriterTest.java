@@ -10,7 +10,7 @@ import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.eas.client.serial.ChangesWriter;
+import com.eas.client.serial.ChangeWriter;
 import com.google.gwt.junit.client.GWTTestCase;
 
 public class ChangesWriterTest extends GWTTestCase {
@@ -52,7 +52,7 @@ public class ChangesWriterTest extends GWTTestCase {
 		changes.add(u);
 		changes.add(d);
 		changes.add(c);
-		String result = ChangesWriter.writeLog(changes);
+		String result = ChangeWriter.writeLog(changes);
 		assertEquals(WRITTEN_CHANGES, result);
 	}
 }

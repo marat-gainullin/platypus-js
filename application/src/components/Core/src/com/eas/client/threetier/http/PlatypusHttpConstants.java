@@ -10,7 +10,7 @@ package com.eas.client.threetier.http;
  */
 public class PlatypusHttpConstants {
     
-    public static final String CONTENT_TYPE = "application/octet-stream";   
+    public static final String JSON_CONTENT_TYPE = "text/json";   
     public static final String AGENT_NAME = "platypus-http-client";
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";    
