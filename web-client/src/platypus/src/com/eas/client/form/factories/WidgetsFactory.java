@@ -64,8 +64,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.RichTextArea;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
@@ -100,6 +98,7 @@ public class WidgetsFactory {
 	protected PlatypusWindow form;
 	protected HasWidgets rootWidget;
 	protected boolean isRoot = true;
+	protected String moduleName;
 
 	private Element tag;
 	private Map<String, UIObject> components = new HashMap<>();
@@ -110,8 +109,9 @@ public class WidgetsFactory {
 	protected List<Runnable> postponedTasks = new ArrayList<>();
 	protected List<Runnable> postponedTasks1 = new ArrayList<>();
 
-	public WidgetsFactory(Element aFormElement, JavaScriptObject aTarget) {
+	public WidgetsFactory(String aModuleName, Element aFormElement, JavaScriptObject aTarget) {
 		super();
+		moduleName = aModuleName;
 		tag = aFormElement;
 		target = aTarget;
 	}
@@ -163,6 +163,8 @@ public class WidgetsFactory {
 		form.setOpacity(Utils.getFloatAttribute(aTag, "opacity", 1.0f));
 		if (aTag.hasAttribute("title")) {
 			form.setTitle(aTag.getAttribute("title"));
+		}else{
+			form.setTitle(moduleName);
 		}
 		return form;
 	}

@@ -37,7 +37,7 @@ public class QueryReader extends JsonReader {
 				query.setManual(bManual.booleanValue());
 			}
 		}
-		query.setEntityId(o.get(APP_ELEMENT_PROP_NAME).isString().stringValue());
+		query.setEntityName(o.get(APP_ELEMENT_PROP_NAME).isString().stringValue());
 		// parameters
 		assert o.containsKey(PARAMETERS_PROP_NAME);
 		JSONArray pa = o.get(PARAMETERS_PROP_NAME).isArray();

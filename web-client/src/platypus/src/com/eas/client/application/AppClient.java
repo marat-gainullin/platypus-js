@@ -73,6 +73,7 @@ public class AppClient {
 	//
 	private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
 	public static final String APPLICATION_URI = "/application";
+	public static final String APP_RESOURCE_PREFIX = "/app/";
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	//
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
@@ -82,7 +83,7 @@ public class AppClient {
 	//
 	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
 	private static AppClient appClient;
-	private String baseUrl;
+	private String apiUrl;
 	private String principal;
 	private Map<String, Document> documents = new HashMap<String, Document>();
 	private Map<String, ModuleStructure> modulesStructures = new HashMap<String, ModuleStructure>();
@@ -256,7 +257,7 @@ public class AppClient {
 
 	public static Cancellable requestUpload(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		req.open("post", AppClient.getInstance().getBaseUrl());
+		req.open("post", AppClient.getInstance().getApiUrl());
 		final ProgressHandler handler = new ProgressHandlerAdapter() {
 			@Override
 			public void onProgress(ProgressEvent aEvent) {
@@ -403,12 +404,13 @@ public class AppClient {
 		return res;
 	}
 
-	public AppClient(String aBaseUrl) {
-		baseUrl = aBaseUrl;
+	public AppClient(String aApiUrl) {
+		super();
+		apiUrl = aApiUrl;
 	}
 
-	public String getBaseUrl() {
-		return baseUrl;
+	public String getApiUrl() {
+		return apiUrl;
 	}
 	
 	public String getPrincipal() {
@@ -428,7 +430,7 @@ public class AppClient {
 	public Document getFormDocument(String aModuleName) {
 		ModuleStructure structure = modulesStructures.get(aModuleName);
 		for(String part : structure.getStructure()){
-			if(part.toLowerCase().endsWith(".form")){
+			if(part.toLowerCase().endsWith(".layout")){
 				return documents.get(part);
 			}
 		}
@@ -474,7 +476,7 @@ public class AppClient {
 
 	public Cancellable requestLogout(final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqLogout));
-		return startRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>(){
+		return startApiRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>(){
 
 			@Override
             public void onFailure(XMLHttpRequest reason) {
@@ -490,8 +492,8 @@ public class AppClient {
 		});
 	}
 
-	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
-		String url = baseUrl + (aUrlPrefix != null ? aUrlPrefix : "") + (aUrlQuery != null ? "?" + aUrlQuery : "");
+	public Cancellable startApiRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
+		String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + (aUrlQuery != null ? "?" + aUrlQuery : "");
 		final XMLHttpRequest req = XMLHttpRequest.create();
 		req.open(aMethod.toString(), url);
 		if (RequestBuilder.POST.equals(aMethod)) {
@@ -591,7 +593,7 @@ public class AppClient {
 			query += param(ent.getKey(), ent.getValue()) + "&";
 		}
 		query += param(PlatypusHttpRequestParams.TYPE, String.valueOf(aRequestType));
-		frame.setUrl(baseUrl + aUrlPrefix + "?" + query);
+		frame.setUrl(apiUrl + aUrlPrefix + "?" + query);
 		RootPanel.get().add(frame);
 	}
 
@@ -604,7 +606,7 @@ public class AppClient {
 	}
 
 	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
-		String url = baseUrl + aUrlPrefix + "?" + aUrlQuery;
+		String url = apiUrl + aUrlPrefix + "?" + aUrlQuery;
 		final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
 		if (req.getStatus() == Response.SC_OK)
 			return req;
@@ -614,7 +616,7 @@ public class AppClient {
 
 	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		aUrl = Loader.URL_PROCESSOR.process(aUrl);
+		aUrl = Loader.URL_QUERY_PROCESSOR.process(aUrl);
 		req.open(aMethod.toString(), aUrl, false);
 		interceptRequest(req);
 		/*
@@ -639,7 +641,7 @@ public class AppClient {
 
 	public Cancellable commit(final List<Change> changeLog, final Callback<Void, String> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCommit));
-		return startRequest(null, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startApiRequest(null, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -659,7 +661,7 @@ public class AppClient {
 
 	public Cancellable requestLoggedInUser(final Callback<String, String> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCredential));
-		return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			protected void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -701,8 +703,8 @@ public class AppClient {
 		} else {
 			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure))
 					,param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
-			query = Loader.URL_PROCESSOR.process(query);
-			return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			query = Loader.URL_QUERY_PROCESSOR.process(query);
+			return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -771,9 +773,9 @@ public class AppClient {
 		}
 	}
 
-	public Cancellable requestDocument(final String aResourceUri, final Callback<Document, XMLHttpRequest> aCallback) throws Exception {
-		if (documents.containsKey(aResourceUri)) {
-			Document doc = documents.get(aResourceUri);
+	public Cancellable requestDocument(final String aResourceName, final Callback<Document, XMLHttpRequest> aCallback) throws Exception {
+		if (documents.containsKey(aResourceName)) {
+			Document doc = documents.get(aResourceName);
 			// doc may be null, because of application elements without a
 			// xml-dom, plain scripts for example.
 			if (aCallback != null) {
@@ -787,16 +789,22 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = "";
-			query = Loader.URL_PROCESSOR.process(query);
-			return startRequest(aResourceUri, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			SafeUri documentUri = new SafeUri(){
+
+				@Override
+                public String asString() {
+	                return relativeUri() + APP_RESOURCE_PREFIX + aResourceName + Loader.URL_QUERY_PROCESSOR.process("");
+                }
+				
+			}; 
+			return startRequest(documentUri, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
 					String text = aResponse.getResponseText();
 					Document doc = text != null && !text.isEmpty() ? XMLParser.parse(text) : null;
-					documents.put(aResourceUri, doc);
+					documents.put(aResourceName, doc);
 					//
 					if (aCallback != null)
 						aCallback.onSuccess(doc);
@@ -824,7 +832,7 @@ public class AppClient {
 			};
 		} else {
 			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCreateServerModule)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
-			return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -864,7 +872,7 @@ public class AppClient {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteServerModuleMethod)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName),
 		        param(PlatypusHttpRequestParams.METHOD_NAME, aMethodName), params(convertedParams));
 		if (onSuccess != null) {
-			startRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			startApiRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -923,7 +931,7 @@ public class AppClient {
 
 	public Cancellable getAppQuery(String queryId, final Callback<Query, String> aCallback) throws Exception {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppQuery)), param(PlatypusHttpRequestParams.QUERY_ID, queryId));
-		return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -950,7 +958,7 @@ public class AppClient {
 
 	public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<Rowset, String> aCallback) throws Exception {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteQuery)), param(PlatypusHttpRequestParams.QUERY_ID, aQueryName), params(aParams));
-		return startRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {

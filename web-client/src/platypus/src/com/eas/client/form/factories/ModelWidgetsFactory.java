@@ -32,8 +32,8 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 	public static final String MODEL_ELEMENT_MISSING = "A model element is required for model-aware controls";
 	protected Model model;
 
-	public ModelWidgetsFactory(Element aFormTag, Model aModel, JavaScriptObject aTarget) {
-		super(aFormTag, aTarget);
+	public ModelWidgetsFactory(String aModuleName, Element aFormTag, Model aModel, JavaScriptObject aTarget) {
+		super(aModuleName, aFormTag, aTarget);
 		model = aModel;
 	}
 

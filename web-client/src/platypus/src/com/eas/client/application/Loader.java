@@ -67,7 +67,7 @@ public class Loader {
 		}
 	}
 
-	public static final UrlQueryProcessor URL_PROCESSOR = GWT.create(UrlQueryProcessor.class);
+	public static final UrlQueryProcessor URL_QUERY_PROCESSOR = GWT.create(UrlQueryProcessor.class);
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
 	public static final String SERVER_MODULE_TOUCHED_NAME = "Proxy-";
 	public static final String MODEL_TAG_NAME = "datamodel";
@@ -115,23 +115,23 @@ public class Loader {
 				modulesNames.add(moduleName);
 			}
 		}
-		final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(modulesNames.size()) {
-
-			@Override
-			protected void failed(List<String> aReasons) {
-				if (aCallback != null) {
-					aCallback.onFailure(aReasons.toString());
-				}
-			}
-
-			@Override
-			protected void doWork(Void aResult) throws Exception {
-				if (aCallback != null)
-					aCallback.onSuccess(null);
-			}
-
-		};
 		if (!modulesNames.isEmpty()) {
+			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(modulesNames.size()) {
+	
+				@Override
+				protected void failed(List<String> aReasons) {
+					if (aCallback != null) {
+						aCallback.onFailure(aReasons.toString());
+					}
+				}
+	
+				@Override
+				protected void doWork(Void aResult) throws Exception {
+					if (aCallback != null)
+						aCallback.onSuccess(null);
+				}
+	
+			};
 			for (final String moduleName : modulesNames) {
 				loadingsStarted.add(client.requestModuleStructure(moduleName, new CallbackAdapter<AppClient.ModuleStructure, XMLHttpRequest>() {
 
@@ -167,7 +167,7 @@ public class Loader {
 						assert !aStructure.getStructure().isEmpty() : "Module ["+moduleName+"] structure should contain at least one element.";
 						for (String part : aStructure.getStructure()) {
 							if (part.toLowerCase().endsWith(".js")) {
-								String jsURL = part + URL_PROCESSOR.process("");
+								String jsURL = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + part + URL_QUERY_PROCESSOR.process("");
 								ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 									@Override
@@ -226,7 +226,7 @@ public class Loader {
 				fireStarted(moduleName);
 			}
 		} else {
-			process.onSuccess(null);
+			aCallback.onSuccess(null);
 		}
 	}
 

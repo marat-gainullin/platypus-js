@@ -69,7 +69,7 @@ public class Application {
 	}
 
 	public static Query putAppQuery(Query aQuery) {
-		return appQueries.put(aQuery.getEntityId(), aQuery);
+		return appQueries.put(aQuery.getEntityName(), aQuery);
 	}
 	
 	public static native JavaScriptObject createReport(String reportLocation)/*-{
@@ -603,7 +603,7 @@ public class Application {
 				aTarget = {};
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = !!aModel ? aModel.unwrap() : null;
-			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
+			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Ljava/lang/String;Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementName, appElementDoc, nativeModel, aTarget);
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			return aTarget;
 		};

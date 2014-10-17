@@ -496,7 +496,7 @@ public class Model implements HasPublished {
 	}
 
 	public Entity getEntityById(String aId) {
-		if (aId != null && ParametersEntity.PARAMETERS_ENTITY_ID == aId) {
+		if (aId != null && ParametersEntity.PARAMETERS_ENTITY_ID.equals(aId)) {
 			return parametersEntity;
 		} else {
 			return entities.get(aId);
