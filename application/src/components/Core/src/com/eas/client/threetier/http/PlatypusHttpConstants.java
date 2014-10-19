@@ -25,6 +25,7 @@ public class PlatypusHttpConstants {
     public static final String HEADER_AUTHORIZATION = "authorization";    
     public static final String HEADER_SETCOOKIE = "Set-Cookie";    
     public static final String HEADER_CONTENTTYPE = "Content-Type";    
+    public static final String HEADER_CONTENTLENGTH = "Content-Length";    
     public static final String HEADER_USER_AGENT = "User-Agent";    
     public static final String HEADER_COOKIE = "Cookie";    
     public static final String HEADER_LOCATION = "Location";

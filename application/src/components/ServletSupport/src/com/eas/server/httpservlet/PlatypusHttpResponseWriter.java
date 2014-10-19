@@ -12,6 +12,8 @@ import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.client.threetier.RowsetJsonWriter;
+import com.eas.client.threetier.http.PlatypusHttpConstants;
+import com.eas.client.threetier.http.PlatypusHttpResponseReader;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -42,16 +45,12 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
-
-    public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
-    public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
-    public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
+public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
 
     protected HttpServletResponse servletResponse;
     protected HttpServletRequest servletRequest;
 
-    public PlatypusResponseHttpWriter(HttpServletResponse aServletResponse, HttpServletRequest aServletRequest) {
+    public PlatypusHttpResponseWriter(HttpServletResponse aServletResponse, HttpServletRequest aServletRequest) {
         super();
         servletRequest = aServletRequest;
         servletResponse = aServletResponse;
@@ -69,7 +68,7 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(CredentialRequest.Response resp) throws Exception {
         String name = ((CredentialRequest.Response) resp).getName();
-        StringBuilder content = JSONUtils.o(new String[]{"userName"}, new StringBuilder[]{JSONUtils.s(name)});
+        StringBuilder content = JSONUtils.o(new StringBuilder("userName"), JSONUtils.s(name));
         writeJsonResponse(content.toString(), servletResponse);
     }
 
@@ -119,7 +118,7 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
                 reportLocation = servletRequest.getContextPath() + reportLocation;
             }
             reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
-            writeResponse(reportLocation, servletResponse, REPORT_LOCATION_CONTENT_TYPE);
+            writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
         } else {// including null result
             writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), servletResponse);
         }
@@ -133,30 +132,13 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(CreateServerModuleRequest.Response resp) throws Exception {
         CreateServerModuleRequest.Response csmr = (CreateServerModuleRequest.Response) resp;
-        makeResponseNotCacheable(servletResponse);
-        writeJsonResponse(moduleResponseToJson(csmr.getInfo().getFunctionsNames(), csmr.getInfo().isPermitted()), servletResponse);
-    }
-
-    @Override
-    public void visit(CommitRequest.Response resp) throws Exception {
-        writeJsonResponse(resp.getUpdated() + "", servletResponse);
-    }
-
-    @Override
-    public void visit(ModuleStructureRequest.Response resp) throws Exception {
-        StringBuilder content = JSONUtils.o(new String[]{
-            "structure",
-            "clientDependencies",
-            "queryDependencies",
-            "serverDependencies"
-        }, new StringBuilder[]{
-            JSONUtils.as(resp.getStructure().toArray(new String[]{})),
-            JSONUtils.as(resp.getClientDependencies().toArray(new String[]{})),
-            JSONUtils.as(resp.getQueryDependencies().toArray(new String[]{})),
-            JSONUtils.as(resp.getServerDependencies().toArray(new String[]{}))
-        });
-        makeResponseNotCacheable(servletResponse);
-        writeJsonResponse(content.toString(), servletResponse);
+        if (csmr.getInfo() != null) {
+            assert resp.getTimeStamp() != null;
+            servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
+            writeJsonResponse(moduleResponseToJson(csmr.getInfo().getFunctionsNames(), csmr.getInfo().isPermitted()), servletResponse);
+        } else {
+            servletResponse.sendError(HttpURLConnection.HTTP_NOT_MODIFIED);
+        }
     }
 
     @Override
@@ -166,9 +148,30 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(AppQueryRequest.Response resp) throws Exception {
-        Query query = ((AppQueryRequest.Response) resp).getAppQuery();
+        AppQueryRequest.Response aqr = ((AppQueryRequest.Response) resp);
+        if (aqr.getAppQuery() != null) {
+            assert resp.getTimeStamp() != null;
+            servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
+            writeResponse(aqr.getAppQuery(), servletResponse);
+        } else {
+            servletResponse.sendError(HttpURLConnection.HTTP_NOT_MODIFIED);
+        }
+    }
+
+    @Override
+    public void visit(CommitRequest.Response resp) throws Exception {
+        writeJsonResponse(resp.getUpdated() + "", servletResponse);
+    }
+
+    @Override
+    public void visit(ModuleStructureRequest.Response resp) throws Exception {
+        StringBuilder content = JSONUtils.o(new StringBuilder(PlatypusHttpResponseReader.STRUCTURE_PROP_NAME), JSONUtils.as(resp.getStructure().toArray(new String[]{})),
+                new StringBuilder(PlatypusHttpResponseReader.CLIENT_DEPENDENCIES_PROP_NAME), JSONUtils.as(resp.getClientDependencies().toArray(new String[]{})),
+                new StringBuilder(PlatypusHttpResponseReader.QUERY_DEPENDENCIES_PROP_NAME), JSONUtils.as(resp.getQueryDependencies().toArray(new String[]{})),
+                new StringBuilder(PlatypusHttpResponseReader.SERVER_DEPENDENCIES_PROP_NAME), JSONUtils.as(resp.getServerDependencies().toArray(new String[]{}))
+        );
         makeResponseNotCacheable(servletResponse);
-        writeResponse(query, servletResponse);
+        writeJsonResponse(content.toString(), servletResponse);
     }
 
     private static void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
@@ -180,11 +183,11 @@ public class PlatypusResponseHttpWriter implements PlatypusResponseVisitor {
     private static String moduleResponseToJson(Set<String> functionsNames, boolean isPermitted) {
         return (new StringBuilder())
                 .append("{")
-                .append("\"").append(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP).append("\"")
+                .append("\"").append(PlatypusHttpResponseReader.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP).append("\"")
                 .append(":")
                 .append("[").append(functionsNames.isEmpty() ? "" : "\"").append(StringUtils.join("\", \"", functionsNames.toArray(new String[]{}))).append(functionsNames.isEmpty() ? "" : "\"").append("]")
                 .append(",")
-                .append("\"").append(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP).append("\"")
+                .append("\"").append(PlatypusHttpResponseReader.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP).append("\"")
                 .append(":")
                 .append(isPermitted)
                 .append("}")

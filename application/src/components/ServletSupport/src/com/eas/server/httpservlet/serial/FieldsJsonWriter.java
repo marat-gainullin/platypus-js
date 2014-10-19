@@ -27,28 +27,28 @@ public class FieldsJsonWriter {
     private static final String TYPE_NAME_PROP_NAME = "typename";
 
     public static StringBuilder fields2a(Fields aFields) {
-        String[] res = new String[aFields.getFieldsCount()];
-        for (int i = 1; i <= aFields.getFieldsCount(); i++) {
-            res[i-1] = writeField(aFields.get(i));
+        StringBuilder[] res = new StringBuilder[aFields.getFieldsCount()];
+        for (int i = 0; i < aFields.getFieldsCount(); i++) {
+            res[i] = writeField(aFields.get(i + 1));
         }
         return JSONUtils.a(res);
     }
 
-    private static String writeTypeInfo(DataTypeInfo aTypeInfo) {
+    private static StringBuilder writeTypeInfo(DataTypeInfo aTypeInfo) {
         StringBuilder sb = JSONUtils.o(
-                TYPE_ID_PROP_NAME, String.valueOf(aTypeInfo.getSqlType()),
-                TYPE_NAME_PROP_NAME, JSONUtils.s(aTypeInfo.getSqlTypeName()).toString());
-        return sb.toString();
+                new StringBuilder(TYPE_ID_PROP_NAME), new StringBuilder(String.valueOf(aTypeInfo.getSqlType())),
+                new StringBuilder(TYPE_NAME_PROP_NAME), JSONUtils.s(aTypeInfo.getSqlTypeName()));
+        return sb;
     }
 
-    private static String writeField(Field aField) {
+    private static StringBuilder writeField(Field aField) {
         StringBuilder sb = JSONUtils.o(
-                NAME_PROP_NAME, JSONUtils.s(aField.getName()).toString(),
-                DESCRIPTION_PROP_NAME, JSONUtils.s(aField.getDescription()).toString(),
-                SIZE_PROP_NAME, String.valueOf(aField.getSize()),
-                TYPE_PROP_NAME, writeTypeInfo(aField.getTypeInfo()),
-                PK_PROP_NAME, String.valueOf(aField.isPk()),
-                NULLABLE_PROP_NAME, String.valueOf(aField.isNullable()));
-        return sb.toString();
+                new StringBuilder(NAME_PROP_NAME), JSONUtils.s(aField.getName()),
+                new StringBuilder(DESCRIPTION_PROP_NAME), JSONUtils.s(aField.getDescription()),
+                new StringBuilder(SIZE_PROP_NAME), new StringBuilder(String.valueOf(aField.getSize())),
+                new StringBuilder(TYPE_PROP_NAME), writeTypeInfo(aField.getTypeInfo()),
+                new StringBuilder(PK_PROP_NAME), new StringBuilder(String.valueOf(aField.isPk())),
+                new StringBuilder(NULLABLE_PROP_NAME), new StringBuilder(String.valueOf(aField.isNullable())));
+        return sb;
     }
 }

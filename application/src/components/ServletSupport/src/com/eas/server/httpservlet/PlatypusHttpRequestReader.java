@@ -45,7 +45,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author mg
  */
-public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
+public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
 
     public static final String API_URI = "/api";
     public static final String RESOURCES_URI = "/resources";
@@ -58,7 +58,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     protected PlatypusServerCore serverCore;
     protected HttpServletRequest httpRequest;
 
-    public PlatypusRequestHttpReader(PlatypusServerCore aServerCore, HttpServletRequest aHttpRequest) {
+    public PlatypusHttpRequestReader(PlatypusServerCore aServerCore, HttpServletRequest aHttpRequest) {
         super();
         serverCore = aServerCore;
         httpRequest = aHttpRequest;
@@ -86,7 +86,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
                     return query.getParameters().get(aFieldName);
                 }
             } else {
-                Logger.getLogger(PlatypusRequestHttpReader.class.getName()).log(Level.SEVERE, String.format("Entity not found %s.", aEntityId));
+                Logger.getLogger(PlatypusHttpRequestReader.class.getName()).log(Level.SEVERE, String.format("Entity not found %s.", aEntityId));
                 return null;
             }
         });

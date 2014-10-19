@@ -15,7 +15,7 @@ import com.google.gwt.json.client.JSONValue;
  *
  * @author mg
  */
-public class JsonReader {
+public class FieldsJSONReader {
     // Field props
     private static final String NAME_PROP_NAME = "name";
     private static final String DESCRIPTION_PROP_NAME = "description";

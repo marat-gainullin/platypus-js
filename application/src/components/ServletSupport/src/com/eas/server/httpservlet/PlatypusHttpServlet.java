@@ -108,7 +108,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             }
             if (uploadedLocations.length() > 0) {
-                PlatypusResponseHttpWriter.writeJsonResponse(uploadedLocations.toString(), response);
+                PlatypusHttpResponseWriter.writeJsonResponse(uploadedLocations.toString(), response);
                 return true;
             }
         }
@@ -199,7 +199,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 };
                 Consumer<Response> onSuccess = (Response resp) -> {
                     try {
-                        PlatypusResponseHttpWriter writer = new PlatypusResponseHttpWriter(aHttpResponse, aHttpRequest);
+                        PlatypusHttpResponseWriter writer = new PlatypusHttpResponseWriter(aHttpResponse, aHttpRequest);
                         resp.accept(writer);
                     } catch (Exception ex) {
                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -287,7 +287,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             int rqType = Integer.valueOf(sType);
             Request rq = PlatypusRequestsFactory.create(rqType);
             if (rq != null) {
-                PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, aHttpRequest);
+                PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(serverCore, aHttpRequest);
                 rq.accept(reader);
                 return rq;
             } else {

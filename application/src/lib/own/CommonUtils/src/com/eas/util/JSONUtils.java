@@ -6,7 +6,7 @@ package com.eas.util;
 
 /**
  *
- * @author AB
+ * @author ab, mg
  */
 public class JSONUtils {
     
@@ -22,7 +22,7 @@ public class JSONUtils {
         return sb.append("\"").append(aPropName).append("\"").append(":").append(aPropValue);
     }
 
-    public static StringBuilder p(String aPropName, StringBuilder aPropValue) {
+    public static StringBuilder p(StringBuilder aPropName, StringBuilder aPropValue) {
         StringBuilder sb = new StringBuilder();
         return sb.append("\"").append(aPropName).append("\"").append(":").append(aPropValue);
     }
@@ -41,15 +41,15 @@ public class JSONUtils {
         return sb;
     }
 
-    public static StringBuilder o(String[] aNames, StringBuilder[] aValues) {
+    public static StringBuilder o(StringBuilder...aValues) {
         StringBuilder sb = new StringBuilder();
-        assert aNames != null && aValues != null && aNames.length == aValues.length;
+        assert aValues != null && aValues.length % 2 == 0;
         sb.append("{");
-        for (int i = 0; i < aValues.length; i++) {
+        for (int i = 0; i < aValues.length; i += 2) {
             if (i > 0) {
                 sb.append(",");
             }
-            sb.append(p(aNames[i], aValues[i]));
+            sb.append(p(aValues[i], aValues[i + 1]));
         }
         sb.append("}");
         return sb;

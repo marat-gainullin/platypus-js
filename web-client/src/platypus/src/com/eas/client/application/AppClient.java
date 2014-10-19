@@ -32,7 +32,7 @@ import com.eas.client.Requests;
 import com.eas.client.published.PublishedFile;
 import com.eas.client.queries.Query;
 import com.eas.client.serial.ChangeWriter;
-import com.eas.client.serial.QueryReader;
+import com.eas.client.serial.QueryJSONReader;
 import com.eas.client.serial.RowsetReader;
 import com.eas.client.xhr.FormData;
 import com.eas.client.xhr.ProgressEvent;
@@ -75,11 +75,6 @@ public class AppClient {
 	public static final String APPLICATION_URI = "/application";
 	public static final String APP_RESOURCE_PREFIX = "/app/";
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
-	//
-	public static final String DEPENDENCY_TAG_NAME = "dependency";
-	public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
-	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
-
 	//
 	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
 	private static AppClient appClient;
@@ -518,7 +513,7 @@ public class AppClient {
 		return startRequest(aUri, ResponseType.Default, aCallback);
 	}
 
-	public Cancellable startRequest(final XMLHttpRequest req, String requestData, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
+	public Cancellable startRequest(final XMLHttpRequest req, String aBody, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
 		// Must set the onreadystatechange handler before calling send().
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
 			public void onReadyStateChange(XMLHttpRequest xhr) {
@@ -556,8 +551,8 @@ public class AppClient {
 			}
 		});
 
-		if (requestData != null && !requestData.isEmpty())
-			req.send(requestData);
+		if (aBody != null && !aBody.isEmpty())
+			req.send(aBody);
 		else
 			req.send();
 		return new Cancellable() {
@@ -732,31 +727,6 @@ public class AppClient {
 					for (int i = 0; i < jsServerDependencies.size(); i++) {
 						serverModuleDependencies.add(jsServerDependencies.get(i).isString().stringValue());
 					}
-					/*
-					 * Element rootNode = doc.getDocumentElement(); NodeList
-					 * docNodes = rootNode.getChildNodes(); for (int i = 0; i <
-					 * docNodes.getLength(); i++) { Node docNode =
-					 * docNodes.item(i); // Don't refactor to switch, since
-					 * GWT2.4 // doesn't support it, applied to strings. // In
-					 * further versions it seems to be, but // unfortunately not
-					 * yet. if
-					 * (DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
-					 * String dependency =
-					 * docNode.getFirstChild().getNodeValue(); if (dependency !=
-					 * null && !dependency.isEmpty() && !isTouched(dependency))
-					 * clientDependencies.add(dependency); } else if
-					 * (SERVER_DEPENDENCY_TAG_NAME
-					 * .equals(docNode.getNodeName())) { String dependency =
-					 * docNode.getFirstChild().getNodeValue(); if (dependency !=
-					 * null && !dependency.isEmpty() &&
-					 * !isTouched(SERVER_MODULE_TOUCHED_NAME + dependency))
-					 * serverModuleDependencies.add(dependency); } else if
-					 * (QUERY_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName()))
-					 * { String dependency =
-					 * docNode.getFirstChild().getNodeValue(); if (dependency !=
-					 * null && !dependency.isEmpty() && !isTouched(dependency))
-					 * queryDependencies.add(dependency); } }
-					 */
 					ModuleStructure moduleStructure = new ModuleStructure(structure, clientDependencies, serverModuleDependencies, queryDependencies);
 					modulesStructures.put(aModuleName, moduleStructure);
 					if (aCallback != null) {
@@ -944,7 +914,7 @@ public class AppClient {
 			}
 
 			private Query readQuery(XMLHttpRequest aResponse) throws Exception {
-				return QueryReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
+				return QueryJSONReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
 			}
 
 			@Override

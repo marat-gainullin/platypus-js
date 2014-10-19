@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -56,7 +55,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
+        requestsSender = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("http-client-", false));
@@ -108,7 +107,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private void enqueue(final RequestCallback rqc, Consumer<Exception> onFailure) {
         startRequestTask(() -> {
             try {
-                HttpRequestSender httpSender = new HttpRequestSender(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
+                PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
                 rqc.requestEnv.request.accept(httpSender);// wait completion analog
                 if (rqc.onComplete != null) {
                     rqc.requestEnv.request.setDone(true);
