@@ -21,7 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -40,7 +40,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ScriptedResource {
 
-    private static final Pattern pattern = Pattern.compile("https?://.*");
+    private static final Pattern httpPattern = Pattern.compile("https?://.*");
     protected static Application<Query> app;
 
     /**
@@ -83,72 +83,52 @@ public class ScriptedResource {
      * avaliable
      * @throws java.lang.Exception
      */
-     public static String getApplicationPath() throws Exception {
+    public static String getApplicationPath() throws Exception {
         return app.getModules().getLocalPath();
-     }
-    /**
-     * Loads a resource's bytes either from disk or from datatbase.
-     *
-     * @param aResourceName An relative path to the resource
-     * @return Bytes for resource
-     * @throws Exception If some error occurs when reading the resource
-     */
-    public static byte[] load(String aResourceName) throws Exception {
-        if (aResourceName != null && !aResourceName.isEmpty()) {
-            Matcher htppMatcher = pattern.matcher(aResourceName);
-            if (htppMatcher.matches()) {
-                URL url = new URL(aResourceName);
+    }
+
+    public static Object load(final String aResourceName) throws Exception {
+        return load(aResourceName, null, null);
+    }
+
+    public static Object load(final String aResourceName, JSObject onSuccess) throws Exception {
+        return load(aResourceName, null, null);
+    }
+
+    public static Object load(final String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
+        if (onSuccess != null) {
+            ScriptUtils.submitTask(() -> {
                 try {
-                    try (InputStream is = url.openStream()) {
-                        return BinaryUtils.readStream(is, -1);
-                    }
-                } catch (IOException ex) {
-                    url = encodeUrl(url);
-                    try (InputStream is = url.openStream()) {
-                        return BinaryUtils.readStream(is, -1);
+                    Object loaded = loadSync(aResourceName);
+                    ScriptUtils.acceptTaskResult(() -> {
+                        onSuccess.call(null, new Object[]{ScriptUtils.toJs(loaded)});
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+                    if (onFailure != null) {
+                        ScriptUtils.acceptTaskResult(() -> {
+                            onFailure.call(null, new Object[]{ScriptUtils.toJs(ex.getMessage())});
+                        });
                     }
                 }
-            } else {
-                String resourceId = normalizeResourcePath(aResourceName);
-                String sourcesPath = app.getModules().getLocalPath();
-                File resourceFile = new File(sourcesPath + File.separator + resourceId);
-                if (resourceFile.exists() && !resourceFile.isDirectory()) {
-                    return FileUtils.readBytes(resourceFile);
-                } else {
-                    throw new IllegalArgumentException(String.format("Resource %s not found", aResourceName));
-                }
-                //}
-            }
-        } else {
+            });
             return null;
+        } else {
+            return loadSync(aResourceName);
         }
     }
 
     /**
      * Loads a resource as text for UTF-8 encoding.
      *
-     * @param aResourceId An relative path to the resource
-     * @return Resource's text
-     * @throws Exception If some error occurs when reading the resource
-     */
-    public static String loadText(String aResourceId) throws Exception {
-        return loadText(aResourceId, SettingsConstants.COMMON_ENCODING);
-    }
-
-    /**
-     * Loads a resource as text.
-     *
      * @param aResourceName An relative path to the resource
-     * @param aEncodingName Encoding name
      * @return Resource's text
      * @throws Exception If some error occurs when reading the resource
      */
-    public static String loadText(String aResourceName, String aEncodingName) throws Exception {
-        if (aEncodingName == null) {
-            aEncodingName = SettingsConstants.COMMON_ENCODING;
-        }
+    protected static Object loadSync(String aResourceName) throws Exception {
         byte[] data = null;
-        Matcher htppMatcher = pattern.matcher(aResourceName);
+        String encoding = null;
+        Matcher htppMatcher = httpPattern.matcher(aResourceName);
         if (htppMatcher.matches()) {
             URL url = new URL(aResourceName);
             URLConnection conn = null;
@@ -169,7 +149,7 @@ public class ScriptedResource {
                 if (contentEncoding.contains("gzip") || contentEncoding.contains("zip")) {
                     is = new GZIPInputStream(is);
                 } else if (contentEncoding.contains("deflate")) {
-                    is = new InflaterInputStream(conn.getInputStream());
+                    is = new InflaterInputStream(is);
                 }
             }
             try (InputStream _is = is) {
@@ -180,26 +160,42 @@ public class ScriptedResource {
                     if (contentType.contains(";charset=")) {
                         String[] typeCharset = contentType.split(";charset=");
                         if (typeCharset.length == 2 && typeCharset[1] != null) {
-                            aEncodingName = typeCharset[1];
+                            encoding = typeCharset[1];
                         } else {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG, aEncodingName);
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                            encoding = SettingsConstants.COMMON_ENCODING;
                         }
                     } else {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG, aEncodingName);
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                        encoding = SettingsConstants.COMMON_ENCODING;
                     }
                 } else {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG, aEncodingName);
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                    encoding = SettingsConstants.COMMON_ENCODING;
                 }
             }
         } else {
-            data = load(aResourceName);
+            String resourceName = normalizeResourcePath(aResourceName);
+            String sourcesPath = app.getModules().getLocalPath();
+            File resourceFile = new File(sourcesPath + File.separator + resourceName);
+            if (resourceFile.exists() && !resourceFile.isDirectory()) {
+                data = FileUtils.readBytes(resourceFile);
+                String fileExt = FileUtils.getFileExtension(resourceFile);
+                if (PlatypusFiles.isPlatypusProjectFileExt(fileExt) && !PlatypusFiles.REPORT_LAYOUT_EXTENSION.equalsIgnoreCase(fileExt) && !PlatypusFiles.REPORT_LAYOUT_EXTENSION_X.equalsIgnoreCase(fileExt)) {
+                    encoding = SettingsConstants.COMMON_ENCODING;
+                } else {
+                    String contentType = Files.probeContentType(resourceFile.toPath());
+                    if (contentType != null && contentType.toLowerCase().startsWith("text/")) {
+                        encoding = SettingsConstants.COMMON_ENCODING;
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException(String.format("Resource %s not found", aResourceName));
+            }
         }
-        if (!Charset.isSupported(aEncodingName)) {
-            throw new IllegalStateException("Encoding: " + aEncodingName + " is not supported.");
-        }
-        return data != null ? new String(data, aEncodingName) : null;
+        return encoding != null ? new String(data, encoding) : data;
     }
-    public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to {0}";
+    public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to " + SettingsConstants.COMMON_ENCODING;
 
     protected static String normalizeResourcePath(String aPath) throws Exception {
         if (aPath.startsWith("/")) {

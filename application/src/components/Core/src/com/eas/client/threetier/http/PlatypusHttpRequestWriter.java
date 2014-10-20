@@ -124,7 +124,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         }
     }
 
-    private void executeRequest(Request request, Consumer<HttpURLConnection> onHeaders) throws Exception {
+    private void pushRequest(Request request, Consumer<HttpURLConnection> onHeaders) throws Exception {
         CallableConsumer<HttpResult, Consumer<HttpURLConnection>> performer = (Consumer<HttpURLConnection> lonHeaders) -> {
             URL rqUrl = new URL(assembleUrl());
             conn = (HttpURLConnection) rqUrl.openConnection();
@@ -164,7 +164,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                                 return null;
                                 //} else if (authScheme.toLowerCase().contains(PlatypusHttpConstants.DIGEST_AUTH_NAME.toLowerCase())) {
                             } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equalsIgnoreCase(res.authScheme)) {
-                                pConn.setBasicCredentials(null);
                                 String redirectLocation = res.redirectLocation;
                                 URL securityFormUrl = new URL(url + (url.toString().endsWith("/") ? "" : "/") + redirectLocation);
                                 HttpURLConnection securityFormConn = (HttpURLConnection) securityFormUrl.openConnection();
@@ -303,7 +302,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.QUERY_ID, rq.getQueryName()));
-        executeRequest(rq, rq.getTimeStamp() != null ? (HttpURLConnection aConn) -> {
+        pushRequest(rq, rq.getTimeStamp() != null ? (HttpURLConnection aConn) -> {
             aConn.setIfModifiedSince(rq.getTimeStamp().getTime());
         } : null);
     }
@@ -313,7 +312,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleOrResourceName()));
-        executeRequest(rq, null);
+        pushRequest(rq, null);
     }
 
     @Override
@@ -323,7 +322,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         String oldUriPrefix = uriPrefix;
         uriPrefix = "app/" + encodedResourceName;
         try {
-            executeRequest(rq, rq.getTimeStamp() != null ? (HttpURLConnection aConn) -> {
+            pushRequest(rq, rq.getTimeStamp() != null ? (HttpURLConnection aConn) -> {
                 aConn.setIfModifiedSince(rq.getTimeStamp().getTime());
             } : null);
         } finally {
@@ -342,7 +341,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             changes.add(changeWriter.written);
         }
         String bodyText = JSONUtils.as(changes.toArray(new String[]{})).toString();
-        executeRequest(rq, (HttpURLConnection aConn) -> {
+        pushRequest(rq, (HttpURLConnection aConn) -> {
             aConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.JSON_CONTENT_TYPE + ";charset=" + SettingsConstants.COMMON_ENCODING);
             try (OutputStream out = aConn.getOutputStream()) {
                 byte[] bodyContent = bodyText.getBytes(SettingsConstants.COMMON_ENCODING);
@@ -358,7 +357,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
-        executeRequest(rq, rq.getTimeStamp() != null ? (HttpURLConnection aConn) -> {
+        pushRequest(rq, rq.getTimeStamp() != null ? (HttpURLConnection aConn) -> {
             aConn.setIfModifiedSince(rq.getTimeStamp().getTime());
         } : null);
     }
@@ -368,7 +367,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
-        executeRequest(rq, null);
+        pushRequest(rq, null);
     }
 
     @Override
@@ -381,7 +380,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             Parameter p = qParams.get(i + 1);
             params.add(new AbstractMap.SimpleEntry<>(p.getName(), valueToString(p.getValue())));
         }
-        executeRequest(rq, null);
+        pushRequest(rq, null);
     }
 
     @Override
@@ -393,20 +392,20 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         for (Object oArg : rq.getArguments()) {
             params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, ScriptUtils.toJson(oArg)));
         }
-        executeRequest(rq, null);
+        pushRequest(rq, null);
     }
 
     @Override
     public void visit(LogoutRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
-        executeRequest(rq, null);
+        pushRequest(rq, null);
     }
 
     @Override
     public void visit(CredentialRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
-        executeRequest(rq, null);
+        pushRequest(rq, null);
     }
 }

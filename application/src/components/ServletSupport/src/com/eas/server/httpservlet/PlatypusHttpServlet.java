@@ -59,7 +59,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         try {
             super.init(config);
             PlatypusServerConfig scp = PlatypusServerConfig.parse(config);
-            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getAppElementName(), scp.getMaximumJdbcThreads());
+            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getAppElementName(), scp.getMaximumJdbcThreads(), scp.getMaximumServicesTreads());
         } catch (Exception ex) {
             throw new ServletException(ex);
         }

@@ -211,6 +211,7 @@ public class PlatypusClientApplication {
                 checkUserHome();
                 config.datasourcesArgs.registerDatasources();
                 ScriptUtils.init();
+                ScriptUtils.initServices(config.threadsArgs.getMaxServicesTreads());
                 ScriptUtils.setGlobalQueue((Runnable aTask) -> {
                     EventQueue.invokeLater(aTask);
                 });

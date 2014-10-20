@@ -1,11 +1,15 @@
 package com.eas.script;
 
+import com.eas.concurrent.DeamonThreadFactory;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,16 +64,82 @@ public class ScriptUtils {
     protected static ThreadLocal<Object> request = new ThreadLocal();
     protected static ThreadLocal<Object> response = new ThreadLocal();
     protected static ThreadLocal<Object> session = new ThreadLocal();
+    protected static ThreadLocal<Object> principal = new ThreadLocal();
     // Global Queue for GUI processes ONLY!
     protected static Consumer<Runnable> globalQueue;
+    // services thread pool
+    protected static ThreadPoolExecutor services = new ThreadPoolExecutor(25, 25,
+            1L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(),
+            new DeamonThreadFactory("platypus-services-", false));
 
     public static void init() {
+        services.allowCoreThreadTimeOut(true);
         if (engine == null) {
+            //
             engine = new ScriptEngineManager().getEngineByName("nashorn");
             try {
                 engine.eval("load('classpath:platypus.js');");
             } catch (ScriptException ex) {
                 Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public static void initServices(int aMaxThreads) {
+        services.setCorePoolSize(aMaxThreads);
+        services.setMaximumPoolSize(aMaxThreads);
+    }
+
+    public static void submitTask(JSObject aTask) {
+        submitTask(() -> {
+            aTask.call(null, new Object[]{});
+        });
+    }
+
+    public static void submitTask(Runnable aTask) {
+        Object closureLock = ScriptUtils.getLock();
+        Object closureRequest = ScriptUtils.getRequest();
+        Object closureResponse = ScriptUtils.getResponse();
+        Object closureSession = ScriptUtils.getSession();
+        Object closurePrincipal = ScriptUtils.getPrincipal();
+        services.submit(() -> {
+            ScriptUtils.setLock(closureLock);
+            ScriptUtils.setRequest(closureRequest);
+            ScriptUtils.setResponse(closureResponse);
+            ScriptUtils.setSession(closureSession);
+            ScriptUtils.setPrincipal(closurePrincipal);
+            try {
+                aTask.run();
+            } finally {
+                ScriptUtils.setLock(null);
+                ScriptUtils.setRequest(null);
+                ScriptUtils.setResponse(null);
+                ScriptUtils.setSession(null);
+                ScriptUtils.setPrincipal(null);
+            }
+        });
+    }
+
+    public static void acceptTaskResult(JSObject aTaskCompleter) {
+        acceptTaskResult(()->{
+            aTaskCompleter.call(null, new Object[]{});
+        });
+    }
+    
+    public static void acceptTaskResult(Runnable aTaskCompleter) {
+        if (ScriptUtils.getGlobalQueue() != null) {
+            ScriptUtils.getGlobalQueue().accept(() -> {
+                aTaskCompleter.run();
+            });
+        } else {
+            final Object _lock = ScriptUtils.getLock();
+            if (_lock != null) {
+                synchronized (_lock) {
+                    aTaskCompleter.run();
+                }
+            } else {
+                aTaskCompleter.run();
             }
         }
     }
@@ -137,6 +207,18 @@ public class ScriptUtils {
             session.set(aSession);
         } else {
             session.remove();
+        }
+    }
+
+    public static Object getPrincipal() {
+        return principal.get();
+    }
+
+    public static void setPrincipal(Object aSession) {
+        if (aSession != null) {
+            principal.set(aSession);
+        } else {
+            principal.remove();
         }
     }
 

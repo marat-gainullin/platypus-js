@@ -52,38 +52,15 @@
     Object.defineProperty(P, "J2SE", {value: "Java SE environment"});
     Object.defineProperty(P, "agent", {value: P.J2SE});
 
-    var fixedThreadPool = null;
     /** 
      * Thread - schedules given function in the thread pool
      */
     Function.prototype.invokeBackground = function() {
-        if (!fixedThreadPool) {
-            fixedThreadPool = ExecutorsClass.newFixedThreadPool(10, new DeamonThreadFactoryClass());
-        }
         var func = this;
         var args = arguments;
         //
-        var lock = ScriptUtilsClass.getLock();
-        var req = ScriptUtilsClass.getRequest();
-        var resp = ScriptUtilsClass.getResponse();
-        var principal = PlatypusPrincipalClass.getInstance();
-        var session = ScriptUtilsClass.getSession();
-        //
-        fixedThreadPool.execute(function() {
-            ScriptUtilsClass.setLock(lock);
-            ScriptUtilsClass.setRequest(req);
-            ScriptUtilsClass.setResponse(resp);
-            ScriptUtilsClass.setSession(session);
-            PlatypusPrincipalClass.setInstance(principal);
-            try{
-                func.apply(func, args);
-            }finally{
-                ScriptUtilsClass.setLock(null);
-                ScriptUtilsClass.setRequest(null);
-                ScriptUtilsClass.setResponse(null);
-                ScriptUtilsClass.setSession(null);
-                PlatypusPrincipalClass.setInstance(null);
-            }
+        ScriptUtilsClass.submitTask(function(){
+            func.apply(func, args);
         });
     };
     var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
@@ -285,8 +262,8 @@
         var Icon = {};
         Object.defineProperty(P, "Icon", {value: Icon});
         Object.defineProperty(Icon, "load", {
-            value: function(aPath) {
-                return IconResourcesClass.load(aPath);
+            value: function(aPath, onSuccess, onFailure) {
+                return IconResourcesClass.load(aPath, onSuccess, onFailure);
             }
         });
         P.Icons = P.Icon;
@@ -1267,60 +1244,7 @@
     var Resource = {};
     Object.defineProperty(Resource, "load", {
         value: function(aResName, onSuccess, onFailure) {
-            try {
-                var loaded = ScriptedResourceClass.load(aResName);
-            } catch (e) {
-                if (onFailure)
-                    onFailure(e);
-                else
-                    throw e;
-            }
-            if (onSuccess) {
-                onSuccess(loaded);
-            } else {
-                return loaded;
-            }
-        }
-    });
-    Object.defineProperty(Resource, "loadText", {
-        value: function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aUndefinedOrOnFailure) {
-            try {
-                var encoding = null;
-                var onSuccess = null;
-                var onFailure = null;
-                if (arguments.length === 1) {
-                    // no op. default values
-                } else if (arguments.length === 2) {
-                    if (typeof aOnSuccessOrEncoding === 'string')
-                        encoding = aOnSuccessOrEncoding;
-                    else if (typeof aOnSuccessOrEncoding === 'function') {
-                        onSuccess = aOnSuccessOrEncoding;
-                    }
-                } else if (arguments.length === 3) {
-                    if (typeof aOnSuccessOrEncoding === 'string') {
-                        encoding = aOnSuccessOrEncoding;
-                        onSuccess = aOnSuccessOrOnFailure;
-                    } else if (typeof aOnSuccessOrEncoding === 'function') {
-                        onSuccess = aOnSuccessOrEncoding;
-                        onFailure = aOnSuccessOrOnFailure;
-                    }
-                } else if (arguments.length === 4) {
-                    encoding = aOnSuccessOrEncoding;
-                    onSuccess = aOnSuccessOrOnFailure;
-                    onFailure = aUndefinedOrOnFailure;
-                }
-                var loaded = encoding ? ScriptedResourceClass.loadText(aResName, encoding) : ScriptedResourceClass.loadText(aResName);
-            } catch (e) {
-                if (onFailure)
-                    onFailure(e);
-                else
-                    throw e;
-            }
-            if (onSuccess) {
-                onSuccess(loaded);
-            } else {
-                return loaded;
-            }
+            return P.boxAsJs(ScriptedResourceClass.load(aResName, onSuccess, onFailure));
         }
     });
     Object.defineProperty(Resource, "upload", {

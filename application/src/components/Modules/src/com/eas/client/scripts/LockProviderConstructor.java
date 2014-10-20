@@ -20,7 +20,7 @@ public class LockProviderConstructor extends JSObjectFacade {
     }
 
     @Override
-    public synchronized Object newObject(Object... args) {
+    public Object newObject(Object... args) {
         ObjectLock lock = new ObjectLock(String.valueOf(super.getMember("name")));
         final Object outerLock = ScriptUtils.getLock();
         if (outerLock != null) {
@@ -38,7 +38,7 @@ public class LockProviderConstructor extends JSObjectFacade {
     }
 
     @Override
-    public synchronized Object call(Object thiz, Object... args) {
+    public Object call(Object thiz, Object... args) {
         return super.call(thiz, args);
     }
 

@@ -194,6 +194,7 @@ public class ServerMain {
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(securityConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                 indexer.watch();
+                ScriptUtils.initServices(threadsConfig.getMaxServicesTreads());
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), new LocalQueriesProxy(serverCoreDbClient, indexer), serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), securityConfigs, appElement, tasksScanner.getAuthorizers());
                 serverCoreDbClient.setContextHost(server);

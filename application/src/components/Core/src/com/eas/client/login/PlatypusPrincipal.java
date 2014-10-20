@@ -10,6 +10,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Set;
@@ -28,19 +29,14 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     private final String name;
     private final PlatypusConnection conn;
 
-    private static final ThreadLocal<PlatypusPrincipal> current = new ThreadLocal<>();
-    private static PlatypusPrincipal clientSpacePrincipal = null;
+    private static PlatypusPrincipal clientSpacePrincipal;
 
     public static PlatypusPrincipal getInstance() {
-        return current.get();
+        return (PlatypusPrincipal) ScriptUtils.getPrincipal();
     }
 
     public static void setInstance(PlatypusPrincipal aValue) {
-        if (aValue != null) {
-            current.set(aValue);
-        } else {
-            current.remove();
-        }
+        ScriptUtils.setPrincipal(aValue);
     }
 
     public static PlatypusPrincipal getClientSpacePrincipal() {

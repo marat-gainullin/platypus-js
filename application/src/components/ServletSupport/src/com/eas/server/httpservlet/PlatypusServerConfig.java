@@ -4,7 +4,6 @@
  */
 package com.eas.server.httpservlet;
 
-import com.eas.util.StringUtils;
 import java.util.*;
 import java.util.logging.Logger;
 import javax.servlet.ServletConfig;
@@ -21,11 +20,13 @@ public class PlatypusServerConfig {
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String MAX_JDBC_THREADS_CONF_PARAM = "max-jdbc-threads";
+    public static final String MAX_SERVICES_THREADS_CONF_PARAM = "max-services-threads";
     //
     protected String appElementName;
     protected String url;
     protected String defaultDatasourceName;
     protected int maximumJdbcThreads = 25;
+    protected int maximumServicesTreads = 25;
 
     public static PlatypusServerConfig parse(ServletConfig aConfig) throws Exception {
         return new PlatypusServerConfig(aConfig);
@@ -40,6 +41,8 @@ public class PlatypusServerConfig {
                     String paramValue = aConfig.getServletContext().getInitParameter(paramName);
                     if (MAX_JDBC_THREADS_CONF_PARAM.equals(paramName)) {
                         maximumJdbcThreads = Double.valueOf(paramValue).intValue();
+                    } else if (MAX_SERVICES_THREADS_CONF_PARAM.equalsIgnoreCase(paramName)) {
+                        maximumServicesTreads = Double.valueOf(paramValue).intValue();
                     } else if (APP_URL_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         url = paramValue;
                     } else if (DEF_DATASOURCE_CONF_PARAM.equalsIgnoreCase(paramName)) {
@@ -71,5 +74,9 @@ public class PlatypusServerConfig {
 
     public int getMaximumJdbcThreads() {
         return maximumJdbcThreads;
+    }
+
+    public int getMaximumServicesTreads() {
+        return maximumServicesTreads;
     }
 }
