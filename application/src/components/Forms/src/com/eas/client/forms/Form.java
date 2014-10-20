@@ -46,7 +46,6 @@ public class Form implements HasPublished {
 
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
-    public static final String LOCK_KEY = "creatorLock";
     public static final String VIEW_SCRIPT_NAME = "view";
     protected static final Map<String, Form> showingForms = new HashMap<>();
     protected static JSObject onChange;
@@ -347,27 +346,7 @@ public class Form implements HasPublished {
     public void displayAsFrame() throws Exception {
         if (surface == null) {
             close(null);
-            final Object formLock = ScriptUtils.getLock();
             final JFrame frame = new JFrame() {
-
-                @Override
-                public void paint(Graphics g) {
-                    if (ScriptUtils.getLock() != null) {
-                        final Object l = ScriptUtils.getLock();
-                        synchronized (l) {
-                            super.paint(g);
-                        }
-                    } else {
-                        synchronized (formLock) {
-                            ScriptUtils.setLock(formLock);
-                            try {
-                                super.paint(g);
-                            } finally {
-                                ScriptUtils.setLock(null);
-                            }
-                        }
-                    }
-                }
 
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
@@ -379,7 +358,6 @@ public class Form implements HasPublished {
                 }
             };
 
-            frame.getRootPane().putClientProperty(LOCK_KEY, formLock);
             frame.addWindowListener(new WindowClosingReflector());
             frame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -446,27 +424,7 @@ public class Form implements HasPublished {
     public void displayAsInternalFrame(DesktopPane aDesktop) throws Exception {
         if (surface == null) {
             close(null);
-            final Object formLock = ScriptUtils.getLock();
             JInternalFrame internalFrame = new PlatypusInternalFrame(this) {
-                @Override
-                public void paint(Graphics g) {
-                    if (ScriptUtils.getLock() != null) {
-                        final Object l = ScriptUtils.getLock();
-                        synchronized (l) {
-                            super.paint(g);
-                        }
-                    } else {
-                        synchronized (formLock) {
-                            ScriptUtils.setLock(formLock);
-                            try {
-                                super.paint(g);
-                            } finally {
-                                ScriptUtils.setLock(null);
-                            }
-                        }
-                    }
-                }
-
                 @Override
                 public void doDefaultCloseAction() {
                     try {
@@ -476,7 +434,6 @@ public class Form implements HasPublished {
                     }
                 }
             };
-            internalFrame.getRootPane().putClientProperty(LOCK_KEY, formLock);
             internalFrame.addInternalFrameListener(new WindowClosingReflector());
             internalFrame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -541,27 +498,7 @@ public class Form implements HasPublished {
     public Object displayAsDialog(final JSObject onOkModalResult) throws Exception {
         if (surface == null) {
             close(null);
-            Object formLock = ScriptUtils.getLock();
             JDialog dialog = new JDialog() {
-
-                @Override
-                public void paint(Graphics g) {
-                    if (ScriptUtils.getLock() != null) {
-                        final Object l = ScriptUtils.getLock();
-                        synchronized (l) {
-                            super.paint(g);
-                        }
-                    } else {
-                        synchronized (formLock) {
-                            ScriptUtils.setLock(formLock);
-                            try {
-                                super.paint(g);
-                            } finally {
-                                ScriptUtils.setLock(null);
-                            }
-                        }
-                    }
-                }
 
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
@@ -609,8 +546,7 @@ public class Form implements HasPublished {
                     }
                 }
             };
-//dialog.addWindowListener(new WindowClosingReflector());
-            dialog.getRootPane().putClientProperty(LOCK_KEY, formLock);
+            //dialog.addWindowListener(new WindowClosingReflector());
             dialog.getContentPane().setLayout(new BorderLayout());
             // configure dialog
             dialog.setDefaultCloseOperation(defaultCloseOperation);

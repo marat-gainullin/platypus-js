@@ -13,6 +13,7 @@ import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
 import com.eas.server.SessionRequestHandler;
 import java.io.*;
+import java.security.AccessControlException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +52,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
     private PlatypusServerCore serverCore;
+    private final Object logoutLock = new Object();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -127,32 +129,34 @@ public class PlatypusHttpServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkUpload(request, response)) {
             if (serverCore != null) {
-                HttpSession httpSession = request.getSession(true);
-                if (httpSession != null) {
-                    SessionManager sessionManager = serverCore.getSessionManager();
-                    Session session;
-                    PlatypusPrincipal principal = servletRequestPrincipal(request);
-                    synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is on the same point
-                        String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
-                        if (platypusSessionId == null) {
-                            platypusSessionId = httpSession.getId();
+                synchronized (logoutLock) {
+                    HttpSession httpSession = request.getSession(true);
+                    if (httpSession != null) {
+                        SessionManager sessionManager = serverCore.getSessionManager();
+                        Session session;
+                        PlatypusPrincipal principal = servletRequestPrincipal(request);
+                        synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is on the same point
+                            String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
+                            if (platypusSessionId == null) {
+                                platypusSessionId = httpSession.getId();
+                            }
+                            session = sessionManager.getOrCreateSession(principal, platypusSessionId);
+                            httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
+                            httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, serverCore);
                         }
-                        session = sessionManager.getOrCreateSession(principal, platypusSessionId);
-                        httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
-                        httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, serverCore);
-                    }
-                    assert session != null : "Platypus session missing";
-                    session.setPrincipal(principal);
+                        assert session != null : "Platypus session missing";
+                        session.setPrincipal(principal);
 
-                    PlatypusPrincipal.setInstance(session.getPrincipal());
-                    ScriptUtils.setRequest(request);
-                    ScriptUtils.setResponse(response);
-                    try {
-                        processPlatypusRequest(request, response, session, httpSession);
-                    } finally {
-                        ScriptUtils.setRequest(null);
-                        ScriptUtils.setResponse(null);
-                        PlatypusPrincipal.setInstance(null);
+                        PlatypusPrincipal.setInstance(session.getPrincipal());
+                        ScriptUtils.setRequest(request);
+                        ScriptUtils.setResponse(response);
+                        try {
+                            processPlatypusRequest(request, response, session, httpSession);
+                        } finally {
+                            ScriptUtils.setRequest(null);
+                            ScriptUtils.setResponse(null);
+                            PlatypusPrincipal.setInstance(null);
+                        }
                     }
                 }
             } else {
@@ -185,14 +189,20 @@ public class PlatypusHttpServlet extends HttpServlet {
     private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, Session aPlatypusSession, HttpSession aHttpSession) throws Exception {
         Request platypusRequest = readPlatypusRequest(aHttpRequest, aHttpResponse, aPlatypusSession);
         if (platypusRequest.getType() == Requests.rqLogout) {
-            aHttpRequest.logout();
-            aHttpSession.invalidate();
+            synchronized (logoutLock) {
+                aHttpRequest.logout();
+                aHttpSession.invalidate();
+            }
         } else {
             RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(serverCore, platypusRequest);
             if (handler != null) {
                 Consumer<Exception> onFailure = (Exception ex) -> {
                     try {
-                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
+                        if (ex instanceof AccessControlException) {
+                            aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
+                        } else {
+                            aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
+                        }
                     } catch (IOException ex1) {
                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                     }

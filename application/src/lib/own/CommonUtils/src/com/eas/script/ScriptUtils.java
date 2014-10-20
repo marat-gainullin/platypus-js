@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
@@ -59,6 +60,8 @@ public class ScriptUtils {
     protected static ThreadLocal<Object> request = new ThreadLocal();
     protected static ThreadLocal<Object> response = new ThreadLocal();
     protected static ThreadLocal<Object> session = new ThreadLocal();
+    // Global Queue for GUI processes ONLY!
+    protected static Consumer<Runnable> globalQueue;
 
     public static void init() {
         if (engine == null) {
@@ -69,6 +72,14 @@ public class ScriptUtils {
                 Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public static Consumer<Runnable> getGlobalQueue() {
+        return globalQueue;
+    }
+
+    public static void setGlobalQueue(Consumer<Runnable> aValue) {
+        globalQueue = aValue;
     }
 
     /**

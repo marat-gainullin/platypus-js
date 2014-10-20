@@ -23,7 +23,6 @@ import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
 import com.eas.util.args.ThreadsArgsConsumer;
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -211,8 +210,10 @@ public class PlatypusClientApplication {
             if (config.url != null) {
                 checkUserHome();
                 config.datasourcesArgs.registerDatasources();
-                Toolkit.getDefaultToolkit().getSystemEventQueue().push(new LockableEventQueue());
                 ScriptUtils.init();
+                ScriptUtils.setGlobalQueue((Runnable aTask) -> {
+                    EventQueue.invokeLater(aTask);
+                });
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {

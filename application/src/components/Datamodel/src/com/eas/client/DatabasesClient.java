@@ -330,15 +330,27 @@ public class DatabasesClient {
             startJdbcTask(() -> {
                 try {
                     Integer affected = doWork.call();
-                    final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                    synchronized (lock) {
-                        onSuccess.accept(affected);
+                    if (ScriptUtils.getGlobalQueue() != null) {
+                        ScriptUtils.getGlobalQueue().accept(() -> {
+                            onSuccess.accept(affected);
+                        });
+                    } else {
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            onSuccess.accept(affected);
+                        }
                     }
                 } catch (Exception ex) {
                     if (onFailure != null) {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            onFailure.accept(ex);
+                        if (ScriptUtils.getGlobalQueue() != null) {
+                            ScriptUtils.getGlobalQueue().accept(() -> {
+                                onFailure.accept(ex);
+                            });
+                        } else {
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
+                                onFailure.accept(ex);
+                            }
                         }
                     }
                 }
@@ -364,7 +376,7 @@ public class DatabasesClient {
         return mdCaches.get(aDatasourceName);
     }
 
-    protected void startJdbcTask(Runnable aTask) {
+    private void startJdbcTask(Runnable aTask) {
         Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
@@ -441,16 +453,27 @@ public class DatabasesClient {
                 ApplyProcess applyProcess = new ApplyProcess(aDatasourcesChangeLogs.size(), (List<ApplyResult> aApplyResults) -> {
                     assert aDatasourcesChangeLogs.size() == aApplyResults.size();
                     CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            onSuccess.accept(aRowsAffected);
-                        }
-
-                    }, (Exception aFailureCause) -> {
-                        if (onFailure != null) {
+                        if (ScriptUtils.getGlobalQueue() != null) {
+                            ScriptUtils.getGlobalQueue().accept(() -> {
+                                onSuccess.accept(aRowsAffected);
+                            });
+                        } else {
                             final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
                             synchronized (lock) {
-                                onFailure.accept(aFailureCause);
+                                onSuccess.accept(aRowsAffected);
+                            }
+                        }
+                    }, (Exception aFailureCause) -> {
+                        if (onFailure != null) {
+                            if (ScriptUtils.getGlobalQueue() != null) {
+                                ScriptUtils.getGlobalQueue().accept(() -> {
+                                    onFailure.accept(aFailureCause);
+                                });
+                            } else {
+                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                synchronized (lock) {
+                                    onFailure.accept(aFailureCause);
+                                }
                             }
                         }
                     });

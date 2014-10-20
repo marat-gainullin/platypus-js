@@ -1664,14 +1664,14 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     @Override
-    public synchronized void addProcessedRow(Row aRow) {
+    public void addProcessedRow(Row aRow) {
         processedRows.add(aRow);
         progressIndicator.setVisible(true);
         gridScroll.repaint();
     }
 
     @Override
-    public synchronized void removeProcessedRow(Row aRow) {
+    public void removeProcessedRow(Row aRow) {
         processedRows.remove(aRow);
         if (processedRows.isEmpty()) {
             progressIndicator.setVisible(false);
@@ -1680,12 +1680,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     @Override
-    public synchronized Row[] getProcessedRows() {
+    public Row[] getProcessedRows() {
         return processedRows.toArray(new Row[]{});
     }
 
     @Override
-    public synchronized boolean isRowProcessed(Row aRow) {
+    public boolean isRowProcessed(Row aRow) {
         return processedRows.contains(aRow);
     }
 

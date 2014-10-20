@@ -21,6 +21,7 @@ import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
+import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.httpservlet.PlatypusServerConfig;
@@ -108,7 +109,7 @@ public class PlatypusWebModuleManager {
             webAppRunUrl = Deployment.getDefault().deploy(webModule,
                     debug ? Deployment.Mode.DEBUG : Deployment.Mode.RUN,
                     webModule.getUrl(),
-                    START_PAGE_FILE_NAME,
+                    ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? "" : START_PAGE_FILE_NAME,
                     true,
                     (String message) -> {
                         if (message != null) {

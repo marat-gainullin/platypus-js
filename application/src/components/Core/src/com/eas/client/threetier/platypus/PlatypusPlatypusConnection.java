@@ -12,6 +12,7 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.ScriptUtils;
 import java.io.IOException;
@@ -135,15 +136,37 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     @Override
     public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
         enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
-            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-            synchronized (lock) {
-                if (aResponse instanceof ErrorResponse) {
-                    if (onFailure != null) {
-                        onFailure.accept(handleErrorResponse((ErrorResponse) aResponse));
+            if (aResponse instanceof ErrorResponse) {
+                if (onFailure != null) {
+                    Exception cause = handleErrorResponse((ErrorResponse) aResponse);
+                    if (ScriptUtils.getGlobalQueue() != null) {
+                        ScriptUtils.getGlobalQueue().accept(() -> {
+                            onFailure.accept(cause);
+                        });
+                    } else {
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            onFailure.accept(cause);
+                        }
                     }
-                } else {
-                    if (onSuccess != null) {
-                        onSuccess.accept((R) aResponse);
+                }
+            } else {
+                if (onSuccess != null) {
+                    if (ScriptUtils.getGlobalQueue() != null) {
+                        ScriptUtils.getGlobalQueue().accept(() -> {
+                            if (rq instanceof LogoutRequest) {
+                                sessionTicket = null;
+                            }
+                            onSuccess.accept((R) aResponse);
+                        });
+                    } else {
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            if (rq instanceof LogoutRequest) {
+                                sessionTicket = null;
+                            }
+                            onSuccess.accept((R) aResponse);
+                        }
                     }
                 }
             }
@@ -261,6 +284,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         if (rqc.response instanceof ErrorResponse) {
             throw handleErrorResponse((ErrorResponse) rqc.response);
         } else {
+            if (rq instanceof LogoutRequest) {
+                sessionTicket = null;
+            }
             return (R) rqc.response;
         }
     }

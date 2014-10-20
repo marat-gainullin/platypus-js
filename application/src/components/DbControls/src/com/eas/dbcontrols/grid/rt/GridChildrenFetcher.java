@@ -112,14 +112,8 @@ public class GridChildrenFetcher implements ChildrenFetcher<Row> {
                             generalRowset.absolute(preservedCursorPos);
                         } finally {
                             fetchCompleter.run();
-                            EventQueue.invokeLater(() -> {
-                                try {
-                                    hostControl.removeProcessedRow(parentRow);
-                                    hostControl.makeVisible(generalRowset.getCurrentRow(), true);
-                                } catch (Exception ex) {
-                                    Logger.getLogger(GridChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            });
+                            hostControl.removeProcessedRow(parentRow);
+                            hostControl.makeVisible(generalRowset.getCurrentRow(), true);
                         }
                     } catch (Exception ex) {
                         Logger.getLogger(GridChildrenFetcher.class.getName()).log(Level.SEVERE, null, ex);
