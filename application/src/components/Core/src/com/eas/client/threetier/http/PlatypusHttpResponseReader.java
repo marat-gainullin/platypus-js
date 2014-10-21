@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,18 +56,20 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     //
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
+    protected PlatypusHttpConnection pConn;
     protected HttpURLConnection conn;
     protected int responseCode;
     protected Converter converter;
     protected Request request;
     protected String bodyText;
 
-    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, Converter aConverter) throws IOException {
+    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, Converter aConverter, PlatypusHttpConnection aPConn) throws IOException {
         super();
         request = aRequest;
         conn = aConn;
         converter = aConverter;
         responseCode = conn.getResponseCode();
+        pConn = aPConn;
     }
 
     public boolean checkIfSecirutyForm() throws IOException {
@@ -162,7 +165,11 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             String reportLocation = extractText();
             URL currentUrl = conn.getURL();
             URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), reportLocation);
-            try (InputStream in = reportUrl.openStream()) {
+            HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
+            reportConn.setDoInput(true);
+            pConn.addCookies(reportConn);
+            pConn.checkedAddBasicAuthentication(reportConn);
+            try (InputStream in = reportConn.getInputStream()) {
                 byte[] content = BinaryUtils.readStream(in, -1);
                 int slashIdx = reportLocation.lastIndexOf("/");
                 String fileName = reportLocation.substring(slashIdx + 1);
@@ -175,6 +182,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
                     rsp.setResult(report);
                 }
             }
+            pConn.acceptCookies(reportConn);
         } else {
             Object oData = ScriptUtils.parseDates(extractJSON());
             rsp.setResult(oData);

@@ -135,10 +135,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             if (lonHeaders != null) {
                 lonHeaders.accept(conn);
             }
-            Credentials basicCredentials = pConn.getBasicCredentials();
-            if (basicCredentials != null) {
-                addBasicAuthentication(conn, basicCredentials.userName, basicCredentials.password);
-            }
+            pConn.checkedAddBasicAuthentication(conn);
             conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
             HttpResult res = completeRequest(request);
             conn.disconnect();
@@ -171,7 +168,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                                 securityFormConn.setDoOutput(true);
                                 securityFormConn.setRequestMethod(PlatypusHttpConstants.HTTP_METHOD_POST);
                                 securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.FORM_CONTENT_TYPE);
-                                addCookies(securityFormConn);
+                                pConn.addCookies(securityFormConn);
                                 String formData = PlatypusHttpConstants.SECURITY_CHECK_USER + "=" + URLEncoder.encode(credentials.userName, SettingsConstants.COMMON_ENCODING) + "&" + PlatypusHttpConstants.SECURITY_CHECK_PASSWORD + "=" + URLEncoder.encode(credentials.password, SettingsConstants.COMMON_ENCODING);
                                 byte[] formDataConent = formData.getBytes(SettingsConstants.COMMON_ENCODING);
                                 securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTLENGTH, "" + formDataConent.length);
@@ -179,7 +176,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                                     out.write(formDataConent);
                                 }
                                 int responseCode = securityFormConn.getResponseCode();
-                                acceptCookies(securityFormConn);
+                                pConn.acceptCookies(securityFormConn);
                                 res.assign(performer.call(onHeaders));
                                 if (!res.isUnauthorized()) {
                                     PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
@@ -199,16 +196,8 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         }
     }
 
-    private static void addBasicAuthentication(HttpURLConnection aConnection, String aLogin, String aPassword) throws UnsupportedEncodingException {
-        if (aLogin != null && !aLogin.isEmpty() && aPassword != null) {
-            BASE64Encoder encoder = new BASE64Encoder();
-            String requestAuthSting = PlatypusHttpConstants.BASIC_AUTH_NAME + " " + encoder.encode(aLogin.concat(":").concat(aPassword).getBytes(PlatypusHttpConstants.HEADERS_ENCODING_NAME));
-            aConnection.setRequestProperty(PlatypusHttpConstants.HEADER_AUTHORIZATION, requestAuthSting);
-        }
-    }
-
     private HttpResult completeRequest(Request aRequest) throws Exception {
-        addCookies(conn);
+        pConn.addCookies(conn);
         int responseCode = conn.getResponseCode();
         String authScheme = null;
         String redirectLocation = null;
@@ -223,7 +212,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
         } else {
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, new RowsetConverter());
+                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, new RowsetConverter(), pConn);
                 if (reader.checkIfSecirutyForm()) {
                     redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
                     authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
@@ -239,7 +228,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                 response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
             }
         }
-        acceptCookies(conn);
+        pConn.acceptCookies(conn);
         return new HttpResult(responseCode, authScheme, redirectLocation);
     }
 
@@ -267,34 +256,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
 
         }
         return urlBuilder.toString();
-    }
-
-    private void acceptCookies(HttpURLConnection aConnection) throws ParseException, NumberFormatException {
-        Map<String, List<String>> headers = aConnection.getHeaderFields();
-        List<String> cookieHeaders = headers.get(PlatypusHttpConstants.HEADER_SETCOOKIE);
-        if (cookieHeaders != null) {
-            cookieHeaders.stream().forEach((setCookieHeaderValue) -> {
-                try {
-                    Cookie cookie = Cookie.parse(setCookieHeaderValue);
-                    cookies.put(cookie.getName(), cookie);
-                } catch (ParseException | NumberFormatException ex) {
-                    Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, ex.getMessage());
-                }
-            });
-        }
-    }
-
-    private void addCookies(HttpURLConnection aConnection) {
-        String[] cookiesNames = cookies.keySet().toArray(new String[]{});
-        for (String cookieName : cookiesNames) {
-            Cookie cookie = cookies.get(cookieName);
-            if (cookie != null && cookie.isActual()) {
-                String cookieHeaderValue = cookieName + "=" + cookie.getValue();
-                aConnection.addRequestProperty(PlatypusHttpConstants.HEADER_COOKIE, cookieHeaderValue);
-            } else {
-                cookies.remove(cookieName);
-            }
-        }
     }
 
     @Override

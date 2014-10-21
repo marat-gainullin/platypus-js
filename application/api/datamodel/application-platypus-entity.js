@@ -510,6 +510,31 @@
         };
 
         /**
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.createSorting(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Deletes the row by cursor position or by row itself.
+         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
+         * @method deleteRow
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Finds row by its key. Key must a single property.
          * @param key the unique identifier of the row.
          * @return a row object or <code>null</code> if nothing is found.
@@ -557,31 +582,6 @@
         P.ApplicationPlatypusEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
-         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Deletes the row by cursor position or by row itself.
-         * @param aCursorPosOrInstance row position in terms of cursor API (1-based)| row instance itself. Note! If no cursor position or instance is passed,then row at current cursor position will be deleted.
-         * @method deleteRow
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.deleteRow = function(aCursorPosOrInstance) {
-            var delegate = this.unwrap();
-            var value = delegate.deleteRow(P.boxAsJava(aCursorPosOrInstance));
             return P.boxAsJs(value);
         };
 

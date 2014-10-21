@@ -23,39 +23,47 @@ public class LockProviderFunction extends JSObjectFacade {
 
     @Override
     public Object call(Object thiz, Object... args) {
-        final Object outerLock = ScriptUtils.getLock();
-        if (outerLock != null) {
-            synchronized (outerLock) {
-                return super.call(thiz, args);
-            }
-        } else {
-            synchronized (lock) {
-                ScriptUtils.setLock(lock);
-                try {
+        if (ScriptUtils.getGlobalQueue() == null) {
+            final Object outerLock = ScriptUtils.getLock();
+            if (outerLock != null) {
+                synchronized (outerLock) {
                     return super.call(thiz, args);
-                } finally {
-                    ScriptUtils.setLock(null);
+                }
+            } else {
+                synchronized (lock) {
+                    ScriptUtils.setLock(lock);
+                    try {
+                        return super.call(thiz, args);
+                    } finally {
+                        ScriptUtils.setLock(null);
+                    }
                 }
             }
+        } else {
+            return super.call(thiz, args);
         }
     }
 
     @Override
     public Object newObject(Object... args) {
-        final Object outerLock = ScriptUtils.getLock();
-        if (outerLock != null) {
-            synchronized (outerLock) {
-                return super.newObject(args);
-            }
-        } else {
-            synchronized (lock) {
-                ScriptUtils.setLock(lock);
-                try {
+        if (ScriptUtils.getGlobalQueue() == null) {
+            final Object outerLock = ScriptUtils.getLock();
+            if (outerLock != null) {
+                synchronized (outerLock) {
                     return super.newObject(args);
-                } finally {
-                    ScriptUtils.setLock(null);
+                }
+            } else {
+                synchronized (lock) {
+                    ScriptUtils.setLock(lock);
+                    try {
+                        return super.newObject(args);
+                    } finally {
+                        ScriptUtils.setLock(null);
+                    }
                 }
             }
+        } else {
+            return super.newObject(args);
         }
     }
 

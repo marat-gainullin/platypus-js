@@ -148,30 +148,8 @@
         Function.prototype.invokeLater = function() {
             var func = this;
             var args = arguments;
-            //
-            var lock = ScriptUtilsClass.getLock();
-            var req = ScriptUtilsClass.getRequest();
-            var resp = ScriptUtilsClass.getResponse();
-            var session = ScriptUtilsClass.getSession();
-            var principal = PlatypusPrincipalClass.getInstance();
-            //
             SwingUtilitiesClass.invokeLater(function() {
-                ScriptUtilsClass.setLock(lock);
-                ScriptUtilsClass.setRequest(req);
-                ScriptUtilsClass.setResponse(resp);
-                ScriptUtilsClass.setSession(session);
-                PlatypusPrincipalClass.setInstance(principal);
-                try{
-                    ScriptUtilsClass.locked(function(){
-                        func.apply(func, args);
-                    }, lock);
-                }finally{
-                    ScriptUtilsClass.setLock(null);
-                    ScriptUtilsClass.setRequest(null);
-                    ScriptUtilsClass.setResponse(null);
-                    ScriptUtilsClass.setSession(null);
-                    PlatypusPrincipalClass.setInstance(null);
-                }
+                func.apply(func, args);
             });
         };
         /** 

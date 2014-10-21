@@ -16,6 +16,8 @@ import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.ScriptUtils;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -24,6 +26,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import sun.misc.BASE64Encoder;
 
 /**
  *
@@ -65,12 +70,51 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         requestsSender.allowCoreThreadTimeOut(true);
     }
 
-    public Credentials getBasicCredentials() {
-        return basicCredentials;
+    public void checkedAddBasicAuthentication(HttpURLConnection aConn) throws UnsupportedEncodingException {
+        Credentials creds = basicCredentials; // To avoid multithreading issues
+        if(creds != null){
+            addBasicAuthentication(aConn, creds.userName, creds.password);
+        }
     }
 
     public void setBasicCredentials(Credentials aValue) {
         basicCredentials = aValue;
+    }
+
+    private static void addBasicAuthentication(HttpURLConnection aConnection, String aLogin, String aPassword) throws UnsupportedEncodingException {
+        if (aLogin != null && !aLogin.isEmpty() && aPassword != null) {
+            BASE64Encoder encoder = new BASE64Encoder();
+            String requestAuthSting = PlatypusHttpConstants.BASIC_AUTH_NAME + " " + encoder.encode(aLogin.concat(":").concat(aPassword).getBytes(PlatypusHttpConstants.HEADERS_ENCODING_NAME));
+            aConnection.setRequestProperty(PlatypusHttpConstants.HEADER_AUTHORIZATION, requestAuthSting);
+        }
+    }
+
+    public void acceptCookies(HttpURLConnection aConnection) throws ParseException, NumberFormatException {
+        Map<String, List<String>> headers = aConnection.getHeaderFields();
+        List<String> cookieHeaders = headers.get(PlatypusHttpConstants.HEADER_SETCOOKIE);
+        if (cookieHeaders != null) {
+            cookieHeaders.stream().forEach((setCookieHeaderValue) -> {
+                try {
+                    Cookie cookie = Cookie.parse(setCookieHeaderValue);
+                    cookies.put(cookie.getName(), cookie);
+                } catch (ParseException | NumberFormatException ex) {
+                    Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, ex.getMessage());
+                }
+            });
+        }
+    }
+
+    public void addCookies(HttpURLConnection aConnection) {
+        String[] cookiesNames = cookies.keySet().toArray(new String[]{});
+        for (String cookieName : cookiesNames) {
+            Cookie cookie = cookies.get(cookieName);
+            if (cookie != null && cookie.isActual()) {
+                String cookieHeaderValue = cookieName + "=" + cookie.getValue();
+                aConnection.addRequestProperty(PlatypusHttpConstants.HEADER_COOKIE, cookieHeaderValue);
+            } else {
+                cookies.remove(cookieName);
+            }
+        }
     }
 
     @Override
