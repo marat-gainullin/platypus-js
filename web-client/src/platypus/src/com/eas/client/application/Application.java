@@ -177,21 +177,9 @@ public class Application {
 				}
 		}});
 		Object.defineProperty($wnd.P.Resource, "load", {get : function(){
-		        return function(aResName, onSuccess, onFailure){
-	            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, false));
-		        };
-		}});
-		
-		Object.defineProperty($wnd.P.Resource, "loadText", {get : function(){
-		        return function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aOnFailure){
-		        	var onSuccess = aOnSuccessOrEncoding;
-		        	var onFailure = aOnSuccessOrOnFailure;
-		        	if(typeof onSuccess != "function"){
-		        		onSuccess = aOnSuccessOrOnFailure;
-		        		onFailure = aOnFailure;
-		        	}
-		        	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, true));
-		        };
+	        return function(aResName, onSuccess, onFailure){
+            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+	        };
 		}});
 		
 		var principal = {};
@@ -741,10 +729,12 @@ public class Application {
 			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aOnSuccess, aOnFailure);
 		} 
 		function _Icons() {
-			this.load = function(aIconName) {
-				var appClient = @com.eas.client.application.AppClient::getInstance()();
-				return appClient.@com.eas.client.application.AppClient::getImageResource(Ljava/lang/String;)(aIconName != null ? '' + aIconName : null);
-			}
+			var _self = this;
+			Object.defineProperty(_self, "load", { 
+				value: function(aIconName, aOnSuccess, aOnFailure) {
+					@com.eas.client.application.PlatypusImageResource::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aIconName != null ? '' + aIconName : null, aOnSuccess, aOnFailure);
+				} 
+			});
 		}
 		$wnd.P.Icon = new _Icons();
 		$wnd.P.Icons = $wnd.P.Icon;
@@ -954,6 +944,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_icon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		    Object.defineProperty(_self, "folderIcon", {
@@ -965,6 +957,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_folderIcon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		    Object.defineProperty(_self, "openFolderIcon", {
@@ -976,6 +970,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_openFolderIcon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		    Object.defineProperty(_self, "leafIcon", {
@@ -987,6 +983,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_leafIcon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		}

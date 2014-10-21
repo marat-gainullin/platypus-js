@@ -14,13 +14,13 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
-import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
+import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
@@ -444,21 +444,19 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		});
 	}
 
-	protected void bindIconCallback(final String aTargetElementId, final PlatypusImageResource aIcon) {
-		if (aIcon != null && aIcon.isPending()) {
-			aIcon.addCallback(new ImageResourceCallback() {
+	protected static void bindIconCallback(final PublishedStyle aStyle, final String aTargetElementId) {
+		aStyle.setIconCallback(new Runnable() {
 
-				@Override
-				public void run(PlatypusImageResource aResource) {
-					Element padded = Document.get().getElementById(aTargetElementId);
-					if (padded != null) {
-						int paddingLeft = RenderedEditorCell.CELL_PADDING + aIcon.getWidth();
-						padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
-					}
+			@Override
+			public void run() {
+				Element padded = Document.get().getElementById(aTargetElementId);
+				if (padded != null) {
+					int paddingLeft = RenderedEditorCell.CELL_PADDING + (aStyle.getIcon()!= null ? aStyle.getIcon().getWidth() : 0);
+					padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
 				}
+			}
 
-			});
-		}
+		});
 	}
 
 	@Override

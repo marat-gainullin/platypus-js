@@ -220,12 +220,14 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		content.setVerticalTextPosition(aValue);
 	}
 
-	public ImageResource getImage() {
-		return content.getImage();
+	@Override
+	public ImageResource getImageResource() {
+		return content.getImageResource();
 	}
 
-	public void setImage(ImageResource aValue) {
-		content.setImage(aValue);
+	@Override
+	public void setImageResource(ImageResource aValue) {
+		content.setImageResource(aValue);
 	}
 
 	@Override
@@ -311,10 +313,4 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		chevron.getElement().setPropertyBoolean("disabled", !enabled);
 		getElement().setPropertyBoolean("disabled", !enabled);
 	}
-
-	@Override
-	public ImageResource getImageResource() {
-		return content.getImageResource();
-	}
-
 }

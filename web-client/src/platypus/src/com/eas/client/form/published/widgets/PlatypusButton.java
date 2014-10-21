@@ -188,15 +188,10 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 		});
 		Object.defineProperty(published, "icon", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusButton::getImage()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusButton::getImageResource()();
 			},
 			set : function(aValue) {
-				var setterCallback = function(){
-					aWidget.@com.eas.client.form.published.widgets.PlatypusButton::setImage(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
-				};
-				if(aValue != null)
-					aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
-				setterCallback();
+				aWidget.@com.eas.client.form.published.widgets.PlatypusButton::setImageResource(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "iconTextGap", {

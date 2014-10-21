@@ -1,7 +1,6 @@
 package com.eas.client.form.published.menu;
 
 import com.bearsoft.gwt.ui.menu.MenuItemImageText;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
@@ -12,6 +11,7 @@ import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeUri;
 
 public class PlatypusMenuItemImageText extends MenuItemImageText implements HasActionHandlers, HasJsFacade, HasEventsExecutor {
@@ -22,7 +22,7 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasA
 	//
 	protected ScheduledCommand onExecute;
 	
-	protected PlatypusImageResource image;
+	protected ImageResource image;
 
 	public PlatypusMenuItemImageText() {
 		this("", false, null, null);
@@ -68,11 +68,11 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasA
 		name = aValue;
 	}
 
-	public PlatypusImageResource getIcon(){
+	public ImageResource getIcon(){
 		return image;
 	}
 	
-	public void setIcon(PlatypusImageResource aIcon){
+	public void setIcon(ImageResource aIcon){
 		image = aIcon;
 		super.setImageUri(image != null ? image.getSafeUri() : null);
 	}
@@ -106,12 +106,7 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasA
 				return aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::getIcon()();
 			},
 			set : function(aValue) {
-				var setterCallback = function(){
-					aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::setIcon(Lcom/eas/client/application/PlatypusImageResource;)(aValue);
-				}
-				if(aValue != null)
-					aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
-				setterCallback();
+				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 			}
 		});			
 	}-*/;

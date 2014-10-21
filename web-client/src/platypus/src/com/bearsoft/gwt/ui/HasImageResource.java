@@ -8,10 +8,12 @@ package com.bearsoft.gwt.ui;
 import com.google.gwt.resources.client.ImageResource;
 
 /**
- *
+ * 
  * @author mg
  */
 public interface HasImageResource {
 
-    public ImageResource getImageResource();
+	public ImageResource getImageResource();
+
+	public void setImageResource(ImageResource aValue);
 }

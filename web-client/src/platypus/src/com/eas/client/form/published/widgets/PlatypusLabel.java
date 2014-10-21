@@ -152,15 +152,10 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 		});
 		Object.defineProperty(published, "icon", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getImage()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getImageResource()();
 			},
 			set : function(aValue) {
-				var setterCallback = function(){
-					aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setImage(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
-				};
-				if(aValue != null)
-					aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
-				setterCallback();
+				aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setImageResource(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "iconTextGap", {

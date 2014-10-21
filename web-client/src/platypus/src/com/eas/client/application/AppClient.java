@@ -82,7 +82,6 @@ public class AppClient {
 	private String principal;
 	private Map<String, Document> documents = new HashMap<String, Document>();
 	private Map<String, ModuleStructure> modulesStructures = new HashMap<String, ModuleStructure>();
-	private Map<String, PlatypusImageResource> iconsCache = new HashMap<String, PlatypusImageResource>();
 
 	public static class ModuleStructure {
 
@@ -156,25 +155,16 @@ public class AppClient {
 		};
 	}
 
-	public PlatypusImageResource getImageResource(final String imageName) {
-		PlatypusImageResource res = iconsCache.get(imageName);
-		if (res == null) {
-			res = new PlatypusImageResource(this, imageName);
-			iconsCache.put(imageName, res);
-		}
-		return res;
-	}
-
-	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final boolean text) throws Exception {
+	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
 		if (onSuccess != null) {
-			AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			AppClient.getInstance().startRequest(uri, ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResult) throws Exception {
 					if (aResult.getStatus() == Response.SC_OK) {
 						if (onSuccess != null)
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResult.getResponseText()));
 					} else {
 						if (onFailure != null)
 							Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
@@ -195,16 +185,13 @@ public class AppClient {
 
 			});
 		} else {
-			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), text ? ResponseType.Default : ResponseType.ArrayBuffer);
+			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), ResponseType.Default);
 			if (executed != null) {
-				if (executed.getStatus() == Response.SC_OK)
-					if (text)
-						return Utils.toJs(executed.getResponseText());
-					else {
-						return Utils.stringToArrayBuffer(executed.getResponseText());
-					}
-				else
+				if (executed.getStatus() == Response.SC_OK){
+					return Utils.toJs(executed.getResponseText());
+				}else{
 					throw new Exception(executed.getStatusText());
+				}
 			}
 		}
 		return null;

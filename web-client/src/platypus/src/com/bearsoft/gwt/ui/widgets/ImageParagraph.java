@@ -284,11 +284,8 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 		}
 	}
 
-	public ImageResource getImage() {
-		return image;
-	}
-
-	public void setImage(ImageResource aValue) {
+	@Override
+	public void setImageResource(ImageResource aValue) {
 		image = aValue;
 		organize();
 	}
@@ -308,5 +305,4 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	protected void onDetach() {
 		super.onDetach();
 	}
-
 }

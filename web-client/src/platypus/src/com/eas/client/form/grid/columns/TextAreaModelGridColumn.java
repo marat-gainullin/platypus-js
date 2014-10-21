@@ -3,7 +3,6 @@ package com.eas.client.form.grid.columns;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.RenderedCellContext;
@@ -48,10 +47,9 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 							if(context instanceof RenderedCellContext){
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
-							TextAreaModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
-							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
-								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
-								TextAreaModelGridColumn.this.bindIconCallback(decorId, pImage);
+							TextAreaModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);
+							if(cellToRender.getStyle() != null){
+								ModelGridColumn.bindIconCallback(cellToRender.getStyle(), decorId);
 							}
 						}
 					} catch (Exception e) {

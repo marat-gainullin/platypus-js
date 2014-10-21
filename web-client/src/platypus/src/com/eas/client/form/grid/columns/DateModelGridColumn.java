@@ -6,7 +6,6 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.DateEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.RenderedCellContext;
@@ -54,9 +53,8 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
 							DateModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
-							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
-								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
-								DateModelGridColumn.this.bindIconCallback(decorId, pImage);
+							if(cellToRender.getStyle() != null){
+								ModelGridColumn.bindIconCallback(cellToRender.getStyle(), decorId);
 							}
 						}
 					} catch (Exception e) {

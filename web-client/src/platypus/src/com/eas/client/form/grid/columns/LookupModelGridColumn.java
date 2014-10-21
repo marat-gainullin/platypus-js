@@ -7,7 +7,6 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.combo.ValueLookup;
@@ -66,9 +65,8 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
 							LookupModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);
-							if (cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource) {
-								PlatypusImageResource pImage = (PlatypusImageResource) cellToRender.getStyle().getIcon();
-								LookupModelGridColumn.this.bindIconCallback(decorId, pImage);
+							if(cellToRender.getStyle() != null){
+								ModelGridColumn.bindIconCallback(cellToRender.getStyle(), decorId);
 							}
 						}
 					} catch (Exception e) {
