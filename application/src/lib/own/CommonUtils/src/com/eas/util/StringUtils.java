@@ -114,6 +114,7 @@ public class StringUtils {
 
     public static String formatDouble(double aValue) {
         DecimalFormat formatter = new DecimalFormat();
+        formatter.setGroupingUsed(false);
         formatter.setMinimumIntegerDigits(1);
         formatter.setMaximumFractionDigits(100);
         formatter.setRoundingMode(RoundingMode.DOWN);

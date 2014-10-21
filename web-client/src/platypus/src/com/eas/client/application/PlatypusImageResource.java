@@ -22,15 +22,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class PlatypusImageResource implements ImageResource {
 
-	protected AppClient client;
 	protected String name;
 	protected int width;
 	protected int height;
 	private static Map<String, ImageResource> iconsCache = new HashMap<String, ImageResource>();
 
-	public PlatypusImageResource(AppClient aClient, String aName, int aWidth, int aHeight) {
+	public PlatypusImageResource(String aName, int aWidth, int aHeight) {
 		super();
-		client = aClient;
 		name = aName;
 		width = aWidth;
 		height = aHeight;
@@ -76,7 +74,7 @@ public class PlatypusImageResource implements ImageResource {
 						int imWidth = im.getWidth();
 						int imHeight = im.getHeight();
 						im.removeFromParent();
-						ImageResource loaded = new PlatypusImageResource(AppClient.getInstance(), aName, imWidth, imHeight);
+						ImageResource loaded = new PlatypusImageResource(aName, imWidth, imHeight);
 						iconsCache.put(aName, loaded);
 						if (aCallback != null) {
 							aCallback.onSuccess(loaded);
@@ -118,7 +116,7 @@ public class PlatypusImageResource implements ImageResource {
 
 	@Override
 	public SafeUri getSafeUri() {
-		return client.getResourceUri(name);
+		return AppClient.getInstance().getResourceUri(name);
 	}
 
 	@Override

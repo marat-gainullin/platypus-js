@@ -59,7 +59,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     indexer.watch();
                     ScriptUtils.initServices(aMaximumServicesThreads);
                     basesProxy = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true, tasksScanner.getValidators(), aMaximumJdbcThreads);
-                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), new LocalQueriesProxy(basesProxy, indexer), basesProxy, lsecurityConfigs, aStartAppElementName, tasksScanner.getAuthorizers());
+                    QueriesProxy queries = new LocalQueriesProxy(basesProxy, indexer);
+                    basesProxy.setQueries(queries);
+                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName, tasksScanner.getAuthorizers());
                     basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
                     instance.startResidents(tasksScanner.getResidents());

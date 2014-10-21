@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class DatabaseMdCache {
 
-    protected String dbId;
+    protected String datasourceName;
     protected DatabasesClient client;
     // Named tables cache
     protected TablesFieldsCache tablesFields;
@@ -45,21 +45,21 @@ public class DatabaseMdCache {
     public DatabaseMdCache(DatabasesClient aClient, String aDbId) throws Exception {
         super();
         client = aClient;
-        dbId = aDbId;
+        datasourceName = aDbId;
         tablesFields = new TablesFieldsCache();
         tablesIndexes = new IndexesCache();
     }
 
     public String getConnectionSchema() throws Exception {
         if (connectionSchema == null) {
-            connectionSchema = client.getConnectionSchema(dbId);
+            connectionSchema = client.getConnectionSchema(datasourceName);
         }
         return connectionSchema;
     }
 
     public SqlDriver getConnectionDriver() throws Exception {
         if (connectionDriver == null) {
-            connectionDriver = client.getConnectionDriver(dbId);
+            connectionDriver = client.getConnectionDriver(datasourceName);
         }
         return connectionDriver;
     }
@@ -82,7 +82,7 @@ public class DatabaseMdCache {
 
     public Rowset getDbTypesInfo() throws Exception {
         if (dbmsSupportedTypes == null) {
-            dbmsSupportedTypes = client.getDbTypesInfo(dbId);
+            dbmsSupportedTypes = client.getDbTypesInfo(datasourceName);
         }
         return dbmsSupportedTypes;
     }
@@ -114,7 +114,7 @@ public class DatabaseMdCache {
         if (schema4Sql != null && !schema4Sql.isEmpty()) {
             SqlDriver driver = getConnectionDriver();
             String queryText = driver.getSql4TablesEnumeration(schema4Sql);
-            SqlCompiledQuery query = new SqlCompiledQuery(client, dbId, queryText);
+            SqlCompiledQuery query = new SqlCompiledQuery(client, datasourceName, queryText);
             Rowset rs = query.executeQuery(null, null);
             int colIndex = rs.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
             assert colIndex > 0;
@@ -156,47 +156,47 @@ public class DatabaseMdCache {
         }
 
         protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys, Map<String, DbTableComments> aTablesComments) throws Exception {
-            for (String lTableName : aTablesFields.keySet()) {
+            aTablesFields.keySet().stream().forEach((String lTableName) -> {
                 Fields fields = aTablesFields.get(lTableName);
                 DbTableKeys keys = aTablesKeys.get(lTableName);
                 DbTableComments comments = aTablesComments.get(lTableName);
                 if (keys != null) {
-                    for (Entry<String, PrimaryKeySpec> pkEntry : keys.getPks().entrySet()) {
+                    keys.getPks().entrySet().stream().forEach((Entry<String, PrimaryKeySpec> pkEntry) -> {
                         Field f = fields.get(pkEntry.getKey());
                         if (f != null) {
                             f.setPk(true);
                         }
-                    }
-                    for (Entry<String, ForeignKeySpec> fkEntry : keys.getFks().entrySet()) {
+                    });
+                    keys.getFks().entrySet().stream().forEach((Entry<String, ForeignKeySpec> fkEntry) -> {
                         Field f = fields.get(fkEntry.getKey());
                         if (f != null) {
                             f.setFk(fkEntry.getValue());
                         }
-                    }
+                    });
                 }
                 if (comments != null) {
                     fields.setTableDescription(comments.getTableComment());
-                    for (Entry<String, String> cEntry : comments.getFieldsComments().entrySet()) {
+                    comments.getFieldsComments().entrySet().stream().forEach((Entry<String, String> cEntry) -> {
                         Field f = fields.get(cEntry.getKey());
                         if (f != null) {
                             f.setDescription(cEntry.getValue());
                         }
-                    }
+                    });
                 }
-            }
+            });
         }
 
         protected void fill(String aSchema, Map<String, Fields> aTablesFields) throws Exception {
             if (aTablesFields != null && !aTablesFields.isEmpty()) {
                 synchronized (lock) {
-                    for (String lTableName : aTablesFields.keySet()) {
+                    aTablesFields.keySet().stream().forEach((String lTableName) -> {
                         Fields fields = aTablesFields.get(lTableName);
                         String fullTableName = lTableName;
                         if (aSchema != null && !aSchema.isEmpty()) {
                             fullTableName = aSchema + "." + fullTableName;
                         }
                         entries.put(transformKey(fullTableName), new CacheEntry(fullTableName, fields));
-                    }
+                    });
                 }
             }
         }
@@ -233,7 +233,7 @@ public class DatabaseMdCache {
                             assert fieldses.size() == 1;
                             return fieldses.values().iterator().next();
                         } else {
-                            SqlCompiledQuery compiledQuery = new SqlCompiledQuery(client, dbId, SQLUtils.makeTableNameMetadataQuery(aId));
+                            SqlCompiledQuery compiledQuery = new SqlCompiledQuery(client, datasourceName, SQLUtils.makeTableNameMetadataQuery(aId));
                             Rowset rs = compiledQuery.executeQuery(null, null);
                             return rs.getFields();
                         }
@@ -268,23 +268,23 @@ public class DatabaseMdCache {
                     Rowset foreignKeysRs = null;
                     String colsSql = driver.getSql4TableColumns(schema4Sql, tables2Retrive);
                     if (colsSql != null && !colsSql.isEmpty()) {
-                        tablesColumnsRs = new SqlCompiledQuery(client, dbId, colsSql).executeQuery(null, null);
+                        tablesColumnsRs = new SqlCompiledQuery(client, datasourceName, colsSql).executeQuery(null, null);
                     }
                     String sqlPks = driver.getSql4TablePrimaryKeys(schema4Sql, tables2Retrive);
                     if (sqlPks != null && !sqlPks.isEmpty()) {
-                        primaryKeysRs = new SqlCompiledQuery(client, dbId, sqlPks).executeQuery(null, null);
+                        primaryKeysRs = new SqlCompiledQuery(client, datasourceName, sqlPks).executeQuery(null, null);
                     }
                     if (aFullMetadata) {
                         String sqlTC = driver.getSql4TableComments(schema4Sql, tables2Retrive);
                         String sqlCC = driver.getSql4ColumnsComments(schema4Sql, tables2Retrive);
                         if (sqlTC != null && !sqlTC.isEmpty()
                                 && sqlCC != null && !sqlCC.isEmpty()) {
-                            tablesCommentsRs = new SqlCompiledQuery(client, dbId, sqlTC).executeQuery(null, null);
-                            columnsCommentsRs = new SqlCompiledQuery(client, dbId, sqlCC).executeQuery(null, null);
+                            tablesCommentsRs = new SqlCompiledQuery(client, datasourceName, sqlTC).executeQuery(null, null);
+                            columnsCommentsRs = new SqlCompiledQuery(client, datasourceName, sqlCC).executeQuery(null, null);
                         }
                         String sqlFks = driver.getSql4TableForeignKeys(schema4Sql, tables2Retrive);
                         if (sqlFks != null && !sqlFks.isEmpty()) {
-                            foreignKeysRs = new SqlCompiledQuery(client, dbId, sqlFks).executeQuery(null, null);
+                            foreignKeysRs = new SqlCompiledQuery(client, datasourceName, sqlFks).executeQuery(null, null);
                         }
                     }
                     return read(tablesColumnsRs, tablesCommentsRs, columnsCommentsRs, primaryKeysRs, foreignKeysRs, aSchema, driver);
@@ -437,7 +437,7 @@ public class DatabaseMdCache {
                         dbPksFks = new DbTableKeys();
                         tabledKeys.put(lfkTableName, dbPksFks);
                     }
-                    dbPksFks.addForeignKey(lfkSchema, lfkTableName, lfkField, lfkName, ForeignKeySpec.ForeignKeyRule.valueOf(lfkUpdateRule != null ? lfkUpdateRule : 0/*DatabaseMetaData.importedKeyCascade*/), ForeignKeySpec.ForeignKeyRule.valueOf(lfkDeleteRule != null ? lfkDeleteRule : 0/*DatabaseMetaData.importedKeyCascade*/), lfkDeferability != null ? lfkDeferability == 5/*DatabaseMetaData.importedKeyInitiallyDeferred*/ ? true : false : false, lpkSchema, lpkTableName, lpkField, lpkName);
+                    dbPksFks.addForeignKey(lfkSchema, lfkTableName, lfkField, lfkName, ForeignKeySpec.ForeignKeyRule.valueOf(lfkUpdateRule != null ? lfkUpdateRule : 0/*DatabaseMetaData.importedKeyCascade*/), ForeignKeySpec.ForeignKeyRule.valueOf(lfkDeleteRule != null ? lfkDeleteRule : 0/*DatabaseMetaData.importedKeyCascade*/), lfkDeferability != null && lfkDeferability == 5, lpkSchema, lpkTableName, lpkField, lpkName);
                 }
             }
             return tabledKeys;
@@ -518,7 +518,7 @@ public class DatabaseMdCache {
                         }
                         String sql4IndexesText = sqlDriver.getSql4Indexes(schema4Sql, lTableNames);
                         if (sql4IndexesText != null && !sql4IndexesText.isEmpty()) {
-                            SqlCompiledQuery indexesQuery = new SqlCompiledQuery(client, dbId, sql4IndexesText);
+                            SqlCompiledQuery indexesQuery = new SqlCompiledQuery(client, datasourceName, sql4IndexesText);
                             Rowset indexesRs = indexesQuery.executeQuery(null, null);
                             if (indexesRs != null) {
                                 indexesRs.beforeFirst();

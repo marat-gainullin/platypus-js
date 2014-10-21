@@ -338,7 +338,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return false;
     }
 
-    private static final String SAVE_JSDOC = ""
+    protected static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
@@ -383,7 +383,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         save(null, null);
     }
 
-    private static final String REVERT_JSDOC = ""
+    protected static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
             + "* After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"

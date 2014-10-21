@@ -14,7 +14,6 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.js.JsEvents;

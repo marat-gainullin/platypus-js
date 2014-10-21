@@ -627,7 +627,6 @@ public class DatabasesClient {
                     statements.addAll(generator.getLogEntries());
                 }
                 rowsAffected = riddleStatements(statements, connection);
-                aLog.clear();
                 return new ApplyResult(rowsAffected, connection);
             } catch (Exception ex) {
                 connection.rollback();
@@ -686,8 +685,8 @@ public class DatabasesClient {
         cache.removeTableIndexes(fullTableName);
     }
 
-    public String getConnectionSchema(String aDatasourceId) throws Exception {
-        DataSource ds = obtainDataSource(aDatasourceId);
+    public String getConnectionSchema(String aDatasourceName) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceName);
         if (ds != null) {
             try (Connection conn = ds.getConnection()) {
                 return schemaByConnection(conn);

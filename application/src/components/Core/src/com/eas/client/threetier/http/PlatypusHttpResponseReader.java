@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -127,7 +126,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
-        Object oData = extractJSON();
+        Object oData = ScriptUtils.parseDates(extractJSON());
         if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
             Rowset rowset = new Rowset(rsp.getExpectedFields());
             rowset.setConverter(converter);

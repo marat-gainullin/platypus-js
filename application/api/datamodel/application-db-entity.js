@@ -548,6 +548,28 @@
         };
 
         /**
+         * Disables automatic model update on parameters change, @see endUpdate method.
+         * @method beginUpdate
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.beginUpdate = function() {
+            var delegate = this.unwrap();
+            var value = delegate.beginUpdate();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Enables automatic model update on parameters change, @see beginUpdate method.
+         * @method endUpdate
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.endUpdate = function() {
+            var delegate = this.unwrap();
+            var value = delegate.endUpdate();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Finds row by its key. Key must a single property.
          * @param key the unique identifier of the row.
          * @return a row object or <code>null</code> if nothing is found.
@@ -595,28 +617,6 @@
         P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Disables automatic model update on parameters change, @see endUpdate method.
-         * @method beginUpdate
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.beginUpdate = function() {
-            var delegate = this.unwrap();
-            var value = delegate.beginUpdate();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Enables automatic model update on parameters change, @see beginUpdate method.
-         * @method endUpdate
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.endUpdate = function() {
-            var delegate = this.unwrap();
-            var value = delegate.endUpdate();
             return P.boxAsJs(value);
         };
 

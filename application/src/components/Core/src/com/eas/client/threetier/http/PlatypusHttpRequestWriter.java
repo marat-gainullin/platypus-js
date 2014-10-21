@@ -27,7 +27,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.internal.runtime.Undefined;
-import sun.misc.BASE64Encoder;
 
 /**
  *
@@ -127,16 +125,21 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     private void pushRequest(Request request, Consumer<HttpURLConnection> onHeaders) throws Exception {
         CallableConsumer<HttpResult, Consumer<HttpURLConnection>> performer = (Consumer<HttpURLConnection> lonHeaders) -> {
             URL rqUrl = new URL(assembleUrl());
+            // create a connection
             conn = (HttpURLConnection) rqUrl.openConnection();
+            // setup the connection
             conn.setDefaultUseCaches(false);
             conn.setInstanceFollowRedirects(false);
             conn.setDoOutput(true);
             conn.setDoInput(true);
+            // add headers
+            pConn.checkedAddBasicAuthentication(conn);
+            conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
+            pConn.addCookies(conn);
             if (lonHeaders != null) {
                 lonHeaders.accept(conn);
             }
-            pConn.checkedAddBasicAuthentication(conn);
-            conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
+            // wait a result
             HttpResult res = completeRequest(request);
             conn.disconnect();
             return res;
@@ -197,7 +200,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     }
 
     private HttpResult completeRequest(Request aRequest) throws Exception {
-        pConn.addCookies(conn);
         int responseCode = conn.getResponseCode();
         String authScheme = null;
         String redirectLocation = null;
@@ -301,7 +303,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             change.accept(changeWriter);
             changes.add(changeWriter.written);
         }
-        String bodyText = JSONUtils.as(changes.toArray(new String[]{})).toString();
+        String bodyText = JSONUtils.a(changes.toArray(new String[]{})).toString();
         pushRequest(rq, (HttpURLConnection aConn) -> {
             aConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.JSON_CONTENT_TYPE + ";charset=" + SettingsConstants.COMMON_ENCODING);
             try (OutputStream out = aConn.getOutputStream()) {

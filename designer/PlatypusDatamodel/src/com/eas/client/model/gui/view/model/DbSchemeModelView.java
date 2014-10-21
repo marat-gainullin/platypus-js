@@ -738,27 +738,29 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                 }
                 undoSupport.beginUpdate();
                 try {
+                    List<FieldsEntity> toDelete = new ArrayList<>();
                     for (FieldsEntity tableEntity : tableEntities) {
-                        doDropTable(tableEntity, sqlController, e);
+                        if(doDropTable(tableEntity, sqlController, e)){
+                            toDelete.add(tableEntity);
+                        }
                     }
-                    super.deleteEntities(tableEntities);
+                    super.deleteEntities(toDelete);
                 } finally {
                     undoSupport.endUpdate();
                 }
             }
         }
 
-        protected void doDropTable(FieldsEntity tableEntity, SqlActionsController sqlController, ActionEvent e) {
+        protected boolean doDropTable(FieldsEntity tableEntity, SqlActionsController sqlController, ActionEvent e) {
             EntityView<FieldsEntity> eView = getEntityView(tableEntity);
             DropTableEdit edit = new DropTableEdit(sqlController, tableEntity.getTableName(), eView.getFields(), tableEntity);
             try {
                 edit.redo();
                 undoSupport.postEdit(edit);
+                return true;
             } catch (Exception ex) {
                 int userChoice = JOptionPane.showConfirmDialog(DbSchemeModelView.this, ex.getLocalizedMessage() + " \n" + DbStructureUtils.getString("removeFromDiagram"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-                if (userChoice == JOptionPane.YES_OPTION) {
-                    super.actionPerformed(e);
-                }
+                return userChoice == JOptionPane.YES_OPTION;
             }
         }
 

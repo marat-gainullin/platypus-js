@@ -11,7 +11,6 @@ import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
-import com.eas.client.application.AppClient;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.MarginConstraints;
@@ -888,7 +887,6 @@ public class WidgetsFactory {
 								String tabTooltipText = null;
 								String textOrHtml = "";
 								boolean html = false;
-								PlatypusImageResource imRes = null;
 								if (aConstraintsTag.hasAttribute("tabTitle")) {
 									textOrHtml = aConstraintsTag.getAttribute("tabTitle");
 									if (textOrHtml != null && textOrHtml.startsWith("<html>")) {

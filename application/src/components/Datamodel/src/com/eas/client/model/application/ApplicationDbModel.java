@@ -78,6 +78,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         super.commited();
     }
 
+    @ScriptFunction(jsDoc = REVERT_JSDOC)
     @Override
     public void revert() {
         changeLogs.values().stream().forEach((changeLog) -> {

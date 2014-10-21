@@ -60,14 +60,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         }
     }
 
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * Saves model data changes. Calls onSuccess when done.\n"
-            + " * If model can't apply the changed, than exception is thrown.\n"
-            + " * In this case, application can call model.save() another time to save the changes.\n"
-            + " * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().\n"
-            + " * @param onSuccess Success callback.\n"
-            + " * @param onFailure Failure callback.\n")
+    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
     public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         super.save(aOnSuccess, aOnFailure);
@@ -84,6 +77,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         super.commited();
     }
 
+    @ScriptFunction(jsDoc = REVERT_JSDOC)
     @Override
     public void revert() {
         changeLog.clear();

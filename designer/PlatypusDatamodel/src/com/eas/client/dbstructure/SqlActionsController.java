@@ -118,7 +118,7 @@ public class SqlActionsController {
 
     public abstract class SqlAction {
 
-        protected String errorMessage = null;
+        protected String errorMessage;
 
         public String getErrorString() {
             return errorMessage;
