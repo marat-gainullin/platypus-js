@@ -105,6 +105,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return changeLog;
     }
 
+    public void forEachChange(Consumer<Change> aActor) {
+        changeLogs.entrySet().stream().forEach((Map.Entry<String, List<Change>> aEntry) -> {
+            aEntry.getValue().stream().forEach(aActor);
+        });
+    }
+
     public synchronized ApplicationDbEntity createEntity(String aSqlText) throws Exception {
         return createEntity(aSqlText, null);
     }

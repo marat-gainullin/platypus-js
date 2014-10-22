@@ -5,7 +5,7 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.login.Credentials;
@@ -227,14 +227,15 @@ public class PlatypusClientApplication {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
                         ModelsDocuments models = new ModelsDocuments();
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath());
-                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, config.threadsArgs.getMaxJdbcTreads());
+                        ScriptConfigs scriptsConfigs = new ScriptConfigs();
+                        ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);                        
+                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
                         ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
                         twoTierCore.setQueries(qp);
                         app = new Application() {
 
-                            protected ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
                             protected FormsDocuments forms = new FormsDocuments();
                             protected ReportsConfigs reports = new ReportsConfigs();
 
@@ -269,8 +270,8 @@ public class PlatypusClientApplication {
                             }
 
                             @Override
-                            public ScriptSecurityConfigs getSecurityConfigs() {
-                                return securityConfigs;
+                            public ScriptConfigs getScriptsConfigs() {
+                                return scriptsConfigs;
                             }
 
                         };

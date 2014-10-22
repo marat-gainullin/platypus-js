@@ -19,6 +19,10 @@ public class ScriptedQuery extends SqlQuery {
 
     public static final String JAVASCRIPT_QUERY_CONTENTS = "JavaScript query";
 
+    public ScriptedQuery(ScriptedQuery aSource) {
+        super(aSource);
+    }
+    
     public ScriptedQuery(DatabasesClient aBasesProxy, String aModuleName) {
         super(aBasesProxy);
         publicAccess = true;
@@ -31,8 +35,14 @@ public class ScriptedQuery extends SqlQuery {
     }
 
     @Override
+    public ScriptedQuery copy() {
+        return new ScriptedQuery(this);
+    }
+
+    @Override
     public SqlCompiledQuery compile() throws Exception {
         SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, entityName, sqlText, params, fields);
+        compiled.setParameters(params);
         return compiled;
     }
 

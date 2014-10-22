@@ -5,6 +5,7 @@
 package com.eas.designer.application.project;
 
 import com.eas.client.DatabasesClient;
+import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
@@ -40,6 +41,8 @@ public interface PlatypusProject extends Project {
 
     LocalQueriesProxy getQueries();
 
+    PlatypusIndexer getIndexer();
+    
     boolean isDbConnected(String aDatasourceId);
 
     void startConnecting2db(String aDatasourceId);

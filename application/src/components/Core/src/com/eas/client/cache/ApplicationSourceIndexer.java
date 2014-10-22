@@ -108,7 +108,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
     protected Map<String, AppElementFiles> families = new HashMap<>();
     protected WatchService service;
     protected ScanCallback scanCallback;
-    protected boolean autoScan;
+    protected boolean autoScan = true;
 
     public ApplicationSourceIndexer(String aAppPathName) throws Exception {
         this(aAppPathName, true, null);

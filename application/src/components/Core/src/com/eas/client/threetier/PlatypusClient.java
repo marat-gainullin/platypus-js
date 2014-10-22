@@ -12,7 +12,7 @@ import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.cache.ServerDataStorage;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
@@ -38,7 +38,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     protected QueriesProxy<PlatypusQuery> queries;
     protected ModulesProxy modules;
     protected ServerModulesProxy serverModulesProxy;
-    protected ScriptSecurityConfigs securityConfigs;
+    protected ScriptConfigs securityConfigs;
     protected FormsDocuments forms;
     protected ReportsConfigs reports;
     protected ModelsDocuments models;
@@ -50,7 +50,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         queries = new RemoteQueriesProxy(aConn, this);
         modules = new RemoteModulesProxy(aConn);
         serverModulesProxy = new ServerModulesProxy(aConn);
-        securityConfigs = new ScriptSecurityConfigs();
+        securityConfigs = new ScriptConfigs();
         forms = new FormsDocuments();
         reports = new ReportsConfigs();
         models = new ModelsDocuments();
@@ -76,7 +76,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     }
 
     @Override
-    public ScriptSecurityConfigs getSecurityConfigs() {
+    public ScriptConfigs getScriptsConfigs() {
         return securityConfigs;
     }
 

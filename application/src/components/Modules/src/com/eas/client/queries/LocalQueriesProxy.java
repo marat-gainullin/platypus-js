@@ -19,6 +19,7 @@ import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.ScriptUtils;
 import java.util.Date;
 import java.util.Map;
@@ -77,9 +78,12 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         assert entry != null : "Neither im memory, nor in files query found";
                         query = entry.getValue();
                     }
-                } else {
-                    entries.remove(aName);
-                    query = null;
+                } else {// Let's support in memory only (without underlying files) queries. Used in createEntity().
+                    if (entry != null) {
+                        query = entry.getValue();
+                    }else{
+                        query = null;
+                    }
                 }
             } else {
                 query = null;
@@ -183,6 +187,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     }
 
     protected JSObject createModule(String aModuleName) throws Exception {
+        ScriptedResource.require(new String[]{aModuleName});
         return ScriptUtils.createModule(aModuleName);
     }
 
@@ -225,6 +230,10 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
         } else {
             return null;
         }
+    }
+
+    public void putCachedQuery(String aName, SqlQuery aQuery) {
+        entries.put(aName, new ActualCacheEntry<>(aQuery, new Date()));
     }
 
     public DatabasesClient getCore() {

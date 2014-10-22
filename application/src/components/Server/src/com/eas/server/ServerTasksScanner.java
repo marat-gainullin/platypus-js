@@ -8,7 +8,7 @@ import com.eas.client.AppElementFiles;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import java.io.File;
@@ -33,11 +33,11 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
     private final Set<String> residents = new HashSet<>();
 
     private final Map<String, Collection<String>> validators = new HashMap<>();
-    private final ScriptSecurityConfigs securityConfigs;
+    private final ScriptConfigs scriptsConfigs;
 
-    public ServerTasksScanner(ScriptSecurityConfigs aSecurityConfigs) {
+    public ServerTasksScanner(ScriptConfigs aSecurityConfigs) {
         super();
-        securityConfigs = aSecurityConfigs;
+        scriptsConfigs = aSecurityConfigs;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
             try {
                 AppElementFiles files = new AppElementFiles();
                 files.addFile(file);
-                ScriptDocument doc = securityConfigs.get(aAppElementName, files);
+                ScriptDocument doc = scriptsConfigs.get(aAppElementName, files);
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     annotations.stream().forEach((JsDoc.Tag tag) -> {
@@ -89,7 +89,7 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
                     });
                 }
             } catch (Exception ex) {
-                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ServerTasksScanner.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

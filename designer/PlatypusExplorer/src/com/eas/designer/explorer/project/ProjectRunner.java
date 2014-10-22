@@ -4,7 +4,9 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.client.AppElementFiles;
 import com.eas.client.application.PlatypusClientApplication;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.platform.PlatformHomePathException;
@@ -23,7 +25,6 @@ import com.eas.server.PlatypusServer;
 import com.eas.util.FileUtils;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -145,7 +146,7 @@ public class ProjectRunner {
         project.getRequestProcessor().post(() -> {
             try {
                 start(project, appElementName, false);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
         });
@@ -164,20 +165,22 @@ public class ProjectRunner {
         project.getRequestProcessor().post(() -> {
             try {
                 start(project, appElementName, true);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
         });
     }
 
-    private static void start(PlatypusProject project, String appElementName, boolean debug) throws IOException {
+    private static void start(PlatypusProject project, String appElementName, boolean debug) throws Exception {
         if (appElementName != null && !appElementName.isEmpty()) {
             FileObject appSrcDir = project.getSrcRoot();
             FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettings.START_JS_FILE_NAME);
             if (startJs == null) {
                 startJs = appSrcDir.createData(PlatypusProjectSettings.START_JS_FILE_NAME);
             }
-            String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName);
+            AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
+            String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION)?"show":"execute";
+            String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName, startMethod);
             FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
         } else {
             throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set"));

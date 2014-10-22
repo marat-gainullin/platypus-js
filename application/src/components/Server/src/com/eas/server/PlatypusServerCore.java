@@ -16,7 +16,7 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
@@ -53,7 +53,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             if (aApplicationUrl.toLowerCase().startsWith("file")) {
                 File f = new File(new URI(aApplicationUrl));
                 if (f.exists() && f.isDirectory()) {
-                    ScriptSecurityConfigs lsecurityConfigs = new ScriptSecurityConfigs();
+                    ScriptConfigs lsecurityConfigs = new ScriptConfigs();
                     ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
                     ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                     indexer.watch();
@@ -86,12 +86,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ModulesProxy modules;
     protected QueriesProxy<SqlQuery> queries;
     protected final Set<String> extraAuthorizers = new HashSet<>();
-    protected ScriptSecurityConfigs securityConfigs;
+    protected ScriptConfigs scriptsConfigs;
     protected FormsDocuments forms = new FormsDocuments();
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptConfigs aSecurityConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
@@ -99,7 +99,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         basesProxy = aDatabasesClient;
         sessionManager = new SessionManager(this);
         defaultAppElement = aDefaultAppElement;
-        securityConfigs = aSecurityConfigs;
+        scriptsConfigs = aSecurityConfigs;
         extraAuthorizers.addAll(aAuthorizers);
     }
 
@@ -118,8 +118,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     }
 
     @Override
-    public ScriptSecurityConfigs getSecurityConfigs() {
-        return securityConfigs;
+    public ScriptConfigs getScriptsConfigs() {
+        return scriptsConfigs;
     }
 
     @Override
