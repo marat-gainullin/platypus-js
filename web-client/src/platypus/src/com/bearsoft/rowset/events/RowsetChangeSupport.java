@@ -153,17 +153,19 @@ public class RowsetChangeSupport {
 					}
 				}
 			}
-			if (res) {
-				for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-					if (l != null) {
-						l.beforeRequery(event);
-					}
-				}
-			}
 		}
 		return res;
 	}
 
+	public void fireBeforeRequery(){
+		RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.BEFORE);
+		for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
+			if (l != null) {
+				l.beforeRequery(event);
+			}
+		}
+	}
+	
 	/**
 	 * Fires <code>willFilter</code> event to all registered listeners. The
 	 * filtering might be vetoed by one of the registered listeners. Nevetheless

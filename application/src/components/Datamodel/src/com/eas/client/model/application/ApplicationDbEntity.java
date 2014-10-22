@@ -72,6 +72,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             + "*/";
 
     @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
+    @Override
     public void enqueueUpdate() throws Exception {
         List<Change> log = getChangeLog();
         Command command = getQuery().compile().prepareCommand();

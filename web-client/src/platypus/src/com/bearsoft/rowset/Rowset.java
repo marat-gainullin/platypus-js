@@ -24,7 +24,6 @@ import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.events.RowsetChangeSupport;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
@@ -55,14 +54,13 @@ import com.google.gwt.core.client.Callback;
  * 
  * @author mg
  */
-public class Rowset implements PropertyChangeListener, VetoableChangeListener, TransactionListener {
+public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 
 	public static final String BAD_FLOW_PROVIDER_RESULT_MSG = "Flow Provider must return at least an empty rowset";
 	// multi-tier transactions support
 	protected String sessionId;
 	// support for data flows.
 	protected FlowProvider flow;
-	protected TransactionListener.Registration transactionRegisration;
 	// rowset's metadata
 	protected Fields fields;
 	// rowset's data
@@ -80,8 +78,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	protected PropertyChangeSupport propertyChangeSupport;
 	protected RowsetChangeSupport rowsetChangeSupport;
 	protected OrderersFactory orderersFactory;
-	protected boolean pending;
-	protected boolean transacted;
 	protected boolean immediateFilter = true;
 	protected boolean modified;
 
@@ -139,13 +135,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 		flow = aFlowProvider;
 	}
 
-	// multi-tier transactions support
-	@Override
+	// changes management support
 	public void commited() throws Exception {
-		if (transactionRegisration != null) {
-			transactionRegisration.remove();
-			transactionRegisration = null;
-		}
 		final Set<RowsetListener> lrowsetListeners = rowsetChangeSupport.getRowsetListeners();
 		rowsetChangeSupport.setRowsetListeners(null);
 		try {
@@ -156,12 +147,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 		rowsetChangeSupport.fireSavedEvent();
 	}
 
-	@Override
 	public void rolledback() throws Exception {
-		if (transactionRegisration != null) {
-			transactionRegisration.remove();
-			transactionRegisration = null;
-		}
 		final Set<RowsetListener> lrowsetListeners = rowsetChangeSupport.getRowsetListeners();
 		rowsetChangeSupport.setRowsetListeners(null);
 		try {
@@ -292,25 +278,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	public void setActiveFilter(Filter aValue) {
 		activeFilter = aValue;
 	}
-
-	public boolean isPending() {
-		return pending;
-	}
-
-	/**
-	 * Returns whether this rowset is transacted. If it's transacted, the rowset
-	 * will not fire the saved event and will not call currentToOriginal method
-	 * after appling changes. It will be done by somebody at the commit. If this
-	 * rowset is not transacted, than it will act as standalone rowset and will
-	 * call currentToOriginal method and fire the saved event.
-	 * 
-	 * @return Whether this rowset is transacted.
-	 * @see #setTransacted(boolean)
-	 */
-	public boolean isTransacted() {
-		return transacted;
-	}
-
 	/**
 	 * Retruns this rowset's modified status.
 	 * 
@@ -331,21 +298,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	 */
 	public void setModified(boolean aValue) {
 		modified = aValue;
-	}
-
-	/**
-	 * Sets the transacted flag. The flag is described in isTransacted() method
-	 * doc.
-	 * 
-	 * @param transacted
-	 * @see #isTransacted()
-	 */
-	public void setTransacted(boolean aTransacted) {
-		boolean oldValue = transacted;
-		if (transacted != aTransacted) {
-			transacted = aTransacted;
-			propertyChangeSupport.firePropertyChange("transacted", oldValue, transacted);
-		}
 	}
 
 	/**
@@ -391,47 +343,51 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	public Cancellable refresh(Parameters aParams, final Callback<Rowset, String> aCallback) throws Exception {
 		if (flow != null) {
 			if (rowsetChangeSupport.fireWillRequeryEvent()) {
-				pending = true;
-				return flow.refresh(aParams, new CallbackAdapter<Rowset, String>() {
-
-					@Override
-					protected void doWork(Rowset aRowset) throws Exception {
-						if (aRowset != null) {
-							if (activeFilter != null && activeFilter.isApplied()) {
-								activeFilter.deactivate(); // No implicit calls
-								                           // to setCurrent and
-								                           // etc.
-								activeFilter = null;
+				rowsetChangeSupport.fireBeforeRequery();
+				if(aCallback != null){
+					return flow.refresh(aParams, new CallbackAdapter<Rowset, String>() {
+	
+						@Override
+						protected void doWork(Rowset aRowset) throws Exception {
+							if (aRowset != null) {
+								if (activeFilter != null && activeFilter.isApplied()) {
+									activeFilter.deactivate(); // No implicit calls
+									                           // to setCurrent and
+									                           // etc.
+									activeFilter = null;
+								}
+								if (fields == null) {
+									setFields(aRowset.getFields());
+								}
+								List<Row> rows = aRowset.getCurrent();
+								aRowset.setCurrent(new ArrayList<Row>());
+	                            aRowset.currentToOriginal();
+								setCurrent(rows);
+								currentToOriginal();
+								invalidateFilters();
+	                            // silent first
+	                            if (!current.isEmpty()) {
+	                                currentRowPos = 1;
+	                            }
+	                            rowsetChangeSupport.fireRequeriedEvent();
+	                            aCallback.onSuccess(Rowset.this);
+							} else {
+								throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
 							}
-							if (fields == null) {
-								setFields(aRowset.getFields());
-							}
-							List<Row> rows = aRowset.getCurrent();
-							aRowset.setCurrent(new ArrayList<Row>());
-							setCurrent(rows);
-							currentToOriginal();
-							invalidateFilters();
-							silentFirst();
-							pending = false;
-							rowsetChangeSupport.fireRequeriedEvent();
-							if(aCallback != null)
-								aCallback.onSuccess(aRowset);
-						} else {
-							throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
 						}
-					}
-					
-					@Override
-					public void onFailure(String reason) {
-						pending = false;
-						if (reason == null)
-							reason = "Unknown network error. May be cancelled.";
-						rowsetChangeSupport.fireNetErrorEvent(reason);
-						if (aCallback != null)
+						
+						@Override
+						public void onFailure(String reason) {
+							if (reason == null)
+								reason = "Unknown network error. May be cancelled.";
+							rowsetChangeSupport.fireNetErrorEvent(reason);
 							aCallback.onFailure(reason);
-					}
-
-				});
+						}
+	
+					});
+				}else{
+					
+				}
 			}
 			return null;
 		} else {
@@ -1908,9 +1864,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
 	protected void generateInsert(Row aRow) {
 		if (flow != null && flow.getChangeLog() != null) {
-			if (transactionRegisration == null) {
-				transactionRegisration = flow.addTransactionListener(this);
-			}
 			List<Change> changesLog = flow.getChangeLog();
 			Insert insert = new Insert(flow.getEntityId());
 			List<Change.Value> data = new ArrayList<>();
@@ -1949,9 +1902,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
 	protected void generateUpdate(int colIndex, Row aRow, Object oldValue, Object newValue) {
 		if (fields != null && flow != null && flow.getChangeLog() != null) {
-			if (transactionRegisration == null) {
-				transactionRegisration = flow.addTransactionListener(this);
-			}
 			List<Change> changesLog = flow.getChangeLog();
 			Field field = fields.get(colIndex);
 			boolean insertComplemented = tryToComplementInsert(aRow, field, newValue);
@@ -1966,9 +1916,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
 	protected void generateDelete(Row aRow) {
 		if (flow != null && flow.getChangeLog() != null) {
-			if (transactionRegisration == null) {
-				transactionRegisration = flow.addTransactionListener(this);
-			}
 			List<Change> changesLog = flow.getChangeLog();
 			Delete delete = new Delete(flow.getEntityId());
 			delete.keys = generateChangeLogKeys(-1, aRow, null);

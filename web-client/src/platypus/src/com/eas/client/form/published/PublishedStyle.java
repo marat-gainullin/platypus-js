@@ -12,6 +12,14 @@ public final class PublishedStyle extends JavaScriptObject {
 		return new $wnd.P.Style();
 	}-*/;
 
+	public final native Runnable getIconCallback()/*-{
+		return this.iconCallback;
+	}-*/;
+	
+	public final native void setIconCallback(Runnable aCallback)/*-{
+		this.iconCallback = aCallback;
+	}-*/;
+
 	public final native PublishedColor getBackground()/*-{
 		return this.background;
 	}-*/;

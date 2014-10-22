@@ -24,7 +24,7 @@
                 <id>jar</id>
             </reference>
             <reference>
-                <foreign-project>PlatypusDeploy</foreign-project>
+                <foreign-project>Deploy</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>
@@ -176,7 +176,7 @@
                 <id>jar</id>
             </reference>
             <reference>
-                <foreign-project>PlatypusServletSupport</foreign-project>
+                <foreign-project>ServletSupport</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>

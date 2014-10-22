@@ -18,6 +18,7 @@ public class Servlet implements ElementConvertable {
     public static final String SERVLET_NAME_TAG_NAME = "servlet-name";//NOI18N
     public static final String SERVLET_CLASS_TAG_NAME = "servlet-class";//NOI18N
     public static final String LOAD_ON_STARTUP_TAG_NAME = "load-on-startup";//NOI18N
+    public static final String ASYNC_SUPPORTED_TAG_NAME = "async-supported";
     private String servletName;
     private String servletClass;
     private String loadOnStartup;
@@ -74,6 +75,9 @@ public class Servlet implements ElementConvertable {
             loadOnStartupElement.setTextContent(loadOnStartup);
             element.appendChild(loadOnStartupElement);
         }
+        Element asyncSupportedElement = aDoc.createElement(ASYNC_SUPPORTED_TAG_NAME);
+        asyncSupportedElement.setTextContent("" + true);
+        element.appendChild(asyncSupportedElement);
         if (multipartConfig != null) {
             element.appendChild(multipartConfig.getElement(aDoc));
         }

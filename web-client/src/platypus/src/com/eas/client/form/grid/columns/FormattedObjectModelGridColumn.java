@@ -6,7 +6,6 @@ import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.RenderedCellContext;
@@ -51,10 +50,9 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 							if(context instanceof RenderedCellContext){
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
-							FormattedObjectModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
-							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
-								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
-								FormattedObjectModelGridColumn.this.bindIconCallback(decorId, pImage);
+							FormattedObjectModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);
+							if(cellToRender.getStyle() != null){
+								ModelGridColumn.bindIconCallback(cellToRender.getStyle(), decorId);
 							}
 						}
 					} catch (Exception e) {

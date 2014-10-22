@@ -8,7 +8,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.util.ListenerRegistration;
 import java.util.List;
 import java.util.function.Consumer;
 

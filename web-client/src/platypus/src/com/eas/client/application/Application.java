@@ -4,10 +4,8 @@
  */
 package com.eas.client.application;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Formatter;
@@ -15,12 +13,10 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
-import com.eas.client.RunnableAdapter;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
@@ -30,7 +26,6 @@ import com.eas.client.model.js.JsModel;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.logging.client.LogConfiguration;
 
 /**
@@ -74,13 +69,14 @@ public class Application {
 	}
 
 	public static Query putAppQuery(Query aQuery) {
-		return appQueries.put(aQuery.getEntityId(), aQuery);
+		return appQueries.put(aQuery.getEntityName(), aQuery);
 	}
 	
 	public static native JavaScriptObject createReport(String reportLocation)/*-{
 		return new $wnd.P.Report(reportLocation);
 	}-*/;
 
+	/*
 	protected static class ExecuteApplicationCallback extends RunnableAdapter {
 
 		protected String startForm;
@@ -99,16 +95,10 @@ public class Application {
 			}
 			loaderHandlerRegistration.removeHandler();
 			onReady();
-			showForm(startForm);
-		}
-		
-		protected native void showForm(String aModuleId)/*-{
-			var m = $wnd.P.Modules.get(aModuleId);
-			if(m.show){
-				m.show();
-			}
-		}-*/;
+		}		
 	}
+	*/
+	
 	/**
 	 * This method is publicONLY because of tests!
 	 * 
@@ -156,7 +146,7 @@ public class Application {
 			});
 		}
 		
-	     // this === global;
+	    // this === global;
 	    var global = $wnd;
 	    if(!global.P){
 	        var oldP = global.P;
@@ -166,10 +156,10 @@ public class Application {
 	            global.P = oldP;
 	            return ns;
 	        };
-	         //global.P = this; // global scope of api - for legacy applications
-	         //global.P.restore = function() {
-	         //throw 'Legacy API can not restore the global namespace.';
-	         //};
+	        //global.P = this; // global scope of api - for legacy applications
+	        //global.P.restore = function() {
+	        //throw 'Legacy API can not restore the global namespace.';
+	        //};
 	    }
 		
 		$wnd.P.selectFile = function(aCallback) {
@@ -182,30 +172,33 @@ public class Application {
 		
 		$wnd.P.Resource = {};
 		Object.defineProperty($wnd.P.Resource, "upload", {get : function(){
-				return function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
-					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aCompleteCallback, aProgressCallback, aAbortCallback);
+				return function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
+					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback);
 				}
 		}});
 		Object.defineProperty($wnd.P.Resource, "load", {get : function(){
-		        return function(aResName, onSuccess, onFailure){
-	            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, false));
-		        };
+	        return function(aResName, onSuccess, onFailure){
+            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+	        };
 		}});
 		
-		Object.defineProperty($wnd.P.Resource, "loadText", {get : function(){
-		        return function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aOnFailure){
-		        	var onSuccess = aOnSuccessOrEncoding;
-		        	var onFailure = aOnSuccessOrOnFailure;
-		        	if(typeof onSuccess != "function"){
-		        		onSuccess = aOnSuccessOrOnFailure;
-		        		onFailure = aOnFailure;
-		        	}
-		        	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, true));
-		        };
-		}});
+		var principal = {};
 		
+		Object.defineProperty(principal, "name", {get: function(){
+			var appClient = @com.eas.client.application.AppClient::getInstance()();
+			return '' + appClient.@com.eas.client.application.AppClient::getPrincipal();
+		}});
+		Object.defineProperty(principal, "hasRole", {value: function(){
+			return true;
+		}});
+		Object.defineProperty(principal, "logout", {value: function(onSuccess, onFailure){
+			var appClient = @com.eas.client.application.AppClient::getInstance()();
+			return appClient.@com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+		}});
+		Object.defineProperty($wnd.P, "principal", {value: principal});
+		// legacy API
 		$wnd.P.logout = function(onSuccess, onFailure) {
-			return @com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+			return principal.logout(onSuccess, onFailure);
 		}
 		
 		$wnd.P.getElementComputedStyle = function(_elem) {
@@ -588,7 +581,7 @@ public class Application {
 		$wnd.P.loadModel = function(appElementName, aTarget) {
 			if(!aTarget)
 				aTarget = {};
-			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
 			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			return aTarget;
@@ -596,9 +589,9 @@ public class Application {
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
 			if(!aTarget)
 				aTarget = {};
-			var appElementDoc = aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementName);
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = !!aModel ? aModel.unwrap() : null;
-			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, nativeModel, aTarget);
+			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Ljava/lang/String;Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementName, appElementDoc, nativeModel, aTarget);
 			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			return aTarget;
 		};
@@ -688,7 +681,7 @@ public class Application {
 				}
 				var nativeClient = @com.eas.client.application.AppClient::getInstance()();
 				if(onSuccess) {
-					nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
+					nativeClient.@com.eas.client.application.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
 						function(aResult){
 							if(typeof aResult === 'object' && aResult instanceof Report)
 								onSuccess(aResult);
@@ -696,7 +689,7 @@ public class Application {
 								onSuccess(parseDates(JSON.parse(aResult)));
 						}, onFailure);
 				} else {
-					var result = nativeClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
+					var result = nativeClient.@com.eas.client.application.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
 					return typeof result === 'object' && result instanceof Report ? result : parseDates(JSON.parse(result)); 
 				}
 			};
@@ -736,10 +729,12 @@ public class Application {
 			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aOnSuccess, aOnFailure);
 		} 
 		function _Icons() {
-			this.load = function(aIconName) {
-				var appClient = @com.eas.client.application.AppClient::getInstance()();
-				return appClient.@com.eas.client.application.AppClient::getImageResource(Ljava/lang/String;)(aIconName != null ? '' + aIconName : null);
-			}
+			var _self = this;
+			Object.defineProperty(_self, "load", { 
+				value: function(aIconName, aOnSuccess, aOnFailure) {
+					@com.eas.client.application.PlatypusImageResource::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aIconName != null ? '' + aIconName : null, aOnSuccess, aOnFailure);
+				} 
+			});
 		}
 		$wnd.P.Icon = new _Icons();
 		$wnd.P.Icons = $wnd.P.Icon;
@@ -949,6 +944,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_icon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		    Object.defineProperty(_self, "folderIcon", {
@@ -960,6 +957,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_folderIcon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		    Object.defineProperty(_self, "openFolderIcon", {
@@ -971,6 +970,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_openFolderIcon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		    Object.defineProperty(_self, "leafIcon", {
@@ -982,6 +983,8 @@ public class Application {
 		    	},
 		    	set : function(aValue){
 		    		_leafIcon = aValue;
+		    		if(_self.iconCallback)
+		    			_self.iconCallback();
 		    	}
 		    });
 		}
@@ -1026,14 +1029,28 @@ public class Application {
 		JsModelWidgets.init();
 		JsEvents.init();
 		loader = new Loader(client);
+		/*
 		Set<Element> indicators = extractPlatypusProgressIndicators();
 		for (Element el : indicators) {
 			el.<XElement> cast().loadMask();
 		}
+		*/
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
-		startAppElements(client, indicators);
+		client.requestLoggedInUser(new CallbackAdapter<String, String>() {
+
+			@Override
+			protected void doWork(String aResult) throws Exception {
+				onReady();
+			}
+
+			@Override
+			public void onFailure(String reason) {	
+				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
+			}
+		});
 	}
 
+	/*
 	private static Set<Element> extractPlatypusProgressIndicators() {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
@@ -1051,103 +1068,46 @@ public class Application {
 		}
 		return platypusIndicators;
 	}
+	*/
 
 	protected static native void onReady()/*-{
 		if ($wnd.P.ready)
 			$wnd.P.ready();
 	}-*/;
 
-	protected static void startAppElements(AppClient client, final Set<Element> aIndicators) throws Exception {
-		client.getStartElement(new CallbackAdapter<String, Void>() {
-
-			@Override
-			protected void doWork(String aResult) throws Exception {
-				if (aResult != null && !aResult.isEmpty()) {
-					List<String> toLoad= new ArrayList<>();
-					toLoad.add(aResult);
-					loader.load(toLoad, new ExecuteApplicationCallback(aResult, aIndicators));
-				} else {
-					for (Element el : aIndicators) {
-						el.<XElement> cast().unmask();
-					}
-					onReady();
-				}
-			}
-
-			@Override
-			public void onFailure(Void reason) {
-				for (Element el : aIndicators) {
-					el.<XElement> cast().unmask();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Avoiding parallel Loader.load() calls like this: require(["Module1",
-	 * "Module2", "Module3", "Module4"], function(){}); require(["Module0",
-	 * "Module2", "Module5", "Module7"], function(){}); Here, loader will be
-	 * called twice form "Module2" in parallel.
-	 */
-	protected static boolean requiring;
-
-	protected static class RequireProcess {
-		public JavaScriptObject deps;
-		public JavaScriptObject onSuccess;
-		public JavaScriptObject onFailure;
-
-		public RequireProcess(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
-			deps = aDeps;
-			onSuccess = aOnSuccess;
-			onFailure = aOnFailure;
-		}
-	}
-
-	protected static List<RequireProcess> requireProcesses = new ArrayList<RequireProcess>();
-
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
-			if (!loader.isLoaded(dep))
-				deps.add(dep);
+			deps.add(dep);
 		}
-		if (!requiring) {
-			requiring = true;
-			try {
-				loader.prepareOptimistic();
-				loader.load(deps, new RunnableAdapter() {
-
-					@Override
-					protected void doWork() throws Exception {
-						requiring = false;
+		try {
+			loader.load(deps, new CallbackAdapter<Void, String>() {
+				
+				@Override
+				public void onFailure(String reason) {
+					if (aOnFailure != null){
 						try {
-							if (deps.isEmpty() || loader.isLoaded(deps)) {
-								if (aOnSuccess != null)
-									Utils.invokeJsFunction(aOnSuccess);
-								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
-							} else {
-								if (aOnFailure != null)
-									Utils.invokeJsFunction(aOnFailure);
-								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
-							}
-						} finally {
-							if (!requireProcesses.isEmpty()) {
-								RequireProcess p = requireProcesses.remove(0);
-								assert p != null;
-								require(p.deps, p.onSuccess, p.onFailure);
-							}
-						}
+	                        Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
+                        } catch (Exception ex) {
+    						Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+					}else{
+						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 					}
-				});
-			} catch (Exception ex) {
-				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		} else {
-			requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
+				}
+				
+				@Override
+                protected void doWork(Void aResult) throws Exception {
+					if (aOnSuccess != null)
+						Utils.invokeJsFunction(aOnSuccess);
+					else
+						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
+                }
+			});
+		} catch (Exception ex) {
+			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 }

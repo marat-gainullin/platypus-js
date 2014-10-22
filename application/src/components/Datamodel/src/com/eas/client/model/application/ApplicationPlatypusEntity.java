@@ -39,8 +39,9 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
             + "*/";
 
     @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
+    @Override
     public void enqueueUpdate() throws Exception {
-        model.getServerProxy().enqueueUpdate(getQueryName(), getQuery().getParameters());
+        model.getChangeLog().add(getQuery().prepareCommand());
     }
 
     @Override

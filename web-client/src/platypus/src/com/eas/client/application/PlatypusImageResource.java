@@ -1,10 +1,13 @@
 package com.eas.client.application;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
-import com.eas.client.ImageResourceCallback;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Position;
@@ -19,67 +22,81 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class PlatypusImageResource implements ImageResource {
 
-	protected AppClient client;
 	protected String name;
 	protected int width;
 	protected int height;
-	protected boolean pending = true;
-	protected List<ImageResourceCallback> javaCallbacks = new ArrayList<>();
-	protected List<JavaScriptObject> jsCallbacks = new ArrayList<>();
+	private static Map<String, ImageResource> iconsCache = new HashMap<String, ImageResource>();
 
-	public PlatypusImageResource(AppClient aClient, String aName) {
-		client = aClient;
+	public PlatypusImageResource(String aName, int aWidth, int aHeight) {
+		super();
 		name = aName;
-		final Image im = new Image(getSafeUri());
-		im.addLoadHandler(new LoadHandler() {
+		width = aWidth;
+		height = aHeight;
+	}
+
+	public static void jsLoad(final String aName, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		load(aName, new CallbackAdapter<ImageResource, String>() {
+
 			@Override
-			public void onLoad(LoadEvent event) {
-				width = im.getWidth();
-				height = im.getHeight();
-				im.removeFromParent();
-				try {
-					for (ImageResourceCallback javaCallback : javaCallbacks)
-						javaCallback.run(PlatypusImageResource.this);
-					for (JavaScriptObject jsCallback : jsCallbacks)
-						Utils.invokeJsFunction(jsCallback);
-				} finally {
-					javaCallbacks.clear();
-					jsCallbacks.clear();
-					pending = false;
+			public void onFailure(String reason) {
+				if (aOnFailure != null) {
+					try {
+						Utils.executeScriptEventVoid(null, aOnFailure, reason);
+					} catch (Exception ex) {
+						Logger.getLogger(PlatypusImageResource.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 			}
-		});
-		im.addErrorHandler(new ErrorHandler() {
+
 			@Override
-			public void onError(ErrorEvent event) {
-				im.removeFromParent();
-				javaCallbacks.clear();
-				jsCallbacks.clear();
-				pending = false;
+			protected void doWork(ImageResource aResult) throws Exception {
+				if (aOnSuccess != null) {
+					Utils.executeScriptEventVoid(null, aOnSuccess, aResult);
+				}
 			}
+
 		});
-
-		im.setVisible(false);
-		im.getElement().getStyle().setPosition(Position.ABSOLUTE);
-		im.getElement().getStyle().setLeft(-Integer.MAX_VALUE / 2, Style.Unit.PX);
-		im.getElement().getStyle().setTop(-Integer.MAX_VALUE / 2, Style.Unit.PX);
-		RootPanel.get().add(im);
 	}
 
-	public PlatypusImageResource addCallback(ImageResourceCallback aCallback) {
-		if (pending)
-			javaCallbacks.add(aCallback);
-		return this;
-	}
-
-	public PlatypusImageResource addCallback(JavaScriptObject aCallback) {
-		if (pending)
-			jsCallbacks.add(aCallback);
-		return this;
-	}
-
-	public boolean isPending() {
-		return pending;
+	public static void load(final String aName, final Callback<ImageResource, String> aCallback) {
+		if (aName != null && !aName.isEmpty()) {
+			if (iconsCache.containsKey(aName)) {
+				ImageResource loaded = iconsCache.get(aName);
+				if (aCallback != null) {
+					aCallback.onSuccess(loaded);
+				}
+			} else {
+				SafeUri imageUri = AppClient.getInstance().getResourceUri(aName);
+				final Image im = new Image(imageUri);
+				im.addLoadHandler(new LoadHandler() {
+					@Override
+					public void onLoad(LoadEvent event) {
+						int imWidth = im.getWidth();
+						int imHeight = im.getHeight();
+						im.removeFromParent();
+						ImageResource loaded = new PlatypusImageResource(aName, imWidth, imHeight);
+						iconsCache.put(aName, loaded);
+						if (aCallback != null) {
+							aCallback.onSuccess(loaded);
+						}
+					}
+				});
+				im.addErrorHandler(new ErrorHandler() {
+					@Override
+					public void onError(ErrorEvent event) {
+						im.removeFromParent();
+						if (aCallback != null) {
+							aCallback.onFailure("Error while loading an image " + aName);
+						}
+					}
+				});
+				im.setVisible(false);
+				im.getElement().getStyle().setPosition(Position.ABSOLUTE);
+				im.getElement().getStyle().setLeft(-Integer.MAX_VALUE / 2, Style.Unit.PX);
+				im.getElement().getStyle().setTop(-Integer.MAX_VALUE / 2, Style.Unit.PX);
+				RootPanel.get().add(im);
+			}
+		}
 	}
 
 	@Override
@@ -99,7 +116,7 @@ public class PlatypusImageResource implements ImageResource {
 
 	@Override
 	public SafeUri getSafeUri() {
-		return client.getResourceUri(name);
+		return AppClient.getInstance().getResourceUri(name);
 	}
 
 	@Override

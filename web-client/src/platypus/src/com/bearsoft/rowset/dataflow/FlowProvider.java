@@ -48,6 +48,4 @@ public interface FlowProvider {
      */
     public List<Change> getChangeLog();
 
-    public TransactionListener.Registration addTransactionListener(TransactionListener aListener);
-    
 }

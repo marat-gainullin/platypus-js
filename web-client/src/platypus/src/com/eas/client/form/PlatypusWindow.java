@@ -26,8 +26,8 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
-import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.js.JsEvents;
@@ -147,12 +147,17 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		caption.setHTML(title);
 		caption.setText(title);
 		if (iconImage != null && !iconImage.isEmpty())
-			setIcon(AppClient.getInstance().getImageResource(iconImage).addCallback(new ImageResourceCallback() {
+			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
 				@Override
-				public void run(PlatypusImageResource aResource) {
-					setIcon(aResource);
+				protected void doWork(ImageResource aResult) throws Exception {
+					setIcon(aResult);
 				}
-			}));
+
+				@Override
+				public void onFailure(String reason) {
+					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Window failed to load title icon. " + reason);
+				}
+			});
 		registerWindowListeners();
 	}
 
@@ -312,10 +317,10 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 			@Override
 			public void onActivate(ActivateEvent<WindowUI> event) {
-				for(WindowUI w : showingForms.values()){
-					if(w != event.getTarget() && w instanceof PlatypusWindow){
-						PlatypusWindow pw = (PlatypusWindow)w;
-						if(!(pw.getParent() instanceof DesktopPane)){
+				for (WindowUI w : showingForms.values()) {
+					if (w != event.getTarget() && w instanceof PlatypusWindow) {
+						PlatypusWindow pw = (PlatypusWindow) w;
+						if (!(pw.getParent() instanceof DesktopPane)) {
 							w.setActive(false);
 						}
 					}
@@ -484,12 +489,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         		return aForm.@com.eas.client.form.PlatypusWindow::getIcon()();
         	},
         	set : function(aValue){
-				var setterCallback = function(){
-        			aForm.@com.eas.client.form.PlatypusWindow::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
-				};
-				if(aValue != null)
-					aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
-				setterCallback();
+      			aForm.@com.eas.client.form.PlatypusWindow::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
         	}
         });
         Object.defineProperty(aPublished, "title", {

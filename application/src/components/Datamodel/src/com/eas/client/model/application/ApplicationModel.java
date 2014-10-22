@@ -68,12 +68,12 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         protected String assembleErrors() {
             if (errors != null && !errors.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
-                for (E entity : errors.keySet()) {
+                errors.entrySet().stream().forEach((Map.Entry<E, Exception> entry) -> {
                     if (sb.length() > 0) {
                         sb.append("\n");
                     }
-                    sb.append(errors.get(entity).getMessage()).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
-                }
+                    sb.append(entry.getValue().getMessage()).append(" (").append(entry.getKey().getName()).append("[ ").append(entry.getKey().getTitle()).append("])");
+                });
                 return sb.toString();
             }
             return null;
@@ -149,17 +149,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     private Set<E> rootEntities() {
         final Set<E> rootEntities = new HashSet<>();
-        for (E entity : entities.values()) {
+        entities.values().stream().forEach((E entity) -> {
             Set<Relation> dependanceRels = new HashSet<>();
-            for (Relation inRel : entity.getInRelations()) {
+            entity.getInRelations().stream().forEach((Relation inRel) -> {
                 if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
                     dependanceRels.add(inRel);
                 }
-            }
+            });
             if (dependanceRels.isEmpty()) {
                 rootEntities.add(entity);
             }
-        }
+        });
         return rootEntities;
     }
 
@@ -281,12 +281,12 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     protected void checkReferenceRelationsIntegrity() {
         List<ReferenceRelation<E>> toDel = new ArrayList<>();
-        for (ReferenceRelation<E> rel : referenceRelations) {
+        referenceRelations.stream().forEach((ReferenceRelation<E> rel) -> {
             if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
                     || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
                 toDel.add(rel);
             }
-        }
+        });
         toDel.stream().forEach((rel) -> {
             removeReferenceRelation(rel);
         });
@@ -338,7 +338,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return false;
     }
 
-    private static final String SAVE_JSDOC = ""
+    protected static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
@@ -383,7 +383,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         save(null, null);
     }
 
-    private static final String REVERT_JSDOC = ""
+    protected static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
             + "* After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"
@@ -553,11 +553,11 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     public Set<ReferenceRelation<E>> getReferenceRelationsByEntity(E aEntity) {
         Set<ReferenceRelation<E>> res = new HashSet<>();
-        for (ReferenceRelation<E> rel : referenceRelations) {
+        referenceRelations.stream().forEach((ReferenceRelation<E> rel) -> {
             if (rel.getLeftEntity() == aEntity || rel.getRightEntity() == aEntity) {
                 res.add(rel);
             }
-        }
+        });
         return res;
     }
 

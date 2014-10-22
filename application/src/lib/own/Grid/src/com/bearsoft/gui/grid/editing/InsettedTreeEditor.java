@@ -20,6 +20,7 @@ import javax.swing.table.TableCellRenderer;
 /**
  *
  * @author Gala
+ * @param <T>
  */
 public class InsettedTreeEditor<T> extends InsettedEditor {
 
@@ -123,9 +124,10 @@ public class InsettedTreeEditor<T> extends InsettedEditor {
                 if (treeLeadingComponent.getNodeIcon() != null) {
                     prefWidth -= treeLeadingComponent.getNodeIcon().getIconWidth();
                 }
+                int legsIconWidth = treeLeadingComponent.getLegsIcon() != null ? treeLeadingComponent.getLegsIcon().getIconWidth() : 0;
                 if (SwingUtilities.isLeftMouseButton(mEvent)
                         && tablePoint.x - cellRectangle.x <= prefWidth
-                        && tablePoint.x - cellRectangle.x >= prefWidth - treeLeadingComponent.getLegsIcon().getIconWidth() - 3) {
+                        && tablePoint.x - cellRectangle.x >= prefWidth - legsIconWidth - 3) {
                     return true;
                 }
             }

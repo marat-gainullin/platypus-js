@@ -239,8 +239,8 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.PlatypusServletSupport}" name="call.subproject"/>
-            <param location="${project.PlatypusServletSupport}/build.xml" name="call.script"/>
+            <param location="${project.ServletSupport}" name="call.subproject"/>
+            <param location="${project.ServletSupport}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>
@@ -253,8 +253,8 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.PlatypusDeploy}" name="call.subproject"/>
-            <param location="${project.PlatypusDeploy}/build.xml" name="call.script"/>
+            <param location="${project.Deploy}" name="call.subproject"/>
+            <param location="${project.Deploy}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>
@@ -284,8 +284,8 @@
         <subant buildpath="${project.Forms}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Application}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Server}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.PlatypusServletSupport}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.PlatypusDeploy}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.ServletSupport}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Deploy}" antfile="build.xml" target="test"/>
     </target>
                                 <!--
                                     Clean section

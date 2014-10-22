@@ -5,12 +5,6 @@
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Application;
 import com.eas.client.ModulesProxy;
 import com.eas.client.RemoteModulesProxy;
@@ -18,9 +12,8 @@ import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.cache.ServerDataStorage;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.RemoteQueriesProxy;
@@ -28,14 +21,12 @@ import com.eas.client.threetier.requests.*;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author kl, mg refactoring
  */
-public class PlatypusClient implements Application<PlatypusQuery>, ServerDataStorage{
+public class PlatypusClient implements Application<PlatypusQuery>, ServerDataStorage {
 
     // error messages
     public static final String ENQUEUEING_UPDATES_THREE_TIER_MSG = "Enqueueing updates are not allowed in three tier mode.";
@@ -47,11 +38,10 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     protected QueriesProxy<PlatypusQuery> queries;
     protected ModulesProxy modules;
     protected ServerModulesProxy serverModulesProxy;
-    protected ScriptSecurityConfigs securityConfigs;
+    protected ScriptConfigs securityConfigs;
     protected FormsDocuments forms;
     protected ReportsConfigs reports;
     protected ModelsDocuments models;
-    protected List<Change> changeLog = new ArrayList<>();
 
     public PlatypusClient(PlatypusConnection aConn) throws Exception {
         super();
@@ -60,10 +50,14 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         queries = new RemoteQueriesProxy(aConn, this);
         modules = new RemoteModulesProxy(aConn);
         serverModulesProxy = new ServerModulesProxy(aConn);
-        securityConfigs = new ScriptSecurityConfigs();
+        securityConfigs = new ScriptConfigs();
         forms = new FormsDocuments();
         reports = new ReportsConfigs();
         models = new ModelsDocuments();
+    }
+
+    public PlatypusConnection getConn() {
+        return conn;
     }
 
     @Override
@@ -80,9 +74,9 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     public ServerModulesProxy getServerModules() {
         return serverModulesProxy;
     }
-    
+
     @Override
-    public ScriptSecurityConfigs getSecurityConfigs() {
+    public ScriptConfigs getScriptsConfigs() {
         return securityConfigs;
     }
 
@@ -105,14 +99,11 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         return url;
     }
 
-    @Override
-    public List<Change> getChangeLog() {
-        return changeLog;
+    /*
+    public FlowProvider createFlowProvider(String aQueryName, Fields aExpectedFields) {
+        return new PlatypusFlowProvider(this, conn, aQueryName, aExpectedFields);
     }
-
-    public FlowProvider createFlowProvider(String aQueryId, Fields aExpectedFields) {
-        return new PlatypusFlowProvider(this, conn, aQueryId, aExpectedFields);
-    }
+    */
 
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
         final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
@@ -128,39 +119,20 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     }
 
     @Override
-    public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Runnable doWork = () -> {
-            changeLog.clear();
-        };
-        CommitRequest request = new CommitRequest(changeLog);
+    public int commit(List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        CommitRequest request = new CommitRequest(aLog);
         if (onSuccess != null) {
             conn.<CommitRequest.Response>enqueueRequest(request, (CommitRequest.Response aResponse) -> {
-                doWork.run();
                 onSuccess.accept(aResponse.getUpdated());
             }, (Exception aException) -> {
-                rollback();
                 if (onFailure != null) {
                     onFailure.accept(aException);
                 }
             });
             return 0;
         } else {
-            try {
-                CommitRequest.Response response = conn.executeRequest(request);
-                doWork.run();
-                return response.getUpdated();
-            } catch (Exception ex) {
-                rollback();
-                throw ex;
-            }
-        }
-    }
-
-    protected void rollback() {
-        try {
-            changeLog.clear();
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusClient.class.getName()).log(Level.SEVERE, null, ex);
+            CommitRequest.Response response = conn.executeRequest(request);
+            return response.getUpdated();
         }
     }
 
@@ -169,16 +141,5 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
             conn.shutdown();
             conn = null;
         }
-    }
-
-    @Override
-    public void enqueueUpdate(String aQueryName, Parameters aParams) throws Exception {
-        Command command = new Command(aQueryName);
-        command.parameters = new ChangeValue[aParams.getParametersCount()];
-        for (int i = 0; i < command.parameters.length; i++) {
-            Parameter p = aParams.get(i + 1);
-            command.parameters[i] = new ChangeValue(p.getName(), p.getValue(), p.getTypeInfo());
-        }
-        changeLog.add(command);
     }
 }

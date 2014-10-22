@@ -83,18 +83,19 @@ public class ScriptedFlowProvider implements FlowProvider {
     @Override
     public Rowset refresh(final Parameters aParameters, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("fetch")) {
-            Object oFirstPage = source.getMember("fetch");
-            if (oFirstPage instanceof JSObject) {
-                JSObject jsFirstPage = (JSObject) oFirstPage;
-                if (jsFirstPage.isFunction()) {
+            Object oFetch = source.getMember("fetch");
+            if (oFetch instanceof JSObject) {
+                JSObject jsFetch = (JSObject) oFetch;
+                if (jsFetch.isFunction()) {
                     if (onSuccess != null) {
-                        Object oRowset = jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{
+                        Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{
+                            ScriptUtils.toJs(aParameters),
                             new AbstractJSObject() {
 
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
                                     try {
-                                        Object ojsRowset = args.length > 0 ? args[0] : null;
+                                        Object ojsRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
                                         Rowset rowset = new Rowset(expectedFields);
                                         readRowset(ojsRowset, rowset);
                                         try {
@@ -137,7 +138,7 @@ public class ScriptedFlowProvider implements FlowProvider {
                             return rowset;
                         }
                     } else {
-                        Object oRowset = jsFirstPage.call(source, ScriptUtils.toJs(new Object[]{aParameters.getPublished()}));
+                        Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{aParameters.getPublished()}));
                         if (oRowset == null || oRowset instanceof Undefined) {
                             return null;
                         } else {

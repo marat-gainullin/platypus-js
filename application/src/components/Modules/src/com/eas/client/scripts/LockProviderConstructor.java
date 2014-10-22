@@ -20,20 +20,25 @@ public class LockProviderConstructor extends JSObjectFacade {
     }
 
     @Override
-    public synchronized Object newObject(Object... args) {
+    public Object newObject(Object... args) {
         ObjectLock lock = new ObjectLock(String.valueOf(super.getMember("name")));
-        Object oldLock = ScriptUtils.getLock();
-        ScriptUtils.setLock(lock);
-        try {
+        final Object outerLock = ScriptUtils.getLock();
+        if (outerLock != null) {
             Object res = super.newObject(args);
             return new LockPropagatorObject((JSObject) res, lock);
-        } finally {
-            ScriptUtils.setLock(oldLock);
+        } else {
+            ScriptUtils.setLock(lock);
+            try {
+                Object res = super.newObject(args);
+                return new LockPropagatorObject((JSObject) res, lock);
+            } finally {
+                ScriptUtils.setLock(null);
+            }
         }
     }
 
     @Override
-    public synchronized Object call(Object thiz, Object... args) {
+    public Object call(Object thiz, Object... args) {
         return super.call(thiz, args);
     }
 

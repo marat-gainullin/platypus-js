@@ -32,7 +32,7 @@ public abstract class Query {
     protected transient Parameters params = new Parameters();
     protected transient String title;
     protected String datasourceName;
-    protected String entityId;
+    protected String entityName;
     protected boolean procedure;
     protected boolean manual;
     protected Set<String> readRoles = new HashSet<>();
@@ -60,7 +60,7 @@ public abstract class Query {
             }
             procedure = aSource.isProcedure();
             manual = aSource.isManual();
-            entityId = aSource.getEntityId();
+            entityName = aSource.getEntityId();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
                 title = new String(aTitle.toCharArray());
@@ -293,13 +293,13 @@ public abstract class Query {
      * @return The application element identifier;
      */
     public String getEntityId() {
-        return entityId;
+        return entityName;
     }
 
     /**
-     * @param aValue the entityId to set
+     * @param aValue the entityName to set
      */
     public void setEntityId(String aValue) {
-        entityId = aValue;
+        entityName = aValue;
     }
 }

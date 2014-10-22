@@ -12,11 +12,9 @@ try {
 }
 
 try {
-    load('classpath:core/anonymous-platypus-principal.js');
     load('classpath:core/platypus-principal.js');
     load('classpath:core/published-sourced-event.js');
     load('classpath:core/report.js');
-    load('classpath:core/system-platypus-principal.js');
     printf('core API loaded.');
 } catch (e) {
     printf('core API skipped.');

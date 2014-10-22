@@ -52,43 +52,15 @@
     Object.defineProperty(P, "J2SE", {value: "Java SE environment"});
     Object.defineProperty(P, "agent", {value: P.J2SE});
 
-    var fixedThreadPool = null;
     /** 
      * Thread - schedules given function in the thread pool
      */
     Function.prototype.invokeBackground = function() {
-        if (!fixedThreadPool) {
-            fixedThreadPool = ExecutorsClass.newFixedThreadPool(10, new DeamonThreadFactoryClass());
-        }
         var func = this;
         var args = arguments;
         //
-        var lock = ScriptUtilsClass.getLock();
-        var req = ScriptUtilsClass.getRequest();
-        var resp = ScriptUtilsClass.getResponse();
-        var principal = PlatypusPrincipalClass.getInstance();
-        var session = ScriptUtilsClass.getSession();
-        //
-        fixedThreadPool.execute(function() {
-            var oldLock = ScriptUtilsClass.getLock();
-            var oldReq = ScriptUtilsClass.getRequest();
-            var oldResp = ScriptUtilsClass.getResponse();
-            var oldSession = ScriptUtilsClass.getSession();
-            var oldPrincipal = PlatypusPrincipalClass.getInstance();
-            ScriptUtilsClass.setLock(lock);
-            ScriptUtilsClass.setRequest(req);
-            ScriptUtilsClass.setResponse(resp);
-            ScriptUtilsClass.setSession(session);
-            PlatypusPrincipalClass.setInstance(principal);
-            try{
-                func.apply(func, args);
-            }finally{
-                ScriptUtilsClass.setLock(oldLock);
-                ScriptUtilsClass.setRequest(oldReq);
-                ScriptUtilsClass.setResponse(oldResp);
-                ScriptUtilsClass.setSession(oldSession);
-                PlatypusPrincipalClass.setInstance(oldPrincipal);
-            }
+        ScriptUtilsClass.submitTask(function(){
+            func.apply(func, args);
         });
     };
     var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
@@ -176,35 +148,8 @@
         Function.prototype.invokeLater = function() {
             var func = this;
             var args = arguments;
-            //
-            var lock = ScriptUtilsClass.getLock();
-            var req = ScriptUtilsClass.getRequest();
-            var resp = ScriptUtilsClass.getResponse();
-            var session = ScriptUtilsClass.getSession();
-            var principal = PlatypusPrincipalClass.getInstance();
-            //
             SwingUtilitiesClass.invokeLater(function() {
-                var oldLock = ScriptUtilsClass.getLock();
-                var oldReq = ScriptUtilsClass.getRequest();
-                var oldResp = ScriptUtilsClass.getResponse();
-                var oldSession = ScriptUtilsClass.getSession();
-                var oldPrincipal = PlatypusPrincipalClass.getInstance();
-                ScriptUtilsClass.setLock(lock);
-                ScriptUtilsClass.setRequest(req);
-                ScriptUtilsClass.setResponse(resp);
-                ScriptUtilsClass.setSession(session);
-                PlatypusPrincipalClass.setInstance(principal);
-                try{
-                    ScriptUtilsClass.locked(function(){
-                        func.apply(func, args);
-                    }, lock);
-                }finally{
-                    ScriptUtilsClass.setLock(oldLock);
-                    ScriptUtilsClass.setRequest(oldReq);
-                    ScriptUtilsClass.setResponse(oldResp);
-                    ScriptUtilsClass.setSession(oldSession);
-                    PlatypusPrincipalClass.setInstance(oldPrincipal);
-                }
+                func.apply(func, args);
             });
         };
         /** 
@@ -227,11 +172,6 @@
             var principal = PlatypusPrincipalClass.getInstance();
             //
             ScriptTimerTaskClass.schedule(function() {
-                var oldLock = ScriptUtilsClass.getLock();
-                var oldReq = ScriptUtilsClass.getRequest();
-                var oldResp = ScriptUtilsClass.getResponse();
-                var oldSession = ScriptUtilsClass.getSession();
-                var oldPrincipal = PlatypusPrincipalClass.getInstance();
                 ScriptUtilsClass.setLock(lock);
                 ScriptUtilsClass.setRequest(req);
                 ScriptUtilsClass.setResponse(resp);
@@ -242,11 +182,11 @@
                         func.apply(func, userArgs);
                     }, lock);
                 }finally{
-                    ScriptUtilsClass.setLock(oldLock);
-                    ScriptUtilsClass.setRequest(oldReq);
-                    ScriptUtilsClass.setResponse(oldResp);
-                    ScriptUtilsClass.setSession(oldSession);
-                    PlatypusPrincipalClass.setInstance(oldPrincipal);
+                    ScriptUtilsClass.setLock(null);
+                    ScriptUtilsClass.setRequest(null);
+                    ScriptUtilsClass.setResponse(null);
+                    ScriptUtilsClass.setSession(null);
+                    PlatypusPrincipalClass.setInstance(null);
                 }
             }, args[0]);
             // HTML5 client doesn't support cancel feature and so, we don't support it too.
@@ -300,8 +240,8 @@
         var Icon = {};
         Object.defineProperty(P, "Icon", {value: Icon});
         Object.defineProperty(Icon, "load", {
-            value: function(aPath) {
-                return IconResourcesClass.load(aPath);
+            value: function(aPath, onSuccess, onFailure) {
+                return IconResourcesClass.load(aPath, onSuccess, onFailure);
             }
         });
         P.Icons = P.Icon;
@@ -1282,64 +1222,11 @@
     var Resource = {};
     Object.defineProperty(Resource, "load", {
         value: function(aResName, onSuccess, onFailure) {
-            try {
-                var loaded = ScriptedResourceClass.load(aResName);
-            } catch (e) {
-                if (onFailure)
-                    onFailure(e);
-                else
-                    throw e;
-            }
-            if (onSuccess) {
-                onSuccess(loaded);
-            } else {
-                return loaded;
-            }
-        }
-    });
-    Object.defineProperty(Resource, "loadText", {
-        value: function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aUndefinedOrOnFailure) {
-            try {
-                var encoding = null;
-                var onSuccess = null;
-                var onFailure = null;
-                if (arguments.length === 1) {
-                    // no op. default values
-                } else if (arguments.length === 2) {
-                    if (typeof aOnSuccessOrEncoding === 'string')
-                        encoding = aOnSuccessOrEncoding;
-                    else if (typeof aOnSuccessOrEncoding === 'function') {
-                        onSuccess = aOnSuccessOrEncoding;
-                    }
-                } else if (arguments.length === 3) {
-                    if (typeof aOnSuccessOrEncoding === 'string') {
-                        encoding = aOnSuccessOrEncoding;
-                        onSuccess = aOnSuccessOrOnFailure;
-                    } else if (typeof aOnSuccessOrEncoding === 'function') {
-                        onSuccess = aOnSuccessOrEncoding;
-                        onFailure = aOnSuccessOrOnFailure;
-                    }
-                } else if (arguments.length === 4) {
-                    encoding = aOnSuccessOrEncoding;
-                    onSuccess = aOnSuccessOrOnFailure;
-                    onFailure = aUndefinedOrOnFailure;
-                }
-                var loaded = encoding ? ScriptedResourceClass.loadText(aResName, encoding) : ScriptedResourceClass.loadText(aResName);
-            } catch (e) {
-                if (onFailure)
-                    onFailure(e);
-                else
-                    throw e;
-            }
-            if (onSuccess) {
-                onSuccess(loaded);
-            } else {
-                return loaded;
-            }
+            return P.boxAsJs(ScriptedResourceClass.load(aResName, onSuccess, onFailure));
         }
     });
     Object.defineProperty(Resource, "upload", {
-        value: function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
+        value: function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
             printf("upload() is not implemented for J2SE");
         }
     });

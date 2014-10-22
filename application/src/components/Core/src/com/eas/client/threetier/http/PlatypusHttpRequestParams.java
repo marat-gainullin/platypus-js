@@ -27,4 +27,5 @@ public class PlatypusHttpRequestParams {
     public static final String PASSWD = "__passwd";
     public static final String ROLE_NAME = "__role";
     public static final String APP_ELEMENT_NAME = "__appElementName";
+    public static final String PARAMS_ARRAY = "__param[]";
 }

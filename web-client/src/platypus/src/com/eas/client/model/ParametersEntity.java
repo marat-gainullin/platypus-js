@@ -4,10 +4,6 @@
  */
 package com.eas.client.model;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
@@ -59,8 +55,8 @@ public class ParametersEntity extends Entity {
 	}
 
 	@Override
-	public String getQueryId() {
-		return PARAMETERS_ENTITY_ID;
+	public String getQueryName() {
+		return null;
 	}
 
 	@Override
@@ -89,18 +85,10 @@ public class ParametersEntity extends Entity {
 
 	@Override
 	protected void internalExecute(Callback<Rowset, String> aCallback) {
-		if (aCallback != null) {
-			try {
-				aCallback.onSuccess(null);
-			} catch (Exception e) {
-				Logger.getLogger(ParametersEntity.class.getName()).log(Level.SEVERE, null, e);
-			}
-		}
 	}
 
 	@Override
-	protected Cancellable refreshRowset(Callback<Rowset, String> onFailure) throws Exception {
-		return null;
+	protected void refreshRowset(Callback<Rowset, String> onFailure) throws Exception {
 	}
 
 	@Override

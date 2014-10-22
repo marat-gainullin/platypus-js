@@ -46,7 +46,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                         JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
                         if (files != null && files.isModule() && jsConstr != null) {
-                            ScriptDocument config = serverCore.getSecurityConfigs().get(moduleName, files);
+                            ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
                             checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
                             // Let's check the if module is resident
                             JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);

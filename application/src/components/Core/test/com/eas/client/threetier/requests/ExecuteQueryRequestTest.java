@@ -96,7 +96,7 @@ public class ExecuteQueryRequestTest extends RequestsBaseTest {
         ExecuteQueryRequest instance = new ExecuteQueryRequest(rqId);
         PlatypusRequestReader bodyReader = new PlatypusRequestReader(outStream.toByteArray());
         instance.accept(bodyReader);
-        assertEquals(queryId, instance.getQueryId());
+        assertEquals(queryId, instance.getQueryName());
         assertEquals(2, instance.getParams().getParametersCount());
 
         assertEquals(DataTypeInfo.INTEGER.getSqlType(), instance.getParams().get(1).getTypeInfo().getSqlType());
@@ -317,7 +317,7 @@ public class ExecuteQueryRequestTest extends RequestsBaseTest {
         PlatypusRequestReader bodyReader = new PlatypusRequestReader(outStream.toByteArray());
         ExecuteQueryRequest instance = new ExecuteQueryRequest(rqId);
         instance.accept(bodyReader);
-        assertEquals(queryId, instance.getQueryId());
+        assertEquals(queryId, instance.getQueryName());
         assertEquals(2, instance.getParams().getParametersCount());
 
         assertEquals(DataTypeInfo.INTEGER.getSqlType(), instance.getParams().get(1).getTypeInfo().getSqlType());

@@ -258,8 +258,14 @@ public class Classes2Scripts {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Abstract class: {0}", ci.javaClassName);
             return null;
         }
-        checkForHasPublised(clazz);
-        checkForSetPublisher(clazz);
+        if (!checkForHasPublished(clazz)) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "HasPublished iterface is not implemented: {0}", clazz.getName());
+            return null;
+        }
+        if (!checkForSetPublisher(clazz)) {
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "setPublisher static method is not implemented: {0}", clazz.getName());
+            return null;
+        }
         ///
         boolean invalidatable = HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz);
         List<Method> methods = new ArrayList<>();
@@ -354,19 +360,17 @@ public class Classes2Scripts {
         return pathBase.relativize(pathAbsolute).toString().replace("\\", "/");
     }
 
-    private static void checkForHasPublised(Class clazz) {
-        if (!HasPublished.class.isAssignableFrom(clazz)) {
-            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "HasPublished iterface is not implemented: {0}", clazz.getName());
-        }
+    private static boolean checkForHasPublished(Class clazz) {
+        return HasPublished.class.isAssignableFrom(clazz);
     }
 
-    private static void checkForSetPublisher(Class clazz) {
-        for (Method m : clazz.getMethods()) {
+    private static boolean checkForSetPublisher(Class clazz) {
+        for (Method m : clazz.getDeclaredMethods()) {
             if (m.getName().equals("setPublisher") && Modifier.isStatic(m.getModifiers())) {
-                return;
+                return true;
             }
         }
-        Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "setPublisher static method is not implemented: {0}", clazz.getName());
+        return false;
     }
 
     private static String getConstructorJsDoc(FunctionInfo ci) {

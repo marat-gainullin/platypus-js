@@ -100,13 +100,13 @@ public class DataFlowTest extends GWTTestCase {
 								Query command = aQuery;
 								command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
 								command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
-								Change enqueued = command.enqueueUpdate();
+								Change enqueued = command.prepareCommand();
 								commonLog.add(enqueued);
 								// rowset.updateObject(fiedls.find("gname"),
 								// NEW_RECORD_NAME_G);
 								rowset.updateObject(fields.find("tname"), NEW_RECORD_NAME_T);
 								rowset.updateObject(fields.find("kname"), NEW_RECORD_NAME_K);
-								client.commit(commonLog, new CallbackAdapter<Void, String>() {
+								client.requestCommit(commonLog, new CallbackAdapter<Void, String>() {
 
 									@Override
 									public void doWork(Void aVoid) throws Exception {
@@ -135,7 +135,7 @@ public class DataFlowTest extends GWTTestCase {
 												assertEquals(newRow.getColumnObject(fields.find("kname")), NEW_RECORD_NAME_K);
 												// Delete operation
 												rowset.delete();
-												client.commit(commonLog, new CallbackAdapter<Void, String>() {
+												client.requestCommit(commonLog, new CallbackAdapter<Void, String>() {
 
 													@Override
 													public void doWork(Void aVoid) throws Exception {

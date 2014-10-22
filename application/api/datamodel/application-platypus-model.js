@@ -24,17 +24,30 @@
         delegate.setPublished(this);
     };
         /**
-         * Saves model data changes. Calls onSuccess when done.
-         * If model can't apply the changed, than exception is thrown.
-         * In this case, application can call model.save() another time to save the changes.
-         * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().
-         * @param onSuccess Success callback.
+         * Saves model data changes.
+         * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.
+         * If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.
+         * Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.
+         * @param onSuccess The function to be invoked after the data changes saved (optional).
+         * @param onFailure The function to be invoked when exception raised while commit process (optional).
          * @method save
          * @memberOf ApplicationPlatypusModel
-         * @param onFailure Failure callback.
-        P.ApplicationPlatypusModel.prototype.save = function(arg0, arg1) {
+         */
+        P.ApplicationPlatypusModel.prototype.save = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.save(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.save(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Reverts model data changes.
+         * After this method call, no data changes are avaliable for <code>model.save()</code> method.
+         * @method revert
+         * @memberOf ApplicationPlatypusModel
+         */
+        P.ApplicationPlatypusModel.prototype.revert = function() {
+            var delegate = this.unwrap();
+            var value = delegate.revert();
             return P.boxAsJs(value);
         };
 

@@ -36,35 +36,27 @@
           <Component id="tabbedPane" max="32767" attributes="0"/>
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="lblClientType" alignment="0" max="32767" attributes="0"/>
+                  <Component id="lblRunPath" alignment="0" max="32767" attributes="0"/>
+                  <Component id="lblServeType" alignment="0" max="32767" attributes="0"/>
+                  <Component id="lblDefDatasource" alignment="0" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="lblClientType" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblRunPath" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblServeType" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblDefDatasource" alignment="0" max="32767" attributes="0"/>
+                  <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
+                          <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
+                          <Component id="cbConnections" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="cbConnections" alignment="0" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="btnBrowse" pref="105" max="32767" attributes="0"/>
-                                  <Component id="btnAddDatasource" max="32767" attributes="0"/>
-                              </Group>
-                          </Group>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="btnBrowse" pref="105" max="32767" attributes="0"/>
+                          <Component id="btnAddDatasource" max="32767" attributes="0"/>
                       </Group>
-                  </Group>
-                  <Group type="102" attributes="0">
-                      <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -98,8 +90,6 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
-              <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="tabbedPane" max="32767" attributes="0"/>
           </Group>
@@ -220,7 +210,7 @@
                           <Component id="lblClientDebugPort" min="-2" pref="24" max="-2" attributes="0"/>
                           <Component id="spClientDebugPort" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="33" max="32767" attributes="0"/>
+                      <EmptySpace pref="101" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -267,8 +257,8 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtClientUrl">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtClientUrlActionPerformed"/>
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtClientUrlFocusLost"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtClientUrlActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="lblClientUrl">
@@ -345,24 +335,32 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="lblServerPort" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblServerVmOptions" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblServerOptions" alignment="0" pref="76" max="32767" attributes="0"/>
-                          <Component id="lblServerLogLevel" alignment="1" max="32767" attributes="0"/>
-                          <Component id="lblServerDebugPort" max="32767" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtServerOptions" max="32767" attributes="0"/>
-                          <Component id="txtServerVmOptions" max="32767" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="cbServerLogLevel" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
-                                  <Component id="spServerDebugPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
-                                  <Component id="spServerPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
+                                  <Component id="lblServerPort" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="lblServerVmOptions" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="lblServerOptions" alignment="0" pref="76" max="32767" attributes="0"/>
+                                  <Component id="lblServerLogLevel" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="lblServerDebugPort" max="32767" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="303" max="32767" attributes="0"/>
+                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="txtServerOptions" max="32767" attributes="0"/>
+                                  <Component id="txtServerVmOptions" max="32767" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                          <Component id="cbServerLogLevel" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
+                                          <Component id="spServerDebugPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
+                                          <Component id="spServerPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace min="0" pref="303" max="32767" attributes="0"/>
+                                  </Group>
+                              </Group>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -397,7 +395,9 @@
                           <Component id="spServerDebugPort" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
                           <Component id="lblServerDebugPort" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="85" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="123" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -484,6 +484,17 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbServerLogLevelActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JCheckBox" name="cbNotStartServer">
+              <Properties>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbNotStartServer.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+                <Property name="actionCommand" type="java.lang.String" value=""/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbNotStartServerActionPerformed"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="j2eeServerPanel">
@@ -501,19 +512,27 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblJ2eeServer" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblContext" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="lblJ2eeServer" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblContext" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
+                                  <Component id="txtContext" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <Component id="btnManageServers" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="102" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="cbEnableWebSecurity" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
-                          <Component id="txtContext" max="32767" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="btnManageServers" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="102" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -531,7 +550,9 @@
                           <Component id="lblContext" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtContext" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="188" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="cbEnableWebSecurity" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="207" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -576,6 +597,16 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnManageServersActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="cbEnableWebSecurity">
+              <Properties>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableWebSecurity.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableWebSecurityActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>
@@ -625,17 +656,6 @@
           <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.lblClientServerMessage.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="cbNotStartServer">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbNotStartServer.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-        <Property name="actionCommand" type="java.lang.String" value=""/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbNotStartServerActionPerformed"/>
-      </Events>
     </Component>
     <Component class="javax.swing.JComboBox" name="cbConnections">
     </Component>

@@ -934,7 +934,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                     });
                 }
             } catch (Exception ex) {
-                Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                Logger.getLogger(ModelView.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
             }
         }
     }
@@ -2190,19 +2190,21 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         }
 
         protected void deleteEntities(Collection<E> aEntities) {
-            undoSupport.beginUpdate();
-            try {
-                Set<E> toDelete = new HashSet<>();
-                toDelete.addAll(aEntities);
-                toDelete.stream().forEach((E entity) -> {
-                    if (!isParametersEntity(entity)) {
-                        if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
-                            doDeleteEntity(entity);
+            if (!aEntities.isEmpty()) {
+                undoSupport.beginUpdate();
+                try {
+                    Set<E> toDelete = new HashSet<>();
+                    toDelete.addAll(aEntities);
+                    toDelete.stream().forEach((E entity) -> {
+                        if (!isParametersEntity(entity)) {
+                            if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
+                                doDeleteEntity(entity);
+                            }
                         }
-                    }
-                });
-            } finally {
-                undoSupport.endUpdate();
+                    });
+                } finally {
+                    undoSupport.endUpdate();
+                }
             }
         }
 

@@ -51,7 +51,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -334,46 +333,44 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public Layer addLayer(String aLayerTitle, ApplicationEntity<?, ?, ?> aEntity, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
         Layer layer;
         MapContent lightweightMapContext = pane.getLightweightMapContext();
-        synchronized (lightweightMapContext) {
-            RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aEntity, new ModelEntityRef(aEntity.getEntityId()));
-            newFeatureDescriptor.setActive(true);
-            newFeatureDescriptor.setGeometryBindingClass(aGeometryClass);
-            newFeatureDescriptor.setCrsWkt(projectedCrs.getBaseCRS().toWKT());
-            dataStore.getFeatureDescriptors().put(aLayerTitle, newFeatureDescriptor);
-            SimpleFeatureSource newFeatureSource = dataStore.getFeatureSource(aLayerTitle);
-            Object oSize = aStyleAttributes.get("size");
-            if (oSize instanceof Number) {
-                newFeatureDescriptor.getStyle().setSize(((Number) oSize).floatValue());
-            }
-            Object oOpacity = aStyleAttributes.get("opacity");
-            if (oOpacity instanceof Number) {
-                newFeatureDescriptor.getStyle().setOpacity(((Number) oOpacity).intValue());
-            }
-            Object oLineColor = aStyleAttributes.get("lineColor");
-            if (oLineColor instanceof Color) {
-                newFeatureDescriptor.getStyle().setLineColor((Color) oLineColor);
-            }
-            Object oHaloColor = aStyleAttributes.get("haloColor");
-            if (oHaloColor instanceof Color) {
-                newFeatureDescriptor.getStyle().setHaloColor((Color) oHaloColor);
-            }
-            Object oFont = aStyleAttributes.get("font");
-            if (oFont instanceof Font) {
-                newFeatureDescriptor.getStyle().setFont((Font) oFont);
-            }
-            Object oFillColor = aStyleAttributes.get("fillColor");
-            if (oFillColor instanceof Color) {
-                newFeatureDescriptor.getStyle().setFillColor((Color) oFillColor);
-            }
-            Object oPointSymbol = aStyleAttributes.get("pointSymbol");
-            if (oPointSymbol instanceof PointSymbol) {
-                newFeatureDescriptor.getStyle().setPointSymbol((PointSymbol) oPointSymbol);
-            }
-            Style newStyle = newFeatureDescriptor.getStyle().buildStyle(newFeatureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
-            lightweightMapContext.addLayer(new FeatureLayer(newFeatureSource, newStyle));
-            layer = lightweightMapContext.layers().get(lightweightMapContext.layers().size() - 1);
-            layer.addMapLayerListener(pane.getLightChangesReflector());
+        RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aEntity, new ModelEntityRef(aEntity.getEntityId()));
+        newFeatureDescriptor.setActive(true);
+        newFeatureDescriptor.setGeometryBindingClass(aGeometryClass);
+        newFeatureDescriptor.setCrsWkt(projectedCrs.getBaseCRS().toWKT());
+        dataStore.getFeatureDescriptors().put(aLayerTitle, newFeatureDescriptor);
+        SimpleFeatureSource newFeatureSource = dataStore.getFeatureSource(aLayerTitle);
+        Object oSize = aStyleAttributes.get("size");
+        if (oSize instanceof Number) {
+            newFeatureDescriptor.getStyle().setSize(((Number) oSize).floatValue());
         }
+        Object oOpacity = aStyleAttributes.get("opacity");
+        if (oOpacity instanceof Number) {
+            newFeatureDescriptor.getStyle().setOpacity(((Number) oOpacity).intValue());
+        }
+        Object oLineColor = aStyleAttributes.get("lineColor");
+        if (oLineColor instanceof Color) {
+            newFeatureDescriptor.getStyle().setLineColor((Color) oLineColor);
+        }
+        Object oHaloColor = aStyleAttributes.get("haloColor");
+        if (oHaloColor instanceof Color) {
+            newFeatureDescriptor.getStyle().setHaloColor((Color) oHaloColor);
+        }
+        Object oFont = aStyleAttributes.get("font");
+        if (oFont instanceof Font) {
+            newFeatureDescriptor.getStyle().setFont((Font) oFont);
+        }
+        Object oFillColor = aStyleAttributes.get("fillColor");
+        if (oFillColor instanceof Color) {
+            newFeatureDescriptor.getStyle().setFillColor((Color) oFillColor);
+        }
+        Object oPointSymbol = aStyleAttributes.get("pointSymbol");
+        if (oPointSymbol instanceof PointSymbol) {
+            newFeatureDescriptor.getStyle().setPointSymbol((PointSymbol) oPointSymbol);
+        }
+        Style newStyle = newFeatureDescriptor.getStyle().buildStyle(newFeatureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
+        lightweightMapContext.addLayer(new FeatureLayer(newFeatureSource, newStyle));
+        layer = lightweightMapContext.layers().get(lightweightMapContext.layers().size() - 1);
+        layer.addMapLayerListener(pane.getLightChangesReflector());
         pane.clearLightweightCache();
         pane.repaint();
         return layer;
@@ -382,15 +379,13 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public Layer removeLayer(String aLayerTitle) throws Exception {
         Layer removed;
         MapContent lightweightMapContext = pane.getLightweightMapContext();
-        synchronized (lightweightMapContext) {
-            removed = findLayer(aLayerTitle, lightweightMapContext.layers());
-            if (removed != null) {
-                lightweightMapContext.removeLayer(removed);
-                removed.removeMapLayerListener(pane.getLightChangesReflector());
-            }
-            dataStore.clearTypeInfoCache(aLayerTitle);
-            dataStore.getFeatureDescriptors().remove(aLayerTitle);
+        removed = findLayer(aLayerTitle, lightweightMapContext.layers());
+        if (removed != null) {
+            lightweightMapContext.removeLayer(removed);
+            removed.removeMapLayerListener(pane.getLightChangesReflector());
         }
+        dataStore.clearTypeInfoCache(aLayerTitle);
+        dataStore.getFeatureDescriptors().remove(aLayerTitle);
         pane.clearLightweightCache();
         pane.repaint();
         return removed;
@@ -399,13 +394,11 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public Layer[] removeAllLayers() {
         List<Layer> lightweightLayers;
         MapContent lightweightMapContext = pane.getLightweightMapContext();
-        synchronized (lightweightMapContext) {
-            lightweightLayers = lightweightMapContext.layers();
-            for (Layer layer : lightweightLayers) {
-                layer.removeMapLayerListener(pane.getLightChangesReflector());
-            }
-            lightweightLayers.clear();
+        lightweightLayers = lightweightMapContext.layers();
+        for (Layer layer : lightweightLayers) {
+            layer.removeMapLayerListener(pane.getLightChangesReflector());
         }
+        lightweightLayers.clear();
         pane.clearLightweightCache();
         pane.repaint();
         return lightweightLayers.toArray(new Layer[0]);
@@ -413,15 +406,10 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
 
     public Layer getLayer(String aLayerTitle) {
         MapContent generalMapContext = pane.getGeneralMapContext();
-        Layer found;
-        synchronized (generalMapContext) {// may this is not need to do because changes are made only on lightweight context
-            found = findLayer(aLayerTitle, generalMapContext.layers());
-        }
+        Layer found = findLayer(aLayerTitle, generalMapContext.layers());
         if (found == null) {
             MapContent lightweightMapContext = pane.getLightweightMapContext();
-            synchronized (lightweightMapContext) {
-                found = findLayer(aLayerTitle, lightweightMapContext.layers());
-            }
+            found = findLayer(aLayerTitle, lightweightMapContext.layers());
         }
         return found;
     }

@@ -304,6 +304,17 @@
         }
     };
         /**
+         * Adds the updates into the change log as a command.
+         * @method enqueueUpdate
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.enqueueUpdate = function() {
+            var delegate = this.unwrap();
+            var value = delegate.enqueueUpdate();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Moves the rowset cursor to the next row.
          * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
          * @method next
@@ -366,14 +377,38 @@
         };
 
         /**
-         * Sorts data according to comparator object returned by createSorting() or by comparator function.
-         * @param comparator A comparator function or object returned from createSorting() method.
-         * @method sort
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method eof
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.sort = function(comparator) {
+        P.ApplicationPlatypusParametersEntity.prototype.eof = function() {
             var delegate = this.unwrap();
-            var value = delegate.sort(P.boxAsJava(comparator));
+            var value = delegate.eof();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Moves the rowset cursor to the first row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method first
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.first = function() {
+            var delegate = this.unwrap();
+            var value = delegate.first();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Moves the rowset cursor to the last row.
+         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
+         * @method last
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.last = function() {
+            var delegate = this.unwrap();
+            var value = delegate.last();
             return P.boxAsJs(value);
         };
 
@@ -391,38 +426,14 @@
         };
 
         /**
-         * Moves the rowset cursor to the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method first
+         * Sorts data according to comparator object returned by createSorting() or by comparator function.
+         * @param comparator A comparator function or object returned from createSorting() method.
+         * @method sort
          * @memberOf ApplicationPlatypusParametersEntity
          */
-        P.ApplicationPlatypusParametersEntity.prototype.first = function() {
+        P.ApplicationPlatypusParametersEntity.prototype.sort = function(comparator) {
             var delegate = this.unwrap();
-            var value = delegate.first();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method eof
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.eof = function() {
-            var delegate = this.unwrap();
-            var value = delegate.eof();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Moves the rowset cursor to the last row.
-         * @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.
-         * @method last
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.last = function() {
-            var delegate = this.unwrap();
-            var value = delegate.last();
+            var value = delegate.sort(P.boxAsJava(comparator));
             return P.boxAsJs(value);
         };
 
@@ -499,57 +510,6 @@
         };
 
         /**
-         * Checks if cursor in the position before the first row.
-         * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
-         * @method bof
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.bof = function() {
-            var delegate = this.unwrap();
-            var value = delegate.bof();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds row by its key. Key must a single property.
-         * @param key the unique identifier of the row.
-         * @return a row object or <code>null</code> if nothing is found.
-         * @method findById
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.findById = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Sets the rowset cursor to the specified row.
-         * @param row the row to position the entity cursor.
-         * @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.
-         * @method scrollTo
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.scrollTo = function(row) {
-            var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
-         * @param onSuccess The callback function for refresh data on success event (optional).
-         * @param onFailure The callback function for refresh data on failure event (optional).
-         * @method requery
-         * @memberOf ApplicationPlatypusParametersEntity
-         */
-        P.ApplicationPlatypusParametersEntity.prototype.requery = function(onSuccess, onFailure) {
-            var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Creates an instance of comparator object using specified constraints objects.
          * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).
          * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
@@ -593,6 +553,57 @@
         P.ApplicationPlatypusParametersEntity.prototype.endUpdate = function() {
             var delegate = this.unwrap();
             var value = delegate.endUpdate();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds row by its key. Key must a single property.
+         * @param key the unique identifier of the row.
+         * @return a row object or <code>null</code> if nothing is found.
+         * @method findById
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.findById = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findById(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Sets the rowset cursor to the specified row.
+         * @param row the row to position the entity cursor.
+         * @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.
+         * @method scrollTo
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.scrollTo = function(row) {
+            var delegate = this.unwrap();
+            var value = delegate.scrollTo(P.boxAsJava(row));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Checks if cursor in the position before the first row.
+         * @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.
+         * @method bof
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.bof = function() {
+            var delegate = this.unwrap();
+            var value = delegate.bof();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccess The callback function for refresh data on success event (optional).
+         * @param onFailure The callback function for refresh data on failure event (optional).
+         * @method requery
+         * @memberOf ApplicationPlatypusParametersEntity
+         */
+        P.ApplicationPlatypusParametersEntity.prototype.requery = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

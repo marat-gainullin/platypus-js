@@ -107,18 +107,30 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                     try {
                         Rowset rs = doWork.call();
                         try {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                            synchronized (lock) {
-                                onSuccess.accept(rs);
+                            if (ScriptUtils.getGlobalQueue() != null) {
+                                ScriptUtils.getGlobalQueue().accept(() -> {
+                                    onSuccess.accept(rs);
+                                });
+                            } else {
+                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                synchronized (lock) {
+                                    onSuccess.accept(rs);
+                                }
                             }
                         } catch (Exception ex) {
                             Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } catch (Exception ex) {
                         if (onFailure != null) {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                            synchronized (lock) {
-                                onFailure.accept(ex);
+                            if (ScriptUtils.getGlobalQueue() != null) {
+                                ScriptUtils.getGlobalQueue().accept(() -> {
+                                    onFailure.accept(ex);
+                                });
+                            } else {
+                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                synchronized (lock) {
+                                    onFailure.accept(ex);
+                                }
                             }
                         }
                     }
@@ -286,18 +298,30 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                     try {
                         Rowset rs = doWork.call();
                         try {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                            synchronized (lock) {
-                                onSuccess.accept(rs);
+                            if (ScriptUtils.getGlobalQueue() != null) {
+                                ScriptUtils.getGlobalQueue().accept(() -> {
+                                    onSuccess.accept(rs);
+                                });
+                            } else {
+                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                synchronized (lock) {
+                                    onSuccess.accept(rs);
+                                }
                             }
                         } catch (Exception ex) {
                             Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } catch (Exception ex) {
                         if (onFailure != null) {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                            synchronized (lock) {
-                                onFailure.accept(ex);
+                            if (ScriptUtils.getGlobalQueue() != null) {
+                                ScriptUtils.getGlobalQueue().accept(() -> {
+                                    onFailure.accept(ex);
+                                });
+                            } else {
+                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                synchronized (lock) {
+                                    onFailure.accept(ex);
+                                }
                             }
                         }
                     }

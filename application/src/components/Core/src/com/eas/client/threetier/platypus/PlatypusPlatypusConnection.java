@@ -12,6 +12,7 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.ScriptUtils;
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.concurrent.Callable;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -52,32 +53,33 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads, int aMaximumConnections) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
+        requestsSender = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("platypus-client-", false));
+        requestsSender.allowCoreThreadTimeOut(true);
         sessionsPool = new BearResourcePool<IoSession>(aMaximumConnections) {
 
             @Override
             protected IoSession createResource() throws Exception {
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
                 ConnectFuture onConnect = connector.connect();
                 onConnect.awaitUninterruptibly();
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.INFO, "{0} is connected to  {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
                 return onConnect.getSession();
             }
         };
-        requestsSender.allowCoreThreadTimeOut(true);
         host = aUrl.getHost();
         port = aUrl.getPort();
-        ThreadPoolExecutor connectorExecutor = new ThreadPoolExecutor(0, aMaximumThreads,
+
+        ThreadPoolExecutor connectorExecutor = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-connector-", true));
         connectorExecutor.allowCoreThreadTimeOut(true);
-        ThreadPoolExecutor processorExecutor = new ThreadPoolExecutor(0, aMaximumThreads,
+        ThreadPoolExecutor processorExecutor = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-processor-", true));
         processorExecutor.allowCoreThreadTimeOut(true);
         connector = new NioSocketConnector(connectorExecutor, new NioProcessor(processorExecutor));
@@ -89,11 +91,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             @Override
             public void messageReceived(IoSession session, Object message) throws Exception {
                 RequestCallback rqc = (RequestCallback) session.getAttribute(RequestCallback.class.getSimpleName());
-                session.removeAttribute(RequestCallback.class.getSimpleName());
-                sessionsPool.returnResource(session);
                 rqc.response = (Response) message;
-                rqc.requestEnv.request.setDone(true);
                 synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
+                    rqc.requestEnv.request.setDone(true);
                     rqc.requestEnv.request.notifyAll();
                 }
             }
@@ -136,15 +136,37 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     @Override
     public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
         enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
-            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-            synchronized (lock) {
-                if (aResponse instanceof ErrorResponse) {
-                    if (onFailure != null) {
-                        onFailure.accept(handleErrorResponse((ErrorResponse) aResponse));
+            if (aResponse instanceof ErrorResponse) {
+                if (onFailure != null) {
+                    Exception cause = handleErrorResponse((ErrorResponse) aResponse);
+                    if (ScriptUtils.getGlobalQueue() != null) {
+                        ScriptUtils.getGlobalQueue().accept(() -> {
+                            onFailure.accept(cause);
+                        });
+                    } else {
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            onFailure.accept(cause);
+                        }
                     }
-                } else {
-                    if (onSuccess != null) {
-                        onSuccess.accept((R) aResponse);
+                }
+            } else {
+                if (onSuccess != null) {
+                    if (ScriptUtils.getGlobalQueue() != null) {
+                        ScriptUtils.getGlobalQueue().accept(() -> {
+                            if (rq instanceof LogoutRequest) {
+                                sessionTicket = null;
+                            }
+                            onSuccess.accept((R) aResponse);
+                        });
+                    } else {
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            if (rq instanceof LogoutRequest) {
+                                sessionTicket = null;
+                            }
+                            onSuccess.accept((R) aResponse);
+                        }
                     }
                 }
             }
@@ -178,61 +200,70 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
         startRequestTask(() -> {
             try {
-                IoSession session = sessionsPool.achieveResource();
-                Callable<Void> performer = () -> {
-                    rqc.response = null;
-                    rqc.requestEnv.request.setDone(false);
-                    rqc.requestEnv.ticket = sessionTicket;
-                    // enqueue network work
-                    session.setAttribute(RequestCallback.class.getSimpleName(), rqc);
-                    session.write(rqc.requestEnv);
-                    // wait completion from the network subsystem
-                    synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
-                        while (!rqc.requestEnv.request.isDone()) {
-                            rqc.requestEnv.request.wait();
-                        }
-                    }
-                    sessionTicket = rqc.requestEnv.ticket;
-                    return null;
-                };
-                // Try to communicate with the server
-                performer.call();
-                if (rqc.response instanceof ErrorResponse
-                        && ((ErrorResponse) rqc.response).isAccessControl()) {
-                    sequence.in(() -> {
-                        // probably new ticket from another thread...
-                        rqc.requestEnv.userName = null;
-                        rqc.requestEnv.password = null;
-                        performer.call();
-                        if (rqc.response instanceof ErrorResponse
-                                && ((ErrorResponse) rqc.response).isAccessControl()) {
-                            // nice try :-(
-                            int authenticateAttempts = 0;
-                            // Try to authenticate
-                            while (rqc.response instanceof ErrorResponse
-                                    && ((ErrorResponse) rqc.response).isAccessControl()
-                                    && authenticateAttempts++ < maximumAuthenticateAttempts) {
-                                Credentials credentials = onCredentials.call();
-                                if (credentials != null) {
-                                    rqc.requestEnv.userName = credentials.userName;
-                                    rqc.requestEnv.password = credentials.password;
-                                    performer.call();
-                                    if(!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()){
-                                        PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
-                                    }
-                                } else {// Credentials are inaccessible, so leave things as is...
-                                    authenticateAttempts = Integer.MAX_VALUE;
-                                }
+                IoSession ioSession = sessionsPool.achieveResource();
+                ioSession.setAttribute(RequestCallback.class.getSimpleName(), rqc);
+                try {
+                    Callable<Void> performer = () -> {
+                        rqc.response = null;
+                        rqc.completed = false;
+                        rqc.requestEnv.request.setDone(false);
+                        rqc.requestEnv.ticket = sessionTicket;
+                        // enqueue network work
+                        ioSession.write(rqc.requestEnv);
+                        // wait completion from the network subsystem
+                        synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
+                            while (!rqc.requestEnv.request.isDone()) {
+                                rqc.requestEnv.request.wait();
                             }
                         }
+                        sessionTicket = rqc.requestEnv.ticket;
                         return null;
-                    });
+                    };
+                    // Try to communicate with the server
+                    performer.call();
+                    if (rqc.response instanceof ErrorResponse
+                            && ((ErrorResponse) rqc.response).isAccessControl()) {
+                        sequence.in(() -> {
+                            // probably new ticket from another thread...
+                            rqc.requestEnv.userName = null;
+                            rqc.requestEnv.password = null;
+                            performer.call();
+                            if (rqc.response instanceof ErrorResponse
+                                    && ((ErrorResponse) rqc.response).isAccessControl()) {
+                                // nice try :-(
+                                int authenticateAttempts = 0;
+                                // Try to authenticate
+                                while (rqc.response instanceof ErrorResponse
+                                        && ((ErrorResponse) rqc.response).isAccessControl()
+                                        && authenticateAttempts++ < maximumAuthenticateAttempts) {
+                                    Credentials credentials = onCredentials.call();
+                                    if (credentials != null) {
+                                        rqc.requestEnv.userName = credentials.userName;
+                                        rqc.requestEnv.password = credentials.password;
+                                        sessionTicket = null;
+                                        performer.call();
+                                        if (!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()) {
+                                            PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
+                                        }
+                                    } else {// Credentials are inaccessible, so leave things as is...
+                                        authenticateAttempts = Integer.MAX_VALUE;
+                                    }
+                                }
+                            }
+                            return null;
+                        });
+                    }
+                } finally {
+                    ioSession.removeAttribute(RequestCallback.class.getSimpleName());
+                    sessionsPool.returnResource(ioSession);
                 }
                 // Report about a result
                 if (rqc.onComplete != null) {
+                    rqc.completed = true;
                     rqc.onComplete.accept(rqc.response);
                 } else {
                     synchronized (rqc) {// synchronized due to J2SE javadoc on wait()/notify() methods
+                        rqc.completed = true;
                         rqc.notifyAll();
                     }
                 }
@@ -253,6 +284,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         if (rqc.response instanceof ErrorResponse) {
             throw handleErrorResponse((ErrorResponse) rqc.response);
         } else {
+            if (rq instanceof LogoutRequest) {
+                sessionTicket = null;
+            }
             return (R) rqc.response;
         }
     }

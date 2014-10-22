@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  */
 public class DatabaseAuthorizer {
 
-    public static final String LOGIN_INCORRECT_MSG = "Bad user name or password.";
+    public static final String LOGIN_INCORRECT_MSG = "Bad user name or password";
     public static final String CREDENTIALS_MISSING_MSG = "User name and password are required while anonymous access is disabled.";
     private static final int LOGIN_DELAY = 500;
 

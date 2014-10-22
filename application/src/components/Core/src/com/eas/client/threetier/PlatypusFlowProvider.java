@@ -13,6 +13,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.AppConnection;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -24,23 +25,19 @@ public class PlatypusFlowProvider implements FlowProvider {
 
     private static final String ROWSET_MISSING_IN_RESPONSE = "Rowset response hasn't returned any rowset. May be dml query is executed as select query.";
 
-    protected PlatypusClient client;
+    protected PlatypusClient serverProxy;
     protected Fields expectedFields;
-    protected boolean procedure = false;
-    protected String entityId;
+    protected boolean procedure;
+    protected String entityName;
     protected AppConnection conn;
+    protected List<Change> changeLog = new ArrayList<>();
 
-    public PlatypusFlowProvider(PlatypusClient aClient, AppConnection aConn, String aEntityId, Fields aExpectedFields) {
+    public PlatypusFlowProvider(PlatypusClient aClient, String aEntityName, Fields aExpectedFields) {
         super();
-        client = aClient;
-        conn = aConn;
-        entityId = aEntityId;
+        serverProxy = aClient;
+        conn = serverProxy.getConn();
+        entityName = aEntityName;
         expectedFields = aExpectedFields;
-    }
-
-    @Override
-    public List<Change> getChangeLog() {
-        return client.getChangeLog();
     }
 
     @Override
@@ -50,7 +47,7 @@ public class PlatypusFlowProvider implements FlowProvider {
 
     @Override
     public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws RowsetException {
-        ExecuteQueryRequest request = new ExecuteQueryRequest(entityId, aParams, expectedFields);
+        ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, aParams, expectedFields);
         if (onSuccess != null) {
             try {
                 conn.<ExecuteQueryRequest.Response>enqueueRequest(request, (ExecuteQueryRequest.Response aResponse) -> {
@@ -97,7 +94,7 @@ public class PlatypusFlowProvider implements FlowProvider {
 
     @Override
     public String getEntityId() {
-        return entityId;
+        return entityName;
     }
 
     @Override
@@ -106,6 +103,11 @@ public class PlatypusFlowProvider implements FlowProvider {
     }
 
     @Override
-    public void setPageSize(int i) {
+    public void setPageSize(int aValue) {
+    }
+
+    @Override
+    public List<Change> getChangeLog() {
+        return changeLog;
     }
 }

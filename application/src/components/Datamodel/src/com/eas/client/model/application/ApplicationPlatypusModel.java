@@ -51,27 +51,24 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @Override
     public void setParametersEntity(ApplicationPlatypusParametersEntity aParamsEntity) {
+        if (parametersEntity != null) {
+            parametersEntity.setModel(null);
+        }
         super.setParametersEntity(aParamsEntity);
-        parametersEntity.setModel(this);
+        if (parametersEntity != null) {
+            parametersEntity.setModel(this);
+        }
     }
 
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * Saves model data changes. Calls onSuccess when done.\n"
-            + " * If model can't apply the changed, than exception is thrown.\n"
-            + " * In this case, application can call model.save() another time to save the changes.\n"
-            + " * If an application need to abort futher attempts and discard model data changes, than it can call model.revert().\n"
-            + " * @param onSuccess Success callback.\n"
-            + " * @param onFailure Failure callback.\n")
+    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
     public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
-        serverProxy.getChangeLog().addAll(changeLog);
         super.save(aOnSuccess, aOnFailure);
     }
 
     @Override
     public int commit(final Consumer<Integer> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        return serverProxy.commit(aOnSuccess, aOnFailure);
+        return serverProxy.commit(changeLog, aOnSuccess, aOnFailure);
     }
 
     @Override
@@ -80,6 +77,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         super.commited();
     }
 
+    @ScriptFunction(jsDoc = REVERT_JSDOC)
     @Override
     public void revert() {
         changeLog.clear();

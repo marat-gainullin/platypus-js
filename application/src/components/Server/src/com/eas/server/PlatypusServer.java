@@ -8,7 +8,7 @@ import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
@@ -54,8 +54,8 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, ScriptSecurityConfigs aSecurityConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
-        super(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, aAuthorizers);
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, ScriptConfigs aScriptsConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
+        super(aIndexer, aModules, aQueries, aDatabasesClient, aScriptsConfigs, aDefaultAppElement, aAuthorizers);
         if (aAddresses == null) {
             throw new NullPointerException("listenAddresses is null");
         } else if (aAddresses.length == 0) {

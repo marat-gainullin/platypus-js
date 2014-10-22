@@ -10,6 +10,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Set;
@@ -28,19 +29,14 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     private final String name;
     private final PlatypusConnection conn;
 
-    private static final ThreadLocal<PlatypusPrincipal> current = new ThreadLocal<>();
-    private static PlatypusPrincipal clientSpacePrincipal = null;
+    private static PlatypusPrincipal clientSpacePrincipal;
 
     public static PlatypusPrincipal getInstance() {
-        return current.get();
+        return (PlatypusPrincipal) ScriptUtils.getPrincipal();
     }
 
     public static void setInstance(PlatypusPrincipal aValue) {
-        if (aValue != null) {
-            current.set(aValue);
-        } else {
-            current.remove();
-        }
+        ScriptUtils.setPrincipal(aValue);
     }
 
     public static PlatypusPrincipal getClientSpacePrincipal() {
@@ -69,7 +65,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         return name;
     }
 
-    private static final String HAS_ROLE_JS_DOC = ""
+    protected static final String HAS_ROLE_JS_DOC = ""
             + "/**\n"
             + "* Checks if a user have a specified role.\n"
             + "* @param role a role's name to test.\n"
@@ -81,7 +77,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         return roles != null ? roles.contains(aRole) : true;
     }
 
-    private static final String LOGOUT_JS_DOC = ""
+    protected static final String LOGOUT_JS_DOC = ""
             + "/**\n"
             + " * Logs out from  user's session on a server.\n"
             + " * @param onSuccess The function to be invoked after the logout (optional).\n"

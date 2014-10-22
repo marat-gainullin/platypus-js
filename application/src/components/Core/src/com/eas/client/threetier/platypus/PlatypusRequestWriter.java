@@ -173,7 +173,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_QUERY_ID, rq.getQueryId());
+        writer.put(RequestsTags.TAG_QUERY_ID, rq.getQueryName());
         for (Field param : rq.getParams().toCollection()) {
             writer.put(RequestsTags.TAG_SQL_PARAMETER);
             writer.put(CoreTags.TAG_STREAM, writeParameter((Parameter) param));

@@ -4,6 +4,9 @@
  */
 package com.eas.util;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,9 +16,9 @@ import java.util.Set;
  */
 public class StringUtils {
 
-    private static String SUBSTITUTE_CHAR = "_";
-    private static String FILENAME_INVALID_CHARACTER_PATTERN = "[\\/:*?\"<>|]";
-    private static String END_WHITE_SPASE = "\\s(?=\\s*$)";
+    private static final String SUBSTITUTE_CHAR = "_";
+    private static final String FILENAME_INVALID_CHARACTER_PATTERN = "[\\/:*?\"<>|]";
+    private static final String END_WHITE_SPASE = "\\s(?=\\s*$)";
 
     public static String join(String separator, String... parts) {
         String delimiter = "";
@@ -44,12 +47,12 @@ public class StringUtils {
     }
 
     /**
-     * Splits a string with a delimiter.
-     * Performs all needed checks.
-     * Empty strings are cutted out.
+     * Splits a string with a delimiter. Performs all needed checks. Empty
+     * strings are cutted out.
+     *
      * @param aSource
      * @param aDelimiter
-     * @return 
+     * @return
      */
     public static Set<String> split(String aSource, String aDelimiter) {
         Set<String> res = new HashSet();
@@ -108,7 +111,19 @@ public class StringUtils {
         }
         return val;
     }
-    
+
+    public static String formatDouble(double aValue) {
+        DecimalFormat formatter = new DecimalFormat();
+        formatter.setGroupingUsed(false);
+        formatter.setMinimumIntegerDigits(1);
+        formatter.setMaximumFractionDigits(100);
+        formatter.setRoundingMode(RoundingMode.DOWN);
+        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        formatter.setDecimalFormatSymbols(symbols);
+        return formatter.format(aValue);
+    }
+
     public static String capitalize(String aValue) {
         return aValue.length() > 0 ? aValue.substring(0, 1).toUpperCase() + aValue.substring(1) : aValue;
     }

@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
@@ -71,6 +72,9 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                             pQuery.setTitle(query.getTitle());
                             pQuery.setReadRoles(query.getReadRoles());
                             pQuery.setWriteRoles(query.getWriteRoles());
+                            query.getParameters().toCollection().stream().forEach((p) -> {
+                                pQuery.putParameter(p.getName(), p.getTypeInfo(), ((Parameter) p).getValue());
+                            });
                             resp.setAppQuery(pQuery);
                             resp.setTimeStamp(serverQueryTime);
                         }

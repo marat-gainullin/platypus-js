@@ -238,7 +238,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         if (!dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
             throw new NullPointerException("No query specified");
         }
-        rq.setQueryId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+        rq.setQueryName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
         Iterator<ProtoNode> it = dom.iterator();
         while (it.hasNext()) {
             ProtoNode node = it.next();

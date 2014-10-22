@@ -30,7 +30,7 @@ import com.eas.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -77,9 +77,9 @@ public class DatabasesClient {
      */
     public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
         super();
-        jdbcProcessor = new ThreadPoolExecutor(0, aMaxJdbcThreads,
+        jdbcProcessor = new ThreadPoolExecutor(aMaxJdbcThreads, aMaxJdbcThreads,
                 10L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("jdbc-", false));
         jdbcProcessor.allowCoreThreadTimeOut(true);
         defaultDatasourceName = aDefaultDatasourceName;
@@ -222,8 +222,20 @@ public class DatabasesClient {
 
     private static class UserInfo {
 
-        public Map<String, String> props;
-        public Set<String> roles;
+        protected boolean strict = true;
+        protected String userName;
+        protected String password;
+        protected Map<String, String> props;
+        protected Set<String> roles;
+        protected Consumer<PlatypusPrincipal> onSuccess;
+
+        public UserInfo(String aUserName, String aPassword, Consumer<PlatypusPrincipal> aOnSuccess, boolean aStrict) {
+            super();
+            userName = aUserName;
+            password = aPassword;
+            onSuccess = aOnSuccess;
+            strict = aStrict;
+        }
 
         public PlatypusPrincipal principal(String aUserName) {
             if (roles != null && props != null) {
@@ -234,40 +246,38 @@ public class DatabasesClient {
                 return null;
             }
         }
+
+        public synchronized void complete(Map<String, String> aProps, Set<String> aRoles) {
+            if (aProps != null) {
+                props = aProps;
+            }
+            if (aRoles != null) {
+                roles = aRoles;
+            }
+            if (props != null && roles != null) {
+                if (!strict || password.equals(props.get(ClientConstants.F_USR_PASSWD))) {
+                    onSuccess.accept(principal(userName));
+                } else {
+                    onSuccess.accept(null);
+                }
+            }
+        }
     }
 
-    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password, Consumer<PlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserInfo ui = new UserInfo();
-        if (onSuccess != null) {
+    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String aPassword, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+        final UserInfo ui = new UserInfo(aUserName, aPassword, aOnSuccess, true);
+        if (aOnSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
-                synchronized (ui) {
-                    ui.props = userProperties;
-                    if (ui.roles != null) {
-                        if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
-                            onSuccess.accept(ui.principal(aUserName));
-                        } else {
-                            onSuccess.accept(null);
-                        }
-                    }
-                }
-            }, onFailure);
+                ui.complete(userProperties, null);
+            }, aOnFailure);
             getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
-                synchronized (ui) {
-                    ui.roles = aRoles;
-                    if (ui.props != null) {
-                        if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
-                            onSuccess.accept(ui.principal(aUserName));
-                        } else {
-                            onSuccess.accept(null);
-                        }
-                    }
-                }
-            }, onFailure);
+                ui.complete(null, aRoles);
+            }, aOnFailure);
             return null;
         } else {
             ui.props = getUserProperties(aClient, aUserName, null, null);
             ui.roles = getUserRoles(aClient, aUserName, null, null);
-            if (password.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
+            if (aPassword.equals(ui.props.get(ClientConstants.F_USR_PASSWD))) {
                 return ui.principal(aUserName);
             } else {
                 return null;
@@ -275,25 +285,15 @@ public class DatabasesClient {
         }
     }
 
-    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<PlatypusPrincipal> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        final UserInfo ui = new UserInfo();
-        if (onSuccess != null) {
+    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+        final UserInfo ui = new UserInfo(aUserName, null, aOnSuccess, false);
+        if (aOnSuccess != null) {
             getUserProperties(aClient, aUserName, (Map<String, String> userProperties) -> {
-                synchronized (ui) {
-                    ui.props = userProperties;
-                    if (ui.roles != null) {
-                        onSuccess.accept(ui.principal(aUserName));
-                    }
-                }
-            }, onFailure);
+                ui.complete(userProperties, null);
+            }, aOnFailure);
             getUserRoles(aClient, aUserName, (Set<String> aRoles) -> {
-                synchronized (ui) {
-                    ui.roles = aRoles;
-                    if (ui.props != null) {
-                        onSuccess.accept(ui.principal(aUserName));
-                    }
-                }
-            }, onFailure);
+                ui.complete(null, aRoles);
+            }, aOnFailure);
             return null;
         } else {
             ui.props = getUserProperties(aClient, aUserName, null, null);
@@ -330,15 +330,27 @@ public class DatabasesClient {
             startJdbcTask(() -> {
                 try {
                     Integer affected = doWork.call();
-                    final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                    synchronized (lock) {
-                        onSuccess.accept(affected);
+                    if (ScriptUtils.getGlobalQueue() != null) {
+                        ScriptUtils.getGlobalQueue().accept(() -> {
+                            onSuccess.accept(affected);
+                        });
+                    } else {
+                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        synchronized (lock) {
+                            onSuccess.accept(affected);
+                        }
                     }
                 } catch (Exception ex) {
                     if (onFailure != null) {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            onFailure.accept(ex);
+                        if (ScriptUtils.getGlobalQueue() != null) {
+                            ScriptUtils.getGlobalQueue().accept(() -> {
+                                onFailure.accept(ex);
+                            });
+                        } else {
+                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            synchronized (lock) {
+                                onFailure.accept(ex);
+                            }
                         }
                     }
                 }
@@ -364,7 +376,7 @@ public class DatabasesClient {
         return mdCaches.get(aDatasourceName);
     }
 
-    protected void startJdbcTask(Runnable aTask) {
+    private void startJdbcTask(Runnable aTask) {
         Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
@@ -441,16 +453,27 @@ public class DatabasesClient {
                 ApplyProcess applyProcess = new ApplyProcess(aDatasourcesChangeLogs.size(), (List<ApplyResult> aApplyResults) -> {
                     assert aDatasourcesChangeLogs.size() == aApplyResults.size();
                     CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            onSuccess.accept(aRowsAffected);
-                        }
-
-                    }, (Exception aFailureCause) -> {
-                        if (onFailure != null) {
+                        if (ScriptUtils.getGlobalQueue() != null) {
+                            ScriptUtils.getGlobalQueue().accept(() -> {
+                                onSuccess.accept(aRowsAffected);
+                            });
+                        } else {
                             final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
                             synchronized (lock) {
-                                onFailure.accept(aFailureCause);
+                                onSuccess.accept(aRowsAffected);
+                            }
+                        }
+                    }, (Exception aFailureCause) -> {
+                        if (onFailure != null) {
+                            if (ScriptUtils.getGlobalQueue() != null) {
+                                ScriptUtils.getGlobalQueue().accept(() -> {
+                                    onFailure.accept(aFailureCause);
+                                });
+                            } else {
+                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                synchronized (lock) {
+                                    onFailure.accept(aFailureCause);
+                                }
                             }
                         }
                     });
@@ -541,7 +564,7 @@ public class DatabasesClient {
 
     protected ApplyResult apply(final String aDatasourceName, List<Change> aLog, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ApplyResult> doWork = () -> {
-            int rowsAffected = 0;
+            int rowsAffected;
             DatabaseMdCache mdCache = getDbMetadataCache(aDatasourceName);
             if (mdCache == null) {
                 throw new IllegalStateException(String.format(UNKNOWN_DATASOURCE_IN_COMMIT, aDatasourceName));
@@ -604,7 +627,6 @@ public class DatabasesClient {
                     statements.addAll(generator.getLogEntries());
                 }
                 rowsAffected = riddleStatements(statements, connection);
-                aLog.clear();
                 return new ApplyResult(rowsAffected, connection);
             } catch (Exception ex) {
                 connection.rollback();
@@ -663,8 +685,8 @@ public class DatabasesClient {
         cache.removeTableIndexes(fullTableName);
     }
 
-    public String getConnectionSchema(String aDatasourceId) throws Exception {
-        DataSource ds = obtainDataSource(aDatasourceId);
+    public String getConnectionSchema(String aDatasourceName) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceName);
         if (ds != null) {
             try (Connection conn = ds.getConnection()) {
                 return schemaByConnection(conn);

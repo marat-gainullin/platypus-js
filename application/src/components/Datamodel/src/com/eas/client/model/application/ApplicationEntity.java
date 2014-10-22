@@ -79,7 +79,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     protected transient Rowset rowset;
     protected boolean valid;
     protected Future<Void> pending;
-    protected transient boolean filteredWhileAjusting;
     protected transient Filter rowsetFilter;
     protected transient boolean userFiltering;
     protected Map<List<Integer>, Locator> userLocators = new HashMap<>();
@@ -890,7 +889,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             if (!defs.containsKey(aName)) {
                 rowset.getFields().putOrmDefinition(aName, aDefinition);
             } else {
-                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
             }
         }
     }
@@ -1475,7 +1474,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             }
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-
             throw ex;
         }
     }
@@ -1642,9 +1640,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
 
     @Override
+    public void beforeRequery(RowsetRequeryEvent rre) {
+    }
+
+    @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
         try {
             assert rowset != null;
+            filterRowset();
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
@@ -1656,12 +1659,18 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
         try {
+            assert rowset != null;
+            filterRowset();
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public void rowsetNetError(RowsetNetErrorEvent rnee) {
     }
 
     @Override

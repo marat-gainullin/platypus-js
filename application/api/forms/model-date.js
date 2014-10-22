@@ -405,20 +405,6 @@
              */
             P.ModelDate.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -435,6 +421,20 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {

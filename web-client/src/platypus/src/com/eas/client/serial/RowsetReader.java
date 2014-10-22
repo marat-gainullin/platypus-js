@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author mg
  */
-public class RowsetReader extends JsonReader {
+public class RowsetReader extends FieldsJSONReader {
 
 	public static DateTimeFormat ISO_DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	

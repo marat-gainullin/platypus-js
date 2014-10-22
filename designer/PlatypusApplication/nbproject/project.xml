@@ -507,16 +507,16 @@
                 <binary-origin>release/modules/ext/jcommon-1.0.18.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/PlatypusDeploy.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/PlatypusDeploy.jar</binary-origin>
+                <runtime-relative-path>ext/Deploy.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Deploy.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/CommonUtils.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/CommonUtils.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/PlatypusServletSupport.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/PlatypusServletSupport.jar</binary-origin>
+                <runtime-relative-path>ext/ServletSupport.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/ServletSupport.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/MetaSync.jar</runtime-relative-path>

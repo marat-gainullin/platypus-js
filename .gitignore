@@ -42,8 +42,8 @@ com.google.gdt.eclipse.core.prefs
 /application/src/components/Forms/build/
 /application/src/components/Application/build/
 /application/src/components/Server/build/
-/application/src/components/PlatypusServletSupport/build/
-/application/src/components/PlatypusDeploy/build/
+/application/src/components/ServletSupport/build/
+/application/src/components/Deploy/build/
 /application/src/components/MetaSync/build/
 /designer/PlatypusForms/build/
 /designer/PlatypusReport/build/

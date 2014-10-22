@@ -68,6 +68,10 @@ public class ConnectionsSelector extends javax.swing.JDialog {
         lstConnections.setCellRenderer(connectionsListModel.getCellRenderer());
         lstConnections.clearSelection();
         lstConnections.addListSelectionListener(connectionsSelectionListener);
+        if (defaultSettings != null) {
+            lstConnections.setSelectedValue(defaultSettings, true);
+        }
+        lstConnections.requestFocus();
     }
 
     private void doClose(int retStatus) {

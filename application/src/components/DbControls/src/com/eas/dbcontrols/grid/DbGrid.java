@@ -1664,14 +1664,14 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     @Override
-    public synchronized void addProcessedRow(Row aRow) {
+    public void addProcessedRow(Row aRow) {
         processedRows.add(aRow);
         progressIndicator.setVisible(true);
         gridScroll.repaint();
     }
 
     @Override
-    public synchronized void removeProcessedRow(Row aRow) {
+    public void removeProcessedRow(Row aRow) {
         processedRows.remove(aRow);
         if (processedRows.isEmpty()) {
             progressIndicator.setVisible(false);
@@ -1680,12 +1680,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     @Override
-    public synchronized Row[] getProcessedRows() {
+    public Row[] getProcessedRows() {
         return processedRows.toArray(new Row[]{});
     }
 
     @Override
-    public synchronized boolean isRowProcessed(Row aRow) {
+    public boolean isRowProcessed(Row aRow) {
         return processedRows.contains(aRow);
     }
 
@@ -2086,8 +2086,8 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                     if (e.getSource() == tlTable) {
                         if (blTable != null && blTable.getRowCount() > 0 && tlTable.getSelectionModel().getLeadSelectionIndex() == tlTable.getRowCount() - 1) {
-                            SwingUtilities.invokeLater(() -> {
-                                int colIndex = tlTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                            int colIndex = tlTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                            EventQueue.invokeLater(() -> {;
                                 tlTable.clearSelection();
                                 blTable.getSelectionModel().setSelectionInterval(0, 0);
                                 blTable.getColumnModel().getSelectionModel().setSelectionInterval(colIndex, colIndex);
@@ -2096,7 +2096,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     } else if (e.getSource() == trTable) {
                         if (brTable != null && brTable.getRowCount() > 0 && trTable.getSelectionModel().getLeadSelectionIndex() == trTable.getRowCount() - 1) {
-                            SwingUtilities.invokeLater(() -> {
+                            EventQueue.invokeLater(() -> {;
                                 int colIndex = trTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
                                 trTable.clearSelection();
                                 brTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -2108,8 +2108,8 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                     if (e.getSource() == blTable) {
                         if (tlTable != null && tlTable.getRowCount() > 0 && blTable.getSelectionModel().getLeadSelectionIndex() == 0) {
-                            SwingUtilities.invokeLater(() -> {
-                                int colIndex = blTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                            int colIndex = blTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                            EventQueue.invokeLater(() -> {;
                                 blTable.clearSelection();
                                 tlTable.getSelectionModel().setSelectionInterval(tlTable.getRowCount() - 1, tlTable.getRowCount() - 1);
                                 tlTable.getColumnModel().getSelectionModel().setSelectionInterval(colIndex, colIndex);
@@ -2118,8 +2118,8 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     } else if (e.getSource() == brTable) {
                         if (trTable != null && trTable.getRowCount() > 0 && brTable.getSelectionModel().getLeadSelectionIndex() == 0) {
-                            SwingUtilities.invokeLater(() -> {
-                                int colIndex = brTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                            int colIndex = brTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                            EventQueue.invokeLater(() -> {;
                                 brTable.clearSelection();
                                 trTable.getSelectionModel().setSelectionInterval(trTable.getRowCount() - 1, trTable.getRowCount() - 1);
                                 trTable.getColumnModel().getSelectionModel().setSelectionInterval(colIndex, colIndex);
@@ -2137,21 +2137,22 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         if (brTable != null && brTable.getColumnCount() > 0
                                 && (blLeadIndex == blColCount - 1
                                 || (blLeadIndex == blColCount - 2 && blTable.getColumnModel().getColumn(blColCount - 1) instanceof AnchorTableColumn))) {
-                            SwingUtilities.invokeLater(() -> {
-                                int lColIndex = 0;
-                                if (!(brTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
-                                    if (brTable.getColumnModel().getColumn(lColIndex) instanceof AnchorTableColumn) {
-                                        lColIndex = 1;
-                                    }
-                                    while (GridTable.skipableColumn(brTable.getColumnModel().getColumn(lColIndex))) {
-                                        lColIndex++;
-                                    }
-                                    if (lColIndex >= 0 && lColIndex < brTable.getColumnModel().getColumnCount()) {
-                                        brTable.getColumnModel().getSelectionModel().setSelectionInterval(lColIndex, lColIndex);
-                                        brTable.requestFocus();
-                                    }
+                            int lColIndex = 0;
+                            if (!(brTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                                if (brTable.getColumnModel().getColumn(lColIndex) instanceof AnchorTableColumn) {
+                                    lColIndex = 1;
                                 }
-                            });
+                                while (GridTable.skipableColumn(brTable.getColumnModel().getColumn(lColIndex))) {
+                                    lColIndex++;
+                                }
+                                if (lColIndex >= 0 && lColIndex < brTable.getColumnModel().getColumnCount()) {
+                                    final int colToSelect = lColIndex;
+                                    EventQueue.invokeLater(() -> {
+                                        brTable.getColumnModel().getSelectionModel().setSelectionInterval(colToSelect, colToSelect);
+                                        brTable.requestFocus();
+                                    });
+                                }
+                            }
                         }
                     } else if (e.getSource() == tlTable) {
                         int tlLeadIndex = tlTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
@@ -2160,21 +2161,22 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             tlLeadIndex++;
                         }
                         if (trTable != null && trTable.getColumnCount() > 0 && (tlLeadIndex == tlColCount - 1 || (tlLeadIndex == tlColCount - 2 && tlTable.getColumnModel().getColumn(tlColCount - 1) instanceof AnchorTableColumn))) {
-                            SwingUtilities.invokeLater(() -> {
-                                int lColIndex = 0;
-                                if (!(trTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
-                                    if (trTable.getColumnModel().getColumn(lColIndex) instanceof AnchorTableColumn) {
-                                        lColIndex = 1;
-                                    }
-                                    while (GridTable.skipableColumn(trTable.getColumnModel().getColumn(lColIndex))) {
-                                        lColIndex++;
-                                    }
-                                    if (lColIndex >= 0 && lColIndex < trTable.getColumnModel().getColumnCount()) {
-                                        trTable.getColumnModel().getSelectionModel().setSelectionInterval(lColIndex, lColIndex);
-                                        trTable.requestFocus();
-                                    }
+                            int lColIndex = 0;
+                            if (!(trTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                                if (trTable.getColumnModel().getColumn(lColIndex) instanceof AnchorTableColumn) {
+                                    lColIndex = 1;
                                 }
-                            });
+                                while (GridTable.skipableColumn(trTable.getColumnModel().getColumn(lColIndex))) {
+                                    lColIndex++;
+                                }
+                                if (lColIndex >= 0 && lColIndex < trTable.getColumnModel().getColumnCount()) {
+                                    final int col2Select = lColIndex;
+                                    EventQueue.invokeLater(() -> {
+                                        trTable.getColumnModel().getSelectionModel().setSelectionInterval(col2Select, col2Select);
+                                        trTable.requestFocus();
+                                    });
+                                }
+                            }
                         }
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
@@ -2186,20 +2188,21 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         if (tlTable != null && tlTable.getColumnCount() > 0
                                 && (trLeadIndex == 0
                                 || (trLeadIndex == 1 && (trTable.getColumnModel().getColumn(trLeadIndex - 1) instanceof AnchorTableColumn)))) {
-                            SwingUtilities.invokeLater(() -> {
-                                if (tlTable.getColumnModel().getColumnCount() > 0) {
-                                    int lColIndex = tlTable.getColumnModel().getColumnCount() - 1;
-                                    if (!(tlTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
-                                        while (GridTable.skipableColumn(tlTable.getColumnModel().getColumn(lColIndex))) {
-                                            lColIndex--;
-                                        }
-                                        if (lColIndex >= 0 && lColIndex < tlTable.getColumnModel().getColumnCount()) {
-                                            tlTable.getColumnModel().getSelectionModel().setSelectionInterval(lColIndex, lColIndex);
+                            if (tlTable.getColumnModel().getColumnCount() > 0) {
+                                int lColIndex = tlTable.getColumnModel().getColumnCount() - 1;
+                                if (!(tlTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                                    while (GridTable.skipableColumn(tlTable.getColumnModel().getColumn(lColIndex))) {
+                                        lColIndex--;
+                                    }
+                                    if (lColIndex >= 0 && lColIndex < tlTable.getColumnModel().getColumnCount()) {
+                                        final int col2Select = lColIndex;
+                                        EventQueue.invokeLater(() -> {
+                                            tlTable.getColumnModel().getSelectionModel().setSelectionInterval(col2Select, col2Select);
                                             tlTable.requestFocus();
-                                        }
+                                        });
                                     }
                                 }
-                            });
+                            }
                         }
                     } else if (e.getSource() == brTable) {
                         int brLeadIndex = brTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
@@ -2209,20 +2212,21 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         if (blTable != null && blTable.getColumnCount() > 0
                                 && (brLeadIndex == 0
                                 || (brLeadIndex == 1 && brTable.getColumnModel().getColumn(brLeadIndex - 1) instanceof AnchorTableColumn))) {
-                            SwingUtilities.invokeLater(() -> {
-                                if (blTable.getColumnModel().getColumnCount() > 0) {
-                                    int lColIndex = blTable.getColumnModel().getColumnCount() - 1;
-                                    if (!(blTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
-                                        while (GridTable.skipableColumn(blTable.getColumnModel().getColumn(lColIndex))) {
-                                            lColIndex--;
-                                        }
-                                        if (lColIndex >= 0 && lColIndex < blTable.getColumnModel().getColumnCount()) {
-                                            blTable.getColumnModel().getSelectionModel().setSelectionInterval(lColIndex, lColIndex);
+                            if (blTable.getColumnModel().getColumnCount() > 0) {
+                                int lColIndex = blTable.getColumnModel().getColumnCount() - 1;
+                                if (!(blTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                                    while (GridTable.skipableColumn(blTable.getColumnModel().getColumn(lColIndex))) {
+                                        lColIndex--;
+                                    }
+                                    if (lColIndex >= 0 && lColIndex < blTable.getColumnModel().getColumnCount()) {
+                                        final int col2Select = lColIndex;
+                                        EventQueue.invokeLater(() -> {
+                                            blTable.getColumnModel().getSelectionModel().setSelectionInterval(col2Select, col2Select);
                                             blTable.requestFocus();
-                                        }
+                                        });
                                     }
                                 }
-                            });
+                            }
                         }
                     }
                 }

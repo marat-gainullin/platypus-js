@@ -208,7 +208,7 @@ public class XmlDom2Model implements ModelVisitor {
 				queryId = null;
 			}
 			assert queryId != null : "Query id must be provided";
-			entity.setQueryId(queryId);
+			entity.setQueryName(queryId);
 			assert model != null;
 			entity.setModel(model);
 			model.addEntity(entity);
@@ -251,37 +251,47 @@ public class XmlDom2Model implements ModelVisitor {
 				@Override
 				public void run() {
 					try {
-						Entity lEntity = model.getEntityById(leftEntityId);
+						Entity lEntity;
 						if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(leftEntityId)) {
 							lEntity = model.getParametersEntity();
-							if (leftParameterName != null && !leftParameterName.isEmpty()) {
-								relation.setLeftField(lEntity.getFields().get(leftParameterName));
-							} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-								relation.setLeftField(lEntity.getFields().get(leftFieldName));
+							if (lEntity != null) {
+								if (leftParameterName != null && !leftParameterName.isEmpty()) {
+									relation.setLeftField(lEntity.getFields().get(leftParameterName));
+								} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+									relation.setLeftField(lEntity.getFields().get(leftFieldName));
+								}
 							}
-						} else if (lEntity != null) {
-							if (leftParameterName != null && !leftParameterName.isEmpty()) {
-								relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
-							} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-								relation.setLeftField(lEntity.getFields().get(leftFieldName));
+						} else{
+							lEntity = model.getEntityById(leftEntityId);
+							if (lEntity != null) {
+								if (leftParameterName != null && !leftParameterName.isEmpty()) {
+									relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
+								} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+									relation.setLeftField(lEntity.getFields().get(leftFieldName));
+								}
 							}
 						}
 						relation.setLeftEntity(lEntity);
 						lEntity.addOutRelation(relation);
 
-						Entity rEntity = model.getEntityById(rightEntityId);
+						Entity rEntity;
 						if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(rightEntityId)) {
 							rEntity = model.getParametersEntity();
-							if (rightParameterName != null && !rightParameterName.isEmpty()) {
-								relation.setRightField(rEntity.getFields().get(rightParameterName));
-							} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-								relation.setRightField(rEntity.getFields().get(rightFieldName));
+							if (rEntity != null) {
+								if (rightParameterName != null && !rightParameterName.isEmpty()) {
+									relation.setRightField(rEntity.getFields().get(rightParameterName));
+								} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+									relation.setRightField(rEntity.getFields().get(rightFieldName));
+								}
 							}
-						} else if (rEntity != null) {
-							if (rightParameterName != null && !rightParameterName.isEmpty()) {
-								relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
-							} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-								relation.setRightField(rEntity.getFields().get(rightFieldName));
+						} else {
+							rEntity = model.getEntityById(rightEntityId);
+							if (rEntity != null) {
+								if (rightParameterName != null && !rightParameterName.isEmpty()) {
+									relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
+								} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+									relation.setRightField(rEntity.getFields().get(rightFieldName));
+								}
 							}
 						}
 						relation.setRightEntity(rEntity);

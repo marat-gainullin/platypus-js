@@ -60,7 +60,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                             AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                             JSObject constr = ScriptUtils.lookupInGlobal(moduleName);
                             if (files != null && files.isModule() && constr != null) {
-                                ScriptDocument config = serverCore.getSecurityConfigs().get(moduleName, files);
+                                ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
                                 // Let's perform security checks
                                 CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
                                 // Let's check the if module is resident

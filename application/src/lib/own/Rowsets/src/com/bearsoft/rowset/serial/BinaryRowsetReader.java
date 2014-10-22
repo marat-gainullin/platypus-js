@@ -38,8 +38,7 @@ public class BinaryRowsetReader extends RowsetReader {
         assert aNode != null;
         List<ProtoNode> fieldNodes = aNode.getChildren(BinaryTags.FIELD);
         Fields fields = new Fields();
-        for (int i = 0; i < fieldNodes.size(); i++) {
-            ProtoNode fieldNode = fieldNodes.get(i);
+        for (ProtoNode fieldNode : fieldNodes) {
             assert fieldNode != null;
             Field field = new Field();
             ProtoNode fNameNode = fieldNode.getChild(BinaryTags.FIELD_NAME);
@@ -267,8 +266,7 @@ public class BinaryRowsetReader extends RowsetReader {
                     ProtoNode updatedNode = rowNode.getChild(BinaryTags.UPDATED);
                     if (updatedNode != null) {
                         List<ProtoNode> indicies = updatedNode.getChildren(BinaryTags.UPDATED_INDEX);
-                        for (int j = 0; j < indicies.size(); j++) {
-                            ProtoNode idxNode = indicies.get(j);
+                        for (ProtoNode idxNode : indicies) {
                             int updIdx = idxNode.getInt();
                             row.setColumnUpdated(updIdx);
                         }

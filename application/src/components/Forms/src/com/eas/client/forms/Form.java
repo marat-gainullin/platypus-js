@@ -4,7 +4,6 @@ import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.client.forms.api.FormWindowEventsIProxy;
 import com.eas.client.forms.api.components.DesktopPane;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
@@ -47,7 +46,6 @@ public class Form implements HasPublished {
 
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
-    public static final String LOCK_KEY = "creatorLock";
     public static final String VIEW_SCRIPT_NAME = "view";
     protected static final Map<String, Form> showingForms = new HashMap<>();
     protected static JSObject onChange;
@@ -349,6 +347,7 @@ public class Form implements HasPublished {
         if (surface == null) {
             close(null);
             final JFrame frame = new JFrame() {
+
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
                     try {
@@ -359,7 +358,6 @@ public class Form implements HasPublished {
                 }
             };
 
-            frame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             frame.addWindowListener(new WindowClosingReflector());
             frame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -436,7 +434,6 @@ public class Form implements HasPublished {
                     }
                 }
             };
-            internalFrame.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             internalFrame.addInternalFrameListener(new WindowClosingReflector());
             internalFrame.getContentPane().setLayout(new BorderLayout());
             // configure frame
@@ -502,6 +499,7 @@ public class Form implements HasPublished {
         if (surface == null) {
             close(null);
             JDialog dialog = new JDialog() {
+
                 @Override
                 protected void processWindowEvent(WindowEvent e) {
                     try {
@@ -549,7 +547,6 @@ public class Form implements HasPublished {
                 }
             };
             //dialog.addWindowListener(new WindowClosingReflector());
-            dialog.getRootPane().putClientProperty(LOCK_KEY, ScriptUtils.getLock());
             dialog.getContentPane().setLayout(new BorderLayout());
             // configure dialog
             dialog.setDefaultCloseOperation(defaultCloseOperation);
@@ -575,13 +572,13 @@ public class Form implements HasPublished {
             surface = null;
             closeCallbackParameter = null;
             if (onOkModalResult != null) {
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        onOkModalResult.call(published, new Object[]{selected});
-                    } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
+                try {
+                    onOkModalResult.call(published, new Object[]{selected});
+
+                } catch (Exception ex) {
+                    Logger.getLogger(Form.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
             }
             return selected;
         } else {

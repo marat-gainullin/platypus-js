@@ -9,9 +9,8 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
+import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
-import com.eas.client.ImageResourceCallback;
-import com.eas.client.application.AppClient;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.MarginConstraints;
@@ -59,13 +58,12 @@ import com.eas.client.form.published.widgets.PlatypusTextField;
 import com.eas.client.form.published.widgets.PlatypusToggleButton;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.RichTextArea;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
@@ -100,6 +98,7 @@ public class WidgetsFactory {
 	protected PlatypusWindow form;
 	protected HasWidgets rootWidget;
 	protected boolean isRoot = true;
+	protected String moduleName;
 
 	private Element tag;
 	private Map<String, UIObject> components = new HashMap<>();
@@ -110,8 +109,9 @@ public class WidgetsFactory {
 	protected List<Runnable> postponedTasks = new ArrayList<>();
 	protected List<Runnable> postponedTasks1 = new ArrayList<>();
 
-	public WidgetsFactory(Element aFormElement, JavaScriptObject aTarget) {
+	public WidgetsFactory(String aModuleName, Element aFormElement, JavaScriptObject aTarget) {
 		super();
+		moduleName = aModuleName;
 		tag = aFormElement;
 		target = aTarget;
 	}
@@ -163,6 +163,8 @@ public class WidgetsFactory {
 		form.setOpacity(Utils.getFloatAttribute(aTag, "opacity", 1.0f));
 		if (aTag.hasAttribute("title")) {
 			form.setTitle(aTag.getAttribute("title"));
+		}else{
+			form.setTitle(moduleName);
 		}
 		return form;
 	}
@@ -323,14 +325,17 @@ public class WidgetsFactory {
 		if (aTag.hasAttribute("verticalTextPosition"))
 			component.setVerticalTextPosition(Utils.getIntegerAttribute(aTag, "verticalTextPosition", PlatypusLabel.RIGHT));
 		if (aTag.hasAttribute("icon")) {
-			component.setImage(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
+			PlatypusImageResource.load(aTag.getAttribute("icon"), new CallbackAdapter<ImageResource, String>(){
+				@Override
+                public void onFailure(String reason) {
+					Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, "Failed to load widget icon." + reason);
+                }
 
 				@Override
-				public void run(PlatypusImageResource aResource) {
-					component.setImage(aResource);
-				}
-
-			}));
+                protected void doWork(ImageResource aResult) throws Exception {
+					component.setImageResource(aResult);
+                }
+			});
 		}
 		if (aTag.hasAttribute("verticalAlignment"))
 			component.setVerticalAlignment(Utils.getIntegerAttribute(aTag, "verticalAlignment", 0));
@@ -610,12 +615,17 @@ public class WidgetsFactory {
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("icon")) {
-			component.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
+			PlatypusImageResource.load(aTag.getAttribute("icon"), new CallbackAdapter<ImageResource, String>(){
 				@Override
-				public void run(PlatypusImageResource aResource) {
-					component.setIcon(aResource);
-				}
-			}));
+                public void onFailure(String reason) {
+					Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, "Failed to load menu widget icon." + reason);
+                }
+
+				@Override
+                protected void doWork(ImageResource aResult) throws Exception {
+					component.setIcon(aResult);
+                }
+			});
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
@@ -877,7 +887,6 @@ public class WidgetsFactory {
 								String tabTooltipText = null;
 								String textOrHtml = "";
 								boolean html = false;
-								PlatypusImageResource imRes = null;
 								if (aConstraintsTag.hasAttribute("tabTitle")) {
 									textOrHtml = aConstraintsTag.getAttribute("tabTitle");
 									if (textOrHtml != null && textOrHtml.startsWith("<html>")) {
@@ -890,10 +899,23 @@ public class WidgetsFactory {
 								if (aConstraintsTag.hasAttribute("tabTooltipText")){
 									tabTooltipText = aConstraintsTag.getAttribute("tabTooltipText");
 								}
+								final TabbedPane.TabLabel tabLabel = new TabbedPane.TabLabel(((TabbedPane)container).getTabs(), (Widget) aComponent, textOrHtml, html, null);
 								if (aConstraintsTag.hasAttribute("tabIcon")) {
-									imRes = AppClient.getInstance().getImageResource(aConstraintsTag.getAttribute("tabIcon"));
+									PlatypusImageResource.load(aConstraintsTag.getAttribute("tabIcon"), new CallbackAdapter<ImageResource, String>(){
+
+										@Override
+                                        public void onFailure(String reason) {
+											Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, "Failed to load tab icon. "+reason);
+                                        }
+
+										@Override
+                                        protected void doWork(ImageResource aResult) throws Exception {
+											tabLabel.setImageResource(aResult);
+                                        }
+										
+									});
 								}
-								container.add((Widget) aComponent, textOrHtml, html, imRes);
+								container.add((Widget) aComponent, tabLabel);
 							} else
 								throw new IllegalStateException(TABS_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " tag.");
 						} else

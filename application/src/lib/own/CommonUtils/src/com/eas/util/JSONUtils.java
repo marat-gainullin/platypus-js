@@ -6,35 +6,58 @@ package com.eas.util;
 
 /**
  *
- * @author AB
+ * @author ab, mg
  */
 public class JSONUtils {
-    public static String s(String aPropValue) {
+    
+    public static StringBuilder s(String aValue) {
         StringBuilder sb = new StringBuilder();
-        aPropValue = aPropValue == null ? "null" : aPropValue.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "\\t").replace("\r", "").replace("\n", "\\n");
-        sb.append("\"").append(aPropValue).append("\"");
-        return sb.toString();
+        aValue = aValue == null ? "null" : aValue.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "\\t").replace("\r", "").replace("\n", "\\n");
+        sb.append("\"").append(aValue).append("\"");
+        return sb;
     }
 
-    public static StringBuilder p(StringBuilder sb, String aPropName, String aPropValue) {
+    public static StringBuilder p(String aPropName, String aPropValue) {
+        StringBuilder sb = new StringBuilder();
         return sb.append("\"").append(aPropName).append("\"").append(":").append(aPropValue);
     }
 
-    public static StringBuilder o(StringBuilder sb, String... aValues) {
+    public static StringBuilder p(StringBuilder aPropName, StringBuilder aPropValue) {
+        StringBuilder sb = new StringBuilder();
+        return sb.append("\"").append(aPropName).append("\"").append(":").append(aPropValue);
+    }
+
+    public static StringBuilder o(String... aValues) {
+        StringBuilder sb = new StringBuilder();
         assert aValues != null && aValues.length % 2 == 0;
         sb.append("{");
         for (int i = 0; i < aValues.length; i += 2) {
             if (i > 0) {
                 sb.append(",");
             }
-            p(sb, aValues[i], aValues[i + 1]);
+            sb.append(p(aValues[i], aValues[i + 1]));
         }
         sb.append("}");
         return sb;
     }
 
-    public static String a(StringBuilder sb, String... aValues) {
+    public static StringBuilder o(StringBuilder...aValues) {
+        StringBuilder sb = new StringBuilder();
+        assert aValues != null && aValues.length % 2 == 0;
+        sb.append("{");
+        for (int i = 0; i < aValues.length; i += 2) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(p(aValues[i], aValues[i + 1]));
+        }
+        sb.append("}");
+        return sb;
+    }
+
+    public static StringBuilder a(String... aValues) {
         assert aValues != null;
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < aValues.length; i++) {
             if (i > 0) {
@@ -43,6 +66,48 @@ public class JSONUtils {
             sb.append(aValues[i]);
         }
         sb.append("]");
-        return sb.toString();
+        return sb;
+    }
+    
+    public static StringBuilder as(String... aValues) {
+        assert aValues != null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < aValues.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(s(aValues[i]));
+        }
+        sb.append("]");
+        return sb;
+    }
+    
+    public static StringBuilder a(StringBuilder... aValues) {
+        assert aValues != null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < aValues.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(aValues[i]);
+        }
+        sb.append("]");
+        return sb;
+    }
+    
+    public static StringBuilder as(StringBuilder... aValues) {
+        assert aValues != null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < aValues.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(s(aValues[i].toString()));
+        }
+        sb.append("]");
+        return sb;
     }
 }

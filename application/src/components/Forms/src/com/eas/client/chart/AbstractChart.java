@@ -5,6 +5,7 @@ import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetListener;
+import com.bearsoft.rowset.events.RowsetNetErrorEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
@@ -112,6 +113,10 @@ public abstract class AbstractChart extends Component<ChartPanel> implements Row
     }
 
     @Override
+    public void beforeRequery(RowsetRequeryEvent rre) {
+    }
+
+    @Override
     public void rowsetRequeried(RowsetRequeryEvent rre) {
         fireDataChanged();
     }
@@ -119,6 +124,10 @@ public abstract class AbstractChart extends Component<ChartPanel> implements Row
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent rnpe) {
         fireDataChanged();
+    }
+
+    @Override
+    public void rowsetNetError(RowsetNetErrorEvent rnee) {
     }
 
     @Override

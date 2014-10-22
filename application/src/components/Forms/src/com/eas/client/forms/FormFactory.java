@@ -31,7 +31,7 @@ public class FormFactory extends DbSwingFactory {
     public Icon resolveIcon(String aIconName) {
         if (aIconName != null) {
             try {
-                Icon res = IconResources.load(aIconName);
+                Icon res = IconResources.load(aIconName, null, null);
                 return res != null ? res : super.resolveIcon(aIconName);
             } catch (Exception ex) {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);

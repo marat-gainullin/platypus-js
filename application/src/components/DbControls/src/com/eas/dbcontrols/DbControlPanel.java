@@ -584,7 +584,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected void setupEditor(JTable table) {
         if (!standalone && !isUpdating()) {
             extraTools.setVisible(false);
-            SwingUtilities.invokeLater(this::invokingLaterProcessControls);
+            EventQueue.invokeLater(this::invokingLaterProcessControls);
         }
     }
 

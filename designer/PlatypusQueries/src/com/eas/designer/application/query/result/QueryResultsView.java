@@ -5,6 +5,7 @@
 package com.eas.designer.application.query.result;
 
 import com.bearsoft.rowset.RowsetConverter;
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
@@ -22,12 +23,14 @@ import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -83,9 +86,8 @@ public class QueryResultsView extends javax.swing.JPanel {
     private static final int[] pageSizes = {100, 200, 500, 1000};
     private PageSizeItem[] pageSizeItems;
     private int pageSize;
-    private final String entityId = IDGenerator.genID().toString();
-    private String dbId;
-    private String queryId;
+    private String datasourceName;
+    private String queryName;
     private final RowsetConverter converter = new RowsetConverter();
 
     public QueryResultsView(PlatypusQueryDataObject aQueryDataObject) throws Exception {
@@ -95,7 +97,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         initCopyMessage();
         queryDataObject = aQueryDataObject;
         client = aQueryDataObject.getBasesProxy();
-        dbId = queryDataObject.getDatasourceName();
+        datasourceName = queryDataObject.getDatasourceName();
         String storedQueryText = queryDataObject.getSqlTextDocument().getText(0, queryDataObject.getSqlTextDocument().getLength());
         String storedDialectQueryText = queryDataObject.getSqlFullTextDocument().getText(0, queryDataObject.getSqlFullTextDocument().getLength());
         StoredQueryFactory factory = new StoredQueryFactory(client, null);
@@ -104,20 +106,20 @@ public class QueryResultsView extends javax.swing.JPanel {
         setName(queryDataObject.getName());
         resetMessage();
         setupButtons();
-        queryId = IndexerQuery.file2AppElementId(aQueryDataObject.getPrimaryFile());
-        if (queryId != null && !queryId.isEmpty()) {
+        queryName = IndexerQuery.file2AppElementId(aQueryDataObject.getPrimaryFile());
+        if (queryName != null && !queryName.isEmpty()) {
             loadParametersValues();
         }
     }
 
-    public QueryResultsView(DatabasesClient aBasesProxy, String aDbId, String aSchemaName, String aTableName) throws Exception {
+    public QueryResultsView(DatabasesClient aBasesProxy, String aDatasourceName, String aSchemaName, String aTableName) throws Exception {
         initComponents();
         initPageSizes();
         initCopyMessage();
         queryDataObject = null;
         client = aBasesProxy;
         queryText = String.format(SQLUtils.TABLE_NAME_2_SQL, getTableName(aSchemaName, aTableName)); //NOI18N
-        dbId = aDbId;
+        datasourceName = aDatasourceName;
         parameters = new Parameters();
         setName(aTableName);
         resetMessage();
@@ -193,13 +195,11 @@ public class QueryResultsView extends javax.swing.JPanel {
         queryEntity = model.newGenericEntity();
         queryEntity.setModel(model);
         SqlQuery query = new SqlQuery(client, queryText);
-        query.setDbId(dbId);
-        query.setEntityId(entityId);
+        query.setDbId(datasourceName);
         query.setPageSize(pageSize);
-        for (Field p : parameters.toCollection()) {
+        parameters.toCollection().stream().forEach((p) -> {
             query.getParameters().add(p.copy());
-        }
-        queryEntity.setQueryName(entityId);
+        });
         queryEntity.setQuery(query);
         model.addEntity(queryEntity);
         try {
@@ -452,6 +452,14 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
         try {
             if (model != null && model.isModified()) {
+                commitButton.setEnabled(false);
+                final String entityId = IDGenerator.genID().toString();
+                queryEntity.getQuery().setEntityId(entityId);
+                queryEntity.setQueryName(entityId);
+                model.forEachChange((Change aChange) -> {
+                    aChange.entityId = entityId;
+                });
+                ((LocalQueriesProxy) client.getQueries()).putCachedQuery(entityId, (SqlQuery) queryEntity.getQuery());
                 RequestProcessor.getDefault().execute(() -> {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
@@ -459,9 +467,19 @@ public class QueryResultsView extends javax.swing.JPanel {
                         model.save();
                         showWarning(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
                     } catch (Exception ex) {
+                        model.revert();
                         showInfo(ex.getMessage()); //NO1I18N
                     } finally {
                         ph.finish();
+                        EventQueue.invokeLater(() -> {
+                            ((LocalQueriesProxy) client.getQueries()).clearCachedQuery(entityId);
+                            model.forEachChange((Change aChange) -> {
+                                aChange.entityId = entityId;
+                            });
+                            queryEntity.getQuery().setEntityId(entityId);
+                            queryEntity.setQueryName(entityId);
+                            commitButton.setEnabled(true);
+                        });
                     }
                 });
             }
@@ -525,7 +543,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                 queryText = querySetupView.getSqlText();
                 parameters = querySetupView.getParameters().copy();
                 logParameters();
-                if (queryId != null && !queryId.isEmpty() && querySetupView.isSaveParamsValuesEnabled()) {
+                if (queryName != null && !queryName.isEmpty() && querySetupView.isSaveParamsValuesEnabled()) {
                     saveParametersValues();
                 }
                 requestExecuteQuery();
@@ -794,7 +812,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void loadParametersValues() {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
-        Preferences paramsPreferences = modulePreferences.node(queryId);
+        Preferences paramsPreferences = modulePreferences.node(queryName);
         for (Field parameter : parameters.toCollection()) {
             Preferences paramPreferences = paramsPreferences.node(parameter.getName());
             try {
@@ -810,7 +828,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void saveParametersValues() {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
-        Preferences paramsPreferences = modulePreferences.node(queryId);
+        Preferences paramsPreferences = modulePreferences.node(queryName);
         for (Field parameter : parameters.toCollection()) {
             try {
                 Preferences paramPreferences = paramsPreferences.node(parameter.getName());

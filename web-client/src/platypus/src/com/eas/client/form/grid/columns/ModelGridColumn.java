@@ -14,13 +14,12 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
-import com.eas.client.ImageResourceCallback;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
+import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
@@ -193,11 +192,6 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			try {
 				if (rowsEntity == columnModelRef.entity) {
 					return converter.convert(aRow.getColumnObject(columnModelRef.getColIndex()));
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						Object value = columnModelRef.entity.getRowset().getObject(columnModelRef.getColIndex());
-						return converter.convert(value);
-					}
 				}
 			} catch (Exception e) {
 				Logger.getLogger(ModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
@@ -212,10 +206,6 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			try {
 				if (rowsEntity == columnModelRef.entity) {
 					aRow.setColumnObject(columnModelRef.getColIndex(), value);
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						columnModelRef.entity.getRowset().updateObject(columnModelRef.getColIndex(), value);
-					}
 				}
 			} catch (Exception e) {
 				Logger.getLogger(ModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
@@ -233,10 +223,11 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		if (visible != aValue) {
 			visible = aValue;
 			if (grid != null) {
-				if (visible)
+				if (visible){
 					grid.showColumn(this);
-				else
+				}else{
 					grid.hideColumn(this);
+				}
 			}
 		}
 	}
@@ -280,8 +271,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	@Override
 	public void setTitle(String aValue) {
-		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>){
 			((DraggableHeader<T>) headerNode.getHeader()).setTitle(aValue);
+		}
 	}
 
 	@Override
@@ -292,8 +284,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setResizable(boolean aValue) {
 		resizable = aValue;
-		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>){
 			((DraggableHeader<T>) headerNode.getHeader()).setResizable(resizable && !fixed);
+		}
 	}
 
 	public boolean isMoveable() {
@@ -302,8 +295,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public void setMoveable(boolean aValue) {
 		moveable = aValue;
-		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>){
 			((DraggableHeader<T>) headerNode.getHeader()).setMoveable(moveable && !fixed);
+		}
 	}
 
 	@Override
@@ -371,8 +365,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setOnSelect(JavaScriptObject aValue) {
 		onSelect = aValue;
-		if (editor != null)
+		if (editor != null){
 			editor.setOnSelect(onSelect);
+		}
 	}
 
 	public String getName() {
@@ -448,21 +443,19 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		});
 	}
 
-	protected void bindIconCallback(final String aTargetElementId, final PlatypusImageResource aIcon) {
-		if (aIcon != null && aIcon.isPending()) {
-			aIcon.addCallback(new ImageResourceCallback() {
+	protected static void bindIconCallback(final PublishedStyle aStyle, final String aTargetElementId) {
+		aStyle.setIconCallback(new Runnable() {
 
-				@Override
-				public void run(PlatypusImageResource aResource) {
-					Element padded = Document.get().getElementById(aTargetElementId);
-					if (padded != null) {
-						int paddingLeft = RenderedEditorCell.CELL_PADDING + aIcon.getWidth();
-						padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
-					}
+			@Override
+			public void run() {
+				Element padded = Document.get().getElementById(aTargetElementId);
+				if (padded != null) {
+					int paddingLeft = RenderedEditorCell.CELL_PADDING + (aStyle.getIcon()!= null ? aStyle.getIcon().getWidth() : 0);
+					padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
 				}
+			}
 
-			});
-		}
+		});
 	}
 
 	@Override
@@ -474,8 +467,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {
 			published = aValue;
-			if (published != null)
+			if (published != null){
 				publish(this, published);
+			}
 		}
 	}
 

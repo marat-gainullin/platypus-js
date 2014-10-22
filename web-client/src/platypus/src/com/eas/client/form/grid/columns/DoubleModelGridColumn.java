@@ -4,7 +4,6 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.DoubleEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.DoubleRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.RenderedCellContext;
@@ -49,10 +48,9 @@ public class DoubleModelGridColumn extends ModelGridColumn<Double> {
 							if(context instanceof RenderedCellContext){
 								((RenderedCellContext)context).setStyle(styleToRender);
 							}
-							DoubleModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);		
-							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
-								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
-								DoubleModelGridColumn.this.bindIconCallback(decorId, pImage);
+							DoubleModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);
+							if(cellToRender.getStyle() != null){
+								ModelGridColumn.bindIconCallback(cellToRender.getStyle(), decorId);
 							}
 						}
 					} catch (Exception e) {

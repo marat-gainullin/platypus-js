@@ -16,9 +16,5 @@ import java.util.function.Consumer;
  */
 public interface ServerDataStorage {
 
-    public List<Change> getChangeLog();
-
-    public void enqueueUpdate(String aQueryName, Parameters aParams) throws Exception;
-
-    public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public int commit(List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
 }

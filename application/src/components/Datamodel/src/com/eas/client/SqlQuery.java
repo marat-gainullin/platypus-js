@@ -257,7 +257,7 @@ public class SqlQuery extends Query {
             }
         }
         SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), ps, fields);
-        compiled.setEntityId(entityId);
+        compiled.setEntityId(entityName);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);
         return compiled;

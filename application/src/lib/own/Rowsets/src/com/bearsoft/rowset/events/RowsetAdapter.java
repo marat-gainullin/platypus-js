@@ -23,6 +23,10 @@ public class RowsetAdapter implements RowsetListener {
     }
 
     @Override
+    public void beforeRequery(RowsetRequeryEvent event) {
+    }
+
+    @Override
     public boolean willRequery(RowsetRequeryEvent event) {
         return true;
     }
@@ -58,6 +62,10 @@ public class RowsetAdapter implements RowsetListener {
 
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
+    }
+
+    @Override
+    public void rowsetNetError(RowsetNetErrorEvent event) {
     }
 
     @Override

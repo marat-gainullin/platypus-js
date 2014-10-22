@@ -230,15 +230,10 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 		});
 		Object.defineProperty(published, "icon", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::getImage()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::getImageResource()();
 			},
 			set : function(aValue) {
-				var setterCallback = function(){
-					aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::setImage(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
-				};
-				if(aValue != null)
-					aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
-				setterCallback();
+				aWidget.@com.eas.client.form.published.widgets.PlatypusSplitButton::setImageResource(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "iconTextGap", {

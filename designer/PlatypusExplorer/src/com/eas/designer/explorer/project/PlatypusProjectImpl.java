@@ -100,6 +100,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected ProjectState state;
     protected final FileObject projectDir;
     protected ScriptedDatabasesClient basesProxy;
+    protected PlatypusIndexer indexer;
     protected LocalQueriesProxy queries;
     protected ScriptEngine jsEngine;
     protected RequestProcessor.Task connecting2Db;
@@ -152,7 +153,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        PlatypusIndexer indexer = (String aAppElementName) -> {
+        indexer = (String aAppElementName) -> {
             if (aAppElementName != null && !aAppElementName.isEmpty()) {
                 FileObject fo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aAppElementName);
                 if (fo != null) {
@@ -183,6 +184,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             }
 
         };
+        basesProxy.setQueries(queries);
         jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
         jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
     }
@@ -201,6 +203,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
     @Override
     public LocalQueriesProxy getQueries() {
         return queries;
+    }
+
+    public PlatypusIndexer getIndexer() {
+        return indexer;
     }
 
     @Override

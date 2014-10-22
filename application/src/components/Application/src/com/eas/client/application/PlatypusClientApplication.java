@@ -5,7 +5,7 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptSecurityConfigs;
+import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.login.Credentials;
@@ -23,7 +23,6 @@ import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.script.ScriptUtils;
 import com.eas.util.args.ThreadsArgsConsumer;
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -211,8 +210,11 @@ public class PlatypusClientApplication {
             if (config.url != null) {
                 checkUserHome();
                 config.datasourcesArgs.registerDatasources();
-                Toolkit.getDefaultToolkit().getSystemEventQueue().push(new LockableEventQueue());
                 ScriptUtils.init();
+                ScriptUtils.initServices(config.threadsArgs.getMaxServicesTreads());
+                ScriptUtils.setGlobalQueue((Runnable aTask) -> {
+                    EventQueue.invokeLater(aTask);
+                });
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
@@ -225,14 +227,15 @@ public class PlatypusClientApplication {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
                         ModelsDocuments models = new ModelsDocuments();
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath());
-                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, config.threadsArgs.getMaxJdbcTreads());
+                        ScriptConfigs scriptsConfigs = new ScriptConfigs();
+                        ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);                        
+                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
                         ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
                         twoTierCore.setQueries(qp);
                         app = new Application() {
 
-                            protected ScriptSecurityConfigs securityConfigs = new ScriptSecurityConfigs();
                             protected FormsDocuments forms = new FormsDocuments();
                             protected ReportsConfigs reports = new ReportsConfigs();
 
@@ -267,8 +270,8 @@ public class PlatypusClientApplication {
                             }
 
                             @Override
-                            public ScriptSecurityConfigs getSecurityConfigs() {
-                                return securityConfigs;
+                            public ScriptConfigs getScriptsConfigs() {
+                                return scriptsConfigs;
                             }
 
                         };
