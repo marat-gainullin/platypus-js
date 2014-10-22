@@ -173,13 +173,6 @@ public abstract class PlatypusConnection implements AppConnection {
     }
 
     protected static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
-        /*
-         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
-         ks.load(null, null);
-         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(DEFAULT_TRUST_ALGORITHM);
-         trustManagerFactory.init(ks);
-         return trustManagerFactory.getTrustManagers();
-         */
         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         char[] password = getTrustStorePassword();
         File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
@@ -302,6 +295,9 @@ public abstract class PlatypusConnection implements AppConnection {
                                 }
                             }
                         }//else if(userChoice == JOptionPane.YES_OPTION)// Accept is no op. Nothing to save and nothing to throw
+                        final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(DEFAULT_TRUST_ALGORITHM);
+                        trustManagerFactory.init(keyStore);
+                        defaultTrustManagers = trustManagerFactory.getTrustManagers();
                     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex1) {
                         throw new CertificateException(ex1);
                     }
