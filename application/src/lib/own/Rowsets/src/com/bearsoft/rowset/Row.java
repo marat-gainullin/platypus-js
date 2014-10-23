@@ -496,7 +496,7 @@ public class Row implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = jdk.nashorn.api.scripting.ScriptUtils.unwrap(publisher.call(null, new Object[]{this}));
         }
         return published;
     }
