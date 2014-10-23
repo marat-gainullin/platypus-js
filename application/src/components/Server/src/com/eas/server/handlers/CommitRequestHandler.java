@@ -69,10 +69,10 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
         public synchronized void complete(Change aChange, SqlQuery aQuery, AccessControlException accessDenied, Exception failed) {
             if (aChange != null && aQuery != null) {
                 try {
-                    SqlCompiledQuery entity = entities.get(aChange.entityId);
+                    SqlCompiledQuery entity = entities.get(aChange.entityName);
                     if (entity == null) {
                         entity = aQuery.compile();
-                        entities.put(aChange.entityId, entity);
+                        entities.put(aChange.entityName, entity);
                     }
                     if (aChange instanceof Command) {
                         ((Command) aChange).command = entity.getSqlClause();
@@ -136,16 +136,16 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
         } else {
             changes.stream().forEach((change) -> {
                 try {
-                    ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityId, (SqlQuery aQuery) -> {
+                    ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, (SqlQuery aQuery) -> {
                         if (aQuery.isPublicAccess()) {
-                            AccessControlException aex = checkWritePrincipalPermission(aSession.getPrincipal(), change.entityId, aQuery.getWriteRoles());
+                            AccessControlException aex = checkWritePrincipalPermission(aSession.getPrincipal(), change.entityName, aQuery.getWriteRoles());
                             if (aex != null) {
                                 process.complete(null, null, aex, null);
                             } else {
                                 process.complete(change, aQuery, null, null);
                             }
                         } else {
-                            process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityId)), null);
+                            process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityName)), null);
                         }
                     }, (Exception ex) -> {
                         process.complete(null, null, null, ex);

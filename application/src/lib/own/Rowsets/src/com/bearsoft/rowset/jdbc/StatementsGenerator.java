@@ -126,7 +126,7 @@ public class StatementsGenerator implements ChangeVisitor {
         if (!aChange.consumed) {
             Map<String, InsertChunk> inserts = new HashMap<>();
             for (ChangeValue data : aChange.data) {
-                Field field = entitiesHost.resolveField(aChange.entityId, data.name);
+                Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
                     InsertChunk chunk = inserts.get(field.getTableName());
                     if (chunk == null) {
@@ -205,7 +205,7 @@ public class StatementsGenerator implements ChangeVisitor {
             Map<String, UpdateChunk> updates = new HashMap<>();
             // data
             for (ChangeValue data : aChange.data) {
-                Field field = entitiesHost.resolveField(aChange.entityId, data.name);
+                Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk == null) {
@@ -227,7 +227,7 @@ public class StatementsGenerator implements ChangeVisitor {
             }
             // keys
             for (ChangeValue key : aChange.keys) {
-                Field field = entitiesHost.resolveField(aChange.entityId, key.name);
+                Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk != null) {
@@ -259,7 +259,7 @@ public class StatementsGenerator implements ChangeVisitor {
         if (!aChange.consumed) {
             Map<String, StatementsLogEntry> deletes = new HashMap<>();
             for (ChangeValue key : aChange.keys) {
-                Field field = entitiesHost.resolveField(aChange.entityId, key.name);
+                Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
                     StatementsLogEntry delete = deletes.get(field.getTableName());
                     if (delete == null) {

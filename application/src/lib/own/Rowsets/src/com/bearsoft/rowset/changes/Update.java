@@ -18,8 +18,8 @@ public class Update extends Change {
     public ChangeValue[] keys;
     public ChangeValue[] data;
 
-    public Update(String aEntityId) {
-        super(aEntityId);
+    public Update(String aEntityName) {
+        super(aEntityName);
     }
 
     @Override

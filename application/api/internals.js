@@ -101,4 +101,7 @@
     ScriptUtils.setIsArrayFunc(function(aInstance){
         return aInstance instanceof Array; 
     });        
+    ScriptUtils.setMakeObjFunc(function(){
+        return {}; 
+    });        
 })();

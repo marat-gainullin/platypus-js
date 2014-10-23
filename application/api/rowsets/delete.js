@@ -22,20 +22,6 @@
         if(P.Delete.superclass)
             P.Delete.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "consumed", {
-            get: function() {
-                var value = delegate.consumed;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Delete){
-            /**
-             * Indicated if the change is consumed.
-             * @property consumed
-             * @memberOf Delete
-             */
-            P.Delete.prototype.consumed = true;
-        }
         Object.defineProperty(this, "keys", {
             get: function() {
                 var value = delegate.keys;
@@ -64,16 +50,19 @@
              */
             P.Delete.prototype.type = '';
         }
+        Object.defineProperty(this, "entity", {
+            get: function() {
+                var value = delegate.entity;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Delete){
+            /**
+             * Indicates the change's destination entity.
+             * @property entity
+             * @memberOf Delete
+             */
+            P.Delete.prototype.entity = '';
+        }
     };
-        /**
-         * Consumes the change, so other validators and database applier won't apply it.
-         * @method consume
-         * @memberOf Delete
-         */
-        P.Delete.prototype.consume = function() {
-            var delegate = this.unwrap();
-            var value = delegate.consume();
-            return P.boxAsJs(value);
-        };
-
 })();

@@ -17,8 +17,8 @@ public class Insert extends Change {
     private static JSObject publisher;
     public ChangeValue[] data;
 
-    public Insert(String aEntityId) {
-        super(aEntityId);
+    public Insert(String aEntityName) {
+        super(aEntityName);
     }
 
     @Override

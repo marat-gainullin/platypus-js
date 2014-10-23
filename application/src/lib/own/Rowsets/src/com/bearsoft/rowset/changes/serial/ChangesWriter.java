@@ -51,7 +51,7 @@ public class ChangesWriter {
         @Override
         public void visit(Insert aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_INSERT);
-            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
+            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
             for (ChangeValue value : aChange.data) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
@@ -62,7 +62,7 @@ public class ChangesWriter {
         @Override
         public void visit(Update aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_UPDATE);            
-            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
+            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
             for (ChangeValue value : aChange.data) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
@@ -77,7 +77,7 @@ public class ChangesWriter {
         @Override
         public void visit(Delete aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_DELETE);
-            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
+            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
             for (ChangeValue value : aChange.keys) {
                 writer.put(ChangesTags.CHANGE_KEY_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
@@ -88,7 +88,7 @@ public class ChangesWriter {
         @Override
         public void visit(Command aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_COMMAND);
-            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityId);
+            writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
             for (ChangeValue value : aChange.parameters) {
                 writer.put(ChangesTags.CHANGE_PARAMETER_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));

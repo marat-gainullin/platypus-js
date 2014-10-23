@@ -128,7 +128,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                                     affected = ((Number) oAffected).intValue();
                                                 }
                                             }
-                                            aLog.clear();
                                             onSuccess.accept(new ApplyResult(affected, new DummySqlConnection()));
                                             return null;
                                         }
@@ -181,7 +180,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                         if (oAffected instanceof Number) {
                             affectedInModules = ((Number) oAffected).intValue();
                         }
-                        aLog.clear();
                         return new ApplyResult(affectedInModules, new DummySqlConnection());
                     } else {
                         throw new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName));

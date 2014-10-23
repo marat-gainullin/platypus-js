@@ -349,21 +349,23 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "*/";
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
-    public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+    public int save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {
             commit((Integer aResult) -> {
                 commited();
-                aOnSuccess.call(null, new Object[]{});
+                aOnSuccess.call(null, new Object[]{aResult});
             }, (Exception ex) -> {
                 rolledback(ex);
                 if (aOnFailure != null) {
                     aOnFailure.call(null, new Object[]{ex.getMessage()});
                 }
             });
+            return 0;
         } else {
             try {
-                commit(null, null);
+                int result = commit(null, null);
                 commited();
+                return result;
             } catch (Exception ex) {
                 rolledback(ex);
                 throw ex;

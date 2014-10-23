@@ -14,25 +14,15 @@ import com.eas.script.ScriptFunction;
  */
 public abstract class Change implements HasPublished {
 
-    public String entityId;
+    public String entityName;
     public boolean consumed;
     //
     
     protected Object published;
 
-    public Change(String aEntityId) {
+    public Change(String aEntityName) {
         super();
-        entityId = aEntityId;
-    }
-
-    @ScriptFunction(jsDoc = "Consumes the change, so other validators and database applier won't apply it.")
-    public void consume() {
-        consumed = true;
-    }
-
-    @ScriptFunction(jsDoc = "Indicated if the change is consumed.")
-    public boolean isConsumed() {
-        return consumed;
+        entityName = aEntityName;
     }
 
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
@@ -40,6 +30,11 @@ public abstract class Change implements HasPublished {
     @ScriptFunction(jsDoc = "Indicates the change's type (Insert, Update, Delete or Command).")
     public String getType() {
         return getClass().getSimpleName();
+    }
+
+    @ScriptFunction(jsDoc = "Indicates the change's destination entity.")
+    public String getEntity() {
+        return entityName;
     }
 
     @Override

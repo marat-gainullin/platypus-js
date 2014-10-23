@@ -11,6 +11,7 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.model.RowsetMissingException;
@@ -87,9 +88,14 @@ public class ScriptedFlowProvider implements FlowProvider {
             if (oFetch instanceof JSObject) {
                 JSObject jsFetch = (JSObject) oFetch;
                 if (jsFetch.isFunction()) {
+                    JSObject jsParams = ScriptUtils.makeObj();
+                    for (int i = 0; i < aParameters.getParametersCount(); i++) {
+                        Parameter p = aParameters.get(i + 1);
+                        jsParams.setMember(p.getName(), ScriptUtils.toJs(p.getValue()));
+                    }
                     if (onSuccess != null) {
                         Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{
-                            ScriptUtils.toJs(aParameters),
+                            jsParams,
                             new AbstractJSObject() {
 
                                 @Override
@@ -138,7 +144,7 @@ public class ScriptedFlowProvider implements FlowProvider {
                             return rowset;
                         }
                     } else {
-                        Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{aParameters.getPublished()}));
+                        Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{jsParams}));
                         if (oRowset == null || oRowset instanceof Undefined) {
                             return null;
                         } else {

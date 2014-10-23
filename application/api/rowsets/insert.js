@@ -22,20 +22,6 @@
         if(P.Insert.superclass)
             P.Insert.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "consumed", {
-            get: function() {
-                var value = delegate.consumed;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Insert){
-            /**
-             * Indicated if the change is consumed.
-             * @property consumed
-             * @memberOf Insert
-             */
-            P.Insert.prototype.consumed = true;
-        }
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
@@ -64,16 +50,19 @@
              */
             P.Insert.prototype.type = '';
         }
+        Object.defineProperty(this, "entity", {
+            get: function() {
+                var value = delegate.entity;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Insert){
+            /**
+             * Indicates the change's destination entity.
+             * @property entity
+             * @memberOf Insert
+             */
+            P.Insert.prototype.entity = '';
+        }
     };
-        /**
-         * Consumes the change, so other validators and database applier won't apply it.
-         * @method consume
-         * @memberOf Insert
-         */
-        P.Insert.prototype.consume = function() {
-            var delegate = this.unwrap();
-            var value = delegate.consume();
-            return P.boxAsJs(value);
-        };
-
 })();

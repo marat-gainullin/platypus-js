@@ -58,6 +58,7 @@ public class ScriptUtils {
     protected static JSObject scalarDefFunc;
     protected static JSObject collectionDefFunc;
     protected static JSObject isArrayFunc;
+    protected static JSObject makeObjFunc;
     protected static ScriptEngine engine;
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
@@ -320,6 +321,11 @@ public class ScriptUtils {
         assert isArrayFunc == null;
         isArrayFunc = aValue;
     }
+    
+    public static void setMakeObjFunc(JSObject aValue) {
+        assert makeObjFunc == null;
+        makeObjFunc = aValue;
+    }    
 
     public static Object toJava(Object aValue) {
         if(aValue instanceof ScriptObject){
@@ -487,6 +493,12 @@ public class ScriptUtils {
         return Boolean.TRUE.equals(oResult);
     }
 
+    public static JSObject makeObj(){
+        assert makeObjFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = makeObjFunc.call(null, new Object[]{});
+        return (JSObject)oResult;
+    }
+    
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});

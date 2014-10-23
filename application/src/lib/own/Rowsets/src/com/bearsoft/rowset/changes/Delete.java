@@ -17,8 +17,8 @@ public class Delete extends Change {
     private static JSObject publisher;
     public ChangeValue[] keys;
 
-    public Delete(String aEntityId) {
-        super(aEntityId);
+    public Delete(String aEntityName) {
+        super(aEntityName);
     }
 
     @Override

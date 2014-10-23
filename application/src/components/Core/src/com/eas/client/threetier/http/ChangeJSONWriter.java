@@ -48,7 +48,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("insert").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityId).toString(),
+                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
                 CHANGE_DATA_NAME, JSONUtils.o(data.toArray(new String[]{})).toString()
         ).toString();
     }
@@ -67,7 +67,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("update").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityId).toString(),
+                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
                 CHANGE_DATA_NAME, JSONUtils.o(data.toArray(new String[]{})).toString(),
                 CHANGE_KEYS_NAME, JSONUtils.o(keys.toArray(new String[]{})).toString()
         ).toString();
@@ -82,7 +82,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("delete").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityId).toString(),
+                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
                 CHANGE_KEYS_NAME, JSONUtils.o(keys.toArray(new String[]{})).toString()
         ).toString();
     }
@@ -96,7 +96,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("command").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityId).toString(),
+                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
                 CHANGE_PARAMETERS_NAME, JSONUtils.as(params.toArray(new String[]{})).toString()
         ).toString();
     }

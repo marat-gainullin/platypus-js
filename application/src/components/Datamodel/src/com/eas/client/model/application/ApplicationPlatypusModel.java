@@ -62,8 +62,8 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
-    public void save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
-        super.save(aOnSuccess, aOnFailure);
+    public int save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        return super.save(aOnSuccess, aOnFailure);
     }
 
     @Override
