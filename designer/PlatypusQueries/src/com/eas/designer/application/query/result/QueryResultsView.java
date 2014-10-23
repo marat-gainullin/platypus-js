@@ -453,13 +453,13 @@ public class QueryResultsView extends javax.swing.JPanel {
         try {
             if (model != null && model.isModified()) {
                 commitButton.setEnabled(false);
-                final String entityId = IDGenerator.genID().toString();
-                queryEntity.getQuery().setEntityId(entityId);
-                queryEntity.setQueryName(entityId);
+                final String entityName = IDGenerator.genID().toString();
+                queryEntity.getQuery().setEntityId(entityName);
+                queryEntity.setQueryName(entityName);
                 model.forEachChange((Change aChange) -> {
-                    aChange.entityId = entityId;
+                    aChange.entityName = entityName;
                 });
-                ((LocalQueriesProxy) client.getQueries()).putCachedQuery(entityId, (SqlQuery) queryEntity.getQuery());
+                ((LocalQueriesProxy) client.getQueries()).putCachedQuery(entityName, (SqlQuery) queryEntity.getQuery());
                 RequestProcessor.getDefault().execute(() -> {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
@@ -472,12 +472,12 @@ public class QueryResultsView extends javax.swing.JPanel {
                     } finally {
                         ph.finish();
                         EventQueue.invokeLater(() -> {
-                            ((LocalQueriesProxy) client.getQueries()).clearCachedQuery(entityId);
+                            ((LocalQueriesProxy) client.getQueries()).clearCachedQuery(entityName);
                             model.forEachChange((Change aChange) -> {
-                                aChange.entityId = entityId;
+                                aChange.entityName = entityName;
                             });
-                            queryEntity.getQuery().setEntityId(entityId);
-                            queryEntity.setQueryName(entityId);
+                            queryEntity.getQuery().setEntityId(entityName);
+                            queryEntity.setQueryName(entityName);
                             commitButton.setEnabled(true);
                         });
                     }
