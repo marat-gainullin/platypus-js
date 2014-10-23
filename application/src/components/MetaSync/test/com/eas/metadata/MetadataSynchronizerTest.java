@@ -22,10 +22,9 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.testdefine.PostgreTestDefine;
@@ -33,6 +32,7 @@ import com.eas.metadata.testdefine.H2TestDefine;
 import com.eas.metadata.testdefine.MySqlTestDefine;
 import com.eas.metadata.testdefine.OracleTestDefine;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1020,13 +1020,13 @@ public class MetadataSynchronizerTest {
     private DatabasesClientWithResource createClient(DbConnection aDbConnection) throws Exception {
 //        DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword(), aDbConnection.getSchema(), null);
         DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword());
-        return new DatabasesClientWithResource(settings);
+        return new DatabasesClientWithResource(settings, null);
     }
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {
         MetadataSynchronizer mds = new MetadataSynchronizer();
         try (DatabasesClientWithResource resource = createClient(aDbConnection)) {
-            DbClient client = resource.getClient();
+            DatabasesClient client = resource.getClient();
             DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
             assertNotNull(databaseStructure);
             Map<String, TableStructure> dbStructure = databaseStructure.getTablesStructure();
@@ -1093,25 +1093,18 @@ public class MetadataSynchronizerTest {
         synchronizeDb(aLogName, aSourceConnection, aDestinationConnection, false, null);
     }
 
-    private void executeSql(DbClient aClient, String aSql) throws Exception {
+    private void executeSql(DatabasesClient aClient, String aSql) throws Exception {
         logText(cntTabs + 1, "sql=" + aSql);
-
         assertNotNull(aClient);
         assertNotNull(aSql);
         assertFalse(aSql.isEmpty());
         SqlCompiledQuery compiledSql = new SqlCompiledQuery(aClient, null, aSql);
-        compiledSql.enqueueUpdate();
-        try {
-            Map<String, List<Change>> changeLogs = new HashMap<>();
-            changeLogs.put(null, compiledSql.getFlow().getChangeLog());
-            aClient.commit(changeLogs);
-        } catch (Exception e) {
-            aClient.rollback();
-            throw e;
-        }
+        Map<String, List<Change>> changeLogs = new HashMap<>();
+        changeLogs.put(null, Collections.singletonList((Change) compiledSql.prepareCommand()));
+        aClient.commit(changeLogs, null, null);
     }
 
-    private void executeSql(DbClient aClient, String[] aSqls) throws Exception {
+    private void executeSql(DatabasesClient aClient, String[] aSqls) throws Exception {
         for (String sql : aSqls) {
             executeSql(aClient, sql);
         }

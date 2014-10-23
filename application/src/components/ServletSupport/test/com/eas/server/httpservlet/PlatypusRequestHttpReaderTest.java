@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -102,10 +101,10 @@ public class PlatypusRequestHttpReaderTest {
         Update u = (Update) changes.get(1);
         Delete d = (Delete) changes.get(2);
         Command c = (Command) changes.get(3);
-        assertEquals("testEntity", i.entityId);
-        assertEquals("testEntity", u.entityId);
-        assertEquals("testEntity", d.entityId);
-        assertEquals("testEntity", c.entityId);
+        assertEquals("testEntity", i.entityName);
+        assertEquals("testEntity", u.entityName);
+        assertEquals("testEntity", d.entityName);
+        assertEquals("testEntity", c.entityName);
         assertNull(c.command);
         assertNotNull(i.data);
         assertEquals(5, i.data.length);

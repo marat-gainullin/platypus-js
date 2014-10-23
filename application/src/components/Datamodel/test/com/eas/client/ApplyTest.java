@@ -13,7 +13,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.model.BaseTest;
+import com.eas.client.model.application.BaseTest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

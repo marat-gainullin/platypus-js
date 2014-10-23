@@ -2,9 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model;
+package com.eas.client.model.application;
 
-import com.eas.client.queries.StoredQueryFactory;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
@@ -13,10 +12,9 @@ import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
+import com.eas.client.SqlQuery;
+import com.eas.client.StoredQueryFactory;
 import com.eas.client.exceptions.NoSuchEntityException;
-import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.util.BinaryUtils;
@@ -258,7 +256,7 @@ public class StoredQueryFactoryTest extends BaseTest {
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery2.xml");
             String queryId = insertEntity(client, queryContent);
             try {
-                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                SqlQuery testQuery = queryFactory.loadQuery(queryId);
                 assertEquals("SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
                         + " * @name namedQuery4Tests\n"
                         + "*/\n"

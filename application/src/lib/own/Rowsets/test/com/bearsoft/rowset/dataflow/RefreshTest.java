@@ -53,10 +53,10 @@ public class RefreshTest extends FlowBaseTest {
             param2.setValue(paramDataValue);
 
             Rowset rs = new Rowset(flow);
-            rs.refresh(params);
+            rs.refresh(params, null, null);
             assertTrue(rs.size() >= 1);
             Fields fields = rs.getFields();
-            rs.refresh(params);
+            rs.refresh(params, null, null);
             assertTrue(rs.size() >= 1);
             Fields fields1 = rs.getFields();
             assertSame(fields1, fields);
@@ -95,10 +95,10 @@ public class RefreshTest extends FlowBaseTest {
             param2.setValue(paramNullValue);
 
             Rowset rs = new Rowset(flow);
-            rs.refresh(params);
+            rs.refresh(params, null, null);
             assertTrue(rs.size() >= 1);
             Fields fields = rs.getFields();
-            rs.refresh(params);
+            rs.refresh(params, null, null);
             assertTrue(rs.size() >= 1);
             Fields fields1 = rs.getFields();
             assertSame(fields1, fields);
@@ -136,13 +136,13 @@ public class RefreshTest extends FlowBaseTest {
             param2.setValue(paramDataValue);
 
             Rowset rs = new Rowset(flow);
-            rs.refresh(params);
+            rs.refresh(params, null, null);
             assertTrue(rs.size() >= 1);
             Fields fields = rs.getFields();
 
             Rowset rs1 = new Rowset(fields);
             rs1.setFlowProvider(flow);
-            rs1.refresh(params);
+            rs1.refresh(params, null, null);
             assertTrue(rs1.size() >= 1);
             Fields fields1 = rs1.getFields();
             assertSame(fields1, fields);
@@ -181,13 +181,13 @@ public class RefreshTest extends FlowBaseTest {
             param2.setValue(paramNullValue);
 
             Rowset rs = new Rowset(flow);
-            rs.refresh(params);
+            rs.refresh(params, null, null);
             assertTrue(rs.size() >= 1);
             Fields fields = rs.getFields();
 
             Rowset rs1 = new Rowset(fields);
             rs1.setFlowProvider(flow);
-            rs1.refresh(params);
+            rs1.refresh(params, null, null);
             assertTrue(rs1.size() >= 1);
             Fields fields1 = rs1.getFields();
             assertSame(fields1, fields);

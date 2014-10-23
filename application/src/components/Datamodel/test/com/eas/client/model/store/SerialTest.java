@@ -6,10 +6,7 @@ package com.eas.client.model.store;
 
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
-import com.eas.client.model.BaseTest;
-import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.model.application.BaseTest;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.InputStream;

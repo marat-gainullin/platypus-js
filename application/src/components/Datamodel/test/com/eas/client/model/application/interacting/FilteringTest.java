@@ -2,14 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.interacting;
+package com.eas.client.model.application.interacting;
 
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.model.BaseTest;
-import com.eas.client.model.EntityDataListener;
-import com.eas.client.model.EntityRefreshFilterDataListener;
+import com.eas.client.model.application.BaseTest;
+import com.eas.client.model.application.EntityDataListener;
+import com.eas.client.model.application.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import java.math.BigDecimal;

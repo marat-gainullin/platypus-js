@@ -4,10 +4,10 @@
  */
 package com.eas.client.queries;
 
+import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.eas.client.exceptions.UnboundSqlParameterException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -40,7 +40,7 @@ public class SqlQueryTest {
 
     @Test
     public void testCreation() {
-        SqlQuery b = new SqlQuery();
+        SqlQuery b = new SqlQuery((DatabasesClient)null);
         assertNull(b.getSqlText());
         assertTrue(b.getParametersBinds().isEmpty());
         b.setSqlText(TWO_PARAMS_QUERY);
@@ -52,8 +52,8 @@ public class SqlQueryTest {
     }
 
     @Test
-    public void testCompiling() throws UnboundSqlParameterException, Exception {
-        SqlQuery b = new SqlQuery();
+    public void testCompiling() throws Exception {
+        SqlQuery b = new SqlQuery((DatabasesClient)null);
         b.setSqlText(TWO_PARAMS_QUERY);
         b.putParameter("param1", DataTypeInfo.INTEGER, 1);
         b.putParameter("param2", DataTypeInfo.VARCHAR, PARAM2_VALUE);

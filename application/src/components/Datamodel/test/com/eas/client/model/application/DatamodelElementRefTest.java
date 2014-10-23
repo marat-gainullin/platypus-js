@@ -3,10 +3,11 @@
  * and open the template in the editor.
  */
 
-package com.eas.client.model;
+package com.eas.client.model.application;
 
 import com.eas.client.model.ModelElementRef;
 import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.model.ModelElementRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import org.junit.Test;

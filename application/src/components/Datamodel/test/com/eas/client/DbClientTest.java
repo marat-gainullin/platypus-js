@@ -12,7 +12,6 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
 import java.sql.SQLException;

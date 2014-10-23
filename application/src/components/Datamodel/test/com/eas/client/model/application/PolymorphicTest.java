@@ -2,15 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.eas.client.model;
+package com.eas.client.model.application;
 
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryEntity;
-import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationDbModel;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -18,11 +15,10 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class PolymorphicTest extends BaseTest{
+public class PolymorphicTest extends BaseTest {
 
     @Test
-    public void applicationEntityTest()
-    {
+    public void applicationEntityTest() {
         System.out.println("applicationEntityTest");
         ApplicationDbModel dm = new ApplicationDbModel();
         ApplicationDbEntity entity = dm.newGenericEntity();
@@ -31,8 +27,7 @@ public class PolymorphicTest extends BaseTest{
     }
 
     @Test
-    public void queryEntityTest()
-    {
+    public void queryEntityTest() {
         System.out.println("slaveEntityTest");
         QueryModel dm = new QueryModel();
         QueryEntity entity = dm.newGenericEntity();
@@ -41,8 +36,7 @@ public class PolymorphicTest extends BaseTest{
     }
 
     @Test
-    public void fieldsEntityTest()
-    {
+    public void fieldsEntityTest() {
         System.out.println("fieldsEntityTest");
         DbSchemeModel dm = new DbSchemeModel();
         FieldsEntity entity = dm.newGenericEntity();
@@ -51,8 +45,7 @@ public class PolymorphicTest extends BaseTest{
     }
 
     @Test
-    public void tables_n_SchemasNames_Forms_Test()
-    {
+    public void tables_n_SchemasNames_Forms_Test() {
         System.out.println("Forms polymorphic test");
         // entities calls vs datamodel data in class hierarchy
         String dbId = "4546465";
@@ -69,8 +62,7 @@ public class PolymorphicTest extends BaseTest{
     }
 
     @Test
-    public void tables_n_SchemasNames_Queries_Test()
-    {
+    public void tables_n_SchemasNames_Queries_Test() {
         System.out.println("Queries polymorphic test");
         // entities calls vs query model data in class hierarchy
         String dbId = "4546465";
@@ -94,8 +86,7 @@ public class PolymorphicTest extends BaseTest{
     }
 
     @Test
-    public void tables_n_SchemasNames_DbSctructure_Test()
-    {
+    public void tables_n_SchemasNames_DbSctructure_Test() {
         System.out.println("DbSctructure polymorphic test");
         // entities calls vs db structure model data in class hierarchy
         String dbId = "4546465";

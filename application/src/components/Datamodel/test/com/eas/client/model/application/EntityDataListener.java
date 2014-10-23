@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model;
+package com.eas.client.model.application;
 
 import com.bearsoft.rowset.events.*;
 
@@ -10,11 +10,12 @@ import com.bearsoft.rowset.events.*;
  *
  * @author mg
  */
-public class EntityRefreshFilterDataListener extends RowsetAdapter {
+public class EntityDataListener extends RowsetAdapter {
 
     protected int events;
+    protected int scrollEvents;
 
-    public EntityRefreshFilterDataListener() {
+    public EntityDataListener() {
         super();
     }
 
@@ -24,10 +25,15 @@ public class EntityRefreshFilterDataListener extends RowsetAdapter {
 
     public void reset() {
         events = 0;
+        scrollEvents = 0;
     }
 
     public int getEvents() {
         return events;
+    }
+
+    public int getScrollEvents() {
+        return scrollEvents;
     }
 
     @Override
@@ -49,7 +55,32 @@ public class EntityRefreshFilterDataListener extends RowsetAdapter {
     }
 
     @Override
+    public boolean willScroll(RowsetScrollEvent event) {
+        scrollEvents++;
+        return true;
+    }
+
+    @Override
+    public boolean willChangeRow(RowChangeEvent event) {
+        incEvents();
+        return true;
+    }
+
+    @Override
+    public boolean willInsertRow(RowsetInsertEvent event) {
+        incEvents();
+        return true;
+    }
+
+    @Override
+    public boolean willDeleteRow(RowsetDeleteEvent event) {
+        incEvents();
+        return true;
+    }
+
+    @Override
     public void rowsetScrolled(RowsetScrollEvent event) {
+        scrollEvents++;
     }
 
     @Override
@@ -58,13 +89,16 @@ public class EntityRefreshFilterDataListener extends RowsetAdapter {
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
+        incEvents();
     }
 
     @Override
     public void rowChanged(RowChangeEvent event) {
+        incEvents();
     }
 
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {
+        incEvents();
     }
 }

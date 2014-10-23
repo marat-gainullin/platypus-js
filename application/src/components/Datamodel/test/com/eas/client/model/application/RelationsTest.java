@@ -2,14 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model;
+package com.eas.client.model.application;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.model.Relation;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

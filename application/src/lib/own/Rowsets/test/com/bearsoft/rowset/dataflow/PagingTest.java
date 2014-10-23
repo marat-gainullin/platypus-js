@@ -31,7 +31,7 @@ public class PagingTest extends FlowBaseTest {
         flow.setPageSize(2);
 
         Rowset rs = new Rowset(flow);
-        rs.refresh(new Parameters());
+        rs.refresh(new Parameters(), null, null);
         assertTrue(rs.size() >= 1);
         assertTrue(rs.size() <= flow.getPageSize());
         Fields fields = rs.getFields();
@@ -40,7 +40,7 @@ public class PagingTest extends FlowBaseTest {
             assertTrue(rs.size() <= flow.getPageSize());
             Fields fields1 = rs.getFields();
             assertSame(fields1, fields);
-        } while (rs.nextPage());
+        } while (rs.nextPage(null, null));
         resCounter.testResources();
     }
 
@@ -56,7 +56,7 @@ public class PagingTest extends FlowBaseTest {
         flow.setPageSize(1);
 
         Rowset rs = new Rowset(flow);
-        rs.refresh(new Parameters());
+        rs.refresh(new Parameters(), null, null);
         assertTrue(rs.size() >= 1);
         assertTrue(rs.size() <= flow.getPageSize());
         Fields fields = rs.getFields();
@@ -65,13 +65,13 @@ public class PagingTest extends FlowBaseTest {
             assertTrue(rs.size() <= flow.getPageSize());
             Fields fields1 = rs.getFields();
             assertSame(fields1, fields);
-        } while (rs.nextPage());
+        } while (rs.nextPage(null, null));
 
-        rs.refresh(new Parameters());
+        rs.refresh(new Parameters(), null, null);
         assertTrue(rs.size() >= 1);
         assertTrue(rs.size() <= flow.getPageSize());
         fields = rs.getFields();
-        while (rs.nextPage()) {
+        while (rs.nextPage(null, null)) {
             assertTrue(rs.size() >= 1);
             assertTrue(rs.size() <= flow.getPageSize());
             Fields fields1 = rs.getFields();
@@ -93,25 +93,25 @@ public class PagingTest extends FlowBaseTest {
         flow.setPageSize(2);
 
         Rowset rs = new Rowset(flow);
-        rs.refresh(new Parameters());
+        rs.refresh(new Parameters(), null, null);
         assertTrue(rs.size() >= 1);
         assertTrue(rs.size() <= flow.getPageSize());// The paged rowset's view maximum size is the page size.
         Fields fields = rs.getFields();
         int pagesCount = 1;
         int recCount = rs.size();
-        while (rs.nextPage()) {
+        while (rs.nextPage(null, null)) {
             pagesCount++;
             recCount += rs.size();
         }
         assertTrue(pagesCount >= 3);// It's needed for good half pages number.
-        rs.refresh();
+        rs.refresh(null, null);
         // Let's invoke refresh in the middle of paging proceess...
-        rs.nextPage();// Second page fetched.
-        rs.refresh();
+        rs.nextPage(null, null);// Second page fetched.
+        rs.refresh(null, null);
         // No exception, because of refresh starts new process from the begining.
         int pagesCount1 = 1;
         int recCount1 = rs.size();
-        while (rs.nextPage()) {
+        while (rs.nextPage(null, null)) {
             pagesCount1++;
             recCount1 += rs.size();
         }
@@ -135,11 +135,11 @@ public class PagingTest extends FlowBaseTest {
         JdbcFlowProvider flow = new JdbcFlowProviderAdapter(null, resCounter, new RowsetConverter(), selectClause4Paging);
 
         Rowset rs = new Rowset(flow);
-        rs.refresh(new Parameters());
+        rs.refresh(new Parameters(), null, null);
         assertTrue(rs.size() >= 1);
         Fields fields = rs.getFields();
         try {
-            rs.nextPage();
+            rs.nextPage(null, null);
             assertTrue(false);
         } catch (FlowProviderNotPagedException ex) {
             // it's ok. This exception must be here!

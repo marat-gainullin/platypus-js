@@ -1131,9 +1131,8 @@ public class SqlDriversTester extends JFrame {
                     long time = System.currentTimeMillis();
                     if (tabIndex == 4) {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, s);
-                        q.enqueueUpdate();
                         Map<String, List<Change>> changeLogs = new HashMap<>();
-                        changeLogs.put(null, q.getFlow().getChangeLog());
+                        changeLogs.put(null, Collections.singletonList((Change)q.prepareCommand()));
                         client.commit(changeLogs, null, null);
                     } else {
                         try (Statement statementJDBC = connectJDBC.createStatement()) {

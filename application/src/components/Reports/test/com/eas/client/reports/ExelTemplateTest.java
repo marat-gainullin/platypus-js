@@ -55,7 +55,7 @@ public class ExelTemplateTest {
         settings.setUser("eas");
         settings.setPassword("eas");
         settings.setMaxStatements(1);
-        return new DatabasesClientWithResource(settings);
+        return new DatabasesClientWithResource(settings, null);
     }
 
     /**
@@ -86,7 +86,7 @@ public class ExelTemplateTest {
         
         System.out.println("GenerateDataNamedMap DataModel");
         try (DatabasesClientWithResource resource = getDBClient()) {
-            ApplicationDbModel model = new ApplicationDbModel(resource.getClient());
+            ApplicationDbModel model = new ApplicationDbModel(resource.getClient(), null);
             ApplicationDbEntity entity41 = model.loadEntity("reportQuery");
             model.addEntity(entity41);
             ((JSObject)model.getPublished()).setMember("dsEnt", entity41.getPublished());

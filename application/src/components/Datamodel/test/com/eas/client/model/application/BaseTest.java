@@ -2,12 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model;
+package com.eas.client.model.application;
 
+import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +33,7 @@ public class BaseTest {
         settings.setUser("eas");
         settings.setPassword("eas");
         settings.setMaxStatements(1);
-        return new DatabasesClientWithResource(settings);
+        return new DatabasesClientWithResource(settings, null);
     }
 
     public static Document documentFromStream(InputStream is) throws ParserConfigurationException, SAXException, IOException {
@@ -51,14 +49,14 @@ public class BaseTest {
         return documentBuilder.parse(is);
     }
 
-    public static ApplicationDbModel modelFromStream(DbClient aClient, InputStream is) throws Exception {
+    public static ApplicationDbModel modelFromStream(DatabasesClient aClient, InputStream is) throws Exception {
         Document modelDoc = BaseTest.documentFromStream(is);
         ApplicationDbModel model = new ApplicationDbModel(aClient);
         model.accept(new XmlDom2ApplicationModel(modelDoc));
         return model;
     }
 
-    public static ApplicationDbModel modelFromString(DbClient aClient, String sData) throws Exception {
+    public static ApplicationDbModel modelFromString(DatabasesClient aClient, String sData) throws Exception {
         Document modelDoc = BaseTest.documentFromString(sData);
         ApplicationDbModel model = new ApplicationDbModel(aClient);
         model.accept(new XmlDom2ApplicationModel(modelDoc));
