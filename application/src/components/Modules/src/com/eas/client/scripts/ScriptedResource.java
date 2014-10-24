@@ -127,7 +127,7 @@ public class ScriptedResource {
      */
     protected static Object loadSync(String aResourceName) throws Exception {
         byte[] data = null;
-        String encoding = null;
+        String encoding;
         Matcher htppMatcher = httpPattern.matcher(aResourceName);
         if (htppMatcher.matches()) {
             URL url = new URL(aResourceName);
@@ -157,17 +157,21 @@ public class ScriptedResource {
                 String contentType = conn.getContentType();
                 if (contentType != null) {
                     contentType = contentType.replaceAll("\\s+", "").toLowerCase();
-                    if (contentType.contains(";charset=")) {
-                        String[] typeCharset = contentType.split(";charset=");
-                        if (typeCharset.length == 2 && typeCharset[1] != null) {
-                            encoding = typeCharset[1];
+                    if (contentType.startsWith("text/") || contentType.contains("charset")) {
+                        if (contentType.contains(";charset=")) {
+                            String[] typeCharset = contentType.split(";charset=");
+                            if (typeCharset.length == 2 && typeCharset[1] != null) {
+                                encoding = typeCharset[1];
+                            } else {
+                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                                encoding = SettingsConstants.COMMON_ENCODING;
+                            }
                         } else {
                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
                             encoding = SettingsConstants.COMMON_ENCODING;
                         }
                     } else {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
-                        encoding = SettingsConstants.COMMON_ENCODING;
+                        encoding = null;// assume binary response
                     }
                 } else {
                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
@@ -187,6 +191,8 @@ public class ScriptedResource {
                     String contentType = Files.probeContentType(resourceFile.toPath());
                     if (contentType != null && contentType.toLowerCase().startsWith("text/")) {
                         encoding = SettingsConstants.COMMON_ENCODING;
+                    } else {
+                        encoding = null;// assume binary content
                     }
                 }
             } else {

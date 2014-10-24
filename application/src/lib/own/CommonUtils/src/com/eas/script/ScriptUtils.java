@@ -49,7 +49,6 @@ public class ScriptUtils {
     protected static JSObject toPrimitiveFunc;
     protected static JSObject lookupInGlobalFunc;
     protected static JSObject putInGlobalFunc;
-    protected static JSObject getModuleFunc;
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
     protected static JSObject parseDatesFunc;
@@ -270,11 +269,6 @@ public class ScriptUtils {
     public static void setPutInGlobalFunc(JSObject aValue) {
         assert putInGlobalFunc == null;
         putInGlobalFunc = aValue;
-    }
-
-    public static void setGetModuleFunc(JSObject aValue) {
-        assert getModuleFunc == null;
-        getModuleFunc = aValue;
     }
 
     public static JSObject getToDateFunc() {
@@ -519,11 +513,6 @@ public class ScriptUtils {
     public static void putInGlobal(String aName, JSObject aValue) {
         assert putInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         putInGlobalFunc.call(null, new Object[]{aName, aValue});
-    }
-
-    public static JSObject getCachedModule(String aModuleName) {
-        assert getModuleFunc != null : SCRIPT_NOT_INITIALIZED;
-        return (JSObject) getModuleFunc.call(null, new Object[]{aModuleName});
     }
 
     public static boolean isInNode(Node node, int offset) {

@@ -7,8 +7,17 @@ package com.eas.server;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.login.SystemPlatypusPrincipal;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
+import com.eas.server.scripts.ModulesJSFacade;
+import com.eas.server.scripts.SyncJSObjectFacade;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,8 +35,10 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author pk, mg refactoring
  */
-public class Session {
+public class Session implements HasPublished {
 
+    protected Object published;
+    //
     private final PlatypusServerCore serverCore;
     private final String sessionId;
     private String userContext;
@@ -36,6 +47,7 @@ public class Session {
     private final AtomicLong atime = new AtomicLong();
     private final Map<String, JSObject> modulesInstances = new HashMap<>();
     private int maxInactiveInterval = 3600000; // 1 hour
+    private final JSObject jsModules = new ModulesJSFacade(this);
 
     /**
      * Creates a new session with given session id.
@@ -153,9 +165,13 @@ public class Session {
     }
 
     public synchronized void registerModule(JSObject aModule) {
-        JSObject c = (JSObject)aModule.getMember("constructor");
+        JSObject c = (JSObject) aModule.getMember("constructor");
         String name = JSType.toString(c.getMember("name"));
-        modulesInstances.put(name, aModule);
+        if (principal instanceof SystemPlatypusPrincipal) {
+            modulesInstances.put(name, new SyncJSObjectFacade(aModule));
+        } else {
+            modulesInstances.put(name, aModule);
+        }
     }
 
     public synchronized void unregisterModule(String aModuleName) {
@@ -164,6 +180,10 @@ public class Session {
 
     public synchronized void unregisterModules() {
         modulesInstances.clear();
+    }
+
+    public synchronized Set<Map.Entry<String, JSObject>> getModulesEntries() {
+        return Collections.unmodifiableSet(modulesInstances.entrySet());
     }
 
     /**
@@ -199,5 +219,38 @@ public class Session {
      */
     public void setContext(String aContext) {
         userContext = aContext;
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Contains modules collection of this session.\n"
+            + " */")
+    public JSObject getModules() {
+        return jsModules;
+    }
+
+    @Override
+    public void setPublished(Object aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    @Override
+    public Object getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

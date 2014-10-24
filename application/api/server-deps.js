@@ -54,3 +54,10 @@ try {
 } catch (e) {
     printf('http-context API skipped.');
 }
+
+try {
+    load('classpath:server/session.js');
+    printf('server API loaded.');
+} catch (e) {
+    printf('server API skipped.');
+}

@@ -240,7 +240,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     public int startResidents(Set<String> aRezidents) throws Exception {
         PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
+        Object oldSession = ScriptUtils.getSession();
         PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
+        ScriptUtils.setSession(sessionManager.getSystemSession());
         try {
             int startedTasks = 0;
             for (String moduleName : aRezidents) {
@@ -255,6 +257,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             }
             return startedTasks;
         } finally {
+            ScriptUtils.setSession(oldSession);
             PlatypusPrincipal.setInstance(oldPrincipal);
         }
     }
@@ -266,11 +269,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @return Success status
      * @throws java.lang.Exception
      */
-    public boolean startResidentModule(String aModuleName) throws Exception {
+    protected boolean startResidentModule(String aModuleName) throws Exception {
         ScriptedResource.require(new String[]{aModuleName});
         Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Starting resident module \"{0}\"", aModuleName);
         try {
-            JSObject module = ScriptUtils.getCachedModule(aModuleName);
+            JSObject jsConstr = ScriptUtils.lookupInGlobal(aModuleName);
+            Object oModule = jsConstr != null ? jsConstr.newObject(new Object[]{}) : null;
+            JSObject module = oModule instanceof JSObject ? (JSObject) oModule : null;
             if (module != null) {
                 sessionManager.getSystemSession().registerModule(module);
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Resident module \"{0}\" has been started successfully", aModuleName);

@@ -598,29 +598,12 @@ public class Application {
 		$wnd.P.HTML5 = "Html5 client";
 		$wnd.P.J2SE = "Java SE client";
 		$wnd.P.agent = $wnd.P.HTML5; 
-		function _Modules() {
-			var platypusModules = {};
-			this.get = function(aModuleId) {
-				var pModule = platypusModules[aModuleId];
-				if (!pModule) {
-					var mc = $wnd[aModuleId];
-					if (mc) {
-						pModule = new mc();
-						platypusModules[aModuleId] = pModule;
-					} else
-						throw 'No module constructor for module: ' + aModuleId;
-				}
-				return pModule;
+		var cachedModules = {};
+		Object.defineProperty($wnd.P, "modules", {
+			get : function(){
+				return cachedModules;
 			}
-			this.create = function(aModuleId) {
-				var mc = $wnd[aModuleId];
-				if (mc) {
-					return new mc();
-				} else
-					throw 'No module constructor for module: ' + aModuleId;
-			}
-		}
-		$wnd.P.Modules = new _Modules();
+		});
 		$wnd.P.Form = {};
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);

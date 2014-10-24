@@ -121,5 +121,4 @@ public class JSObjectFacade implements JSObject {
     public double toNumber() {
         return delegate.toNumber();
     }
-
 }
