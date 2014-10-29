@@ -2,9 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.application;
+package com.eas.client;
 
-import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
@@ -22,9 +21,9 @@ import org.xml.sax.SAXException;
  *
  * @author mg
  */
-public class BaseTest {
+public class BaseModelTest {
 
-    public static final String RESOURCES_PREFIX = "/com/eas/client/model/resources/";
+    //public static final String RESOURCES_PREFIX = "/com/eas/client/model/resources/";
 
     public static DatabasesClientWithResource initDevelopTestClient() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
@@ -48,21 +47,21 @@ public class BaseTest {
         InputSource is = new InputSource(new StringReader(aData));
         return documentBuilder.parse(is);
     }
-
+/*
     public static ApplicationDbModel modelFromStream(DatabasesClient aClient, InputStream is) throws Exception {
-        Document modelDoc = BaseTest.documentFromStream(is);
+        Document modelDoc = BaseModelTest.documentFromStream(is);
         ApplicationDbModel model = new ApplicationDbModel(aClient);
         model.accept(new XmlDom2ApplicationModel(modelDoc));
         return model;
     }
 
     public static ApplicationDbModel modelFromString(DatabasesClient aClient, String sData) throws Exception {
-        Document modelDoc = BaseTest.documentFromString(sData);
+        Document modelDoc = BaseModelTest.documentFromString(sData);
         ApplicationDbModel model = new ApplicationDbModel(aClient);
         model.accept(new XmlDom2ApplicationModel(modelDoc));
         return model;
     }
-
+*/
     @Test
     public void dummyTest() {
     }

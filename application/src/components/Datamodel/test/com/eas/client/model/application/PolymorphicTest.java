@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.eas.client.BaseModelTest;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.query.QueryModel;
@@ -15,7 +16,7 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class PolymorphicTest extends BaseTest {
+public class PolymorphicTest extends BaseModelTest {
 
     @Test
     public void applicationEntityTest() {

@@ -7,7 +7,7 @@ package com.eas.client.model.application.interacting;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.model.application.BaseTest;
+import com.eas.client.BaseModelTest;
 import com.eas.client.model.application.EntityDataListener;
 import com.eas.client.model.application.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -23,9 +23,9 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class FilteringTest extends BaseTest {
+public class FilteringTest extends BaseModelTest {
 
-    public static String MODEL_TEST_PATH = BaseTest.RESOURCES_PREFIX + "datamodelFilteringRelations.xml";
+    public static String MODEL_TEST_PATH = BaseModelTest.RESOURCES_PREFIX + "datamodelFilteringRelations.xml";
     // 1st layer
     public static Long ENTITY_GRUPPA_OBJECTA_REMONTA_ID = 128049573928131L;
     public static Long ENTITY_VID_OBJECTA_REMONTA_ID = 128049576096827L;
@@ -100,10 +100,10 @@ public class FilteringTest extends BaseTest {
 
     @Test
     public void filteringMultiTypesKeysTest() throws Exception {
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
             System.out.println("Test of filtering process with key values of various types, but same values");
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -189,9 +189,9 @@ public class FilteringTest extends BaseTest {
     @Test
     public void userFilteringTest() throws Exception {
         System.out.println("Enable and disable user custom filtering");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -237,9 +237,9 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringScrollTest() throws Exception {
         System.out.println("filteringScrollTest, filteringPointsOfIntererstTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
             Map<Long, Integer> counts = state.gatherRowCounts();
@@ -348,9 +348,9 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringEmptyKeysSourceTest() throws Exception {
         System.out.println("filteringEmptyKeysSourceTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
 
@@ -379,9 +379,9 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringBadSourcePositionTest() throws Exception {
         System.out.println("filteringBadSourcePositionTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
 
@@ -422,9 +422,9 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringCrudTest() throws Exception {
         System.out.println("filteringCrudTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -521,9 +521,9 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringScriptEventsVsDataEventsTest() throws Exception {
         System.out.println("filteringScriptEventsVsDataTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
 
             ModelState state = new ModelState(model);
@@ -590,10 +590,10 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringExecutingOrderTest() throws Exception {
         System.out.println("filteringExecutingOrderTest layer by layer");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
             try {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                 model.requery();
 
                 ModelState state = new ModelState(model);
