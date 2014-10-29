@@ -50,7 +50,7 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     annotations.stream().forEach((JsDoc.Tag tag) -> {
-                        if (JsDoc.Tag.ACCEPTOR_TAG.equals(tag.getName()) || JsDoc.Tag.ACCEPTED_PROTOCOL_TAG.equals(tag.getName())) {
+                        if (JsDoc.Tag.ACCEPTOR_TAG.equalsIgnoreCase(tag.getName()) || JsDoc.Tag.ACCEPTED_PROTOCOL_TAG.equalsIgnoreCase(tag.getName())) {
                             if (tag.getParams() == null || tag.getParams().isEmpty()) {
                                 if (acceptors.containsKey(null)) {
                                     Logger.getLogger(ServerTasksScanner.class.getName()).log(Level.WARNING, "Duplicated acceptor \"{0}\" on any protocol. Ignored.", aAppElementName);
@@ -71,18 +71,18 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
                         }
                     });
                     if (annotations.stream().anyMatch((JsDoc.Tag tag) -> {
-                        return JsDoc.Tag.AUTHORIZER_TAG.equals(tag.getName());
+                        return JsDoc.Tag.AUTHORIZER_TAG.equalsIgnoreCase(tag.getName());
                     })) {
                         authorizers.add(aAppElementName);
                         Logger.getLogger(ServerTasksScanner.class.getName()).log(Level.INFO, "Authorizer \"{0}\" has been registered", aAppElementName);
                     }
                     if (annotations.stream().anyMatch((JsDoc.Tag tag) -> {
-                        return JsDoc.Tag.RESIDENT_TAG.equals(tag.getName());
+                        return JsDoc.Tag.RESIDENT_TAG.equalsIgnoreCase(tag.getName());
                     })) {
                         residents.add(aAppElementName);
                     }
                     annotations.stream().forEach((JsDoc.Tag tag) -> {
-                        if (JsDoc.Tag.VALIDATOR_TAG.equals(tag.getName())) {
+                        if (JsDoc.Tag.VALIDATOR_TAG.equalsIgnoreCase(tag.getName())) {
                             validators.put(aAppElementName, tag.getParams());
                             Logger.getLogger(ServerTasksScanner.class.getName()).log(Level.INFO, "Validator \"{0}\" on datasources {1} has been registered", new Object[]{aAppElementName, tag.getParams().toString()});
                         }

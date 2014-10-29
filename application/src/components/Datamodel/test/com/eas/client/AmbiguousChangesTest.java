@@ -11,7 +11,6 @@ import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.application.BaseTest;
 import com.eas.client.queries.Query;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class AmbiguousChangesTest extends BaseTest {
+public class AmbiguousChangesTest extends BaseModelTest {
 
     public static final String AMBIGUOUS_QUERY_ID = "134564170799279";
     public static final String AMBIGUOUS_SEMI_WRITABLE_QUERY_ID = "test.ambigous.changes.mutatable";//@mutatable Asset_Kinds, AssET_TYPES
@@ -37,7 +36,7 @@ public class AmbiguousChangesTest extends BaseTest {
 
     @Test
     public void threeTablesTest() throws Exception {
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final List<Change> commonLog = new ArrayList<>();
             Map<String, List<Change>> changeLogs = new HashMap<>();
             changeLogs.put(null, commonLog);
@@ -145,7 +144,7 @@ public class AmbiguousChangesTest extends BaseTest {
 
     @Test
     public void twoWritableTablesTest() throws Exception {
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final List<Change> commonLog = new ArrayList<>();
             Map<String, List<Change>> changeLogs = new HashMap<>();
             changeLogs.put(null, commonLog);

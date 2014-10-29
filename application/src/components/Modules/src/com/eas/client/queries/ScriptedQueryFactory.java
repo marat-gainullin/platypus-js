@@ -26,13 +26,13 @@ public class ScriptedQueryFactory extends StoredQueryFactory{
 
     private final LocalQueriesProxy subQueriesProxy;
     
-    public ScriptedQueryFactory(DatabasesClient aClient, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        super(aClient, aIndexer, aPreserveDatasources);
+    public ScriptedQueryFactory(DatabasesClient aBasesProxy, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
+        super(aBasesProxy, aIndexer, aPreserveDatasources);
         subQueriesProxy = aQueriesProxy;
     }
 
-    public ScriptedQueryFactory(DatabasesClient aClient, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
-        super(aClient, aIndexer);
+    public ScriptedQueryFactory(DatabasesClient aBasesProxy, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
+        super(aBasesProxy, aIndexer);
         subQueriesProxy = aQueriesProxy;
     }
     

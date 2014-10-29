@@ -45,13 +45,14 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements Quer
     
     @Override
     public void visit(QueryModel aModel) {
-        readModel(aModel);
+        Runnable resolver = readModel(aModel);
         if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
-            String dbIdAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
-            if (dbIdAttr != null && !"null".equals(dbIdAttr)) {
-                aModel.setDbId(dbIdAttr);
+            String datasourceName = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+            if (datasourceName != null && !"null".equals(datasourceName)) {
+                aModel.setDbId(datasourceName);
             }
         }
+        resolver.run();
     }
 
     @Override

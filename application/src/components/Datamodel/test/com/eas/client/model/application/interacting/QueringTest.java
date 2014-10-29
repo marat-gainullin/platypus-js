@@ -7,7 +7,7 @@ package com.eas.client.model.application.interacting;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.model.application.BaseTest;
+import com.eas.client.BaseModelTest;
 import com.eas.client.model.application.EntityDataListener;
 import com.eas.client.model.application.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -21,9 +21,9 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class QueringTest extends BaseTest {
+public class QueringTest extends BaseModelTest {
 
-    private static final String MODEL_TEST_PATH = BaseTest.RESOURCES_PREFIX + "datamodelQueringRelations.xml";
+    private static final String MODEL_TEST_PATH = BaseModelTest.RESOURCES_PREFIX + "datamodelQueringRelations.xml";
     // 1st layer
     private static final Long ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID = 128049787114001L;
     private static final Long ENTITY_VID_OBJECTA_REMONTA_ID = 128049576096827L;
@@ -94,9 +94,9 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringScrollTest() throws Exception {
         System.out.println("queringScrollTest, queringPointOfInterestTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
             int parIndex = model.getParametersEntity().getRowset().getFields().find("P_ID");
@@ -212,9 +212,9 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringEmptyKeysSourceTest() throws Exception {
         System.out.println("queringEmptyKeysSourceTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
 
@@ -243,9 +243,9 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringBadSourcePositionTest() throws Exception {
         System.out.println("queringBadSourcePositionTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
 
@@ -286,9 +286,9 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringCrudTest() throws Exception {
         System.out.println("queringCrudTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -386,9 +386,9 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringScriptEventsVsDataTest() throws Exception {
         System.out.println("queringScriptEventsVsDataTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
-            ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+            ApplicationDbModel model = BaseModelTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
             model.requery();
 
             ModelState state = new ModelState(model);
@@ -458,10 +458,10 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringExecutingOrderTest() throws Exception {
         System.out.println("queringExecutingOrderTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
             try {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                ApplicationDbModel model = BaseModelTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
                 model.requery();
 
                 ModelState state = new ModelState(model);

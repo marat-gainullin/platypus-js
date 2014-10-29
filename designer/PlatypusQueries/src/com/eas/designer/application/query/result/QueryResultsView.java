@@ -24,6 +24,7 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.queries.LocalQueriesProxy;
+import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
@@ -73,7 +74,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private final PlatypusQueryDataObject queryDataObject;
     private QuerySetupView querySetupView;
     private DbGrid dbGrid;
-    private final DatabasesClient client;
+    private final DatabasesClient basesProxy;
     private String queryText;
     private Parameters parameters;
     private ApplicationDbModel model;
@@ -96,11 +97,11 @@ public class QueryResultsView extends javax.swing.JPanel {
         initPageSizes();
         initCopyMessage();
         queryDataObject = aQueryDataObject;
-        client = aQueryDataObject.getBasesProxy();
+        basesProxy = aQueryDataObject.getBasesProxy();
         datasourceName = queryDataObject.getDatasourceName();
         String storedQueryText = queryDataObject.getSqlTextDocument().getText(0, queryDataObject.getSqlTextDocument().getLength());
         String storedDialectQueryText = queryDataObject.getSqlFullTextDocument().getText(0, queryDataObject.getSqlFullTextDocument().getLength());
-        StoredQueryFactory factory = new StoredQueryFactory(client, null);
+        StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, queryDataObject.getProject().getQueries(), queryDataObject.getProject().getIndexer());
         queryText = factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, queryDataObject.getModel());
         parameters = queryDataObject.getModel().getParameters();
         setName(queryDataObject.getName());
@@ -117,7 +118,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         initPageSizes();
         initCopyMessage();
         queryDataObject = null;
-        client = aBasesProxy;
+        basesProxy = aBasesProxy;
         queryText = String.format(SQLUtils.TABLE_NAME_2_SQL, getTableName(aSchemaName, aTableName)); //NOI18N
         datasourceName = aDatasourceName;
         parameters = new Parameters();
@@ -131,7 +132,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         initPageSizes();
         initCopyMessage();
         queryDataObject = aQueryDataObject;
-        client = aQueryDataObject.getBasesProxy();
+        basesProxy = aQueryDataObject.getBasesProxy();
         queryText = aQueryText;
         parseParameters();
         setName(getGeneratedTitle());
@@ -170,7 +171,7 @@ public class QueryResultsView extends javax.swing.JPanel {
      * @throws Exception
      */
     private boolean initModel() throws Exception {
-        model = new ApplicationDbModel(client, null);
+        model = new ApplicationDbModel(basesProxy, null);
         model.setParameters(parameters);
         setupQueryEntityBySql();
         setModelRelations();
@@ -178,7 +179,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         if (queryEntity.getQuery().isCommand()) {
             queryEntity.getQuery().setManual(true);
             model.requery();
-            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile(), null, null);
+            int rowsAffected = basesProxy.executeUpdate(queryEntity.getQuery().compile(), null, null);
             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
             return false;
         } else {
@@ -194,7 +195,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         }
         queryEntity = model.newGenericEntity();
         queryEntity.setModel(model);
-        SqlQuery query = new SqlQuery(client, queryText);
+        SqlQuery query = new SqlQuery(basesProxy, queryText);
         query.setDbId(datasourceName);
         query.setPageSize(pageSize);
         parameters.toCollection().stream().forEach((p) -> {
@@ -203,7 +204,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         queryEntity.setQuery(query);
         model.addEntity(queryEntity);
         try {
-            StoredQueryFactory factory = new StoredQueryFactory(client, null, false);
+            StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, false);
             query.setCommand(!factory.putTableFieldsMetadata(query));
             enableCommitQueryButton(!query.isCommand());
             enableNextPageButton(!query.isCommand());
@@ -432,7 +433,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                     ph.start();
                     try {
                         if (queryEntity.getQuery().isCommand()) {
-                            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile(), null, null);
+                            int rowsAffected = basesProxy.executeUpdate(queryEntity.getQuery().compile(), null, null);
                             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
                         } else {
                             model.requery();
@@ -459,7 +460,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                 model.forEachChange((Change aChange) -> {
                     aChange.entityName = entityName;
                 });
-                ((LocalQueriesProxy) client.getQueries()).putCachedQuery(entityName, (SqlQuery) queryEntity.getQuery());
+                ((LocalQueriesProxy) basesProxy.getQueries()).putCachedQuery(entityName, (SqlQuery) queryEntity.getQuery());
                 RequestProcessor.getDefault().execute(() -> {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
@@ -472,7 +473,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                     } finally {
                         ph.finish();
                         EventQueue.invokeLater(() -> {
-                            ((LocalQueriesProxy) client.getQueries()).clearCachedQuery(entityName);
+                            ((LocalQueriesProxy) basesProxy.getQueries()).clearCachedQuery(entityName);
                             model.forEachChange((Change aChange) -> {
                                 aChange.entityName = entityName;
                             });

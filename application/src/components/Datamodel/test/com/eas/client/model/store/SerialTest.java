@@ -6,7 +6,7 @@ package com.eas.client.model.store;
 
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.model.application.BaseTest;
+import com.eas.client.BaseModelTest;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.InputStream;
@@ -17,12 +17,12 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class SerialTest extends BaseTest {
+public class SerialTest extends BaseModelTest {
 
     @Test
     public void logicalStabilityTest() throws Exception {
         System.out.println("serialization logical stability test");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
             ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
@@ -37,7 +37,7 @@ public class SerialTest extends BaseTest {
     @Test
     public void binaryStabilityTest() throws Exception {
         System.out.println("serialization binary stability test");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final DatabasesClient client = resource.getClient();
             ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
@@ -52,8 +52,8 @@ public class SerialTest extends BaseTest {
     }
 
     protected ApplicationDbModel modelFromResource(DbClient aClient) throws Exception {
-        InputStream is = SerialTest.class.getResourceAsStream(BaseTest.RESOURCES_PREFIX + "formsDatamodel1.xml");
-        return BaseTest.modelFromStream(aClient, is);
+        InputStream is = SerialTest.class.getResourceAsStream(BaseModelTest.RESOURCES_PREFIX + "formsDatamodel1.xml");
+        return BaseModelTest.modelFromStream(aClient, is);
     }
 
     protected String model2String(ApplicationDbModel model) {

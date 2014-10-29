@@ -25,6 +25,7 @@ import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.QueryDocument2XmlDom;
 import com.eas.client.model.store.XmlDom2QueryModel;
+import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
@@ -61,6 +62,7 @@ import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import org.netbeans.modules.editor.NbEditorDocument;
+import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.openide.ErrorManager;
 import org.openide.awt.StatusDisplayer;
 import org.openide.awt.UndoRedo;
@@ -790,7 +792,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         if (statementError == null && basesProxy != null && s != null && !s.isEmpty()) {
             try {
-                StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, true);
+                StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer(), true);
                 SqlQuery outQuery = new SqlQuery(basesProxy, datasourceName, s);
                 outQuery.setEntityId(String.valueOf(IDGenerator.genID()));
                 factory.putTableFieldsMetadata(outQuery);

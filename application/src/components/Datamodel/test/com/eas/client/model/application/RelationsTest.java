@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.eas.client.BaseModelTest;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
@@ -19,12 +20,12 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class RelationsTest extends BaseTest {
+public class RelationsTest extends BaseModelTest {
 
     @Test
     public void attainabilityTest() throws Exception {
         System.out.println("attainabilityTest. Field to parameter, parameter to parameter and field to parameter relations test");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             ApplicationDbModel model = new ApplicationDbModel(resource.getClient());
             ApplicationDbEntity entity11 = model.newGenericEntity();
             entity11.setTableName("GOODORDER");

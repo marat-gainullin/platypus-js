@@ -13,7 +13,6 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.model.application.BaseTest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class ApplyTest extends BaseTest {
+public class ApplyTest extends BaseModelTest {
 
     protected static final String tableName = "access_list";
     protected static final String selectClause = "select a.ACCESS_LIST_ID, a.ACCESS_NAME, a.KEY_WORD, a.FORM_ID from " + tableName + " a where a.KEY_WORD = ? or (a.KEY_WORD is null and ? is null)";
@@ -39,7 +38,7 @@ public class ApplyTest extends BaseTest {
     @Test
     public void applyCRUDTest() throws Exception {
         System.out.println("applyCRUDTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final List<Change> commonLog = new ArrayList<>();
             Map<String, List<Change>> changeLogs = new HashMap<>();
             changeLogs.put(null, commonLog);
@@ -150,7 +149,7 @@ public class ApplyTest extends BaseTest {
     @Test
     public void applyNullsTest() throws Exception {
         System.out.println("applyNullsTest");
-        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+        try (DatabasesClientWithResource resource = BaseModelTest.initDevelopTestClient()) {
             final List<Change> commonLog = new ArrayList<>();
             Map<String, List<Change>> changeLogs = new HashMap<>();
             changeLogs.put(null, commonLog);
