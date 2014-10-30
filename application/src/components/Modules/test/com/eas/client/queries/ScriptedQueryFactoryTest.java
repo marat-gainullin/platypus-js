@@ -7,7 +7,6 @@ package com.eas.client.queries;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.BaseModelTest;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.script.JsDoc;

@@ -273,6 +273,20 @@
              */
             P.ModelScheme.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -289,20 +303,6 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {

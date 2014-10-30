@@ -32,13 +32,13 @@ public class TaggedFeedEndPoint {
         Set<String> tags = tagsByPeer.get(aPeer.getId());
         tagsByPeer.remove(aPeer.getId());
         if (tags != null) {
-            for (String tag : tags) {
+            tags.stream().forEach((tag) -> {
                 Set<Session> peers = peersByTag.get(tag);
                 peers.remove(aPeer);
                 if (peers.isEmpty()) {
                     peersByTag.remove(tag);
                 }
-            }
+            });
         }
     }
 
@@ -92,16 +92,20 @@ public class TaggedFeedEndPoint {
         }
     }
 
-    public static synchronized void broadcast(String aTag, String aData) {
+    public static void broadcast(String aTag, String aData) {
         if (aTag != null) {
             aTag = aTag.trim();
             if (!aTag.isEmpty()) {
                 synchronized (peersByTag) {
                     Set<Session> taggedPeers = peersByTag.get(aTag);
                     if (taggedPeers != null) {
-                        for (Session peer : taggedPeers) {
-                            peer.getAsyncRemote().sendText(aData);
-                        }
+                        taggedPeers.stream().forEach((peer) -> {
+                            try {
+                                peer.getAsyncRemote().sendText(aData);
+                            } catch (Exception ex) {
+                                Logger.getLogger(TaggedFeedEndPoint.class.getName()).log(Level.WARNING, ex.getMessage());
+                            }
+                        });
                     }
                 }
             }

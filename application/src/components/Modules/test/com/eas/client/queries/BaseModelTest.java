@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client;
+package com.eas.client.queries;
 
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
@@ -22,8 +23,6 @@ import org.xml.sax.SAXException;
  * @author mg
  */
 public class BaseModelTest {
-
-    //public static final String RESOURCES_PREFIX = "/com/eas/client/model/resources/";
 
     public static DatabasesClientWithResource initDevelopTestClient() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
