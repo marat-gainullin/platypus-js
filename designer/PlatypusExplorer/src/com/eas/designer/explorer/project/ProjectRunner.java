@@ -267,7 +267,7 @@ public class ProjectRunner {
 
                 String classPath = getExtendedClasspath(getApiClasspath(getExecutablePath(binDir)));
                 arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-                arguments.add("\"" + classPath + "\"");
+                arguments.add(classPath);
 
                 arguments.add(PlatypusClientApplication.class.getName());
 
@@ -345,6 +345,22 @@ public class ProjectRunner {
                 for (String argument : arguments) {
                     processBuilder = processBuilder.addArgument(argument);
                 }
+                
+//                processBuilder = processBuilder
+//                        .addArgument("-D.level=SEVERE")
+//                        .addArgument("-Dhandlers=java.util.logging.ConsoleHandler")
+//                        .addArgument("-Djava.util.logging.ConsoleHandler.level=INFO")
+//                        .addArgument("-DApplication.level=INFO")
+//                        .addArgument("-Djava.util.logging.ConsoleHandler.formatter=com.eas.util.logging.PlatypusFormatter")
+//                        .addArgument("-Djava.util.logging.config.class=com.eas.util.logging.LoggersConfig")
+//                        .addArgument("-cp")
+//                        .addArgument("\"/home/user/workspace/platypus js/application/bin/Application.jar:/home/user/workspace/platypus js/application/bin/Application.jar:/home/user/workspace/platypus js/application/api:/home/user/workspace/platypus js/application/ext/*:/home/user/workspace/platypus js/application/ext\"")
+//                        .addArgument("com.eas.client.application.PlatypusClientApplication")
+//                        .addArgument("-appelement")
+//                        .addArgument("\"start.js\"")
+//                        .addArgument("-url")
+//                        .addArgument("file:/home/user/workspace/platypus%20tests/")
+//                        ;
                 ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
@@ -447,9 +463,9 @@ public class ProjectRunner {
         File extDir = getPlatformExtDirectory();
         if (extDir.exists() && extDir.isDirectory()) {
             classpathStr.append(File.pathSeparator);
-            classpathStr.append(extDir);
-            classpathStr.append(File.pathSeparator);
             classpathStr.append(String.format("%s/*", extDir)); //NOI18N
+            classpathStr.append(File.pathSeparator);
+            classpathStr.append(extDir);
         }
         return classpathStr.toString();
     }
