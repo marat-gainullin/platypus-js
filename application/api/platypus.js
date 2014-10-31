@@ -736,7 +736,7 @@
     function publishRow(aDelegate, aTarget) {
         var nnFields = aDelegate.getFields();
         var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
-        var target = !!aTarget ? aTarget : !!instanceCTor ? new instanceCTor() : {};
+        var target = arguments.length > 1 ? aTarget : (!!instanceCTor ? new instanceCTor() : {});
         var nFields = nnFields.toCollection();
         // plain mutable properties
         for (var n = 0; n < nFields.size(); n++) {
@@ -837,11 +837,11 @@
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
                         justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
-                        publishRow(justInserted, arguments[a]);
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
                     }
                 } else if (arguments.length === 1) {
                     justInserted = rowset.insertAt(rowset.size() + 1, true, objectToInsertIniting(arguments[0]));
-                    publishRow(justInserted, arguments[0]);
+                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
                     Array.prototype.push.call(target, justInserted.getPublished());
                 }
                 return target.length;
@@ -899,7 +899,7 @@
                     var insertAt = beginToDeleteAt;
                     for (var a = 2; a < arguments.length; a++) {
                         var justInserted = rowset.insertAt(insertAt + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
-                        publishRow(justInserted, arguments[a]);
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
                         insertAt++;
                     }
                     return deleted;
@@ -915,11 +915,11 @@
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
                         justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
-                        publishRow(justInserted, arguments[a]);
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
                     }
                 } else if (arguments.length === 1) {
                     justInserted = rowset.insertAt(1, true, objectToInsertIniting(arguments[0]));
-                    publishRow(justInserted, arguments[0]);
+                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
                     Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
                 return target.length;
@@ -964,7 +964,7 @@
             value: function () {
                 var nEntity = this.unwrap();
                 var args = arguments.length === 1 ? arguments[0] : arguments;
-                if (Array.isArray(args)) {
+                if (Array.isArray(args) || args === arguments) {
                     var varargs = new JavaArrayClass(args.length);
                     for (var v = 0; v < args.length; v++)
                         varargs[v] = boxAsJava(args[v]);
@@ -980,7 +980,7 @@
                 var found;
                 var nEntity = this.unwrap();
                 var args = arguments.length === 1 ? arguments[0] : arguments;
-                if (Array.isArray(args)) {
+                if (Array.isArray(args) || args === arguments) {
                     var varargs = new JavaArrayClass(args.length);
                     for (var v = 0; v < args.length; v++)
                         varargs[v] = boxAsJava(args[v]);
@@ -1000,7 +1000,7 @@
         });
     }
 
-    RowClass.setPublisher(rowPublisher);
+    RowClass.setPublisher(publishRow);
     FieldsClass.setPublisher(function (aDelegate) {
         var target = {};
         var nFields = aDelegate.toCollection();
@@ -1103,17 +1103,19 @@
                 var ncParameters = nParameters.toCollection();
                 var pParams = {};
                 for (var p = 0; p < ncParameters.size(); p++) {
-                    var nParameter = ncParameters[p];
-                    var pDesc = {
-                        get: function () {
-                            return boxAsJs(nParameter.value);
-                        },
-                        set: function (aValue) {
-                            nParameter.value = boxAsJava(aValue);
-                        }
-                    };
-                    Object.defineProperty(pParams, nParameter.name, pDesc);
-                    Object.defineProperty(pParams, p, pDesc);
+                    (function(){
+                        var nParameter = ncParameters[p];
+                        var pDesc = {
+                            get: function () {
+                                return boxAsJs(nParameter.value);
+                            },
+                            set: function (aValue) {
+                                nParameter.value = boxAsJava(aValue);
+                            }
+                        };
+                        Object.defineProperty(pParams, nParameter.name, pDesc);
+                        Object.defineProperty(pParams, p, pDesc);
+                    })();
                 }
                 Object.defineProperty(pParams, "length", {value: ncParameters.size()});
                 Object.defineProperty(published, "params", {value: pParams});
@@ -1295,25 +1297,25 @@
     var Logger = {};
     Object.defineProperty(P, "Logger", {value: Logger});
     Object.defineProperty(Logger, "config", {value: function (aMessage) {
-            applicationLogger.config(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.config("" + aMessage);
         }});
     Object.defineProperty(Logger, "severe", {value: function (aMessage) {
-            applicationLogger.severe(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.severe("" + aMessage);
         }});
     Object.defineProperty(Logger, "warning", {value: function (aMessage) {
-            applicationLogger.warning(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.warning("" + aMessage);
         }});
     Object.defineProperty(Logger, "info", {value: function (aMessage) {
-            applicationLogger.info(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.info("" + aMessage);
         }});
     Object.defineProperty(Logger, "fine", {value: function (aMessage) {
-            applicationLogger.fine(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.fine("" + aMessage);
         }});
     Object.defineProperty(Logger, "finer", {value: function (aMessage) {
-            applicationLogger.finer(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.finer("" + aMessage);
         }});
     Object.defineProperty(Logger, "finest", {value: function (aMessage) {
-            applicationLogger.finest(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.finest("" + aMessage);
         }});
 
     function readString(aFileName, aEncoding) {

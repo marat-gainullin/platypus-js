@@ -733,6 +733,19 @@
         }
     };
         /**
+         * Gets map's layer by the title.
+         * @param layerTitle the layer's title.
+         * @return an <code>MapLayer</code> instance.
+         * @method getLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.getLayer = function(layerTitle) {
+            var delegate = this.unwrap();
+            var value = delegate.getLayer(P.boxAsJava(layerTitle));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Hits to the specified point.
          * @param hitObject the object to hit, can be either a Point or a Polygon instance.
          * @return an array of <code>SelectionEntry</code> elements
@@ -754,19 +767,6 @@
         P.ModelMap.prototype.select = function(selectionEntries) {
             var delegate = this.unwrap();
             var value = delegate.select(P.boxAsJava(selectionEntries));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets map's layer by the title.
-         * @param layerTitle the layer's title.
-         * @return an <code>MapLayer</code> instance.
-         * @method getLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.getLayer = function(layerTitle) {
-            var delegate = this.unwrap();
-            var value = delegate.getLayer(P.boxAsJava(layerTitle));
             return P.boxAsJs(value);
         };
 

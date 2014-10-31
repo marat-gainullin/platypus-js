@@ -750,7 +750,7 @@ public class DatabasesClient {
                 } catch (Exception ex) {
                     errorStatements.add(entry);
                     errors.add(ex.getMessage());
-                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                 }
             }
             if (errorStatements.size() == aStatements.size()) {

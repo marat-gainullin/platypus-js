@@ -281,6 +281,18 @@
         };
 
         /**
+         * Deletes a object by cursor position or by object itself.
+         * @param aCursorPosOrInstance Object position in terms of cursor API (1-based)| object instance itself. Note! If no cursor position or instance is passed,then object at current cursor position will be deleted.
+         * @method remove
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.remove = function(aCursorPosOrInstance) {
+            var delegate = this.unwrap();
+            var value = delegate.remove(P.boxAsJava(aCursorPosOrInstance));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Finds rows using field - value pairs.
          * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName or just a prop name in a string form) and the value for this property.
          * @return the rows object's array accordind to the search condition or empty array if nothing is found.
@@ -303,6 +315,17 @@
         P.ApplicationDbEntity.prototype.execute = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Deletes all rows in the rowset.
+         * @method removeAll
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.removeAll = function() {
+            var delegate = this.unwrap();
+            var value = delegate.removeAll();
             return P.boxAsJs(value);
         };
 

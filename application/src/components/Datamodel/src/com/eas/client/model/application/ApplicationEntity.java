@@ -309,87 +309,87 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "*/";
 
     /*
-    @ScriptFunction(jsDoc = BEFORE_FIRST_JSDOC)
-    public void beforeFirst() throws Exception {
-        rowset.beforeFirst();
-    }
-    */
+     @ScriptFunction(jsDoc = BEFORE_FIRST_JSDOC)
+     public void beforeFirst() throws Exception {
+     rowset.beforeFirst();
+     }
+     */
     private static final String AFTER_LAST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the position after the last row.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = AFTER_LAST_JSDOC)
-    public void afterLast() throws Exception {
-        rowset.afterLast();
-    }
-    */
+     @ScriptFunction(jsDoc = AFTER_LAST_JSDOC)
+     public void afterLast() throws Exception {
+     rowset.afterLast();
+     }
+     */
     private static final String BOF_JSDOC = ""
             + "/**\n"
             + "* Checks if cursor in the position before the first row.\n"
             + "* @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = BOF_JSDOC)
-    public boolean bof() throws Exception {
-        return rowset.isBeforeFirst();
-    }
-    */
+     @ScriptFunction(jsDoc = BOF_JSDOC)
+     public boolean bof() throws Exception {
+     return rowset.isBeforeFirst();
+     }
+     */
     private static final String EOF_JSDOC = ""
             + "/**\n"
             + "* Checks if cursor in the position before the first row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = EOF_JSDOC)
-    public boolean eof() throws Exception {
-        return rowset.isAfterLast();
-    }
-    */
+     @ScriptFunction(jsDoc = EOF_JSDOC)
+     public boolean eof() throws Exception {
+     return rowset.isAfterLast();
+     }
+     */
     private static final String FIRST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the first row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = FIRST_JSDOC)
-    public boolean first() throws Exception {
-        return rowset.first();
-    }
-    */
+     @ScriptFunction(jsDoc = FIRST_JSDOC)
+     public boolean first() throws Exception {
+     return rowset.first();
+     }
+     */
     private static final String NEXT_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the next row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = NEXT_JSDOC)
-    public boolean next() throws Exception {
-        return rowset.next();
-    }
-    */
+     @ScriptFunction(jsDoc = NEXT_JSDOC)
+     public boolean next() throws Exception {
+     return rowset.next();
+     }
+     */
     private static final String PREV_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the privious row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = PREV_JSDOC)
-    public boolean prev() throws Exception {
-        return rowset.previous();
-    }
-    */
+     @ScriptFunction(jsDoc = PREV_JSDOC)
+     public boolean prev() throws Exception {
+     return rowset.previous();
+     }
+     */
     private static final String LAST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the last row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = LAST_JSDOC)
-    public boolean last() throws Exception {
-        return rowset.last();
-    }
-    */
+     @ScriptFunction(jsDoc = LAST_JSDOC)
+     public boolean last() throws Exception {
+     return rowset.last();
+     }
+     */
     private static final String POS_JSDOC = ""
             + "/**\n"
             + "* Positions the rowset cursor on the specified row number. Row number is 1-based.\n"
@@ -397,11 +397,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = POS_JSDOC, params = {"index"})
-    public boolean pos(int recordIndex) throws Exception {
-        return rowset.absolute(recordIndex);
-    }
-    */
+     @ScriptFunction(jsDoc = POS_JSDOC, params = {"index"})
+     public boolean pos(int recordIndex) throws Exception {
+     return rowset.absolute(recordIndex);
+     }
+     */
     private static final String GET_ROW_JSDOC = ""
             + "/**\n"
             + "* Gets the row at specified index.\n"
@@ -409,11 +409,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* @return the row object or <code>null</code> if no row object have found at the specified index.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = GET_ROW_JSDOC, params = {"index"})
-    public Row getRow(int aIndex) throws Exception {
-        return rowset.getRow(aIndex);
-    }
-    */
+     @ScriptFunction(jsDoc = GET_ROW_JSDOC, params = {"index"})
+     public Row getRow(int aIndex) throws Exception {
+     return rowset.getRow(aIndex);
+     }
+     */
 
     private static final String CURSOR_JSDOC = ""
             + "/**\n"
@@ -432,22 +432,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = EMPTY_JSDOC)
-    public boolean isEmpty() throws Exception {
-        return rowset.isEmpty();
-    }
-    */
+     @ScriptFunction(jsDoc = EMPTY_JSDOC)
+     public boolean isEmpty() throws Exception {
+     return rowset.isEmpty();
+     }
+     */
 
     private static final String SIZE_JSDOC = ""
             + "/**\n"
             + "* The rowset size.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = SIZE_JSDOC)
-    public int getSize() throws Exception {
-        return rowset.size();
-    }
-    */
+     @ScriptFunction(jsDoc = SIZE_JSDOC)
+     public int getSize() throws Exception {
+     return rowset.size();
+     }
+     */
 
     private static final String CURSOR_POS_JSDOC = ""
             + "/**\n"
@@ -701,16 +701,16 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
-    public void insert(Object... requiredFields) throws Exception {
-        if (requiredFields != null) {
-            for (int i = 0; i < requiredFields.length; i++) {
-                requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
-            }
-        }
-        rowset.insert(requiredFields);
-    }
-    */
+     @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
+     public void insert(Object... requiredFields) throws Exception {
+     if (requiredFields != null) {
+     for (int i = 0; i < requiredFields.length; i++) {
+     requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
+     }
+     }
+     rowset.insert(requiredFields);
+     }
+     */
 
     private static final String INSERT_AT_JSDOC = ""
             + "/**\n"
@@ -719,15 +719,16 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
             + "*/";
     /*
-    @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})
-    public void insertAt(int aIndex, Object... requiredFields) throws Exception {
-        if (requiredFields != null) {
-            for (int i = 0; i < requiredFields.length; i++) {
-                requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
-            }
-        }
-        rowset.insertAt(aIndex, false, requiredFields);
-    }
+     @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})
+     public void insertAt(int aIndex, Object... requiredFields) throws Exception {
+     if (requiredFields != null) {
+     for (int i = 0; i < requiredFields.length; i++) {
+     requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
+     }
+     }
+     rowset.insertAt(aIndex, false, requiredFields);
+     }
+     */
 
     public boolean delete() throws Exception {
         int oldCount = rowset.size();
@@ -736,19 +737,26 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         }
         return oldCount != rowset.size();
     }
-    */
-    private static final String DELETE_ALL_JSDOC = ""
+    private static final String REMOVE_ALL_JSDOC = ""
             + "/**\n"
             + "* Deletes all rows in the rowset.\n"
             + "*/";
-    /*
-    @ScriptFunction(jsDoc = DELETE_ALL_JSDOC)
+
+    @ScriptFunction(jsDoc = REMOVE_ALL_JSDOC)
     public boolean removeAll() throws Exception {
         rowset.deleteAll();
         return rowset.isEmpty();
     }
 
-    @ScriptFunction(jsDoc = DELETE_ROW_JSDOC, params = {"aCursorPosOrInstance"})
+    private static final String REMOVE_JSDOC = ""
+            + "/**\n"
+            + " * Deletes a object by cursor position or by object itself.\n"
+            + " * @param aCursorPosOrInstance Object position in terms of cursor API (1-based)"
+            + "| object instance itself. Note! If no cursor position or instance is passed,"
+            + "then object at current cursor position will be deleted.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"aCursorPosOrInstance"})
     public boolean remove(Object aCursorPosOrInstance) throws Exception {
         if (aCursorPosOrInstance instanceof Row) {
             return deleteRow((Row) aCursorPosOrInstance);
@@ -758,16 +766,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             return delete();
         }
     }
-    */
-    
-    private static final String DELETE_ROW_JSDOC = ""
-            + "/**\n"
-            + " * Deletes a object by cursor position or by object itself.\n"
-            + " * @param aCursorPosOrInstance Object position in terms of cursor API (1-based)"
-            + "| object instance itself. Note! If no cursor position or instance is passed,"
-            + "then object at current cursor position will be deleted.\n"
-            + " */";
-    /*
+
     public boolean deleteRow(int aCursorIndex) throws Exception {
         if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
             rowset.deleteAt(aCursorIndex);
@@ -787,7 +786,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             return false;
         }
     }
-    */
 
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -966,10 +964,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + " * Sunstitute's cursor is used when in original entity's cursor some field's value is null.\n"
             + " */")
     /*
-    public E getSubstitute() {
-        return substitute;
-    }
-    */
+     public E getSubstitute() {
+     return substitute;
+     }
+     */
 
     /**
      * Sets cursor substitute. Use this function carefully. Circular references
@@ -978,29 +976,28 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
      * @param aValue Cursor substitute entity to be set.
      */
     /*
-    @ScriptFunction
-    public void setSubstitute(E aValue) {
-        if (aValue != this) {
-            substitute = aValue;
-        }
-    }
+     @ScriptFunction
+     public void setSubstitute(E aValue) {
+     if (aValue != this) {
+     substitute = aValue;
+     }
+     }
 
-    public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
-        E lsubstitute = substitute;
-        while (lsubstitute != null) {
-            Rowset sRowset = lsubstitute.getRowset();
-            if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
-                Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
-                if (value != null) {
-                    return value;
-                }
-            }
-            lsubstitute = lsubstitute.getSubstitute();
-        }
-        return null;
-    }
-    */
-
+     public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
+     E lsubstitute = substitute;
+     while (lsubstitute != null) {
+     Rowset sRowset = lsubstitute.getRowset();
+     if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
+     Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
+     if (value != null) {
+     return value;
+     }
+     }
+     lsubstitute = lsubstitute.getSubstitute();
+     }
+     return null;
+     }
+     */
     /**
      * Returns change log for this entity. In some cases, we might have several
      * change logs in one model. Several databases is the case.

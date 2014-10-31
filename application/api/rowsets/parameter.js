@@ -104,23 +104,6 @@
              */
             P.Parameter.prototype.precision = 0;
         }
-        Object.defineProperty(this, "scale", {
-            get: function() {
-                var value = delegate.scale;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.scale = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Parameter){
-            /**
-             * The scale of the field.
-             * @property scale
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.scale = 0;
-        }
         Object.defineProperty(this, "signed", {
             get: function() {
                 var value = delegate.signed;
@@ -137,6 +120,23 @@
              * @memberOf Parameter
              */
             P.Parameter.prototype.signed = true;
+        }
+        Object.defineProperty(this, "scale", {
+            get: function() {
+                var value = delegate.scale;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.scale = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Parameter){
+            /**
+             * The scale of the field.
+             * @property scale
+             * @memberOf Parameter
+             */
+            P.Parameter.prototype.scale = 0;
         }
         Object.defineProperty(this, "description", {
             get: function() {

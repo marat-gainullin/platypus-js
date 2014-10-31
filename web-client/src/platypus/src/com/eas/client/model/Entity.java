@@ -404,7 +404,16 @@ public class Entity implements RowsetListener, HasPublished{
 		// find interface
 		Object.defineProperty(published, "find", {
 			value : function() {
-				return aEntity.@com.eas.client.model.Entity::find(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments.length == 1 ? arguments[0] : arguments);
+				var args;
+				if(arguments.length == 1){
+					args = arguments[0];
+				}else{
+					args = [];
+					for(var a=0;a<arguments.length;a++){
+						args[args.length] = arguments[a]; 
+					}
+				}
+				return aEntity.@com.eas.client.model.Entity::find(Lcom/google/gwt/core/client/JavaScriptObject;)(args);
 			}
 		});
 		Object.defineProperty(published, "findById", {
@@ -471,7 +480,16 @@ public class Entity implements RowsetListener, HasPublished{
 		
 		Object.defineProperty(published, "createSorting", {
 			value : function() {
-				return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments.length == 1 ? arguments[0] : arguments);
+				var args;
+				if(arguments.length == 1){
+					args = arguments[0];
+				}else{
+					args = [];
+					for(var a=0;a<arguments.length;a++){
+						args[args.length] = arguments[a]; 
+					}
+				}
+				return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(args);
 			}
 		});
 		// data at cursor interface
@@ -504,31 +522,34 @@ public class Entity implements RowsetListener, HasPublished{
 //				aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)($wnd.P.boxAsJava(arguments[0]), $wnd.Array.prototype.slice.call(arguments, 1));
 //			}
 //		});
-//		Object.defineProperty(published, "removeAll", {
-//			value : function() {
-//				if(rowset != null)
-//					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
-//			}
-//		});
+		Object.defineProperty(published, "removeAll", {
+			value : function() {
+				if(rowset != null){
+					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
+				}
+			}
+		});
 //		Object.defineProperty(published, "deleteAll", {
 //			value : function() {
 //				if(rowset != null)
 //					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
 //			}
 //		});
-//		Object.defineProperty(published, "remove", {
-//			value : function(aRow) {
-//				if(rowset != null){
-//					if(aRow){
-//						if(aRow.unwrap)
-//							rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
-//						else
-//							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
-//					}else
-//						rowset.@com.bearsoft.rowset.Rowset::delete()();
-//				}
-//			}
-//		});
+		Object.defineProperty(published, "remove", {
+			value : function(aRow) {
+				if(rowset != null){
+					if(aRow){
+						if(aRow.unwrap){
+							rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+						}else{
+							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
+						}
+					}else{
+						rowset.@com.bearsoft.rowset.Rowset::delete()();
+					}
+				}
+			}
+		});
 //		Object.defineProperty(published, "deleteRow", {
 //			value : function(aRow) {
 //				if(rowset != null){
