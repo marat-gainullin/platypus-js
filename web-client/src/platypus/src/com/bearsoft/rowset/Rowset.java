@@ -961,12 +961,15 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 	 *            Values inserting row to be initialized with.
 	 * @throws RowsetException
 	 */
-	public void insert(Object... initingValues) throws RowsetException {
+	public Row insert(Object... initingValues) throws RowsetException {
 		if (!showOriginal) {
 			assert fields != null;
 			Row row = new Row();
 			row.setFields(fields);
 			insert(row, false, initingValues);
+			return row;
+		}else{
+			return null;
 		}
 	}
 
@@ -983,12 +986,15 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 	 *            Values inserting row to be initialized with.
 	 * @throws RowsetException
 	 */
-	public void insertAt(int insertAt, Object... initingValues) throws RowsetException {
+	public Row insertAt(int insertAt, Object... initingValues) throws RowsetException {
 		if (!showOriginal) {
 			assert fields != null;
 			Row row = new Row();
 			row.setFields(fields);
 			insertAt(row, false, insertAt, initingValues);
+			return row;
+		}else{
+			return null;
 		}
 	}
 

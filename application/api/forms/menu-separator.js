@@ -274,6 +274,20 @@
              */
             P.MenuSeparator.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -290,20 +304,6 @@
              * @memberOf MenuSeparator
              */
             P.MenuSeparator.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MenuSeparator){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf MenuSeparator
-             */
-            P.MenuSeparator.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {

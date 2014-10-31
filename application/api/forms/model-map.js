@@ -332,6 +332,20 @@
              */
             P.ModelMap.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -348,20 +362,6 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -771,6 +771,18 @@
         };
 
         /**
+         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
+         * @param area the <code>Geometry</code> of the specified area (optional)
+         * @method fit
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.fit = function(area) {
+            var delegate = this.unwrap();
+            var value = delegate.fit(P.boxAsJava(area));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Removes layer by the specified title.
          * @param layerTitle the layer's title.
          * @return <code>MapLayer</code> instance.
@@ -869,18 +881,6 @@
         P.ModelMap.prototype.hitSelection = function(hitPoint) {
             var delegate = this.unwrap();
             var value = delegate.hitSelection(P.boxAsJava(hitPoint));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
-         * @param area the <code>Geometry</code> of the specified area (optional)
-         * @method fit
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.fit = function(area) {
-            var delegate = this.unwrap();
-            var value = delegate.fit(P.boxAsJava(area));
             return P.boxAsJs(value);
         };
 

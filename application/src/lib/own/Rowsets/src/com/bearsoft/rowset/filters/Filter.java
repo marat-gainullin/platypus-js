@@ -16,6 +16,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -131,8 +132,8 @@ public class Filter extends HashOrderer implements HasPublished {
     }
 
     /**
-     * Applies this filter ti the rowset with keys values according to fields
-     * (columns) conditions vector already prepared with
+     * Applies this filter to the rowset with keys values according to fields
+     * (columns) conditions collection already prepared with
      * <code>setFields()</code> or <code>...Constrainting()</code> methods.
      *
      * @param values Values vector.

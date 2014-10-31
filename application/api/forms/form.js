@@ -487,17 +487,6 @@
         };
 
         /**
-         * Maximizes this form.
-         * @method maximize
-         * @memberOf Form
-         */
-        P.Form.prototype.maximize = function() {
-            var delegate = this.unwrap();
-            var value = delegate.maximize();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Minimizes this form.
          * @method minimize
          * @memberOf Form
@@ -505,6 +494,17 @@
         P.Form.prototype.minimize = function() {
             var delegate = this.unwrap();
             var value = delegate.minimize();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Maximizes this form.
+         * @method maximize
+         * @memberOf Form
+         */
+        P.Form.prototype.maximize = function() {
+            var delegate = this.unwrap();
+            var value = delegate.maximize();
             return P.boxAsJs(value);
         };
 

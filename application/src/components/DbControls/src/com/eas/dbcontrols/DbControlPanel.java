@@ -865,9 +865,11 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         if (rsEntity != null && rsEntity.getRowset() != null && colIndex > 0) {
             if (!rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
                 Object value = rsEntity.getRowset().getObject(colIndex);
+                /*
                 if (value == null && datamodelElement != null) {
                     value = rsEntity.getSubstituteRowsetObject(datamodelElement.getFieldName());
                 }
+                */
                 return value;
             }
         }

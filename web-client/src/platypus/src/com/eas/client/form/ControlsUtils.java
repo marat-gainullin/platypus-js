@@ -294,7 +294,7 @@ public class ControlsUtils {
 				        aEventThis,
 				        cellFunction,
 				        JsEvents.publishOnRenderEvent(aEventThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
-				                Entity.publishRowFacade(aRow, aModelElement.entity), cell));
+				                Entity.publishRowFacade(aRow, aModelElement.entity, null), cell));
 				if (res != null && res) {
 					return cell;
 				}
