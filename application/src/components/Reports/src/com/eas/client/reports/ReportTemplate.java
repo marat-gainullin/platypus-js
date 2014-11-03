@@ -14,13 +14,20 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
- * TODO Create factory for ReportTemplate descendants as new formats will be added.  
+ * TODO Create factory for ReportTemplate descendants as new formats will be
+ * added.
+ *
  * @author mg
  */
-public class ReportTemplate implements HasPublished{
+@ScriptObj(name = "Report", jsDoc = ""
+        + "/**\n"
+        + " * Application report.\n"
+        + " */")
+public class ReportTemplate implements HasPublished {
 
     protected ReportConfig config;
     //
@@ -28,13 +35,7 @@ public class ReportTemplate implements HasPublished{
     protected JSObject scriptData;
     private static JSObject publisher;
     protected Object published;
-    
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * Constructs new report template object.\n"
-            + " * @param config Config of report template.\n"
-            + " * @param data Object, containing data to be printed in report.\n"
-            + " */", params = {"config", "data"})
+
     public ReportTemplate(ReportConfig aConfig, JSObject aData) {
         super();
         config = aConfig;
@@ -65,6 +66,10 @@ public class ReportTemplate implements HasPublished{
         }
         return null;
     }
+
+    public void injectPublished(JSObject aValue){
+        published = aValue;
+    }
     
     @Override
     public Object getPublished() {
@@ -93,6 +98,7 @@ public class ReportTemplate implements HasPublished{
             + "/**\n"
             + " * Name of the generated report's file.\n"
             + " */";
+
     @ScriptFunction(jsDoc = NAME_JSDOC)
     public String getName() {
         return name;
@@ -102,5 +108,5 @@ public class ReportTemplate implements HasPublished{
     public void setName(String aName) {
         name = aName;
     }
-    
+
 }

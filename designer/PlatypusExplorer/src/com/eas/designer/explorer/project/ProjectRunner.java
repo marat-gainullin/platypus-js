@@ -179,9 +179,14 @@ public class ProjectRunner {
                 startJs = appSrcDir.createData(PlatypusProjectSettings.START_JS_FILE_NAME);
             }
             AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
-            String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION)?"show":"execute";
-            String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName, startMethod);
-            FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+            if (startFiles != null) {
+                String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "        var m = new " + appElementName+"();\n", "        m." + startMethod+"();\n");
+                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+            } else if (appElementName.toLowerCase().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "", "");
+                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+            }
         } else {
             throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set"));
         }
@@ -345,7 +350,7 @@ public class ProjectRunner {
                 for (String argument : arguments) {
                     processBuilder = processBuilder.addArgument(argument);
                 }
-                
+
 //                processBuilder = processBuilder
 //                        .addArgument("-D.level=SEVERE")
 //                        .addArgument("-Dhandlers=java.util.logging.ConsoleHandler")
@@ -525,8 +530,8 @@ public class ProjectRunner {
     private static String getDevPlatypusServerUrl(PlatypusProjectSettings pps) {
         return String.format("%s://%s:%s", PlatypusServer.DEFAULT_PROTOCOL, LOCAL_HOSTNAME, pps.getServerPort()); //NOI18N
     }
-    
-     private static String escapeString(String s) {
+
+    private static String escapeString(String s) {
         if (s.length() == 0) {
             return "\"\""; // NOI18N
         }
@@ -555,5 +560,5 @@ public class ProjectRunner {
         }
         return sb.toString();
     }
-    
+
 }
