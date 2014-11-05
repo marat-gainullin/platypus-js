@@ -12,9 +12,6 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
-import com.eas.client.model.store.ApplicationModel2XmlDom;
-import com.eas.client.model.visitors.ApplicationModelVisitor;
-import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
@@ -34,16 +31,14 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
-import org.w3c.dom.Document;
 
 /**
  *
  * @author mg
  * @param <E>
- * @param <P>
  * @param <Q>
  */
-public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, Q extends Query> extends Model<E, P, Q> implements HasPublished {
+public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q extends Query> extends Model<E, Q> implements HasPublished {
 
     protected Object published;
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
@@ -150,13 +145,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private Set<E> rootEntities() {
         final Set<E> rootEntities = new HashSet<>();
         entities.values().stream().forEach((E entity) -> {
-            Set<Relation> dependanceRels = new HashSet<>();
-            entity.getInRelations().stream().forEach((Relation inRel) -> {
-                if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
-                    dependanceRels.add(inRel);
-                }
-            });
-            if (dependanceRels.isEmpty()) {
+            if (entity.getInRelations().isEmpty()) {
                 rootEntities.add(entity);
             }
         });
@@ -226,7 +215,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    protected void resolveRelation(Relation<E> aRelation, Model<E, P, Q> aModel) throws Exception {
+    protected void resolveRelation(Relation<E> aRelation, Model<E, Q> aModel) throws Exception {
         super.resolveRelation(aRelation, aModel);
         if (aRelation instanceof ReferenceRelation<?>) {
             if (aRelation.getLeftField() != null && !aRelation.getLeftField().isFk()) {
@@ -254,14 +243,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    public Model<E, P, Q> copy() throws Exception {
-        Model<E, P, Q> copied = super.copy();
+    public Model<E, Q> copy() throws Exception {
+        Model<E, Q> copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {
             ReferenceRelation<E> rcopied = (ReferenceRelation<E>) relation.copy();
             resolveRelation(rcopied, copied);
-            ((ApplicationModel<E, P, Q>) copied).getReferenceRelations().add(rcopied);
+            ((ApplicationModel<E, Q>) copied).getReferenceRelations().add(rcopied);
         }
-        ((ApplicationModel<E, P, Q>) copied).checkReferenceRelationsIntegrity();
+        ((ApplicationModel<E, Q>) copied).checkReferenceRelationsIntegrity();
         return copied;
     }
 
@@ -290,18 +279,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         toDel.stream().forEach((rel) -> {
             removeReferenceRelation(rel);
         });
-    }
-
-    @Override
-    public void accept(ModelVisitor<E> visitor) {
-        if (visitor instanceof ApplicationModelVisitor<?>) {
-            ((ApplicationModelVisitor<E>) visitor).visit(this);
-        }
-    }
-
-    @Override
-    public Document toXML() {
-        return ApplicationModel2XmlDom.transform(this);
     }
 
     /**

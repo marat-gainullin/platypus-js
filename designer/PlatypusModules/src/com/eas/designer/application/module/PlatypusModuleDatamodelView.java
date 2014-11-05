@@ -9,7 +9,6 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.ApplicationModelEditorView;
 import com.eas.client.model.gui.selectors.SelectedField;
@@ -100,7 +99,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                                 if (node.getParentNode() != null) {
                                     ev = appModelEditor.getModelView().getEntityView(((EntityNode<ApplicationDbEntity>) node.getParentNode()).getEntity());
                                     FieldNode fieldNode = (FieldNode) node;
-                                    if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof ApplicationParametersEntity)) {
+                                    if ((fieldNode.getField() instanceof Parameter)) {
                                         if (!toSelectParameters.containsKey(ev)) {
                                             toSelectParameters.put(ev, new HashSet<>());
                                         }

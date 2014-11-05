@@ -8,7 +8,6 @@ import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.queries.QueriesProxy;
@@ -24,8 +23,9 @@ import org.w3c.dom.Element;
  *
  * @author mg
  * @param <E>
+ * @param <M>
  */
-public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> extends XmlDom2Model<E> implements ApplicationModelVisitor<E> {
+public class XmlDom2ApplicationModel<E extends ApplicationEntity<M, ?, E>, M extends ApplicationModel<E, ?>> extends XmlDom2Model<E, M> implements ApplicationModelVisitor<E, M> {
 
     public XmlDom2ApplicationModel(Document aDoc) {
         super();
@@ -38,7 +38,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
     }
 
     @Override
-    public void visit(ApplicationModel<E, ?, ?> aModel) {
+    public void visit(M aModel) {
         Runnable resolver = readModel(aModel);
         QueriesProxy<?> queries = aModel.getQueries();
         aModel.getEntities().values().stream().forEach((entity) -> {
@@ -100,15 +100,8 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         aRelation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
         aRelation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
         if (currentModel != null) {
-            ((ApplicationModel<E, ?, ?>) currentModel).getReferenceRelations().add(aRelation);
+            ((ApplicationModel<E, ?>) currentModel).getReferenceRelations().add(aRelation);
         }
     }
 
-    @Override
-    public void visit(ApplicationParametersEntity entity) {
-        // Hack. Assume that ApplicationParametersEntity interface is supported only by 
-        // ApplicationEntity descendants.
-        E appEntity = (E) entity;
-        readEntityDesignAttributes(appEntity);
-    }
 }

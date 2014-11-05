@@ -24,6 +24,7 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.QueryDocument2XmlDom;
+import com.eas.client.model.store.QueryModel2XmlDom;
 import com.eas.client.model.store.XmlDom2QueryModel;
 import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.client.sqldrivers.SqlDriver;
@@ -625,7 +626,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             fullSqlModified = false;
         }
         if (modelModified) {
-            Document modelDocument = model.toXML();
+            Document modelDocument = QueryModel2XmlDom.transform(model);
             write2File(modelEntry.getFile(), XmlDom2String.transform(modelDocument));
             modelModified = false;
         }

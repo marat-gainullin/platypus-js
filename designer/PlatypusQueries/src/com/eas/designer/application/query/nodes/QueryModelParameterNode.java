@@ -5,7 +5,7 @@
 package com.eas.designer.application.query.nodes;
 
 import com.bearsoft.rowset.metadata.Parameter;
-import com.eas.client.model.Model;
+import com.eas.client.model.query.QueryModel;
 import com.eas.designer.datamodel.nodes.QueryParameterNode;
 import javax.swing.undo.UndoableEdit;
 import org.openide.ErrorManager;
@@ -25,7 +25,7 @@ public class QueryModelParameterNode extends QueryParameterNode {
     
     @Override
     protected UndoableEdit editName(String val) {
-        if (isValidName(getEntity().getModel(), val)) {
+        if (isValidName((QueryModel)getEntity().getModel(), val)) {
             return super.editName(val);
         } else {
             throw Exceptions.attachLocalizedMessage(new IllegalArgumentException(), String.format(NbBundle.getMessage(QueryModelParameterNode.class, "MSG_InvalidParameterName"), val)); //NOI18N
@@ -33,7 +33,7 @@ public class QueryModelParameterNode extends QueryParameterNode {
 
     }
 
-    public static boolean isValidName(Model model, String name) {
+    public static boolean isValidName(QueryModel model, String name) {
         try {
             model.getParameters().invalidateFieldsHash();
             return !name.isEmpty() && model.getParameters().get(name) == null;

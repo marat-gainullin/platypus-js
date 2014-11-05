@@ -10,7 +10,6 @@ import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
-import static com.eas.designer.application.module.completion.ModuleCompletionContext.PARAMS_SCRIPT_NAME;
 import java.util.Collection;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
@@ -29,16 +28,12 @@ public class ModelCompletionContext extends CompletionContext {
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
         fillJavaCompletionItems(point, resultSet);
     }
 
     @Override
     public CompletionContext getChildContext(CompletionPoint.CompletionToken token, int offset) throws Exception {
-        if (PARAMS_SCRIPT_NAME.equals(token.name)) {
-            return new ParametersCompletionContext(dataObject.getModel().getParametersEntity().getFields());
-        }
         ApplicationDbEntity entity = dataObject.getModel().getEntityByName(token.name);
         if (entity != null) {
             return new EntityCompletionContext(entity);

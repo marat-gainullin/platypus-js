@@ -34,7 +34,7 @@ public class DeleteReferenceRelationEdit<E extends ApplicationEntity<?, ?, E>> e
 
     @Override
     protected void redoWork() {
-        ApplicationModel<E, ?, ?> model = relation.getLeftEntity().getModel();
+        ApplicationModel<E, ?> model = relation.getLeftEntity().getModel();
         if (model != null) {
             model.removeReferenceRelation(relation);
         }
@@ -42,7 +42,7 @@ public class DeleteReferenceRelationEdit<E extends ApplicationEntity<?, ?, E>> e
 
     @Override
     protected void undoWork() {
-        ApplicationModel<E, ?, ?> model = relation.getLeftEntity().getModel();
+        ApplicationModel<E, ?> model = relation.getLeftEntity().getModel();
         if (model != null) {
             model.addReferenceRelation(relation);
         }

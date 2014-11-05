@@ -16,9 +16,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
-import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.IconCache;
@@ -132,9 +130,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     public void fireFieldSelectionChanged(java.util.List<Parameter> aParameters, java.util.List<Field> aFields) {
-        for (FieldSelectionListener<E> l : fieldsSelectionListeners) {
+        fieldsSelectionListeners.stream().forEach((l) -> {
             l.selected(this, aParameters, aFields);
-        }
+        });
     }
 
     public String getFieldDisplayLabel(Field aField) {
@@ -360,9 +358,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
     public static <E extends Entity<?, ?, E>> String getCheckedEntityTitle(E entity) {
         String text = "";
-        if (entity instanceof ApplicationParametersEntity) {
-            text = String.format("%s [%s]", Model.PARAMETERS_SCRIPT_NAME, DatamodelDesignUtils.getLocalizedString("Parameters"));
-        } else if (entity instanceof QueryParametersEntity) {
+        if (entity instanceof QueryParametersEntity) {
             text = DatamodelDesignUtils.getLocalizedString("Parameters");
         } else if (entity != null) {
             try {
@@ -393,7 +389,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     public static <E extends Entity<?, ?, E>> Icon initViewIcon(E entity) {
-        if (!(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
+        if (!(entity instanceof QueryParametersEntity)) {
             return (entity.getTableName() != null && !entity.getTableName().isEmpty()) ? IconCache.getIcon("table.png") : IconCache.getIcon("query.png");
         } else {
             return IconCache.getIcon("edit-list.png");
@@ -560,7 +556,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                 }
                 String lText = (((ldesc != null && !ldesc.isEmpty()) ? fieldName + " (" + ldesc + ") " : fieldName) + " : " + lTypeName);
                 JOptionPane.showInputDialog(EntityView.this, null, entity.getTitle(), JOptionPane.INFORMATION_MESSAGE, null, null, lText);
-            } else if (!(EntityView.this.getEntity() instanceof ApplicationParametersEntity) && !(EntityView.this.getEntity() instanceof QueryParametersEntity)) {
+            } else if (!(EntityView.this.getEntity() instanceof QueryParametersEntity)) {
                 final E ent = EntityView.this.getEntity();
                 final String info;
                 String name = ent.getName();
@@ -1127,7 +1123,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     public String getTitle() {
-        if (entity instanceof ApplicationParametersEntity || entity instanceof QueryParametersEntity) {
+        if (entity instanceof QueryParametersEntity) {
             return DatamodelDesignUtils.getLocalizedString("parametersTabTitle");
         } else {
             return entity.getTitle();

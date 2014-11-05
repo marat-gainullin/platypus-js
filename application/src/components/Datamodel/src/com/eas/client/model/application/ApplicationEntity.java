@@ -30,8 +30,6 @@ import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationModel.RequeryProcess;
-import com.eas.client.model.visitors.ApplicationModelVisitor;
-import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -55,7 +53,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <Q>
  * @param <E>
  */
-public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
+public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
 
     public static final String BAD_FIELD_NAME_MSG = "Bad field name %s";
     public static final String BAD_FIND_AGRUMENTS_MSG = "Bad find agruments";
@@ -939,13 +937,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
 
     @Override
-    public void accept(ModelVisitor<E> visitor) {
-        if (visitor instanceof ApplicationModelVisitor<?>) {
-            ((ApplicationModelVisitor<E>) visitor).visit((E) this);
-        }
-    }
-
-    @Override
     public void setPublished(Object aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
@@ -998,6 +989,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
      return null;
      }
      */
+    
     /**
      * Returns change log for this entity. In some cases, we might have several
      * change logs in one model. Several databases is the case.

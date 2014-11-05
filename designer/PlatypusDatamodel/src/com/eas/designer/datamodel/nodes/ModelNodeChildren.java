@@ -23,7 +23,7 @@ import org.openide.util.Lookup;
  *
  * @author mg
  */
-public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV extends Model<E, ?, SqlQuery>> extends Children.Keys<Object> implements ModelEditingListener<E> {
+public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV extends Model<E, SqlQuery>> extends Children.Keys<Object> implements ModelEditingListener<E> {
 
     protected MV model;
     protected NodePropertiesUndoRecorder undoRecordrer;

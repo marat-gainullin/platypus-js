@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.dbscheme;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
@@ -13,13 +12,9 @@ import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.eas.client.model.Relation;
-import com.eas.client.model.visitors.DbSchemeModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,10 +41,8 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     }
 
     @Override
-    public void accept(ModelVisitor<FieldsEntity> visitor) {
-        if (visitor instanceof DbSchemeModelVisitor) {
-            ((DbSchemeModelVisitor) visitor).visit(this);
-        }
+    public void accept(ModelVisitor<FieldsEntity, DbSchemeModel> visitor) {
+        visitor.visit(this);
     }
 
     @Override
@@ -77,7 +70,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     protected String getTableNameForDescription() {
         return tableName;
     }
-    
+
     public String getFullTableName() {
         String fullTableName = tableName;
         if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {
@@ -128,27 +121,6 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     @Override
     protected boolean isTagValid(String aTagName) {
         return aTagName != null && !aTagName.equals(Model.DATASOURCE_TITLE_TAG_NAME);
-    }
-
-    public static <RE extends Entity<?, ?, RE>> Set<Relation<RE>> getInOutRelationsByEntityField(RE aEntity, Field aField) {
-        Set<Relation<RE>> result = new HashSet<>();
-        Set<Relation<RE>> rels = aEntity.getInRelations();
-        if (rels != null) {
-            for (Relation<RE> rel : rels) {
-                if (rel.getRightField() == aField) {
-                    result.add(rel);
-                }
-            }
-        }
-        rels = aEntity.getOutRelations();
-        if (rels != null) {
-            for (Relation<RE> rel : rels) {
-                if (rel.getLeftField() == aField) {
-                    result.add(rel);
-                }
-            }
-        }
-        return result;
     }
 
     @Override

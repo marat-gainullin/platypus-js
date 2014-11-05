@@ -10,6 +10,9 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
+import com.eas.client.model.Model;
+import com.eas.client.model.visitors.ApplicationModelVisitor;
+import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -24,19 +27,23 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, ApplicationDbParametersEntity, SqlQuery> {
+public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, SqlQuery> {
 
     protected Map<String, List<Change>> changeLogs = new HashMap<>();
     protected DatabasesClient basesProxy;
 
     public ApplicationDbModel(QueriesProxy<SqlQuery> aQueries) {
         super(aQueries);
-        parametersEntity = new ApplicationDbParametersEntity(this);
     }
 
     public ApplicationDbModel(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueries) {
         this(aQueries);
         basesProxy = aBasesProxy;
+    }
+
+    @Override
+    public <M extends Model<ApplicationDbEntity, ?>> void accept(ModelVisitor<ApplicationDbEntity, M> visitor) {
+        visitor.visit((M)this);
     }
 
     public DatabasesClient getBasesProxy() {
@@ -52,17 +59,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void addEntity(ApplicationDbEntity aEntity) {
         aEntity.setModel(this);
         super.addEntity(aEntity);
-    }
-
-    @Override
-    public void setParametersEntity(ApplicationDbParametersEntity aParamsEntity) {
-        if (parametersEntity != null) {
-            parametersEntity.setModel(null);
-        }
-        super.setParametersEntity(aParamsEntity);
-        if (parametersEntity != null) {
-            parametersEntity.setModel(this);
-        }
     }
 
     @Override

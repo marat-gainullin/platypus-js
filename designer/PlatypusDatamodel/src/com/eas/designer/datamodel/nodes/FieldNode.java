@@ -11,7 +11,6 @@ import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ReferenceRelation;
-import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
@@ -393,7 +392,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
         Set<Relation> toProcessRels = new HashSet<>();
-        Set<Relation> rels = FieldsEntity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
+        Set<Relation> rels = Entity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
         rels.stream().forEach((rel) -> {
             Field lfield = rel.getLeftField();
             Field rfield = rel.getRightField();

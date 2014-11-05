@@ -451,7 +451,7 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
         return nodesToSelect.toArray(new Node[]{});
     }
 
-    public static class ViewData<E extends Entity<?, SqlQuery, E>, MV extends ModelView<E, ?, ?>> {
+    public static class ViewData<E extends Entity<?, SqlQuery, E>, MV extends ModelView<E, ?>> {
 
         // current view data
         protected transient MV modelView;

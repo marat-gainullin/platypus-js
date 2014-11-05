@@ -18,7 +18,6 @@ import com.eas.client.SqlQuery;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.*;
 import com.eas.client.model.application.ReferenceRelation;
-import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.DmAction;
 import com.eas.client.model.gui.FindFrame;
@@ -29,7 +28,6 @@ import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.NewEntityEdit;
 import com.eas.client.model.gui.edits.NotSavableUndoableEditSupport;
 import com.eas.client.model.gui.edits.RelationPolylineEdit;
-import com.eas.client.model.gui.edits.fields.DeleteFieldEdit;
 import com.eas.client.model.gui.edits.fields.NewFieldEdit;
 import com.eas.client.model.gui.selectors.SelectedField;
 import com.eas.client.model.gui.selectors.SelectedParameter;
@@ -46,7 +44,6 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.utils.scalableui.JScalablePanel;
 import com.eas.designer.datamodel.nodes.ModelParameterNode;
 import com.eas.xml.dom.Source2XmlDom;
-import com.eas.xml.dom.XmlDom2String;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
@@ -77,10 +74,9 @@ import org.w3c.dom.Document;
  *
  * @author mg
  * @param <E>
- * @param <P>
  * @param <M>
  */
-public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M extends Model<E, P, SqlQuery>> extends JPanel {
+public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Model<E, SqlQuery>> extends JPanel {
 
     // settings
     public final static int slotWidth = 3;
@@ -104,7 +100,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     protected EntityView<?> modelParametersEntityView;
     // processing
     protected ModelViewMouseHandler mouseHandler;
-    protected FindFrame<E, P, M> finder;
+    protected FindFrame<E, M> finder;
     protected Component dragTarget;
     protected boolean reallyDragged;
     protected boolean needRerouteConnectors = true;
@@ -159,6 +155,14 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
 
     public void checkActions() {
         DatamodelDesignUtils.checkActions(this);
+    }
+
+    protected static void string2SystemClipboard(String sEntity) throws HeadlessException {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        if (sEntity != null && clipboard != null) {
+            StringSelection ss = new StringSelection(sEntity);
+            clipboard.setContents(ss, ss);
+        }
     }
 
     public boolean isViewSelected(EntityView<E> aView) {
@@ -373,11 +377,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     }
 
     public EntityView<E> getParametersView() {
-        if (entityViews != null && model != null && model.getParametersEntity() != null) {
-            return entityViews.get(model.getParametersEntity().getEntityId());
-        } else {
-            return null;
-        }
+        return null;
     }
 
     public void fireEntityViewDoubleClicked(EntityView<E> eView, boolean fieldsClicked, boolean paramsClicked) {
@@ -1159,40 +1159,6 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     protected abstract boolean isSelectedDeletableFields();
 
     protected void deleteSelectedFields() {
-        if (isSelectedDeletableFields()) {
-            /*
-             Set<Relation<E>> toConfirm = new HashSet<>();
-             for (EntityFieldTuple t : selectedFields) {
-             Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
-             toConfirm.addAll(toDel);
-             }
-             if (!toConfirm.isEmpty()) {
-             if (JOptionPane.showConfirmDialog(ModelView.this,
-             DatamodelDesignUtils.getLocalizedString("ifDeleteRelationsReferences"), //NOI18N
-             DatamodelDesignUtils.getLocalizedString("datamodel"), //NOI18N
-             JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
-             return;
-             }
-             }
-             */
-            AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-            Set<EntityFieldTuple> toDelete = new HashSet<>(selectedFields);
-            clearSelection();
-            for (EntityFieldTuple t : toDelete) {
-                Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
-                for (Relation rel : toDel) {
-                    assert !(rel instanceof ReferenceRelation);
-                    DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
-                    drEdit.redo();
-                    section.addEdit(drEdit);
-                }
-                DeleteFieldEdit edit = new DeleteFieldEdit(t.entity, t.field);
-                edit.redo();
-                section.addEdit(edit);
-            }
-            section.end();
-            undoSupport.postEdit(section);
-        }
     }
 
     public EntityView<E> createEntityView(E aEntity) throws Exception {
@@ -1611,8 +1577,6 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
     protected abstract boolean isParametersEntity(E aEntity);
 
     protected abstract void prepareEntityForPaste(E aEntity);
-
-    protected abstract M newModelInstance();
 
     protected void checkPastingName(E toPaste) {
         if (toPaste.getName() != null && model.isNamePresent(toPaste.getName(), toPaste, null)) {
@@ -2385,27 +2349,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 try {
-                    M model = newModelInstance();
-                    if (isParametersCopy()) {
-                        selectedFields.stream().forEach((ef) -> {
-                            model.getParameters().add(ef.field);
-                        });
-                    } else {
-                        selectedEntities.stream().forEach((E ent) -> {
-                            if (ent != null && !isParametersEntity(ent)) {
-                                model.addEntity(ent);
-                            }
-                        });
-                    }
-                    try {
-                        Document doc = model.toXML();
-                        if (doc != null) {
-                            String sEntity = XmlDom2String.transform(doc);
-                            string2SystemClipboard(sEntity);
-                        }
-                    } finally {
-                        model.getEntities().clear();
-                    }
+                    copySelectedEntities();
                 } catch (Exception ex) {
                     Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -2435,14 +2379,6 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
         @Override
         public KeyStroke getDmActionAccelerator() {
             return KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK);
-        }
-
-        private void string2SystemClipboard(String sEntity) throws HeadlessException {
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            if (sEntity != null && clipboard != null) {
-                StringSelection ss = new StringSelection(sEntity);
-                clipboard.setContents(ss, ss);
-            }
         }
     }
 
@@ -2474,13 +2410,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
                             Document doc = Source2XmlDom.transform(sDm);
                             if (doc != null) {
                                 M pastedModel = transformDocToModel(doc);
-                                if (pastedModel != null && model != null) {
-                                    if (pastedModel.getParameters() != null && pastedModel.getParameters().getParametersCount() > 0) {
-                                        pasteParameters(pastedModel);
-                                    }
-                                } else {
-                                    pasteEntities(pastedModel, entitiesPasted);
-                                }
+                                pasteEntities(pastedModel, entitiesPasted);
                             } else {
                                 JOptionPane.showMessageDialog(ModelView.this, DatamodelDesignUtils.getLocalizedString("BadClipboardData"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.ERROR_MESSAGE);
                             }
@@ -2525,54 +2455,34 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, P extends E, M
             return KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK);
         }
 
-        private void pasteEntities(M pastedModel, List<E> entitiesPasted) throws CannotRedoException {
-            Map<Long, E> entities = pastedModel.getEntities();
-            if (entities != null && !entities.isEmpty()) {
-                undoSupport.beginUpdate();
-                try {
-                    Set<Map.Entry<Long, E>> entSet = entities.entrySet();
-                    if (entSet != null) {
-                        entSet.stream().forEach((Map.Entry<Long, E> entEntry) -> {
-                            E toPaste = entEntry.getValue();
-                            if (isPasteable(toPaste)) {
-                                prepareEntityForPaste(toPaste);
-                                checkPastingName(toPaste);
-                                if (model.checkEntityAddingValid(toPaste)) {
-                                    doPasteEntity(toPaste);
-                                    entitiesPasted.add(toPaste);
-                                }
-                            }
-                        });
-                    }
-                } finally {
-                    undoSupport.endUpdate();
-                }
-            }
-        }
+    }
 
-        private void pasteParameters(M pastedModel) {
+    protected void pasteEntities(M pastedModel, List<E> entitiesPasted) throws CannotRedoException {
+        Map<Long, E> entities = pastedModel.getEntities();
+        if (entities != null && !entities.isEmpty()) {
             undoSupport.beginUpdate();
             try {
-                for (Field field : pastedModel.getParameters().toCollection()) {
-                    field.setName(getParameterName(field.getName()));
-                    NewFieldEdit edit = new NewFieldEdit(getParametersView().getEntity(), field);
-                    edit.redo();
-                    undoSupport.postEdit(edit);
+                Set<Map.Entry<Long, E>> entSet = entities.entrySet();
+                if (entSet != null) {
+                    entSet.stream().forEach((Map.Entry<Long, E> entEntry) -> {
+                        E toPaste = entEntry.getValue();
+                        if (isPasteable(toPaste)) {
+                            prepareEntityForPaste(toPaste);
+                            checkPastingName(toPaste);
+                            if (model.checkEntityAddingValid(toPaste)) {
+                                doPasteEntity(toPaste);
+                                entitiesPasted.add(toPaste);
+                            }
+                        }
+                    });
                 }
             } finally {
                 undoSupport.endUpdate();
             }
         }
-
-        private String getParameterName(String paramName) {
-            String s = paramName;
-            int i = 1;
-            while (model.getParameters().get(s) != null) {
-                s = String.format(NAME_PATTERN, paramName, i++);
-            }
-            return s;
-        }
     }
+    
+    protected abstract void copySelectedEntities();
 
     public class EntityFieldTuple {
 

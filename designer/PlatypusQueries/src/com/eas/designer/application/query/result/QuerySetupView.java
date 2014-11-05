@@ -7,8 +7,7 @@ package com.eas.designer.application.query.result;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.dbcontrols.grid.EntityFieldsGrid;
+import com.eas.client.model.query.QueryModel;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
@@ -52,7 +51,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     protected QueryResultsView parentView;
     protected DialogDescriptor dialogDescriptor;
     protected Dialog dialog;
-    protected ApplicationDbModel paramsModel;
+    protected QueryModel paramsModel;
     protected EntityFieldsGrid parametersGrid;
     protected Document sqlTextDocument;
     protected EditorKit editorKit = CloneableEditorSupport.getEditorKit(SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
@@ -187,9 +186,8 @@ public class QuerySetupView extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     private void initParametersView() throws Exception {
-        paramsModel = new ApplicationDbModel(null);
+        paramsModel = new QueryModel(null);
         paramsModel.setParameters(parentView.getParameters().copy());
-        paramsModel.requery();
         parametersGrid = new EntityFieldsGrid();
         parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
         parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N
@@ -231,16 +229,13 @@ public class QuerySetupView extends javax.swing.JPanel {
     protected Component initCustomEditor(JEditorPane aPane) {
         if (aPane.getDocument() instanceof NbDocument.CustomEditor) {
             NbDocument.CustomEditor ce = (NbDocument.CustomEditor) aPane.getDocument();
-            ce.addUndoableEditListener(new UndoableEditListener() {
-                @Override
-                public void undoableEditHappened(UndoableEditEvent e) {
-                    try {
-                        String sqlText = getSqlText();
-                        updateParameters(sqlText);
-                        parametersGrid.setEntity(paramsModel.getParametersEntity());
-                    } catch (Exception ex) {
-                        logger.log(Level.SEVERE, "Error updating parameters", ex); // NOI18N
-                    }
+            ce.addUndoableEditListener((UndoableEditEvent e) -> {
+                try {
+                    String sqlText = getSqlText();
+                    updateParameters(sqlText);
+                    parametersGrid.setEntity(paramsModel.getParametersEntity());
+                } catch (Exception ex) {
+                    logger.log(Level.SEVERE, "Error updating parameters", ex); // NOI18N
                 }
             });
             Component customComponent = ce.createEditor(aPane);

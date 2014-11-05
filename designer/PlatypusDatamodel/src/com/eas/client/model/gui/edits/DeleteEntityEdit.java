@@ -12,14 +12,13 @@ package com.eas.client.model.gui.edits;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.eas.client.queries.QueriesProxy;
 import org.openide.util.Exceptions;
 
 /**
  *
  * @author mg
  */
-public class DeleteEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends DatamodelEdit {
+public class DeleteEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, SqlQuery>> extends DatamodelEdit {
 
     private final M model;
     protected E entity;

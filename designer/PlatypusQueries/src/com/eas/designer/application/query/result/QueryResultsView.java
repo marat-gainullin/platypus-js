@@ -172,9 +172,7 @@ public class QueryResultsView extends javax.swing.JPanel {
      */
     private boolean initModel() throws Exception {
         model = new ApplicationDbModel(basesProxy, null);
-        model.setParameters(parameters);
         setupQueryEntityBySql();
-        setModelRelations();
         // enable dataworks
         if (queryEntity.getQuery().isCommand()) {
             queryEntity.getQuery().setManual(true);
@@ -270,15 +268,6 @@ public class QueryResultsView extends javax.swing.JPanel {
             message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), queryEntity.getEntityId());
         }
         showInfo(message);
-    }
-
-    private void setModelRelations() throws Exception {
-        Parameters modelParameters = model.getParameters();
-        for (int i = 1; i <= modelParameters.getParametersCount(); i++) {
-            Relation<ApplicationDbEntity> r = new Relation<>(model.getParametersEntity(), modelParameters.get(i),
-                    queryEntity, modelParameters.get(i));
-            model.addRelation(r);
-        }
     }
 
     public void logParameters() throws Exception {

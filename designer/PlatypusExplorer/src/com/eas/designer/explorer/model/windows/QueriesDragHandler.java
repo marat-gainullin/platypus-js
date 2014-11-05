@@ -25,9 +25,9 @@ import org.openide.loaders.DataObject;
 public class QueriesDragHandler extends TransferHandler {
 
     protected ModelViewDragHandler delegate;
-    protected ModelView<?, ?, ?> modelView;
+    protected ModelView<?, ?> modelView;
 
-    public QueriesDragHandler(ModelViewDragHandler aDelegate, ModelView<?, ?, ?> aModelView) {
+    public QueriesDragHandler(ModelViewDragHandler aDelegate, ModelView<?, ?> aModelView) {
         super();
         delegate = aDelegate;
         modelView = aModelView;

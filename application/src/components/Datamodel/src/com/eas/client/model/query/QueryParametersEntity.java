@@ -7,7 +7,6 @@ package com.eas.client.model.query;
 
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SqlQuery;
-import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
 
@@ -45,13 +44,6 @@ public class QueryParametersEntity extends QueryEntity {
     }
 
     @Override
-    public void accept(ModelVisitor<QueryEntity> visitor) {
-        if (visitor instanceof QueryModelVisitor) {
-            ((QueryModelVisitor) visitor).visit(this);
-        }
-    }
-
-    @Override
     public String getQueryName() {
         return null;
     }
@@ -81,6 +73,6 @@ public class QueryParametersEntity extends QueryEntity {
 
     @Override
     public Long getEntityId() {
-        return ApplicationModel.PARAMETERS_ENTITY_ID;
+        return QueryModel.PARAMETERS_ENTITY_ID;
     }
 }
