@@ -37,7 +37,6 @@
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
-    var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
     var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
     var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
@@ -45,7 +44,6 @@
     var ModelLoaderClass = Java.type('com.eas.client.scripts.ApplicationModelLoader');
     var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
     var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
-    var TemplateClass = Java.type('com.eas.client.reports.ReportTemplate');
 
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
@@ -1148,11 +1146,10 @@
     function loadTemplate(aName, aData, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
-        var template = new TemplateClass(reportConfig, aData);
         if (aTarget) {
-            P.ReportTemplate.call(aTarget, template);
+            P.ReportTemplate.call(aTarget, reportConfig, aData);
         } else {
-            aTarget = new P.ReportTemplate(template);
+            aTarget = new P.ReportTemplate(reportConfig, aData);
         }
         return aTarget;
     }

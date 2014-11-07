@@ -4,6 +4,7 @@
  */
 package com.eas.client.threetier.platypus;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
@@ -27,10 +28,12 @@ import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -121,13 +124,24 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getResult() instanceof Report) {
-            Report report = (Report) rsp.getResult();
-            writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
-            writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
-            writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
+        if (rsp.getResult() instanceof JSObject) {
+            JSObject jsResult = (JSObject) rsp.getResult();
+            JSObject p = ScriptUtils.lookupInGlobal("P");
+            if (p != null) {
+                Object reportClass = p.getMember("Report");
+                if (jsResult.isInstanceOf(reportClass)) {
+                    Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
+                    writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
+                    writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
+                } else {
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+                }
+            } else {
+                writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+            }
         } else {
-            writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+            writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(ScriptUtils.toJs(rsp.getResult())));
         }
         writer.flush();
     }

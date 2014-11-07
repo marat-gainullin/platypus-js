@@ -16,6 +16,7 @@ import com.eas.script.ScriptUtils;
 import com.eas.server.*;
 import java.security.AccessControlException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -46,35 +47,43 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                         JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
                         if (files != null && files.isModule() && jsConstr != null) {
-                            ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
-                            checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
-                            // Let's check the if module is resident
-                            JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
-                            if (moduleInstance == null) {
-                                if (aSession.containsModule(moduleName)) {
-                                    moduleInstance = aSession.getModule(moduleName);
-                                } else {
-                                    if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
-                                        moduleInstance = (JSObject) jsConstr.newObject(new Object[]{});
-                                        // Let's decide if we have to register the module in user's session.
-                                        if (!config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                                            aSession.registerModule(moduleInstance);
-                                        }
-                                        Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
+                            Set<String> functionProps = new HashSet<>();
+                            CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(null);
+                            Date serverModuleTime = files.getLastModified();
+                            Date clientModuleTime = getRequest().getTimeStamp();
+                            if (clientModuleTime == null || serverModuleTime.after(clientModuleTime)) {
+                                ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
+                                checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
+                                // Let's check the if module is resident
+                                JSObject moduleInstance = getServerCore().getSessionManager().getSystemSession().getModule(moduleName);
+                                if (moduleInstance == null) {
+                                    if (aSession.containsModule(moduleName)) {
+                                        moduleInstance = aSession.getModule(moduleName);
                                     } else {
-                                        throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
+                                        if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                                            moduleInstance = (JSObject) jsConstr.newObject(new Object[]{});
+                                            // Let's decide if we have to register the module in user's session.
+                                            if (!config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
+                                                aSession.registerModule(moduleInstance);
+                                            }
+                                            Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
+                                        } else {
+                                            throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
+                                        }
                                     }
                                 }
+
+                                final JSObject funSource = moduleInstance;
+                                funSource.keySet().stream().forEach((String aKey) -> {
+                                    Object oFun = funSource.getMember(aKey);
+                                    if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                                        functionProps.add(aKey);
+                                    }
+                                });
+                                response.setInfo(new ServerModuleInfo(moduleName, functionProps, true));
+                                response.setTimeStamp(serverModuleTime);
                             }
-                            Set<String> functionProps = new HashSet<>();
-                            final JSObject funSource = moduleInstance;
-                            funSource.keySet().stream().forEach((String aKey) -> {
-                                Object oFun = funSource.getMember(aKey);
-                                if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                                    functionProps.add(aKey);
-                                }
-                            });
-                            onSuccess.accept(new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, functionProps, true)));
+                            onSuccess.accept(response);
                         } else {
                             onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
                         }

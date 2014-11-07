@@ -588,7 +588,7 @@ public class AppClient {
 	}
 
 	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
-		String url = apiUrl + aUrlPrefix + "?" + aUrlQuery;
+		String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + "?" + aUrlQuery;
 		final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
 		if (req.getStatus() == Response.SC_OK)
 			return req;
