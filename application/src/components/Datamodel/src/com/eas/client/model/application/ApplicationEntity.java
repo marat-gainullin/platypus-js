@@ -29,7 +29,6 @@ import com.eas.client.SQLUtils;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
-import com.eas.client.model.application.ApplicationModel.RequeryProcess;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -161,7 +160,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     protected void silentUnpend() {
-        RequeryProcess p = model.process;
+        ApplicationModel.RequeryProcess p = model.process;
         model.process = null;
         try {
             unpend();
@@ -1126,30 +1125,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     public abstract void enqueueUpdate() throws Exception;
-
-    private static final String BEGIN_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Disables automatic model update on parameters change, @see endUpdate method.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = BEGIN_UPDATE_JSDOC)
-    public void beginUpdate() {
-        updatingCounter++;
-    }
-
-    private static final String END_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Enables automatic model update on parameters change, @see beginUpdate method.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = END_UPDATE_JSDOC)
-    public void endUpdate() throws Exception {
-        assert updatingCounter > 0;
-        updatingCounter--;
-        if (updatingCounter == 0) {
-            internalExecuteChildren(false);
-        }
-    }
 
     public boolean isRowsetPresent() {
         return rowset != null;

@@ -8,10 +8,10 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Model;
+import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.sqldrivers.SqlDriver;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,18 +77,19 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
         return copied;
     }
 
-    @Override
-    public QueryEntity getEntityByName(String aName) {
-        QueryEntity found = super.getEntityByName(aName);
-        if (found == null) {
-            assert parametersEntity != null;
-            if (parametersEntity.getName() != null && parametersEntity.getName().equalsIgnoreCase(aName)) {
-                found = parametersEntity;
-            }
-        }
-        return found;
-    }
-
+    /*
+     @Override
+     public QueryEntity getEntityByName(String aName) {
+     QueryEntity found = super.getEntityByName(aName);
+     if (found == null) {
+     assert parametersEntity != null;
+     if (parametersEntity.getName() != null && parametersEntity.getName().equalsIgnoreCase(aName)) {
+     found = parametersEntity;
+     }
+     }
+     return found;
+     }
+     */
     public QueryParametersEntity getParametersEntity() {
         return parametersEntity;
     }
@@ -111,27 +112,20 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
         }
     }
 
-    @Override
-    public QueryEntity getEntityById(Long aId) {
-        if (aId != null && PARAMETERS_ENTITY_ID == aId) {
-            return parametersEntity;
-        } else {
-            return super.getEntityById(aId);
-        }
-    }
-
-    @Override
-    public Map<Long, QueryEntity> getAllEntities() {
-        Map<Long, QueryEntity> allEntities = super.getAllEntities();
-        allEntities.put(parametersEntity.getEntityId(), parametersEntity);
-        return allEntities;
-    }
-
+    /*
+     @Override
+     public QueryEntity getEntityById(Long aId) {
+     if (aId != null && PARAMETERS_ENTITY_ID == aId) {
+     return parametersEntity;
+     } else {
+     return super.getEntityById(aId);
+     }
+     }
+     */
     @Override
     public <M extends Model<QueryEntity, ?>> void accept(ModelVisitor<QueryEntity, M> visitor) {
-        visitor.visit((M)this);
+        visitor.visit((M) this);
     }
-
 
     @Override
     public QueryEntity newGenericEntity() {
@@ -142,6 +136,24 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
     public void addEntity(QueryEntity aEntity) {
         aEntity.setModel(this);
         super.addEntity(aEntity);
+    }
+
+    @Override
+    protected void resolveRelationEntities(Relation<QueryEntity> aRelation) {
+        if (aRelation.getLeftEntity() != null) {
+            if (aRelation.getLeftEntity() instanceof QueryParametersEntity) {
+                aRelation.setLeftEntity(getParametersEntity());
+            } else {
+                aRelation.setLeftEntity(getEntityById(aRelation.getLeftEntity().getEntityId()));
+            }
+        }
+        if (aRelation.getRightEntity() != null) {
+            if (aRelation.getRightEntity() instanceof QueryParametersEntity) {
+                aRelation.setRightEntity(getParametersEntity());
+            } else {
+                aRelation.setRightEntity(getEntityById(aRelation.getRightEntity().getEntityId()));
+            }
+        }
     }
 
     @Override

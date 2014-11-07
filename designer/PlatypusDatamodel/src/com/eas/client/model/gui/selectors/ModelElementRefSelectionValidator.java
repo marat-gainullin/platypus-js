@@ -9,6 +9,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.*;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.gui.view.ModelSelectionListener;
+import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import java.util.Collection;
 import java.util.List;
@@ -20,13 +21,14 @@ import javax.swing.Action;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implements ModelSelectionListener<E> {
 
-    protected ModelElementRef dmRef = null;
+    protected ModelElementRef dmRef;
     protected Action okAction;
     protected int selectionSubject = ModelElementSelector.DATASOURCE_SELECTION_SUBJECT;
-    protected ModelElementValidator validator = null;
+    protected ModelElementValidator validator;
 
     public ModelElementRefSelectionValidator(ModelElementRef aElementRef, Action aOkAction, int aSelectionSubject, ModelElementValidator aValidator) {
         super();
@@ -38,12 +40,17 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
 
     protected E getEntityByField(Model<E, ?> aModel, Field aField) {
         try {
-            for (E e : aModel.getAllEntities().values()) {
+            for (E e : aModel.getEntities().values()) {
                 if (e.getFields().toCollection().contains(aField)) {
                     return e;
                 }
                 if (e instanceof ApplicationEntity<?, ?, ?> && ((ApplicationEntity<?, ?, ?>) e).getQuery().getParameters().toCollection().contains(aField)) {
                     return e;
+                }
+            }
+            if(aModel instanceof QueryModel){
+                if(((QueryModel)aModel).getParameters().toCollection().contains(aField)){
+                    return (E) ((QueryModel)aModel).getParametersEntity();
                 }
             }
             return null;

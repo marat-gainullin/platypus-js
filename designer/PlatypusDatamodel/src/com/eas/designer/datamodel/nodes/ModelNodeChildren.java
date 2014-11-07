@@ -9,6 +9,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
+import com.eas.client.model.query.QueryModel;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +64,7 @@ public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV ext
     }
 
     protected Collection getKeys() {
-        return model.getAllEntities().values();
+        return model.getEntities().values();
     }
 
     @Override

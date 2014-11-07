@@ -215,8 +215,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     @Override
-    protected void resolveRelation(Relation<E> aRelation, Model<E, Q> aModel) throws Exception {
-        super.resolveRelation(aRelation, aModel);
+    public void resolveRelation(Relation<E> aRelation) throws Exception {
+        super.resolveRelation(aRelation);
         if (aRelation instanceof ReferenceRelation<?>) {
             if (aRelation.getLeftField() != null && !aRelation.getLeftField().isFk()) {
                 aRelation.setLeftField(null);
@@ -247,7 +247,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         Model<E, Q> copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {
             ReferenceRelation<E> rcopied = (ReferenceRelation<E>) relation.copy();
-            resolveRelation(rcopied, copied);
+            copied.resolveRelation(rcopied);
             ((ApplicationModel<E, Q>) copied).getReferenceRelations().add(rcopied);
         }
         ((ApplicationModel<E, Q>) copied).checkReferenceRelationsIntegrity();
@@ -258,7 +258,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     protected void validateRelations() throws Exception {
         super.validateRelations();
         for (Relation<E> rel : referenceRelations) {
-            resolveRelation(rel, this);
+            resolveRelation(rel);
         }
     }
 
