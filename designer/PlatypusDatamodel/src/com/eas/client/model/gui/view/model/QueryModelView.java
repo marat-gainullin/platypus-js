@@ -46,6 +46,13 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
     }
 
     @Override
+    protected void doCreateEntityViews() throws Exception {
+        super.doCreateEntityViews();
+        EntityView<QueryEntity> eView = createEntityView(model.getParametersEntity());
+        addEntityView(eView);
+    }
+
+    @Override
     protected TableRef prepareTableRef4Selection() {
         TableRef tr = new TableRef();
         tr.dbId = model.getDatasourceName();

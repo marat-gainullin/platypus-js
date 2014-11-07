@@ -1262,14 +1262,6 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         removeAll();
     }
 
-    public void recreateEntityViews() throws Exception {
-        if (model != null) {
-            createEntityViews();
-        } else {
-            removeEntityViews();
-        }
-    }
-
     @Override
     public void addNotify() {
         super.addNotify();
@@ -1288,25 +1280,29 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
     public static final int ALLOCATION_STEP_X = 10;
     public static final int ALLOCATION_STEP_Y = 20;
 
-    public void createEntityViews() throws Exception {
-        relationsDesignInfo.clear();
+    public void recreateEntityViews() throws Exception {
         removeEntityViews();
-        needRerouteConnectors = false;
-        try {
-            Map<Long, E> entMap = model.getAllEntities();
-            if (entMap != null && !entMap.isEmpty()) {
-                Collection<E> entCol = entMap.values();
-                if (entCol != null) {
-                    List<E> entities = new ArrayList<>();
-                    entities.addAll(entCol);
-                    for (E entity : entities) {
-                        EntityView<E> eView = createEntityView(entity);
-                        addEntityView(eView);
-                    }
+        if (model != null) {
+            relationsDesignInfo.clear();
+            needRerouteConnectors = false;
+            try {
+                doCreateEntityViews();
+            } finally {
+                needRerouteConnectors = true;
+            }
+        }
+    }
+
+    protected void doCreateEntityViews() throws Exception {
+        Map<Long, E> entMap = model.getEntities();
+        if (entMap != null && !entMap.isEmpty()) {
+            Collection<E> entCol = entMap.values();
+            if (entCol != null) {
+                for (E entity : entCol) {
+                    EntityView<E> eView = createEntityView(entity);
+                    addEntityView(eView);
                 }
             }
-        } finally {
-            needRerouteConnectors = true;
         }
     }
     List<Vertex<PathFragment>> graph;
@@ -2481,7 +2477,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
             }
         }
     }
-    
+
     protected abstract void copySelectedEntities();
 
     public class EntityFieldTuple {

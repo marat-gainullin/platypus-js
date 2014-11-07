@@ -123,8 +123,12 @@ public class ModelElementSelector {
             model.addEditingValidator(stopper);
             ModelElementRef ldmRef = oldValue;
             if (ldmRef != null) {
-                Map<Long, E> ents = model.getAllEntities();
+                Map<Long, E> ents = model.getEntities();
                 if (ents != null) {
+                    if(model instanceof QueryModel){
+                        E paramsEntity = (E) ((QueryModel)model).getParametersEntity();
+                        ents.put(paramsEntity.getEntityId(), paramsEntity);
+                    }
                     E ent = ents.get(ldmRef.getEntityId());
                     if (ent != null) {
                         EntityView<E> eView = mView.getEntityView(ent);

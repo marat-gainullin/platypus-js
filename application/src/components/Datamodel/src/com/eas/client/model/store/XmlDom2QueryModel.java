@@ -4,20 +4,17 @@
  */
 package com.eas.client.model.store;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
-import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.visitors.QueryModelVisitor;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.queries.Query;
 import com.eas.xml.dom.XmlDomUtils;
 import java.util.HashSet;
 import java.util.List;
@@ -97,23 +94,23 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> imp
     }
 
     @Override
-    protected void resolveRelation(Long leftEntityId, String leftParameterName, Relation<QueryEntity> relation, String leftFieldName, Long rightEntityId, String rightParameterName, String rightFieldName) {
-        super.resolveRelation(leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
+    protected void resolveRelation(QueryModel aModel, Long leftEntityId, String leftParameterName, Relation<QueryEntity> relation, String leftFieldName, Long rightEntityId, String rightParameterName, String rightFieldName) {
+        super.resolveRelation(aModel, leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
         try {
             if (QueryModel.PARAMETERS_ENTITY_ID == leftEntityId) {
-                QueryParametersEntity lEntity = currentModel.getParametersEntity();
+                QueryParametersEntity lEntity = aModel.getParametersEntity();
                 if (leftParameterName != null && !leftParameterName.isEmpty()) {
                     Fields fields = lEntity.getFields();
                     if (fields != null) {
                         relation.setLeftField(fields.get(leftParameterName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setLeftField(new Parameter(leftParameterName));
                     }
                 } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
                     Fields fields = lEntity.getFields();
                     if (fields != null) {
                         relation.setLeftField(fields.get(leftFieldName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setLeftField(new Parameter(leftFieldName));
                     }
                 }
@@ -123,19 +120,19 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> imp
                 }
             }
             if (QueryModel.PARAMETERS_ENTITY_ID == rightEntityId) {
-                QueryParametersEntity rEntity = currentModel.getParametersEntity();
+                QueryParametersEntity rEntity = aModel.getParametersEntity();
                 if (rightParameterName != null && !rightParameterName.isEmpty()) {
                     Fields fields = rEntity.getFields();
                     if (fields != null) {
                         relation.setRightField(fields.get(rightParameterName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setRightField(new Parameter(rightParameterName));
                     }
                 } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
                     Fields fields = rEntity.getFields();
                     if (fields != null) {
                         relation.setRightField(fields.get(rightFieldName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setRightField(new Parameter(rightFieldName));
                     }
                 }

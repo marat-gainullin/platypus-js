@@ -158,28 +158,29 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
                     readPolyline(polyline, relation);
                 }
             }
+            M model = currentModel;
             relationsResolvers.add((Runnable) () -> {
-                resolveRelation(leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
+                resolveRelation(model, leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
             });
         }
     }
 
-    protected void resolveRelation(final Long leftEntityId, final String leftParameterName, final Relation<E> relation, final String leftFieldName, final Long rightEntityId, final String rightParameterName, final String rightFieldName) {
+    protected void resolveRelation(final M aModel, final Long leftEntityId, final String leftParameterName, final Relation<E> relation, final String leftFieldName, final Long rightEntityId, final String rightParameterName, final String rightFieldName) {
         try {
-            E lEntity = currentModel.getEntityById(leftEntityId);
+            E lEntity = aModel.getEntityById(leftEntityId);
             if (lEntity != null) {
                 if (leftParameterName != null && !leftParameterName.isEmpty()) {
                     Query query = lEntity.getQuery();
                     if (query != null) {
                         relation.setLeftField(query.getParameters().get(leftParameterName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setLeftField(new Parameter(leftParameterName));
                     }
                 } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
                     Fields fields = lEntity.getFields();
                     if (fields != null) {
                         relation.setLeftField(fields.get(leftFieldName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setLeftField(new Field(leftFieldName));
                     }
                 }
@@ -187,20 +188,20 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
                 lEntity.addOutRelation(relation);
             }
             
-            E rEntity = currentModel.getEntityById(rightEntityId);
+            E rEntity = aModel.getEntityById(rightEntityId);
             if (rEntity != null) {
                 if (rightParameterName != null && !rightParameterName.isEmpty()) {
                     Query query = rEntity.getQuery();
                     if (query != null) {
                         relation.setRightField(query.getParameters().get(rightParameterName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setRightField(new Parameter(rightParameterName));
                     }
                 } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
                     Fields fields = rEntity.getFields();
                     if (fields != null) {
                         relation.setRightField(fields.get(rightFieldName));
-                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setRightField(new Field(rightFieldName));
                     }
                 }

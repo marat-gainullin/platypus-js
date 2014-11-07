@@ -323,10 +323,13 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
                 Relation<E> dummyRel = new DummyRelation<>(leftEntity, null, rightEntity, null);
                 try {
                     model.addRelation(dummyRel);
-                    Map<Long, E> lets = model.getAllEntities();
+                    Map<Long, E> lets = model.getEntities();
                     if (lets != null) {
                         Collection<E> entCol = lets.values();
                         if (entCol != null) {
+                            if (model instanceof QueryModel) {
+                                entCol.add((E)((QueryModel) model).getParametersEntity());
+                            }
                             // Build the graph to control cycles
                             List<CycledGraphNode> graph = new ArrayList<>();
                             Map<E, CycledGraphNode> ent2gn = new HashMap<>();

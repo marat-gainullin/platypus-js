@@ -41,7 +41,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
         }
         for (Relation<E> relation : relations) {
             Relation<E> rcopied = relation.copy();
-            resolveRelation(rcopied, copied);
+            copied.resolveRelation(rcopied);
             copied.addRelation(rcopied);
         }
         return copied;
@@ -86,7 +86,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
 
     protected void validateRelations() throws Exception {
         for (Relation<E> rel : relations) {
-            resolveRelation(rel, this);
+            resolveRelation(rel);
         }
     }
 
@@ -288,17 +288,6 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
         return entities;
     }
 
-    /**
-     * Sane as getEntities, but returns also parameters entity if it exists.
-     *
-     * @return
-     */
-    public Map<Long, E> getAllEntities() {
-        Map<Long, E> allEntities = new HashMap<>();
-        allEntities.putAll(entities);
-        return allEntities;
-    }
-
     public E getEntityById(Long aId) {
         return entities.get(aId);
     }
@@ -353,13 +342,12 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
         relationsAgressiveCheck = aValue;
     }
 
-    protected void resolveRelation(Relation<E> aRelation, Model<E, Q> aModel) throws Exception {
-        if (aRelation.getLeftEntity() != null) {
-            aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
-        }
-        if (aRelation.getRightEntity() != null) {
-            aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
-        }
+    public void resolveRelation(Relation<E> aRelation) throws Exception {
+        resolveRelationEntities(aRelation);
+        resolveRelationFields(aRelation);
+    }
+
+    protected void resolveRelationFields(Relation<E> aRelation) {
         if (aRelation.getLeftField() != null) {
             String targetName = aRelation.getLeftField().getName();
             if (aRelation.getLeftEntity() != null) {
@@ -415,6 +403,15 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
             } else {
                 aRelation.setRightField(new Field(targetName));
             }
+        }
+    }
+
+    protected void resolveRelationEntities(Relation<E> aRelation) {
+        if (aRelation.getLeftEntity() != null) {
+            aRelation.setLeftEntity(getEntityById(aRelation.getLeftEntity().getEntityId()));
+        }
+        if (aRelation.getRightEntity() != null) {
+            aRelation.setRightEntity(getEntityById(aRelation.getRightEntity().getEntityId()));
         }
     }
 

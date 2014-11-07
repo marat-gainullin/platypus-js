@@ -1086,7 +1086,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 edit.redo();
             }
             if (!entities2Delete.isEmpty()) {
-                createEntityViews();
+                recreateEntityViews();
             }
         }
     }
