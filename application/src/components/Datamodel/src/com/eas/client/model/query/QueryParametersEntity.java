@@ -7,8 +7,6 @@ package com.eas.client.model.query;
 
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SqlQuery;
-import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.model.visitors.QueryModelVisitor;
 
 /**
  *
@@ -29,6 +27,12 @@ public class QueryParametersEntity extends QueryEntity {
     @Override
     public void validateQuery() throws Exception {
         // no op for parameters entity
+    }
+
+    @Override
+    public boolean validate() throws Exception {
+        // no op for parameters entity
+        return false;
     }
 
     @Override
