@@ -315,7 +315,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         DefaultCaret caret = new DefaultCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         caret.setVisible(false);
-        absentQueryText.setCaret(caret);        
+        absentQueryText.setCaret(caret);
         absentQueryText.setBorder(null);
         absentQueryText.setEditable(false);
         absentQueryText.setOpaque(false);
@@ -1043,6 +1043,15 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             am.put(MinimizeRestoreAction.class.getSimpleName(), minimizeRestoreAction);
             im.put((KeyStroke) minimizeRestoreAction.getValue(Action.ACCELERATOR_KEY), MinimizeRestoreAction.class.getSimpleName());
         }
+        fieldsList.setActionMap(am);
+        parametersList.setActionMap(am);
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        ActionMap am = getActionMap();
+        am.setParent(((JComponent) getParent()).getActionMap());
     }
 
     public class ParametersMetadataModel extends FieldsListModel.ParametersModel {

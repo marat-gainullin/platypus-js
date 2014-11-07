@@ -890,7 +890,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         setModel(aModel);
     }
 
-    protected void putEditingActions() {
+    protected final void putEditingActions() {
         ActionMap am = getActionMap();
         am.put(AddTable.class.getSimpleName(), new AddTable());
         am.put(AddField.class.getSimpleName(), new AddField());
@@ -2137,10 +2137,6 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         return Introspector.decapitalize(s);
     }
 
-    private boolean isParametersCopy() {
-        return isSelectedFieldsOnOneEntity() && isParametersEntity(selectedFields.iterator().next().entity);
-    }
-
     protected abstract boolean isAnyDeletableEntities();
 
     public class Delete extends DmAction {
@@ -2311,7 +2307,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
 
         @Override
         public boolean isEnabled() {
-            return isParametersCopy() || isAnyDeletableEntities();
+            boolean deleteEnabled = isShowing() && (isAnyDeletableEntities() ^ isSelectedDeletableFields());
+            boolean copyEnabled = (selectedFields != null && !selectedFields.isEmpty()) || (selectedEntities != null && !selectedEntities.isEmpty() && (selectedEntities.size() > 1 || !isParametersEntity(selectedEntities.iterator().next())));
+            return deleteEnabled && copyEnabled;
         }
 
         @Override
@@ -2354,7 +2352,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
 
         @Override
         public boolean isEnabled() {
-            return isParametersCopy() || (selectedEntities != null && !selectedEntities.isEmpty() && (selectedEntities.size() > 1 || !isParametersEntity(selectedEntities.iterator().next())));
+            return (selectedFields != null && !selectedFields.isEmpty()) || (selectedEntities != null && !selectedEntities.isEmpty() && (selectedEntities.size() > 1 || !isParametersEntity(selectedEntities.iterator().next())));
         }
 
         @Override
