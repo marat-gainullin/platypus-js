@@ -10,7 +10,6 @@ import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
 import com.eas.client.dbstructure.gui.edits.DbStructureUndoableEditSupport;
-import com.eas.client.dbstructure.gui.edits.NotSavableDbStructureCompoundEdit;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
@@ -19,7 +18,6 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ModelView;
 import javax.swing.JOptionPane;
 import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEditSupport;
 
 /**
@@ -30,7 +28,7 @@ public class FksFieldsDragHandler extends RelationsFieldsDragHandler<FieldsEntit
 
     protected SqlActionsController sqlActionsController;
 
-    public FksFieldsDragHandler(SqlActionsController aSqlActionsController, ModelView<FieldsEntity, FieldsEntity, DbSchemeModel> aModelView, EntityView<FieldsEntity> aEntityView) {
+    public FksFieldsDragHandler(SqlActionsController aSqlActionsController, ModelView<FieldsEntity, DbSchemeModel> aModelView, EntityView<FieldsEntity> aEntityView) {
         super(aModelView, aEntityView);
         sqlActionsController = aSqlActionsController;
     }

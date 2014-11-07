@@ -527,7 +527,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         }
     }
 
-    public ModelView<FieldsEntity, FieldsEntity, DbSchemeModel> getEntitiesView() {
+    public ModelView<FieldsEntity, DbSchemeModel> getEntitiesView() {
         return modelView;
     }
 

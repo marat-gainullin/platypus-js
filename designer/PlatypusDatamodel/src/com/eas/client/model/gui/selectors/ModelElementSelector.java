@@ -55,7 +55,7 @@ public class ModelElementSelector {
      */
     public static final int STRICT_DATASOURCE_PARAMETER_SELECTION_SUBJECT = 5;
 
-    public static <E extends Entity<?, SqlQuery, E>> ModelElementRef selectDatamodelElement(final Model<E, ?, ?> aModel, final ModelElementRef aOldValue, int selectionSubject, ModelElementValidator aValidator, Component aParentComponent, String aTitle) {
+    public static <E extends Entity<?, SqlQuery, E>> ModelElementRef selectDatamodelElement(final Model<E, ?> aModel, final ModelElementRef aOldValue, int selectionSubject, ModelElementValidator aValidator, Component aParentComponent, String aTitle) {
         if (aModel != null) {
             final ModelElementRef selected = new ModelElementRef();
             ResultingDialog dlg = prepareDialog(aModel, aTitle, selected, selectionSubject, aValidator, aOldValue, null);
@@ -67,14 +67,14 @@ public class ModelElementSelector {
         return null;
     }
 
-    public static <E extends Entity<?, SqlQuery, E>> ResultingDialog prepareDialog(final Model<E, ?, ?> aModel, String aTitle, ModelElementRef trackSubject, int selectionSubject, ModelElementValidator aValidator, final ModelElementRef aOldValue, ActionListener aOkActionListener) {
-        ModelView<E, ?, ?> mView = null;
+    public static <E extends Entity<?, SqlQuery, E>> ResultingDialog prepareDialog(final Model<E, ?> aModel, String aTitle, ModelElementRef trackSubject, int selectionSubject, ModelElementValidator aValidator, final ModelElementRef aOldValue, ActionListener aOkActionListener) {
+        ModelView<E, ?> mView = null;
         if (aModel instanceof ApplicationDbModel) {
-            mView = (ModelView<E, ?, ?>) new ApplicationModelView((ApplicationDbModel) aModel, null, null, null);
+            mView = (ModelView<E, ?>) new ApplicationModelView((ApplicationDbModel) aModel, null, null);
         } else if (aModel instanceof QueryModel) {
-            mView = (ModelView<E, ?, ?>) new QueryModelView((QueryModel) aModel, null, null);
+            mView = (ModelView<E, ?>) new QueryModelView((QueryModel) aModel, null, null);
         } else if (aModel instanceof DbSchemeModel) {
-            mView = (ModelView<E, ?, ?>) new DbSchemeModelView((DbSchemeModel) aModel, null);
+            mView = (ModelView<E, ?>) new DbSchemeModelView((DbSchemeModel) aModel, null);
         }
         mView.setAutoscrolls(true);
         JScalableScrollPane scroll = new JScalableScrollPane();
@@ -107,11 +107,11 @@ public class ModelElementSelector {
     private static class Positioner<E extends Entity<?, SqlQuery, E>> extends WindowAdapter {
 
         private final ModelElementRef oldValue;
-        private final Model<E, ?, ?> model;
-        private final ModelView<E, ?, ?> mView;
+        private final Model<E, ?> model;
+        private final ModelView<E, ?> mView;
         private final ModelEditingValidator<E> stopper = new ModelEditingStopper<>();
 
-        public Positioner(ModelElementRef aOldValue, Model<E, ?, ?> aModel, ModelView<E, ?, ?> aMView) {
+        public Positioner(ModelElementRef aOldValue, Model<E, ?> aModel, ModelView<E, ?> aMView) {
             super();
             oldValue = aOldValue;
             model = aModel;

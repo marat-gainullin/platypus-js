@@ -709,7 +709,7 @@
             }
         }
     });
-    
+
     Object.defineProperty(P, "principal", {
         get: function () {
             var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
@@ -731,6 +731,44 @@
         return initing;
     }
 
+    function publishRow(aDelegate, aTarget) {
+        var nnFields = aDelegate.getFields();
+        var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
+        var target = arguments.length > 1 ? aTarget : (!!instanceCTor ? new instanceCTor() : {});
+        var nFields = nnFields.toCollection();
+        // plain mutable properties
+        for (var n = 0; n < nFields.size(); n++) {
+            (function () {
+                var colIndex = n + 1;
+                var nField = nFields[n];
+                var valueAccessorDesc = {
+                    get: function () {
+                        return boxAsJs(aDelegate.getColumnObject(colIndex));
+                    },
+                    set: function (aValue) {
+                        aDelegate.setColumnObject(colIndex, boxAsJava(aValue));
+                    }
+                };
+                Object.defineProperty(target, nField.name, {get: valueAccessorDesc.get, set: valueAccessorDesc.set, enumerable: true});
+                Object.defineProperty(target, n, valueAccessorDesc);
+            })();
+        }
+        if (!target.schema)
+            Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
+        // ORM mutable scalar and readonly collection properties
+        var ormDefs = nnFields.getOrmDefinitions();
+        for each (var o in ormDefs.keySet()) {
+            var def = EngineUtilsClass.unwrap(ormDefs.get(o));
+            Object.defineProperty(target, o, def);
+        }
+        Object.defineProperty(target, "unwrap", {
+            value: function () {
+                return aDelegate;
+            }});
+        return target;
+        // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
+    }
+    
     function BoundArray() {
         BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
@@ -793,12 +831,15 @@
         });
         Object.defineProperty(target, "push", {
             value: function () {
+                var justInserted;
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
-                        rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
                     }
                 } else if (arguments.length === 1) {
-                    var justInserted = rowset.insertAt(rowset.size() + 1, true, objectToInsertIniting(arguments[0]));
+                    justInserted = rowset.insertAt(rowset.size() + 1, true, objectToInsertIniting(arguments[0]));
+                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
                     Array.prototype.push.call(target, justInserted.getPublished());
                 }
                 return target.length;
@@ -855,7 +896,8 @@
                     }
                     var insertAt = beginToDeleteAt;
                     for (var a = 2; a < arguments.length; a++) {
-                        rowset.insertAt(insertAt + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        var justInserted = rowset.insertAt(insertAt + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
                         insertAt++;
                     }
                     return deleted;
@@ -867,18 +909,22 @@
 
         Object.defineProperty(target, "unshift", {
             value: function () {
+                var justInserted;
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
-                        rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
                     }
                 } else if (arguments.length === 1) {
-                    var justInserted = rowset.insertAt(1, true, objectToInsertIniting(arguments[0]));
+                    justInserted = rowset.insertAt(1, true, objectToInsertIniting(arguments[0]));
+                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
                     Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
                 return target.length;
             }
         });
 
+        /*
         Object.defineProperty(target, "insert", {
             value: function () {
                 var initing = new JavaArrayClass(arguments.length);
@@ -899,13 +945,15 @@
                 }
             }
         });
+        */
 
         Object.defineProperty(target, "createFilter", {
             value: function () {
                 var nEntity = this.unwrap();
                 var varargs = new JavaArrayClass(arguments.length);
-                for (var v = 0; v < arguments.length; v++)
-                    varargs[v] = boxAsJava(arguments[v]);
+                var args = arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments;
+                for (var v = 0; v < args.length; v++)
+                    varargs[v] = boxAsJava(args[v]);
                 return boxAsJs(nEntity.createFilter(varargs));
             }
         });
@@ -913,20 +961,31 @@
         Object.defineProperty(target, "createSorting", {
             value: function () {
                 var nEntity = this.unwrap();
-                var varargs = new JavaArrayClass(arguments.length);
-                for (var v = 0; v < arguments.length; v++)
-                    varargs[v] = boxAsJava(arguments[v]);
-                return boxAsJs(nEntity.createSorting(varargs));
+                var args = arguments.length === 1 ? arguments[0] : arguments;
+                if (Array.isArray(args) || args === arguments) {
+                    var varargs = new JavaArrayClass(args.length);
+                    for (var v = 0; v < args.length; v++)
+                        varargs[v] = boxAsJava(args[v]);
+                    return boxAsJs(nEntity.createSorting(varargs));
+                }else{
+                    return boxAsJs(nEntity.createSorting(args));
+                }
             }
         });
 
         Object.defineProperty(target, "find", {
             value: function () {
+                var found;
                 var nEntity = this.unwrap();
-                var varargs = new JavaArrayClass(arguments.length);
-                for (var v = 0; v < arguments.length; v++)
-                    varargs[v] = boxAsJava(arguments[v]);
-                var found = nEntity.find(varargs);
+                var args = arguments.length === 1 ? arguments[0] : arguments;
+                if (Array.isArray(args) || args === arguments) {
+                    var varargs = new JavaArrayClass(args.length);
+                    for (var v = 0; v < args.length; v++)
+                        varargs[v] = boxAsJava(args[v]);
+                    found = nEntity.find(varargs);
+                }else{
+                    found = nEntity.find(args);
+                }
                 if (!found.tag) {
                     var res = [];
                     for (var f = 0; f < found.size(); f++) {
@@ -939,43 +998,7 @@
         });
     }
 
-    RowClass.setPublisher(function (aDelegate) {
-        var nnFields = aDelegate.getFields();
-        var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
-        var target = !!instanceCTor ? new instanceCTor() : {};
-        var nFields = nnFields.toCollection();
-        // plain mutable properties
-        for (var n = 0; n < nFields.size(); n++) {
-            (function () {
-                var colIndex = n + 1;
-                var nField = nFields[n];
-                var valueAccessorDesc = {
-                    get: function () {
-                        return boxAsJs(aDelegate.getColumnObject(colIndex));
-                    },
-                    set: function (aValue) {
-                        aDelegate.setColumnObject(colIndex, boxAsJava(aValue));
-                    }
-                };
-                Object.defineProperty(target, nField.name, {get: valueAccessorDesc.get, set: valueAccessorDesc.set, enumerable: true});
-                Object.defineProperty(target, n, valueAccessorDesc);
-            })();
-        }
-        if (!target.schema)
-            Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
-        // ORM mutable scalar and readonly collection properties
-        var ormDefs = nnFields.getOrmDefinitions();
-        for each (var o in ormDefs.keySet()) {
-            var def = EngineUtilsClass.unwrap(ormDefs.get(o));
-            Object.defineProperty(target, o, def);
-        }
-        Object.defineProperty(target, "unwrap", {
-            value: function () {
-                return aDelegate;
-            }});
-        return target;
-        // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
-    });
+    RowClass.setPublisher(publishRow);
     FieldsClass.setPublisher(function (aDelegate) {
         var target = {};
         var nFields = aDelegate.toCollection();
@@ -1078,17 +1101,19 @@
                 var ncParameters = nParameters.toCollection();
                 var pParams = {};
                 for (var p = 0; p < ncParameters.size(); p++) {
-                    var nParameter = ncParameters[p];
-                    var pDesc = {
-                        get: function () {
-                            return boxAsJs(nParameter.value);
-                        },
-                        set: function (aValue) {
-                            nParameter.value = boxAsJava(aValue);
-                        }
-                    };
-                    Object.defineProperty(pParams, nParameter.name, pDesc);
-                    Object.defineProperty(pParams, p, pDesc);
+                    (function(){
+                        var nParameter = ncParameters[p];
+                        var pDesc = {
+                            get: function () {
+                                return boxAsJs(nParameter.value);
+                            },
+                            set: function (aValue) {
+                                nParameter.value = boxAsJava(aValue);
+                            }
+                        };
+                        Object.defineProperty(pParams, nParameter.name, pDesc);
+                        Object.defineProperty(pParams, p, pDesc);
+                    })();
                 }
                 Object.defineProperty(pParams, "length", {value: ncParameters.size()});
                 Object.defineProperty(published, "params", {value: pParams});
@@ -1125,8 +1150,8 @@
             }
         }
         model.createORMDefinitions();
-        aTarget.loadEntity = function (queryId) {
-            var lnEntity = model.loadEntity(P.boxAsJava(queryId));
+        aTarget.loadEntity = function (queryName) {
+            var lnEntity = model.loadEntity(P.boxAsJava(queryName));
             return publishEntity(lnEntity);
         };
         aTarget.createEntity = function (sqlText, datasourceName) {
@@ -1151,6 +1176,7 @@
         } else {
             aTarget = new P.ReportTemplate(reportConfig, aData);
         }
+        template.injectPublished(aTarget);
         return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
@@ -1269,25 +1295,25 @@
     var Logger = {};
     Object.defineProperty(P, "Logger", {value: Logger});
     Object.defineProperty(Logger, "config", {value: function (aMessage) {
-            applicationLogger.config(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.config("" + aMessage);
         }});
     Object.defineProperty(Logger, "severe", {value: function (aMessage) {
-            applicationLogger.severe(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.severe("" + aMessage);
         }});
     Object.defineProperty(Logger, "warning", {value: function (aMessage) {
-            applicationLogger.warning(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.warning("" + aMessage);
         }});
     Object.defineProperty(Logger, "info", {value: function (aMessage) {
-            applicationLogger.info(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.info("" + aMessage);
         }});
     Object.defineProperty(Logger, "fine", {value: function (aMessage) {
-            applicationLogger.fine(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.fine("" + aMessage);
         }});
     Object.defineProperty(Logger, "finer", {value: function (aMessage) {
-            applicationLogger.finer(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.finer("" + aMessage);
         }});
     Object.defineProperty(Logger, "finest", {value: function (aMessage) {
-            applicationLogger.finest(aMessage !== null ? "" + aMessage : null);
+            applicationLogger.finest("" + aMessage);
         }});
 
     function readString(aFileName, aEncoding) {

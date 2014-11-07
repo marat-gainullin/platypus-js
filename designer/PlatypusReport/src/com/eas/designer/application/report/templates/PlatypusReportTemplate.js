@@ -15,6 +15,6 @@ function ${appElementName}(){
         // TODO : place data processing code here
         
         var report = template.generateReport();
-        // template.show(); | template.print(); | var savedTo = template.save(saveTo ?);
+        // report.show(); | report.print(); | var savedTo = report.save(saveTo ?);
     };
 }

@@ -7,7 +7,6 @@ package com.eas.client.model.store;
 import com.eas.client.model.Model;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import org.w3c.dom.Document;
@@ -16,41 +15,33 @@ import org.w3c.dom.Element;
 /**
  *
  * @author mg
+ * @param <E>
+ * @param <M>
  */
-public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> extends Model2XmlDom<E> implements ApplicationModelVisitor<E> {
+public class ApplicationModel2XmlDom<E extends ApplicationEntity<M, ?, E>, M extends ApplicationModel<E, ?>> extends Model2XmlDom<E, M> implements ApplicationModelVisitor<E, M> {
 
     protected static final String REFERENCE_RELATION_TAG_NAME = "referenceRelation";
     protected static final String SCALAR_PROP_NAME_ATTR_NAME = "scalarPropertyName";
     protected static final String COLLECTION_PROP_NAME_ATTR_NAME = "collectionPropertyName";
 
-    public static <E extends ApplicationEntity<?, ?, E>> Document transform(ApplicationModel<E, ?, ?> aModel) {
-        ApplicationModel2XmlDom<E> transformer = new ApplicationModel2XmlDom<>();
+    public static <E extends ApplicationEntity<M, ?, E>, M extends ApplicationModel<E, ?>> Document transform(M aModel) {
+        ApplicationModel2XmlDom<E, M> transformer = new ApplicationModel2XmlDom<>();
         return transformer.model2XmlDom(aModel);
     }
 
     @Override
-    public void visit(ApplicationModel<E, ?, ?> aModel) {
+    public void visit(M aModel) {
         writeModel(aModel);
     }
 
     @Override
-    public void writeModel(Model<E, ?, ?> aModel) {
+    public void writeModel(M aModel) {
         super.writeModel(aModel);
-        if (aModel != null && ((ApplicationModel<E, ?, ?>) aModel).getReferenceRelations() != null) {
-            for (ReferenceRelation<E> relation : ((ApplicationModel<E, ?, ?>) aModel).getReferenceRelations()) {
+        if (aModel != null && aModel.getReferenceRelations() != null) {
+            aModel.getReferenceRelations().stream().forEach((relation) -> {
                 relation.accept(this);
-            }
+            });
         }
-    }
-
-    @Override
-    public void visit(ApplicationParametersEntity entity) {
-        Element node = doc.createElement(PARAMETERS_ENTITY_TAG_NAME);
-        currentNode.appendChild(node);
-        // Hack. Assume that ApplicationParametersEntity interface is supported only by 
-        // ApplicationEntity descendants.
-        E appEntity = (E) entity;
-        writeEntityDesignAttributes(node, appEntity);
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.eas.client.DatabaseMdCache;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.NoPublisherException;
@@ -41,6 +42,11 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
 
     public ApplicationDbEntity(String aEntityId) {
         super(aEntityId);
+    }
+
+    @Override
+    public void accept(ModelVisitor<ApplicationDbEntity, ApplicationDbModel> visitor) {
+        visitor.visit(this);
     }
 
     private static final String EXECUTE_UPDATE_JSDOC = ""

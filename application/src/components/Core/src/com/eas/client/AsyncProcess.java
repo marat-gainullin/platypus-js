@@ -5,6 +5,7 @@
  */
 package com.eas.client;
 
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -42,7 +43,11 @@ public abstract class AsyncProcess<T, F> {
                     if (eMessagesSum.length() > 0) {
                         eMessagesSum.append("\n");
                     }
-                    eMessagesSum.append(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString());
+                    String message = ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString();
+                    if (ex instanceof FileNotFoundException) {
+                        message = "Not found: " + message;
+                    }
+                    eMessagesSum.append(message);
                 });
                 onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
             }

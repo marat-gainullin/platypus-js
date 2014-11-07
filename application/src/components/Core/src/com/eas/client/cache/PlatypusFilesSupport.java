@@ -119,10 +119,10 @@ public class PlatypusFilesSupport {
             String docComment = matcher.group();
             String[] lines = docComment.split(System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME)); //NOI18N
             for (String line : lines) {
-                if (line.contains(aAnnotationName)) {
+                if (line.toLowerCase().contains(aAnnotationName.toLowerCase())) {
                     String[] tokens = line.split("\\s");  //NOI18N
                     for (int i = 0; i < tokens.length; i++) {
-                        if (tokens[i].endsWith(aAnnotationName)) {
+                        if (tokens[i].toLowerCase().endsWith(aAnnotationName.toLowerCase())) {
                             if (i < tokens.length - 1) {
                                 return tokens[i + 1];
                             } else {

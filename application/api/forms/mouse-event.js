@@ -93,20 +93,6 @@
              */
             P.MouseEvent.prototype.clickCount = 0;
         }
-        Object.defineProperty(this, "X", {
-            get: function() {
-                var value = delegate.X;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MouseEvent){
-            /**
-             * X cursor coordinate in component's space.
-             * @property X
-             * @memberOf MouseEvent
-             */
-            P.MouseEvent.prototype.X = 0;
-        }
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
@@ -120,6 +106,20 @@
              * @memberOf MouseEvent
              */
             P.MouseEvent.prototype.metaDown = true;
+        }
+        Object.defineProperty(this, "X", {
+            get: function() {
+                var value = delegate.X;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MouseEvent){
+            /**
+             * X cursor coordinate in component's space.
+             * @property X
+             * @memberOf MouseEvent
+             */
+            P.MouseEvent.prototype.X = 0;
         }
         Object.defineProperty(this, "Y", {
             get: function() {

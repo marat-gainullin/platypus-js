@@ -849,7 +849,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		List<JavaScriptObject> result = new ArrayList<>();
 		for (Row row : dataProvider.getList()) {
 			if (getSelectionModel().isSelected(row))
-				result.add(Entity.publishRowFacade(row, rowsSource));
+				result.add(Entity.publishRowFacade(row, rowsSource, null));
 		}
 		return result;
 	}

@@ -67,7 +67,7 @@ public class ScriptDocument {
 
     public boolean hasModuleAnnotation(String anAnnotation) {
         return moduleAnnotations != null && moduleAnnotations.stream().anyMatch((Tag aTag) -> {
-            return aTag.getName().equals(anAnnotation);
+            return aTag.getName().equalsIgnoreCase(anAnnotation);
         });
     }
 
@@ -95,7 +95,7 @@ public class ScriptDocument {
                     jsDoc.parseAnnotations();
                     jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
                         moduleAnnotations.add(tag);
-                        if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                        if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
                             tag.getParams().stream().forEach((role) -> {
                                 moduleAllowedRoles.add(role);
                             });
@@ -117,7 +117,7 @@ public class ScriptDocument {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
             jsDoc.parseAnnotations();
             jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
-                if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
                     Set<String> roles = propertyAllowedRoles.get(aPropertyName);
                     if (roles == null) {
                         roles = new HashSet<>();

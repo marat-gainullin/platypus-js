@@ -10,6 +10,7 @@ import com.eas.client.model.Entity;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public class EntityFieldRef<E extends Entity<?, ?, E>> {
 

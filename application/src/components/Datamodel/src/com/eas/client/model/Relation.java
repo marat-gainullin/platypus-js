@@ -113,10 +113,8 @@ public class Relation<E extends Entity<?, ?, E>> {
         changeSupport.firePropertyChange("fkDeferrable", oldValue, aValue);
     }
 
-    public void accept(ModelVisitor<E> visitor) {
-        if (visitor != null) {
-            visitor.visit(this);
-        }
+    public void accept(ModelVisitor<E, ?> visitor) {
+        visitor.visit(this);
     }
 
     public E getLeftEntity() {

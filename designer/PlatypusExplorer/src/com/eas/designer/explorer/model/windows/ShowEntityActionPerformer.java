@@ -15,7 +15,7 @@ import javax.swing.AbstractAction;
  *
  * @author mg
  */
-public class ShowEntityActionPerformer<E extends Entity<?, SqlQuery, E>, MV extends ModelView<E, ?, ?>> extends AbstractAction {
+public class ShowEntityActionPerformer<E extends Entity<?, SqlQuery, E>, MV extends ModelView<E, ?>> extends AbstractAction {
 
     protected MV mView;
 

@@ -18,7 +18,6 @@ import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.selectors.ModelElementSelector;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
@@ -162,7 +161,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity entity = model.getEntityById(element.getEntityId());
-                    if (entity != null && (entity.isQuery() || entity instanceof ApplicationParametersEntity)) {
+                    if (entity != null && entity.isQuery()) {
                         Font fieldsFont = DatamodelDesignUtils.getFieldsFont();
                         int iconTextGap = 4;
                         String entityText = entity.getName() != null && !entity.getName().isEmpty() ? entity.getName() : entity.getTitle();
@@ -172,10 +171,6 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                             if (field != null) {
                                 element.setField(field);
                             }
-                        }
-                        if (entity instanceof ApplicationParametersEntity) {
-                            entityText = ApplicationDbModel.PARAMETERS_SCRIPT_NAME;// since we prefer names instead of titles
-                            //entityText = DatamodelDesignUtils.getLocalizedString("Parameters");
                         }
                         if (field != null) {
                             String fieldDescription = field.getDescription();

@@ -19,7 +19,7 @@ import com.eas.client.model.Model;
  * @param <E>
  * @param <M>
  */
-public class NewEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends DeleteEntityEdit<E, M> {
+public class NewEntityEdit<E extends Entity<?, SqlQuery, E>, M extends Model<E, SqlQuery>> extends DeleteEntityEdit<E, M> {
 
     public NewEntityEdit(M aModel, E aEntity) {
         super(aModel, aEntity);

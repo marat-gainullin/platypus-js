@@ -124,9 +124,9 @@ public class JsDoc {
          *
          * @rolesAllowed admin, manager
          */
-        public static final String ROLES_ALLOWED_TAG = "@rolesAllowed";
-        public static final String ROLES_ALLOWED_READ_TAG = "@rolesAllowedRead";
-        public static final String ROLES_ALLOWED_WRITE_TAG = "@rolesAllowedWrite";
+        public static final String ROLES_ALLOWED_TAG = "@rolesallowed";
+        public static final String ROLES_ALLOWED_READ_TAG = "@rolesallowedread";
+        public static final String ROLES_ALLOWED_WRITE_TAG = "@rolesallowedwrite";
         /**
          * Annotation marks query entity undelying table readonly for changes
          * made on entity.
@@ -201,13 +201,13 @@ public class JsDoc {
         }
 
         private boolean isParametrized() {
-            return ROLES_ALLOWED_TAG.equals(name)
-                    || ROLES_ALLOWED_READ_TAG.equals(name)
-                    || ROLES_ALLOWED_WRITE_TAG.equals(name)
-                    || READONLY_TAG.equals(name)
-                    || WRITABLE_TAG.equals(name)
-                    || ACCEPTED_PROTOCOL_TAG.equals(name)
-                    || VALIDATOR_TAG.equals(name);
+            return ROLES_ALLOWED_TAG.equalsIgnoreCase(name)
+                    || ROLES_ALLOWED_READ_TAG.equalsIgnoreCase(name)
+                    || ROLES_ALLOWED_WRITE_TAG.equalsIgnoreCase(name)
+                    || READONLY_TAG.equalsIgnoreCase(name)
+                    || WRITABLE_TAG.equalsIgnoreCase(name)
+                    || ACCEPTED_PROTOCOL_TAG.equalsIgnoreCase(name)
+                    || VALIDATOR_TAG.equalsIgnoreCase(name);
         }
 
         private List<String> parseParams() {

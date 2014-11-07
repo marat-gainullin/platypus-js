@@ -11,7 +11,6 @@ package com.eas.client.model.gui.view;
 
 import com.eas.client.model.gui.view.model.ModelView;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
@@ -21,9 +20,9 @@ import javax.swing.TransferHandler;
  */
 public class ModelViewDragHandler extends TransferHandler {
 
-    protected ModelView<?, ?, ?> mView = null;
+    protected ModelView<?, ?> mView = null;
 
-    public ModelViewDragHandler(ModelView<?, ?, ?> aModelView) {
+    public ModelViewDragHandler(ModelView<?, ?> aModelView) {
         super();
         mView = aModelView;
     }

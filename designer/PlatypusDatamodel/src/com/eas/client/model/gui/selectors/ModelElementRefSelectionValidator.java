@@ -8,7 +8,6 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.*;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.query.QueryParametersEntity;
 import java.util.Collection;
@@ -37,7 +36,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
         validator = aValidator;
     }
 
-    protected E getEntityByField(Model<E, ?, ?> aModel, Field aField) {
+    protected E getEntityByField(Model<E, ?> aModel, Field aField) {
         try {
             for (E e : aModel.getAllEntities().values()) {
                 if (e.getFields().toCollection().contains(aField)) {
@@ -75,7 +74,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                 }
                 break;
             case ModelElementSelector.STRICT_DATASOURCE_PARAMETER_SELECTION_SUBJECT:
-                if (aParams != null && !aParams.isEmpty() && !(aParams.get(0).entity instanceof ApplicationParametersEntity) && !(aParams.get(0).entity instanceof QueryParametersEntity)) {
+                if (aParams != null && !aParams.isEmpty() && !(aParams.get(0).entity instanceof QueryParametersEntity)) {
                     okAction.setEnabled(true);
                     dmRef.setField(false);
                     dmRef.setField(aParams.get(0).parameter);

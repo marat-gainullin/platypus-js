@@ -44,9 +44,9 @@ import javax.swing.JTextField;
  */
 public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfoVisitor {
 
-    protected ApplicationModel<?, ?, ?> model;
+    protected ApplicationModel<?, ?> model;
 
-    public DbSwingFactory(ApplicationModel<?, ?, ?> aModel) {
+    public DbSwingFactory(ApplicationModel<?, ?> aModel) {
         super();
         model = aModel;
     }

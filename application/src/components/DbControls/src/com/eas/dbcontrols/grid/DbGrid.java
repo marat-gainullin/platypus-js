@@ -2520,15 +2520,15 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return style;
     }
 
-    protected ApplicationModel<?, ?, ?> model;
+    protected ApplicationModel<?, ?> model;
 
     @Override
-    public ApplicationModel<?, ?, ?> getModel() {
+    public ApplicationModel<?, ?> getModel() {
         return model;
     }
 
     @Override
-    public void setModel(ApplicationModel<?, ?, ?> aValue) {
+    public void setModel(ApplicationModel<?, ?> aValue) {
         model = aValue;
     }
 

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -35,15 +36,27 @@ public class Utils {
 		}-*/;
 		
 		public final native void inject(String aName, JavaScriptObject aValue)/*-{
-		if (aName != null) {
-			Object.defineProperty(this, aName, {
-				get : function() {
-					return aValue;
-				}
-			});
-		}
-	}-*/;
+			if (aName != null) {
+				Object.defineProperty(this, aName, {
+					get : function() {
+						return aValue;
+					}
+				});
+			}
+		}-*/;
 
+		public final native boolean isArray()/*-{
+			return Array.isArray(this);
+		}-*/;
+		
+		public final native boolean getBoolean(String aName)/*-{
+			return !!this[aName];
+		}-*/;
+		
+		public final native JsArrayString keys()/*-{
+			return Object.keys(this);
+		}-*/;
+	
 	}
 
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{

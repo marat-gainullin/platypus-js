@@ -2,43 +2,25 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid;
+package com.eas.designer.application.query.result;
 
-import com.bearsoft.rowset.events.RowChangeEvent;
-import com.bearsoft.rowset.events.RowsetDeleteEvent;
-import com.bearsoft.rowset.events.RowsetFilterEvent;
-import com.bearsoft.rowset.events.RowsetInsertEvent;
-import com.bearsoft.rowset.events.RowsetListener;
-import com.bearsoft.rowset.events.RowsetNetErrorEvent;
-import com.bearsoft.rowset.events.RowsetNextPageEvent;
-import com.bearsoft.rowset.events.RowsetRequeryEvent;
-import com.bearsoft.rowset.events.RowsetRollbackEvent;
-import com.bearsoft.rowset.events.RowsetSaveEvent;
-import com.bearsoft.rowset.events.RowsetScrollEvent;
-import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.ModelElementRef;
-import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.model.query.QueryEntity;
 import com.eas.dbcontrols.DbControlDesignInfo;
 import com.eas.dbcontrols.DbControlPanel;
 import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.check.DbCheck;
-import com.eas.dbcontrols.combo.DbCombo;
-import com.eas.dbcontrols.combo.DbComboDesignInfo;
 import com.eas.dbcontrols.date.DbDate;
 import com.eas.dbcontrols.date.DbDateDesignInfo;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.EventObject;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,20 +40,20 @@ import javax.swing.table.TableModel;
  *
  * @author mg
  */
-public class EntityFieldsGrid extends JTable implements RowsetListener {
+public class EntityFieldsGrid extends JTable {
 
     protected static final int HEADER_COLUMN_INDEX = 0;
     protected static final int LABEL_COLUMN_INDEX = 1;
     protected static final int VALUE_COLUMN_INDEX = 2;
-    protected ApplicationEntity<?, ?, ?> entity = null;
+    protected QueryEntity entity;
     protected String labelTitle = "Characteristic";
     protected String valueTitle = "Value";
     protected List<ScalarDbControl> controls = new ArrayList<>();
     protected Set<String> hidingFields = new HashSet<>();
-    protected boolean filterPrimaryKeys = false;
-    protected boolean filterForeignKeys = false;
+    protected boolean filterPrimaryKeys;
+    protected boolean filterForeignKeys;
     protected boolean editable = true;
-    protected String booleanFieldsMask = null;
+    protected String booleanFieldsMask;
 
     public boolean isFilterForeignKeys() {
         return filterForeignKeys;
@@ -97,7 +79,7 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
         booleanFieldsMask = aValue;
     }
 
-    private Fields fieldsByEntity(ApplicationEntity<?, ?, ?> entity) {
+    private Fields fieldsByEntity(QueryEntity entity) {
         Fields fields = filterFields(entity.getFields());
         assert fields != null;
         return fields;
@@ -127,163 +109,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                 ((DbControlPanel) control).setEditable(aValue);
             }
         }
-    }
-
-    private void unbind() throws Exception {
-        if (entity != null && entity.getRowset() != null) {
-            entity.getRowset().removeRowsetListener(this);
-        }
-        assert controls != null;
-        for (int i = 0; i < controls.size(); i++) {
-            ScalarDbControl control = controls.get(i);
-            control.setModel(null);
-        }
-    }
-
-    @Override
-    public boolean willScroll(RowsetScrollEvent rse) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public boolean willFilter(RowsetFilterEvent rfe) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public boolean willRequery(RowsetRequeryEvent rre) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public boolean willNextPageFetch(RowsetNextPageEvent rnpe) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public boolean willInsertRow(RowsetInsertEvent rie) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public boolean willChangeRow(RowChangeEvent rce) {
-        // stop editing must not go here
-        // see comment in rowChanged() handler.
-        return true;
-    }
-
-    @Override
-    public boolean willDeleteRow(RowsetDeleteEvent rde) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public boolean willSort(RowsetSortEvent rse) {
-        stopEditing();
-        return true;
-    }
-
-    @Override
-    public void rowsetFiltered(RowsetFilterEvent rfe) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void beforeRequery(RowsetRequeryEvent rre) {
-    }
-
-    @Override
-    public void rowsetNetError(RowsetNetErrorEvent rnee) {
-    }
-
-    @Override
-    public void rowsetRequeried(RowsetRequeryEvent rre) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void rowsetNextPageFetched(RowsetNextPageEvent rnpe) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void rowsetSaved(RowsetSaveEvent rse) {
-        stopEditing();
-    }
-
-    @Override
-    public void rowsetRolledback(RowsetRollbackEvent event) {
-        stopEditing();
-    }
-
-    @Override
-    public void rowsetScrolled(RowsetScrollEvent rse) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void rowsetSorted(RowsetSortEvent rse) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void rowInserted(RowsetInsertEvent rie) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void rowChanged(RowChangeEvent rce) {
-        // In this grid all edited cells have their's own db-controls,
-        // configured as STANDALONE controls. So, each control is able to work
-        // with rowset by itself.
-        // Thus, any row's change is processed in a standard way. And we don't need
-        // to stop editing. But event must be propagated properly. 
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    @Override
-    public void rowDeleted(RowsetDeleteEvent rde) {
-        stopEditing();
-        ((EntityFieldsModel) getModel()).fireDataChanged();
-    }
-
-    private Map<String, DbComboDesignInfo> gatherDirsConfig(ApplicationModel<?, ?, ?> aModel) throws Exception {
-        Map<String, DbComboDesignInfo> infos = new HashMap<>();
-        for (ApplicationEntity<?, ?, ?> appEntity : aModel.getEntities().values()) {
-            if (!(appEntity instanceof ApplicationParametersEntity)) {
-                Fields qFields = appEntity.getQuery().getFields();
-                for (int i = 1; i <= qFields.getFieldsCount(); i++) {
-                    Field field = qFields.get(i);
-                    if (field.isPk()) {
-                        DbComboDesignInfo info = new DbComboDesignInfo();
-                        infos.put(field.getTableName().toLowerCase(), info);
-                        info.setList(true);
-                        info.setValueField(new ModelElementRef(field, true, appEntity.getEntityId()));
-                    }
-                }
-                for (int i = 1; i <= qFields.getFieldsCount(); i++) {
-                    Field field = qFields.get(i);
-                    if (!field.isPk() && String.class.getName().equals(field.getTypeInfo().getJavaClassName())) {
-                        DbComboDesignInfo info = infos.get(field.getTableName().toLowerCase());
-                        info.setDisplayField(new ModelElementRef(field, true, appEntity.getEntityId()));
-                        break;
-                    }
-                }
-            }
-        }
-        return infos;
     }
 
     protected class EntityFieldsModel implements TableModel {
@@ -465,20 +290,10 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
         }
     }
 
-    public void setQuery(ApplicationEntity<?, ?, ?> aValue) throws Exception {
-        if (aValue != null) {
-            setEntity(aValue);
-        } else {
-            unbind();
-        }
-    }
-
-    public void setEntity(ApplicationEntity<?, ?, ?> aEntity) throws Exception {
+    public void setEntity(QueryEntity aEntity) throws Exception {
         entity = aEntity;
         if (entity != null) {
             fillDbControls();
-        } else {
-            unbind();
         }
     }
 
@@ -529,7 +344,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
         controls.clear();
         // fill in the controls
         if (entity != null) {
-            Map<String, DbComboDesignInfo> configsByTableName = gatherDirsConfig(entity.getModel());
             Fields fields = fieldsByEntity(entity);
             int cCount = fields.getFieldsCount();
             for (int i = 0; i < cCount; i++) {
@@ -540,26 +354,14 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                 Class<?>[] compatibleControlsClasses = DbControlsUtils.getCompatibleControls(field.getTypeInfo().getSqlType());
                 if (compatibleControlsClasses != null && compatibleControlsClasses.length > 0) {
                     Class<?> lControlClass = compatibleControlsClasses[0];
-                    String referencingTableName = null;
-                    if (field.isFk() && field.getFk() != null && field.getFk().getReferee() != null
-                            && field.getFk().getReferee().getTable() != null) {
-                        referencingTableName = field.getFk().getReferee().getTable().toLowerCase();
-                        if (configsByTableName.containsKey(referencingTableName)) {
-                            lControlClass = DbCombo.class;
-                        }
-                    } else if (booleanFieldsMask != null && Pattern.matches(booleanFieldsMask, field.getName())) {
+                    if (booleanFieldsMask != null && Pattern.matches(booleanFieldsMask, field.getName())) {
                         lControlClass = DbCheck.class;
                     }
                     if (lControlClass != null) {
                         Class<?> infoClass = DbControlsUtils.getDesignInfoClass(lControlClass);
                         if (infoClass != null) {
                             Logger.getLogger(EntityFieldsGrid.class.getName()).log(Level.FINEST, "Creating control for parameter {0} of type {1} with control class {2}", new Object[]{field.getName(), field.getTypeInfo().getSqlTypeName(), lControlClass.getName()});
-                            DbControlDesignInfo cdi = null;
-                            if (field.isFk() && configsByTableName.containsKey(referencingTableName)) {
-                                cdi = configsByTableName.get(referencingTableName);
-                            } else {
-                                cdi = (DbControlDesignInfo) infoClass.newInstance();
-                            }
+                            DbControlDesignInfo cdi = (DbControlDesignInfo) infoClass.newInstance();
                             cdi.setDatamodelElement(ref);
                             if (cdi instanceof DbDateDesignInfo) {
                                 DbDateDesignInfo dateDesignInfo = (DbDateDesignInfo) cdi;
@@ -573,7 +375,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                             cdi.accept(factory);
                             assert factory.getComp() instanceof ScalarDbControl;
                             ScalarDbControl control = (ScalarDbControl) factory.getComp();
-                            control.setModel(entity.getModel());
                             control.configure();
                             control.setBorderless(true);
 
@@ -597,9 +398,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                     }
                 }
             }
-        }
-        if (entity != null && entity.getRowset() != null) {
-            entity.getRowset().addRowsetListener(this);
         }
         // notify all of change
         ((EntityFieldsModel) getModel()).fireDataChanged();

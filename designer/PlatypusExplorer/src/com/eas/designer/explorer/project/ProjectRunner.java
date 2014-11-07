@@ -179,9 +179,14 @@ public class ProjectRunner {
                 startJs = appSrcDir.createData(PlatypusProjectSettings.START_JS_FILE_NAME);
             }
             AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
-            String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION)?"show":"execute";
-            String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName, startMethod);
-            FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+            if (startFiles != null) {
+                String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "        var m = new " + appElementName+"();\n", "        m." + startMethod+"();\n");
+                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+            } else if (appElementName.toLowerCase().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "", "");
+                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+            }
         } else {
             throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set"));
         }
@@ -267,7 +272,7 @@ public class ProjectRunner {
 
                 String classPath = getExtendedClasspath(getApiClasspath(getExecutablePath(binDir)));
                 arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-                arguments.add("\"" + classPath + "\"");
+                arguments.add(classPath);
 
                 arguments.add(PlatypusClientApplication.class.getName());
 
@@ -345,6 +350,22 @@ public class ProjectRunner {
                 for (String argument : arguments) {
                     processBuilder = processBuilder.addArgument(argument);
                 }
+
+//                processBuilder = processBuilder
+//                        .addArgument("-D.level=SEVERE")
+//                        .addArgument("-Dhandlers=java.util.logging.ConsoleHandler")
+//                        .addArgument("-Djava.util.logging.ConsoleHandler.level=INFO")
+//                        .addArgument("-DApplication.level=INFO")
+//                        .addArgument("-Djava.util.logging.ConsoleHandler.formatter=com.eas.util.logging.PlatypusFormatter")
+//                        .addArgument("-Djava.util.logging.config.class=com.eas.util.logging.LoggersConfig")
+//                        .addArgument("-cp")
+//                        .addArgument("\"/home/user/workspace/platypus js/application/bin/Application.jar:/home/user/workspace/platypus js/application/bin/Application.jar:/home/user/workspace/platypus js/application/api:/home/user/workspace/platypus js/application/ext/*:/home/user/workspace/platypus js/application/ext\"")
+//                        .addArgument("com.eas.client.application.PlatypusClientApplication")
+//                        .addArgument("-appelement")
+//                        .addArgument("\"start.js\"")
+//                        .addArgument("-url")
+//                        .addArgument("file:/home/user/workspace/platypus%20tests/")
+//                        ;
                 ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
@@ -404,6 +425,7 @@ public class ProjectRunner {
     public static String getCommandLineStr(List<String> arguments) {
         StringBuilder sb = new StringBuilder(JVM_RUN_COMMAND_NAME);
         arguments.stream().forEach((argument) -> {
+            argument = escapeString(argument);
             sb.append(" "); //NOI18N
             sb.append(argument);
         });
@@ -447,9 +469,9 @@ public class ProjectRunner {
         File extDir = getPlatformExtDirectory();
         if (extDir.exists() && extDir.isDirectory()) {
             classpathStr.append(File.pathSeparator);
-            classpathStr.append(extDir);
-            classpathStr.append(File.pathSeparator);
             classpathStr.append(String.format("%s/*", extDir)); //NOI18N
+            classpathStr.append(File.pathSeparator);
+            classpathStr.append(extDir);
         }
         return classpathStr.toString();
     }
@@ -508,4 +530,35 @@ public class ProjectRunner {
     private static String getDevPlatypusServerUrl(PlatypusProjectSettings pps) {
         return String.format("%s://%s:%s", PlatypusServer.DEFAULT_PROTOCOL, LOCAL_HOSTNAME, pps.getServerPort()); //NOI18N
     }
+
+    private static String escapeString(String s) {
+        if (s.length() == 0) {
+            return "\"\""; // NOI18N
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        boolean hasSpace = false;
+        final int slen = s.length();
+        char c;
+
+        for (int i = 0; i < slen; i++) {
+            c = s.charAt(i);
+
+            if (Character.isWhitespace(c)) {
+                hasSpace = true;
+                sb.append(c);
+
+                continue;
+            }
+            sb.append(c);
+        }
+
+        if (hasSpace) {
+            sb.insert(0, '"'); // NOI18N
+            sb.append('"'); // NOI18N
+        }
+        return sb.toString();
+    }
+
 }

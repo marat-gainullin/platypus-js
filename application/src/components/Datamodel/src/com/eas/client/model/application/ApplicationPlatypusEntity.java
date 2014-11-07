@@ -7,6 +7,7 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
+import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -31,6 +32,11 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
 
     public ApplicationPlatypusEntity(String aQueryName) {
         super(aQueryName);
+    }
+
+    @Override
+    public void accept(ModelVisitor<ApplicationPlatypusEntity, ApplicationPlatypusModel> visitor) {
+        visitor.visit(this);
     }
 
     private static final String ENQUEUE_UPDATE_JSDOC = ""

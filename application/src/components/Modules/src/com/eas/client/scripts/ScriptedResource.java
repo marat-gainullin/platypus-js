@@ -12,6 +12,7 @@ import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import com.eas.util.FileUtils;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -270,43 +271,50 @@ public class ScriptedResource {
             for (String scriptOrModuleName : aScriptsNames) {
                 required.add(scriptOrModuleName);
                 app.getModules().getModule(scriptOrModuleName, (ModuleStructure structure) -> {
-                    AppElementFiles files = structure.getParts();
-                    File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                    if (structure != null) {
+                        AppElementFiles files = structure.getParts();
+                        File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
 
-                    RequireProcess scriptProcess = new RequireProcess(3, (Void v) -> {
-                        try {
-                            URL sourceUrl = sourceFile.toURI().toURL();
-                            ScriptUtils.exec(sourceUrl);
-                            if (files.isModule()) {
-                                JSObject jsConstr = ScriptUtils.lookupInGlobal(scriptOrModuleName);
-                                if (jsConstr instanceof JSObjectFacade) {
-                                    jsConstr = ((JSObjectFacade) jsConstr).getDelegate();
+                        RequireProcess scriptProcess = new RequireProcess(3, (Void v) -> {
+                            try {
+                                URL sourceUrl = sourceFile.toURI().toURL();
+                                ScriptUtils.exec(sourceUrl);
+                                try {
+                                    scriptsProceses.complete(null, null);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                                 }
-                                ScriptUtils.putInGlobal(scriptOrModuleName, new LockProviderConstructor(jsConstr));
+                            } catch (Exception ex) {
+                                scriptsProceses.complete(null, ex);
+                            }
+                        }, (Exception ex) -> {
+                            scriptsProceses.complete(null, ex);
+                        });
+                        if (files.isModule()) {
+                            try {
+                                qRequire(structure.getQueryDependencies().toArray(new String[]{}), (Void v) -> {
+                                    scriptProcess.complete(null, null);
+                                }, (Exception ex) -> {
+                                    scriptProcess.complete(null, ex);
+                                });
+                            } catch (Exception ex) {
+                                scriptProcess.complete(null, ex);
                             }
                             try {
-                                scriptsProceses.complete(null, null);
+                                sRequire(structure.getServerDependencies().toArray(new String[]{}), (Void v) -> {
+                                    scriptProcess.complete(null, null);
+                                }, (Exception ex) -> {
+                                    scriptProcess.complete(null, ex);
+                                });
                             } catch (Exception ex) {
-                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        } catch (Exception ex) {
-                            scriptsProceses.complete(null, ex);
-                        }
-                    }, (Exception ex) -> {
-                        scriptsProceses.complete(null, ex);
-                    });
-                    if (files.isModule()) {
-                        try {
-                            qRequire(structure.getQueryDependencies().toArray(new String[]{}), (Void v) -> {
-                                scriptProcess.complete(null, null);
-                            }, (Exception ex) -> {
                                 scriptProcess.complete(null, ex);
-                            });
-                        } catch (Exception ex) {
-                            scriptProcess.complete(null, ex);
+                            }
+                        } else {
+                            scriptProcess.complete(null, null);// instead of qRequire
+                            scriptProcess.complete(null, null);// instead of sRequire
                         }
                         try {
-                            sRequire(structure.getServerDependencies().toArray(new String[]{}), (Void v) -> {
+                            _require(structure.getClientDependencies().toArray(new String[]{}), required, (Void v) -> {
                                 scriptProcess.complete(null, null);
                             }, (Exception ex) -> {
                                 scriptProcess.complete(null, ex);
@@ -315,17 +323,7 @@ public class ScriptedResource {
                             scriptProcess.complete(null, ex);
                         }
                     } else {
-                        scriptProcess.complete(null, null);// instead of qRequire
-                        scriptProcess.complete(null, null);// instead of sRequire
-                    }
-                    try {
-                        _require(structure.getClientDependencies().toArray(new String[]{}), required, (Void v) -> {
-                            scriptProcess.complete(null, null);
-                        }, (Exception ex) -> {
-                            scriptProcess.complete(null, ex);
-                        });
-                    } catch (Exception ex) {
-                        scriptProcess.complete(null, ex);
+                        scriptsProceses.complete(null, new FileNotFoundException(scriptOrModuleName));
                     }
                 }, (Exception ex) -> {
                     scriptsProceses.complete(null, ex);

@@ -6,15 +6,10 @@ package com.eas.designer.application.module.nodes;
 
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationDbParametersEntity;
 import com.eas.designer.datamodel.nodes.EntityNode;
-import com.eas.designer.datamodel.nodes.FieldsOrderSupport;
 import com.eas.designer.datamodel.nodes.ModelNodeChildren;
-import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;
-import org.openide.nodes.Node.Property;
-import org.openide.nodes.Node.PropertySet;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
@@ -37,18 +32,8 @@ public class ApplicationModelNodeChildren extends ModelNodeChildren<ApplicationD
     }
 
     protected ApplicationEntityNode newNodeInstance(ApplicationDbEntity key) throws Exception {
-        ApplicationEntityNode node;
-        FieldsOrderSupport fos;
-        Lookup lkp;
-        if (key instanceof ApplicationDbParametersEntity) {
-            fos = new FieldsOrderSupport();
-            lkp = Lookups.fixed(key, fos);
-            node = new ApplicationEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
-            fos.setEntityNode(node);
-        } else {
-            lkp = Lookups.fixed(key);
-            node = new ApplicationEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
-        }
+        Lookup lkp = Lookups.fixed(key);
+        ApplicationEntityNode node = new ApplicationEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
         return node;
     }
 

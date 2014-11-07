@@ -408,7 +408,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				        aThis,
 				        aOnRender,
 				        JsEvents.publishOnRenderEvent(aThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
-				                Entity.publishRowFacade(renderedRow, aRowsEntity), cell));
+				                Entity.publishRowFacade(renderedRow, aRowsEntity, null), cell));
 				return cell;
 			}
 		}

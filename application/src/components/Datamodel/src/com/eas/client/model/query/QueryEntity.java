@@ -8,7 +8,6 @@ import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.model.visitors.QueryModelVisitor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +30,11 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
 
     public QueryEntity(String aQueryName) {
         super(aQueryName);
+    }
+
+    @Override
+    public void accept(ModelVisitor<QueryEntity, QueryModel> visitor) {
+        visitor.visit(this);
     }
 
     @Override
@@ -62,13 +66,6 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
             fullTableName = getTableSchemaName() + "." + fullTableName;
         }
         return fullTableName;
-    }
-
-    @Override
-    public void accept(ModelVisitor<QueryEntity> visitor) {
-        if (visitor instanceof QueryModelVisitor) {
-            ((QueryModelVisitor) visitor).visit(this);
-        }
     }
 
     @Override

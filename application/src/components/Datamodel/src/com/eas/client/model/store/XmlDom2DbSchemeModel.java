@@ -7,7 +7,7 @@ package com.eas.client.model.store;
 import com.eas.client.DatabasesClient;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.model.visitors.DbSchemeModelVisitor;
+import com.eas.client.model.visitors.ModelVisitor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
  *
  * @author mg
  */
-public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity> implements DbSchemeModelVisitor{
+public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity, DbSchemeModel> implements ModelVisitor<FieldsEntity, DbSchemeModel>{
 
     public XmlDom2DbSchemeModel(Document aDoc) {
         super();

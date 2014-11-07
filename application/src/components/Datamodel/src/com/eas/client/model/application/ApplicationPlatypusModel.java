@@ -6,6 +6,8 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.changes.Change;
 import com.eas.client.cache.ServerDataStorage;
+import com.eas.client.model.Model;
+import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;
@@ -19,20 +21,25 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatypusEntity, ApplicationPlatypusParametersEntity, PlatypusQuery> {
+public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatypusEntity, PlatypusQuery> {
 
     protected List<Change> changeLog = new ArrayList<>();
     protected ServerDataStorage serverProxy;
 
     protected ApplicationPlatypusModel(QueriesProxy<PlatypusQuery> aQueries) {
         super(aQueries);
-        parametersEntity = new ApplicationPlatypusParametersEntity(this);
     }
 
     public ApplicationPlatypusModel(ServerDataStorage aServerProxy, QueriesProxy<PlatypusQuery> aQueries) {
         this(aQueries);
         serverProxy = aServerProxy;
     }
+
+    @Override
+    public <M extends Model<ApplicationPlatypusEntity, ?>> void accept(ModelVisitor<ApplicationPlatypusEntity, M> visitor) {
+        visitor.visit((M)this);
+    }
+
 
     public ServerDataStorage getServerProxy() {
         return serverProxy;
@@ -47,17 +54,6 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     public void addEntity(ApplicationPlatypusEntity aEntity) {
         aEntity.setModel(this);
         super.addEntity(aEntity);
-    }
-
-    @Override
-    public void setParametersEntity(ApplicationPlatypusParametersEntity aParamsEntity) {
-        if (parametersEntity != null) {
-            parametersEntity.setModel(null);
-        }
-        super.setParametersEntity(aParamsEntity);
-        if (parametersEntity != null) {
-            parametersEntity.setModel(this);
-        }
     }
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})

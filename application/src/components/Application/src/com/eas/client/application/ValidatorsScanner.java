@@ -44,7 +44,7 @@ public class ValidatorsScanner implements ApplicationSourceIndexer.ScanCallback 
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     annotations.stream().forEach((JsDoc.Tag tag) -> {
-                        if (JsDoc.Tag.VALIDATOR_TAG.equals(tag.getName())) {
+                        if (JsDoc.Tag.VALIDATOR_TAG.equalsIgnoreCase(tag.getName())) {
                             validators.put(aAppElementName, tag.getParams());
                             Logger.getLogger(ValidatorsScanner.class.getName()).log(Level.INFO, "Validator \"{0}\" on datasources {1} has been registered", new Object[]{aAppElementName, tag.getParams().toString()});
                         }

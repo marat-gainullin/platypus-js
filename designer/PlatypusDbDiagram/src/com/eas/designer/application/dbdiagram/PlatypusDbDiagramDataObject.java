@@ -6,6 +6,7 @@ package com.eas.designer.application.dbdiagram;
 
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.dbdiagram.nodes.TableEntityNode;
@@ -118,7 +119,7 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
 
     public void saveModel() throws Exception {
         DbSchemeModel lModel = getModel();
-        Document doc = lModel.toXML();
+        Document doc = DbSchemeModel2XmlDom.transform(lModel);
         String sData = XmlDom2String.transform(doc);
         FileObject fo = getPrimaryFile();
         try (OutputStream out = fo.getOutputStream()) {

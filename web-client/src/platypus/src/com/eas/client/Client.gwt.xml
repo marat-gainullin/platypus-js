@@ -14,13 +14,13 @@
 		<when-type-is class="com.eas.client.xhr.UrlQueryProcessor"/>
 	</replace-with>
 	
-	<!-- Chrome bug 266971 needs a workaround-->
+	<!-- Chrome bug 266971 needs a workaround>
 	<replace-with class="com.eas.client.xhr.impl.ChromeUrlQueryProcessor">
 	  <when-type-is class="com.eas.client.xhr.UrlQueryProcessor" />
 	  <any>
 	    <when-property-is name="user.agent" value="safari"/>
 	  </any>
-	</replace-with>
+	</replace-with-->
 	
     <source path=""/>
 </module>

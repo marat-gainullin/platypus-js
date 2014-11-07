@@ -180,7 +180,8 @@ public class ParametersRowset extends Rowset {
 	}
 
 	@Override
-	public void insert(Object... initingValues) throws RowsetException {
+	public Row insert(Object... initingValues) throws RowsetException {
+		return null;
 	}
 
 	@Override

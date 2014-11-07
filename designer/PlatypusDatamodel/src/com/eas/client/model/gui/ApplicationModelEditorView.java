@@ -5,33 +5,26 @@
  */
 package com.eas.client.model.gui;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.selectors.AppElementSelectorCallback;
 import com.eas.client.model.gui.selectors.SelectedField;
 import com.eas.client.model.gui.selectors.SelectedParameter;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.ModelSelectionListener;
-import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.client.utils.scalableui.ScaleListener;
 import com.eas.gui.JDropDownButton;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.beans.Customizer;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -119,7 +112,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
     public ApplicationModelEditorView(TablesSelectorCallback aTablesSelectorCallback, AppElementSelectorCallback aAppElementSelector) throws Exception {
         super();
         // create views
-        modelView = new ApplicationModelView(aTablesSelectorCallback, aAppElementSelector, getActionMap().get(EditAction.class.getSimpleName()));
+        modelView = new ApplicationModelView(aTablesSelectorCallback, aAppElementSelector);
         initComponents();
 
         // incorporate views
@@ -488,61 +481,6 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
 
     public String getLocalizedString(String aKey) {
         return DatamodelDesignUtils.getLocalizedString(aKey);
-    }
-
-    public class EditAction extends DmAction {
-
-        public EditAction() {
-            super();
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (isEnabled()) {
-                if (e.getSource() instanceof Component) {
-                    Component cSource = (Component) e.getSource();
-                    EntityView<ApplicationDbEntity> eView = DatamodelDesignUtils.lookupEntityView(cSource);
-                    if (eView != null) {
-                        try {
-//                            fieldsView.setEntity((ApplicationDbEntity) eView.getEntity());
-//                            focusFieldsView();
-                        } catch (Exception ex) {
-                            Logger.getLogger(ApplicationModelEditorView.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }
-        }
-
-        @Override
-        public boolean isEnabled() {
-            if (modelView.isAnySelectedEntities()) {
-                ApplicationDbEntity entity = modelView.getSelectedEntities().iterator().next();
-                return entity instanceof ApplicationParametersEntity;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public String getDmActionText() {
-            return DatamodelDesignUtils.getLocalizedString(EditAction.class.getSimpleName());
-        }
-
-        @Override
-        public String getDmActionHint() {
-            return DatamodelDesignUtils.getLocalizedString(EditAction.class.getSimpleName() + ".hint");
-        }
-
-        @Override
-        public Icon getDmActionSmallIcon() {
-            return IconCache.getIcon("edit.png");
-        }
-
-        @Override
-        public KeyStroke getDmActionAccelerator() {
-            return null;
-        }
     }
     
 }

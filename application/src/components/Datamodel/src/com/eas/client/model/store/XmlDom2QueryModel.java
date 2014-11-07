@@ -4,14 +4,26 @@
  */
 package com.eas.client.model.store;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameter;
+import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
+import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.visitors.QueryModelVisitor;
 import com.eas.client.queries.QueriesProxy;
+import com.eas.client.queries.Query;
+import com.eas.xml.dom.XmlDomUtils;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -19,13 +31,13 @@ import org.w3c.dom.Element;
  *
  * @author mg
  */
-public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements QueryModelVisitor{
-    
+public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> implements QueryModelVisitor {
+
     public XmlDom2QueryModel(Document aDoc) {
         super();
         doc = aDoc;
     }
-    
+
     public XmlDom2QueryModel(Element aModelElement) {
         super();
         modelElement = aModelElement;
@@ -42,16 +54,111 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements Quer
         model.accept(new XmlDom2QueryModel(aModelElement));
         return model;
     }
-    
+
     @Override
-    public void visit(QueryModel aModel) {
-        readModel(aModel);
-        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
-            String dbIdAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
-            if (dbIdAttr != null && !"null".equals(dbIdAttr)) {
-                aModel.setDbId(dbIdAttr);
+    protected void readEntities(QueryModel aModel) {
+        Element paramsEl = getElementByTagName(currentNode, Model2XmlDom.PARAMETERS_TAG_NAME);
+        if (paramsEl != null) {
+            Parameters parameters = aModel.getParameters();
+            List<Element> pnl = XmlDomUtils.elementsByTagName(paramsEl, Model2XmlDom.PARAMETER_TAG_NAME);
+            if (pnl != null && parameters != null) {
+                Element lcurrentNode = currentNode;
+                try {
+                    Set<String> names = new HashSet<>();
+                    pnl.stream().forEach((Element pnl1) -> {
+                        currentNode = pnl1;
+                        Parameter param = new Parameter();
+                        visit(param);
+                        String paramName = param.getName();
+                        if (paramName != null && !paramName.isEmpty() && !names.contains(paramName)) {
+                            names.add(paramName);
+                            parameters.add(param);
+                        }
+                    });
+                } finally {
+                    currentNode = lcurrentNode;
+                }
             }
         }
+        Element paramsEntityEl = getElementByTagName(currentNode, Model2XmlDom.PARAMETERS_ENTITY_TAG_NAME);
+        if (paramsEntityEl != null) {
+            QueryEntity pe = aModel.getParametersEntity();
+            if (pe != null) {
+                Element lcurrentNode = currentNode;
+                try {
+                    currentNode = paramsEntityEl;
+                    pe.accept(this);
+                } finally {
+                    currentNode = lcurrentNode;
+                }
+            }
+        }
+        super.readEntities(aModel);
+    }
+
+    @Override
+    protected void resolveRelation(Long leftEntityId, String leftParameterName, Relation<QueryEntity> relation, String leftFieldName, Long rightEntityId, String rightParameterName, String rightFieldName) {
+        super.resolveRelation(leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
+        try {
+            if (QueryModel.PARAMETERS_ENTITY_ID == leftEntityId) {
+                QueryParametersEntity lEntity = currentModel.getParametersEntity();
+                if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                    Fields fields = lEntity.getFields();
+                    if (fields != null) {
+                        relation.setLeftField(fields.get(leftParameterName));
+                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                        relation.setLeftField(new Parameter(leftParameterName));
+                    }
+                } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                    Fields fields = lEntity.getFields();
+                    if (fields != null) {
+                        relation.setLeftField(fields.get(leftFieldName));
+                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                        relation.setLeftField(new Parameter(leftFieldName));
+                    }
+                }
+                if (lEntity != null) {
+                    relation.setLeftEntity(lEntity);
+                    lEntity.addOutRelation(relation);
+                }
+            }
+            if (QueryModel.PARAMETERS_ENTITY_ID == rightEntityId) {
+                QueryParametersEntity rEntity = currentModel.getParametersEntity();
+                if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                    Fields fields = rEntity.getFields();
+                    if (fields != null) {
+                        relation.setRightField(fields.get(rightParameterName));
+                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                        relation.setRightField(new Parameter(rightParameterName));
+                    }
+                } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                    Fields fields = rEntity.getFields();
+                    if (fields != null) {
+                        relation.setRightField(fields.get(rightFieldName));
+                    } else if (!currentModel.isRelationsAgressiveCheck()) {
+                        relation.setRightField(new Parameter(rightFieldName));
+                    }
+                }
+                if (rEntity != null) {
+                    relation.setRightEntity(rEntity);
+                    rEntity.addInRelation(relation);
+                }
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(XmlDom2Model.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+
+    @Override
+    public void visit(QueryModel aModel) {
+        Runnable resolver = readModel(aModel);
+        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
+            String datasourceName = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+            if (datasourceName != null && !"null".equals(datasourceName)) {
+                aModel.setDbId(datasourceName);
+            }
+        }
+        resolver.run();
     }
 
     @Override

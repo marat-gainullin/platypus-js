@@ -10,6 +10,8 @@ import com.bearsoft.rowset.metadata.Field;
  * Used to form a graph to control cycles into.
  *
  * @author mg
+ * @param <RE>
+ * @param <V>
  */
 public class DummyRelation<RE extends Entity<?, ?, RE>> extends Relation<RE> {
 

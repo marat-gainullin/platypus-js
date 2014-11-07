@@ -2,11 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.dbscheme;
+package com.eas.client.model.store;
 
 import com.eas.client.model.Relation;
-import com.eas.client.model.store.Model2XmlDom;
-import com.eas.client.model.visitors.DbSchemeModelVisitor;
+import com.eas.client.model.dbscheme.DbSchemeModel;
+import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.client.model.visitors.ModelVisitor;
 import java.util.Set;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -15,9 +16,9 @@ import org.w3c.dom.Element;
  *
  * @author mg
  */
-public class DbSchemeModel2XmlDom extends Model2XmlDom<FieldsEntity> implements DbSchemeModelVisitor {
+public class DbSchemeModel2XmlDom extends Model2XmlDom<FieldsEntity, DbSchemeModel> implements ModelVisitor<FieldsEntity, DbSchemeModel> {
 
-    static Document transform(DbSchemeModel aModel) {
+    public static Document transform(DbSchemeModel aModel) {
         DbSchemeModel2XmlDom transformer = new DbSchemeModel2XmlDom();
         return transformer.model2XmlDom(aModel);
     }

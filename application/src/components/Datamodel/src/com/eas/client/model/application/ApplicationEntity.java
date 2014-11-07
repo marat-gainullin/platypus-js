@@ -30,8 +30,6 @@ import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationModel.RequeryProcess;
-import com.eas.client.model.visitors.ApplicationModelVisitor;
-import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -55,7 +53,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <Q>
  * @param <E>
  */
-public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
+public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
 
     public static final String BAD_FIELD_NAME_MSG = "Bad field name %s";
     public static final String BAD_FIND_AGRUMENTS_MSG = "Bad find agruments";
@@ -193,7 +191,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     private static final String FIND_JSDOC = ""
             + "/**\n"
             + "* Finds rows using field - value pairs.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
+            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName or just a prop name in a string form) and the value for this property.\n"
             + "* @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
             + "*/";
 
@@ -201,49 +199,54 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
 
     @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
     public List<Row> find(Object... values) throws Exception {
-        if (values != null && values.length > 0 && values.length % 2 == 0) {
-            Fields fields = rowset.getFields();
-            Converter converter = rowset.getConverter();
-            List<Integer> constraints = new ArrayList<>();
-            List<Object> keyValues = new ArrayList<>();
-            for (int i = 0; i < values.length - 1; i += 2) {
-                if (values[i] != null && values[i] instanceof Field) {
-                    Field field = (Field) values[i];
-                    int colIndex = fields.find(field.getName());
-                    if (colIndex > 0) {
-                        constraints.add(colIndex);
-                    } else {
-                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIELD_NAME_MSG, field.getName()));
-                    }
-                    Object keyValue = ScriptUtils.toJava(values[i + 1]);
-                    if (converter != null) {
-                        try {
-                            keyValue = converter.convert2RowsetCompatible(keyValue, field.getTypeInfo());
-                        } catch (Exception ex) {
-                            Logger.getLogger(ApplicationEntity.class.getName()).warning(String.format(CANT_CONVERT_TO_MSG, field.getTypeInfo().getSqlTypeName()));
-                            keyValue = null;
+        if (values != null) {
+            values = ScriptUtils.jsObjectToCriteria(values);
+            if (values.length > 0 && values.length % 2 == 0) {
+                Fields fields = rowset.getFields();
+                Converter converter = rowset.getConverter();
+                List<Integer> constraints = new ArrayList<>();
+                List<Object> keyValues = new ArrayList<>();
+                for (int i = 0; i < values.length - 1; i += 2) {
+                    if (values[i] != null && (values[i] instanceof Number || values[i] instanceof Field || values[i] instanceof String)) {
+                        Field field = values[i] instanceof Number ? fields.get(((Number) values[i]).intValue()) : (values[i] instanceof Field ? (Field) values[i] : fields.get((String) values[i]));
+                        int colIndex = fields.find(field.getName());
+                        if (colIndex > 0) {
+                            constraints.add(colIndex);
+                        } else {
+                            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIELD_NAME_MSG, field.getName()));
                         }
+                        Object keyValue = ScriptUtils.toJava(values[i + 1]);
+                        if (converter != null) {
+                            try {
+                                keyValue = converter.convert2RowsetCompatible(keyValue, field.getTypeInfo());
+                            } catch (Exception ex) {
+                                Logger.getLogger(ApplicationEntity.class.getName()).warning(String.format(CANT_CONVERT_TO_MSG, field.getTypeInfo().getSqlTypeName()));
+                                keyValue = null;
+                            }
+                        }
+                        keyValues.add(keyValue);
+                    } else {
+                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIND_ARGUMENT_MSG, i));
                     }
-                    keyValues.add(keyValue);
-                } else {
-                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIND_ARGUMENT_MSG, i));
                 }
-            }
-            if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
-                Locator loc = checkUserLocator(constraints);
-                if (loc.find(keyValues.toArray())) {
-                    TaggedList<RowWrap> subSet = loc.getSubSet();
-                    if (subSet.tag == null) {
-                        List<Row> found = new TaggedList<>();
-                        subSet.stream().forEach((rw) -> {
-                            found.add(rw.getRow());
-                        });
-                        subSet.tag = found;
+                if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
+                    Locator loc = checkUserLocator(constraints);
+                    if (loc.find(keyValues.toArray())) {
+                        TaggedList<RowWrap> subSet = loc.getSubSet();
+                        if (subSet.tag == null) {
+                            List<Row> found = new TaggedList<>();
+                            subSet.stream().forEach((rw) -> {
+                                found.add(rw.getRow());
+                            });
+                            subSet.tag = found;
+                        }
+                        return (TaggedList<Row>) subSet.tag;
+                    } else {
+                        return emptyFoundResults;
                     }
-                    return (TaggedList<Row>) subSet.tag;
-                } else {
-                    return emptyFoundResults;
                 }
+            } else {
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
             }
         } else {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
@@ -277,19 +280,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
     private static final String SCROLL_TO_JSDOC = ""
             + "/**\n"
-            + "* Sets the rowset cursor to the specified row.\n"
-            + "* @param row the row to position the entity cursor.\n"
-            + "* @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.\n"
+            + "* Sets the array cursor to the specified object.\n"
+            + "* @param object the object to position the entity cursor on.\n"
+            + "* @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = SCROLL_TO_JSDOC, params = {"row"})
-    public boolean scrollTo(Row aRow) throws Exception {
-        if (aRow != null) {
-            List<Integer> constraints = aRow.getFields().getPrimaryKeysIndicies();
+    public boolean scrollTo(Row aObject) throws Exception {
+        if (aObject != null) {
+            List<Integer> constraints = aObject.getFields().getPrimaryKeysIndicies();
             Locator loc = checkUserLocator(constraints);
             List<Object> values = new ArrayList<>();
             for (Integer colIndx : constraints) {
-                values.add(aRow.getColumnObject(colIndx));
+                values.add(aObject.getColumnObject(colIndx));
             }
             return loc.find(values.toArray()) && loc.first();
         } else {
@@ -303,101 +306,112 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* Moves the rowset cursor to the position before the first row.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = BEFORE_FIRST_JSDOC)
-    public void beforeFirst() throws Exception {
-        rowset.beforeFirst();
-    }
+    /*
+     @ScriptFunction(jsDoc = BEFORE_FIRST_JSDOC)
+     public void beforeFirst() throws Exception {
+     rowset.beforeFirst();
+     }
+     */
     private static final String AFTER_LAST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the position after the last row.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = AFTER_LAST_JSDOC)
-    public void afterLast() throws Exception {
-        rowset.afterLast();
-    }
+    /*
+     @ScriptFunction(jsDoc = AFTER_LAST_JSDOC)
+     public void afterLast() throws Exception {
+     rowset.afterLast();
+     }
+     */
     private static final String BOF_JSDOC = ""
             + "/**\n"
             + "* Checks if cursor in the position before the first row.\n"
             + "* @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = BOF_JSDOC)
-    public boolean bof() throws Exception {
-        return rowset.isBeforeFirst();
-    }
+    /*
+     @ScriptFunction(jsDoc = BOF_JSDOC)
+     public boolean bof() throws Exception {
+     return rowset.isBeforeFirst();
+     }
+     */
     private static final String EOF_JSDOC = ""
             + "/**\n"
             + "* Checks if cursor in the position before the first row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = EOF_JSDOC)
-    public boolean eof() throws Exception {
-        return rowset.isAfterLast();
-    }
+    /*
+     @ScriptFunction(jsDoc = EOF_JSDOC)
+     public boolean eof() throws Exception {
+     return rowset.isAfterLast();
+     }
+     */
     private static final String FIRST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the first row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = FIRST_JSDOC)
-    public boolean first() throws Exception {
-        return rowset.first();
-    }
+    /*
+     @ScriptFunction(jsDoc = FIRST_JSDOC)
+     public boolean first() throws Exception {
+     return rowset.first();
+     }
+     */
     private static final String NEXT_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the next row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = NEXT_JSDOC)
-    public boolean next() throws Exception {
-        return rowset.next();
-    }
+    /*
+     @ScriptFunction(jsDoc = NEXT_JSDOC)
+     public boolean next() throws Exception {
+     return rowset.next();
+     }
+     */
     private static final String PREV_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the privious row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = PREV_JSDOC)
-    public boolean prev() throws Exception {
-        return rowset.previous();
-    }
+    /*
+     @ScriptFunction(jsDoc = PREV_JSDOC)
+     public boolean prev() throws Exception {
+     return rowset.previous();
+     }
+     */
     private static final String LAST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the last row.\n"
             + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = LAST_JSDOC)
-    public boolean last() throws Exception {
-        return rowset.last();
-    }
+    /*
+     @ScriptFunction(jsDoc = LAST_JSDOC)
+     public boolean last() throws Exception {
+     return rowset.last();
+     }
+     */
     private static final String POS_JSDOC = ""
             + "/**\n"
             + "* Positions the rowset cursor on the specified row number. Row number is 1-based.\n"
             + "* @param index the row index to check, starting form <code>1</code>.\n"
             + "* @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = POS_JSDOC, params = {"index"})
-    public boolean pos(int recordIndex) throws Exception {
-        return rowset.absolute(recordIndex);
-    }
+    /*
+     @ScriptFunction(jsDoc = POS_JSDOC, params = {"index"})
+     public boolean pos(int recordIndex) throws Exception {
+     return rowset.absolute(recordIndex);
+     }
+     */
     private static final String GET_ROW_JSDOC = ""
             + "/**\n"
             + "* Gets the row at specified index.\n"
             + "* @param index the row index, starting form <code>1</code>.\n"
             + "* @return the row object or <code>null</code> if no row object have found at the specified index.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = GET_ROW_JSDOC, params = {"index"})
-    public Row getRow(int aIndex) throws Exception {
-        return rowset.getRow(aIndex);
-    }
+    /*
+     @ScriptFunction(jsDoc = GET_ROW_JSDOC, params = {"index"})
+     public Row getRow(int aIndex) throws Exception {
+     return rowset.getRow(aIndex);
+     }
+     */
 
     private static final String CURSOR_JSDOC = ""
             + "/**\n"
@@ -415,21 +429,23 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* Checks if the rowset is empty.\n"
             + "* @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = EMPTY_JSDOC)
-    public boolean isEmpty() throws Exception {
-        return rowset.isEmpty();
-    }
+    /*
+     @ScriptFunction(jsDoc = EMPTY_JSDOC)
+     public boolean isEmpty() throws Exception {
+     return rowset.isEmpty();
+     }
+     */
 
     private static final String SIZE_JSDOC = ""
             + "/**\n"
             + "* The rowset size.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = SIZE_JSDOC)
-    public int getSize() throws Exception {
-        return rowset.size();
-    }
+    /*
+     @ScriptFunction(jsDoc = SIZE_JSDOC)
+     public int getSize() throws Exception {
+     return rowset.size();
+     }
+     */
 
     private static final String CURSOR_POS_JSDOC = ""
             + "/**\n"
@@ -471,10 +487,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                         if (colIndex > 0) {
                             loc.addConstraint(colIndex);
                         } else {
-                            throw new RowsetException(String.valueOf(i + 1) + String.format(" field name %s not found.", field.getName()));
+                            throw new RowsetException(String.format(" field name %s not found.", field.getName()));
+                        }
+                    } else if (constraints[i] instanceof String) {
+                        int colIndex = rowset.getFields().find((String) constraints[i]);
+                        if (colIndex > 0) {
+                            loc.addConstraint(colIndex);
+                        } else {
+                            throw new RowsetException(String.format(" field name %s not found.", (String) constraints[i]));
                         }
                     } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field instance.");
+                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or a field name or field instance.");
                     }
                 }
             } finally {
@@ -491,7 +514,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     private static final String CREATE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instace of filter object to filter rowset data in-place using specified constraints objects.\n"
-            + "* @param fields the filter conditions fields in following form: entity.schema.propName.\n"
+            + "* @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.\n"
             + "* @return a comparator object.\n"
             + "*/";
 
@@ -515,15 +538,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                             throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
                         }
                     } else if (constraints[i] instanceof Field) {
-                        Field rsFmd = (Field) constraints[i];
-                        int colIndex = rowset.getFields().find(rsFmd.getName());
+                        Field field = (Field) constraints[i];
+                        int colIndex = rowset.getFields().find(field.getName());
                         if (colIndex > 0) {
                             hf.addConstraint(colIndex);
                         } else {
-                            throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
+                            throw new RowsetException(field.getName() + " field name not found.");
+                        }
+                    } else if (constraints[i] instanceof String) {
+                        int colIndex = rowset.getFields().find((String) constraints[i]);
+                        if (colIndex > 0) {
+                            hf.addConstraint(colIndex);
+                        } else {
+                            throw new RowsetException((String) constraints[i] + " field name not found.");
                         }
                     } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
+                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or a field name or field metadata descriptor.");
                     }
                 }
             } finally {
@@ -541,13 +571,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     private static final String CREATE_SORTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instance of comparator object using specified constraints objects.\n"
-            + "* @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName) and the order of sort (ascending - true; descending - false).\n"
+            + "* @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).\n"
             + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC, params = {"pairs"})
     public RowsComparator createSorting(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
+            constraints = ScriptUtils.jsObjectToCriteria(constraints);
             List<SortingCriterion> criteria = new ArrayList<>();
             for (int i = 0; i < constraints.length; i += 2) {
                 int colIndex = 0;
@@ -564,13 +595,18 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
                         throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
                     }
                 } else if (constraints[i] instanceof Field) {
-                    Field rsFmd = (Field) constraints[i];
-                    colIndex = rowset.getFields().find(rsFmd.getName());
+                    Field field = (Field) constraints[i];
+                    colIndex = rowset.getFields().find(field.getName());
                     if (colIndex <= 0) {
-                        throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
+                        throw new RowsetException(field.getName() + " field name not found.");
+                    }
+                } else if (constraints[i] instanceof String) {
+                    colIndex = rowset.getFields().find((String) constraints[i]);
+                    if (colIndex <= 0) {
+                        throw new RowsetException((String) constraints[i] + " field name not found.");
                     }
                 } else {
-                    throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
+                    throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or a field name or field metadata descriptor.");
                 }
                 if (colIndex > 0) {
                     boolean ascending = true;
@@ -621,7 +657,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
-            + "* Refreshes rowset, only if any of its parameters has changed.\n"
+            + "* Refreshes entity, only if any of its parameters has changed.\n"
             + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
             + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
             + "*/";
@@ -641,7 +677,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
-            + "* Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.\n"
+            + "* Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.\n"
             + "* @param onSuccess The callback function for refresh data on success event (optional).\n"
             + "* @param onFailure The callback function for refresh data on failure event (optional).\n"
             + "*/";
@@ -662,16 +698,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
             + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
-    public void insert(Object... requiredFields) throws Exception {
-        if (requiredFields != null) {
-            for (int i = 0; i < requiredFields.length; i++) {
-                requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
-            }
-        }
-        rowset.insert(requiredFields);
-    }
+    /*
+     @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
+     public void insert(Object... requiredFields) throws Exception {
+     if (requiredFields != null) {
+     for (int i = 0; i < requiredFields.length; i++) {
+     requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
+     }
+     }
+     rowset.insert(requiredFields);
+     }
+     */
 
     private static final String INSERT_AT_JSDOC = ""
             + "/**\n"
@@ -679,16 +716,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + "* @param index The new row will be inserted at. 1 - based.\n"
             + "* @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
             + "*/";
-
-    @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})
-    public void insertAt(int aIndex, Object... requiredFields) throws Exception {
-        if (requiredFields != null) {
-            for (int i = 0; i < requiredFields.length; i++) {
-                requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
-            }
-        }
-        rowset.insertAt(aIndex, false, requiredFields);
-    }
+    /*
+     @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})
+     public void insertAt(int aIndex, Object... requiredFields) throws Exception {
+     if (requiredFields != null) {
+     for (int i = 0; i < requiredFields.length; i++) {
+     requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
+     }
+     }
+     rowset.insertAt(aIndex, false, requiredFields);
+     }
+     */
 
     public boolean delete() throws Exception {
         int oldCount = rowset.size();
@@ -697,27 +735,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
         }
         return oldCount != rowset.size();
     }
-    private static final String DELETE_ALL_JSDOC = ""
+    private static final String REMOVE_ALL_JSDOC = ""
             + "/**\n"
             + "* Deletes all rows in the rowset.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = DELETE_ALL_JSDOC)
-    public boolean deleteAll() throws Exception {
+    @ScriptFunction(jsDoc = REMOVE_ALL_JSDOC)
+    public boolean removeAll() throws Exception {
         rowset.deleteAll();
         return rowset.isEmpty();
     }
 
-    private static final String DELETE_ROW_JSDOC = ""
+    private static final String REMOVE_JSDOC = ""
             + "/**\n"
-            + " * Deletes the row by cursor position or by row itself.\n"
-            + " * @param aCursorPosOrInstance row position in terms of cursor API (1-based)"
-            + "| row instance itself. Note! If no cursor position or instance is passed,"
-            + "then row at current cursor position will be deleted.\n"
+            + " * Deletes a object by cursor position or by object itself.\n"
+            + " * @param aCursorPosOrInstance Object position in terms of cursor API (1-based)"
+            + "| object instance itself. Note! If no cursor position or instance is passed,"
+            + "then object at current cursor position will be deleted.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = DELETE_ROW_JSDOC, params = {"aCursorPosOrInstance"})
-    public boolean deleteRow(Object aCursorPosOrInstance) throws Exception {
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"aCursorPosOrInstance"})
+    public boolean remove(Object aCursorPosOrInstance) throws Exception {
         if (aCursorPosOrInstance instanceof Row) {
             return deleteRow((Row) aCursorPosOrInstance);
         } else if (aCursorPosOrInstance instanceof Number) {
@@ -899,13 +937,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
 
     @Override
-    public void accept(ModelVisitor<E> visitor) {
-        if (visitor instanceof ApplicationModelVisitor<?>) {
-            ((ApplicationModelVisitor<E>) visitor).visit((E) this);
-        }
-    }
-
-    @Override
     public void setPublished(Object aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
@@ -923,9 +954,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             + " * Returns cursor-substitute entity.\n"
             + " * Sunstitute's cursor is used when in original entity's cursor some field's value is null.\n"
             + " */")
-    public E getSubstitute() {
-        return substitute;
-    }
+    /*
+     public E getSubstitute() {
+     return substitute;
+     }
+     */
 
     /**
      * Sets cursor substitute. Use this function carefully. Circular references
@@ -933,28 +966,30 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
      *
      * @param aValue Cursor substitute entity to be set.
      */
-    @ScriptFunction
-    public void setSubstitute(E aValue) {
-        if (aValue != this) {
-            substitute = aValue;
-        }
-    }
+    /*
+     @ScriptFunction
+     public void setSubstitute(E aValue) {
+     if (aValue != this) {
+     substitute = aValue;
+     }
+     }
 
-    public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
-        E lsubstitute = substitute;
-        while (lsubstitute != null) {
-            Rowset sRowset = lsubstitute.getRowset();
-            if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
-                Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
-                if (value != null) {
-                    return value;
-                }
-            }
-            lsubstitute = lsubstitute.getSubstitute();
-        }
-        return null;
-    }
-
+     public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
+     E lsubstitute = substitute;
+     while (lsubstitute != null) {
+     Rowset sRowset = lsubstitute.getRowset();
+     if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
+     Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
+     if (value != null) {
+     return value;
+     }
+     }
+     lsubstitute = lsubstitute.getSubstitute();
+     }
+     return null;
+     }
+     */
+    
     /**
      * Returns change log for this entity. In some cases, we might have several
      * change logs in one model. Several databases is the case.
@@ -1091,7 +1126,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
 
     public abstract void enqueueUpdate() throws Exception;
-    
+
     private static final String BEGIN_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Disables automatic model update on parameters change, @see endUpdate method.\n"

@@ -107,7 +107,7 @@ public class QueryDocument {
         File modelFile = aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION);
         String modelContent = FileUtils.readString(modelFile, SettingsConstants.COMMON_ENCODING);
         Document modelDoc = Source2XmlDom.transform(modelContent);        
-        QueryModel model = XmlDom2QueryModel.transform(null, null, modelDoc);
+        QueryModel model = XmlDom2QueryModel.transform(aBasesProxy, null, modelDoc);
         // output fields hints
         File outFile = aFiles.findFileByExtension(PlatypusFiles.OUT_EXTENSION);
         String outContent = FileUtils.readString(outFile, SettingsConstants.COMMON_ENCODING);

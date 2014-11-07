@@ -228,7 +228,7 @@ public class StoredQueryFactory {
             JsDoc jsDoc = new JsDoc(comment);
             jsDoc.parseAnnotations();
             for (JsDoc.Tag tag : jsDoc.getAnnotations()) {
-                switch (tag.getName()) {
+                switch (tag.getName().toLowerCase()) {
                     case JsDoc.Tag.ROLES_ALLOWED_TAG:
                         aQuery.getReadRoles().addAll(tag.getParams());
                         aQuery.getWriteRoles().addAll(tag.getParams());

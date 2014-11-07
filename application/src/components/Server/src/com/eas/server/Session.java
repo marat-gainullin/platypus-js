@@ -7,13 +7,11 @@ package com.eas.server;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.server.scripts.ModulesJSFacade;
-import com.eas.server.scripts.SyncJSObjectFacade;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -167,11 +165,7 @@ public class Session implements HasPublished {
     public synchronized void registerModule(JSObject aModule) {
         JSObject c = (JSObject) aModule.getMember("constructor");
         String name = JSType.toString(c.getMember("name"));
-        if (principal instanceof SystemPlatypusPrincipal) {
-            modulesInstances.put(name, new SyncJSObjectFacade(aModule));
-        } else {
-            modulesInstances.put(name, aModule);
-        }
+        modulesInstances.put(name, aModule);
     }
 
     public synchronized void unregisterModule(String aModuleName) {

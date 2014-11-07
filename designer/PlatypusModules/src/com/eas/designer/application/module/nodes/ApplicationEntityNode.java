@@ -51,9 +51,7 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
 
     protected boolean isValidName(String name) {
         try {
-            entity.getModel().getParameters().invalidateFieldsHash();
             return !name.isEmpty()
-                    && entity.getModel().getParameters().get(name) == null
                     && (entity.getModel().getEntityByName(name) == null || getName().equalsIgnoreCase(name))
                     && ScriptUtils.isValidJsIdentifier(name);
         } catch (Exception ex) {
