@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -155,7 +156,11 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                     query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
                 } catch (Exception ex) {
                     query = null;
-                    Logger.getLogger(ApplicationDbEntity.class.getName()).log(Level.WARNING, null, ex);
+                    if (ex instanceof NamingException) {
+                        Logger.getLogger(ApplicationDbEntity.class.getName()).log(Level.WARNING, ex.getMessage());
+                    } else {
+                        Logger.getLogger(ApplicationDbEntity.class.getName()).log(Level.WARNING, null, ex);
+                    }
                 }
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";
@@ -164,6 +169,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         }
     }
 
+    @Override
     public void prepareRowsetByQuery() throws Exception {
         Rowset oldRowset = rowset;
         if (rowset != null) {

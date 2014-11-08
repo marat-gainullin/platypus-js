@@ -12,7 +12,6 @@ import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.events.*;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
-import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.filters.Filter;
 import com.bearsoft.rowset.locators.Locator;
@@ -161,7 +160,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     protected void silentUnpend() {
-        ApplicationModel.RequeryProcess p = model.process;
+        ApplicationModel.RequeryProcess<E, Q> p = model.process;
         model.process = null;
         try {
             unpend();
@@ -993,8 +992,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
      * Returns change log for this entity. In some cases, we might have several
      * change logs in one model. Several databases is the case.
      *
-     * @return
      * @throws java.lang.Exception
+     * @return
      */
     protected abstract List<Change> getChangeLog() throws Exception;
 
@@ -1256,7 +1255,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         return res;
     }
 
-    protected abstract void prepareRowsetByQuery() throws InvalidFieldsExceptionException;
+    protected abstract void prepareRowsetByQuery() throws Exception;
 
     protected abstract void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception;
 

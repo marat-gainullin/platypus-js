@@ -71,14 +71,13 @@ import org.openide.util.RequestProcessor;
  */
 public class QueryResultsView extends javax.swing.JPanel {
 
-    private final PlatypusQueryDataObject queryDataObject;
     private QuerySetupView querySetupView;
     private DbGrid dbGrid;
     private final DatabasesClient basesProxy;
     private String queryText;
     private Parameters parameters;
     private ApplicationDbModel model;
-    private ApplicationDbEntity queryEntity;
+    private ApplicationDbEntity dataEntity;
     private static int queryIndex;
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
     private static final String DEFAULT_TEXT_COLOR_KEY = "textText"; //NOI18N
@@ -91,20 +90,21 @@ public class QueryResultsView extends javax.swing.JPanel {
     private String queryName;
     private final RowsetConverter converter = new RowsetConverter();
 
+    public QueryResultsView(DatabasesClient aBasesProxy, String aDatasourceName, String aSchemaName, String aTableName) throws Exception {
+        this(aBasesProxy, aDatasourceName, String.format(SQLUtils.TABLE_NAME_2_SQL, getTableName(aSchemaName, aTableName)));
+        setName(aTableName);
+    }
+
     public QueryResultsView(PlatypusQueryDataObject aQueryDataObject) throws Exception {
-        super();
-        initComponents();
-        initPageSizes();
-        initCopyMessage();
-        queryDataObject = aQueryDataObject;
-        basesProxy = aQueryDataObject.getBasesProxy();
-        datasourceName = queryDataObject.getDatasourceName();
-        String storedQueryText = queryDataObject.getSqlTextDocument().getText(0, queryDataObject.getSqlTextDocument().getLength());
-        String storedDialectQueryText = queryDataObject.getSqlFullTextDocument().getText(0, queryDataObject.getSqlFullTextDocument().getLength());
-        StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, queryDataObject.getProject().getQueries(), queryDataObject.getProject().getIndexer());
-        queryText = factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, queryDataObject.getModel());
-        parameters = queryDataObject.getModel().getParameters();
-        setName(queryDataObject.getName());
+        this(aQueryDataObject.getBasesProxy(), aQueryDataObject.getDatasourceName(), extractText(aQueryDataObject));
+        for (Field sourceParam : aQueryDataObject.getModel().getParameters().toCollection()) {
+            Parameter p = parameters.get(sourceParam.getName());
+            if (p != null) {
+                p.setTypeInfo(sourceParam.getTypeInfo());
+                p.setMode(((Parameter) sourceParam).getMode());
+            }
+        }
+        setName(aQueryDataObject.getName());
         resetMessage();
         setupButtons();
         queryName = IndexerQuery.file2AppElementId(aQueryDataObject.getPrimaryFile());
@@ -113,26 +113,12 @@ public class QueryResultsView extends javax.swing.JPanel {
         }
     }
 
-    public QueryResultsView(DatabasesClient aBasesProxy, String aDatasourceName, String aSchemaName, String aTableName) throws Exception {
+    public QueryResultsView(DatabasesClient aBasesProxy, String aDatasourceName, String aQueryText) throws Exception {
         initComponents();
         initPageSizes();
         initCopyMessage();
-        queryDataObject = null;
         basesProxy = aBasesProxy;
-        queryText = String.format(SQLUtils.TABLE_NAME_2_SQL, getTableName(aSchemaName, aTableName)); //NOI18N
         datasourceName = aDatasourceName;
-        parameters = new Parameters();
-        setName(aTableName);
-        resetMessage();
-        setupButtons();
-    }
-
-    public QueryResultsView(PlatypusQueryDataObject aQueryDataObject, String aQueryText) throws Exception {
-        initComponents();
-        initPageSizes();
-        initCopyMessage();
-        queryDataObject = aQueryDataObject;
-        basesProxy = aQueryDataObject.getBasesProxy();
         queryText = aQueryText;
         parseParameters();
         setName(getGeneratedTitle());
@@ -140,6 +126,13 @@ public class QueryResultsView extends javax.swing.JPanel {
         runButton.setEnabled(false);
         refreshButton.setEnabled(false);
         commitButton.setEnabled(false);
+    }
+
+    protected static String extractText(PlatypusQueryDataObject aQueryDataObject) throws Exception {
+        String storedQueryText = aQueryDataObject.getSqlTextDocument().getText(0, aQueryDataObject.getSqlTextDocument().getLength());
+        String storedDialectQueryText = aQueryDataObject.getSqlFullTextDocument().getText(0, aQueryDataObject.getSqlFullTextDocument().getLength());
+        StoredQueryFactory factory = new ScriptedQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
+        return factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, aQueryDataObject.getModel());
     }
 
     private void setupButtons() {
@@ -172,12 +165,12 @@ public class QueryResultsView extends javax.swing.JPanel {
      */
     private boolean initModel() throws Exception {
         model = new ApplicationDbModel(basesProxy, null);
-        setupQueryEntityBySql();
+        setupDataEntityBySql();
         // enable dataworks
-        if (queryEntity.getQuery().isCommand()) {
-            queryEntity.getQuery().setManual(true);
+        if (dataEntity.getQuery().isCommand()) {
+            dataEntity.getQuery().setManual(true);
             model.requery();
-            int rowsAffected = basesProxy.executeUpdate(queryEntity.getQuery().compile(), null, null);
+            int rowsAffected = basesProxy.executeUpdate(dataEntity.getQuery().compile(), null, null);
             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
             return false;
         } else {
@@ -186,23 +179,23 @@ public class QueryResultsView extends javax.swing.JPanel {
         }
     }
 
-    private void setupQueryEntityBySql() throws Exception {
-        if (queryEntity != null) {
-            queryEntity.setModel(null);
-            model.removeEntity(queryEntity);
+    private void setupDataEntityBySql() throws Exception {
+        if (dataEntity != null) {
+            dataEntity.setModel(null);
+            model.removeEntity(dataEntity);
         }
-        queryEntity = model.newGenericEntity();
-        queryEntity.setModel(model);
+        dataEntity = model.newGenericEntity();
+        dataEntity.setModel(model);
         SqlQuery query = new SqlQuery(basesProxy, queryText);
         query.setDbId(datasourceName);
         query.setPageSize(pageSize);
         parameters.toCollection().stream().forEach((p) -> {
             query.getParameters().add(p.copy());
         });
-        queryEntity.setQuery(query);
-        model.addEntity(queryEntity);
+        dataEntity.setQuery(query);
+        model.addEntity(dataEntity);
         try {
-            StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, false);
+            StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null, false);
             query.setCommand(!factory.putTableFieldsMetadata(query));
             enableCommitQueryButton(!query.isCommand());
             enableNextPageButton(!query.isCommand());
@@ -216,11 +209,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Uncommitable"));
         }
         enableRefreshQueryButton(true);
-        queryEntity.prepareRowsetByQuery();
-    }
-
-    public PlatypusQueryDataObject getQueryDataObject() {
-        return queryDataObject;
+        dataEntity.prepareRowsetByQuery();
     }
 
     public String getQueryText() {
@@ -262,10 +251,10 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void showQueryResultsMessage() throws Exception {
-        String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), queryEntity.getRowset().size());
-        List<Field> pks = queryEntity.getRowset().getFields().getPrimaryKeys();
+        String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), dataEntity.getRowset().size());
+        List<Field> pks = dataEntity.getRowset().getFields().getPrimaryKeys();
         if (pks == null || pks.isEmpty()) {
-            message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), queryEntity.getEntityId());
+            message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), dataEntity.getEntityId());
         }
         showInfo(message);
     }
@@ -421,8 +410,8 @@ public class QueryResultsView extends javax.swing.JPanel {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
                     try {
-                        if (queryEntity.getQuery().isCommand()) {
-                            int rowsAffected = basesProxy.executeUpdate(queryEntity.getQuery().compile(), null, null);
+                        if (dataEntity.getQuery().isCommand()) {
+                            int rowsAffected = basesProxy.executeUpdate(dataEntity.getQuery().compile(), null, null);
                             showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
                         } else {
                             model.requery();
@@ -444,12 +433,12 @@ public class QueryResultsView extends javax.swing.JPanel {
             if (model != null && model.isModified()) {
                 commitButton.setEnabled(false);
                 final String entityName = IDGenerator.genID().toString();
-                queryEntity.getQuery().setEntityId(entityName);
-                queryEntity.setQueryName(entityName);
+                dataEntity.getQuery().setEntityId(entityName);
+                dataEntity.setQueryName(entityName);
                 model.forEachChange((Change aChange) -> {
                     aChange.entityName = entityName;
                 });
-                ((LocalQueriesProxy) basesProxy.getQueries()).putCachedQuery(entityName, (SqlQuery) queryEntity.getQuery());
+                ((LocalQueriesProxy) basesProxy.getQueries()).putCachedQuery(entityName, (SqlQuery) dataEntity.getQuery());
                 RequestProcessor.getDefault().execute(() -> {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
@@ -466,8 +455,8 @@ public class QueryResultsView extends javax.swing.JPanel {
                             model.forEachChange((Change aChange) -> {
                                 aChange.entityName = entityName;
                             });
-                            queryEntity.getQuery().setEntityId(entityName);
-                            queryEntity.setQueryName(entityName);
+                            dataEntity.getQuery().setEntityId(entityName);
+                            dataEntity.setQueryName(entityName);
                             commitButton.setEnabled(true);
                         });
                     }
@@ -479,9 +468,9 @@ public class QueryResultsView extends javax.swing.JPanel {
     }//GEN-LAST:event_commitButtonActionPerformed
 
     private void nextPageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextPageButtonActionPerformed
-        if (model != null && queryEntity != null) {
+        if (model != null && dataEntity != null) {
             try {
-                queryEntity.getRowset().nextPage(null, null);
+                dataEntity.getRowset().nextPage(null, null);
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -531,7 +520,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             dlg.setVisible(true);
             if (DialogDescriptor.OK_OPTION.equals(nd.getValue())) {
                 queryText = querySetupView.getSqlText();
-                parameters = querySetupView.getParameters().copy();
+                parameters = querySetupView.acceptParametersValues();
                 logParameters();
                 if (queryName != null && !queryName.isEmpty() && querySetupView.isSaveParamsValuesEnabled()) {
                     saveParametersValues();
@@ -660,13 +649,13 @@ public class QueryResultsView extends javax.swing.JPanel {
         dbGrid = new DbGrid();
         dbGrid.setModel(model);
         gridPanel.add(dbGrid);
-        DbGrid.fillByEntity(queryEntity, dbGrid, 120);
-        List<Field> pks = queryEntity.getRowset().getFields().getPrimaryKeys();
+        DbGrid.fillByEntity(dataEntity, dbGrid, 120);
+        List<Field> pks = dataEntity.getRowset().getFields().getPrimaryKeys();
         dbGrid.setEditable(pks != null && !pks.isEmpty());
         dbGrid.setDeletable(pks != null && !pks.isEmpty());
         deleteButton.setEnabled(pks != null && !pks.isEmpty());
-        showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), queryEntity.getEntityId()));
-        queryEntity.getRowset().addRowsetListener(new RowsetAdapter() {
+        showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), dataEntity.getEntityId()));
+        dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {
             @Override
             public boolean willInsertRow(RowsetInsertEvent event) {
                 try {
@@ -754,13 +743,13 @@ public class QueryResultsView extends javax.swing.JPanel {
         Statement statement = parserManager.parse(new StringReader(queryText));
         parameters = new Parameters();
         Set<NamedParameter> parsedParameters = SqlTextEditsComplementor.extractParameters(statement);
-        for (NamedParameter parsedParameter : parsedParameters) {
+        parsedParameters.stream().forEach((NamedParameter parsedParameter) -> {
             Parameter newParameter = new Parameter(parsedParameter.getName());
             newParameter.setMode(1);
             newParameter.setTypeInfo(DataTypeInfo.VARCHAR);
             newParameter.setValue("");
             parameters.add(newParameter);
-        }
+        });
     }
 
     private void initPageSizes() {

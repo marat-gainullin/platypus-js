@@ -11,7 +11,6 @@ import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.Model;
-import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;
@@ -128,7 +127,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         modelEntity.setName(USER_DATASOURCE_NAME);
         SqlQuery query = new SqlQuery(basesProxy, aDatasourceName, aSqlText);
         query.setEntityId(String.valueOf(IDGenerator.genID()));
-        StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, true);
+        StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         modelEntity.setQuery(query);
         modelEntity.prepareRowsetByQuery();

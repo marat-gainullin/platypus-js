@@ -213,7 +213,7 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
         }
     }
 
-    private void readPolyline(String aPolyline, Relation aRelation) {
+    private void readPolyline(String aPolyline, Relation<E> aRelation) {
         String[] points = aPolyline.split(" ");
         if (points != null && points.length > 0) {
             int[] xs = new int[points.length];

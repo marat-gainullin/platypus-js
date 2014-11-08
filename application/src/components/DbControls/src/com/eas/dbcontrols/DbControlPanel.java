@@ -956,7 +956,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public void configure() throws Exception {
         cleanup();
         if (standalone) {
-            if (model != null/* && datamodelElement != null*/) {
+            if (model != null) {
                 kind = InitializingMethod.UNDEFINED;
                 unbind();
                 bind();

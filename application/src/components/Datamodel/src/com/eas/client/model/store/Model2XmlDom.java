@@ -215,7 +215,7 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
         }
     }
 
-    private String polylineToString(Relation relation) {
+    private String polylineToString(Relation<E> relation) {
         if (relation.getXs() != null && relation.getYs() != null && relation.getXs().length == relation.getYs().length) {
             StringBuilder sb = new StringBuilder();
             int[] xs = relation.getXs();

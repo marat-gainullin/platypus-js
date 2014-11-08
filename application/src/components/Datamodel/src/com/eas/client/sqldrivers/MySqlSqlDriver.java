@@ -530,7 +530,7 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4CreateFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
-        List<ForeignKeySpec> fkList = new ArrayList();
+        List<ForeignKeySpec> fkList = new ArrayList<>();
         fkList.add(aFk);
         return getSql4CreateFkConstraint(aSchemaName, fkList);
     }

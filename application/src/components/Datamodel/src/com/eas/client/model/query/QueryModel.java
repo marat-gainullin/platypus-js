@@ -112,16 +112,6 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
         }
     }
 
-    /*
-     @Override
-     public QueryEntity getEntityById(Long aId) {
-     if (aId != null && PARAMETERS_ENTITY_ID == aId) {
-     return parametersEntity;
-     } else {
-     return super.getEntityById(aId);
-     }
-     }
-     */
     @Override
     public <M extends Model<QueryEntity, ?>> void accept(ModelVisitor<QueryEntity, M> visitor) {
         visitor.visit((M) this);

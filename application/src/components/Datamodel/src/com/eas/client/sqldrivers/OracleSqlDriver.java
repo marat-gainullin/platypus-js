@@ -432,7 +432,7 @@ public class OracleSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4CreateFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
-        List<ForeignKeySpec> fkList = new ArrayList();
+        List<ForeignKeySpec> fkList = new ArrayList<>();
         fkList.add(aFk);
         return getSql4CreateFkConstraint(aSchemaName, fkList);
     }
@@ -471,7 +471,7 @@ public class OracleSqlDriver extends SqlDriver {
      */
     @Override
     public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
-        List<String> sqls = new ArrayList();
+        List<String> sqls = new ArrayList<>();
         Field newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + wrapName(aOldFieldMd.getName()) + " ";

@@ -43,16 +43,16 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     protected Object published;
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected QueriesProxy<Q> queries;
-    protected RequeryProcess process;
+    protected RequeryProcess<E, Q> process;
 
     public static class RequeryProcess<E extends ApplicationEntity<?, Q, E>, Q extends Query> {
 
         public Collection<E> entities;
         public Map<E, Exception> errors = new HashMap<>();
-        public Consumer<Rowset> onSuccess;
+        public Consumer<Void> onSuccess;
         public Consumer<Exception> onFailure;
 
-        public RequeryProcess(Collection<E> aEntities, Consumer<Rowset> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public RequeryProcess(Collection<E> aEntities, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
             super();
             entities = aEntities;
             onSuccess = aOnSuccess;
@@ -118,7 +118,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
                 process.errors.put(aSource, aErrorMessage);
             }
             if (!isPending()) {
-                RequeryProcess pr = process;
+                RequeryProcess<E, Q> pr = process;
                 process = null;
                 pr.end();
             }
@@ -418,7 +418,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             process.cancel();
         }
         if (onSuccess != null) {
-            process = new RequeryProcess<>(entities.values(), (Rowset v) -> {
+            process = new RequeryProcess<>(entities.values(), (Void v) -> {
                 onSuccess.call(null, new Object[]{});
             }, (Exception ex) -> {
                 if (onFailure != null) {
@@ -454,7 +454,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             process.cancel();
         }
         if (onSuccess != null) {
-            process = new RequeryProcess(entities.values(), onSuccess, onFailure);
+            process = new RequeryProcess<>(entities.values(), onSuccess, onFailure);
         }
         executeEntities(false, rootEntities());
         if (!isPending() && process != null) {
