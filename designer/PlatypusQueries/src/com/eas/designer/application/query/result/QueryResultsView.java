@@ -187,7 +187,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         dataEntity = model.newGenericEntity();
         dataEntity.setModel(model);
         SqlQuery query = new SqlQuery(basesProxy, queryText);
-        query.setDbId(datasourceName);
+        query.setDatasourceName(datasourceName);
         query.setPageSize(pageSize);
         parameters.toCollection().stream().forEach((p) -> {
             query.getParameters().add(p.copy());

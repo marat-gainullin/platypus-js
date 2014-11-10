@@ -1,9 +1,11 @@
 package com.eas.client.forms;
 
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.client.forms.api.FormWindowEventsIProxy;
 import com.eas.client.forms.api.components.DesktopPane;
+import com.eas.client.forms.api.containers.AnchorsPane;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
@@ -18,7 +20,6 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
-import com.eas.script.ScriptUtils;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
@@ -144,26 +145,23 @@ public class Form implements HasPublished {
         }
     }
     // From design info
-    protected int defaultCloseOperation;
+    protected int defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE;
     protected ImageIcon icon;
     protected String title;
-    protected boolean resizable;
-    protected boolean minimizable;
-    protected boolean maximizable;
+    protected boolean resizable = true;
+    protected boolean minimizable = true;
+    protected boolean maximizable = true;
     protected boolean undecorated;
-    protected float opacity;
+    protected float opacity = 1.0f;
     protected boolean alwaysOnTop;
-    protected boolean locationByPlatform;
+    protected boolean locationByPlatform = true;
     protected Point formLocation;
     protected Dimension designedViewSize;
     protected Dimension formSize;
     protected Dimension windowDecorSize = new Dimension();
     protected WindowEventsIProxy windowHandler;
     // runtime 
-    protected ApplicationModel<?, ?> model;
-    protected JPanel view;
-    protected Map<String, JComponent> components;
-    protected Collection<JSObject> publishedComponents = new ArrayList<>();
+    protected JComponent view;
     protected String formKey;
     private static JSObject publisher;
     protected Object published;
@@ -171,15 +169,24 @@ public class Form implements HasPublished {
     protected Container surface;
     protected Object closeCallbackParameter;
 
+    public Form() throws Exception {
+        this("form-" + IDGenerator.genID());
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Creates a form.\n"
+            + " * @param aFormKey Form instance key for open windows accounting. Optional.\n"
+            + " */",
+            params = {"aFormKey"})
+    public Form(String aFormKey) throws Exception {
+        this(aFormKey, null, null);
+    }
+
     public Form(String aFormKey, FormDesignInfo aDocument, ApplicationModel<?, ?> aModel) throws Exception {
         super();
         formKey = aFormKey;
-        model = aModel;
-        prepareForm(aDocument);
-    }
-
-    public ApplicationModel<?, ?> getModel() {
-        return model;
+        prepareForm(aDocument, aModel);
     }
 
     @Override
@@ -316,6 +323,14 @@ public class Form implements HasPublished {
                 }
             }
         }
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Top level widget of a form.\n"
+            + " */")
+    public JComponent getView() {
+        return view;
     }
 
     private static final String IS_VISIBLE_JSDOC = ""
@@ -1284,56 +1299,64 @@ public class Form implements HasPublished {
         }
     }
 
-    private void prepareForm(FormDesignInfo aDocument) throws Exception {
-        defaultCloseOperation = aDocument.getDefaultCloseOperation();
-        icon = IconCache.getIcon(aDocument.getIconImage());
-        title = aDocument.getTitle();
-        if (title == null || title.isEmpty()) {
+    private void prepareForm(FormDesignInfo aDocument, ApplicationModel<?, ?> aModel) throws Exception {
+        if (aDocument != null) {
+            defaultCloseOperation = aDocument.getDefaultCloseOperation();
+            icon = IconCache.getIcon(aDocument.getIconImage());
             title = aDocument.getTitle();
-        }
-        resizable = aDocument.isResizable();
-        undecorated = aDocument.isUndecorated();
-        opacity = aDocument.getOpacity();
-        alwaysOnTop = aDocument.isAlwaysOnTop();
-        locationByPlatform = aDocument.isLocationByPlatform();
-        designedViewSize = aDocument.getDesignedPreferredSize();
-        windowHandler = new FormWindowEventsIProxy(this);
-        final DbSwingFactory factory = new FormFactory(model);
-        final FormDesignInfo fdi = aDocument;//.copy();
-        fdi.accept(factory);
-        view = factory.getResult();
-        components = new HashMap<>();
-        components.putAll(factory.getNonvisuals());
-        components.putAll(factory.getComponents());
-        components.entrySet().stream().map((entry) -> {
-            String cName = entry.getKey();
-            ControlDesignInfo aDesignInfo = factory.getControlDesignInfos().get(cName);
-            JComponent aComp = entry.getValue();
-            if (view == entry.getValue()) {
-                aComp.setName("view");
+            if (title == null || title.isEmpty()) {
+                title = aDocument.getTitle();
             }
-            ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
-            aDesignInfo.accept(apiWrapper);
-            com.eas.client.forms.api.Component<?> comp = apiWrapper.getResult();
-            if (aComp instanceof ButtonGroupWrapper) {
-                aComp.setName(cName);
-            }
-            JSObject compPublished = (JSObject) ((HasPublished) comp).getPublished();
-            ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(comp);
+            resizable = aDocument.isResizable();
+            undecorated = aDocument.isUndecorated();
+            opacity = aDocument.getOpacity();
+            alwaysOnTop = aDocument.isAlwaysOnTop();
+            locationByPlatform = aDocument.isLocationByPlatform();
+            designedViewSize = aDocument.getDesignedPreferredSize();
+            windowHandler = new FormWindowEventsIProxy(this);
+            final DbSwingFactory factory = new FormFactory(aModel);
+            final FormDesignInfo fdi = aDocument;//.copy();
+            fdi.accept(factory);
+            view = factory.getResult();
+            Map<String, JComponent> components = new HashMap<>();
+            components.putAll(factory.getNonvisuals());
+            components.putAll(factory.getComponents());
+            components.entrySet().stream().forEach((entry) -> {
+                String cName = entry.getKey();
+                ControlDesignInfo aDesignInfo = factory.getControlDesignInfos().get(cName);
+                JComponent aComp = entry.getValue();
+                if (view == entry.getValue()) {
+                    aComp.setName(VIEW_SCRIPT_NAME);
+                }
+                ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
+                aDesignInfo.accept(apiWrapper);
+                com.eas.client.forms.api.Component<?> comp = apiWrapper.getResult();
+                if (aComp instanceof ButtonGroupWrapper) {
+                    aComp.setName(cName);
+                }
+                JSObject compPublished = (JSObject) ((HasPublished) comp).getPublished();
+                ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(comp);
+                if (eventsProxy != null) {
+                    eventsProxy.setEventThis(compPublished);
+                }
+            });
+        } else {
+            AnchorsPane viewWrapper = new AnchorsPane();
+            view = viewWrapper.getComponent();
+            view.setName(VIEW_SCRIPT_NAME);
+            JSObject compPublished = (JSObject) ((HasPublished) viewWrapper).getPublished();
+            ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(viewWrapper);
             if (eventsProxy != null) {
                 eventsProxy.setEventThis(compPublished);
             }
-            return compPublished;
-        }).forEach((compPublished) -> {
-            publishedComponents.add(compPublished);
-        });
+        }
     }
-
+/*
     public JSObject[] getPublishedComponents() {
         Collection<JSObject> copy = new ArrayList<>();
         copy.addAll(publishedComponents);
         publishedComponents.clear();
         return copy.toArray(new JSObject[]{});
     }
-
+*/
 }

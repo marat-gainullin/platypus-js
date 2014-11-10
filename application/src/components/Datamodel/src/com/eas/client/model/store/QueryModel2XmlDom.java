@@ -8,7 +8,6 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
-import static com.eas.client.model.store.Model2XmlDom.PARAMETERS_TAG_NAME;
 import com.eas.client.model.visitors.QueryModelVisitor;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -54,7 +53,7 @@ public class QueryModel2XmlDom extends Model2XmlDom<QueryEntity, QueryModel> imp
         writeModel(aModel);
         if (aModel.getDatasourceName() != null && currentNode != null && currentNode instanceof Element) {
             Element el = (Element) currentNode;
-            el.setAttribute(DATAMODEL_DB_ID, String.valueOf(aModel.getDatasourceName()));
+            el.setAttribute(Model2XmlDom.DATAMODEL_DATASOURCE, String.valueOf(aModel.getDatasourceName()));
         }
     }
 

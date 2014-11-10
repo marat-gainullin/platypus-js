@@ -62,7 +62,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
     @Override
     protected TableRef prepareTableRef4Selection() {
         TableRef tr = new TableRef();
-        tr.dbId = model.getDatasourceName();
+        tr.datasourceName = model.getDatasourceName();
         return tr;
     }
 

@@ -44,7 +44,7 @@ public class TableRefDmSelectionListener<E extends Entity<?, ?, E>> implements M
         for (E entity : newSelected) {
             TableRef tr = new TableRef();
             tr.tableName = entity.getTableName();
-            tr.dbId = tableRefTemplate.dbId;
+            tr.datasourceName = tableRefTemplate.datasourceName;
             tr.schema = tableRefTemplate.schema;
             selected.add(tr);
         }

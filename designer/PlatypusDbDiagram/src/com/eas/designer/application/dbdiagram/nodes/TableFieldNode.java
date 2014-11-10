@@ -131,8 +131,8 @@ public class TableFieldNode extends FieldNode {
             //
             DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
             DatabasesClient client = model.getBasesProxy();
-            String dbId = model.getDbId();
-            SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
+            String datasourceName = model.getDatasourceName();
+            SqlDriver driver = client.getDbMetadataCache(datasourceName).getConnectionDriver();
             driver.getTypesResolver().resolve2RDBMS(newContent);
 
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();

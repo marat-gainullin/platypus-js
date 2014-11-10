@@ -770,7 +770,7 @@
         return target;
         // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
     }
-    
+
     function BoundArray() {
         BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
@@ -927,27 +927,27 @@
         });
 
         /*
-        Object.defineProperty(target, "insert", {
-            value: function () {
-                var initing = new JavaArrayClass(arguments.length);
-                for (var v = 0; v < arguments.length; v++)
-                    initing[v] = boxAsJava(arguments[v]);
-                rowset.insert(initing);
-            }
-        });
-
-        Object.defineProperty(target, "insertAt", {
-            value: function () {
-                if (arguments.length > 0) {
-                    var index = arguments[0];
-                    var initing = new JavaArrayClass(arguments.length - 1);
-                    for (var v = 1; v < arguments.length; v++)
-                        initing[v - 1] = boxAsJava(arguments[v]);
-                    rowset.insertAt(index, false, initing);
-                }
-            }
-        });
-        */
+         Object.defineProperty(target, "insert", {
+         value: function () {
+         var initing = new JavaArrayClass(arguments.length);
+         for (var v = 0; v < arguments.length; v++)
+         initing[v] = boxAsJava(arguments[v]);
+         rowset.insert(initing);
+         }
+         });
+         
+         Object.defineProperty(target, "insertAt", {
+         value: function () {
+         if (arguments.length > 0) {
+         var index = arguments[0];
+         var initing = new JavaArrayClass(arguments.length - 1);
+         for (var v = 1; v < arguments.length; v++)
+         initing[v - 1] = boxAsJava(arguments[v]);
+         rowset.insertAt(index, false, initing);
+         }
+         }
+         });
+         */
 
         Object.defineProperty(target, "createFilter", {
             value: function () {
@@ -969,7 +969,7 @@
                     for (var v = 0; v < args.length; v++)
                         varargs[v] = boxAsJava(args[v]);
                     return boxAsJs(nEntity.createSorting(varargs));
-                }else{
+                } else {
                     return boxAsJs(nEntity.createSorting(args));
                 }
             }
@@ -985,7 +985,7 @@
                     for (var v = 0; v < args.length; v++)
                         varargs[v] = boxAsJava(args[v]);
                     found = nEntity.find(varargs);
-                }else{
+                } else {
                     found = nEntity.find(args);
                 }
                 if (!found.tag) {
@@ -1103,7 +1103,7 @@
                 var ncParameters = nParameters.toCollection();
                 var pParams = {};
                 for (var p = 0; p < ncParameters.size(); p++) {
-                    (function(){
+                    (function () {
                         var nParameter = ncParameters[p];
                         var pDesc = {
                             get: function () {
@@ -1231,10 +1231,10 @@
                     };
                 });
             } else {
-                throw "Access denied for module" + aModuleName + ". May be denied public access."
+                throw "Access denied for module" + aModuleName + ". May be denied public access.";
             }
         } else {
-            throw "This architecture does not support server modules."
+            throw "This architecture does not support server modules.";
         }
     }
 
@@ -1318,6 +1318,29 @@
     Object.defineProperty(Logger, "finest", {value: function (aMessage) {
             applicationLogger.finest("" + aMessage);
         }});
+
+    function async(aWorker, onSuccess, onFailure) {
+        ScriptUtilsClass.submitTask(function () {
+            try {
+                var result = aWorker();
+                try {
+                    ScriptUtilsClass.acceptTaskResult(function () {
+                        onSuccess(result);
+                    });
+                } catch (e) {
+                    applicationLogger.severe(e);
+                }
+            } catch (e) {
+                if (onFailure)
+                    onFailure('' + e);
+            }
+        });
+    }
+    Object.defineProperty(P, "async", {
+        get: function () {
+            return async;
+        }
+    });
 
     function readString(aFileName, aEncoding) {
         var encoding = 'utf-8';

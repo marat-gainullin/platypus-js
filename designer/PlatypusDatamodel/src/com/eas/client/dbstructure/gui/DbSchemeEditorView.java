@@ -539,7 +539,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         modelView.setModel(aModel);
         if (aModel != null) {
             sqlController.setBasesProxy(aModel.getBasesProxy());
-            sqlController.setDatasourceName(aModel.getDbId());
+            sqlController.setDatasourceName(aModel.getDatasourceName());
             sqlController.setSchema(aModel.getSchema());
         }
     }

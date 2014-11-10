@@ -47,7 +47,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
 
     @Override
     public String getTableDatasourceName() {
-        return model != null ? model.getDbId() : null;
+        return model != null ? model.getDatasourceName() : null;
     }
 
     @Override

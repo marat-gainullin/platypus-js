@@ -49,7 +49,7 @@ public class TableEntityNode extends EntityNode<FieldsEntity> {
                 DbSchemeModel dbModel = entity.getModel();
                 SqlActionsController sqlController = new SqlActionsController(dbModel);
                 sqlController.setBasesProxy(dbModel.getBasesProxy());
-                sqlController.setDatasourceName(dbModel.getDbId());
+                sqlController.setDatasourceName(dbModel.getDatasourceName());
                 sqlController.setSchema(dbModel.getSchema());
                 SqlAction laction = sqlController.createDescribeTableAction(entity.getTableName(), (String) evt.getNewValue());
                 if (!laction.execute()) {

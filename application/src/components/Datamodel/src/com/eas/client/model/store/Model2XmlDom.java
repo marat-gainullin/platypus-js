@@ -279,5 +279,7 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
      * visit(pk); } finally { currentNode = lcurrentNode; } } } }
      */
     public static final String DATAMODEL_DB_ID = "datamodelDbId";
+    public static final String DATAMODEL_DATASOURCE = "datasource";
     public static final String DATAMODEL_DB_SCHEMA_NAME = "datamodelSchemaName";
+    public static final String DATAMODEL_DATASOURCE_SCHEMA_NAME = "schema";
 }
