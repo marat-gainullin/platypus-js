@@ -241,7 +241,7 @@
         Object.defineProperty(P, "Icon", {value: Icon});
         Object.defineProperty(Icon, "load", {
             value: function (aPath, onSuccess, onFailure) {
-                return IconResourcesClass.load(aPath, onSuccess, onFailure);
+                return IconResourcesClass.load(P.boxAsJava(aPath), P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             }
         });
         P.Icons = P.Icon;
@@ -1242,7 +1242,7 @@
     var Resource = {};
     Object.defineProperty(Resource, "load", {
         value: function (aResName, onSuccess, onFailure) {
-            return P.boxAsJs(ScriptedResourceClass.load(aResName, onSuccess, onFailure));
+            return P.boxAsJs(ScriptedResourceClass.load(P.boxAsJava(aResName), P.boxAsJava(onSuccess), P.boxAsJava(onFailure)));
         }
     });
     Object.defineProperty(Resource, "upload", {
