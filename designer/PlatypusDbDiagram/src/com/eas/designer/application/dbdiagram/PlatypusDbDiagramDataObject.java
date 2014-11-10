@@ -58,7 +58,7 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
     }
 
     public String getResolvedDatasourceName() {
-        String datasourceName = model.getDbId();
+        String datasourceName = model.getDatasourceName();
         if (datasourceName == null) {
             PlatypusProject pp = getProject();
             if (pp != null) {
@@ -72,7 +72,7 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
         String schemName = model.getSchema();
         if (schemName == null) {
             try {
-                schemName = model.getBasesProxy().getConnectionSchema(model.getDbId());
+                schemName = model.getBasesProxy().getConnectionSchema(model.getDatasourceName());
             } catch (Exception ex) {
                 schemName = null;
                 Exceptions.printStackTrace(ex);

@@ -81,7 +81,7 @@ public class QueryDocument {
         query = aQuery;
         model = aModel;
         additionalFieldsMetadata = aAdditionalFieldsMetadata;
-        query.setDbId(model.getDatasourceName());
+        query.setDatasourceName(model.getDatasourceName());
         assert query.getEntityId() != null : "SqlQuery should be constructured with non-null entity id!";
     }
 

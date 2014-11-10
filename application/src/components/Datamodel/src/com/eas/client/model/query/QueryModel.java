@@ -61,7 +61,7 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
         return datasourceName;
     }
 
-    public void setDbId(String aValue) {
+    public void setDatasourceName(String aValue) {
         datasourceName = aValue;
     }
 

@@ -25,7 +25,6 @@ import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.eas.client.model.ParametersEntity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -335,7 +334,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		Entity newEntity = aField != null && aField.getOwner() != null && aField.getOwner().getOwner() != null ? aField.getOwner().getOwner() : null;
 		Model newModel = newEntity != null ? newEntity.getModel() : null;
 		if (newEntity != null && newModel != null) {
-			setValueElement(new ModelElementRef(newModel, newEntity.getEntityId(), aField.getName(), newEntity instanceof ParametersEntity || !(aField instanceof Parameter)));
+			setValueElement(new ModelElementRef(newModel, newEntity.getEntityId(), aField.getName(), !(aField instanceof Parameter)));
 		}
 		redraw();
 	}
@@ -353,7 +352,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		Entity newEntity = aField != null && aField.getOwner() != null && aField.getOwner().getOwner() != null ? aField.getOwner().getOwner() : null;
 		Model newModel = newEntity != null ? newEntity.getModel() : null;
 		if (newEntity != null && newModel != null) {
-			setDisplayElement(new ModelElementRef(newModel, newEntity.getEntityId(), aField.getName(), newEntity instanceof ParametersEntity || !(aField instanceof Parameter)));
+			setDisplayElement(new ModelElementRef(newModel, newEntity.getEntityId(), aField.getName(), !(aField instanceof Parameter)));
 		}
 		redraw();
 	}

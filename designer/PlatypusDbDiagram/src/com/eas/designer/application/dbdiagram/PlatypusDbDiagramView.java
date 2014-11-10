@@ -166,7 +166,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
             @Override
             public void connected(String aDatasourceName) {
                 try {
-                    String dsName = dataObject.getModel().getDbId();
+                    String dsName = dataObject.getModel().getDatasourceName();
                     if (dsName == null) {
                         dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                     }
@@ -181,7 +181,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
             @Override
             public void disconnected(String aDatasourceName) {
                 try {
-                    String dsName = dataObject.getModel().getDbId();
+                    String dsName = dataObject.getModel().getDatasourceName();
                     if (dsName == null) {
                         dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                     }
@@ -196,7 +196,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
             @Override
             public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
                 try {
-                    if (dataObject.getModel().getDbId() == null && dataObject.isModelValid()) {
+                    if (dataObject.getModel().getDatasourceName()== null && dataObject.isModelValid()) {
                         dataObject.setModelValid(false);
                         dataObject.startModelValidating();
                     }
@@ -243,7 +243,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     private void initDbRelatedViews() throws Exception {
         removeAll();
         setLayout(new BorderLayout());
-        if (dataObject.getProject().isDbConnected(dataObject.getModel().getDbId())) {
+        if (dataObject.getProject().isDbConnected(dataObject.getModel().getDatasourceName())) {
             if (dataObject.isModelValid()) {
                 if (editor != null) {
                     editor.setModel(null);
@@ -310,7 +310,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                 add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);
             }
         } else {
-            add(dataObject.getProject().generateDbPlaceholder(dataObject.getModel().getDbId()), BorderLayout.CENTER);
+            add(dataObject.getProject().generateDbPlaceholder(dataObject.getModel().getDatasourceName()), BorderLayout.CENTER);
         }
         revalidate();
         repaint();

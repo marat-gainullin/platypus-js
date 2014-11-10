@@ -35,6 +35,7 @@ public class SqlQuery extends Query {
 
     private final static Pattern PARAMETER_NAME_PATTERN = Pattern.compile(SQLUtils.PARAMETER_NAME_REGEXP, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
     private final static Pattern STRINGS_PATTERN = Pattern.compile("'[^']*'", Pattern.MULTILINE);
+    protected String datasourceName;
     // For single and multi-table queries
     // Joins, conditions, parametersList, groups, havings etc.
     protected String sqlText;
@@ -49,6 +50,7 @@ public class SqlQuery extends Query {
     /**
      * Creates an instance of Query with empty SQL query text and parameters
      * map.
+     *
      * @param aBasesProxy
      */
     public SqlQuery(DatabasesClient aBasesProxy) {
@@ -83,6 +85,10 @@ public class SqlQuery extends Query {
 
     public SqlQuery(SqlQuery aSource) {
         super(aSource);
+        String sourceDatasourceName = aSource.getDatasourceName();
+        if (sourceDatasourceName != null) {
+            datasourceName = sourceDatasourceName;
+        }
         String asqlText = aSource.getSqlText();
         if (asqlText != null) {
             sqlText = asqlText;
@@ -109,6 +115,22 @@ public class SqlQuery extends Query {
         return basesProxy;
     }
 
+    /**
+     * @return the datasourceName
+     */
+    public String getDatasourceName() {
+        return datasourceName;
+    }
+
+    /**
+     * @param aValue A datasourceName to set to the squery.
+     */
+    public void setDatasourceName(String aValue) {
+        String oldValue = datasourceName;
+        datasourceName = aValue;
+        changeSupport.firePropertyChange("datasourceName", oldValue, datasourceName);
+    }
+
     public boolean isCommand() {
         return command;
     }
@@ -118,9 +140,9 @@ public class SqlQuery extends Query {
     }
 
     /**
-     * Clears all roles assigned to this query.
-     * Used by two-tier datamodel for security context inheritance.
-     * WARNING!!! Don't use it if you have no clear mind about your use case.
+     * Clears all roles assigned to this query. Used by two-tier datamodel for
+     * security context inheritance. WARNING!!! Don't use it if you have no
+     * clear mind about your use case.
      */
     public void clearRoles() {
         if (readRoles != null) {
@@ -312,9 +334,9 @@ public class SqlQuery extends Query {
     }
 
     /*
-    @Override
-    public void enqueueUpdate() throws Exception {
-        compile().enqueueUpdate();
-    }
-    */
+     @Override
+     public void enqueueUpdate() throws Exception {
+     compile().enqueueUpdate();
+     }
+     */
 }

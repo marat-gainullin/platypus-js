@@ -159,7 +159,7 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     private Parameters decodeQueryParams(String aQueryName, HttpServletRequest aRequest) throws RowsetException, IOException, UnsupportedEncodingException, Exception {
         SqlQuery query = serverCore.getQueries().getQuery(aQueryName, null, null);
         Parameters params = query.getParameters();
-        DatabaseMdCache mdCache = serverCore.getDatabasesClient().getDbMetadataCache(query.getDbId());
+        DatabaseMdCache mdCache = serverCore.getDatabasesClient().getDbMetadataCache(query.getDatasourceName());
         Converter converter = mdCache != null && mdCache.getConnectionDriver() != null ? mdCache.getConnectionDriver().getConverter() : new RowsetConverter();
         for (int i = 1; i <= params.getParametersCount(); i++) {
             Parameter param = params.get(i);

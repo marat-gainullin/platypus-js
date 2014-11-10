@@ -46,10 +46,10 @@ public class DbSchemeModel2XmlDom extends Model2XmlDom<FieldsEntity, DbSchemeMod
         }
         if (currentNode != null && currentNode instanceof Element) {
             Element el = (Element) currentNode;
-            el.setAttribute(DATAMODEL_DB_ID, String.valueOf(aModel.getDbId()));
+            el.setAttribute(DATAMODEL_DATASOURCE, String.valueOf(aModel.getDatasourceName()));
             String lSchema = aModel.getSchema();
             if (lSchema != null) {
-                el.setAttribute(DATAMODEL_DB_SCHEMA_NAME, String.valueOf(lSchema));
+                el.setAttribute(DATAMODEL_DATASOURCE_SCHEMA_NAME, String.valueOf(lSchema));
             }
         }
     }

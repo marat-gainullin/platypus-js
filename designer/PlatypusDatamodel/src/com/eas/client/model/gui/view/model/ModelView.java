@@ -2096,7 +2096,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         entity.setY(rect.y);
         entity.setWidth(rect.width);
         entity.setHeight(rect.height);
-        entity.setTableDatasourceName(rSelected.dbId);
+        entity.setTableDatasourceName(rSelected.datasourceName);
         entity.setTableSchemaName(rSelected.schema);
         entity.setName(getEntiyName(rSelected.tableName));
         entity.setTableName(rSelected.tableName);

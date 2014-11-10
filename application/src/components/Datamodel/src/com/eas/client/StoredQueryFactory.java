@@ -35,7 +35,7 @@ public class StoredQueryFactory {
     public static final String _Q = "\\" + ClientConstants.STORED_QUERY_REF_PREFIX + "?";
 
     private Fields processSubQuery(SqlQuery aQuery, SubSelect aSubSelect) throws Exception {
-        SqlQuery subQuery = new SqlQuery(aQuery.getBasesProxy(), aQuery.getDbId(), "");
+        SqlQuery subQuery = new SqlQuery(aQuery.getBasesProxy(), aQuery.getDatasourceName(), "");
         subQuery.setEntityId(aSubSelect.getAliasName());
         resolveOutputFieldsFromTables(subQuery, aSubSelect.getSelectBody());
         Fields subFields = subQuery.getFields();
@@ -56,7 +56,7 @@ public class StoredQueryFactory {
     private boolean preserveDatasources;
 
     protected void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
-        Fields fields = getTableFields(aQuery.getDbId(), table);
+        Fields fields = getTableFields(aQuery.getDatasourceName(), table);
         if (fields != null) {
             fields.toCollection().stream().forEach((Field field) -> {
                 Field copied = field.copy();
@@ -287,7 +287,7 @@ public class StoredQueryFactory {
             if (parsedQuery instanceof Select) {
                 Select select = (Select) parsedQuery;
                 resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
-                SqlDriver driver = basesProxy.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
+                SqlDriver driver = basesProxy.getDbMetadataCache(aQuery.getDatasourceName()).getConnectionDriver();
                 Fields queryFields = aQuery.getFields();
                 if (queryFields != null) {
                     queryFields.toCollection().stream().forEach((field) -> {
@@ -443,7 +443,7 @@ public class StoredQueryFactory {
                      * таблицей из списка from. Поэтому мы должны связать их
                      * самостоятельно. Такая вот особенность парсера.
                      */
-                    Fields tableFields = getTableFields(aQuery.getDbId(), (Table) source);
+                    Fields tableFields = getTableFields(aQuery.getDatasourceName(), (Table) source);
                     field = tableFields != null ? tableFields.get(column.getColumnName()) : null;
                 } else if (source instanceof SubSelect) {
                     Fields subFields = processSubQuery(aQuery, (SubSelect) source);
@@ -461,7 +461,7 @@ public class StoredQueryFactory {
             for (FromItem anySource : aSources.values()) {
                 Fields fields = null;
                 if (anySource instanceof Table) {
-                    fields = getTableFields(aQuery.getDbId(), (Table) anySource);
+                    fields = getTableFields(aQuery.getDatasourceName(), (Table) anySource);
                 } else if (anySource instanceof SubSelect) {
                     fields = processSubQuery(aQuery, (SubSelect) anySource);
                 }

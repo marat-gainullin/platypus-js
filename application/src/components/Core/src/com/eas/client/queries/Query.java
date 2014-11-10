@@ -31,7 +31,6 @@ public abstract class Query {
     protected transient Fields fields = new Fields();
     protected transient Parameters params = new Parameters();
     protected transient String title;
-    protected String datasourceName;
     protected String entityName;
     protected boolean procedure;
     protected boolean manual;
@@ -54,10 +53,6 @@ public abstract class Query {
      */
     protected Query(Query aSource) {
         if (aSource != null) {
-            String sourceDatasourceName = aSource.getDbId();
-            if (sourceDatasourceName != null) {
-                datasourceName = sourceDatasourceName;
-            }
             procedure = aSource.isProcedure();
             manual = aSource.isManual();
             entityName = aSource.getEntityId();
@@ -271,23 +266,6 @@ public abstract class Query {
     }
 
     public abstract Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
-
-    //public abstract void enqueueUpdate() throws Exception;
-    /**
-     * @return the datasourceName
-     */
-    public String getDbId() {
-        return datasourceName;
-    }
-
-    /**
-     * @param aValue A datasourceName to set to the squery.
-     */
-    public void setDbId(String aValue) {
-        String oldValue = datasourceName;
-        datasourceName = aValue;
-        changeSupport.firePropertyChange("dbId", oldValue, datasourceName);
-    }
 
     /**
      * @return The application element identifier;

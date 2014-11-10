@@ -89,7 +89,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     @Override
     protected List<Change> getChangeLog() throws Exception {
         validateQuery();
-        String datasourceName = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDbId() : null;
+        String datasourceName = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDatasourceName() : null;
         return model.getChangeLog(datasourceName);
     }
 
@@ -181,7 +181,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             SqlCompiledQuery compiled = query.compile();
             rowset = compiled.prepareRowset();
             if (tableName != null && !tableName.isEmpty()) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
-                DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDbId());
+                DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDatasourceName());
                 SqlDriver driver = mdCache.getConnectionDriver();
                 TypesResolver resolver = driver.getTypesResolver();
                 rowset.getFields().toCollection().stream().forEach((field) -> {

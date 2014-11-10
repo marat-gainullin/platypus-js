@@ -591,9 +591,9 @@
             var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
             var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null);
             if (aTarget) {
-                P.Form.call(aTarget, form);
+                P.Form.call(aTarget, null, form);
             } else {
-                aTarget = new P.Form(form);
+                aTarget = new P.Form(null, form);
             }
             form.injectPublished(aTarget);
             if (!form.title)
@@ -1278,6 +1278,29 @@
     Object.defineProperty(Logger, "finest", {value: function (aMessage) {
             applicationLogger.finest("" + aMessage);
         }});
+
+    function async(aWorker, onSuccess, onFailure) {
+        ScriptUtilsClass.submitTask(function () {
+            try {
+                var result = aWorker();
+                try {
+                    ScriptUtilsClass.acceptTaskResult(function () {
+                        onSuccess(result);
+                    });
+                } catch (e) {
+                    applicationLogger.severe(e);
+                }
+            } catch (e) {
+                if (onFailure)
+                    onFailure('' + e);
+            }
+        });
+    }
+    Object.defineProperty(P, "async", {
+        get: function () {
+            return async;
+        }
+    });
 
     function readString(aFileName, aEncoding) {
         var encoding = 'utf-8';
