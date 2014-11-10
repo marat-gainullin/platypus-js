@@ -1350,6 +1350,7 @@ public class Form implements HasPublished {
                 }
             });
         } else {
+            windowHandler = new FormWindowEventsIProxy(this);
             view = new AnchorsPane();
             view.getComponent().setName(VIEW_SCRIPT_NAME);
             JSObject compPublished = (JSObject) view.getPublished();
