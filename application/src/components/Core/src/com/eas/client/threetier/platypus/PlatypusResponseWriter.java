@@ -8,9 +8,11 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
 import com.eas.client.ServerModuleInfo;
+import com.bearsoft.rowset.RowsetContainer;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Response;
+import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
@@ -31,6 +33,7 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -121,13 +124,29 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getResult() instanceof Report) {
-            Report report = (Report) rsp.getResult();
-            writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
-            writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
-            writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
+        if (rsp.getResult() instanceof JSObject) {
+            JSObject jsResult = (JSObject) rsp.getResult();
+            JSObject p = ScriptUtils.lookupInGlobal("P");
+            if (p != null) {
+                Object reportClass = p.getMember("Report");
+                Object dbEntityClass = p.getMember("ApplicationDbEntity");
+                if (jsResult.isInstanceOf(reportClass)) {
+                    Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
+                    writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
+                    writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
+                } else if (jsResult.isInstanceOf(dbEntityClass)) {
+                    RowsetContainer entity = (RowsetContainer) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
+                    RowsetJsonWriter rowsetWriter = new RowsetJsonWriter(entity.getRowset());
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, rowsetWriter.write()); 
+                } else {
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+                }
+            } else {
+                writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+            }
         } else {
-            writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
+            writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(ScriptUtils.toJs(rsp.getResult())));
         }
         writer.flush();
     }

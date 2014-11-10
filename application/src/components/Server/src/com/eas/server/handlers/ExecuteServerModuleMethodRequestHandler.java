@@ -14,6 +14,7 @@ import com.eas.script.ScriptUtils;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.security.AccessControlException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -85,7 +86,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                     Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
                                     Object oFun = moduleInstance.getMember(methodName);
                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                                        List<Object> args = Arrays.asList(getRequest().getArguments());
+                                        List<Object> args = new ArrayList<>(Arrays.asList(getRequest().getArguments()));
                                         args.add(new AbstractJSObject() {
                                             @Override
                                             public Object call(final Object thiz, final Object... largs) {

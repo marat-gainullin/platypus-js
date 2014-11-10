@@ -170,7 +170,6 @@ public class DependenciesWalker {
         });
         dependencies.removeAll(localFunctions);
         dependencies.removeAll(dynamicDependencies);
-        serverDependencies.removeAll(dynamicDependencies);
     }
 
     private void putDependence(String entityId) {

@@ -37,7 +37,6 @@
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
-    var DeamonThreadFactoryClass = Java.type("com.eas.concurrent.DeamonThreadFactory");
     var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
     var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
@@ -45,7 +44,6 @@
     var ModelLoaderClass = Java.type('com.eas.client.scripts.ApplicationModelLoader');
     var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
     var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
-    var TemplateClass = Java.type('com.eas.client.reports.ReportTemplate');
 
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
@@ -948,7 +946,7 @@
          }
          });
          */
-
+        
         Object.defineProperty(target, "createFilter", {
             value: function () {
                 var nEntity = this.unwrap();
@@ -1025,8 +1023,6 @@
     extend(BoundArray, Array);
     extend(P.ApplicationDbEntity, BoundArray);
     extend(P.ApplicationPlatypusEntity, BoundArray);
-    extend(P.ApplicationDbParametersEntity, BoundArray);
-    extend(P.ApplicationPlatypusParametersEntity, BoundArray);
 
     P.Filter.prototype.apply = function () {
         var varargs = new JavaArrayClass(arguments.length);
@@ -1061,8 +1057,6 @@
         }
         function publishEntity(nEntity) {
             var published = EngineUtilsClass.unwrap(nEntity.getPublished());
-            var paramsSubject = published instanceof P.ApplicationDbParametersEntity
-                    || published instanceof P.ApplicationPlatypusParametersEntity;
             var pSchema = {};
             Object.defineProperty(published, "schema", {
                 value: pSchema
@@ -1071,18 +1065,6 @@
             for (var n = 0; n < nFields.size(); n++) {
                 (function () {
                     var nField = nFields[n];
-                    if (paramsSubject) {
-                        var valueDesc = {
-                            get: function () {
-                                return boxAsJs(nField.value);
-                            },
-                            set: function (aValue) {
-                                nField.value = boxAsJava(aValue);
-                            }
-                        };
-                        Object.defineProperty(published, nField.name, valueDesc);
-                        Object.defineProperty(published, n, valueDesc);
-                    }
                     // schema
                     var schemaDesc = {
                         value: nField.getPublished()
@@ -1091,13 +1073,6 @@
                     Object.defineProperty(pSchema, n, schemaDesc);
                 })();
             }
-            if (paramsSubject) {
-                Object.defineProperty(published, "length", {
-                    get: function () {
-                        return nFields.size();
-                    }
-                });
-            } else {
                 // entity.params.p1 syntax
                 var nParameters = nEntity.getQuery().getParameters();
                 var ncParameters = nParameters.toCollection();
@@ -1122,7 +1097,6 @@
                 // entity.params.schema.p1 syntax
                 var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
                 Object.defineProperty(pParams, "schema", {value: pParamsSchema});
-            }
             Object.defineProperty(pSchema, "length", {
                 get: function () {
                     return nFields.size();
@@ -1130,14 +1104,6 @@
             });
             return published;
         }
-        (function () {
-            var pEntity = model.getParametersEntity();
-            var ppEntity = publishEntity(pEntity);
-            Object.defineProperty(aTarget, "params", {
-                value: ppEntity,
-                enumerable: true
-            });
-        })();
         var entities = model.entities();
         for each (var enEntity in entities) {
             enEntity.validateQuery();
@@ -1173,11 +1139,10 @@
     function loadTemplate(aName, aData, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
-        var template = new TemplateClass(reportConfig, aData);
         if (aTarget) {
-            P.ReportTemplate.call(aTarget, template);
+            P.ReportTemplate.call(aTarget, reportConfig, aData);
         } else {
-            aTarget = new P.ReportTemplate(template);
+            aTarget = new P.ReportTemplate(reportConfig, aData);
         }
         template.injectPublished(aTarget);
         return aTarget;
@@ -1189,52 +1154,49 @@
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
     function ServerModule(aModuleName) {
-        var client = ScriptedResourceClass.getPlatypusClient();
-        if (client) {
-            var request = new CreateRequestClass(IDGeneratorClass.genID(), aModuleName);
-            client.executeRequest(request);
-            var response = request.getResponse();
-            if (response.isPermitted()) {
-                var functions = response.getFunctionsNames();
-                var currentObject = this;
-                functions.forEach(function (aFunctionName) {
-                    currentObject[aFunctionName] = function () {
-                        var onSuccess = null;
-                        var onFailure = null;
-                        var argsLength = arguments.length;
-                        if (arguments.length > 1 && typeof arguments[arguments.length - 1] === "function" && typeof arguments[arguments.length - 2] === "function") {
-                            onSuccess = arguments[arguments.length - 2];
-                            onFailure = arguments[arguments.length - 1];
-                            argsLength -= 2;
-                        } else if (arguments.length > 0 && typeof arguments[arguments.length - 1] === "function") {
-                            onSuccess = arguments[arguments.length - 1];
-                            argsLength -= 1;
-                        }
-                        try {
-                            var params = new JavaArrayClass(argsLength);
-                            for (var j = 0; j < argsLength; j++) {
-                                params[j] = arguments[j];
-                            }
-                            var result = client.executeServerModuleMethod(aModuleName, aFunctionName, params);
-                            if (onSuccess) {
-                                onSuccess(result && result.getPublished ? result.getPublished() : result);
-                            } else {
-                                return result && result.getPublished ? result.getPublished() : result;
-                            }
-                        } catch (e) {
-                            if (onFailure) {
-                                onFailure(e);
-                            } else {
-                                throw e;
-                            }
-                        }
-                    };
-                });
-            } else {
-                throw "Access denied for module" + aModuleName + ". May be denied public access.";
+        if (aModuleName != null && aModuleName != "") {
+            var app = ScriptedResourceClass.getApp();
+            if (app) {
+                var proxy = app.getServerModules();
+                if (proxy) {
+                    var moduleInfo = proxy.getCachedStructure(aModuleName);
+                    if (moduleInfo.isPermitted()) {
+                        var functions = moduleInfo.getFunctionsNames();
+                        var currentObject = this;
+                        functions.forEach(function (aFunctionName) {
+                            currentObject[aFunctionName] = function () {
+                                var onSuccess = null;
+                                var onFailure = null;
+                                var argsLength = arguments.length;
+                                if (arguments.length > 1 && typeof arguments[arguments.length - 1] === "function" && typeof arguments[arguments.length - 2] === "function") {
+                                    onSuccess = arguments[arguments.length - 2];
+                                    onFailure = arguments[arguments.length - 1];
+                                    argsLength -= 2;
+                                } else if (arguments.length > 0 && typeof arguments[arguments.length - 1] === "function") {
+                                    onSuccess = arguments[arguments.length - 1];
+                                    argsLength -= 1;
+                                }
+                                var params = new JavaArrayClass(argsLength);
+                                for (var j = 0; j < argsLength; j++) {
+                                    params[j] = arguments[j];
+                                }
+                                if (onSuccess) {
+                                    proxy.callServerModuleMethod(aModuleName, aFunctionName, onSuccess, onFailure, params);
+                                } else {
+                                    var result = proxy.callServerModuleMethod(aModuleName, aFunctionName, null, null, params);
+                                    return result && result.getPublished ? result.getPublished() : result;
+                                }
+                            };
+                        });
+                    } else {
+                        throw "Access denied for module" + aModuleName + ". May be denied public access.";
+                    }
+                } else {
+                    throw "This architecture does not support server modules.";
+                }
             }
         } else {
-            throw "This architecture does not support server modules.";
+            throw "Module Name could not be empty.";
         }
     }
 

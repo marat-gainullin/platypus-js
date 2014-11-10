@@ -315,14 +315,9 @@ public class Model implements HasPublished {
 		validateQueries();
 		for (Entity entity : entities.values()) {
 			JavaScriptObject publishedEntity = JsModel.publish(entity);
-			if (entity instanceof ParametersEntity) {
-				ParametersEntity.publishTopLevelFacade(publishedEntity);
-				jsPublished.<JsObject> cast().inject("params", publishedEntity);
-			} else {
-				Entity.publishRows(publishedEntity);
-				if (entity.getName() != null && !entity.getName().isEmpty()) {
-					jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
-				}
+			Entity.publishRows(publishedEntity);
+			if (entity.getName() != null && !entity.getName().isEmpty()) {
+				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
 			}
 		}
 		//
