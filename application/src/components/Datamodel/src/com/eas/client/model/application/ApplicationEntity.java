@@ -29,9 +29,6 @@ import com.eas.client.SQLUtils;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
-import com.eas.client.model.application.ApplicationModel.RequeryProcess;
-import com.eas.client.model.visitors.ApplicationModelVisitor;
-import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -55,7 +52,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <Q>
  * @param <E>
  */
-public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
+public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
 
     public static final String BAD_FIELD_NAME_MSG = "Bad field name %s";
     public static final String BAD_FIND_AGRUMENTS_MSG = "Bad find agruments";
@@ -163,7 +160,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
 
     protected void silentUnpend() {
-        RequeryProcess p = model.process;
+        ApplicationModel.RequeryProcess<E, Q> p = model.process;
         model.process = null;
         try {
             unpend();
@@ -939,13 +936,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
     }
 
     @Override
-    public void accept(ModelVisitor<E> visitor) {
-        if (visitor instanceof ApplicationModelVisitor<?>) {
-            ((ApplicationModelVisitor<E>) visitor).visit((E) this);
-        }
-    }
-
-    @Override
     public void setPublished(Object aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
@@ -1002,8 +992,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
      * Returns change log for this entity. In some cases, we might have several
      * change logs in one model. Several databases is the case.
      *
-     * @return
      * @throws java.lang.Exception
+     * @return
      */
     protected abstract List<Change> getChangeLog() throws Exception;
 
@@ -1135,30 +1125,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
 
     public abstract void enqueueUpdate() throws Exception;
 
-    private static final String BEGIN_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Disables automatic model update on parameters change, @see endUpdate method.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = BEGIN_UPDATE_JSDOC)
-    public void beginUpdate() {
-        updatingCounter++;
-    }
-
-    private static final String END_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Enables automatic model update on parameters change, @see beginUpdate method.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = END_UPDATE_JSDOC)
-    public void endUpdate() throws Exception {
-        assert updatingCounter > 0;
-        updatingCounter--;
-        if (updatingCounter == 0) {
-            internalExecuteChildren(false);
-        }
-    }
-
     public boolean isRowsetPresent() {
         return rowset != null;
     }
@@ -1278,6 +1244,18 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, Q>, Q e
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
+
+    @Override
+    public boolean validate() throws Exception {
+        Rowset oldRowset = rowset;
+        boolean res = super.validate();
+        if (!res) {
+            rowset = oldRowset;
+        }
+        return res;
+    }
+
+    protected abstract void prepareRowsetByQuery() throws Exception;
 
     protected abstract void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception;
 

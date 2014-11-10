@@ -12,7 +12,6 @@ import com.eas.client.model.DummyRelation;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.gui.DatamodelDesignUtils;
@@ -52,10 +51,10 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
 
     protected static final String SCALABLE_COVER_DROP_LOCATION_TAG = "ScalableDropLocation";
     protected static final String SCALABLE_COVER_DROP_ACTION_TAG = "ScalableDropAction";
-    protected ModelView<E, ?, ?> modelView;
+    protected ModelView<E, ?> modelView;
     protected EntityView<E> entityView;
 
-    public RelationsFieldsDragHandler(ModelView<E, ?, ?> aModelView, EntityView<E> aEntityView) {
+    public RelationsFieldsDragHandler(ModelView<E, ?> aModelView, EntityView<E> aEntityView) {
         super();
         modelView = aModelView;
         entityView = aEntityView;
@@ -155,9 +154,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
                                             }
                                         }
                                     } else if (dropAction == COPY) {
-                                        return !(leftEntity instanceof ApplicationParametersEntity)
-                                                && !(leftEntity instanceof QueryParametersEntity)
-                                                && !(rightEntity instanceof ApplicationParametersEntity)
+                                        return !(leftEntity instanceof QueryParametersEntity)
                                                 && !(rightEntity instanceof QueryParametersEntity);
                                     }
                                 }
@@ -207,7 +204,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
                                             rightField = ((FieldsListModel.FieldsModel) list.getModel()).getElementAt(targetItemIndex);
                                         }
                                         if (leftEntity != null && rightEntity != null && leftField != null && rightField != null) {
-                                            if (rightEntity instanceof ApplicationParametersEntity || rightEntity instanceof QueryParametersEntity) {
+                                            if (rightEntity instanceof QueryParametersEntity) {
                                                 E tmpEntity = leftEntity;
                                                 leftEntity = rightEntity;
                                                 rightEntity = tmpEntity;
@@ -321,15 +318,18 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
 
     private boolean willFormCycle(E leftEntity, E rightEntity) {
         if (modelView != null) {
-            Model<E, ?, SqlQuery> model = modelView.getModel();
+            Model<E, SqlQuery> model = modelView.getModel();
             if (model != null) {
                 Relation<E> dummyRel = new DummyRelation<>(leftEntity, null, rightEntity, null);
                 try {
                     model.addRelation(dummyRel);
-                    Map<Long, E> lets = model.getAllEntities();
+                    Map<Long, E> lets = model.getEntities();
                     if (lets != null) {
                         Collection<E> entCol = lets.values();
                         if (entCol != null) {
+                            if (model instanceof QueryModel) {
+                                entCol.add((E)((QueryModel) model).getParametersEntity());
+                            }
                             // Build the graph to control cycles
                             List<CycledGraphNode> graph = new ArrayList<>();
                             Map<E, CycledGraphNode> ent2gn = new HashMap<>();

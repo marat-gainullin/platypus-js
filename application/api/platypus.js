@@ -1152,8 +1152,8 @@
             }
         }
         model.createORMDefinitions();
-        aTarget.loadEntity = function (queryId) {
-            var lnEntity = model.loadEntity(P.boxAsJava(queryId));
+        aTarget.loadEntity = function (queryName) {
+            var lnEntity = model.loadEntity(P.boxAsJava(queryName));
             return publishEntity(lnEntity);
         };
         aTarget.createEntity = function (sqlText, datasourceName) {
@@ -1179,6 +1179,7 @@
         } else {
             aTarget = new P.ReportTemplate(template);
         }
+        template.injectPublished(aTarget);
         return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});

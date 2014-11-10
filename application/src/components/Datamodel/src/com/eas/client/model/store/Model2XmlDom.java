@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,8 +22,10 @@ import org.w3c.dom.Node;
 /**
  *
  * @author mg
+ * @param <E>
+ * @param <M>
  */
-public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVisitor<E> {
+public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E, ?>> implements ModelVisitor<E, M> {
 
     protected final static String YES_STRING = "yes";
     protected final static String NO_STRING = "no";
@@ -56,12 +59,12 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         }
     }
 
-    protected Document model2XmlDom(Model<E, ?, ?> aModel) {
+    protected Document model2XmlDom(M aModel) {
         if (aModel != null && builder != null) {
             doc = builder.newDocument();
             doc.setXmlStandalone(true);
             currentNode = doc;
-            aModel.accept(this);
+            aModel.accept((ModelVisitor<E, Model<E, ?>>)this);
             doc.setXmlStandalone(true);
             return doc;
         }
@@ -73,40 +76,29 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         currentNode = null;
     }
 
-    public void writeModel(Model<E, ?, ?> aModel) {
+    public void writeModel(M aModel) {
         if (aModel != null) {
             Element datamodelNode = doc.createElement(DATAMODEL_TAG_NAME);
             currentNode.appendChild(datamodelNode);
             currentNode = datamodelNode;
+            writeEntities(aModel);
+            writeRelations(aModel);
+        }
+    }
 
-            Parameters parameters = aModel.getParameters();
-            if (parameters != null && !parameters.isEmpty()) {
-                Element paramsNode = doc.createElement(PARAMETERS_TAG_NAME);
-                currentNode.appendChild(paramsNode);
-                Node lCurrentNode = currentNode;
-                try {
-                    currentNode = paramsNode;
-                    for (int i = 0; i < parameters.getParametersCount(); i++) {
-                        visit(parameters.get(i + 1));
-                    }
-                } finally {
-                    currentNode = lCurrentNode;
-                }
-            }
-            // Special processing of parameters entity in order to save events and design information.
-            if (aModel.getParametersEntity() != null) {
-                aModel.getParametersEntity().accept(this);
-            }
-            if (aModel.getEntities() != null) {
-                for (E entity : aModel.getEntities().values()) {
-                    entity.accept(this);
-                }
-            }
-            if (aModel.getRelations() != null) {
-                for (Relation<E> relation : aModel.getRelations()) {
-                    relation.accept(this);
-                }
-            }
+    protected void writeRelations(M aModel) {
+        if (aModel.getRelations() != null) {
+            aModel.getRelations().stream().forEach((relation) -> {
+                relation.accept(this);
+            });
+        }
+    }
+
+    protected void writeEntities(M aModel) throws DOMException {
+        if (aModel.getEntities() != null) {
+            aModel.getEntities().values().stream().forEach((entity) -> {
+                entity.accept(this);
+            });
         }
     }
     public static final String NAME_ATTR_NAME = "name";
@@ -223,7 +215,7 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         }
     }
 
-    private String polylineToString(Relation relation) {
+    private String polylineToString(Relation<E> relation) {
         if (relation.getXs() != null && relation.getYs() != null && relation.getXs().length == relation.getYs().length) {
             StringBuilder sb = new StringBuilder();
             int[] xs = relation.getXs();

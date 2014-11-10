@@ -19,17 +19,16 @@ import javax.swing.event.DocumentListener;
  *
  * @author mg
  * @param <E>
- * @param <P>
  * @param <M>
  */
-public class FindFrame<E extends Entity<?, SqlQuery, E>, P extends E, M extends Model<E, P, SqlQuery>> extends javax.swing.JDialog implements DocumentListener {
+public class FindFrame<E extends Entity<?, SqlQuery, E>, M extends Model<E, SqlQuery>> extends javax.swing.JDialog implements DocumentListener {
 
-    private List<ModelView<E, P, M>.FindResult> found = null;
+    private List<ModelView<E, M>.FindResult> found = null;
     private int foundIndex = -1;
-    private ModelView<E, P, M> modelView = null;
+    private ModelView<E, M> modelView = null;
 
     /** Creates new form FindFrame */
-    public FindFrame(ModelView<E, P, M> aModelView) {
+    public FindFrame(ModelView<E, M> aModelView) {
         super();
         modelView = aModelView;
         initComponents();
@@ -37,7 +36,7 @@ public class FindFrame<E extends Entity<?, SqlQuery, E>, P extends E, M extends 
         txtFind.requestFocusInWindow();
     }
 
-    public FindFrame(ModelView<E, P, M> aModelView, JFrame aFrame) {
+    public FindFrame(ModelView<E, M> aModelView, JFrame aFrame) {
         super(aFrame);
         modelView = aModelView;
         initComponents();
@@ -45,7 +44,7 @@ public class FindFrame<E extends Entity<?, SqlQuery, E>, P extends E, M extends 
         txtFind.requestFocusInWindow();
     }
 
-    public FindFrame(ModelView<E, P, M> aModelView, JDialog aDlg) {
+    public FindFrame(ModelView<E, M> aModelView, JDialog aDlg) {
         super(aDlg);
         modelView = aModelView;
         initComponents();
@@ -301,7 +300,7 @@ private void formWindowDeactivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:
         assert !found.isEmpty() : "Search result is empty";
         assert foundIndex >= 0 : "Wrong found location (less than zero)";
         assert foundIndex < found.size() : "Wrong found location (greater than the search result size)";
-        ModelView<E, ?, ?>.FindResult fr = found.get(foundIndex);
+        ModelView<E, ?>.FindResult fr = found.get(foundIndex);
         if (fr != null) {
             fr.show();
         }

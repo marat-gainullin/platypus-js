@@ -243,14 +243,14 @@ public class DbControlsUtils {
         return false;
     }
 
-    public static ApplicationEntity<?, ?, ?> resolveEntity(ApplicationModel<?, ?, ?> aModel, ModelElementRef aModelRef) throws Exception {
+    public static ApplicationEntity<?, ?, ?> resolveEntity(ApplicationModel<?, ?> aModel, ModelElementRef aModelRef) throws Exception {
         if (aModel != null && aModelRef != null && aModelRef.getEntityId() != null) {
             return aModel.getEntityById(aModelRef.getEntityId());
         }
         return null;
     }
 
-    public static Rowset resolveRowset(ApplicationModel<?, ?, ?> aModel, ModelElementRef aModelRef) throws Exception {
+    public static Rowset resolveRowset(ApplicationModel<?, ?> aModel, ModelElementRef aModelRef) throws Exception {
         if (aModel != null && aModelRef != null && aModelRef.getEntityId() != null) {
             ApplicationEntity<?, ?, ?> appEntity = aModel.getEntityById(aModelRef.getEntityId());
             if (appEntity != null) {
@@ -260,7 +260,7 @@ public class DbControlsUtils {
         return null;
     }
 
-    public static int resolveFieldIndex(ApplicationModel<?, ?, ?> aModel, ModelElementRef aModelRef) throws Exception {
+    public static int resolveFieldIndex(ApplicationModel<?, ?> aModel, ModelElementRef aModelRef) throws Exception {
         if (aModel != null && aModelRef != null && aModelRef.getEntityId() != null) {
             ApplicationEntity<?, ?, ?> appEntity = aModel.getEntityById(aModelRef.getEntityId());
             if (appEntity != null) {
@@ -273,7 +273,7 @@ public class DbControlsUtils {
         return 0;
     }
 
-    public static Field resolveField(ApplicationModel<?, ?, ?> aModel, ModelElementRef aModelRef) throws Exception {
+    public static Field resolveField(ApplicationModel<?, ?> aModel, ModelElementRef aModelRef) throws Exception {
         if (aModel != null && aModelRef != null && aModelRef.getEntityId() != null) {
             ApplicationEntity<?, ?, ?> appEntity = aModel.getEntityById(aModelRef.getEntityId());
             if (appEntity != null) {
@@ -286,7 +286,7 @@ public class DbControlsUtils {
         return null;
     }
 
-    public static Parameter resolveParameter(ApplicationModel<?, ?, ?> aModel, ModelElementRef aModelRef) throws Exception {
+    public static Parameter resolveParameter(ApplicationModel<?, ?> aModel, ModelElementRef aModelRef) throws Exception {
         if (aModel != null && aModelRef != null && aModelRef.getEntityId() != null) {
             ApplicationEntity<?, ?, ?> appEntity = aModel.getEntityById(aModelRef.getEntityId());
             if (!aModelRef.isField() && appEntity != null && appEntity.getQuery() != null) {

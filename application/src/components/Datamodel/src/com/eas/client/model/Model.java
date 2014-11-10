@@ -17,43 +17,31 @@ import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
-import org.w3c.dom.Document;
 
 /**
  * @param <E> Entity generic type.
- * @param <P> Parameters entity generic type.
  * @param <Q> Query generic type.
  * @author mg
  */
-public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Query> {
+public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
 
-    public static final long PARAMETERS_ENTITY_ID = -1L;
-    public static final String PARAMETERS_SCRIPT_NAME = "params";
     public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
     public static final String DATASOURCE_NAME_TAG_NAME = "Name";
     public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
     protected Set<Relation<E>> relations = new HashSet<>();
     protected Map<Long, E> entities = new HashMap<>();
-    protected P parametersEntity;
-    protected Parameters parameters = new Parameters();
     protected ModelEditingSupport<E> editingSupport = new ModelEditingSupport<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected boolean relationsAgressiveCheck;
 
-    public Model<E, P, Q> copy() throws Exception {
-        Model<E, P, Q> copied = getClass().newInstance();
+    public Model<E, Q> copy() throws Exception {
+        Model<E, Q> copied = getClass().newInstance();
         for (E entity : entities.values()) {
             copied.addEntity((E) entity.copy());
         }
-        if (parameters != null) {
-            copied.setParameters(parameters.copy());
-        }
-        if (getParametersEntity() != null) {
-            copied.setParametersEntity((P) getParametersEntity().copy());
-        }
         for (Relation<E> relation : relations) {
             Relation<E> rcopied = relation.copy();
-            resolveRelation(rcopied, copied);
+            copied.resolveRelation(rcopied);
             copied.addRelation(rcopied);
         }
         return copied;
@@ -98,7 +86,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
 
     protected void validateRelations() throws Exception {
         for (Relation<E> rel : relations) {
-            resolveRelation(rel, this);
+            resolveRelation(rel);
         }
     }
 
@@ -184,17 +172,12 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
                 return appEntity;
             }
         }
-        if (parametersEntity != null && parametersEntity.getName() != null && parametersEntity.getName().equalsIgnoreCase(aName)) {
-            return parametersEntity;
-        }
         return null;
     }
 
     public abstract E newGenericEntity();
 
-    public abstract void accept(ModelVisitor<E> visitor);
-
-    public abstract Document toXML();
+    public abstract <M extends Model<E, ?>> void accept(ModelVisitor<E, M> visitor);
 
     /**
      * Registers an <code>DatamodelEditingValidator</code>. The validator is
@@ -257,14 +240,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
         editingSupport.fireRelationRemoved(aRel);
     }
 
-    public P getParametersEntity() {
-        return parametersEntity;
-    }
-
-    public Parameters getParameters() {
-        return parameters;
-    }
-
     public void addRelation(Relation<E> aRel) {
         relations.add(aRel);
         E lEntity = aRel.getLeftEntity();
@@ -313,26 +288,8 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
         return entities;
     }
 
-    /**
-     * Sane as getEntities, but returns also parameters entity if it exists.
-     *
-     * @return
-     */
-    public Map<Long, E> getAllEntities() {
-        Map<Long, E> allEntities = new HashMap<>();
-        allEntities.putAll(entities);
-        if (parametersEntity != null) {
-            allEntities.put(parametersEntity.getEntityId(), parametersEntity);
-        }
-        return allEntities;
-    }
-
     public E getEntityById(Long aId) {
-        if (aId != null && PARAMETERS_ENTITY_ID == aId) {
-            return parametersEntity;
-        } else {
-            return entities.get(aId);
-        }
+        return entities.get(aId);
     }
 
     public void setEntities(Map<Long, E> aValue) {
@@ -341,14 +298,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
 
     public Set<Relation<E>> getRelations() {
         return relations;
-    }
-
-    public void setParameters(Parameters aParams) {
-        parameters = aParams;
-    }
-
-    public void setParametersEntity(P aParamsEntity) {
-        parametersEntity = aParamsEntity;
     }
 
     public void setRelations(Set<Relation<E>> aRelations) {
@@ -393,13 +342,12 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
         relationsAgressiveCheck = aValue;
     }
 
-    protected void resolveRelation(Relation<E> aRelation, Model<E, P, Q> aModel) throws Exception {
-        if (aRelation.getLeftEntity() != null) {
-            aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
-        }
-        if (aRelation.getRightEntity() != null) {
-            aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
-        }
+    public void resolveRelation(Relation<E> aRelation) throws Exception {
+        resolveRelationEntities(aRelation);
+        resolveRelationFields(aRelation);
+    }
+
+    protected void resolveRelationFields(Relation<E> aRelation) {
         if (aRelation.getLeftField() != null) {
             String targetName = aRelation.getLeftField().getName();
             if (aRelation.getLeftEntity() != null) {
@@ -455,6 +403,15 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, Q extends Qu
             } else {
                 aRelation.setRightField(new Field(targetName));
             }
+        }
+    }
+
+    protected void resolveRelationEntities(Relation<E> aRelation) {
+        if (aRelation.getLeftEntity() != null) {
+            aRelation.setLeftEntity(getEntityById(aRelation.getLeftEntity().getEntityId()));
+        }
+        if (aRelation.getRightEntity() != null) {
+            aRelation.setRightEntity(getEntityById(aRelation.getRightEntity().getEntityId()));
         }
     }
 

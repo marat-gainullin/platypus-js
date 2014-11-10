@@ -38,7 +38,7 @@ public final class QueryResultsSelectedTextAction implements ActionListener {
                 if (ec != null && ec.getOpenedPane() != null) {
                     String selectedText = ec.getOpenedPane().getSelectedText();
                     if (selectedText != null && !selectedText.isEmpty()) {
-                        QueryResultsAction.openQueryResultsView(new QueryResultsView(context, selectedText));
+                        QueryResultsAction.openQueryResultsView(new QueryResultsView(context.getBasesProxy(), context.getDatasourceName(), selectedText));
                         return;
                     }
                 }

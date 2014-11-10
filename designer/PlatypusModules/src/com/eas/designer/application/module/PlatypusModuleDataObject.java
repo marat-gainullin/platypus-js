@@ -14,6 +14,7 @@ import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
@@ -231,11 +232,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     public void shrink() {
-        if (model != null) {
-            for (Field field : model.getParametersEntity().getFields().toCollection()) {
-                field.getChangeSupport().removePropertyChangeListener(modelChangesObserver);
-            }
-        }
         model = null;
         modelNode = null;
         astIsValid = false;
@@ -270,11 +266,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             model = readModel();
             modelNode = createModelNode();
             model.addEditingListener(modelChangesObserver);
-            model.getParametersEntity().getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            model.getParametersEntity().getFields().getCollectionSupport().addListener(modelChangesObserver);
-            for (Field field : model.getParametersEntity().getFields().toCollection()) {
-                field.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            }
             for (ApplicationDbEntity entity : model.getEntities().values()) {
                 entity.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
             }
@@ -312,7 +303,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     public void saveModel() throws IOException {
         if (model != null) {
-            org.w3c.dom.Document doc = model.toXML();
+            org.w3c.dom.Document doc = ApplicationModel2XmlDom.transform(model);
             String modelContent = XmlDom2String.transform(doc);
             try (OutputStream out = getModelFile().getOutputStream()) {
                 out.write(modelContent.getBytes(PlatypusUtils.COMMON_ENCODING_NAME));

@@ -4,25 +4,22 @@
  */
 package com.eas.client.model.dbscheme;
 
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.Model;
-import com.eas.client.model.visitors.DbSchemeModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.Types;
 import java.util.List;
 import java.util.Set;
-import org.w3c.dom.Document;
 
 /**
  *
  * @author mg
  */
-public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, SqlQuery> {
+public class DbSchemeModel extends Model<FieldsEntity, SqlQuery> {
 
     protected String datasourceName;
     protected String schema;
@@ -30,20 +27,17 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, SqlQuery> {
 
     public DbSchemeModel() {
         super();
-        assert parametersEntity == null;
     }
 
     public DbSchemeModel(DatabasesClient aBasesProxy) {
         super();
         basesProxy = aBasesProxy;
-        assert parametersEntity == null;
     }
 
     public DbSchemeModel(DatabasesClient aBasesProxy, String aDatasourceName) {
         super();
         basesProxy = aBasesProxy;
         datasourceName = aDatasourceName;
-        assert parametersEntity == null;
     }
 
     public DatabasesClient getBasesProxy() {
@@ -51,10 +45,8 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, SqlQuery> {
     }
 
     @Override
-    public void accept(ModelVisitor<FieldsEntity> visitor) {
-        if (visitor instanceof DbSchemeModelVisitor) {
-            ((DbSchemeModelVisitor) visitor).visit(this);
-        }
+    public <M extends Model<FieldsEntity, ?>> void accept(ModelVisitor<FieldsEntity, M> visitor) {
+        visitor.visit((M)this);
     }
 
     @Override
@@ -66,21 +58,6 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, SqlQuery> {
     public void addEntity(FieldsEntity aEntity) {
         aEntity.setModel(this);
         super.addEntity(aEntity);
-    }
-
-    @Override
-    public Document toXML() {
-        return DbSchemeModel2XmlDom.transform(this);
-    }
-
-    @Override
-    public Parameters getParameters() {
-        return null;
-    }
-
-    @Override
-    public FieldsEntity getParametersEntity() {
-        return null;
     }
 
     public String getDbId() {

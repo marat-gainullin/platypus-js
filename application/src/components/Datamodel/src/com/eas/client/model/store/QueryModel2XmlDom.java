@@ -2,22 +2,51 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.query;
+package com.eas.client.model.store;
 
-import com.eas.client.model.store.Model2XmlDom;
+import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.model.query.QueryEntity;
+import com.eas.client.model.query.QueryModel;
+import com.eas.client.model.query.QueryParametersEntity;
+import static com.eas.client.model.store.Model2XmlDom.PARAMETERS_TAG_NAME;
 import com.eas.client.model.visitors.QueryModelVisitor;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  *
  * @author mg
  */
-public class QueryModel2XmlDom extends Model2XmlDom<QueryEntity> implements QueryModelVisitor {
+public class QueryModel2XmlDom extends Model2XmlDom<QueryEntity, QueryModel> implements QueryModelVisitor {
 
-    static Document transform(QueryModel aModel) {
+    public static Document transform(QueryModel aModel) {
         QueryModel2XmlDom transformer = new QueryModel2XmlDom();
         return transformer.model2XmlDom(aModel);
+    }
+
+    @Override
+    protected void writeEntities(QueryModel aModel) throws DOMException {
+        Parameters parameters = aModel.getParameters();
+        if (parameters != null && !parameters.isEmpty()) {
+            Element paramsNode = doc.createElement(PARAMETERS_TAG_NAME);
+            currentNode.appendChild(paramsNode);
+            Node lCurrentNode = currentNode;
+            try {
+                currentNode = paramsNode;
+                for (int i = 0; i < parameters.getParametersCount(); i++) {
+                    visit(parameters.get(i + 1));
+                }
+            } finally {
+                currentNode = lCurrentNode;
+            }
+        }
+        // Special processing of parameters entity in order to save events and design information.
+        if (aModel.getParametersEntity() != null) {
+            aModel.getParametersEntity().accept(this);
+        }
+        super.writeEntities(aModel);
     }
 
     @Override

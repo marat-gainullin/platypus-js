@@ -4,24 +4,29 @@
  */
 package com.eas.client.model.query;
 
+import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Model;
+import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.model.visitors.QueryModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.w3c.dom.Document;
 
 /**
  *
  * @author mg
  */
-public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQuery> {
+public class QueryModel extends Model<QueryEntity, SqlQuery> {
 
+    public static final long PARAMETERS_ENTITY_ID = -1L;
+    public static final String PARAMETERS_SCRIPT_NAME = "params";
+    protected QueryParametersEntity parametersEntity;
+    //
+    protected Parameters parameters = new Parameters();
     protected QueriesProxy<SqlQuery> queries;
     protected DatabasesClient basesProxy;
     protected String datasourceName;
@@ -61,10 +66,55 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQue
     }
 
     @Override
-    public void accept(ModelVisitor<QueryEntity> visitor) {
-        if (visitor instanceof QueryModelVisitor) {
-            ((QueryModelVisitor) visitor).visit(this);
+    public Model<QueryEntity, SqlQuery> copy() throws Exception {
+        Model<QueryEntity, SqlQuery> copied = super.copy();
+        if (parameters != null) {
+            ((QueryModel) copied).setParameters(parameters.copy());
         }
+        if (getParametersEntity() != null) {
+            ((QueryModel) copied).setParametersEntity(getParametersEntity().copy());
+        }
+        return copied;
+    }
+
+    /*
+     @Override
+     public QueryEntity getEntityByName(String aName) {
+     QueryEntity found = super.getEntityByName(aName);
+     if (found == null) {
+     assert parametersEntity != null;
+     if (parametersEntity.getName() != null && parametersEntity.getName().equalsIgnoreCase(aName)) {
+     found = parametersEntity;
+     }
+     }
+     return found;
+     }
+     */
+    public QueryParametersEntity getParametersEntity() {
+        return parametersEntity;
+    }
+
+    public Parameters getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Parameters aParams) {
+        parameters = aParams;
+    }
+
+    public void setParametersEntity(QueryParametersEntity aParamsEntity) {
+        if (parametersEntity != null) {
+            parametersEntity.setModel(null);
+        }
+        parametersEntity = aParamsEntity;
+        if (parametersEntity != null) {
+            parametersEntity.setModel(this);
+        }
+    }
+
+    @Override
+    public <M extends Model<QueryEntity, ?>> void accept(ModelVisitor<QueryEntity, M> visitor) {
+        visitor.visit((M) this);
     }
 
     @Override
@@ -79,19 +129,21 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQue
     }
 
     @Override
-    public void setParametersEntity(QueryParametersEntity aParamsEntity) {
-        if (parametersEntity != null) {
-            parametersEntity.setModel(null);
+    protected void resolveRelationEntities(Relation<QueryEntity> aRelation) {
+        if (aRelation.getLeftEntity() != null) {
+            if (aRelation.getLeftEntity() instanceof QueryParametersEntity) {
+                aRelation.setLeftEntity(getParametersEntity());
+            } else {
+                aRelation.setLeftEntity(getEntityById(aRelation.getLeftEntity().getEntityId()));
+            }
         }
-        super.setParametersEntity(aParamsEntity);
-        if (parametersEntity != null) {
-            parametersEntity.setModel(this);
+        if (aRelation.getRightEntity() != null) {
+            if (aRelation.getRightEntity() instanceof QueryParametersEntity) {
+                aRelation.setRightEntity(getParametersEntity());
+            } else {
+                aRelation.setRightEntity(getEntityById(aRelation.getRightEntity().getEntityId()));
+            }
         }
-    }
-    
-    @Override
-    public Document toXML() {
-        return QueryModel2XmlDom.transform(this);
     }
 
     @Override
@@ -111,11 +163,12 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, SqlQue
             }
         }
     }
-    
+
     /**
      * Validates queries in force way. Such case is used in designer ONLY!
+     *
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     @Override
     protected boolean validateEntities() throws Exception {

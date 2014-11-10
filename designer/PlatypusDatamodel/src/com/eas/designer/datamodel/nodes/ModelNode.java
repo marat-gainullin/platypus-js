@@ -24,7 +24,7 @@ import org.openide.util.ImageUtilities;
 /**
  * @author mg
  */
-public class ModelNode<E extends Entity<?, SqlQuery, E>, M extends Model<E, ?, SqlQuery>> extends AbstractNode {
+public class ModelNode<E extends Entity<?, SqlQuery, E>, M extends Model<E, SqlQuery>> extends AbstractNode {
 
     protected static final String DATAMODEL_ICON_NAME = "datamodel16.png"; //NOI18N
     protected DataObject dataObject;

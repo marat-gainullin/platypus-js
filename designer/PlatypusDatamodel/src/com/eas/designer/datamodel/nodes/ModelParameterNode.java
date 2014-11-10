@@ -6,9 +6,7 @@ package com.eas.designer.datamodel.nodes;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Model;
-import com.eas.script.ScriptUtils;
 import javax.swing.undo.UndoableEdit;
-import org.openide.ErrorManager;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -35,6 +33,7 @@ public class ModelParameterNode extends FieldNode {
     }
 
     public boolean isValidName(Model model, String name) {
+        /*
         try {
             model.getParameters().invalidateFieldsHash();
             return !name.isEmpty() 
@@ -45,6 +44,8 @@ public class ModelParameterNode extends FieldNode {
             ErrorManager.getDefault().notify(ex);
         }
         return false;
+                */
+        return true;
     }
     
     @Override

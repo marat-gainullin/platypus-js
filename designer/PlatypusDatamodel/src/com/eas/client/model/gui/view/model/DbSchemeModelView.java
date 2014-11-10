@@ -24,15 +24,20 @@ import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.DmAction;
+import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
 import com.eas.client.model.gui.edits.DeleteEntityEdit;
+import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.NewEntityEdit;
 import com.eas.client.model.gui.edits.NewRelationEdit;
+import com.eas.client.model.gui.edits.fields.DeleteFieldEdit;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.entities.TableEntityView;
+import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.xml.dom.Source2XmlDom;
+import com.eas.xml.dom.XmlDom2String;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -58,7 +63,7 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel> {
+public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
     protected SqlActionsController sqlController;
 
@@ -68,7 +73,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     @Override
-    public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
+    public void doAddQuery(String aAppQueryName, int aX, int aY) throws Exception {
         // No op. We can't add queries to db-diagram model
     }
 
@@ -211,8 +216,25 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     @Override
-    protected DbSchemeModel newModelInstance() {
-        return new DbSchemeModel(model.getBasesProxy());
+    protected void deleteSelectedFields() {
+        if (isSelectedDeletableFields()) {
+            AccessibleCompoundEdit section = new AccessibleCompoundEdit();
+            Set<EntityFieldTuple> toDelete = new HashSet<>(selectedFields);
+            clearSelection();
+            for (EntityFieldTuple t : toDelete) {
+                Set<Relation<FieldsEntity>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
+                for (Relation rel : toDel) {
+                    DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
+                    drEdit.redo();
+                    section.addEdit(drEdit);
+                }
+                DeleteFieldEdit edit = new DeleteFieldEdit(t.entity, t.field);
+                edit.redo();
+                section.addEdit(edit);
+            }
+            section.end();
+            undoSupport.postEdit(section);
+        }
     }
 
     public Relation<FieldsEntity> getSelectedFkFieldRelation() {
@@ -308,7 +330,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         }
     }
 
-    public class AddTableAction extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel>.AddTable {
+    public class AddTableAction extends ModelView<FieldsEntity, DbSchemeModel>.AddTable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -524,7 +546,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         }
     }
 
-    public class DropFkRemoveTableAction extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel>.Delete {
+    public class DropFkRemoveTableAction extends ModelView<FieldsEntity, DbSchemeModel>.Delete {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -792,7 +814,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         }
     }
 
-    public class PasteTablesAction extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel>.Paste {
+    public class PasteTablesAction extends ModelView<FieldsEntity,  DbSchemeModel>.Paste {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -1035,6 +1057,19 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         sqlController = aSqlActionsController;
     }
 
+    @Override
+    protected void copySelectedEntities() {
+        DbSchemeModel copied = new DbSchemeModel(model.getBasesProxy());
+        selectedEntities.stream().forEach((FieldsEntity ent) -> {
+            if (ent != null) {
+                copied.getEntities().put(ent.getEntityId(), ent);
+            }
+        });
+        Document doc = DbSchemeModel2XmlDom.transform(copied);
+        String content = XmlDom2String.transform(doc);
+        string2SystemClipboard(content);
+    }
+
     public void resolveTables() throws Exception {
         Map<Long, FieldsEntity> entities = model.getEntities();
         if (entities != null && !entities.isEmpty()) {
@@ -1051,7 +1086,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                 edit.redo();
             }
             if (!entities2Delete.isEmpty()) {
-                createEntityViews();
+                recreateEntityViews();
             }
         }
     }

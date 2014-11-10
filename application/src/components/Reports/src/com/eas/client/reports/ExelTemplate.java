@@ -7,29 +7,16 @@
  */
 package com.eas.client.reports;
 
-import com.eas.client.report.Report;
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactBlob;
-import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.bearsoft.rowset.wrappers.jdbc.ResultSetImpl;
-import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.script.ScriptUtils;
-import com.eas.util.BinaryUtils;
 import java.io.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.objects.NativeArray;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.*;
 import org.apache.poi.ss.usermodel.Workbook;

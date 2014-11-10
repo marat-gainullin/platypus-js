@@ -92,7 +92,7 @@ public class FileIndexer extends CustomIndexer {
     }
 
     private static boolean isIndexableFile(String nameExt) {
-        //For now indexing only js, sql and connection files
+        //For now indexing only js and sql files
         return nameExt.endsWith(PlatypusFiles.JAVASCRIPT_EXTENSION)
                 || nameExt.endsWith(PlatypusFiles.SQL_EXTENSION);
     }

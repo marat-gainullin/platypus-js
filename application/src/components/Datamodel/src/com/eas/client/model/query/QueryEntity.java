@@ -8,9 +8,9 @@ import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.visitors.ModelVisitor;
-import com.eas.client.model.visitors.QueryModelVisitor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 
 /**
  *
@@ -31,6 +31,11 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
 
     public QueryEntity(String aQueryName) {
         super(aQueryName);
+    }
+
+    @Override
+    public void accept(ModelVisitor<QueryEntity, QueryModel> visitor) {
+        visitor.visit(this);
     }
 
     @Override
@@ -65,13 +70,6 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
     }
 
     @Override
-    public void accept(ModelVisitor<QueryEntity> visitor) {
-        if (visitor instanceof QueryModelVisitor) {
-            ((QueryModelVisitor) visitor).visit(this);
-        }
-    }
-
-    @Override
     public void validateQuery() throws Exception {
         if (query == null) {
             if (queryName != null) {
@@ -84,7 +82,11 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
                     query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
                 } catch (Exception ex) {
                     query = null;
-                    Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, null, ex);
+                    if (ex instanceof NamingException) {
+                        Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, ex.getMessage());
+                    } else {
+                        Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, null, ex);
+                    }
                 }
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";

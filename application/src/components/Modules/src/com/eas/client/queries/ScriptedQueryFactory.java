@@ -24,16 +24,12 @@ import java.util.regex.Pattern;
  */
 public class ScriptedQueryFactory extends StoredQueryFactory{
 
-    private final LocalQueriesProxy subQueriesProxy;
-    
     public ScriptedQueryFactory(DatabasesClient aBasesProxy, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        super(aBasesProxy, aIndexer, aPreserveDatasources);
-        subQueriesProxy = aQueriesProxy;
+        super(aBasesProxy, aQueriesProxy, aIndexer, aPreserveDatasources);
     }
 
     public ScriptedQueryFactory(DatabasesClient aBasesProxy, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
-        super(aBasesProxy, aIndexer);
-        subQueriesProxy = aQueriesProxy;
+        super(aBasesProxy, aQueriesProxy, aIndexer);
     }
     
     /**

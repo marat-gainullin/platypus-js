@@ -4,8 +4,15 @@
  */
 package com.eas.client.model.gui.view.model;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.metadata.TableRef;
+import com.eas.client.model.Entity;
+import com.eas.client.model.Relation;
+import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
+import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.NewEntityEdit;
+import com.eas.client.model.gui.edits.fields.DeleteFieldEdit;
+import com.eas.client.model.gui.edits.fields.NewFieldEdit;
 import com.eas.client.model.gui.selectors.AppElementSelectorCallback;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
@@ -15,15 +22,21 @@ import com.eas.client.model.gui.view.entities.QueryParametersEntityView;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
+import com.eas.client.model.store.QueryModel2XmlDom;
 import com.eas.client.model.store.XmlDom2QueryModel;
+import com.eas.xml.dom.XmlDom2String;
 import java.awt.Rectangle;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.swing.undo.CannotRedoException;
 import org.w3c.dom.Document;
 
 /**
  *
  * @author mg
  */
-public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity, QueryModel> {
+public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
 
     protected AppElementSelectorCallback appElementSelector;
 
@@ -37,6 +50,13 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
         super(aModel, aSelectorCallback);
         appElementSelector = aAppElementSelector;
         putAddQueryAction();
+    }
+
+    @Override
+    protected void doCreateEntityViews() throws Exception {
+        super.doCreateEntityViews();
+        EntityView<QueryEntity> eView = createEntityView(model.getParametersEntity());
+        addEntityView(eView);
     }
 
     @Override
@@ -54,6 +74,15 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
     @Override
     protected boolean isParametersEntity(QueryEntity aEntity) {
         return aEntity instanceof QueryParametersEntity;
+    }
+
+    @Override
+    public EntityView<QueryEntity> getParametersView() {
+        if (entityViews != null) {
+            return entityViews.get(QueryModel.PARAMETERS_ENTITY_ID);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -101,11 +130,6 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
         }
     }
 
-    @Override
-    protected QueryModel newModelInstance() {
-        return new QueryModel(model.getBasesProxy(), model.getQueries());
-    }
-
     protected final void putAddQueryAction() {
         getActionMap().put(AddQueryAction.class.getSimpleName(), new AddQueryAction(this, undoSupport, appElementSelector));
     }
@@ -137,4 +161,74 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
         }
         return false;
     }
+
+    @Override
+    protected void deleteSelectedFields() {
+        if (isSelectedDeletableFields()) {
+            AccessibleCompoundEdit section = new AccessibleCompoundEdit();
+            Set<EntityFieldTuple> toDelete = new HashSet<>(selectedFields);
+            clearSelection();
+            for (EntityFieldTuple t : toDelete) {
+                Set<Relation<QueryEntity>> toDel = Entity.getInOutRelationsByEntityField(t.entity, t.field);
+                for (Relation rel : toDel) {
+                    DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
+                    drEdit.redo();
+                    section.addEdit(drEdit);
+                }
+                DeleteFieldEdit edit = new DeleteFieldEdit(t.entity, t.field);
+                edit.redo();
+                section.addEdit(edit);
+            }
+            section.end();
+            undoSupport.postEdit(section);
+        }
+    }
+
+    @Override
+    protected void copySelectedEntities() {
+        QueryModel copied = new QueryModel(model.getQueries());
+        selectedFields.stream().forEach((ef) -> {
+            if (ef.entity instanceof QueryParametersEntity) {
+                copied.getParameters().add(ef.field);
+            }
+        });
+        selectedEntities.stream().forEach((QueryEntity ent) -> {
+            if (ent != null && !(ent instanceof QueryParametersEntity)) {
+                copied.getEntities().put(ent.getEntityId(), ent);
+            }
+        });
+        Document doc = QueryModel2XmlDom.transform(copied);
+        String content = XmlDom2String.transform(doc);
+        string2SystemClipboard(content);
+    }
+
+    @Override
+    protected void pasteEntities(QueryModel pastedModel, List<QueryEntity> entitiesPasted) throws CannotRedoException {
+        pasteParameters(pastedModel);
+        super.pasteEntities(pastedModel, entitiesPasted);
+    }
+
+    private void pasteParameters(QueryModel sourceModel) {
+        undoSupport.beginUpdate();
+        try {
+            for (Field field : sourceModel.getParameters().toCollection()) {
+                field.setName(getParameterName(field.getName()));
+                NewFieldEdit edit = new NewFieldEdit(getParametersView().getEntity(), field);
+                edit.redo();
+                undoSupport.postEdit(edit);
+            }
+        } finally {
+            undoSupport.endUpdate();
+        }
+    }
+
+    private String getParameterName(String paramName) {
+        String s = paramName;
+        int i = 1;
+        while (model.getParameters().get(s) != null) {
+            s = String.format(NAME_PATTERN, paramName, i++);
+        }
+        return s;
+    }
+
 }

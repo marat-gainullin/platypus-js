@@ -9,6 +9,7 @@
  */
 package com.eas.client.model;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -25,7 +26,7 @@ import java.util.Set;
  * @param <Q>
  * @param <E>
  */
-public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extends Entity<M, Q, E>> {
+public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends Entity<M, Q, E>> {
 
     public static final String MODEL_PROPERTY = "model";
     public static final String ENTITY_ID_PROPERTY = "entityId";
@@ -103,18 +104,18 @@ public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extend
     public boolean validate() throws Exception {
         Q oldQuery = query;
         Fields oldFields = oldQuery != null ? oldQuery.getFields() : null;
-        Parameters oldParams = oldQuery != null ? oldQuery.getParameters(): null;
+        Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
         query = null;
         validateQuery();
         Q newQuery = getQuery();
         Fields newFields = newQuery != null ? newQuery.getFields() : null;
-        Parameters newParams = newQuery != null ? newQuery.getParameters(): null;
-        
+        Parameters newParams = newQuery != null ? newQuery.getParameters() : null;
+
         boolean res = false;
-        if(oldFields == null ? newFields != null : !oldFields.isEqual(newFields)){
+        if (oldFields == null ? newFields != null : !oldFields.isEqual(newFields)) {
             res = true;
         }
-        if(oldParams == null ? newParams != null : !oldParams.isEqual(newParams)){
+        if (oldParams == null ? newParams != null : !oldParams.isEqual(newParams)) {
             res = true;
         }
         if (!res) {
@@ -141,7 +142,7 @@ public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extend
         changeSupport.firePropertyChange(MODEL_PROPERTY, oldValue, aValue);
     }
 
-    public abstract void accept(ModelVisitor<E> visitor);
+    public abstract void accept(ModelVisitor<E, M> visitor);
 
     public Long getEntityId() {
         return entityId;
@@ -358,4 +359,26 @@ public abstract class Entity<M extends Model<E, ?, Q>, Q extends Query, E extend
         assignTo.setTitle(getTitle());
         assignTo.setName(getName());
     }
+
+    public static <E extends Entity<?, ?, E>> Set<Relation<E>> getInOutRelationsByEntityField(E aEntity, Field aField) {
+        Set<Relation<E>> result = new HashSet<>();
+        Set<Relation<E>> rels = aEntity.getInRelations();
+        if (rels != null) {
+            for (Relation<E> rel : rels) {
+                if (rel.getRightField() == aField) {
+                    result.add(rel);
+                }
+            }
+        }
+        rels = aEntity.getOutRelations();
+        if (rels != null) {
+            for (Relation<E> rel : rels) {
+                if (rel.getLeftField() == aField) {
+                    result.add(rel);
+                }
+            }
+        }
+        return result;
+    }
+
 }

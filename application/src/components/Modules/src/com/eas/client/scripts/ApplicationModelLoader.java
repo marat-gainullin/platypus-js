@@ -23,18 +23,18 @@ import org.w3c.dom.Document;
  */
 public class ApplicationModelLoader {
 
-    public static ApplicationModel<?, ?, ?> load(Document aDoc, Application aApp) {
+    public static ApplicationModel<?, ?> load(Document aDoc, Application aApp) {
         if (aApp.getQueries() instanceof LocalQueriesProxy) {
             LocalQueriesProxy localQueries = (LocalQueriesProxy) aApp.getQueries();
             ApplicationDbModel model = new ApplicationDbModel(localQueries.getCore(), localQueries);
-            XmlDom2ApplicationModel<ApplicationDbEntity> parser = new XmlDom2ApplicationModel<>(aDoc);
+            XmlDom2ApplicationModel<ApplicationDbEntity, ApplicationDbModel> parser = new XmlDom2ApplicationModel<>(aDoc);
             parser.visit(model);
             return model;
         } else {
             RemoteQueriesProxy remoteQueries = (RemoteQueriesProxy) aApp.getQueries();
             assert aApp instanceof ServerDataStorage;
             ApplicationPlatypusModel model = new ApplicationPlatypusModel((ServerDataStorage) aApp, remoteQueries);
-            XmlDom2ApplicationModel<ApplicationPlatypusEntity> parser = new XmlDom2ApplicationModel<>(aDoc);
+            XmlDom2ApplicationModel<ApplicationPlatypusEntity, ApplicationPlatypusModel> parser = new XmlDom2ApplicationModel<>(aDoc);
             parser.visit(model);
             return model;
         }

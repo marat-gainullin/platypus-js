@@ -6,21 +6,15 @@ package com.eas.client.model.visitors;
 
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 
 /**
  *
  * @author mg
  * @param <E>
+ * @param <M>
  */
-public interface ApplicationModelVisitor<E extends ApplicationEntity<?, ?, E>> extends ModelVisitor<E> {
+public interface ApplicationModelVisitor<E extends ApplicationEntity<M, ?, E>, M extends ApplicationModel<E, ?>> extends ModelVisitor<E, M> {
 
-    public void visit(ApplicationModel<E, ?, ?> aModel);
-
-    public void visit(E aEntity);
-
-    public void visit(ApplicationParametersEntity aEntity);
-    
     public void visit(ReferenceRelation<E> aRelation);
 }

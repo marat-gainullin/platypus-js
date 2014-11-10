@@ -7,9 +7,7 @@ package com.eas.designer.application.query.result;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.dbcontrols.grid.EntityFieldsGrid;
-import com.eas.designer.application.query.PlatypusQueryDataObject;
+import com.eas.dbcontrols.DbControlPanel;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.result.QueryResultsView.PageSizeItem;
@@ -27,7 +25,6 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
@@ -39,6 +36,7 @@ import org.netbeans.modules.editor.NbEditorDocument;
 import org.openide.DialogDescriptor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.NbDocument;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
@@ -52,14 +50,14 @@ public class QuerySetupView extends javax.swing.JPanel {
     protected QueryResultsView parentView;
     protected DialogDescriptor dialogDescriptor;
     protected Dialog dialog;
-    protected ApplicationDbModel paramsModel;
-    protected EntityFieldsGrid parametersGrid;
+    protected ParametersGrid parametersGrid;
     protected Document sqlTextDocument;
     protected EditorKit editorKit = CloneableEditorSupport.getEditorKit(SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
     protected CCJSqlParserManager parserManager = new CCJSqlParserManager();
     protected static final Logger logger = Logger.getLogger(QuerySetupView.class.getName());
 
     public QuerySetupView(QueryResultsView aParentView) throws Exception {
+        super();
         parentView = aParentView;
         initComponents();
         initParametersView();
@@ -170,6 +168,17 @@ public class QuerySetupView extends javax.swing.JPanel {
         dialog.setVisible(false);
     }//GEN-LAST:event_toolbarRunButtonActionPerformed
 
+    public Parameters acceptParametersValues() {
+        parametersGrid.getControls().entrySet().stream().forEach((cEntry) -> {
+            try {
+                ((Parameter)cEntry.getKey()).setValue(((DbControlPanel)cEntry.getValue()).getValue());
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        });
+        return parametersGrid.getParams().copy();
+    }
+
     private void saveParamsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveParamsCheckBoxActionPerformed
         setSaveParamsValuesEnabled(saveParamsCheckBox.isSelected());
     }//GEN-LAST:event_saveParamsCheckBoxActionPerformed
@@ -187,13 +196,10 @@ public class QuerySetupView extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     private void initParametersView() throws Exception {
-        paramsModel = new ApplicationDbModel(null);
-        paramsModel.setParameters(parentView.getParameters().copy());
-        paramsModel.requery();
-        parametersGrid = new EntityFieldsGrid();
+        parametersGrid = new ParametersGrid();
         parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
         parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N
-        parametersGrid.setEntity(paramsModel.getParametersEntity());
+        parametersGrid.setParams(parentView.getParameters().copy());
         topPanel.add(new JScrollPane(parametersGrid), BorderLayout.CENTER);
     }
 
@@ -207,7 +213,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     private void initDocument() throws BadLocationException {
         sqlTextDocument = (NbEditorDocument) editorKit.createDefaultDocument();
         sqlTextDocument.putProperty(NbEditorDocument.MIME_TYPE_PROP, SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
-        sqlTextDocument.putProperty(PlatypusQueryDataObject.DATAOBJECT_DOC_PROPERTY, parentView.getQueryDataObject());// to enable code completion
+        //sqlTextDocument.putProperty(PlatypusQueryDataObject.DATAOBJECT_DOC_PROPERTY, parentView.getQueryDataObject());// to enable code completion
         sqlTextDocument.insertString(0, parentView.getQueryText(), null);
     }
 
@@ -217,7 +223,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     }
 
     public Parameters getParameters() {
-        return paramsModel.getParameters();
+        return (Parameters) parametersGrid.getParams();
     }
 
     public void setDialog(Dialog aDialog, DialogDescriptor aDialogDescriptor) {
@@ -231,16 +237,15 @@ public class QuerySetupView extends javax.swing.JPanel {
     protected Component initCustomEditor(JEditorPane aPane) {
         if (aPane.getDocument() instanceof NbDocument.CustomEditor) {
             NbDocument.CustomEditor ce = (NbDocument.CustomEditor) aPane.getDocument();
-            ce.addUndoableEditListener(new UndoableEditListener() {
-                @Override
-                public void undoableEditHappened(UndoableEditEvent e) {
-                    try {
-                        String sqlText = getSqlText();
-                        updateParameters(sqlText);
-                        parametersGrid.setEntity(paramsModel.getParametersEntity());
-                    } catch (Exception ex) {
-                        logger.log(Level.SEVERE, "Error updating parameters", ex); // NOI18N
-                    }
+            ce.addUndoableEditListener((UndoableEditEvent e) -> {
+                try {
+                    String sqlText = getSqlText();
+                    updateParameters(sqlText);
+                    Parameters params = parametersGrid.getParams();
+                    parametersGrid.setParams(null);
+                    parametersGrid.setParams(params);
+                } catch (Exception ex) {
+                    logger.log(Level.SEVERE, "Error updating parameters", ex); // NOI18N
                 }
             });
             Component customComponent = ce.createEditor(aPane);
@@ -266,12 +271,12 @@ public class QuerySetupView extends javax.swing.JPanel {
     }
 
     private void mergeParameters(Set<NamedParameter> parsedParameters) {
-        Parameters parameters = paramsModel.getParameters();
+        Parameters parameters = (Parameters) parametersGrid.getParams();
         //Remove absent parameters from model
         Set<String> parametersNames = new HashSet<>();
-        for (NamedParameter parameter : parsedParameters) {
+        parsedParameters.stream().forEach((parameter) -> {
             parametersNames.add(parameter.getName());
-        }
+        });
         Set<Parameter> parametersToRemove = new HashSet<>();
         for (int i = 1; i <= parameters.getParametersCount(); i++) {
             Parameter parameter = parameters.get(i);
@@ -279,11 +284,11 @@ public class QuerySetupView extends javax.swing.JPanel {
                 parametersToRemove.add(parameter);
             }
         }
-        for (Parameter parameter : parametersToRemove) {
+        parametersToRemove.stream().forEach((parameter) -> {
             parameters.remove(parameter);
-        }
+        });
         //Add new parameters
-        for (NamedParameter parsedParameter : parsedParameters) {
+        parsedParameters.stream().forEach((NamedParameter parsedParameter) -> {
             if (parameters.get(parsedParameter.getName()) == null) {
                 Parameter newParameter = new Parameter(parsedParameter.getName());
                 newParameter.setMode(1);
@@ -291,6 +296,6 @@ public class QuerySetupView extends javax.swing.JPanel {
                 newParameter.setValue("");
                 parameters.add(newParameter);
             }
-        }
+        });
     }
 }

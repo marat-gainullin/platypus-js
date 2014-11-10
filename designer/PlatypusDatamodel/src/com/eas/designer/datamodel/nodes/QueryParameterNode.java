@@ -5,7 +5,6 @@
 package com.eas.designer.datamodel.nodes;
 
 import com.bearsoft.rowset.metadata.Parameter;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.model.query.QueryParametersEntity;
 import java.beans.PropertyEditor;
@@ -30,7 +29,7 @@ public class QueryParameterNode extends FieldNode {
 
     @Override
     public boolean canChange() {
-        return getEntity() instanceof QueryParametersEntity || getEntity() instanceof ApplicationParametersEntity;
+        return getEntity() instanceof QueryParametersEntity;
     }
 
     public Integer getMode() {

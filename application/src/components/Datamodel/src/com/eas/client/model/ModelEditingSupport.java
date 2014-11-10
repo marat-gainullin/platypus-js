@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public class ModelEditingSupport<E extends Entity<?, ?, E>> {
 

@@ -7,7 +7,6 @@ package com.eas.client.model.gui.view.entities;
 import com.eas.client.model.gui.view.EntityViewsManager;
 import com.eas.client.model.query.QueryEntity;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  *
@@ -17,15 +16,10 @@ public class QueryEntityView extends EntityView<QueryEntity> {
 
     public QueryEntityView(QueryEntity aEntity, EntityViewsManager<QueryEntity> aMovesManager) throws Exception {
         super(aEntity, aMovesManager);
-        entity.getChangeSupport().addPropertyChangeListener(QueryEntity.ALIAS_PROPERTY, new PropertyChangeListener() {
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                titleLabel.setText(getCheckedEntityTitle());
-                titleLabel.invalidate();
-                reLayout();
-            }
-
+        entity.getChangeSupport().addPropertyChangeListener(QueryEntity.ALIAS_PROPERTY, (PropertyChangeEvent evt) -> {
+            titleLabel.setText(getCheckedEntityTitle());
+            titleLabel.invalidate();
+            reLayout();
         });
     }
 

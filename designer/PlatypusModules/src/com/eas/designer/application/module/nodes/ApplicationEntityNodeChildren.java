@@ -7,7 +7,6 @@ package com.eas.designer.application.module.nodes;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
-import com.eas.client.model.application.ApplicationDbParametersEntity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.designer.datamodel.nodes.ModelParameterNode;
@@ -34,9 +33,7 @@ public class ApplicationEntityNodeChildren extends EntityNodeChildren<EntityNode
     @Override
     protected Node[] createNodes(EntityFieldKey key) {
         Node node;
-        if (entity instanceof ApplicationDbParametersEntity) {
-            node = new ModelParameterNode(key.field, lookup);
-        } else if (key.field instanceof Parameter) {
+        if (key.field instanceof Parameter) {
             node = new QueryParameterNode((Parameter) key.field, lookup);
         } else {
             node = new FieldNode(key.field, lookup);

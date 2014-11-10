@@ -11,8 +11,6 @@ import com.eas.client.metadata.TableRef;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationDbParametersEntity;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.EntityFieldRef;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.DatamodelDesignUtils;
@@ -27,12 +25,13 @@ import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.ScalarCollectionView;
 import com.eas.client.model.gui.view.entities.ApplicationEntityView;
-import com.eas.client.model.gui.view.entities.ApplicationParametersEntityView;
 import com.eas.client.model.gui.view.entities.EntityView;
 import static com.eas.client.model.gui.view.model.ModelView.connectorWidth;
 import static com.eas.client.model.gui.view.model.ModelView.connectorsStroke;
 import static com.eas.client.model.gui.view.model.ModelView.hittedConnectorsStroke;
+import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
+import com.eas.xml.dom.XmlDom2String;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -44,7 +43,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
@@ -55,7 +53,7 @@ import org.w3c.dom.Document;
  *
  * @author mg
  */
-public class ApplicationModelView extends ModelView<ApplicationDbEntity, ApplicationDbParametersEntity, ApplicationDbModel> {
+public class ApplicationModelView extends ModelView<ApplicationDbEntity, ApplicationDbModel> {
 
     protected final static Stroke fkConnectorsStroke = new BasicStroke(connectorWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, new float[]{5, 4}, 0);
     protected final static Stroke fkHittedConnectorsStroke = new BasicStroke(connectorWidth + 1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, new float[]{5, 4}, 0);
@@ -68,21 +66,10 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
         putActions();
     }
 
-    public ApplicationModelView(TablesSelectorCallback aSelectorCallback, AppElementSelectorCallback aAppElementSelector, Action aEntityEditAction) {
-        super(aSelectorCallback);
-        appElementSelector = aAppElementSelector;
-        putActions();
-    }
-
-    public ApplicationModelView(ApplicationDbModel aModel, Action aEntityEditAction, TablesSelectorCallback aSelectorCallback, AppElementSelectorCallback aAppElementSelector) {
+    public ApplicationModelView(ApplicationDbModel aModel, TablesSelectorCallback aSelectorCallback, AppElementSelectorCallback aAppElementSelector) {
         super(aModel, aSelectorCallback);
         appElementSelector = aAppElementSelector;
         putActions();
-    }
-
-    @Override
-    protected ApplicationDbModel newModelInstance() {
-        return new ApplicationDbModel(model.getQueries());
     }
 
     protected final void putActions() {
@@ -97,14 +84,14 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected ApplicationDbModel transformDocToModel(Document aDoc) throws Exception {
-        ApplicationDbModel lmodel = newModelInstance();
+        ApplicationDbModel lmodel = new ApplicationDbModel(model.getQueries());
         lmodel.accept(new XmlDom2ApplicationModel<>(aDoc));
         return lmodel;
     }
 
     @Override
     protected boolean isParametersEntity(ApplicationDbEntity aEntity) {
-        return aEntity instanceof ApplicationParametersEntity;
+        return false;
     }
 
     @Override
@@ -114,15 +101,11 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) throws Exception {
-        if (isParametersEntity(aEntity)) {
-            return new ApplicationParametersEntityView((ApplicationDbParametersEntity) aEntity, entitiesViewsMover);
-        } else {
-            if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
-                model.getQueries().getQuery(aEntity.getQueryName(), null, null);
-            }
-            aEntity.validateQuery();
-            return new ApplicationEntityView(aEntity, entitiesViewsMover);
+        if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
+            model.getQueries().getQuery(aEntity.getQueryName(), null, null);
         }
+        aEntity.validateQuery();
+        return new ApplicationEntityView(aEntity, entitiesViewsMover);
     }
 
     @Override
@@ -162,7 +145,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     public void complementReferenceRelationsByKeys(ForeignKeyBindingTask aTask) {
         complementReferenceRelations(aTask, model);
     }
-    
+
     public static void complementReferenceRelations(ForeignKeyBindingTask aTask, ApplicationDbModel model) {
         Set<String> alreadyRels = new HashSet<>();
         model.getReferenceRelations().stream().forEach((rel) -> {
@@ -211,6 +194,19 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
         edit.redo();
         undoSupport.postEdit(edit);
     };
+
+    @Override
+    protected void copySelectedEntities() {
+        ApplicationDbModel copied = new ApplicationDbModel(model.getQueries());
+        selectedEntities.stream().forEach((ApplicationDbEntity ent) -> {
+            if (ent != null) {
+                copied.getEntities().put(ent.getEntityId(), ent);
+            }
+        });
+        Document doc = ApplicationModel2XmlDom.transform(copied);
+        String sEntity = XmlDom2String.transform(doc);
+        string2SystemClipboard(sEntity);
+    }
 
     @Override
     public boolean isSelectedDeletableRelations() {
@@ -292,7 +288,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected boolean isSelectedDeletableFields() {
-        return selectedFields != null && !selectedFields.isEmpty() && selectedFields.stream().allMatch((t) -> (t.entity instanceof ApplicationParametersEntity));
+        return false;
     }
 
     @Override

@@ -48,7 +48,6 @@ import com.bearsoft.org.netbeans.modules.form.node.FormEntityNode;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.forms.Form;
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationDbParametersEntity;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
@@ -125,8 +124,9 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
      * Provides node that should represent this data object. When a node for
      * representation in a parent is requested by a call to getNode(parent) it
      * is the exact copy of this node with only parent changed. This
-     * implementation creates instance
-     * <CODE>DataNode</CODE>. <P> This method is called only once.
+     * implementation creates instance <CODE>DataNode</CODE>.
+     * <P>
+     * This method is called only once.
      *
      * @return the node representation for this data object
      * @see DataNode
@@ -142,23 +142,13 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
         return new ModelNode<>(new ApplicationModelNodeChildren(model,
                 getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
                 getLookup()) {
-            @Override
-            protected ApplicationEntityNode newNodeInstance(ApplicationDbEntity key) throws Exception {
-                FormEntityNode node;
-                FieldsOrderSupport fos;
-                Lookup lkp;
-                if (key instanceof ApplicationDbParametersEntity) {
-                    fos = new FieldsOrderSupport();
-                    lkp = Lookups.fixed(key, fos);
-                    node = new FormEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
-                    fos.setEntityNode(node);
-                } else {
-                    lkp = Lookups.fixed(key);
-                    node = new FormEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
-                }
-                return node;
-            }
-        }, this);
+                    @Override
+                    protected ApplicationEntityNode newNodeInstance(ApplicationDbEntity key) throws Exception {
+                        Lookup lkp = Lookups.fixed(key);
+                        FormEntityNode node = new FormEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
+                        return node;
+                    }
+                }, this);
     }
 
     //--------------------------------------------------------------------

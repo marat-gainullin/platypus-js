@@ -9,6 +9,7 @@ import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryModel;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.JsDoc;
 import java.io.StringReader;
@@ -49,11 +50,12 @@ public class StoredQueryFactory {
     public static final String DUMMY_FIELD_NAME = "dummy";
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
+    protected QueriesProxy<SqlQuery> subQueriesProxy;
     private DatabasesClient basesProxy;
     private PlatypusIndexer indexer;
     private boolean preserveDatasources;
 
-    public void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
+    protected void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
         Fields fields = getTableFields(aQuery.getDbId(), table);
         if (fields != null) {
             fields.toCollection().stream().forEach((Field field) -> {
@@ -112,7 +114,7 @@ public class StoredQueryFactory {
     }
 
     protected SqlQuery filesToSqlQuery(String aName, AppElementFiles aFiles) throws Exception {
-        QueryDocument queryDoc = QueryDocument.parse(aName, aFiles, basesProxy);
+        QueryDocument queryDoc = QueryDocument.parse(aName, aFiles, basesProxy, subQueriesProxy);
         QueryModel model = queryDoc.getModel();
         SqlQuery query = queryDoc.getQuery();
         putRolesMutatables(query);
@@ -147,13 +149,15 @@ public class StoredQueryFactory {
      *
      * @param aBasesProxy ClientIntf instance, responsible for interacting with
      * appliction database.
+     * @param aSubQueriesProxy
      * @param aIndexer
      * @throws java.lang.Exception
      * @see DbClientIntf
      */
-    public StoredQueryFactory(DatabasesClient aBasesProxy, PlatypusIndexer aIndexer) throws Exception {
+    public StoredQueryFactory(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aSubQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
         super();
         basesProxy = aBasesProxy;
+        subQueriesProxy = aSubQueriesProxy;
         indexer = aIndexer;
     }
 
@@ -162,6 +166,7 @@ public class StoredQueryFactory {
      *
      * @param aBasesProxy ClientIntf instance, responsible for interacting with
      * appliction database.
+     * @param subQueriesProxy
      * @param aIndexer
      * @param aPreserveDatasources If true, aliased names of tables
      * (datasources) are setted to resulting fields in query compilation
@@ -169,8 +174,8 @@ public class StoredQueryFactory {
      * setted to resulting fields.
      * @throws java.lang.Exception
      */
-    public StoredQueryFactory(DatabasesClient aBasesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        this(aBasesProxy, aIndexer);
+    public StoredQueryFactory(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> subQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
+        this(aBasesProxy, subQueriesProxy, aIndexer);
         preserveDatasources = aPreserveDatasources;
     }
 
@@ -413,7 +418,7 @@ public class StoredQueryFactory {
         if (tableFields != null) {// Tables have a higher priority in soft reference case
             return tableFields;
         } else {
-            SqlQuery query = loadQuery(aTablyName);
+            SqlQuery query = subQueriesProxy.getQuery(aTablyName, null, null);
             if (query != null) {
                 return query.getFields();
             } else {

@@ -29,15 +29,16 @@ import org.w3c.dom.Node;
  *
  * @author mg
  * @param <E>
+ * @param <M>
  */
-public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVisitor<E> {
+public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E, ?>> implements ModelVisitor<E, M> {
 
     public static final int DEFAULT_ENTITY_HEIGHT = 200;
     public static final int DEFAULT_ENTITY_WIDTH = 150;
     protected Document doc;
     protected Element modelElement;
     protected Element currentNode;
-    protected Model<E, ?, ?> currentModel;
+    protected M currentModel;
     protected Collection<Runnable> relationsResolvers = new ArrayList<>();
 
     protected XmlDom2Model() {
@@ -60,69 +61,13 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
         return null;
     }
 
-    public Runnable readModel(final Model<E, ?, ?> aModel) {
-        Element el = doc != null ? getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME) : modelElement;
-        if (el != null && aModel != null) {
+    public Runnable readModel(final M aModel) {
+        Element elModel = doc != null ? getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME) : modelElement;
+        if (elModel != null && aModel != null) {
             currentModel = aModel;
             try {
-                currentNode = el;
-                Element paramsEl = getElementByTagName(currentNode, Model2XmlDom.PARAMETERS_TAG_NAME);
-                if (paramsEl != null) {
-                    Parameters parameters = aModel.getParameters();
-                    List<Element> pnl = XmlDomUtils.elementsByTagName(paramsEl, Model2XmlDom.PARAMETER_TAG_NAME);
-                    if (pnl != null && parameters != null) {
-                        Element lcurrentNode = currentNode;
-                        try {
-                            Set<String> names = new HashSet<>();
-                            pnl.stream().forEach((Element pnl1) -> {
-                                currentNode = pnl1;
-                                Parameter param = new Parameter();
-                                visit(param);
-                                String paramName = param.getName();
-                                if (paramName != null && !paramName.isEmpty() && !names.contains(paramName)) {
-                                    names.add(paramName);
-                                    parameters.add(param);
-                                }
-                            });
-                        } finally {
-                            currentNode = lcurrentNode;
-                        }
-                    }
-                }
-                Element paramsEntityEl = getElementByTagName(currentNode, Model2XmlDom.PARAMETERS_ENTITY_TAG_NAME);
-                if (paramsEntityEl != null) {
-                    E pe = aModel.getParametersEntity();
-                    if (pe != null) {
-                        Element lcurrentNode = currentNode;
-                        try {
-                            currentNode = paramsEntityEl;
-                            pe.accept(this);
-                        } finally {
-                            currentNode = lcurrentNode;
-                        }
-                    }
-                }
-                List<Element> dsnl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.ENTITY_TAG_NAME);
-                List<Element> fnl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.FIELDS_ENTITY_TAG_NAME);
-                List<Element> nl = new ArrayList<>();
-                if (dsnl != null) {
-                    nl.addAll(dsnl);
-                }
-                if (fnl != null) {
-                    nl.addAll(fnl);
-                }
-                if (!nl.isEmpty()) {
-                    Element lcurrentNode = currentNode;
-                    try {
-                        nl.stream().forEach((Element nl1) -> {
-                            currentNode = nl1;
-                            E entity = aModel.newGenericEntity();
-                            entity.accept(this);
-                        });
-                    } finally {
-                        currentNode = lcurrentNode;
-                    }
-                }
+                currentNode = elModel;
+                readEntities(aModel);
                 readRelations();
                 final Runnable[] resolvers = relationsResolvers.toArray(new Runnable[]{});
                 Runnable relationsResolver = () -> {
@@ -139,6 +84,30 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
             }
         }
         return null;
+    }
+
+    protected void readEntities(final M aModel) {
+        List<Element> dsnl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.ENTITY_TAG_NAME);
+        List<Element> fnl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.FIELDS_ENTITY_TAG_NAME);
+        List<Element> nl = new ArrayList<>();
+        if (dsnl != null) {
+            nl.addAll(dsnl);
+        }
+        if (fnl != null) {
+            nl.addAll(fnl);
+        }
+        if (!nl.isEmpty()) {
+            Element lcurrentNode = currentNode;
+            try {
+                nl.stream().forEach((Element nl1) -> {
+                    currentNode = nl1;
+                    E entity = aModel.newGenericEntity();
+                    entity.accept(this);
+                });
+            } finally {
+                currentNode = lcurrentNode;
+            }
+        }
     }
 
     public void readEntity(E entity) {
@@ -159,7 +128,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
             entity.setTableSchemaName(currentNode.getAttribute(Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME));
             entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
-            Model<E, ?, ?> dm = entity.getModel();
+            Model<E, ?> dm = entity.getModel();
             if (dm != null) {
                 dm.addEntity(entity);
             }
@@ -189,96 +158,62 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                     readPolyline(polyline, relation);
                 }
             }
-            final Model<E, ?, ?> model = currentModel;
+            M model = currentModel;
             relationsResolvers.add((Runnable) () -> {
-                try {
-                    E lEntity = model.getEntityById(leftEntityId);
-                    if (Model.PARAMETERS_ENTITY_ID == leftEntityId) {
-                        lEntity = model.getParametersEntity();
-                        if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                            Fields fields = lEntity.getFields();
-                            if (fields != null) {
-                                relation.setLeftField(fields.get(leftParameterName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setLeftField(new Parameter(leftParameterName));
-                            }
-                        } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                            Fields fields = lEntity.getFields();
-                            if (fields != null) {
-                                relation.setLeftField(fields.get(leftFieldName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setLeftField(new Parameter(leftFieldName));
-                            }
-                        }
-                    } else if (lEntity != null) {
-                        if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                            Query query = lEntity.getQuery();
-                            if (query != null) {
-                                relation.setLeftField(query.getParameters().get(leftParameterName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setLeftField(new Parameter(leftParameterName));
-                            }
-                        } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                            Fields fields = lEntity.getFields();
-                            if (fields != null) {
-                                relation.setLeftField(fields.get(leftFieldName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setLeftField(new Field(leftFieldName));
-                            }
-                        }
-                    }
-                    if (lEntity != null) {
-                        relation.setLeftEntity(lEntity);
-                        lEntity.addOutRelation(relation);
-                    }
-                    
-                    E rEntity = model.getEntityById(rightEntityId);
-                    if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
-                        rEntity = model.getParametersEntity();
-                        if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                            Fields fields = rEntity.getFields();
-                            if (fields != null) {
-                                relation.setRightField(fields.get(rightParameterName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setRightField(new Parameter(rightParameterName));
-                            }
-                        } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                            Fields fields = rEntity.getFields();
-                            if (fields != null) {
-                                relation.setRightField(fields.get(rightFieldName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setRightField(new Parameter(rightFieldName));
-                            }
-                        }
-                    } else if (rEntity != null) {
-                        if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                            Query query = rEntity.getQuery();
-                            if (query != null) {
-                                relation.setRightField(query.getParameters().get(rightParameterName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setRightField(new Parameter(rightParameterName));
-                            }
-                        } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                            Fields fields = rEntity.getFields();
-                            if (fields != null) {
-                                relation.setRightField(fields.get(rightFieldName));
-                            } else if (!model.isRelationsAgressiveCheck()) {
-                                relation.setRightField(new Field(rightFieldName));
-                            }
-                        }
-                    }
-                    if (rEntity != null) {
-                        relation.setRightEntity(rEntity);
-                        rEntity.addInRelation(relation);
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(XmlDom2Model.class.getName()).log(Level.WARNING, null, ex);
-                }
+                resolveRelation(model, leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
             });
         }
     }
 
-    private void readPolyline(String aPolyline, Relation aRelation) {
+    protected void resolveRelation(final M aModel, final Long leftEntityId, final String leftParameterName, final Relation<E> relation, final String leftFieldName, final Long rightEntityId, final String rightParameterName, final String rightFieldName) {
+        try {
+            E lEntity = aModel.getEntityById(leftEntityId);
+            if (lEntity != null) {
+                if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                    Query query = lEntity.getQuery();
+                    if (query != null) {
+                        relation.setLeftField(query.getParameters().get(leftParameterName));
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
+                        relation.setLeftField(new Parameter(leftParameterName));
+                    }
+                } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                    Fields fields = lEntity.getFields();
+                    if (fields != null) {
+                        relation.setLeftField(fields.get(leftFieldName));
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
+                        relation.setLeftField(new Field(leftFieldName));
+                    }
+                }
+                relation.setLeftEntity(lEntity);
+                lEntity.addOutRelation(relation);
+            }
+            
+            E rEntity = aModel.getEntityById(rightEntityId);
+            if (rEntity != null) {
+                if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                    Query query = rEntity.getQuery();
+                    if (query != null) {
+                        relation.setRightField(query.getParameters().get(rightParameterName));
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
+                        relation.setRightField(new Parameter(rightParameterName));
+                    }
+                } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                    Fields fields = rEntity.getFields();
+                    if (fields != null) {
+                        relation.setRightField(fields.get(rightFieldName));
+                    } else if (!aModel.isRelationsAgressiveCheck()) {
+                        relation.setRightField(new Field(rightFieldName));
+                    }
+                }
+                relation.setRightEntity(rEntity);
+                rEntity.addInRelation(relation);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(XmlDom2Model.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+
+    private void readPolyline(String aPolyline, Relation<E> aRelation) {
         String[] points = aPolyline.split(" ");
         if (points != null && points.length > 0) {
             int[] xs = new int[points.length];

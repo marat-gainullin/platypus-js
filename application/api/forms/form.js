@@ -272,23 +272,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "onWindowRestored", {
-            get: function() {
-                var value = delegate.onWindowRestored;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onWindowRestored = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The handler function for the form's <i>after restore</i> event.
-             * @property onWindowRestored
-             * @memberOf Form
-             */
-            P.Form.prototype.onWindowRestored = {};
-        }
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
@@ -305,6 +288,23 @@
              * @memberOf Form
              */
             P.Form.prototype.formKey = '';
+        }
+        Object.defineProperty(this, "onWindowRestored", {
+            get: function() {
+                var value = delegate.onWindowRestored;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onWindowRestored = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after restore</i> event.
+             * @property onWindowRestored
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowRestored = {};
         }
         Object.defineProperty(this, "maximized", {
             get: function() {

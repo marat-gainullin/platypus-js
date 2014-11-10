@@ -6,7 +6,6 @@ package com.eas.designer.datamodel.nodes;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Entity;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.edits.fields.ReorderFieldsEdit;
 import com.eas.client.model.gui.view.entities.EntityView;
@@ -209,8 +208,7 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     }
 
     protected boolean isParametersEntity() {
-        return entity instanceof ApplicationParametersEntity
-                || entity instanceof QueryParametersEntity;
+        return entity instanceof QueryParametersEntity;
     }
 
     @Override

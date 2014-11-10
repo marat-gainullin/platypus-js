@@ -12,11 +12,10 @@ import com.eas.client.model.query.QueryParametersEntity;
  *
  * @author mg
  */
-public interface QueryModelVisitor extends ModelVisitor<QueryEntity> {
+public interface QueryModelVisitor extends ModelVisitor<QueryEntity, QueryModel> {
 
+    @Override
     public void visit(QueryModel aModel);
-
-    public void visit(QueryEntity aEntity);
 
     public void visit(QueryParametersEntity aEntity);
 }

@@ -23,11 +23,11 @@ import javax.swing.undo.UndoableEditSupport;
  */
 public class AddQueryAction extends DmAction {
 
-    protected ModelView<?, ?, ?> modelView;
+    protected ModelView<?, ?> modelView;
     protected UndoableEditSupport undoSupport;
     protected AppElementSelectorCallback appElementSelector;
 
-    public AddQueryAction(ModelView<?, ?, ?> aModelView, UndoableEditSupport aUndoSupport, AppElementSelectorCallback aAppElementSelector) {
+    public AddQueryAction(ModelView<?, ?> aModelView, UndoableEditSupport aUndoSupport, AppElementSelectorCallback aAppElementSelector) {
         super();
         modelView = aModelView;
         undoSupport = aUndoSupport;

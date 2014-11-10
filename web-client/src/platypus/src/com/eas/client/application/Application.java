@@ -588,7 +588,7 @@ public class Application {
 		};
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
 			if(!aTarget)
-				aTarget = {};
+				aTarget = new $wnd.P.Form();
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = !!aModel ? aModel.unwrap() : null;
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Ljava/lang/String;Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementName, appElementDoc, nativeModel, aTarget);
@@ -604,7 +604,7 @@ public class Application {
 				return cachedModules;
 			}
 		});
-		$wnd.P.Form = {};
+		$wnd.P.Form = function(){};
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		};

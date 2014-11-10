@@ -146,7 +146,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public static final int DEFAULTHIT_PRECISION = 4;
     public static final String BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME = "onBeforeToolTipShow";
     protected int hitPrecision = DEFAULTHIT_PRECISION;
-    private ApplicationModel<?, ?, ?> model;
+    private ApplicationModel<?, ?> model;
     private JGeoPane pane;
     private ProjectedCRS projectedCrs;
     protected MouseTools tools;
@@ -194,12 +194,12 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     @Override
-    public ApplicationModel<?, ?, ?> getModel() {
+    public ApplicationModel<?, ?> getModel() {
         return model;
     }
 
     @Override
-    public void setModel(ApplicationModel<?, ?, ?> aValue) {
+    public void setModel(ApplicationModel<?, ?> aValue) {
         model = aValue;
     }
 
