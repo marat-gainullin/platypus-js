@@ -345,7 +345,7 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4CreateFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
-        List<ForeignKeySpec> fkList = new ArrayList();
+        List<ForeignKeySpec> fkList = new ArrayList<>();
         fkList.add(aFk);
         return getSql4CreateFkConstraint(aSchemaName, fkList);
     }
@@ -430,7 +430,7 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
-        List<String> sqls = new ArrayList();
+        List<String> sqls = new ArrayList<>();
         Field newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String updateDefinition = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapName(aOldFieldMd.getName()) + " ";
@@ -627,7 +627,7 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
-        List<String> sqls = new ArrayList();
+        List<String> sqls = new ArrayList<>();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         sqls.add(getSql4VolatileTable(fullTableName));
         sqls.add(String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField));

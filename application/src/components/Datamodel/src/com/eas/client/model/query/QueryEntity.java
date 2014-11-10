@@ -10,6 +10,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.visitors.ModelVisitor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 
 /**
  *
@@ -81,7 +82,11 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
                     query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
                 } catch (Exception ex) {
                     query = null;
-                    Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, null, ex);
+                    if (ex instanceof NamingException) {
+                        Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, ex.getMessage());
+                    } else {
+                        Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, null, ex);
+                    }
                 }
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";

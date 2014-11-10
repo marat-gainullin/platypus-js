@@ -11,6 +11,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.XmlDom2QueryModel;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.Source2XmlDom;
@@ -96,7 +97,7 @@ public class QueryDocument {
         return model;
     }
 
-    public static QueryDocument parse(String aName, AppElementFiles aFiles, DatabasesClient aBasesProxy) throws Exception {
+    public static QueryDocument parse(String aName, AppElementFiles aFiles, DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueriesPrioxy) throws Exception {
         // sql source
         File sqlFile = aFiles.findFileByExtension(PlatypusFiles.SQL_EXTENSION);
         String sqlContent = FileUtils.readString(sqlFile, SettingsConstants.COMMON_ENCODING);
@@ -107,7 +108,7 @@ public class QueryDocument {
         File modelFile = aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION);
         String modelContent = FileUtils.readString(modelFile, SettingsConstants.COMMON_ENCODING);
         Document modelDoc = Source2XmlDom.transform(modelContent);        
-        QueryModel model = XmlDom2QueryModel.transform(aBasesProxy, null, modelDoc);
+        QueryModel model = XmlDom2QueryModel.transform(aBasesProxy, aQueriesPrioxy, modelDoc);
         // output fields hints
         File outFile = aFiles.findFileByExtension(PlatypusFiles.OUT_EXTENSION);
         String outContent = FileUtils.readString(outFile, SettingsConstants.COMMON_ENCODING);

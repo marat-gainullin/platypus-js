@@ -102,6 +102,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
         }
     }
 
+    @Override
     protected void prepareRowsetByQuery() throws InvalidFieldsExceptionException {
         Rowset oldRowset = rowset;
         if (rowset != null) {

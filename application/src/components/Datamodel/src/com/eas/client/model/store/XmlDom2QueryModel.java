@@ -95,6 +95,7 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> imp
 
     @Override
     protected void resolveRelation(QueryModel aModel, Long leftEntityId, String leftParameterName, Relation<QueryEntity> relation, String leftFieldName, Long rightEntityId, String rightParameterName, String rightFieldName) {
+        
         super.resolveRelation(aModel, leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
         try {
             if (QueryModel.PARAMETERS_ENTITY_ID == leftEntityId) {
@@ -155,6 +156,14 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> imp
                 aModel.setDbId(datasourceName);
             }
         }
+        aModel.getEntities().values().stream().forEach((e) -> {
+            try {
+                aModel.getQueries().getQuery(e.getQueryName(), null, null);
+                e.validateQuery();
+            } catch (Exception ex) {
+                Logger.getLogger(XmlDom2QueryModel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         resolver.run();
     }
 
