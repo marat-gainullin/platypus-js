@@ -30,7 +30,6 @@
     var LoggerClass = Java.type("java.util.logging.Logger");
     var RowClass = Java.type("com.bearsoft.rowset.Row");
     var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
-    var ParamsClass = Java.type("com.bearsoft.rowset.metadata.Parameters");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
     var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
@@ -1021,10 +1020,8 @@
     });
 
     extend(BoundArray, Array);
-//    extend(P.ApplicationDbEntity, BoundArray);
-//    extend(P.ApplicationPlatypusEntity, BoundArray);
-//    extend(P.ApplicationDbParametersEntity, BoundArray);
-//    extend(P.ApplicationPlatypusParametersEntity, BoundArray);
+    extend(P.ApplicationDbEntity, BoundArray);
+    extend(P.ApplicationPlatypusEntity, BoundArray);
 
     P.Filter.prototype.apply = function () {
         var varargs = new JavaArrayClass(arguments.length);
@@ -1146,7 +1143,6 @@
         } else {
             aTarget = new P.ReportTemplate(reportConfig, aData);
         }
-        template.injectPublished(aTarget);
         return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
