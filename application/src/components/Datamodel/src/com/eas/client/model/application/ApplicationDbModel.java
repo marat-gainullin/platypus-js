@@ -11,7 +11,6 @@ import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.model.Model;
-import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;

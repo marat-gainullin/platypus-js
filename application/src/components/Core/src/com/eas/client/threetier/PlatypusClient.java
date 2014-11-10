@@ -99,25 +99,6 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         return url;
     }
 
-    /*
-    public FlowProvider createFlowProvider(String aQueryName, Fields aExpectedFields) {
-        return new PlatypusFlowProvider(this, conn, aQueryName, aExpectedFields);
-    }
-    */
-
-    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
-        final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
-        if (onSuccess != null) {
-            conn.<ExecuteServerModuleMethodRequest.Response>enqueueRequest(request, (ExecuteServerModuleMethodRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.getResult());
-            }, onFailure);
-            return null;
-        } else {
-            ExecuteServerModuleMethodRequest.Response response = conn.executeRequest(request);
-            return response.getResult();
-        }
-    }
-
     @Override
     public int commit(List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         CommitRequest request = new CommitRequest(aLog);

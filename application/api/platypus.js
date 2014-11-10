@@ -768,7 +768,7 @@
         return target;
         // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
     }
-    
+
     function BoundArray() {
         BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
@@ -925,28 +925,28 @@
         });
 
         /*
-        Object.defineProperty(target, "insert", {
-            value: function () {
-                var initing = new JavaArrayClass(arguments.length);
-                for (var v = 0; v < arguments.length; v++)
-                    initing[v] = boxAsJava(arguments[v]);
-                rowset.insert(initing);
-            }
-        });
-
-        Object.defineProperty(target, "insertAt", {
-            value: function () {
-                if (arguments.length > 0) {
-                    var index = arguments[0];
-                    var initing = new JavaArrayClass(arguments.length - 1);
-                    for (var v = 1; v < arguments.length; v++)
-                        initing[v - 1] = boxAsJava(arguments[v]);
-                    rowset.insertAt(index, false, initing);
-                }
-            }
-        });
-        */
-
+         Object.defineProperty(target, "insert", {
+         value: function () {
+         var initing = new JavaArrayClass(arguments.length);
+         for (var v = 0; v < arguments.length; v++)
+         initing[v] = boxAsJava(arguments[v]);
+         rowset.insert(initing);
+         }
+         });
+         
+         Object.defineProperty(target, "insertAt", {
+         value: function () {
+         if (arguments.length > 0) {
+         var index = arguments[0];
+         var initing = new JavaArrayClass(arguments.length - 1);
+         for (var v = 1; v < arguments.length; v++)
+         initing[v - 1] = boxAsJava(arguments[v]);
+         rowset.insertAt(index, false, initing);
+         }
+         }
+         });
+         */
+        
         Object.defineProperty(target, "createFilter", {
             value: function () {
                 var nEntity = this.unwrap();
@@ -967,7 +967,7 @@
                     for (var v = 0; v < args.length; v++)
                         varargs[v] = boxAsJava(args[v]);
                     return boxAsJs(nEntity.createSorting(varargs));
-                }else{
+                } else {
                     return boxAsJs(nEntity.createSorting(args));
                 }
             }
@@ -983,7 +983,7 @@
                     for (var v = 0; v < args.length; v++)
                         varargs[v] = boxAsJava(args[v]);
                     found = nEntity.find(varargs);
-                }else{
+                } else {
                     found = nEntity.find(args);
                 }
                 if (!found.tag) {
@@ -1021,10 +1021,10 @@
     });
 
     extend(BoundArray, Array);
-    extend(P.ApplicationDbEntity, BoundArray);
-    extend(P.ApplicationPlatypusEntity, BoundArray);
-    extend(P.ApplicationDbParametersEntity, BoundArray);
-    extend(P.ApplicationPlatypusParametersEntity, BoundArray);
+//    extend(P.ApplicationDbEntity, BoundArray);
+//    extend(P.ApplicationPlatypusEntity, BoundArray);
+//    extend(P.ApplicationDbParametersEntity, BoundArray);
+//    extend(P.ApplicationPlatypusParametersEntity, BoundArray);
 
     P.Filter.prototype.apply = function () {
         var varargs = new JavaArrayClass(arguments.length);
@@ -1059,8 +1059,6 @@
         }
         function publishEntity(nEntity) {
             var published = EngineUtilsClass.unwrap(nEntity.getPublished());
-            var paramsSubject = published instanceof P.ApplicationDbParametersEntity
-                    || published instanceof P.ApplicationPlatypusParametersEntity;
             var pSchema = {};
             Object.defineProperty(published, "schema", {
                 value: pSchema
@@ -1069,18 +1067,6 @@
             for (var n = 0; n < nFields.size(); n++) {
                 (function () {
                     var nField = nFields[n];
-                    if (paramsSubject) {
-                        var valueDesc = {
-                            get: function () {
-                                return boxAsJs(nField.value);
-                            },
-                            set: function (aValue) {
-                                nField.value = boxAsJava(aValue);
-                            }
-                        };
-                        Object.defineProperty(published, nField.name, valueDesc);
-                        Object.defineProperty(published, n, valueDesc);
-                    }
                     // schema
                     var schemaDesc = {
                         value: nField.getPublished()
@@ -1089,19 +1075,12 @@
                     Object.defineProperty(pSchema, n, schemaDesc);
                 })();
             }
-            if (paramsSubject) {
-                Object.defineProperty(published, "length", {
-                    get: function () {
-                        return nFields.size();
-                    }
-                });
-            } else {
                 // entity.params.p1 syntax
                 var nParameters = nEntity.getQuery().getParameters();
                 var ncParameters = nParameters.toCollection();
                 var pParams = {};
                 for (var p = 0; p < ncParameters.size(); p++) {
-                    (function(){
+                    (function () {
                         var nParameter = ncParameters[p];
                         var pDesc = {
                             get: function () {
@@ -1120,7 +1099,6 @@
                 // entity.params.schema.p1 syntax
                 var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
                 Object.defineProperty(pParams, "schema", {value: pParamsSchema});
-            }
             Object.defineProperty(pSchema, "length", {
                 get: function () {
                     return nFields.size();
@@ -1128,14 +1106,6 @@
             });
             return published;
         }
-        (function () {
-            var pEntity = model.getParametersEntity();
-            var ppEntity = publishEntity(pEntity);
-            Object.defineProperty(aTarget, "params", {
-                value: ppEntity,
-                enumerable: true
-            });
-        })();
         var entities = model.entities();
         for each (var enEntity in entities) {
             enEntity.validateQuery();
@@ -1186,52 +1156,49 @@
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
     function ServerModule(aModuleName) {
-        var client = ScriptedResourceClass.getPlatypusClient();
-        if (client) {
-            var request = new CreateRequestClass(IDGeneratorClass.genID(), aModuleName);
-            client.executeRequest(request);
-            var response = request.getResponse();
-            if (response.isPermitted()) {
-                var functions = response.getFunctionsNames();
-                var currentObject = this;
-                functions.forEach(function (aFunctionName) {
-                    currentObject[aFunctionName] = function () {
-                        var onSuccess = null;
-                        var onFailure = null;
-                        var argsLength = arguments.length;
-                        if (arguments.length > 1 && typeof arguments[arguments.length - 1] === "function" && typeof arguments[arguments.length - 2] === "function") {
-                            onSuccess = arguments[arguments.length - 2];
-                            onFailure = arguments[arguments.length - 1];
-                            argsLength -= 2;
-                        } else if (arguments.length > 0 && typeof arguments[arguments.length - 1] === "function") {
-                            onSuccess = arguments[arguments.length - 1];
-                            argsLength -= 1;
-                        }
-                        try {
-                            var params = new JavaArrayClass(argsLength);
-                            for (var j = 0; j < argsLength; j++) {
-                                params[j] = arguments[j];
-                            }
-                            var result = client.executeServerModuleMethod(aModuleName, aFunctionName, params);
-                            if (onSuccess) {
-                                onSuccess(result && result.getPublished ? result.getPublished() : result);
-                            } else {
-                                return result && result.getPublished ? result.getPublished() : result;
-                            }
-                        } catch (e) {
-                            if (onFailure) {
-                                onFailure(e);
-                            } else {
-                                throw e;
-                            }
-                        }
-                    };
-                });
-            } else {
-                throw "Access denied for module" + aModuleName + ". May be denied public access."
+        if (aModuleName != null && aModuleName != "") {
+            var app = ScriptedResourceClass.getApp();
+            if (app) {
+                var proxy = app.getServerModules();
+                if (proxy) {
+                    var moduleInfo = proxy.getCachedStructure(aModuleName);
+                    if (moduleInfo.isPermitted()) {
+                        var functions = moduleInfo.getFunctionsNames();
+                        var currentObject = this;
+                        functions.forEach(function (aFunctionName) {
+                            currentObject[aFunctionName] = function () {
+                                var onSuccess = null;
+                                var onFailure = null;
+                                var argsLength = arguments.length;
+                                if (arguments.length > 1 && typeof arguments[arguments.length - 1] === "function" && typeof arguments[arguments.length - 2] === "function") {
+                                    onSuccess = arguments[arguments.length - 2];
+                                    onFailure = arguments[arguments.length - 1];
+                                    argsLength -= 2;
+                                } else if (arguments.length > 0 && typeof arguments[arguments.length - 1] === "function") {
+                                    onSuccess = arguments[arguments.length - 1];
+                                    argsLength -= 1;
+                                }
+                                var params = new JavaArrayClass(argsLength);
+                                for (var j = 0; j < argsLength; j++) {
+                                    params[j] = arguments[j];
+                                }
+                                if (onSuccess) {
+                                    proxy.callServerModuleMethod(aModuleName, aFunctionName, onSuccess, onFailure, params);
+                                } else {
+                                    var result = proxy.callServerModuleMethod(aModuleName, aFunctionName, null, null, params);
+                                    return result && result.getPublished ? result.getPublished() : result;
+                                }
+                            };
+                        });
+                    } else {
+                        throw "Access denied for module" + aModuleName + ". May be denied public access.";
+                    }
+                } else {
+                    throw "This architecture does not support server modules.";
+                }
             }
         } else {
-            throw "This architecture does not support server modules."
+            throw "Module Name could not be empty.";
         }
     }
 

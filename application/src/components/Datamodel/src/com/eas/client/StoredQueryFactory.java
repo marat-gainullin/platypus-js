@@ -293,7 +293,7 @@ public class StoredQueryFactory {
             }
         } catch (JSQLParserException ex) {
             if (aQuery.isProcedure()) {
-                Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, ex.getMessage());
             } else {
                 throw ex;
             }

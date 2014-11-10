@@ -7,6 +7,7 @@ package com.eas.server.httpservlet;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.queries.Query;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
@@ -93,7 +94,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         final Object result = ((ExecuteServerModuleMethodRequest.Response) resp).getResult();
         makeResponseNotCacheable(servletResponse);
 //        if (result instanceof Rowset) {
-//            writeResponse((Rowset) result, servletResponse);
+//           
 //        } else 
         if (result instanceof String) {
             writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
@@ -102,6 +103,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
             JSObject p = ScriptUtils.lookupInGlobal("P");
             if (p != null) {
                 Object reportClass = p.getMember("Report");
+                Object dbEntityClass = p.getMember("ApplicationDbEntity");
                 if (jsResult.isInstanceOf(reportClass)) {
                     Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
                     String docsRoot = servletRequest.getServletContext().getRealPath("/");
@@ -123,6 +125,9 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                     }
                     reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
                     writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
+                } else if (jsResult.isInstanceOf(dbEntityClass)) {
+                    ApplicationDbEntity entity = (ApplicationDbEntity) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
+                    writeResponse(entity.getRowset(), servletResponse);
                 } else {
                     writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
                 }

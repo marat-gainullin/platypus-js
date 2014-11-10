@@ -7,6 +7,7 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.RowsetContainer;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.events.*;
@@ -52,7 +53,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <Q>
  * @param <E>
  */
-public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener {
+public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q extends Query, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements HasPublished, RowsetListener, RowsetContainer {
 
     public static final String BAD_FIELD_NAME_MSG = "Bad field name %s";
     public static final String BAD_FIND_AGRUMENTS_MSG = "Bad find agruments";
@@ -1130,7 +1131,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         return rowset != null;
     }
 
-    public Rowset getRowset() throws Exception {
+    @Override
+    public Rowset getRowset() {
         return rowset;
     }
 

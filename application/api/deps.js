@@ -23,10 +23,8 @@ try {
 try {
     load('classpath:datamodel/application-db-entity.js');
     load('classpath:datamodel/application-db-model.js');
-    load('classpath:datamodel/application-db-parameters-entity.js');
     load('classpath:datamodel/application-platypus-entity.js');
     load('classpath:datamodel/application-platypus-model.js');
-    load('classpath:datamodel/application-platypus-parameters-entity.js');
     load('classpath:datamodel/cursor-position-changed-event.js');
     load('classpath:datamodel/cursor-position-will-change-event.js');
     load('classpath:datamodel/entity-instance-change-event.js');
@@ -133,11 +131,4 @@ try {
     printf('rowsets API loaded.');
 } catch (e) {
     printf('rowsets API skipped.');
-}
-
-try {
-    load('classpath:server/session.js');
-    printf('server API loaded.');
-} catch (e) {
-    printf('server API skipped.');
 }

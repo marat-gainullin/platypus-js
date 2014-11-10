@@ -118,11 +118,10 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
 
                                         });
                                         Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
-                                        if (result instanceof Undefined) {
-                                            result = null;
+                                        if (!(result instanceof Undefined)) {
+                                            onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
+                                            args.clear();
                                         }
-                                        onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
-                                        args.clear();
                                     } else {
                                         onFailure.accept(new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName())));
                                     }
