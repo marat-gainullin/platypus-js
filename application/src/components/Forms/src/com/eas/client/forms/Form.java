@@ -161,11 +161,12 @@ public class Form implements HasPublished {
     protected Dimension windowDecorSize = new Dimension();
     protected WindowEventsIProxy windowHandler;
     // runtime 
-    protected JComponent view;
+    protected com.eas.client.forms.api.Container<?> view;
     protected String formKey;
     private static JSObject publisher;
     protected Object published;
     // frequent runtime
+    protected Collection<JSObject> publishedComponents = new ArrayList<>();
     protected Container surface;
     protected Object closeCallbackParameter;
 
@@ -329,8 +330,8 @@ public class Form implements HasPublished {
             + "/**\n"
             + " * Top level widget of a form.\n"
             + " */")
-    public JComponent getView() {
-        return view;
+    public JSObject getView() {
+        return (JSObject)view.getPublished();
     }
 
     private static final String IS_VISIBLE_JSDOC = ""
@@ -388,7 +389,7 @@ public class Form implements HasPublished {
             checkUndecorated(frame);
             frame.setAlwaysOnTop(alwaysOnTop);
             frame.setLocationByPlatform(locationByPlatform);
-            frame.getContentPane().add(view, BorderLayout.CENTER);
+            frame.getContentPane().add(view.getComponent(), BorderLayout.CENTER);
             // add window listener
             // for unknown reasons, control events are also working
             windowHandler.setHandlee(frame);
@@ -461,7 +462,7 @@ public class Form implements HasPublished {
             internalFrame.setClosable(true);
             internalFrame.setIconifiable(true);
             internalFrame.setMaximizable(true);
-            internalFrame.getContentPane().add(view, BorderLayout.CENTER);
+            internalFrame.getContentPane().add(view.getComponent(), BorderLayout.CENTER);
 
             // add window listener
             // for unknown reasons, control events are also working
@@ -575,7 +576,7 @@ public class Form implements HasPublished {
             }
             checkUndecorated(dialog);
             dialog.setLocationByPlatform(locationByPlatform);
-            dialog.getContentPane().add(view, BorderLayout.CENTER);
+            dialog.getContentPane().add(view.getComponent(), BorderLayout.CENTER);
             dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 
             // add window listener
@@ -666,8 +667,8 @@ public class Form implements HasPublished {
                 } else {
                     windowHandler.windowClosing(new WindowEvent(new JFrame(), WindowEvent.WINDOW_CLOSING));
                     windowHandler.windowClosed(new WindowEvent(new JFrame(), WindowEvent.WINDOW_CLOSED));
-                    view.invalidate();
-                    surface.remove(view);
+                    view.getComponent().invalidate();
+                    surface.remove(view.getComponent());
                     surface.validate();
                     surface.repaint();
                 }
@@ -1317,46 +1318,52 @@ public class Form implements HasPublished {
             final DbSwingFactory factory = new FormFactory(aModel);
             final FormDesignInfo fdi = aDocument;//.copy();
             fdi.accept(factory);
-            view = factory.getResult();
+            JComponent viewComp = factory.getResult();
             Map<String, JComponent> components = new HashMap<>();
             components.putAll(factory.getNonvisuals());
             components.putAll(factory.getComponents());
-            components.entrySet().stream().forEach((entry) -> {
+            components.entrySet().stream().map((entry) -> {
                 String cName = entry.getKey();
                 ControlDesignInfo aDesignInfo = factory.getControlDesignInfos().get(cName);
                 JComponent aComp = entry.getValue();
-                if (view == entry.getValue()) {
+                if (viewComp == entry.getValue()) {
                     aComp.setName(VIEW_SCRIPT_NAME);
                 }
                 ControlsWrapper apiWrapper = new ControlsWrapper(aComp);
                 aDesignInfo.accept(apiWrapper);
                 com.eas.client.forms.api.Component<?> comp = apiWrapper.getResult();
+                if (viewComp == entry.getValue()) {
+                    view = (com.eas.client.forms.api.Container<?>)comp;
+                }
                 if (aComp instanceof ButtonGroupWrapper) {
                     aComp.setName(cName);
                 }
-                JSObject compPublished = (JSObject) ((HasPublished) comp).getPublished();
+                JSObject compPublished = (JSObject) comp.getPublished();
                 ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(comp);
                 if (eventsProxy != null) {
                     eventsProxy.setEventThis(compPublished);
                 }
+                return compPublished;
+            }).forEach((compPublished) -> {
+                if (!VIEW_SCRIPT_NAME.equals(compPublished.getMember("name"))) {
+                    publishedComponents.add(compPublished);
+                }
             });
         } else {
-            AnchorsPane viewWrapper = new AnchorsPane();
-            view = viewWrapper.getComponent();
-            view.setName(VIEW_SCRIPT_NAME);
-            JSObject compPublished = (JSObject) ((HasPublished) viewWrapper).getPublished();
-            ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(viewWrapper);
+            view = new AnchorsPane();
+            view.getComponent().setName(VIEW_SCRIPT_NAME);
+            JSObject compPublished = (JSObject) view.getPublished();
+            ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(view);
             if (eventsProxy != null) {
                 eventsProxy.setEventThis(compPublished);
             }
         }
     }
-/*
+
     public JSObject[] getPublishedComponents() {
         Collection<JSObject> copy = new ArrayList<>();
         copy.addAll(publishedComponents);
         publishedComponents.clear();
         return copy.toArray(new JSObject[]{});
     }
-*/
 }

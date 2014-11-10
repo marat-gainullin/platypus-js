@@ -11,8 +11,6 @@ import java.sql.Time;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,13 +18,11 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.application.AppClient;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelVisitor;
-import com.eas.client.model.ParametersEntity;
 import com.eas.client.model.ReferenceRelation;
 import com.eas.client.model.Relation;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -45,8 +41,6 @@ public class XmlDom2Model implements ModelVisitor {
 	protected final static String YES_STRING = "yes";
 	protected final static String NO_STRING = "no";
 	public static final String DATAMODEL_TAG_NAME = "datamodel";
-	public static final String PARAMETER_TAG_NAME = "parameter";
-	public static final String PARAMETERS_TAG_NAME = "parameters";
 	public static final String ENTITY_TAG_NAME = "entity";
 	public static final String FIELDS_ENTITY_TAG_NAME = "fieldsEntity";
 	public static final String PARAMETERS_ENTITY_TAG_NAME = "parametersEntity";
@@ -122,44 +116,6 @@ public class XmlDom2Model implements ModelVisitor {
 			model = aModel;
 			try {
 				currentTag = el;
-				Element paramsEl = Utils.getElementByTagName(currentTag, PARAMETERS_TAG_NAME);
-				if (paramsEl != null) {
-					Parameters parameters = aModel.getParameters();
-					NodeList pnl = paramsEl.getChildNodes();
-					if (pnl != null && parameters != null) {
-						Element lcurrentTag = currentTag;
-						try {
-							Set<String> names = new HashSet<String>();
-							for (int i = 0; i < pnl.getLength(); i++) {
-								if (PARAMETER_TAG_NAME.equals(pnl.item(i).getNodeName())) {
-									currentTag = (Element) pnl.item(i);
-									Parameter param = new Parameter();
-									visit(param);
-									String paramName = param.getName();
-									if (paramName != null && !paramName.isEmpty() && !names.contains(paramName)) {
-										names.add(paramName);
-										parameters.add(param);
-									}
-								}
-							}
-						} finally {
-							currentTag = lcurrentTag;
-						}
-					}
-				}
-				Element paramsEntityEl = Utils.getElementByTagName(currentTag, PARAMETERS_ENTITY_TAG_NAME);
-				if (paramsEntityEl != null) {
-					Entity pe = aModel.getParametersEntity();
-					if (pe != null) {
-						Element lcurrentTag = currentTag;
-						try {
-							currentTag = paramsEntityEl;
-							pe.accept(this);
-						} finally {
-							currentTag = lcurrentTag;
-						}
-					}
-				}
 				NodeList nl = currentTag.getChildNodes();
 				if (nl != null && nl.getLength() > 0) {
 					Element lcurrentTag = currentTag;
@@ -251,47 +207,23 @@ public class XmlDom2Model implements ModelVisitor {
 				@Override
 				public void run() {
 					try {
-						Entity lEntity;
-						if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(leftEntityId)) {
-							lEntity = model.getParametersEntity();
-							if (lEntity != null) {
-								if (leftParameterName != null && !leftParameterName.isEmpty()) {
-									relation.setLeftField(lEntity.getFields().get(leftParameterName));
-								} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-									relation.setLeftField(lEntity.getFields().get(leftFieldName));
-								}
-							}
-						} else{
-							lEntity = model.getEntityById(leftEntityId);
-							if (lEntity != null) {
-								if (leftParameterName != null && !leftParameterName.isEmpty()) {
-									relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
-								} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-									relation.setLeftField(lEntity.getFields().get(leftFieldName));
-								}
+						Entity lEntity = model.getEntityById(leftEntityId);
+						if (lEntity != null) {
+							if (leftParameterName != null && !leftParameterName.isEmpty()) {
+								relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
+							} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+								relation.setLeftField(lEntity.getFields().get(leftFieldName));
 							}
 						}
 						relation.setLeftEntity(lEntity);
 						lEntity.addOutRelation(relation);
 
-						Entity rEntity;
-						if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(rightEntityId)) {
-							rEntity = model.getParametersEntity();
-							if (rEntity != null) {
-								if (rightParameterName != null && !rightParameterName.isEmpty()) {
-									relation.setRightField(rEntity.getFields().get(rightParameterName));
-								} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-									relation.setRightField(rEntity.getFields().get(rightFieldName));
-								}
-							}
-						} else {
-							rEntity = model.getEntityById(rightEntityId);
-							if (rEntity != null) {
-								if (rightParameterName != null && !rightParameterName.isEmpty()) {
-									relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
-								} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-									relation.setRightField(rEntity.getFields().get(rightFieldName));
-								}
+						Entity rEntity = model.getEntityById(rightEntityId);
+						if (rEntity != null) {
+							if (rightParameterName != null && !rightParameterName.isEmpty()) {
+								relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
+							} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+								relation.setRightField(rEntity.getFields().get(rightFieldName));
 							}
 						}
 						relation.setRightEntity(rEntity);
@@ -318,10 +250,6 @@ public class XmlDom2Model implements ModelVisitor {
 		;
 		relation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
 		relation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
-	}
-
-	@Override
-	public void visit(ParametersEntity entity) {
 	}
 
 	@Override

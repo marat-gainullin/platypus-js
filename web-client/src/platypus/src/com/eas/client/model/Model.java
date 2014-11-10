@@ -29,8 +29,6 @@ import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.model.js.JsModel;
@@ -43,7 +41,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class Model implements HasPublished {
 
 	public static final String SCRIPT_MODEL_NAME = "model";
-	public static final String PARAMETERS_SCRIPT_NAME = "params";
 	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
 	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
 	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
@@ -52,8 +49,6 @@ public class Model implements HasPublished {
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
 	protected Map<String, Entity> entities = new HashMap<String, Entity>();
-	protected ParametersEntity parametersEntity;
-	protected Parameters parameters = new Parameters();
 	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	protected List<Change> changeLog = new ArrayList<Change>();
 	//
@@ -140,12 +135,6 @@ public class Model implements HasPublished {
 		for (Entity entity : entities.values()) {
 			copied.addEntity(entity.copy());
 		}
-		if (parameters != null) {
-			copied.setParameters(parameters.copy());
-		}
-		if (getParametersEntity() != null) {
-			copied.setParametersEntity((ParametersEntity) getParametersEntity().copy());
-		}
 		for (Relation relation : relations) {
 			Relation rcopied = relation.copy();
 			resolveCopiedRelation(rcopied, copied);
@@ -222,8 +211,6 @@ public class Model implements HasPublished {
 	 */
 	protected Model() {
 		super();
-		parametersEntity = new ParametersEntity();
-		parametersEntity.setModel(this);
 	}
 
 	/**
@@ -260,14 +247,6 @@ public class Model implements HasPublished {
 				return true;
 		}
 		return false;
-	}
-
-	public ParametersEntity getParametersEntity() {
-		return parametersEntity;
-	}
-
-	public Parameters getParameters() {
-		return parameters;
 	}
 
 	public void addRelation(Relation aRel) {
@@ -481,21 +460,8 @@ public class Model implements HasPublished {
 		return entities;
 	}
 
-	public Map<String, Entity> getAllEntities() {
-		Map<String, Entity> allEntities = new HashMap<>();
-		allEntities.putAll(entities);
-		if (parametersEntity != null) {
-			allEntities.put(parametersEntity.getEntityId(), parametersEntity);
-		}
-		return allEntities;
-	}
-
 	public Entity getEntityById(String aId) {
-		if (aId != null && ParametersEntity.PARAMETERS_ENTITY_ID.equals(aId)) {
-			return parametersEntity;
-		} else {
 			return entities.get(aId);
-		}
 	}
 
 	public void setEntities(Map<String, Entity> aValue) {
@@ -504,18 +470,6 @@ public class Model implements HasPublished {
 
 	public Set<Relation> getRelations() {
 		return relations;
-	}
-
-	public void setParameters(Parameters aParams) {
-		parameters = aParams;
-	}
-
-	public void setParametersEntity(ParametersEntity aParamsEntity) {
-		if (parametersEntity != null)
-			parametersEntity.setModel(null);
-		parametersEntity = aParamsEntity;
-		if (parametersEntity != null)
-			parametersEntity.setModel(this);
 	}
 
 	public void setRelations(Set<Relation> aRelations) {
@@ -538,15 +492,8 @@ public class Model implements HasPublished {
 	private Set<Entity> rootEntities() {
 		final Set<Entity> rootEntities = new HashSet<>();
 		for (Entity entity : entities.values()) {
-			Set<Relation> dependanceRels = new HashSet<>();
-			for (Relation inRel : entity.getInRelations()) {
-				if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
-					dependanceRels.add(inRel);
-				}
-			}
-			if (dependanceRels.isEmpty()) {
+			if(entity.getInRelations().isEmpty())
 				rootEntities.add(entity);
-			}
 		}
 		return rootEntities;
 	}
@@ -583,12 +530,6 @@ public class Model implements HasPublished {
 					String lName = ent.getName();
 					if (lName != null && aName.equals(lName)) {
 						return true;
-					}
-					if (ent instanceof ParametersEntity) {
-						Fields params = ent.getFields();
-						if (params != null && params.isNameAlreadyPresent(aName, field2Exclude)) {
-							return true;
-						}
 					}
 				}
 			}

@@ -96,11 +96,11 @@ public class AbsolutePane extends Container<JPanel> {
         return new MarginConstraints(left, top, null, null, width, height);
     }
     
-    public void toFront(Component aComp) {
+    public void toFront(Component<?> aComp) {
         Ordering.toFront(delegate, aComp);
     }
 
-    public void toBack(Component aComp) {
+    public void toBack(Component<?> aComp) {
         Ordering.toBack(delegate, aComp);
     }
 
@@ -112,7 +112,7 @@ public class AbsolutePane extends Container<JPanel> {
             + "*/";
 
     @ScriptFunction(jsDoc = TO_FRONT_JSDOC, params = {"component", "count"})
-    public void toFront(Component aComp, int aCount) {
+    public void toFront(Component<?> aComp, int aCount) {
         Ordering.toFront(delegate, aComp, aCount);
     }
 
@@ -124,7 +124,7 @@ public class AbsolutePane extends Container<JPanel> {
             + "*/";
 
     @ScriptFunction(jsDoc = TO_BACK_JSDOC, params = {"component", "count"})
-    public void toBack(Component aComp, int aCount) {
+    public void toBack(Component<?> aComp, int aCount) {
         Ordering.toBack(delegate, aComp, aCount);
     }
 

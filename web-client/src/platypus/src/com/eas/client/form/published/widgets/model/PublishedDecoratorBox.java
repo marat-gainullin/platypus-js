@@ -27,7 +27,6 @@ import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.eas.client.model.ParametersEntity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -268,7 +267,7 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 		Entity newEntity = aField != null && aField.getOwner() != null && aField.getOwner().getOwner() != null ? aField.getOwner().getOwner() : null;
 		Model newModel = newEntity != null ? newEntity.getModel() : null;
 		if (newEntity != null && newModel != null) {
-			ModelWidgetBounder<T> newBound = new ModelWidgetBounder<T>(newModel, newEntity.getEntityId(), aField.getName(), newEntity instanceof ParametersEntity || !(aField instanceof Parameter),
+			ModelWidgetBounder<T> newBound = new ModelWidgetBounder<T>(newModel, newEntity.getEntityId(), aField.getName(), !(aField instanceof Parameter),
 			        aConverter);
 			newBound.setWidget(this);
 			setModelElement(newBound);

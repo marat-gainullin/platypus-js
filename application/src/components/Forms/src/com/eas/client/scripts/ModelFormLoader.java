@@ -16,7 +16,7 @@ import org.w3c.dom.Document;
  */
 public class ModelFormLoader {
     
-    public static DbFormDesignInfo load(Document aDoc, Application aApp) {
+    public static DbFormDesignInfo load(Document aDoc, Application<?> aApp) {
         DbFormDesignInfo di = new DbFormDesignInfo();
         Object2Dom.transform(di, aDoc);
         return di;

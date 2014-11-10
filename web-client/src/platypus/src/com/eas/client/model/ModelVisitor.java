@@ -17,8 +17,6 @@ public interface ModelVisitor {
 
     public void visit(Entity entity);
 
-    public void visit(ParametersEntity entity);
-
     public void visit(Relation relation);
     
     public void visit(ReferenceRelation relation);    
