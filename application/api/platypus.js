@@ -30,7 +30,6 @@
     var LoggerClass = Java.type("java.util.logging.Logger");
     var RowClass = Java.type("com.bearsoft.rowset.Row");
     var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
-    var ParamsClass = Java.type("com.bearsoft.rowset.metadata.Parameters");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
     var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
@@ -1144,7 +1143,6 @@
         } else {
             aTarget = new P.ReportTemplate(reportConfig, aData);
         }
-        template.injectPublished(aTarget);
         return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});

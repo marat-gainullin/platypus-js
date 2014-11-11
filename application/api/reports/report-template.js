@@ -1,17 +1,21 @@
 (function() {
     var javaClass = Java.type("com.eas.client.reports.ReportTemplate");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.ReportTemplate(aDelegate);
+        return new P.ReportTemplate(null, null, aDelegate);
     });
     
     /**
-     * Generated constructor.
+     * Creates report template.
+     * @param config The report binary body (array of byte) and some options.
+     * @param data Object that propeties can be added to the report.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function () {
-        var maxArgs = 0;
+    P.ReportTemplate = function (config, data) {
+        var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(config), P.boxAsJava(data))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(config))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

@@ -14,7 +14,6 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptObj;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -23,10 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-@ScriptObj(name = "Report", jsDoc = ""
-        + "/**\n"
-        + " * Application report.\n"
-        + " */")
+
 public class ReportTemplate implements HasPublished {
 
     protected ReportConfig config;
@@ -36,6 +32,13 @@ public class ReportTemplate implements HasPublished {
     private static JSObject publisher;
     protected Object published;
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Creates report template.\n"
+            + " * @param config The report binary body (array of byte) and some options.\n"
+            + " * @param data Object that propeties can be added to the report.\n"
+            + " */"
+            + "", params = {"config", "data"})
     public ReportTemplate(ReportConfig aConfig, JSObject aData) {
         super();
         config = aConfig;

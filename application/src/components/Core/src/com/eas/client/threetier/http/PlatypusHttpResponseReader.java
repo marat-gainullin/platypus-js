@@ -163,7 +163,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         if (conn.getContentType() != null && conn.getContentType().toLowerCase().startsWith(REPORT_LOCATION_CONTENT_TYPE)) {
             String reportLocation = extractText();
             URL currentUrl = conn.getURL();
-            URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), reportLocation);
+            URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), currentUrl.getPort(), reportLocation);
             HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
             reportConn.setDoInput(true);
             pConn.addCookies(reportConn);
@@ -173,8 +173,8 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
                 int slashIdx = reportLocation.lastIndexOf("/");
                 String fileName = reportLocation.substring(slashIdx + 1);
                 if (fileName.contains(".")) {
-                    String[] nameFormat = fileName.split(".");
-                    Report report = new Report(content, nameFormat[1], nameFormat[0]);
+                    String[] nameFormat = fileName.split("\\.");
+                    Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
                     rsp.setResult(report);
                 } else {
                     Report report = new Report(content, "unknown", "unknown");
