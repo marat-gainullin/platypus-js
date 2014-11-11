@@ -32,7 +32,7 @@ public class TimeSeriesChart extends AbstractLineChart {
     private final String xLabel;
     private final String yLabel;
     private static JSObject publisher;
-    
+
     public TimeSeriesChart(String pTitle, String pXAxisLabel, String pYAxisLabel) {
         super();
         title = pTitle;
@@ -164,18 +164,18 @@ public class TimeSeriesChart extends AbstractLineChart {
         chart.fireChartChanged();
         super.fireDataChanged();
     }
-    
-        @Override
-    public Object getPublished() {
+
+    @Override
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
-    
+
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }

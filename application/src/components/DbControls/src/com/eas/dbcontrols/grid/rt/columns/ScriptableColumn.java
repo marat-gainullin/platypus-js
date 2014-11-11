@@ -40,7 +40,7 @@ public class ScriptableColumn implements HasPublished {
     protected ModelColumn modelColumn;
     // view
     protected TableColumn viewColumn;
-    protected Object published;
+    protected JSObject published;
     protected int viewIndex = -1;
     protected boolean visible;
     // Temporarily stored values involved in columns show/hide process.
@@ -227,18 +227,18 @@ public class ScriptableColumn implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object jsColumn) {
+    public void setPublished(JSObject jsColumn) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

@@ -45,7 +45,7 @@ public abstract class Component<D extends JComponent> implements HasPublished {
     protected ScriptColor foreground;
     protected String errorMessage;
     protected D delegate;
-    protected Object published;
+    protected JSObject published;
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
@@ -726,7 +726,7 @@ public abstract class Component<D extends JComponent> implements HasPublished {
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

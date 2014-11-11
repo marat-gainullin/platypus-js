@@ -95,6 +95,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
+import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.api.editor.DialogBinding;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
@@ -686,7 +687,7 @@ public class FormUtils {
     private static class Panel extends com.eas.client.forms.api.Container<JPanel> {
 
         @Override
-        public Object getPublished() {
+        public JSObject getPublished() {
             throw new UnsupportedOperationException("Dummt implementation for reflection only!");
         }
         

@@ -30,7 +30,7 @@ public class ReportTemplate implements HasPublished {
     protected String name;
     protected JSObject scriptData;
     private static JSObject publisher;
-    protected Object published;
+    protected JSObject published;
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
@@ -75,18 +75,18 @@ public class ReportTemplate implements HasPublished {
     }
     
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

@@ -163,8 +163,9 @@ public class Form implements HasPublished {
     // runtime 
     protected com.eas.client.forms.api.Container<?> view;
     protected String formKey;
+    //
     private static JSObject publisher;
-    protected Object published;
+    protected JSObject published;
     // frequent runtime
     protected Collection<JSObject> publishedComponents = new ArrayList<>();
     protected Container surface;
@@ -191,18 +192,18 @@ public class Form implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

@@ -7,6 +7,7 @@
 package com.eas.dbcontrols;
 
 import com.eas.script.HasPublished;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -14,20 +15,20 @@ import com.eas.script.HasPublished;
  */
 public class DummyHasPublished implements HasPublished{
 
-    protected Object published;
+    protected JSObject published;
     
-    public DummyHasPublished(Object aPublished){
+    public DummyHasPublished(JSObject aPublished){
         super();
         published = aPublished;
     }
     
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         return published;
     }
 
     @Override
-    public void setPublished(Object aPublished) {
+    public void setPublished(JSObject aPublished) {
         throw new UnsupportedOperationException("Not supported in dummy implementation.");
     }
     

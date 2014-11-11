@@ -40,7 +40,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q extends Query> extends Model<E, Q> implements HasPublished {
 
-    protected Object published;
+    protected JSObject published;
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected QueriesProxy<Q> queries;
     protected RequeryProcess<E, Q> process;
@@ -177,8 +177,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     @Override
-    public void setPublished(Object aValue) {
-        Object oldValue = published;
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

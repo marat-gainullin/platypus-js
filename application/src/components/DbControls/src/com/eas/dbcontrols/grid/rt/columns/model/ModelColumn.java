@@ -23,7 +23,7 @@ public class ModelColumn implements HasStyle, HasPublished {
     protected Rowset rowset;
     protected boolean readOnly;
     protected HasStyle styleHost;
-    protected Object published;
+    protected JSObject published;
     protected ScalarDbControl view;
     protected ScalarDbControl editor;
 
@@ -105,12 +105,12 @@ public class ModelColumn implements HasStyle, HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         published = aValue;
     }
 }

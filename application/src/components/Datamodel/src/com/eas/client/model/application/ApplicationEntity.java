@@ -72,7 +72,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected JSObject onRequeried;
     protected JSObject onFiltered;
     //
-    protected Object published;
+    protected JSObject published;
     protected transient List<Integer> filterConstraints = new ArrayList<>();
     protected transient Rowset rowset;
     protected boolean valid;
@@ -937,7 +937,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }
