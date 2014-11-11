@@ -21,7 +21,7 @@ public class Font implements HasPublished {
     protected String family;
     protected int style;
     protected int size;
-    protected Object published;
+    protected JSObject published;
 
     @ScriptFunction(params = {"family", "style", "size"}, jsDoc = "/**\n"
             + "* Font object, which is used to render text in a visible way.\n"
@@ -86,18 +86,18 @@ public class Font implements HasPublished {
     }
     
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

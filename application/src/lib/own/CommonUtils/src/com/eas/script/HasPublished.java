@@ -5,13 +5,15 @@
  */
 package com.eas.script;
 
+import jdk.nashorn.api.scripting.JSObject;
+
 /**
  *
  * @author mg
  */
 public interface HasPublished {
 
-    Object getPublished();
+    JSObject getPublished();
 
-    void setPublished(Object aPublished);
+    void setPublished(JSObject aPublished);
 }

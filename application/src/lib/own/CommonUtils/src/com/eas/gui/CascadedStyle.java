@@ -43,7 +43,7 @@ public class CascadedStyle implements HasPublished {
     protected String openFolderIconName;
     protected String leafIconName;
     protected CascadedStyle parent;
-    protected Object published;
+    protected JSObject published;
 
     public CascadedStyle() {
         super();
@@ -513,18 +513,18 @@ public class CascadedStyle implements HasPublished {
     }
     
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }
