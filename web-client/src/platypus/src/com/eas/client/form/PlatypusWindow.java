@@ -33,6 +33,7 @@ import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.HasJsName;
+import com.eas.client.form.published.containers.AnchorsPane;
 import com.eas.client.form.published.widgets.DesktopPane;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -116,6 +117,11 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	protected String formKey = "window-" + Document.get().createUniqueId();
 
+	public PlatypusWindow() {
+		this(new AnchorsPane());
+		Publisher.publish((AnchorsPane)view);
+	}
+	
 	public PlatypusWindow(Widget aView) {
 		super();
 		view = aView;
@@ -821,6 +827,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setWidth(double aValue) {
 		super.setWidth(aValue + "px");
+		if(viewSize == null)
+			viewPreferredWidth = aValue;
 	}
 
 	public double getHeight() {
@@ -829,6 +837,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setHeight(double aValue) {
 		super.setHeight(aValue + "px");
+		if(viewSize == null)
+			viewPreferredHeight = aValue;
 	}
 
 	public ImageResource getIcon() {

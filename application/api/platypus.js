@@ -591,9 +591,9 @@
             var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
             var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null);
             if (aTarget) {
-                P.Form.call(aTarget, null, form);
+                P.Form.call(aTarget, aName, form);
             } else {
-                aTarget = new P.Form(null, form);
+                aTarget = new P.Form(aName, form);
             }
             form.injectPublished(aTarget);
             if (!form.title)

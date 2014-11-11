@@ -94,7 +94,6 @@ public class WidgetsFactory {
 	protected static final String BORDER_TAG = "border";
 	protected static final String ROOT_WIDGET_NAME = "Form";
 
-	protected JavaScriptObject target;
 	protected PlatypusWindow form;
 	protected HasWidgets rootWidget;
 	protected boolean isRoot = true;
@@ -109,11 +108,10 @@ public class WidgetsFactory {
 	protected List<Runnable> postponedTasks = new ArrayList<>();
 	protected List<Runnable> postponedTasks1 = new ArrayList<>();
 
-	public WidgetsFactory(String aModuleName, Element aFormElement, JavaScriptObject aTarget) {
+	public WidgetsFactory(String aModuleName, Element aFormElement) {
 		super();
 		moduleName = aModuleName;
 		tag = aFormElement;
-		target = aTarget;
 	}
 
 	/**
@@ -456,7 +454,6 @@ public class WidgetsFactory {
 		toggleGroups.put(widgetName, buttonGroup);
 		buttonGroup.setJsName(widgetName);
 		buttonGroup.setPublished(Publisher.publish(buttonGroup));
-		target.<Utils.JsObject> cast().inject(widgetName, buttonGroup.getPublished());
 	}
 
 	private PlatypusTextField createTextField(Element aTag) throws Exception {
@@ -593,7 +590,6 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -605,7 +601,6 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -629,7 +624,6 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
-		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -643,7 +637,6 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -657,7 +650,6 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 

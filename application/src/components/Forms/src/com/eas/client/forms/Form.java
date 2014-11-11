@@ -197,7 +197,7 @@ public class Form implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
@@ -332,7 +332,7 @@ public class Form implements HasPublished {
             + " * Top level widget of a form.\n"
             + " */")
     public JSObject getView() {
-        return (JSObject)view.getPublished();
+        return (JSObject) view.getPublished();
     }
 
     private static final String IS_VISIBLE_JSDOC = ""
@@ -402,16 +402,16 @@ public class Form implements HasPublished {
                     showingForms.put(formKey, this);
                 }
                 frame.setVisible(true);
+                Insets decorInsets = frame.getInsets();
+                windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
                 if (formSize != null) {
-                    frame.setSize(formSize);
+                    frame.setSize(formSize.width + windowDecorSize.width, formSize.height + windowDecorSize.height);
                 } else if (designedViewSize != null) {
-                    Insets decorInsets = frame.getInsets();
-                    windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
                     frame.setSize(designedViewSize.width + windowDecorSize.width, designedViewSize.height + windowDecorSize.height);
                 } else {
                     frame.pack();
                 }
-                formSize = frame.getSize();
+                formSize = new Dimension(frame.getSize().width - windowDecorSize.width, frame.getSize().height - windowDecorSize.height);
                 if (formLocation != null && !locationByPlatform) {
                     frame.setLocation(formLocation);
                 }
@@ -428,7 +428,7 @@ public class Form implements HasPublished {
 
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    formSize = surface.getSize();
+                    formSize = new Dimension(surface.getSize().width - windowDecorSize.width, surface.getSize().height - windowDecorSize.height);
                 }
             });
             surface.revalidate();
@@ -477,16 +477,16 @@ public class Form implements HasPublished {
                 }
                 ControlsWrapper.unwrap(aDesktop).add(internalFrame);
                 internalFrame.setVisible(true);
+                Insets decorInsets = internalFrame.getInsets();
+                windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
                 if (formSize != null) {
-                    internalFrame.setSize(formSize);
+                    internalFrame.setSize(formSize.width + windowDecorSize.width, formSize.height + windowDecorSize.height);
                 } else if (designedViewSize != null) {
-                    Insets decorInsets = internalFrame.getInsets();
-                    windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
                     internalFrame.setSize(designedViewSize.width + windowDecorSize.width, designedViewSize.height + windowDecorSize.height);
                 } else {
                     internalFrame.pack();
                 }
-                formSize = internalFrame.getSize();
+                formSize = new Dimension(internalFrame.getSize().width - windowDecorSize.width, internalFrame.getSize().height - windowDecorSize.height);
                 if (formLocation != null && !locationByPlatform) {
                     internalFrame.setLocation(formLocation);
                 }
@@ -503,7 +503,7 @@ public class Form implements HasPublished {
 
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    formSize = surface.getSize();
+                    formSize = new Dimension(surface.getSize().width - windowDecorSize.width, surface.getSize().height - windowDecorSize.height);
                 }
             });
             windowHandler.windowOpened(null);
@@ -522,16 +522,16 @@ public class Form implements HasPublished {
                 protected void processWindowEvent(WindowEvent e) {
                     try {
                         if (e.getID() == WindowEvent.WINDOW_OPENED) {
+                            Insets decorInsets = surface.getInsets();
+                            windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
                             if (formSize != null) {
-                                surface.setSize(formSize);
+                                surface.setSize(formSize.width + windowDecorSize.width, formSize.height + windowDecorSize.height);
                             } else if (designedViewSize != null) {
-                                Insets decorInsets = surface.getInsets();
-                                windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
                                 surface.setSize(designedViewSize.width + windowDecorSize.width, designedViewSize.height + windowDecorSize.height);
                             } else {
                                 ((JDialog) surface).pack();
                             }
-                            formSize = surface.getSize();
+                            formSize = new Dimension(surface.getSize().width - windowDecorSize.width, surface.getSize().height - windowDecorSize.height);
                             if (formLocation != null && !locationByPlatform) {
                                 surface.setLocation(formLocation);
                             }
@@ -546,7 +546,7 @@ public class Form implements HasPublished {
                                 @Override
                                 public void componentResized(ComponentEvent e) {
                                     if (surface != null && surface.isVisible()) {
-                                        formSize = surface.getSize();
+                                        formSize = new Dimension(surface.getSize().width - windowDecorSize.width, surface.getSize().height - windowDecorSize.height);
                                     }
                                 }
                             });
@@ -875,18 +875,18 @@ public class Form implements HasPublished {
     @ScriptFunction(jsDoc = WIDTH_JSDOC)
     public int getWidth() {
         if (surface != null) {
-            return surface.getWidth();
+            return surface.getWidth() - windowDecorSize.width;
         } else if (formSize != null) {
             return formSize.width;
         } else {
-            return designedViewSize.width + windowDecorSize.width;
+            return designedViewSize.width;
         }
     }
 
     @ScriptFunction
     public void setWidth(int aValue) {
         if (surface != null) {
-            surface.setSize(aValue, surface.getHeight());
+            surface.setSize(aValue + windowDecorSize.width, surface.getHeight());
         } else {
             if (formSize == null) {
                 formSize = new Dimension();
@@ -903,18 +903,18 @@ public class Form implements HasPublished {
     @ScriptFunction(jsDoc = HEIGHT_JSDOC)
     public int getHeight() {
         if (surface != null) {
-            return surface.getHeight();
+            return surface.getHeight() - windowDecorSize.height;
         } else if (formSize != null) {
             return formSize.height;
         } else {
-            return designedViewSize.height + windowDecorSize.height;
+            return designedViewSize.height;
         }
     }
 
     @ScriptFunction
     public void setHeight(int aValue) {
         if (surface != null) {
-            surface.setSize(surface.getWidth(), aValue);
+            surface.setSize(surface.getWidth(), aValue + windowDecorSize.height);
         } else {
             if (formSize == null) {
                 formSize = new Dimension();
@@ -1334,7 +1334,7 @@ public class Form implements HasPublished {
                 aDesignInfo.accept(apiWrapper);
                 com.eas.client.forms.api.Component<?> comp = apiWrapper.getResult();
                 if (viewComp == entry.getValue()) {
-                    view = (com.eas.client.forms.api.Container<?>)comp;
+                    view = (com.eas.client.forms.api.Container<?>) comp;
                 }
                 if (aComp instanceof ButtonGroupWrapper) {
                     aComp.setName(cName);

@@ -23,7 +23,6 @@ import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.ModelSpin;
 import com.eas.client.form.published.widgets.model.ModelTextArea;
 import com.eas.client.model.Model;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.xml.client.Element;
 
@@ -32,8 +31,8 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 	public static final String MODEL_ELEMENT_MISSING = "A model element is required for model-aware controls";
 	protected Model model;
 
-	public ModelWidgetsFactory(String aModuleName, Element aFormTag, Model aModel, JavaScriptObject aTarget) {
-		super(aModuleName, aFormTag, aTarget);
+	public ModelWidgetsFactory(String aModuleName, Element aFormTag, Model aModel) {
+		super(aModuleName, aFormTag);
 		model = aModel;
 	}
 
