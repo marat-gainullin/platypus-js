@@ -19,6 +19,7 @@ public class UpdaterConstants {
     public static final String CMD_TMP_UPDATE_NAME = "uname";
     public static final String CMD_CURRENT_PATH = "path";
     public static final String CMD_RUN_COMMAND = "wrun";
+    public static final String CMD_IS_SILENT = "silent";
     
     public static final String ROOT_NAME = "update";
     public static final String VERSION_NAME = "version";
@@ -55,6 +56,7 @@ public class UpdaterConstants {
         + "         -cname <value>   Name of your file containing application version information.\n"
         + "         -uname <value>   Name of file to download to update the application.\n"
         + "         -path <value>    Current directory. Use if Updater located not in application dir.\n"
-        + "         -wrun <value>    What run to start platypus. (deprecated)\n";
+        + "         -silent <true/false> Is programm runs asks user interaction";
+//        + "         -wrun <value>    What run to start platypus. (deprecated)\n";
 
 }

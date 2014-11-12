@@ -31,6 +31,7 @@ import org.netbeans.api.db.explorer.JDBCDriverManager;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
 /**
@@ -79,26 +80,17 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            String[] command = new String[1];
+            
             String updaterPath = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
+            String[] command = new String[]{updaterPath,"newversion","-silent","true"};
             if (Utilities.isWindows()) {
                 command[0] = ("\"" + updaterPath + "\"");
             } else {
                 command[0] = updaterPath;
             }
-
+            
             try {
                updaterProcess=  Runtime.getRuntime().exec(command);
-               //Добавляем shutdownHook
-                Runnable runnable = new Runnable(){
-                    public void run(){
-                        if (updaterProcess!=null){
-                            updaterProcess.destroy();
-                        }
-                    }
-                };
-                Runtime.getRuntime().addShutdownHook(new Thread(runnable));
-                
             } catch (IOException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName())
                         .log(Level.SEVERE, null, ex); // NOI18N
@@ -109,6 +101,14 @@ public class PlatypusPlatform {
         }
     }
 
+    /**
+     * 
+     * @return link to updater process
+     */
+    public static Process getUpdaterProcess(){
+        return updaterProcess;
+    }
+    
     /**
      * Gets the platform home directory.
      *
