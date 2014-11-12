@@ -1,19 +1,21 @@
 (function() {
     var javaClass = Java.type("com.eas.client.forms.Form");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.Form(null, aDelegate);
+        return new P.Form(null, null, aDelegate);
     });
     
     /**
      * Creates a form.
+     * @param aView Container instance to be used as view of created form.
      * @param aFormKey Form instance key for open windows accounting. Optional.
      * @constructor Form Form
      */
-    P.Form = function (aFormKey) {
-        var maxArgs = 1;
+    P.Form = function (aView, aFormKey) {
+        var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(aFormKey))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(aView), P.boxAsJava(aFormKey))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(aView))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

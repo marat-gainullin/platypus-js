@@ -589,11 +589,11 @@
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
             var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
             var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
-            var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null);
+            var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null, null);
             if (aTarget) {
-                P.Form.call(aTarget, aName, form);
+                P.Form.call(aTarget, null, aName, form);
             } else {
-                aTarget = new P.Form(aName, form);
+                aTarget = new P.Form(null, aName, form);
             }
             form.injectPublished(aTarget);
             if (!form.title)

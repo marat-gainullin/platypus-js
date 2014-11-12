@@ -175,20 +175,25 @@ public class Form implements HasPublished {
         this("form-" + IDGenerator.genID());
     }
 
+    public Form(String aFormKey) throws Exception {
+        this(aFormKey, null, null, null);
+    }
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Creates a form.\n"
+            + " * @param aView Container instance to be used as view of created form. Optional. If it is omitted P.AnchorsPane will be created and used as view.\n"
             + " * @param aFormKey Form instance key for open windows accounting. Optional.\n"
             + " */",
-            params = {"aFormKey"})
-    public Form(String aFormKey) throws Exception {
-        this(aFormKey, null, null);
+            params = {"aView", "aFormKey"})
+    public Form(com.eas.client.forms.api.Container<?> aView, String aFormKey) throws Exception {
+        this(aFormKey, null, null, aView);
     }
-
-    public Form(String aFormKey, FormDesignInfo aDocument, ApplicationModel<?, ?> aModel) throws Exception {
+    
+    public Form(String aFormKey, FormDesignInfo aDocument, ApplicationModel<?, ?> aModel, com.eas.client.forms.api.Container<?> aView) throws Exception {
         super();
         formKey = aFormKey;
-        prepareForm(aDocument, aModel);
+        prepareForm(aDocument, aModel, aView);
     }
 
     @Override
@@ -1301,7 +1306,7 @@ public class Form implements HasPublished {
         }
     }
 
-    private void prepareForm(FormDesignInfo aDocument, ApplicationModel<?, ?> aModel) throws Exception {
+    private void prepareForm(FormDesignInfo aDocument, ApplicationModel<?, ?> aModel, com.eas.client.forms.api.Container<?> aView) throws Exception {
         if (aDocument != null) {
             defaultCloseOperation = aDocument.getDefaultCloseOperation();
             icon = IconCache.getIcon(aDocument.getIconImage());
@@ -1352,7 +1357,7 @@ public class Form implements HasPublished {
             });
         } else {
             windowHandler = new FormWindowEventsIProxy(this);
-            view = new AnchorsPane();
+            view = aView != null ? aView : new AnchorsPane();
             view.getComponent().setName(VIEW_SCRIPT_NAME);
             JSObject compPublished = (JSObject) view.getPublished();
             ControlEventsIProxy eventsProxy = ControlsWrapper.getEventsProxy(view);

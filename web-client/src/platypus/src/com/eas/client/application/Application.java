@@ -591,9 +591,9 @@ public class Application {
 			var nativeModel = !!aModel ? aModel.unwrap() : null;
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Ljava/lang/String;Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementName, appElementDoc, nativeModel);
 			if(aTarget)
-				$wnd.P.Form.call(aTarget, appElementName, nativeForm);
+				$wnd.P.Form.call(aTarget, null, appElementName, nativeForm);
 			else
-				aTarget = new $wnd.P.Form(appElementName, nativeForm);
+				aTarget = new $wnd.P.Form(null, appElementName, nativeForm);
 			return aTarget;
 		};
 		$wnd.P.HTML5 = "Html5 client";
@@ -605,12 +605,16 @@ public class Application {
 				return cachedModules;
 			}
 		});
-		function Form(aFormKey){
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
+		function Form(aView, aFormKey){
+			var aComponent = arguments.length > 2 ? arguments[2] : null;
 
 			var published = this;
-			 
-			aComponent = aComponent || @com.eas.client.form.PlatypusWindow::new()(); 	
+			if(!aComponent){ 
+				if(aView)
+					aComponent = @com.eas.client.form.PlatypusWindow::new(Lcom/google/gwt/user/client/ui/Widget;)(aView.unwrap());
+				else
+					aComponent = @com.eas.client.form.PlatypusWindow::new()();
+			} 	
 			published.unwrap = function() {
 				return aComponent;
 			};
