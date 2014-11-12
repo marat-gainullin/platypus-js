@@ -1,17 +1,21 @@
 (function() {
     var javaClass = Java.type("com.eas.client.forms.Form");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.Form(aDelegate);
+        return new P.Form(null, null, aDelegate);
     });
     
     /**
-     * Generated constructor.
+     * Creates a form.
+     * @param aView Container instance to be used as view of created form.
+     * @param aFormKey Form instance key for open windows accounting. Optional.
      * @constructor Form Form
      */
-    P.Form = function () {
-        var maxArgs = 0;
+    P.Form = function (aView, aFormKey) {
+        var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(aView), P.boxAsJava(aFormKey))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(aView))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -120,6 +124,20 @@
              * @memberOf Form
              */
             P.Form.prototype.onWindowMinimized = {};
+        }
+        Object.defineProperty(this, "view", {
+            get: function() {
+                var value = delegate.view;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Form){
+            /**
+             * Top level widget of a form.
+             * @property view
+             * @memberOf Form
+             */
+            P.Form.prototype.view = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {

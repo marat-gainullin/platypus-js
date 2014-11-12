@@ -588,28 +588,26 @@ public class Entity implements RowsetListener, HasPublished{
 		Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
 		// entity.params
 		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
-		if(nativeQuery != null){// Parameters entity has no query
-			var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
-			var publishedParams = {};  
-			Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-			Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
-			for(var i = 0; i < publishedParams.schema.length; i++){
-				(function(){
-					var _i = i;
-					var propDesc = {
-						 get : function(){ return publishedParams.schema[_i].value; },
-						 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
-					};
-					Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
-					Object.defineProperty(publishedParams, _i, propDesc);
-				})();
-			}			
-			Object.defineProperty(published, "params", {
-				get : function(){
-					return publishedParams;
-				}
-			});
-		}
+		var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
+		var publishedParams = {};  
+		Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
+		Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
+		for(var i = 0; i < publishedParams.schema.length; i++){
+			(function(){
+				var _i = i;
+				var propDesc = {
+					 get : function(){ return publishedParams.schema[_i].value; },
+					 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
+				};
+				Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
+				Object.defineProperty(publishedParams, _i, propDesc);
+			})();
+		}			
+		Object.defineProperty(published, "params", {
+			get : function(){
+				return publishedParams;
+			}
+		});
 		// events
 		Object.defineProperty(published, "willChange", {
 			get : function(){

@@ -7,6 +7,7 @@ package com.eas.server.httpservlet;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.queries.Query;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
@@ -92,33 +93,47 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     public void visit(ExecuteServerModuleMethodRequest.Response resp) throws Exception {
         final Object result = ((ExecuteServerModuleMethodRequest.Response) resp).getResult();
         makeResponseNotCacheable(servletResponse);
-        if (result instanceof Rowset) {
-            writeResponse((Rowset) result, servletResponse);
-        } else if (result instanceof String) {
+//        if (result instanceof Rowset) {
+//           
+//        } else 
+        if (result instanceof String) {
             writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
         } else if (result instanceof JSObject) {
-            writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
-        } else if (result instanceof Report) {
-            Report report = (Report) result;
-            String docsRoot = servletRequest.getServletContext().getRealPath("/");
-            String userName = servletRequest.getUserPrincipal() != null ? servletRequest.getUserPrincipal().getName() : servletRequest.getSession().getId();
-            String userHomeInApplication = "/reports/" + userName + "/";
-            File userDir = new File(docsRoot + userHomeInApplication);
-            if (!userDir.exists()) {
-                userDir.mkdirs();
+            JSObject jsResult = (JSObject) result;
+            JSObject p = ScriptUtils.lookupInGlobal("P");
+            if (p != null) {
+                Object reportClass = p.getMember("Report");
+                Object dbEntityClass = p.getMember("ApplicationDbEntity");
+                if (jsResult.isInstanceOf(reportClass)) {
+                    Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
+                    String docsRoot = servletRequest.getServletContext().getRealPath("/");
+                    String userName = servletRequest.getUserPrincipal() != null ? servletRequest.getUserPrincipal().getName() : servletRequest.getSession().getId();
+                    String userHomeInApplication = "/reports/" + userName + "/";
+                    File userDir = new File(docsRoot + userHomeInApplication);
+                    if (!userDir.exists()) {
+                        userDir.mkdirs();
+                    }
+                    String reportName = report.getName() + IDGenerator.genID() + "." + report.getFormat();
+                    File rep = new File(docsRoot + userHomeInApplication + reportName);
+                    try (FileOutputStream out = new FileOutputStream(rep)) {
+                        out.write(report.getReport());
+                        out.flush();
+                    }
+                    String reportLocation = userHomeInApplication + reportName;
+                    if (!"/".equals(servletRequest.getContextPath())) {
+                        reportLocation = servletRequest.getContextPath() + reportLocation;
+                    }
+                    reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
+                    writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
+                } else if (jsResult.isInstanceOf(dbEntityClass)) {
+                    ApplicationDbEntity entity = (ApplicationDbEntity) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
+                    writeResponse(entity.getRowset(), servletResponse);
+                } else {
+                    writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
+                }
+            } else {
+                writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
             }
-            String reportName = report.getName() + IDGenerator.genID() + "." + report.getFormat();
-            File rep = new File(docsRoot + userHomeInApplication + reportName);
-            try (FileOutputStream out = new FileOutputStream(rep)) {
-                out.write(report.getReport());
-                out.flush();
-            }
-            String reportLocation = userHomeInApplication + reportName;
-            if (!"/".equals(servletRequest.getContextPath())) {
-                reportLocation = servletRequest.getContextPath() + reportLocation;
-            }
-            reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
-            writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
         } else {// including null result
             writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), servletResponse);
         }

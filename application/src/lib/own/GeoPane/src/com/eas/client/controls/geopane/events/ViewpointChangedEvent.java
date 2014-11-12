@@ -4,9 +4,12 @@
  */
 package com.eas.client.controls.geopane.events;
 
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.vividsolutions.jts.geom.Geometry;
 import java.awt.geom.AffineTransform;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Base class to view point changes related events
@@ -19,7 +22,8 @@ public class ViewpointChangedEvent implements HasPublished {
     protected Geometry areaOfInterest;
     protected Geometry cartesianAreaOfInterest;
     //
-    protected Object published;
+    private static JSObject publisher;
+    protected JSObject published;
 
     public ViewpointChangedEvent(AffineTransform aTransform, Geometry aAreaOfInterest, Geometry aCartesianAreaOfInterest) {
         super();
@@ -55,12 +59,25 @@ public class ViewpointChangedEvent implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject)publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
         published = aValue;
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

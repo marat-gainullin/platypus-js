@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
  *
  * @author mg
  */
-public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity, DbSchemeModel> implements ModelVisitor<FieldsEntity, DbSchemeModel>{
+public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity, DbSchemeModel> implements ModelVisitor<FieldsEntity, DbSchemeModel> {
 
     public XmlDom2DbSchemeModel(Document aDoc) {
         super();
@@ -36,15 +36,33 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity, DbSchemeMod
     @Override
     public void visit(DbSchemeModel aModel) {
         readModel(aModel);
-        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
-            String dbIdAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
-            if (dbIdAttr != null && !"null".equals(dbIdAttr)) {
-                aModel.setDbId(dbIdAttr);
+        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DATASOURCE)) {
+            String datasourceAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DATASOURCE);
+            if (datasourceAttr != null && !"null".equals(datasourceAttr)) {
+                aModel.setDatasourceName(datasourceAttr);
+            }
+        } else {
+            // legacy code
+            if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
+                String dbIdAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+                if (dbIdAttr != null && !"null".equals(dbIdAttr)) {
+                    aModel.setDatasourceName(dbIdAttr);
+                }
             }
         }
-        String schemaAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
-        if (schemaAttr != null && !"null".equals(schemaAttr)) {
-            aModel.setSchema(schemaAttr);
+        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DATASOURCE_SCHEMA_NAME)) {
+            String schemaAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DATASOURCE_SCHEMA_NAME);
+            if (schemaAttr != null && !"null".equals(schemaAttr)) {
+                aModel.setSchema(schemaAttr);
+            }
+        } else if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME)) {
+            // legacy code
+            String schemaAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
+            if (schemaAttr != null && !"null".equals(schemaAttr)) {
+                aModel.setSchema(schemaAttr);
+            }
+        } else {
+            aModel.setSchema("");
         }
     }
 

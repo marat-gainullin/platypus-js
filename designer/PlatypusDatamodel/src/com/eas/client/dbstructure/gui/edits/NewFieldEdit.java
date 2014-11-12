@@ -76,7 +76,7 @@ public class NewFieldEdit extends DbStructureEdit {
         }
         rsmd.setTableName(aEntity.getTableName());
         DatabasesClient client = aEntity.getModel().getBasesProxy();
-        String dbId = aEntity.getModel().getDbId();
+        String dbId = aEntity.getModel().getDatasourceName();
         SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
         driver.getTypesResolver().resolve2RDBMS(rsmd);
         return rsmd;

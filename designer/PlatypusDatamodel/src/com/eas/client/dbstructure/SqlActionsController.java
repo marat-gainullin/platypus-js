@@ -35,7 +35,7 @@ public class SqlActionsController {
         super();
         if (aModel != null) {
             basesProxy = aModel.getBasesProxy();
-            datasourceName = aModel.getDbId();
+            datasourceName = aModel.getDatasourceName();
             schema = aModel.getSchema();
         }
     }

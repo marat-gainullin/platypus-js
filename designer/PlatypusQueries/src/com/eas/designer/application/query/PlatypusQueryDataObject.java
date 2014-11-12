@@ -380,7 +380,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         datasourceName = aValue;
         if (model != null) {
-            model.setDbId(aValue);
+            model.setDatasourceName(aValue);
         }
         firePropertyChange(CONN_PROP_NAME, oldValue, aValue);
     }

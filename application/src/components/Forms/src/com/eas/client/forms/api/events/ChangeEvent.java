@@ -18,12 +18,12 @@ public class ChangeEvent extends Event<javax.swing.event.ChangeEvent> {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }

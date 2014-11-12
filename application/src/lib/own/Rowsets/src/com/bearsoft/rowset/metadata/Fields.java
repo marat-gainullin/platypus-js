@@ -34,7 +34,7 @@ public class Fields implements HasPublished {
     protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
     protected JSObject instanceConstructor;
     protected Map<String, Object> ormDefinitions = new HashMap<>();
-    protected Object published;
+    protected JSObject published;
 
     /**
      * The default constructor.
@@ -549,18 +549,18 @@ public class Fields implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

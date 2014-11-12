@@ -14,7 +14,6 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptObj;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -23,10 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-@ScriptObj(name = "Report", jsDoc = ""
-        + "/**\n"
-        + " * Application report.\n"
-        + " */")
+
 public class ReportTemplate implements HasPublished {
 
     protected ReportConfig config;
@@ -34,8 +30,15 @@ public class ReportTemplate implements HasPublished {
     protected String name;
     protected JSObject scriptData;
     private static JSObject publisher;
-    protected Object published;
+    protected JSObject published;
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Creates report template.\n"
+            + " * @param config The report binary body (array of byte) and some options.\n"
+            + " * @param data Object that propeties can be added to the report.\n"
+            + " */"
+            + "", params = {"config", "data"})
     public ReportTemplate(ReportConfig aConfig, JSObject aData) {
         super();
         config = aConfig;
@@ -72,18 +75,18 @@ public class ReportTemplate implements HasPublished {
     }
     
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

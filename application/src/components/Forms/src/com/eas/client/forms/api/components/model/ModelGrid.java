@@ -305,13 +305,12 @@ public class ModelGrid extends Component<DbGrid> {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
-            JSObject jsPublished = (JSObject) published;
+            published = (JSObject)publisher.call(null, new Object[]{this});
             delegate.getScriptableColumns().stream().forEach((ScriptableColumn aColumn) -> {
                 if (aColumn.getDesignColumn() != null && aColumn.getDesignColumn().getControlInfo() != null) {
                     TableCellEditor cellEditor = aColumn.getViewColumn().getCellEditor();
@@ -326,7 +325,7 @@ public class ModelGrid extends Component<DbGrid> {
                         editorControl.injectPublished(apiWrapper.getResult().getPublished());
                     }
                 }
-                jsPublished.setMember(aColumn.getName(), aColumn.getPublished());
+                published.setMember(aColumn.getName(), aColumn.getPublished());
             });
         }
         return published;

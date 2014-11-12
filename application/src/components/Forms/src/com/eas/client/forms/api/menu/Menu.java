@@ -100,24 +100,24 @@ public class Menu extends Container<JMenu> {
         delegate.add(unwrap(aComp));
     }
 
-    private static final String COUNT_JSDOC = ""
+    private static final String MENU_COUNT_JSDOC = ""
             + "/**\n"
             + "* The count of the menu items.\n"
             + "*/";
 
     @Override
-    @ScriptFunction(jsDoc = COUNT_JSDOC)
+    @ScriptFunction(jsDoc = MENU_COUNT_JSDOC)
     public int getCount() {
         return delegate.getMenuComponentCount();
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }

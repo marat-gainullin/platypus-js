@@ -4,7 +4,6 @@
  */
 package com.eas.gui;
 
-import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -23,7 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ScriptColor extends java.awt.Color implements HasPublished {
 
     private static JSObject publisher;
-    protected Object published;
+    protected JSObject published;
     
     @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
             + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space."
@@ -53,18 +52,18 @@ public class ScriptColor extends java.awt.Color implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

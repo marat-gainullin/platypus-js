@@ -189,7 +189,7 @@ public class DatabasesClient {
     public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
-        aClient.initUsersSpace(q.getDbId());
+        aClient.initUsersSpace(q.getDatasourceName());
         SqlCompiledQuery compiled = q.compile();
         CallableConsumer<Map<String, String>, Rowset> doWork = (Rowset rs) -> {
             Map<String, String> properties = new HashMap<>();

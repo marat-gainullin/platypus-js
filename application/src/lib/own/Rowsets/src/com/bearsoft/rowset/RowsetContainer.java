@@ -3,17 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.script;
-
-import jdk.nashorn.api.scripting.JSObject;
+package com.bearsoft.rowset;
 
 /**
  *
- * @author mg
+ * @author Andrew
  */
-public interface HasPublished {
+public interface RowsetContainer {
 
-    JSObject getPublished();
-
-    void setPublished(JSObject aPublished);
+    public Rowset getRowset();
 }

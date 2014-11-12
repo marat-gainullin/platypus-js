@@ -32,7 +32,7 @@ public class Row implements HasPublished {
     protected List<Object> originalValues = new ArrayList<>();
     protected List<Object> currentValues = new ArrayList<>();
     protected Insert insertChange;
-    protected Object published;
+    protected JSObject published;
 
     /**
      * Row's POJO-like constructor.
@@ -491,18 +491,18 @@ public class Row implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = jdk.nashorn.api.scripting.ScriptUtils.unwrap(publisher.call(null, new Object[]{this}));
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

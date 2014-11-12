@@ -15,13 +15,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Set;
@@ -131,54 +132,7 @@ public class ScriptedResource {
         String encoding;
         Matcher htppMatcher = httpPattern.matcher(aResourceName);
         if (htppMatcher.matches()) {
-            URL url = new URL(aResourceName);
-            URLConnection conn = null;
-            InputStream is = null;
-            try {
-                conn = url.openConnection();
-                conn.setRequestProperty("accept-encoding", "deflate");
-                ((HttpURLConnection) conn).getResponseCode();
-                is = conn.getInputStream();
-            } catch (IOException ex) {
-                url = encodeUrl(url);
-                conn = url.openConnection();
-                ((HttpURLConnection) conn).getResponseCode();
-                is = conn.getInputStream();
-            }
-            String contentEncoding = conn.getContentEncoding();
-            if (contentEncoding != null) {
-                if (contentEncoding.contains("gzip") || contentEncoding.contains("zip")) {
-                    is = new GZIPInputStream(is);
-                } else if (contentEncoding.contains("deflate")) {
-                    is = new InflaterInputStream(is);
-                }
-            }
-            try (InputStream _is = is) {
-                data = BinaryUtils.readStream(_is, -1);
-                String contentType = conn.getContentType();
-                if (contentType != null) {
-                    contentType = contentType.replaceAll("\\s+", "").toLowerCase();
-                    if (contentType.startsWith("text/") || contentType.contains("charset")) {
-                        if (contentType.contains(";charset=")) {
-                            String[] typeCharset = contentType.split(";charset=");
-                            if (typeCharset.length == 2 && typeCharset[1] != null) {
-                                encoding = typeCharset[1];
-                            } else {
-                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
-                                encoding = SettingsConstants.COMMON_ENCODING;
-                            }
-                        } else {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
-                            encoding = SettingsConstants.COMMON_ENCODING;
-                        }
-                    } else {
-                        encoding = null;// assume binary response
-                    }
-                } else {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
-                    encoding = SettingsConstants.COMMON_ENCODING;
-                }
-            }
+            return requestViaHttpSync(aResourceName, null, null);
         } else {
             String resourceName = normalizeResourcePath(aResourceName);
             String sourcesPath = app.getModules().getLocalPath();
@@ -198,6 +152,71 @@ public class ScriptedResource {
                 }
             } else {
                 throw new IllegalArgumentException(String.format("Resource %s not found", aResourceName));
+            }
+            return encoding != null ? new String(data, encoding) : data;
+        }
+    }
+
+    public static Object requestViaHttpSync(String aUrl, String aMethodName, String aRequestBody) throws URISyntaxException, IOException, MalformedURLException, UnsupportedEncodingException {
+        byte[] data;
+        String encoding;
+        URL url = new URL(aUrl);
+        HttpURLConnection conn;
+        InputStream is;
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+        } catch (IOException ex) {
+            url = encodeUrl(url);
+            conn = (HttpURLConnection) url.openConnection();
+        }
+        if (aMethodName != null && !aMethodName.isEmpty()) {
+            conn.setRequestMethod(aMethodName);
+        }
+        conn.setDoInput(true);
+        if (aRequestBody != null && !aRequestBody.isEmpty()) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("content-type", "text/plain;charset=" + SettingsConstants.COMMON_ENCODING);
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] body = aRequestBody.getBytes(SettingsConstants.COMMON_ENCODING);
+                os.write(body);
+                conn.setRequestProperty("content-length", ""+body.length);
+            }
+        }
+        conn.setRequestProperty("accept-encoding", "deflate");
+        conn.getResponseCode();
+        is = conn.getInputStream();
+        String contentEncoding = conn.getContentEncoding();
+        if (contentEncoding != null) {
+            if (contentEncoding.contains("gzip") || contentEncoding.contains("zip")) {
+                is = new GZIPInputStream(is);
+            } else if (contentEncoding.contains("deflate")) {
+                is = new InflaterInputStream(is);
+            }
+        }
+        try (InputStream _is = is) {
+            data = BinaryUtils.readStream(_is, -1);
+            String contentType = conn.getContentType();
+            if (contentType != null) {
+                contentType = contentType.replaceAll("\\s+", "").toLowerCase();
+                if (contentType.startsWith("text/") || contentType.contains("charset")) {
+                    if (contentType.contains(";charset=")) {
+                        String[] typeCharset = contentType.split(";charset=");
+                        if (typeCharset.length == 2 && typeCharset[1] != null) {
+                            encoding = typeCharset[1];
+                        } else {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                            encoding = SettingsConstants.COMMON_ENCODING;
+                        }
+                    } else {
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                        encoding = SettingsConstants.COMMON_ENCODING;
+                    }
+                } else {
+                    encoding = null;// assume binary response
+                }
+            } else {
+                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                encoding = SettingsConstants.COMMON_ENCODING;
             }
         }
         return encoding != null ? new String(data, encoding) : data;

@@ -88,7 +88,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     entitiesByTableName.put(entity.getTableName().toLowerCase(), entity);
                 }
             }
-            DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(model.getDbId());
+            DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(model.getDatasourceName());
             String schema = model.getSchema();
             for (FieldsEntity entity : entities.values()) {
                 if (entity != null) {
@@ -143,7 +143,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     @Override
     protected TableRef prepareTableRef4Selection() {
         TableRef oldValue = new TableRef();
-        oldValue.dbId = model.getDbId();
+        oldValue.datasourceName = model.getDatasourceName();
         oldValue.schema = model.getSchema();
         if (oldValue.schema == null) {
             oldValue.schema = "";

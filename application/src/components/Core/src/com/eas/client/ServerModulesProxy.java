@@ -8,10 +8,12 @@ package com.eas.client;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -27,6 +29,15 @@ public class ServerModulesProxy {
         conn = aConn;
     }
 
+    public ServerModuleInfo getCachedStructure(String aName) throws Exception {
+        ActualCacheEntry<ServerModuleInfo> entry = entries.get(aName);
+        if (entry != null) {
+            return entry.getValue();
+        } else {
+            return null;
+        }
+    }
+    
     public ServerModuleInfo getServerModuleStructure(String aName, Consumer<ServerModuleInfo> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         ActualCacheEntry<ServerModuleInfo> entry = entries.get(aName);
@@ -60,4 +71,31 @@ public class ServerModulesProxy {
     }
     private static final String NEITHER_SM_INFO = "Neither cached nor network response server module info found";
 
+    public Object callServerModuleMethod(String aModuleName, String aMethodName, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
+        if (onSuccess != null) {
+            executeServerModuleMethod(aModuleName, aMethodName, (Object aResult) -> {
+                onSuccess.call(null, new Object[]{aResult});
+            }, (Exception ex) -> {
+                if (onFailure != null) {
+                    onFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            }, aArguments);
+            return null;
+        } else {
+            return executeServerModuleMethod(aModuleName, aMethodName, null, null, aArguments);
+        }
+    }
+
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
+        final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
+        if (onSuccess != null) {
+            conn.<ExecuteServerModuleMethodRequest.Response>enqueueRequest(request, (ExecuteServerModuleMethodRequest.Response aResponse) -> {
+                onSuccess.accept(aResponse.getResult());
+            }, onFailure);
+            return null;
+        } else {
+            ExecuteServerModuleMethodRequest.Response response = conn.executeRequest(request);
+            return response.getResult();
+        }
+    }
 }

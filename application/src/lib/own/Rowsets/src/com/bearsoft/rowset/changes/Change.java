@@ -7,6 +7,7 @@ package com.bearsoft.rowset.changes;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -17,8 +18,7 @@ public abstract class Change implements HasPublished {
     public String entityName;
     public boolean consumed;
     //
-    
-    protected Object published;
+    protected JSObject published;
 
     public Change(String aEntityName) {
         super();
@@ -38,7 +38,7 @@ public abstract class Change implements HasPublished {
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }

@@ -22,7 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class PlatypusPrincipal implements Principal, HasPublished {
 
-    protected Object published;
+    protected JSObject published;
 
     private final String context;
     private final Set<String> roles;
@@ -161,7 +161,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
         }
@@ -169,12 +169,12 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }

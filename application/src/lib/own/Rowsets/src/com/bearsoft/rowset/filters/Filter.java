@@ -34,7 +34,7 @@ public class Filter extends HashOrderer implements HasPublished {
     protected int originalPos;
     protected boolean filterApplied;
     protected KeySet keysetApplied;
-    protected Object published;
+    protected JSObject published;
 
     /**
      * The filter's class constructor
@@ -349,18 +349,18 @@ public class Filter extends HashOrderer implements HasPublished {
     }
 
     @Override
-    public Object getPublished() {
+    public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = publisher.call(null, new Object[]{this});
+            published = (JSObject)publisher.call(null, new Object[]{this});
         }
         return published;
     }
 
     @Override
-    public void setPublished(Object aValue) {
+    public void setPublished(JSObject aValue) {
         Object oldValue = published;
         if (published != null) {
             throw new AlreadyPublishedException();

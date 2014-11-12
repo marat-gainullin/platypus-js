@@ -8,7 +8,6 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.eas.client.model.ParametersEntity;
 import com.google.gwt.xml.client.Element;
 
 public class ModelElementRef {
@@ -46,15 +45,15 @@ public class ModelElementRef {
 
 	public void resolveField() throws Exception {
 		if (entity != null) {
-			if (entity instanceof ParametersEntity) {
-				assert isField : "Parameter must be refereced as a field only! (Parameters entity has no own parameters)";
-				field = entity.getFields().get(fieldName);
-			} else if (entity.getQuery() != null) {
+			if (entity.getQuery() != null) {
 				if (isField) {
 					field = entity.getFields().get(fieldName);
 				} else {
 					field = entity.getQuery().getParameters().get(fieldName);
 				}
+			} else {
+				Logger.getLogger(ModelElementRef.class.getName()).log(Level.WARNING,
+				        "Model's entity's query missing while controls binding. Entity name: " + entityId + "; " + (isField ? "field" : "parameter") + " name: " + fieldName);
 			}
 		} else {
 			Logger.getLogger(ModelElementRef.class.getName()).log(Level.WARNING,

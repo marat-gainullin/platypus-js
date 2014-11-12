@@ -56,7 +56,7 @@ public class TableNameSelector {
         Window parentWindow = getFirstParentWindow(aParentComponent);
 
         JScrollPane scroll = new JScrollPane();
-        final DbTablesView tablesView = new DbTablesView(aProject, aOldValue.dbId, aOldValue.schema, aTitle, allowSchemaChange, allowDBChange);
+        final DbTablesView tablesView = new DbTablesView(aProject, aOldValue.datasourceName, aOldValue.schema, aTitle, allowSchemaChange, allowDBChange);
         if (tablesView.txtConnection.getModel().getSize() != 0) {
             scroll.setViewportView(tablesView);
             final ResultingDialog dlg = new ResultingDialog(parentWindow, aTitle, scroll);
@@ -93,7 +93,7 @@ public class TableNameSelector {
                         String schemaName = sSelected.substring(0, indexOfDot);
                         String tableName = sSelected.substring(indexOfDot + 1);
                         TableRef lselected = new TableRef();
-                        lselected.dbId = tablesView.datasourceName;
+                        lselected.datasourceName = tablesView.datasourceName;
                         lselected.schema = schemaName;
                         lselected.tableName = tableName;
                         aSelected.add(lselected);
@@ -115,15 +115,15 @@ public class TableNameSelector {
                 if (tRef != null && tRef.schema != null && !tRef.schema.isEmpty()) {
                     try {
                         if (aProject.getBasesProxy() != null) {
-                            String schema = aProject.getBasesProxy().getConnectionSchema(tRef.dbId);
+                            String schema = aProject.getBasesProxy().getConnectionSchema(tRef.datasourceName);
                             if (schema != null && !schema.isEmpty()
                                     && schema.equalsIgnoreCase(tRef.schema)) {
                                 tRef.schema = null;
                             }
                         }
                         String defDatasource = aProject.getSettings().getDefaultDataSourceName();
-                        if (tRef.dbId == null ? defDatasource == null : tRef.dbId.equals(defDatasource)) {
-                            tRef.dbId = null;
+                        if (tRef.datasourceName == null ? defDatasource == null : tRef.datasourceName.equals(defDatasource)) {
+                            tRef.datasourceName = null;
                         }
                     } catch (Exception ex) {
                         Logger.getLogger(TableNameSelector.class.getName()).log(Level.SEVERE, null, ex);

@@ -587,12 +587,13 @@ public class Application {
 			return aTarget;
 		};
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
-			if(!aTarget)
-				aTarget = new $wnd.P.Form();
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = !!aModel ? aModel.unwrap() : null;
-			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Ljava/lang/String;Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementName, appElementDoc, nativeModel, aTarget);
-			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Ljava/lang/String;Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementName, appElementDoc, nativeModel);
+			if(aTarget)
+				$wnd.P.Form.call(aTarget, null, appElementName, nativeForm);
+			else
+				aTarget = new $wnd.P.Form(null, appElementName, nativeForm);
 			return aTarget;
 		};
 		$wnd.P.HTML5 = "Html5 client";
@@ -604,7 +605,25 @@ public class Application {
 				return cachedModules;
 			}
 		});
-		$wnd.P.Form = function(){};
+		function Form(aView, aFormKey){
+			var aComponent = arguments.length > 2 ? arguments[2] : null;
+
+			var published = this;
+			if(!aComponent){ 
+				if(aView)
+					aComponent = @com.eas.client.form.PlatypusWindow::new(Lcom/google/gwt/user/client/ui/Widget;)(aView.unwrap());
+				else
+					aComponent = @com.eas.client.form.PlatypusWindow::new()();
+			} 	
+			published.unwrap = function() {
+				return aComponent;
+			};
+			if(aFormKey){
+				aComponent.@com.eas.client.form.PlatypusWindow::setFormKey(Ljava/lang/String;)(aFormKey);
+			}
+			aComponent.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		}
+		$wnd.P.Form = Form;
 		$wnd.P.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		};

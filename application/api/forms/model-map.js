@@ -746,6 +746,18 @@
         };
 
         /**
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.select = function(selectionEntries) {
+            var delegate = this.unwrap();
+            var value = delegate.select(P.boxAsJava(selectionEntries));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Gets map's layer by the title.
          * @param layerTitle the layer's title.
          * @return an <code>MapLayer</code> instance.
@@ -755,18 +767,6 @@
         P.ModelMap.prototype.getLayer = function(layerTitle) {
             var delegate = this.unwrap();
             var value = delegate.getLayer(P.boxAsJava(layerTitle));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.select = function(selectionEntries) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(selectionEntries));
             return P.boxAsJs(value);
         };
 

@@ -60,11 +60,11 @@ public class DbSchemeModel extends Model<FieldsEntity, SqlQuery> {
         super.addEntity(aEntity);
     }
 
-    public String getDbId() {
+    public String getDatasourceName() {
         return datasourceName;
     }
 
-    public void setDbId(String aValue) {
+    public void setDatasourceName(String aValue) {
         datasourceName = aValue;
     }
 

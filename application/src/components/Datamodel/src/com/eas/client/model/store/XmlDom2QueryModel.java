@@ -95,7 +95,7 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> imp
 
     @Override
     protected void resolveRelation(QueryModel aModel, Long leftEntityId, String leftParameterName, Relation<QueryEntity> relation, String leftFieldName, Long rightEntityId, String rightParameterName, String rightFieldName) {
-        
+
         super.resolveRelation(aModel, leftEntityId, leftParameterName, relation, leftFieldName, rightEntityId, rightParameterName, rightFieldName);
         try {
             if (QueryModel.PARAMETERS_ENTITY_ID == leftEntityId) {
@@ -150,10 +150,18 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity, QueryModel> imp
     @Override
     public void visit(QueryModel aModel) {
         Runnable resolver = readModel(aModel);
-        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
-            String datasourceName = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DATASOURCE)) {
+            String datasourceName = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DATASOURCE);
             if (datasourceName != null && !"null".equals(datasourceName)) {
-                aModel.setDbId(datasourceName);
+                aModel.setDatasourceName(datasourceName);
+            }
+        } else {
+            // legacy code
+            if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
+                String datasourceName = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+                if (datasourceName != null && !"null".equals(datasourceName)) {
+                    aModel.setDatasourceName(datasourceName);
+                }
             }
         }
         aModel.getEntities().values().stream().forEach((e) -> {
