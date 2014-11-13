@@ -92,7 +92,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     @Override
-    public void injectPublished(Object aValue) {
+    public void injectPublished(JSObject aValue) {
         published = aValue;
     }
 
@@ -773,7 +773,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected ApplicationEntity<?, ?, ?> rsEntity;
     protected int colIndex;
     protected DbControlRowsetListener rowsetListener;
-    protected Object published;
+    protected JSObject published;
 
     protected void bind() throws Exception {
         assert model != null;
