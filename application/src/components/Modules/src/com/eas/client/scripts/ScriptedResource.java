@@ -169,7 +169,7 @@ public class ScriptedResource {
             aHeaders.keySet().stream().forEach((String aKey) -> {
                 Object oValue = ScriptUtils.toJava(aHeaders.getMember(aKey));
                 if (oValue != null) {
-                    headers.put(aKey, oValue);
+                    headers.put(aKey.toLowerCase(), oValue);
                 }
             });
         }
@@ -192,15 +192,6 @@ public class ScriptedResource {
             conn.setRequestMethod(aMethod);
         }
         conn.setDoInput(true);
-        if (aRequestBody != null && !aRequestBody.isEmpty()) {
-            conn.setDoOutput(true);
-            conn.setRequestProperty("content-type", "text/plain;charset=" + SettingsConstants.COMMON_ENCODING);
-            try (OutputStream os = conn.getOutputStream()) {
-                byte[] body = aRequestBody.getBytes(SettingsConstants.COMMON_ENCODING);
-                os.write(body);
-                conn.setRequestProperty("content-length", "" + body.length);
-            }
-        }
         conn.setRequestProperty("accept-encoding", "deflate");
         if (aHeaders != null) {
             aHeaders.entrySet().stream().forEach((Map.Entry<String, Object> aHeader) -> {
@@ -214,6 +205,15 @@ public class ScriptedResource {
                     conn.setRequestProperty(aHeader.getKey(), "" + oValue);
                 }
             });
+        }
+        if (aRequestBody != null && !aRequestBody.isEmpty()) {
+            conn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, aHeaders != null && aHeaders.containsKey(PlatypusHttpConstants.HEADER_CONTENTTYPE.toLowerCase()) ? "" + aHeaders.get(PlatypusHttpConstants.HEADER_CONTENTTYPE.toLowerCase()) : "text/plain;charset=" + SettingsConstants.COMMON_ENCODING);
+            byte[] body = aRequestBody.getBytes(SettingsConstants.COMMON_ENCODING);
+            conn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTLENGTH, "" + body.length);
+            conn.setDoOutput(true);
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(body);
+            }
         }
         conn.getResponseCode();
         InputStream is = conn.getInputStream();

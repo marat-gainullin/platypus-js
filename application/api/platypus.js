@@ -1269,11 +1269,11 @@
         }});
 
     function async(aWorker, onSuccess, onFailure) {
-        ScriptUtilsClass.submitTask(function () {
+        ScriptUtilsClass.jsSubmitTask(function () {
             try {
                 var result = aWorker();
                 try {
-                    ScriptUtilsClass.acceptTaskResult(function () {
+                    ScriptUtilsClass.jsAcceptTaskResult(function () {
                         onSuccess(result);
                     });
                 } catch (e) {

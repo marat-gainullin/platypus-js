@@ -149,7 +149,7 @@ public class AppClient {
 				if (htppMatch != null) {
 					return imageName;
 				} else {
-					return imageName;
+					return relativeUri() + APP_RESOURCE_PREFIX + imageName;
 				}
 			}
 		};
@@ -187,9 +187,9 @@ public class AppClient {
 		} else {
 			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), ResponseType.Default);
 			if (executed != null) {
-				if (executed.getStatus() == Response.SC_OK){
+				if (executed.getStatus() == Response.SC_OK) {
 					return Utils.toJs(executed.getResponseText());
-				}else{
+				} else {
 					throw new Exception(executed.getStatusText());
 				}
 			}
@@ -197,7 +197,8 @@ public class AppClient {
 		return null;
 	}
 
-	public static JavaScriptObject jsUpload(PublishedFile aFile, String aName, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
+	public static JavaScriptObject jsUpload(PublishedFile aFile, String aName, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback,
+	        final JavaScriptObject aErrorCallback) {
 		if (aFile != null) {
 			Cancellable cancellable = requestUpload(aFile, aName, new Callback<ProgressEvent, String>() {
 
@@ -394,15 +395,15 @@ public class AppClient {
 	public String getApiUrl() {
 		return apiUrl;
 	}
-	
+
 	public String getPrincipal() {
 		return principal;
 	}
 
 	public Document getModelDocument(String aModuleName) {
 		ModuleStructure structure = modulesStructures.get(aModuleName);
-		for(String part : structure.getStructure()){
-			if(part.toLowerCase().endsWith(".model")){
+		for (String part : structure.getStructure()) {
+			if (part.toLowerCase().endsWith(".model")) {
 				return documents.get(part);
 			}
 		}
@@ -411,8 +412,8 @@ public class AppClient {
 
 	public Document getFormDocument(String aModuleName) {
 		ModuleStructure structure = modulesStructures.get(aModuleName);
-		for(String part : structure.getStructure()){
-			if(part.toLowerCase().endsWith(".layout")){
+		for (String part : structure.getStructure()) {
+			if (part.toLowerCase().endsWith(".layout")) {
 				return documents.get(part);
 			}
 		}
@@ -458,18 +459,18 @@ public class AppClient {
 
 	public Cancellable requestLogout(final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqLogout));
-		return startApiRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>(){
+		return startApiRequest(null, query, null, RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
-            public void onFailure(XMLHttpRequest reason) {
+			public void onFailure(XMLHttpRequest reason) {
 				aCallback.onFailure(reason);
-            }
+			}
 
 			@Override
-            protected void doWork(XMLHttpRequest aResult) throws Exception {
-				principal = "anonymous-"+String.valueOf(IDGenerator.genId());
+			protected void doWork(XMLHttpRequest aResult) throws Exception {
+				principal = "anonymous-" + String.valueOf(IDGenerator.genId());
 				aCallback.onSuccess(aResult);
-            }
+			}
 
 		});
 	}
@@ -651,10 +652,10 @@ public class AppClient {
 				Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
 				assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
 				JavaScriptObject jsObject = (JavaScriptObject) oResult;
-				Object oUserName = jsObject.<JsObject>cast().getJava("userName");
-				assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";				
-				principal = (String)oUserName;
-				if(principal == null)
+				Object oUserName = jsObject.<JsObject> cast().getJava("userName");
+				assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
+				principal = (String) oUserName;
+				if (principal == null)
 					principal = "anonymous" + String.valueOf(IDGenerator.genId());
 				if (aCallback != null) {
 					aCallback.onSuccess(principal);
@@ -683,8 +684,7 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure))
-					,param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
 			query = Loader.URL_QUERY_PROCESSOR.process(query);
 			return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
@@ -746,14 +746,14 @@ public class AppClient {
 				}
 			};
 		} else {
-			SafeUri documentUri = new SafeUri(){
+			SafeUri documentUri = new SafeUri() {
 
 				@Override
-                public String asString() {
-	                return relativeUri() + APP_RESOURCE_PREFIX + aResourceName + Loader.URL_QUERY_PROCESSOR.process("");
-                }
-				
-			}; 
+				public String asString() {
+					return relativeUri() + APP_RESOURCE_PREFIX + aResourceName + Loader.URL_QUERY_PROCESSOR.process("");
+				}
+
+			};
 			return startRequest(documentUri, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override

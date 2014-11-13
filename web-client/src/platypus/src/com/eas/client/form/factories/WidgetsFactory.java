@@ -145,11 +145,14 @@ public class WidgetsFactory {
 		UIObject w = parseWidget(aTag);
 		assert w instanceof HasWidgets;
 		rootWidget = (HasWidgets) w;
-		Point size = componentsPreferredSize.get(rootWidget);
-		((Widget) rootWidget).setSize(size.getX() + "px", size.getY() + "px");
+		Point prefSize = componentsPreferredSize.get(rootWidget);
+		if(prefSize != null){
+			((HasPublished) rootWidget).getPublished().<PublishedComponent> cast().setWidth(prefSize.getX());
+			((HasPublished) rootWidget).getPublished().<PublishedComponent> cast().setHeight(prefSize.getY());
+		}
 		final PlatypusWindow form = new PlatypusWindow((Widget) rootWidget);
-		form.setViewPreferredWidth(size.getX());
-		form.setViewPreferredHeight(size.getY());
+		form.setViewPreferredWidth(prefSize.getX());
+		form.setViewPreferredHeight(prefSize.getY());
 		if (aTag.hasAttribute("iconImage")) {
 			form.setIconImage(aTag.getAttribute("iconImage"));
 		}
@@ -821,8 +824,10 @@ public class WidgetsFactory {
 					} else if (parentComp instanceof FlowPane) {
 						FlowPane container = (FlowPane) parentComp;
 						Point prefSize = componentsPreferredSize.get(aComponent);
-						if (prefSize != null)
-							aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
+						if(prefSize != null){
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setWidth(prefSize.getX());
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setHeight(prefSize.getY());
+						}
 						container.add((Widget) aComponent);
 					} else if (parentComp instanceof GridPane) {
 						GridPane container = (GridPane) parentComp;
@@ -864,7 +869,10 @@ public class WidgetsFactory {
 						Point prefSize = componentsPreferredSize.get(aComponent);
 						ScrollPane container = (ScrollPane) parentComp;
 						container.setWidget((Widget) aComponent);
-						aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
+						if(prefSize != null){
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setWidth(prefSize.getX());
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setHeight(prefSize.getY());
+						}
 					} else if (parentComp instanceof DesktopPane) {
 						DesktopPane container = (DesktopPane) parentComp;
 						container.add((Widget) aComponent);
@@ -915,6 +923,9 @@ public class WidgetsFactory {
 					} else if (parentComp instanceof ToolBar) {
 						ToolBar container = (ToolBar) parentComp;
 						container.add((Widget) aComponent);
+						Point prefSize = componentsPreferredSize.get(aComponent);
+						if (prefSize != null)
+							((HasPublished) aComponent).getPublished().<PublishedComponent> cast().setWidth(prefSize.getX());
 					} else if (parentComp instanceof HBoxPane) {
 						HBoxPane container = (HBoxPane) parentComp;
 						container.add((Widget) aComponent);

@@ -197,6 +197,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(serverCore, platypusRequest);
             if (handler != null) {
                 Consumer<Exception> onFailure = (Exception ex) -> {
+                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                     try {
                         if (ex instanceof AccessControlException) {
                             aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());

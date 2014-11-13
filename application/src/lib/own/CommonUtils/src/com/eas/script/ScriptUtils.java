@@ -91,7 +91,7 @@ public class ScriptUtils {
         services.setMaximumPoolSize(aMaxThreads);
     }
 
-    public static void submitTask(JSObject aTask) {
+    public static void jsSubmitTask(JSObject aTask) {
         submitTask(() -> {
             aTask.call(null, new Object[]{});
         });
@@ -121,7 +121,7 @@ public class ScriptUtils {
         });
     }
 
-    public static void acceptTaskResult(JSObject aTaskCompleter) {
+    public static void jsAcceptTaskResult(JSObject aTaskCompleter) {
         acceptTaskResult(()->{
             aTaskCompleter.call(null, new Object[]{});
         });
