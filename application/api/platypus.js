@@ -49,17 +49,6 @@
     Object.defineProperty(P, "J2SE", {value: "Java SE environment"});
     Object.defineProperty(P, "agent", {value: P.J2SE});
 
-    /** 
-     * Thread - schedules given function in the thread pool
-     */
-    Function.prototype.invokeBackground = function () {
-        var func = this;
-        var args = arguments;
-        //
-        ScriptUtilsClass.submitTask(function () {
-            func.apply(func, args);
-        });
-    };
     var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
 
     /**
@@ -237,8 +226,8 @@
         var Icon = {};
         Object.defineProperty(P, "Icon", {value: Icon});
         Object.defineProperty(Icon, "load", {
-            value: function (aPath, onSuccess, onFailure) {
-                return IconResourcesClass.load(aPath, onSuccess, onFailure);
+            value: function (aResName, onSuccess, onFailure) {
+                return IconResourcesClass.load(aResName, onSuccess, onFailure);
             }
         });
         P.Icons = P.Icon;
@@ -945,7 +934,7 @@
          }
          });
          */
-        
+
         Object.defineProperty(target, "createFilter", {
             value: function () {
                 var nEntity = this.unwrap();
@@ -1072,30 +1061,30 @@
                     Object.defineProperty(pSchema, n, schemaDesc);
                 })();
             }
-                // entity.params.p1 syntax
-                var nParameters = nEntity.getQuery().getParameters();
-                var ncParameters = nParameters.toCollection();
-                var pParams = {};
-                for (var p = 0; p < ncParameters.size(); p++) {
-                    (function () {
-                        var nParameter = ncParameters[p];
-                        var pDesc = {
-                            get: function () {
-                                return boxAsJs(nParameter.value);
-                            },
-                            set: function (aValue) {
-                                nParameter.value = boxAsJava(aValue);
-                            }
-                        };
-                        Object.defineProperty(pParams, nParameter.name, pDesc);
-                        Object.defineProperty(pParams, p, pDesc);
-                    })();
-                }
-                Object.defineProperty(pParams, "length", {value: ncParameters.size()});
-                Object.defineProperty(published, "params", {value: pParams});
-                // entity.params.schema.p1 syntax
-                var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
-                Object.defineProperty(pParams, "schema", {value: pParamsSchema});
+            // entity.params.p1 syntax
+            var nParameters = nEntity.getQuery().getParameters();
+            var ncParameters = nParameters.toCollection();
+            var pParams = {};
+            for (var p = 0; p < ncParameters.size(); p++) {
+                (function () {
+                    var nParameter = ncParameters[p];
+                    var pDesc = {
+                        get: function () {
+                            return boxAsJs(nParameter.value);
+                        },
+                        set: function (aValue) {
+                            nParameter.value = boxAsJava(aValue);
+                        }
+                    };
+                    Object.defineProperty(pParams, nParameter.name, pDesc);
+                    Object.defineProperty(pParams, p, pDesc);
+                })();
+            }
+            Object.defineProperty(pParams, "length", {value: ncParameters.size()});
+            Object.defineProperty(published, "params", {value: pParams});
+            // entity.params.schema.p1 syntax
+            var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
+            Object.defineProperty(pParams, "schema", {value: pParamsSchema});
             Object.defineProperty(pSchema, "length", {
                 get: function () {
                     return nFields.size();
@@ -1333,16 +1322,71 @@ if (!P) {
     P.HTML5 = "";
     P.J2SE = "";
     P.agent = "";
-    P.require = function () {
+
+    /**
+     * Dependencies resolver function.
+     * Performs automatic dependencies resolving of modules mentioned in first parameter.
+     * Can be used as synchronous or asynchronous dependencies resolver.
+     * Module names may be platypus module name, e.g. 'Calculator'.
+     * Platypus modules names do not depend on location of modules' files in project. Platypus modules names are global script names.
+     * Module names may be plain scripts names in the following form: libs/leaflet.js from the root of the project's source.
+     * Platypus project's source root is the "app" folder. Relative paths to plain scripts are not supported.
+     * 
+     * @param {Array} aDeps Array of modules names or a single module name.
+     * @param {Function} aOnSuccess Success callback. Optional. If omitted, synchronous version of code will be used.
+     * @param {Function} aOnFailure Failure callback. Optional. If omitted, no error information will be provided.
+     * @returns {undefined}
+     */
+    P.require = function (aDeps, aOnSuccess, aOnFailure) {
     };
-    P.extend = function () {
+    /**
+     * Classic js extend function.
+     * @param {Function} aChild
+     * @param {Function} aParent
+     * @returns {undefined}
+     */
+    P.extend = function (aChild, aParent) {
     };
-    P.Modules;
-    P.loadModel = function () {
+    /**
+     * Global modules array available in server environment.
+     * Theese modules are inaccessible via a network.
+     * @type Array
+     */
+    P.modules = [];
+    /**
+     * Session object available in server environment.
+     * It is inaccessible via a network.
+     */
+    P.session = {};
+    /**
+     * Modules array of session available in server environment.
+     * Theese modules are accessible to network clients
+     * @type Array
+     */
+    P.session.modules = [];
+    /**
+     * Parses *.model files and creates data model (entity manager) of a module.
+     * @param aModuleName Name of the module, the data model will be loaded for.
+     * @returns Model instance.
+     */
+    P.loadModel = function (aModuleName) {
+        return {};
     };
-    P.loadForm = function () {
+    /**
+     * Parses *.layout files and creates view of a module if it is a form module.
+     * @param aModuleName Name of the module, the form will be loaded for.
+     * @param aData Script data object, model widgets to be bound to. Currently is may be only data model.
+     * @returns P.Form instance.
+     */
+    P.loadForm = function (aModuleName, aData) {
     };
-    P.loadTemplate = function () {
+    /**
+     * Parses *.xlsx files and creates report template of a module if it is a report module.
+     * @param aModuleName Name of the module, the template will be loaded for.
+     * @param aData Script data object, that will be used while report generating.
+     * @returns P.ReportTemplate instance.
+     */
+    P.loadTemplate = function (aModuleName, aData) {
     };
     /**
      * Constructs server module network proxy.
@@ -1350,18 +1394,83 @@ if (!P) {
      */
     P.ServerModule = function () {
     };
-    P.boxAsJava = function () {
+    /**
+     * Utility class with resource load/upload/location methods.
+     */
+    P.Resource = {
+        /**
+         * Loads some plain resource from project or from network via http.
+         * @param {String} aResName Platypus project's reource name e.g. "some-project-folder/some-resource.sr" or http url of the resource.
+         * @param {Function} onSuccess Success callback. Optional. If omitted sycnhronous version of code will be used.
+         * @param {Function} onFailure Failure callback. Optional. If omitted no error information will provided.
+         * @returns Loaded content if synchronous version of code is used or null otherwise.
+         */
+        load: function (aResName, onSuccess, onFailure) {
+        },
+        /**
+         * Points to application source root directory "app" in local filesystem.
+         * To make full absolute path to some platypus project's resource in local filesystem, 
+         * one should write such code: <code> var fullPath = P.applicationPath + "/" + "some-project-folder/some-resource.sr"</code>
+         * Note, that folders separator char may vary in various operating systems.
+         * @type String
+         */
+        applicationPath: "",
+        /**
+         * Available only in browser environment.
+         * @param {Object} aFile
+         * @param {String} aName
+         * @param {Function} aCompleteCallback
+         * @param {Function} aProgressCallback
+         * @param {Function} aAbortCallback
+         * @returns {undefined}
+         */
+        upload: function (aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
+        }
     };
-    P.boxAsJs = function () {
+    /**
+     * Invalidates user's session at the connected server.
+     * Available only in client environment.
+     * In server environment does nothing.
+     * @param {Function} onSuccess Success callback. Optional. If omitted sycnhronous version of code will be used.
+     * @param {Function} onFailure Failure callback. Optional. If omitted no error information will provided.
+     * @returns {undefined}
+     */
+    P.logout = function (onSuccess, onFailure) {
     };
-    P.Resource = {};
-    P.logout = function () {
+    /**
+     * Current logged in principal. ay system principal if called in resident module code context.
+     */
+    P.principal = {
+        name: ""
     };
-    P.principal = {name: ""};
-    P.Icon = {};
-    P.ID = {generate: function (aValue) {
+    /**
+     * Utility class to maange icons and theirs underlying data.
+     */
+    P.Icon = {
+        /**
+         * Loads an icon from platypus project's plain resource or from a network via http.
+         * @param {type} aResName Platypus project's reource name e.g. "some-project-folder/some-icon.png" or http url of the image.
+         * @param {type} onSuccess Success callback. Optional. If omitted sycnhronous version of code will be used.
+         * @param {type} onFailure Failure callback. Optional. If omitted no error information will provided.
+         * @returns Loaded icon if synchronous version of code is used or null otherwise.
+         * @returns {undefined}
+         */
+        load: function (aResName, onSuccess, onFailure) {
+        }
+    };
+    /**
+     * Id generator.
+     * @type 
+     */
+    P.ID = {
+        /**
+         * Generates an id and returns it as a string comprised of numbers.
+         * @returns {String} Generated id string
+         */
+        generate: function () {
             return "";
-        }};
+        }
+    };
 
     /**
      * Md5 hash generator
@@ -1413,4 +1522,17 @@ if (!P) {
     P.VerticalPosition = {};
     P.Orientation = {};
     P.FontStyle = {};
+    /**
+     * Utility function, that allows some application code to become asynchronous in terms of platypus async io model.
+     * WARNING!!! When one uses this function, aWorkerFunc will be run in a separate thread.
+     * So make sure, that there are no any shared data will be used by aWorkerFunc's code.      
+     * This method intended generally for input/output libraries writers.
+     * The callbacks provided to the async function are guaranteed to be called according to Platypus.js parallelism levels.
+     * @param {Function} aWorkerFunc A function with application logic, input, output, etc.
+     * @param {Function} aOnSuccess Success callback to be called when aWorkerFunc will complete its work.
+     * @param {Function} aOnFailure Failure callback to be called while aWorkerFunc will raise an exception.
+     * @returns {undefined}
+     */
+    P.async = function (aWorkerFunc, aOnSuccess, aOnFailure) {
+    };
 }

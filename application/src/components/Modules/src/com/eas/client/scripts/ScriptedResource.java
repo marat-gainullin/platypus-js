@@ -8,6 +8,7 @@ import com.eas.client.ServerModuleInfo;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.queries.Query;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import com.eas.util.FileUtils;
@@ -16,7 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.IDN;
 import java.net.MalformedURLException;
@@ -24,8 +24,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -132,7 +138,7 @@ public class ScriptedResource {
         String encoding;
         Matcher htppMatcher = httpPattern.matcher(aResourceName);
         if (htppMatcher.matches()) {
-            return requestViaHttpSync(aResourceName, null, null);
+            return requestHttpResource(aResourceName, null, null, null);
         } else {
             String resourceName = normalizeResourcePath(aResourceName);
             String sourcesPath = app.getModules().getLocalPath();
@@ -157,20 +163,33 @@ public class ScriptedResource {
         }
     }
 
-    public static Object requestViaHttpSync(String aUrl, String aMethodName, String aRequestBody) throws URISyntaxException, IOException, MalformedURLException, UnsupportedEncodingException {
+    public static Object jsRequestHttpResource(String aUrl, String aMethod, String aRequestBody, JSObject aHeaders) throws Exception {
+        Map<String, Object> headers = new HashMap<>();
+        if (aHeaders != null) {
+            aHeaders.keySet().stream().forEach((String aKey) -> {
+                Object oValue = ScriptUtils.toJava(aHeaders.getMember(aKey));
+                if (oValue != null) {
+                    headers.put(aKey, oValue);
+                }
+            });
+        }
+        return requestHttpResource(aUrl, aMethod, aRequestBody, headers);
+    }
+
+    public static Object requestHttpResource(String aUrl, String aMethod, String aRequestBody, Map<String, Object> aHeaders) throws Exception {
         byte[] data;
         String encoding;
-        URL url = new URL(aUrl);
-        HttpURLConnection conn;
-        InputStream is;
-        try {
-            conn = (HttpURLConnection) url.openConnection();
-        } catch (IOException ex) {
-            url = encodeUrl(url);
-            conn = (HttpURLConnection) url.openConnection();
-        }
-        if (aMethodName != null && !aMethodName.isEmpty()) {
-            conn.setRequestMethod(aMethodName);
+        Callable<HttpURLConnection> connFactory = () -> {
+            try {
+                return (HttpURLConnection) new URL(aUrl).openConnection();
+            } catch (IOException ex) {
+                URL encodedUrl = encodeUrl(new URL(aUrl));
+                return (HttpURLConnection) encodedUrl.openConnection();
+            }
+        };
+        final HttpURLConnection conn = connFactory.call();
+        if (aMethod != null && !aMethod.isEmpty()) {
+            conn.setRequestMethod(aMethod);
         }
         conn.setDoInput(true);
         if (aRequestBody != null && !aRequestBody.isEmpty()) {
@@ -179,12 +198,25 @@ public class ScriptedResource {
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] body = aRequestBody.getBytes(SettingsConstants.COMMON_ENCODING);
                 os.write(body);
-                conn.setRequestProperty("content-length", ""+body.length);
+                conn.setRequestProperty("content-length", "" + body.length);
             }
         }
         conn.setRequestProperty("accept-encoding", "deflate");
+        if (aHeaders != null) {
+            aHeaders.entrySet().stream().forEach((Map.Entry<String, Object> aHeader) -> {
+                Object oValue = aHeader.getValue();
+                if (oValue instanceof Number) {
+                    conn.setRequestProperty(aHeader.getKey(), "" + ((Number) oValue).intValue());
+                } else if (oValue instanceof Date) {
+                    DateFormat df = new SimpleDateFormat(PlatypusHttpConstants.HTTP_DATE_FORMAT);
+                    conn.setRequestProperty(aHeader.getKey(), df.format((Date) oValue));
+                } else if (oValue != null) {
+                    conn.setRequestProperty(aHeader.getKey(), "" + oValue);
+                }
+            });
+        }
         conn.getResponseCode();
-        is = conn.getInputStream();
+        InputStream is = conn.getInputStream();
         String contentEncoding = conn.getContentEncoding();
         if (contentEncoding != null) {
             if (contentEncoding.contains("gzip") || contentEncoding.contains("zip")) {
