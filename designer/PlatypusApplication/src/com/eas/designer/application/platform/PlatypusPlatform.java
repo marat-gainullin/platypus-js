@@ -90,8 +90,10 @@ public class PlatypusPlatform {
             }
             
             try {
-               updaterProcess=  Runtime.getRuntime().exec(command);
-            } catch (IOException ex) {
+               updaterProcess = Runtime.getRuntime().exec(command);
+               int some = updaterProcess.waitFor();
+               
+            } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName())
                         .log(Level.SEVERE, null, ex); // NOI18N
             }

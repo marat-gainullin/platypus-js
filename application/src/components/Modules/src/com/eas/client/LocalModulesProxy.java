@@ -49,13 +49,18 @@ public class LocalModulesProxy implements ModulesProxy {
         Callable<ModuleStructure> doWork = () -> {
             String name = aName;
             if (name == null || name.isEmpty()) {
-                if(defaultModuleName == null || defaultModuleName.isEmpty())
+                if (defaultModuleName == null || defaultModuleName.isEmpty()) {
                     throw new IllegalStateException("Default application element must present if you whant to resolve empty string names.");
+                }
                 name = defaultModuleName;
             }
             if (name != null) {
                 AppElementFiles files = indexer.nameToFiles(name);
                 if (files != null) {
+                    ModuleStructure structure = new ModuleStructure();
+                    files.getFiles().stream().forEach((file) -> {
+                        structure.getParts().addFile(file);
+                    });
                     File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
                     if (jsFile != null) {
                         String jsSource = FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING);
@@ -71,10 +76,6 @@ public class LocalModulesProxy implements ModulesProxy {
                             return false;
                         });
                         walker.walk();
-                        ModuleStructure structure = new ModuleStructure();
-                        files.getFiles().stream().forEach((file) -> {
-                            structure.getParts().addFile(file);
-                        });
                         structure.getClientDependencies().addAll(walker.getDependencies());
                         structure.getServerDependencies().addAll(walker.getServerDependencies());
                         if (files.isModule()) {
@@ -93,10 +94,8 @@ public class LocalModulesProxy implements ModulesProxy {
                                 }
                             }
                         }
-                        return structure;
-                    } else {
-                        return null;
                     }
+                    return structure;
                 } else {
                     return null;
                 }

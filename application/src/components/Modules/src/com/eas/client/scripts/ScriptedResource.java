@@ -140,6 +140,7 @@ public class ScriptedResource {
         if (htppMatcher.matches()) {
             return requestHttpResource(aResourceName, null, null, null);
         } else {
+            app.getModules().getModule(aResourceName, null, null);
             String resourceName = normalizeResourcePath(aResourceName);
             String sourcesPath = app.getModules().getLocalPath();
             File resourceFile = new File(sourcesPath + File.separator + resourceName);
