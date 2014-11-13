@@ -83,7 +83,7 @@ public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCell
 
     public void extraCellControls(JSObject aSelectFunction, boolean nullable) throws Exception;
 
-    public void injectPublished(Object aPublished);
+    public void injectPublished(JSObject aPublished);
     
     public boolean haveNullerAction();
 
