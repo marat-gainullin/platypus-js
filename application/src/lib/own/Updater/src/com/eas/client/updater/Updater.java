@@ -10,6 +10,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -28,6 +29,7 @@ public class Updater {
     private static String curPath = "../../../../";
     private static String whatRun = "";
     private static String command = "";
+    private static boolean isSilent = false;
 
     /**
      * @param args the command line arguments
@@ -42,7 +44,7 @@ public class Updater {
 
             String userHome = System.getProperty("user.home");
             String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
-            File logPath =  new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
+            File logPath = new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
             logPath.mkdirs();
             FileHandler h = new FileHandler(pathHome);
             h.setFormatter(new SimpleFormatter());
@@ -57,7 +59,33 @@ public class Updater {
             if (!"".equals(command)) {
                 switch (command) {
                     case UpdaterConstants.COMMAND_CHECK_NEW_VERSION: {
-                        System.exit(au.checkNewVersion());
+                        int versionEqual = au.checkNewVersion();
+                        byte status = UpdaterConstants.NOT_NEED_UPDATE;
+                        switch (versionEqual) {
+                            case UpdaterConstants.FATAL_NOT_EQUALS: {//Need update from distributive
+                                if (!isSilent) {
+                                    JOptionPane.showMessageDialog(null, Updater.res.getString("mesDownloadNew"), Updater.res.getString("mesCaption"), JOptionPane.INFORMATION_MESSAGE);
+                                }
+                                status = UpdaterConstants.NOT_NEED_UPDATE;
+                            }
+                            case UpdaterConstants.NOT_EQUALS: {// Do you want to automaticaly update?
+                                if (!isSilent) {
+                                    int selection = JOptionPane.showConfirmDialog(null, Updater.res.getString("confirmUpdate"), Updater.res.getString("confirmCaption"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                                    if (selection == JOptionPane.YES_OPTION) {
+                                        status = UpdaterConstants.NEED_UPDATE;
+                                    } else {
+                                        status = UpdaterConstants.NOT_NEED_UPDATE;
+                                    }
+                                } else {
+                                    status = UpdaterConstants.NEED_UPDATE;
+                                }
+                            }
+                            case UpdaterConstants.EQUALS: { //Update not need!
+                                status = UpdaterConstants.NOT_NEED_UPDATE;
+                            }
+                        }
+
+                        System.exit(status);
                     }
                     case UpdaterConstants.COMMAND_DO_UPDATE: {
                         upd = new UpdProgress();
@@ -130,25 +158,39 @@ public class Updater {
                 } else {
                     throw new IllegalArgumentException("Program curent path: -path <value>");
                 }
-            } else if ((UpdaterConstants.CMD_SWITCHS_PREFIX + UpdaterConstants.CMD_RUN_COMMAND).equalsIgnoreCase(args[i])) {
-                if (i < args.length - 2) {
-                    whatRun = args[i + 1];
-                    if ((whatRun.indexOf("cscript") >= 0) || (whatRun.indexOf("wscript") >= 0)) {
-                        whatRun += " \"" + args[i + 2] + "\"";
+            } else if ((UpdaterConstants.CMD_SWITCHS_PREFIX + UpdaterConstants.CMD_IS_SILENT).equalsIgnoreCase(args[i])) {
+                if (i < args.length - 1) {
+                    if (args[i + 1].equalsIgnoreCase("true")) {
+                        isSilent = true;
+                    } else if (args[i + 1].equalsIgnoreCase("false")) {
+                        isSilent = false;
                     } else {
-                        whatRun += " " + args[i + 2];
+                        throw new IllegalArgumentException("Program silent mode parameters are only true or false");
                     }
-                    i += 3;
+                    i += 2;
                 } else {
-                    if (i < args.length - 1) {
-                        whatRun = args[i + 1];
-                        i += 2;
-                    } else {
-                        throw new IllegalArgumentException("Command to run: -wrun <value>(if you want to run *.js or *.vbs script use \n"
-                                + " -wrun cscript(wscript) \"<value>\")");
-                    }
+                    throw new IllegalArgumentException("Program silent mode: -silent <true | false>");
                 }
-            } else {
+            } //            else if ((UpdaterConstants.CMD_SWITCHS_PREFIX + UpdaterConstants.CMD_RUN_COMMAND).equalsIgnoreCase(args[i])) {
+            //                if (i < args.length - 2) {
+            //                    whatRun = args[i + 1];
+            //                    if ((whatRun.indexOf("cscript") >= 0) || (whatRun.indexOf("wscript") >= 0)) {
+            //                        whatRun += " \"" + args[i + 2] + "\"";
+            //                    } else {
+            //                        whatRun += " " + args[i + 2];
+            //                    }
+            //                    i += 3;
+            //                } else {
+            //                    if (i < args.length - 1) {
+            //                        whatRun = args[i + 1];
+            //                        i += 2;
+            //                    } else {
+            //                        throw new IllegalArgumentException("Command to run: -wrun <value>(if you want to run *.js or *.vbs script use \n"
+            //                                + " -wrun cscript(wscript) \"<value>\")");
+            //                    }
+            //                }
+            //            } 
+            else {
                 i++;
             }
         }

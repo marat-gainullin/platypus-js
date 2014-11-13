@@ -21,7 +21,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
@@ -29,12 +28,10 @@ import java.util.logging.Logger;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
-import org.netbeans.api.extexecution.ExecutionDescriptor;
-import org.netbeans.api.extexecution.ExecutionService;
-import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
 /**
@@ -58,7 +55,7 @@ public class PlatypusPlatform {
 //    private static final String MAC_UPDATE_EXECUTABLE = "update-mac.sh";
     private static final String WINDOWS_UPDATE_EXECUTABLE = "lookup-x86.exe";
     private static final String WINDOWS_UPDATE_EXECUTABLE_x64 = "lookup-x64.exe";
-
+    private static Process updaterProcess;
     private static final Map<String, File> jarsCache = new HashMap<>();
 
     static {
@@ -83,17 +80,20 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            String[] command = new String[1];
+            
             String updaterPath = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
+            String[] command = new String[]{updaterPath,"newversion","-silent","true"};
             if (Utilities.isWindows()) {
                 command[0] = ("\"" + updaterPath + "\"");
             } else {
                 command[0] = updaterPath;
             }
-
+            
             try {
-                Runtime.getRuntime().exec(command);
-            } catch (IOException ex) {
+               updaterProcess = Runtime.getRuntime().exec(command);
+               int some = updaterProcess.waitFor();
+               
+            } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName())
                         .log(Level.SEVERE, null, ex); // NOI18N
             }
@@ -103,6 +103,14 @@ public class PlatypusPlatform {
         }
     }
 
+    /**
+     * 
+     * @return link to updater process
+     */
+    public static Process getUpdaterProcess(){
+        return updaterProcess;
+    }
+    
     /**
      * Gets the platform home directory.
      *

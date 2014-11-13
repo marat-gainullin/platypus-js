@@ -111,7 +111,7 @@ public class AppUpdater {
      *
      * @return
      */
-    public byte checkNewVersion() {
+    public int checkNewVersion() {
         if ((!"".equals(fNameConfig)) && (!"".equals(configUrl))) {
             try {
                 File f = new File(fNameConfig);
@@ -124,23 +124,7 @@ public class AppUpdater {
                         Document docto = XMLVersion.getDocumentFile(fNameConfig);
                         Document docfrom = XMLVersion.getDocumentStream(in);
                         int idx = XMLVersion.compareDocumentsNodeEx(docto, docfrom);
-                        switch (idx) {
-                            case UpdaterConstants.FATAL_NOT_EQUALS: {//Need update from distributive
-                                JOptionPane.showMessageDialog(null, Updater.res.getString("mesDownloadNew"), Updater.res.getString("mesCaption"), JOptionPane.INFORMATION_MESSAGE);
-                                return UpdaterConstants.NOT_NEED_UPDATE;
-                            }
-                            case UpdaterConstants.NOT_EQUALS: {// Do you want to automaticaly update?
-                                int selection = JOptionPane.showConfirmDialog(null, Updater.res.getString("confirmUpdate"), Updater.res.getString("confirmCaption"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                                if (selection == JOptionPane.YES_OPTION) {
-                                    return UpdaterConstants.NEED_UPDATE;
-                                } else {
-                                    return UpdaterConstants.NOT_NEED_UPDATE;
-                                }
-                            }
-                            case UpdaterConstants.EQUALS: { //Update not need!
-                                return UpdaterConstants.NOT_NEED_UPDATE;
-                            }
-                        }
+                        return idx;
                     } else {// download failed
                         Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotLoad"), configUrl));
                         return UpdaterConstants.ERROR;
@@ -156,7 +140,6 @@ public class AppUpdater {
         } else {
             return UpdaterConstants.ERROR;
         }
-        return UpdaterConstants.NOT_NEED_UPDATE;
     }
 
     /**

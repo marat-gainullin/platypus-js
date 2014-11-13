@@ -247,7 +247,7 @@ public class JsEvents {
 			Object.defineProperty(this, "shiftDown", {
 				get : function() {
 					return aEvent.@com.google.gwt.event.dom.client.KeyEvent::isShiftKeyDown()();
-				}
+				}																																																																			
 			});
 			Object.defineProperty(this, "metaDown", {
 				get : function() {
@@ -255,17 +255,17 @@ public class JsEvents {
 				}
 			});
 			Object.defineProperty(this, "key", {
-                get : function() {                                                        
-       				var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
-       				return ne.keyCode || 0;
+				get : function() {																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
+					return ne.keyCode || 0;																																																																																																																																																																																																																																																																																																																																																																																																																																																																													
 				}
             });
 			Object.defineProperty(aPublishedEvent, "char", {
-               get : function() {
-               		var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
+				get : function() {																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
 					return String.fromCharCode(ne.charCode || 0); 
-               }
-            });
+				}
+			});
 		};
 		$wnd.P.ContainerEvent = function(aEvent, isAdd){
 			Object.defineProperty(this, "source", {

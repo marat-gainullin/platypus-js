@@ -1,4 +1,18 @@
 #!/bin/bash
+IS_SILENT="false"
+while [ 1 ]; do
+	if [ "$1" = "-silent" ] ; then
+		shift
+		IS_SILENT="$1"
+	elif [ "$1" = "newversion" ] ; then
+		MODE="newversion"
+	elif [ "$1" = "update" ] ; then
+		MODE="update"
+	elif [ -z "$1" ] ; then
+		break #no morekeys
+	fi
+	shift
+done
 JRE_PATH=java
 BASEDIR="`dirname "$0"`/.."
 PLATYPUS_HOME=`(cd "$BASEDIR"; pwd)`
@@ -35,11 +49,15 @@ if [ -f $configFile ]; then
 	done < $configFile
 fi
 CONFIG_NAME="${CONFIG_NAME_PATH}${CONFIG_NAME}"
-$JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS newversion -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -path "$PLATYPUS_HOME/" 
-if [ $? -eq 10 ]; then 
-$JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS update -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -path "${PLATYPUS_HOME}/"
- if [ -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" ]; then
-  rm "${PLATYPUS_HOME}/lib/own/Updater.jar" 
-  mv -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" "${PLATYPUS_HOME}/lib/own/Updater.jar";
- fi
+if [ -n "$MODE" ] ; then
+    $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS $MODE -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "${PLATYPUS_HOME}/"
+else 
+     $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS newversion -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "$PLATYPUS_HOME/" 
+    if [ $? -eq 10 ]; then 
+        $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS update -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "${PLATYPUS_HOME}/"
+       if [ -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" ]; then
+           rm "${PLATYPUS_HOME}/lib/own/Updater.jar" 
+           mv -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" "${PLATYPUS_HOME}/lib/own/Updater.jar";
+       fi
+    fi
 fi	
