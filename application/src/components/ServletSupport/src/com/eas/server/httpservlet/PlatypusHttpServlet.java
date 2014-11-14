@@ -67,6 +67,11 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     @Override
     public void destroy() {
+        try {
+            serverCore.getIndexer().unwatch();
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
         super.destroy();
     }
 

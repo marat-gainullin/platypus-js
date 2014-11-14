@@ -377,6 +377,7 @@ public class DatabasesClient {
     }
 
     private void startJdbcTask(Runnable aTask) {
+        ScriptUtils.incAsyncsCount();
         Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();

@@ -39,7 +39,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
     protected DataSource dataSource;
     protected Converter converter;
     protected Fields expectedFields;
-    protected Consumer<Runnable> dataPuller;
+    protected Consumer<Runnable> asyncDataPuller;
     protected boolean procedure;
 
     protected ResultSet lowLevelResults;
@@ -54,7 +54,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @param aDataSource A DataSource instance, that would supply resources for
      * use them by flow dataSource in single operations, like retriving data of
      * applying data changes.
-     * @param aDataPuller
+     * @param aAsyncDataPuller
      * @param aClause A sql clause, dataSource should use to achieve
      * PreparedStatement instance to use it in the result set querying process.
      * @param aExpectedFields
@@ -62,10 +62,10 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * a jdbc datasource.
      * @see DataSource
      */
-    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, Consumer<Runnable> aDataPuller, Converter aConverter, String aClause, Fields aExpectedFields) {
+    public JdbcFlowProvider(JKT aJdbcSourceTag, DataSource aDataSource, Consumer<Runnable> aAsyncDataPuller, Converter aConverter, String aClause, Fields aExpectedFields) {
         super(aJdbcSourceTag, aClause);
         dataSource = aDataSource;
-        dataPuller = aDataPuller;
+        asyncDataPuller = aAsyncDataPuller;
         converter = aConverter;
         expectedFields = aExpectedFields;
         assert dataSource != null : "Flow provider can't exist without a data source";
@@ -103,7 +103,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 }
             };
             if (onSuccess != null) {
-                dataPuller.accept(() -> {
+                asyncDataPuller.accept(() -> {
                     try {
                         Rowset rs = doWork.call();
                         try {
@@ -294,7 +294,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 return null;
             };
             if (onSuccess != null) {
-                dataPuller.accept(() -> {
+                asyncDataPuller.accept(() -> {
                     try {
                         Rowset rs = doWork.call();
                         try {

@@ -214,7 +214,7 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		}
 	}
 
-	private void updateToolsVisibility() {
+	public void updateToolsVisibility() {
 		btnMinimize.setVisible(window.isMinimizable() && !window.isMinimized());
 		btnMaximize.setVisible(window.isMaximizable() && !window.isMaximized() && !window.isMinimized());
 		btnRestore.setVisible(window.isMinimized() || window.isMaximized());

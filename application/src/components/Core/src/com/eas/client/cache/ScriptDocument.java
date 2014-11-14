@@ -4,7 +4,6 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.PropertiesAnnotationsMiner;
@@ -71,6 +70,11 @@ public class ScriptDocument {
         });
     }
 
+    public Tag getModuleAnnotation(String anAnnotation) {
+        return moduleAnnotations != null ? moduleAnnotations.stream().filter((Tag aTag) -> {
+            return aTag.getName().equalsIgnoreCase(anAnnotation);
+        }).findAny().get() : null;
+    }
     /**
      * Reads script annotations. Annotations, accompanied with
      *

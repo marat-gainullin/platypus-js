@@ -61,6 +61,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                             AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                             JSObject constr = ScriptUtils.lookupInGlobal(moduleName);
                             if (files != null && files.isModule() && constr != null) {
+                                Object moduleLock;
                                 ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
                                 // Let's perform security checks
                                 CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
@@ -68,11 +69,13 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                 JSObject moduleInstance = serverCore.getSessionManager().getSystemSession().getModule(moduleName);
                                 if (moduleInstance == null) {
                                     if (aSession.containsModule(moduleName)) {
+                                        moduleLock = aSession;
                                         moduleInstance = aSession.getModule(moduleName);
                                     } else {
                                         if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                                             if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                                 moduleInstance = (JSObject) constr.newObject(new Object[]{});
+                                                moduleLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
                                                 Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
                                             } else {
                                                 throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", moduleName));
@@ -81,8 +84,27 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                             throw new AccessControlException(String.format("Public access to module %s is denied.", moduleName));//NOI18N
                                         }
                                     }
+                                } else {
+                                    moduleLock = serverCore;
                                 }
                                 if (moduleInstance != null) {
+                                    if (config.hasModuleAnnotation(JsDoc.Tag.WAIT_TAG)) {
+                                        JsDoc.Tag waitTag = config.getModuleAnnotation(JsDoc.Tag.WAIT_TAG);
+                                        String waitFor = waitTag.getParams() != null && !waitTag.getParams().isEmpty() ? waitTag.getParams().get(0) : SELF_WAIT_OPTION;
+                                        switch (waitFor.toLowerCase()) {
+                                            case SELF_WAIT_OPTION:
+                                                moduleLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
+                                                break;
+                                            case SESSION_WAIT_OPTION:
+                                                moduleLock = aSession;
+                                                break;
+                                            case SERVER_WAIT_OPTION:
+                                                moduleLock = serverCore;
+                                                break;
+                                            default:
+                                                Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, "Unknown {0} option {1} in module {2}. Falling back to default parallelism.", new String[]{JsDoc.Tag.WAIT_TAG, waitFor, moduleName});
+                                        }
+                                    }
                                     Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
                                     Object oFun = moduleInstance.getMember(methodName);
                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
@@ -117,10 +139,18 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                             }
 
                                         });
-                                        Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
-                                        if (!(result instanceof Undefined)) {
-                                            onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
-                                            args.clear();
+                                        ScriptUtils.initAsyncs(0);
+                                        try {
+                                            synchronized (moduleLock) {
+                                                Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
+                                                int asyncs = ScriptUtils.getAsyncsCount();
+                                                if (!(result instanceof Undefined) || asyncs == 0) {
+                                                    onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
+                                                    args.clear();
+                                                }
+                                            }
+                                        } finally {
+                                            ScriptUtils.initAsyncs(null);
                                         }
                                     } else {
                                         onFailure.accept(new Exception(String.format(METHOD_MISSING_MSG, getRequest().getMethodName(), getRequest().getModuleName())));
@@ -141,6 +171,9 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
             }
         }
     }
+    protected static final String SERVER_WAIT_OPTION = "server";
+    protected static final String SESSION_WAIT_OPTION = "session";
+    protected static final String SELF_WAIT_OPTION = "self";
     protected static final String MODULE_MISSING_OR_NOT_A_MODULE = "No module: %s, or it is not a module";
     protected static final String BOTH_IO_MODELS_MSG = "Method {0} in module {1} attempts to return value and call a callback. Sync and async io models both are not allowed. You should make a choice.";
 }

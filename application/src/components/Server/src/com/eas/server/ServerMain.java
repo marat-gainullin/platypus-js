@@ -7,6 +7,7 @@ package com.eas.server;
 import com.eas.client.ClientConstants;
 import com.eas.client.LocalModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ScriptConfigs;
@@ -197,7 +198,7 @@ public class ServerMain {
                 indexer.watch();
                 ScriptUtils.initServices(threadsConfig.getMaxServicesTreads());
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
-                QueriesProxy queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
+                QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
                 serverCoreDbClient.setQueries(queries);
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), scriptsConfigs, appElement, tasksScanner.getAuthorizers());
                 serverCoreDbClient.setContextHost(server);
