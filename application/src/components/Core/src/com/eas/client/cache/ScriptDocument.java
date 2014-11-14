@@ -38,9 +38,9 @@ public class ScriptDocument {
         super();
     }
 
-    public static ScriptDocument parse(String aSource) {
+    public static ScriptDocument parse(String aSource, String aName) {
         ScriptDocument doc = new ScriptDocument();
-        doc.readScriptAnnotations(aSource);
+        doc.readScriptAnnotations(aSource, aName);
         return doc;
     }
 
@@ -83,13 +83,13 @@ public class ScriptDocument {
      * annotations will be taken into account while accessing through modules.
      * @param aSource
      */
-    private void readScriptAnnotations(String aSource) {
+    private void readScriptAnnotations(String aSource, String aName) {
         assert aSource != null : "JavaScript source can't be null";
         moduleAnnotations = new ArrayList<>();
         propertyAllowedRoles.clear();
-        Source source = Source.sourceFor("", aSource);
+        Source source = Source.sourceFor(aName, aSource);
         FunctionNode ast = ScriptUtils.parseJs(aSource);
-        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast);
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast, aName);
         ast.accept(new PropertiesAnnotationsMiner(source, ScriptUtils.getThisAliases(moduleConstructor)) {
 
             @Override
