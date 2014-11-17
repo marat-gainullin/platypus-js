@@ -103,6 +103,7 @@ public class FlowPane extends JPanel implements HasPublished, HasContainerEvents
         }
     }
 
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
     @Override
     public JComponent child(int aIndex) {
         return (JComponent) super.getComponent(aIndex);
