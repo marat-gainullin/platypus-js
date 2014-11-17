@@ -4,26 +4,28 @@
  */
 package com.eas.client.forms.api.components;
 
-import com.eas.client.forms.api.Component;
-import com.eas.client.forms.api.HorizontalPosition;
-import com.eas.client.forms.api.VerticalPosition;
+import com.eas.client.forms.api.FormEventsIProxy;
+import com.eas.client.forms.api.HasComponentEvents;
+import com.eas.client.forms.api.events.ActionEvent;
+import com.eas.client.forms.api.events.ComponentEvent;
+import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.controls.events.ControlEventsIProxy;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.EventMethod;
+import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class Button extends Component<JButton> {
-
-    protected Button(JButton aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+public class Button extends JButton implements HasPublished, HasComponentEvents {
 
     public Button(String aText, Icon aIcon, int aIconTextGap) {
         this(aText, aIcon, aIconTextGap, null);
@@ -44,9 +46,8 @@ public class Button extends Component<JButton> {
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
     public Button(String aText, Icon aIcon, int aIconTextGap, JSObject aActionPerformedHandler) {
-        super();
-        setDelegate(new JButton(aText, aIcon));
-        delegate.setIconTextGap(aIconTextGap);
+        super(aText, aIcon);
+        super.setIconTextGap(aIconTextGap);
         setOnActionPerformed(aActionPerformedHandler);
     }
 
@@ -68,13 +69,15 @@ public class Button extends Component<JButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = TEXT_JSDOC)
+    @Override
     public String getText() {
-        return delegate.getText();
+        return super.getText();
     }
 
     @ScriptFunction
+    @Override
     public void setText(String aValue) {
-        delegate.setText(aValue);
+        super.setText(aValue);
     }
 
     private static final String ICON_JSDOC = ""
@@ -83,13 +86,15 @@ public class Button extends Component<JButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = ICON_JSDOC)
+    @Override
     public Icon getIcon() {
-        return delegate.getIcon();
+        return super.getIcon();
     }
 
     @ScriptFunction
+    @Override
     public void setIcon(Icon aValue) {
-        delegate.setIcon(aValue);
+        super.setIcon(aValue);
     }
 
     private static final String ICON_TEXT_GAP_JSDOC = ""
@@ -98,13 +103,15 @@ public class Button extends Component<JButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = ICON_TEXT_GAP_JSDOC)
+    @Override
     public int getIconTextGap() {
-        return delegate.getIconTextGap();
+        return super.getIconTextGap();
     }
 
     @ScriptFunction
+    @Override
     public void setIconTextGap(int aValue) {
-        delegate.setIconTextGap(aValue);
+        super.setIconTextGap(aValue);
     }
 
     private static final String HORIZONTAL_TEXT_POSITION_JSDOC = ""
@@ -113,35 +120,15 @@ public class Button extends Component<JButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = HORIZONTAL_TEXT_POSITION_JSDOC)
+    @Override
     public int getHorizontalTextPosition() {
-        switch (delegate.getHorizontalTextPosition()) {
-            case JLabel.LEFT:
-                return HorizontalPosition.LEFT;
-            case JLabel.CENTER:
-                return HorizontalPosition.CENTER;
-            case JLabel.RIGHT:
-                return HorizontalPosition.RIGHT;
-            default:
-                return HorizontalPosition.LEFT;
-        }
+        return super.getHorizontalTextPosition();
     }
 
     @ScriptFunction
+    @Override
     public void setHorizontalTextPosition(int aValue) {
-        switch (aValue) {
-            case HorizontalPosition.LEFT:
-                delegate.setHorizontalTextPosition(JLabel.LEFT);
-                break;
-            case HorizontalPosition.CENTER:
-                delegate.setHorizontalTextPosition(JLabel.CENTER);
-                break;
-            case HorizontalPosition.RIGHT:
-                delegate.setHorizontalTextPosition(JLabel.RIGHT);
-                break;
-            default:
-                delegate.setHorizontalTextPosition(JLabel.LEFT);
-                break;
-        }
+        super.setHorizontalTextPosition(aValue);
     }
 
     private static final String VERTICAL_TEXT_POSITION_JSDOC = ""
@@ -150,36 +137,18 @@ public class Button extends Component<JButton> {
             + "*/";
 
     @ScriptFunction(jsDoc = VERTICAL_TEXT_POSITION_JSDOC)
+    @Override
     public int getVerticalTextPosition() {
-        switch (delegate.getVerticalTextPosition()) {
-            case JLabel.TOP:
-                return VerticalPosition.TOP;
-            case JLabel.CENTER:
-                return VerticalPosition.CENTER;
-            case JLabel.BOTTOM:
-                return VerticalPosition.BOTTOM;
-            default:
-                return VerticalPosition.CENTER;
-        }
+        return super.getVerticalTextPosition();
     }
 
     @ScriptFunction
+    @Override
     public void setVerticalTextPosition(int aValue) {
-        switch (aValue) {
-            case VerticalPosition.TOP:
-                delegate.setVerticalTextPosition(JLabel.TOP);
-                break;
-            case VerticalPosition.CENTER:
-                delegate.setVerticalTextPosition(JLabel.CENTER);
-                break;
-            case VerticalPosition.BOTTOM:
-                delegate.setVerticalTextPosition(JLabel.BOTTOM);
-                break;
-            default:
-                delegate.setVerticalTextPosition(JLabel.CENTER);
-                break;
-        }
+        super.setVerticalTextPosition(aValue);
     }
+
+    protected JSObject published;
 
     @Override
     public JSObject getPublished() {
@@ -187,9 +156,17 @@ public class Button extends Component<JButton> {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
+    }
+
+    @Override
+    public void setPublished(JSObject aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
     }
 
     private static JSObject publisher;
@@ -198,4 +175,239 @@ public class Button extends Component<JButton> {
         publisher = aPublisher;
     }
 
+    protected ControlEventsIProxy eventsProxy = new FormEventsIProxy(this);
+
+    @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseClicked() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseClicked);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseClicked(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseClicked, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseDragged() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseDragged);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseDragged(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseDragged, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseEntered() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseEntered);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseEntered(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseEntered, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseExited() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseExited);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseExited(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseExited, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseMoved() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseMoved);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseMoved(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseMoved, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMousePressed() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mousePressed);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMousePressed(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mousePressed, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseReleased() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseReleased);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseReleased(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseReleased, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
+    @EventMethod(eventClass = MouseEvent.class)
+    @Override
+    public JSObject getOnMouseWheelMoved() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseWheelMoved);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseWheelMoved(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
+    @EventMethod(eventClass = ActionEvent.class)
+    @Override
+    public JSObject getOnActionPerformed() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.actionPerformed);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnActionPerformed(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.actionPerformed, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
+    @Override
+    public JSObject getOnComponentHidden() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentHidden);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentHidden(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentHidden, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
+    @Override
+    public JSObject getOnComponentMoved() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentMoved);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentMoved(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentMoved, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
+    @Override
+    public JSObject getOnComponentResized() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentResized);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentResized(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentResized, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
+    @Override
+    public JSObject getOnComponentShown() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentShown);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentShown(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentShown, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
+    @EventMethod(eventClass = FocusEvent.class)
+    @Override
+    public JSObject getOnFocusGained() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.focusGained);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnFocusGained(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.focusGained, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
+    @EventMethod(eventClass = FocusEvent.class)
+    @Override
+    public JSObject getOnFocusLost() {
+        return eventsProxy != null ? eventsProxy.getHandlers().get(ControlEventsIProxy.focusLost) : null;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnFocusLost(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.focusLost, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
+    @Override
+    public JSObject getOnKeyPressed() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.keyPressed);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnKeyPressed(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.keyPressed, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
+    @Override
+    public JSObject getOnKeyReleased() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.keyReleased);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnKeyReleased(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.keyReleased, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
+    @Override
+    public JSObject getOnKeyTyped() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.keyTyped);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnKeyTyped(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
+    }
 }

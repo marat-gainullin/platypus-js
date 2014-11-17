@@ -6,6 +6,7 @@ package com.eas.client.forms.api;
 
 import com.eas.client.forms.api.events.EventsWrapper;
 import com.eas.controls.events.ControlEventsIProxy;
+import javax.swing.JComponent;
 
 /**
  *
@@ -15,6 +16,11 @@ public class FormEventsIProxy extends ControlEventsIProxy {
 
     public FormEventsIProxy() {
         super();
+    }
+
+    public FormEventsIProxy(JComponent aHandlee) {
+        super();
+        setHandlee(aHandlee);
     }
 
     @Override

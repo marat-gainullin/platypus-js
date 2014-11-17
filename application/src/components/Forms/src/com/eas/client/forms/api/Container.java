@@ -37,17 +37,6 @@ public abstract class Container<D extends JComponent> extends Component<D> imple
 
     };
 
-    @Override
-    protected void setDelegate(D aDelegate) {
-        if (delegate != null) {
-            delegate.removeContainerListener(invalidatorListener);
-        }
-        super.setDelegate(aDelegate);
-        if (delegate != null) {
-            delegate.addContainerListener(invalidatorListener);
-        }
-    }
-
     protected JSObject publishedCollectionInvalidator;
 
     @Override
@@ -64,6 +53,17 @@ public abstract class Container<D extends JComponent> extends Component<D> imple
     public void invalidatePublishedCollection() {
         if (publishedCollectionInvalidator != null && publishedCollectionInvalidator.isFunction()) {
             publishedCollectionInvalidator.call(getPublished(), new Object[]{});
+        }
+    }
+
+    @Override
+    protected void setDelegate(D aDelegate) {
+        if (delegate != null) {
+            delegate.removeContainerListener(invalidatorListener);
+        }
+        super.setDelegate(aDelegate);
+        if (delegate != null) {
+            delegate.addContainerListener(invalidatorListener);
         }
     }
 
