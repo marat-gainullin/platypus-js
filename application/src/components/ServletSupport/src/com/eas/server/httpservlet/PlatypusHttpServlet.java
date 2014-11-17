@@ -40,11 +40,9 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String ERRORRESPONSE_ERROR_MSG = "Error while sending ErrorResponse";
     public static final String PLATYPUS_SERVER_CORE_ATTR_NAME = "PLATYPUS_SERVER_CORE_ATTR_NAME";
     public static final String PLATYPUS_SESSION_ATTR_NAME = "PLATYPUS_SESSION_ATTR_NAME";
-    public static final String REQUEST_NOT_CORRECT_MSG = "Your request is incorrect. Please, download and use Platypus Client";
     public static final String REQUEST_PARAMETER_MISSING_MSG = "Http request parameter '{0}' not found.";
     public static final String UNKNOWN_REQUEST_MSG = "Unknown http request has arrived. It's type is %d";
     public static final String REQUEST_PROCESSSING_ERROR_MSG = "Request processsing error";
-    public static final String SUCCESS_JSON = "{\"success\": \"true\"}";
     public static final String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
     public static final String HTTP_HOST_OBJECT_NAME = "http";
     public static final String EXCEL_CONTENT_TYPE = "application/xls";
@@ -206,6 +204,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                     try {
                         if (ex instanceof AccessControlException) {
                             aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
+                        } else if (ex instanceof FileNotFoundException) {
+                            aHttpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                         }
@@ -311,7 +311,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             }
         } else {
             Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
-            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -0- ");
+            throw new Exception(String.format("Platypus http requset parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
         }
     }
 }

@@ -58,6 +58,7 @@ public class ScriptUtils {
     protected static JSObject collectionDefFunc;
     protected static JSObject isArrayFunc;
     protected static JSObject makeObjFunc;
+    protected static JSObject makeArrayFunc;
     protected static ScriptEngine engine;
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
@@ -343,6 +344,11 @@ public class ScriptUtils {
         makeObjFunc = aValue;
     }
 
+    public static void setMakeArrayFunc(JSObject aValue) {
+        assert makeArrayFunc == null;
+        makeArrayFunc = aValue;
+    }
+
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
             aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
@@ -501,11 +507,11 @@ public class ScriptUtils {
         if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
             aObj = null;
         }
-        if (aObj instanceof JSObject || aObj instanceof String
+        if (aObj instanceof JSObject || aObj instanceof CharSequence
                 || aObj instanceof Number || aObj instanceof Boolean || aObj instanceof ScriptObject || aObj == null) {
             return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
         } else {
-            throw new IllegalArgumentException("Could not convert to JSON Java object!");
+            throw new IllegalArgumentException("Java object couldn't be converted to JSON!");
         }
     }
 
@@ -533,6 +539,12 @@ public class ScriptUtils {
     public static JSObject makeObj() {
         assert makeObjFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = makeObjFunc.call(null, new Object[]{});
+        return (JSObject) oResult;
+    }
+
+    public static JSObject makeArray() {
+        assert makeArrayFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = makeArrayFunc.call(null, new Object[]{});
         return (JSObject) oResult;
     }
 

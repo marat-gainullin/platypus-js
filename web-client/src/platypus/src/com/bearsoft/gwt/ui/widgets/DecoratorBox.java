@@ -249,6 +249,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		if (decorated instanceof RequiresResize) {
 			((RequiresResize) decorated).onResize();
 		}
+		organizeButtonsContent();
 	}
 	
 	@Override

@@ -14,6 +14,7 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.security.AccessControlException;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -37,25 +38,30 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
             if (moduleOrResourceName == null || moduleOrResourceName.isEmpty()) {
                 moduleOrResourceName = serverCore.getDefaultAppElement();
             }
-            // Security check
-            checkModuleRoles(aSession, moduleOrResourceName, serverCore.getIndexer().nameToFiles(moduleOrResourceName));
-            // Actual work
-            serverCore.getModules().getModule(moduleOrResourceName, (ModuleStructure aStructure) -> {
-                ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response();
-                String localPath = serverCore.getModules().getLocalPath();
-                aStructure.getParts().getFiles().stream().forEach((File f) -> {
-                    String resourceName = f.getPath().substring(localPath.length());
-                    resourceName = resourceName.replace("\\", "/");
-                    if (resourceName.startsWith("/")) {
-                        resourceName = resourceName.substring(1);
-                    }
-                    resp.getStructure().add(resourceName);
-                });
-                resp.getClientDependencies().addAll(aStructure.getClientDependencies());
-                resp.getServerDependencies().addAll(aStructure.getServerDependencies());
-                resp.getQueryDependencies().addAll(aStructure.getQueryDependencies());
-                onSuccess.accept(resp);
-            }, onFailure);
+            AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleOrResourceName);
+            if (files != null) {
+                // Security check
+                checkModuleRoles(aSession, moduleOrResourceName, files);
+                // Actual work
+                serverCore.getModules().getModule(moduleOrResourceName, (ModuleStructure aStructure) -> {
+                    ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response();
+                    String localPath = serverCore.getModules().getLocalPath();
+                    aStructure.getParts().getFiles().stream().forEach((File f) -> {
+                        String resourceName = f.getPath().substring(localPath.length());
+                        resourceName = resourceName.replace("\\", "/");
+                        if (resourceName.startsWith("/")) {
+                            resourceName = resourceName.substring(1);
+                        }
+                        resp.getStructure().add(resourceName);
+                    });
+                    resp.getClientDependencies().addAll(aStructure.getClientDependencies());
+                    resp.getServerDependencies().addAll(aStructure.getServerDependencies());
+                    resp.getQueryDependencies().addAll(aStructure.getQueryDependencies());
+                    onSuccess.accept(resp);
+                }, onFailure);
+            } else {
+                onFailure.accept(new FileNotFoundException(moduleOrResourceName));
+            }
         } catch (Exception ex) {
             onFailure.accept(ex);
         }

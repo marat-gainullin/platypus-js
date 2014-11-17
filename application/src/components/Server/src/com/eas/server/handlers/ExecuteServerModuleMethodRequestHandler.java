@@ -61,7 +61,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                             AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                             JSObject constr = ScriptUtils.lookupInGlobal(moduleName);
                             if (files != null && files.isModule() && constr != null) {
-                                Object moduleLock;
+                                String waitFor;
                                 ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
                                 // Let's perform security checks
                                 CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
@@ -69,13 +69,13 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                 JSObject moduleInstance = serverCore.getSessionManager().getSystemSession().getModule(moduleName);
                                 if (moduleInstance == null) {
                                     if (aSession.containsModule(moduleName)) {
-                                        moduleLock = aSession;
+                                        waitFor = SESSION_WAIT_OPTION;
                                         moduleInstance = aSession.getModule(moduleName);
                                     } else {
                                         if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                                             if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                                 moduleInstance = (JSObject) constr.newObject(new Object[]{});
-                                                moduleLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
+                                                waitFor = SELF_WAIT_OPTION;
                                                 Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with name {1}", new Object[]{getRequest().getModuleName(), moduleName});
                                             } else {
                                                 throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", moduleName));
@@ -85,26 +85,22 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                         }
                                     }
                                 } else {
-                                    moduleLock = serverCore;
+                                    waitFor = SERVER_WAIT_OPTION;
+                                }
+                                if (config.hasModuleAnnotation(JsDoc.Tag.WAIT_TAG)) {
+                                    JsDoc.Tag waitTag = config.getModuleAnnotation(JsDoc.Tag.WAIT_TAG);
+                                    String waitOption = waitTag.getParams() != null && !waitTag.getParams().isEmpty() ? waitTag.getParams().get(0) : SELF_WAIT_OPTION;
+                                    switch (waitOption.toLowerCase()) {
+                                        case SELF_WAIT_OPTION:
+                                        case SESSION_WAIT_OPTION:
+                                        case SERVER_WAIT_OPTION:
+                                            waitFor = waitOption.toLowerCase();
+                                            break;
+                                        default:
+                                            Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, "Unknown {0} option {1} in module {2}. Falling back to default parallelism.", new String[]{JsDoc.Tag.WAIT_TAG, waitOption, moduleName});
+                                    }
                                 }
                                 if (moduleInstance != null) {
-                                    if (config.hasModuleAnnotation(JsDoc.Tag.WAIT_TAG)) {
-                                        JsDoc.Tag waitTag = config.getModuleAnnotation(JsDoc.Tag.WAIT_TAG);
-                                        String waitFor = waitTag.getParams() != null && !waitTag.getParams().isEmpty() ? waitTag.getParams().get(0) : SELF_WAIT_OPTION;
-                                        switch (waitFor.toLowerCase()) {
-                                            case SELF_WAIT_OPTION:
-                                                moduleLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
-                                                break;
-                                            case SESSION_WAIT_OPTION:
-                                                moduleLock = aSession;
-                                                break;
-                                            case SERVER_WAIT_OPTION:
-                                                moduleLock = serverCore;
-                                                break;
-                                            default:
-                                                Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, "Unknown {0} option {1} in module {2}. Falling back to default parallelism.", new String[]{JsDoc.Tag.WAIT_TAG, waitFor, moduleName});
-                                        }
-                                    }
                                     Logger.getLogger(ExecuteQueryRequestHandler.class.getName()).log(Level.FINE, EXECUTING_METHOD_TRACE_MSG, new Object[]{getRequest().getMethodName(), getRequest().getModuleName()});
                                     Object oFun = moduleInstance.getMember(methodName);
                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
@@ -139,14 +135,33 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                             }
 
                                         });
+                                        final Object leveledLock;
+                                        switch (waitFor) {
+                                            case SELF_WAIT_OPTION:
+                                                leveledLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
+                                                break;
+                                            case SESSION_WAIT_OPTION:
+                                                leveledLock = aSession;
+                                                break;
+                                            case SERVER_WAIT_OPTION:
+                                                leveledLock = serverCore;
+                                                break;
+                                            default:
+                                                throw new IllegalStateException("moduleLock must be already known value.");
+                                        }
                                         ScriptUtils.initAsyncs(0);
                                         try {
-                                            synchronized (moduleLock) {
-                                                Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
-                                                int asyncs = ScriptUtils.getAsyncsCount();
-                                                if (!(result instanceof Undefined) || asyncs == 0) {
-                                                    onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
-                                                    args.clear();
+                                            synchronized (leveledLock) {
+                                                ScriptUtils.setLock(leveledLock);// provide lock to callback threads
+                                                try {
+                                                    Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
+                                                    int asyncs = ScriptUtils.getAsyncsCount();
+                                                    if (!(result instanceof Undefined) || asyncs == 0) {
+                                                        onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
+                                                        args.clear();
+                                                    }
+                                                } finally {
+                                                    ScriptUtils.setLock(null);
                                                 }
                                             }
                                         } finally {

@@ -13,6 +13,7 @@ import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
+import java.io.FileNotFoundException;
 import java.security.AccessControlException;
 import java.util.Date;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
             ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityId() == null) {
-                        throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
+                        throw new FileNotFoundException(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
                     }
                     if (!query.isPublicAccess()) {
                         throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryName()));//NOI18N

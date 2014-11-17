@@ -80,6 +80,7 @@ public class WindowPopupPanel extends PopupPanel implements WindowUI, RequiresRe
     }
     
     protected final void initPopup() {
+    	setGlassEnabled(isModal());
         // clearPopupDecorations
         getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
         getElement().getStyle().setMargin(0, Style.Unit.PX);

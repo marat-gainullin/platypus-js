@@ -141,7 +141,7 @@ public class Session implements HasPublished {
                     Map<String, String> userProps = DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), userName, null, null);
                     userContext = userProps.get(ClientConstants.F_USR_CONTEXT);
                 } catch (Exception ex) {
-                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user {0} properties.", userName);
+                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", userName);
                 }
             }
         }

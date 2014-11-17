@@ -398,14 +398,14 @@ public class PlatypusProjectImpl implements PlatypusProject {
         String html = new String(htmlData, PlatypusUtils.COMMON_ENCODING_NAME);
         URL urlBase = PlatypusProjectImpl.class.getResource("");
         html = html.replaceAll("noDatabaseBaseHref", urlBase.toString());
-        String datasourceId = aDatasourceName;
-        if (datasourceId == null) {
-            datasourceId = settings.getDefaultDataSourceName();
+        String datasourceName = aDatasourceName;
+        if (datasourceName == null) {
+            datasourceName = settings.getDefaultDataSourceName();
         }
-        if (datasourceId == null || datasourceId.isEmpty()) {
-            datasourceId = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_DatasourceNameMissing");
+        if (datasourceName == null || datasourceName.isEmpty()) {
+            datasourceName = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_DatasourceNameMissing");
         }
-        html = html.replaceAll("\\$\\{datasourceName\\}", datasourceId);
+        html = html.replaceAll("\\$\\{datasourceName\\}", datasourceName);
         JEditorPane htmlPage = new JEditorPane("text/html", html);
         htmlPage.addHyperlinkListener((HyperlinkEvent e) -> {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getDescription().equals("platypus://start_connecting")) { // NOI18N
