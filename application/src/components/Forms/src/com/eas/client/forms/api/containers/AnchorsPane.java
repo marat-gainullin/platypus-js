@@ -51,6 +51,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public AnchorsPane() {
         super(new MarginLayout());
+        super.addContainerListener(invalidatorListener);
     }
 
     private static final String ADD_JSDOC = ""

@@ -53,6 +53,7 @@ public class FlowPane extends JPanel implements HasPublished, HasContainerEvents
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public FlowPane(int hgap, int vgap) {
         super(new FlowLayout(FlowLayout.LEFT, hgap, vgap));
+        super.addContainerListener(invalidatorListener);
     }
 
     private static final String ADD_JSDOC = ""

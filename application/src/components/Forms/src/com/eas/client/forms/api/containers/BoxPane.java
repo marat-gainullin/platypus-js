@@ -73,6 +73,7 @@ public class BoxPane extends JPanel implements HasPublished, HasContainerEvents,
         super.setLayout(layout);
         super.addContainerListener(resizer);
         super.addHierarchyBoundsListener(resizer);
+        super.addContainerListener(invalidatorListener);
     }
 
     private static final String ORIENTATION_JSDOC = ""

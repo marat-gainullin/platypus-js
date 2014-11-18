@@ -69,6 +69,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
         super(new PlatypusCardLayout(hgap, vgap));
         PlatypusCardLayout layout = (PlatypusCardLayout) super.getLayout();
         layout.addChangeListener(cardsChangeListener);
+        super.addContainerListener(invalidatorListener);
     }
 
     @ScriptFunction(jsDoc = ""

@@ -4,7 +4,7 @@
  */
 package com.eas.client.forms.api.events;
 
-import com.eas.client.forms.api.Component;
+import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JComponent;
@@ -24,7 +24,7 @@ public class ContainerEvent extends Event<java.awt.event.ContainerEvent> {
             + "/**\n"
             + " * The child component the operation is performed on.\n"
             + " */")
-    public Component<?> getChild() {
+    public HasPublished getChild() {
         return delegate.getChild() instanceof JComponent ? lookupApiComponent((JComponent) delegate.getChild()) : null;
     }
 

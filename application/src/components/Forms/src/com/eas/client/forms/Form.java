@@ -2,7 +2,6 @@ package com.eas.client.forms;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.events.PublishedSourcedEvent;
-import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.client.forms.api.FormWindowEventsIProxy;
 import com.eas.client.forms.api.components.DesktopPane;
 import com.eas.client.forms.api.containers.AnchorsPane;

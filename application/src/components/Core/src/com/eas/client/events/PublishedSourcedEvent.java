@@ -14,7 +14,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * The base event type.
  * @author vv
  */
-public class PublishedSourcedEvent implements HasPublished {
+public class PublishedSourcedEvent implements SourcedEvent {
 
     private static JSObject publisher;
     //
@@ -26,10 +26,8 @@ public class PublishedSourcedEvent implements HasPublished {
         source = aSource;
     }
 
-    private static final String SOURCE_JS_DOC = "/**\n"
-            + "* The source object of the event.\n"
-            + "*/";
     @ScriptFunction(jsDoc = SOURCE_JS_DOC)
+    @Override
     public HasPublished getSource() {
         return source;
     }

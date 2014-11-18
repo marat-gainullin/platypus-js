@@ -44,6 +44,7 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
     public ToolBar(boolean floatable) {
         super();
         super.setFloatable(floatable);
+        super.addContainerListener(invalidatorListener);
     }
 
     public ToolBar() {

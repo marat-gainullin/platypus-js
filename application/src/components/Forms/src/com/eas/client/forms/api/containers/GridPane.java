@@ -72,6 +72,7 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
                 super.add(new PlaceHolder());
             }
         }
+        super.addContainerListener(invalidatorListener);
     }
 
     private static final String ADD_JSDOC = ""
@@ -144,7 +145,7 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
                 int index = i * layout.getColumns() + j;
                 if (super.getComponent(index) == aComp) {
                     super.remove(index);
-                    super.add(new PlaceHolder());
+                    super.add(new PlaceHolder(), index);
                     super.revalidate();
                     super.repaint();
                     return;
@@ -164,7 +165,8 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
     public JComponent child(int aRow, int aCol) {
         int index = aRow * layout.getColumns() + aCol;
         if (index >= 0 && index < getCount()) {
-            return (JComponent) super.getComponent(index);
+            JComponent res = (JComponent) super.getComponent(index);
+            return res instanceof PlaceHolder ? null : res;
         } else {
             return null;
         }
@@ -172,7 +174,8 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
 
     @Override
     public JComponent child(int aIndex) {
-        return (JComponent) super.getComponent(aIndex);
+        JComponent res = (JComponent) super.getComponent(aIndex);
+        return res instanceof PlaceHolder ? null : res;
     }
 
     @Override
@@ -190,7 +193,9 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
             for (int j = 0; j < layout.getColumns(); j++) {
                 int index = i * layout.getColumns() + j;
                 JComponent comp = (JComponent) super.getComponent(index);
-                if (comp != null) {
+                if (comp instanceof PlaceHolder) {
+                    ch.add(null);
+                } else {
                     ch.add(comp);
                 }
             }

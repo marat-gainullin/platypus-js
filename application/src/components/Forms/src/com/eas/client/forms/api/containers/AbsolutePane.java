@@ -51,6 +51,7 @@ public class AbsolutePane extends JPanel implements HasPublished, HasContainerEv
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public AbsolutePane() {
         super(new MarginLayout());
+        super.addContainerListener(invalidatorListener);
     }
 
     private static final String ADD_JSDOC = ""

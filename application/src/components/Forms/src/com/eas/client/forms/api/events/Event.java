@@ -5,7 +5,6 @@
 package com.eas.client.forms.api.events;
 
 import com.eas.client.events.PublishedSourcedEvent;
-import com.eas.client.forms.api.Component;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.util.EventObject;
@@ -26,11 +25,6 @@ public abstract class Event<E extends EventObject> extends PublishedSourcedEvent
         delegate = aDelegate;
     }
 
-    private static final String SOURCE_JS_DOC = ""
-            + "/**\n"
-            + "* The source component object of the event.\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = SOURCE_JS_DOC)
     @Override
     public HasPublished getSource() {
@@ -38,7 +32,7 @@ public abstract class Event<E extends EventObject> extends PublishedSourcedEvent
         if (oSource instanceof JComponent) {
             return lookupApiComponent((JComponent) oSource);
         } else if (oSource instanceof HasPublished) {
-            return (HasPublished)oSource;
+            return (HasPublished) oSource;
         } else {
             return null;
         }
@@ -49,11 +43,11 @@ public abstract class Event<E extends EventObject> extends PublishedSourcedEvent
         return String.format("%s on %s", getClass().getSimpleName(), getSource() != null ? getSource().toString() : "");
     }
 
-    protected static Component<?> lookupApiComponent(JComponent aComp) {
+    public static HasPublished lookupApiComponent(JComponent aComp) {
         JComponent comp = aComp;
-        while (comp.getParent() != null && comp.getClientProperty(Component.WRAPPER_PROP_NAME) == null) {
+        while (comp.getParent() != null && !(comp instanceof HasPublished)) {
             comp = (JComponent) comp.getParent();
         }
-        return (Component<?>) comp.getClientProperty(Component.WRAPPER_PROP_NAME);
+        return comp instanceof HasPublished ? (HasPublished) comp : null;
     }
 }

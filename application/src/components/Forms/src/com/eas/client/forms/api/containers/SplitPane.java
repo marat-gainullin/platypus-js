@@ -48,6 +48,7 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
     public SplitPane(int aOrientation) {
         super(aOrientation == Orientation.VERTICAL ? JSplitPane.VERTICAL_SPLIT : JSplitPane.HORIZONTAL_SPLIT);
+        super.addContainerListener(invalidatorListener);
     }
 
     private static final String ORIENTATION_JSDOC = ""

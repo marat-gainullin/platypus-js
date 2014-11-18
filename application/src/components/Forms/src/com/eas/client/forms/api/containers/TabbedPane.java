@@ -59,6 +59,7 @@ public class TabbedPane extends JTabbedPane implements HasPublished, HasContaine
     public TabbedPane() {
         super();
         super.addChangeListener(tabsChangeListener);
+        super.addContainerListener(invalidatorListener);
     }
 
     @ScriptFunction(jsDoc = ""

@@ -55,6 +55,7 @@ public class BorderPane extends JPanel implements HasPublished, HasContainerEven
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public BorderPane(int hgap, int vgap) {
         super(new BorderLayout(hgap, vgap));
+        super.addContainerListener(invalidatorListener);
     }
 
     public void add(JComponent aComp, int aPlace) {
