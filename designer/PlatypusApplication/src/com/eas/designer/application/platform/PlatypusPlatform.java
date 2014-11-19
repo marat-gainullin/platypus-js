@@ -109,7 +109,7 @@ public class PlatypusPlatform {
                         updateAction = new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "true"});
+                                String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false"});
                                 try {
                                     Process updaterProcess = Runtime.getRuntime().exec(command);
                                     notification.clear();
@@ -143,7 +143,7 @@ public class PlatypusPlatform {
                     }
                 }
 
-                if (updateStatus != NOT_NEED_UPDATE) {
+                if (updateStatus == NEW_VERSION_CODE || updateStatus == UPGRADE_VERSION_CODE) {
                     try {
                         notification = NotificationDisplayer.getDefault().notify(res.getString("title"),
                                 icon,
