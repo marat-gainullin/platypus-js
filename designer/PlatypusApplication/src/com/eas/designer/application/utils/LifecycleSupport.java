@@ -35,8 +35,7 @@ public class LifecycleSupport {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                LifecycleManager.getDefault().markForRestart();
-                LifecycleManager.getDefault().exit();
+                
             };
         };
         NotificationDisplayer.getDefault().notify(NbBundle.getMessage(LifecycleSupport.class, "RestartNeeded_Tooltip"),//NOI18N

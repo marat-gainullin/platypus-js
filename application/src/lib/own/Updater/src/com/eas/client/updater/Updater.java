@@ -66,7 +66,8 @@ public class Updater {
                                 if (!isSilent) {
                                     JOptionPane.showMessageDialog(null, Updater.res.getString("mesDownloadNew"), Updater.res.getString("mesCaption"), JOptionPane.INFORMATION_MESSAGE);
                                 }
-                                status = UpdaterConstants.NOT_NEED_UPDATE;
+                                status = UpdaterConstants.NEED_UPGRADE;
+                                break;
                             }
                             case UpdaterConstants.NOT_EQUALS: {// Do you want to automaticaly update?
                                 if (!isSilent) {
@@ -79,9 +80,11 @@ public class Updater {
                                 } else {
                                     status = UpdaterConstants.NEED_UPDATE;
                                 }
+                                break;
                             }
                             case UpdaterConstants.EQUALS: { //Update not need!
                                 status = UpdaterConstants.NOT_NEED_UPDATE;
+                                break;
                             }
                         }
 
