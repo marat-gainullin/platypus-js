@@ -6,26 +6,34 @@ package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
+import com.eas.client.forms.api.HasJsName;
+import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
 import com.eas.controls.events.ControlEventsIProxy;
+import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class Button extends JButton implements HasPublished, HasComponentEvents {
+public class Button extends JButton implements HasPublished, HasComponentEvents, HasJsName, Widget {
 
     public Button(String aText, Icon aIcon, int aIconTextGap) {
         this(aText, aIcon, aIconTextGap, null);
@@ -61,6 +69,236 @@ public class Button extends JButton implements HasPublished, HasComponentEvents 
 
     public Button() {
         this(null, null, 4);
+    }
+
+    @ScriptFunction(jsDoc = JS_NAME_DOC)
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+
+    @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
+    @Override
+    public JComponent getNextFocusableComponent() {
+        return (JComponent) super.getNextFocusableComponent();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setNextFocusableComponent(JComponent aValue) {
+        super.setNextFocusableComponent(aValue);
+    }
+
+    protected String errorMessage;
+
+    @ScriptFunction(jsDoc = ERROR_JSDOC)
+    @Override
+    public String getError() {
+        return errorMessage;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setError(String aValue) {
+        errorMessage = aValue;
+    }
+
+    @ScriptFunction(jsDoc = BACKGROUND_JSDOC)
+    @Override
+    public Color getBackground() {
+        return super.getBackground();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setBackground(Color aValue) {
+        super.setBackground(aValue);
+    }
+
+    @ScriptFunction(jsDoc = FOREGROUND_JSDOC)
+    @Override
+    public Color getForeground() {
+        return super.getForeground();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setForeground(Color aValue) {
+        super.setForeground(aValue);
+    }
+
+    @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+    @Override
+    public boolean getVisible() {
+        return super.isVisible();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setVisible(boolean aValue) {
+        super.setVisible(aValue);
+    }
+
+    @ScriptFunction(jsDoc = FOCUSABLE_JSDOC)
+    @Override
+    public boolean getFocusable() {
+        return super.isFocusable();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setFocusable(boolean aValue) {
+        super.setFocusable(aValue);
+    }
+
+    @ScriptFunction(jsDoc = ENABLED_JSDOC)
+    @Override
+    public boolean getEnabled() {
+        return super.isEnabled();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setEnabled(boolean aValue) {
+        super.setEnabled(aValue);
+    }
+
+    @ScriptFunction(jsDoc = TOOLTIP_TEXT_JSDOC)
+    @Override
+    public String getToolTipText() {
+        return super.getToolTipText();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setToolTipText(String aValue) {
+        super.setToolTipText(aValue);
+    }
+
+    @ScriptFunction(jsDoc = OPAQUE_TEXT_JSDOC)
+    @Override
+    public boolean getOpaque() {
+        return super.isOpaque();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOpaque(boolean aValue) {
+        super.setOpaque(aValue);
+    }
+
+    @ScriptFunction(jsDoc = COMPONENT_POPUP_MENU_JSDOC)
+    @Override
+    public JPopupMenu getComponentPopupMenu() {
+        return super.getComponentPopupMenu();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setComponentPopupMenu(JPopupMenu aMenu) {
+        super.setComponentPopupMenu(aMenu);
+    }
+
+    @ScriptFunction(jsDoc = FONT_JSDOC)
+    @Override
+    public Font getFont() {
+        return super.getFont();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setFont(Font aFont) {
+        super.setFont(aFont);
+    }
+
+    @ScriptFunction(jsDoc = CURSOR_JSDOC)
+    @Override
+    public Cursor getCursor() {
+        return super.getCursor();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setCursor(Cursor aCursor) {
+        super.setCursor(aCursor);
+    }
+
+    @ScriptFunction(jsDoc = LEFT_JSDOC)
+    @Override
+    public int getLeft() {
+        return super.getLocation().x;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setLeft(int aValue) {
+        if (super.getParent() != null && super.getParent().getLayout() instanceof MarginLayout) {
+            MarginLayout.ajustLeft(this, aValue);
+        }
+        super.setLocation(aValue, getTop());
+    }
+
+    @ScriptFunction(jsDoc = TOP_JSDOC)
+    @Override
+    public int getTop() {
+        return super.getLocation().y;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setTop(int aValue) {
+        if (super.getParent() != null && super.getParent().getLayout() instanceof MarginLayout) {
+            MarginLayout.ajustTop(this, aValue);
+        }
+        super.setLocation(getLeft(), aValue);
+    }
+
+    @ScriptFunction(jsDoc = WIDTH_JSDOC)
+    @Override
+    public int getWidth() {
+        return super.getWidth();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setWidth(int aValue) {
+        Widget.setWidth(this, aValue);
+    }
+
+    @ScriptFunction(jsDoc = HEIGHT_JSDOC)
+    @Override
+    public int getHeight() {
+        return super.getHeight();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setHeight(int aValue) {
+        Widget.setHeight(this, aValue);
+    }
+
+    @ScriptFunction(jsDoc = FOCUS_JSDOC)
+    @Override
+    public void focus() {
+        super.requestFocus();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s [%s]", super.getName() != null ? super.getName() : "", getClass().getSimpleName());
+    }
+
+    // Native API
+    @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Override
+    public JComponent getComponent() {
+        return this;
+    }
+
+    @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Override
+    public Object getElement() {
+        return null;
     }
 
     private static final String TEXT_JSDOC = ""
