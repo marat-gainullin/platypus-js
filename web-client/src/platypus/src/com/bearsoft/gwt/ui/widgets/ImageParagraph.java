@@ -68,6 +68,11 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	protected ImageResource image;
 	protected Element container;
 	protected Element content;
+	//
+	private int contentPaddingLeft;
+	private int contentPaddingRight;
+	private int contentPaddingTop;
+	private int contentPaddingBottom;
 
 	protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml) {
 		this(aContainer, aTitle, asHtml, null);
@@ -96,16 +101,18 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	}
 
 	private void organize() {
-		Style contentStyle = content.getStyle();
-		organizeImage();
-		organizeText();
-		if (isAttached() && (getParent() instanceof FlowPanel || getParent() instanceof RootPanel || getParent() instanceof ScrollPanel)) {
-			contentStyle.setPosition(Style.Position.RELATIVE);
-		} else {
-			contentStyle.setPosition(Style.Position.ABSOLUTE);
+		if (isAttached()) {
+			Style contentStyle = content.getStyle();
+			organizeImage();
+			organizeText();
+			if (isAttached() && (getParent() instanceof FlowPanel || getParent() instanceof RootPanel || getParent() instanceof ScrollPanel)) {
+				contentStyle.setPosition(Style.Position.RELATIVE);
+			} else {
+				contentStyle.setPosition(Style.Position.ABSOLUTE);
+			}
+			organizeVerticalAlignment(contentStyle);
+			organizeHorizontalAlignment(contentStyle);
 		}
-		organizeVerticalAlignment(contentStyle);
-		organizeHorizontalAlignment(contentStyle);
 	}
 
 	protected void organizeHorizontalAlignment(Style contentStyle) {
@@ -181,8 +188,12 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				int imageOverflow = image.getWidth() - content.getOffsetWidth();
 				if (imageOverflow < 0)
 					imageOverflow = 0;
-				contentStyle.setPaddingLeft(imageOverflow / 2, Style.Unit.PX);
-				contentStyle.setPaddingRight(imageOverflow / 2, Style.Unit.PX);
+
+				contentPaddingLeft += imageOverflow / 2;
+				contentStyle.setPaddingLeft(contentPaddingLeft, Style.Unit.PX);
+
+				contentPaddingRight += imageOverflow / 2;
+				contentStyle.setPaddingRight(contentPaddingRight, Style.Unit.PX);
 			}
 			backgroundPosition += " ";
 			if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
@@ -198,8 +209,12 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				if (imageOverflow < 0)
 					imageOverflow = 0;
 				backgroundPosition += "center";
-				contentStyle.setPaddingTop(imageOverflow / 2, Style.Unit.PX);
-				contentStyle.setPaddingBottom(imageOverflow / 2, Style.Unit.PX);
+
+				contentPaddingTop += imageOverflow / 2;
+				contentStyle.setPaddingTop(contentPaddingTop, Style.Unit.PX);
+
+				contentPaddingBottom += imageOverflow / 2;
+				contentStyle.setPaddingBottom(contentPaddingBottom, Style.Unit.PX);
 			}
 			contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);
 		}

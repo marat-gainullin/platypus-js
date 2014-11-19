@@ -8,6 +8,7 @@ import com.eas.client.ServerModuleInfo;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.queries.Query;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.client.threetier.http.Cookie;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
@@ -25,10 +26,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -138,7 +142,8 @@ public class ScriptedResource {
         String encoding;
         Matcher htppMatcher = httpPattern.matcher(aResourceName);
         if (htppMatcher.matches()) {
-            return requestHttpResource(aResourceName, null, null, null);
+            SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
+            return httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer();
         } else {
             app.getModules().getModule(aResourceName, null, null);
             String resourceName = normalizeResourcePath(aResourceName);
@@ -164,7 +169,7 @@ public class ScriptedResource {
         }
     }
 
-    public static Object jsRequestHttpResource(String aUrl, String aMethod, String aRequestBody, JSObject aHeaders) throws Exception {
+    public static JSObject jsRequestHttpResource(String aUrl, String aMethod, String aRequestBody, JSObject aHeaders) throws Exception {
         Map<String, Object> headers = new HashMap<>();
         if (aHeaders != null) {
             aHeaders.keySet().stream().forEach((String aKey) -> {
@@ -174,10 +179,113 @@ public class ScriptedResource {
                 }
             });
         }
-        return requestHttpResource(aUrl, aMethod, aRequestBody, headers);
+        SEHttpResponse httResponse = requestHttpResource(aUrl, aMethod, aRequestBody, headers);
+        return httResponse.toJs();
     }
 
-    public static Object requestHttpResource(String aUrl, String aMethod, String aRequestBody, Map<String, Object> aHeaders) throws Exception {
+    protected static class SEHttpResponse {
+
+        protected int status;
+        protected String statusText;
+        protected String characterEncoding;
+        protected List<Cookie> cookies = new ArrayList<>();
+        protected Map<String, Object> headers = new HashMap<>();
+        protected byte[] bodyContent;
+        protected String body;
+
+        public SEHttpResponse() {
+            super();
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public String getStatusText() {
+            return statusText;
+        }
+
+        public void setStatusText(String statusText) {
+            this.statusText = statusText;
+        }
+
+        public String getCharacterEncoding() {
+            return characterEncoding;
+        }
+
+        public void setCharacterEncoding(String characterEncoding) {
+            this.characterEncoding = characterEncoding;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public void setBody(String body) {
+            this.body = body;
+        }
+
+        public List<Cookie> getCookies() {
+            return cookies;
+        }
+
+        public void setCookies(List<Cookie> cookies) {
+            this.cookies = cookies;
+        }
+
+        public Map<String, Object> getHeaders() {
+            return headers;
+        }
+
+        public void setHeaders(Map<String, Object> headers) {
+            this.headers = headers;
+        }
+
+        public byte[] getBodyBuffer() {
+            return bodyContent;
+        }
+
+        public void setBodyContent(byte[] bodyContent) {
+            this.bodyContent = bodyContent;
+        }
+
+        public JSObject toJs() {
+            JSObject jsResp = ScriptUtils.makeObj();
+            // general
+            jsResp.setMember("status", getStatus());
+            jsResp.setMember("statusText", getStatusText());
+            jsResp.setMember("contentType", getHeaders().get(PlatypusHttpConstants.HEADER_CONTENTTYPE));
+            jsResp.setMember("body", getBody());
+            jsResp.setMember("bodyBuffer", getBodyBuffer());
+            jsResp.setMember("characterEncoding", getCharacterEncoding());
+            // headers
+            JSObject jsHeaders = ScriptUtils.makeObj();
+            getHeaders().entrySet().stream().forEach((Map.Entry<String, Object> aEntry) -> {
+                jsHeaders.setMember(aEntry.getKey(), ScriptUtils.toJs(aEntry.getValue()));
+            });
+            jsResp.setMember("headers", jsHeaders);
+            // cookies
+            JSObject jsCookies = ScriptUtils.makeObj();
+            getCookies().forEach((Cookie aCookie) -> {
+                JSObject jsCookie = ScriptUtils.makeObj();
+                jsCookie.setMember("name", aCookie.getName());
+                jsCookie.setMember("domain", aCookie.getDomain());
+                jsCookie.setMember("expires", ScriptUtils.toJs(aCookie.getExpires()));
+                jsCookie.setMember("maxAge", (double) aCookie.getMaxAge());
+                jsCookie.setMember("path", aCookie.getPath());
+                jsCookie.setMember("value", aCookie.getValue());
+                jsCookies.setMember(aCookie.getName(), jsCookie);
+            });
+            jsResp.setMember("cookies", jsCookies);
+            return jsResp;
+        }
+    }
+
+    public static SEHttpResponse requestHttpResource(String aUrl, String aMethod, String aRequestBody, Map<String, Object> aHeaders) throws Exception {
         byte[] data;
         String encoding;
         Callable<HttpURLConnection> connFactory = () -> {
@@ -216,7 +324,9 @@ public class ScriptedResource {
                 os.write(body);
             }
         }
-        conn.getResponseCode();
+        SEHttpResponse resp = new SEHttpResponse();
+        resp.setStatus(conn.getResponseCode());
+        resp.setStatusText(conn.getResponseMessage());
         InputStream is = conn.getInputStream();
         String contentEncoding = conn.getContentEncoding();
         if (contentEncoding != null) {
@@ -231,7 +341,7 @@ public class ScriptedResource {
             String contentType = conn.getContentType();
             if (contentType != null) {
                 contentType = contentType.replaceAll("\\s+", "").toLowerCase();
-                if (contentType.startsWith("text/") || contentType.contains("charset")) {
+                if (contentType.startsWith("text/") || contentType.contains("charset") || contentType.startsWith("application/json")) {
                     if (contentType.contains(";charset=")) {
                         String[] typeCharset = contentType.split(";charset=");
                         if (typeCharset.length == 2 && typeCharset[1] != null) {
@@ -252,7 +362,47 @@ public class ScriptedResource {
                 encoding = SettingsConstants.COMMON_ENCODING;
             }
         }
-        return encoding != null ? new String(data, encoding) : data;
+        if (encoding != null) {
+            resp.setCharacterEncoding(encoding);
+            resp.setBody(new String(data, encoding));
+        } else {
+            resp.setBodyContent(data);
+        }
+        Map<String, List<String>> headers = conn.getHeaderFields();
+        headers.entrySet().stream().forEach((Map.Entry<String, List<String>> aEntry) -> {
+            /*  Crazy J2SE Http client!*/
+            if (aEntry.getKey() != null && !aEntry.getValue().isEmpty()) {
+                resp.getHeaders().put(aEntry.getKey().toLowerCase(), aEntry.getValue().get(0));
+            }
+        });
+        List<String> cookieHeaders = headers.get(PlatypusHttpConstants.HEADER_SETCOOKIE);
+        if (cookieHeaders != null) {
+            cookieHeaders.stream().forEach((setCookieHeaderValue) -> {
+                try {
+                    Cookie cookie = Cookie.parse(setCookieHeaderValue.toLowerCase());
+                    resp.getCookies().add(cookie);
+                } catch (ParseException | NumberFormatException ex) {
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, ex.getMessage());
+                }
+            });
+        }
+        long contentLength = conn.getContentLengthLong();
+        if (contentLength != -1) {
+            resp.getHeaders().put(PlatypusHttpConstants.HEADER_CONTENTLENGTH, contentLength);
+        }
+        long date = conn.getDate();
+        if (date != 0) {
+            resp.getHeaders().put(PlatypusHttpConstants.HEADER_DATE, new Date(date));
+        }
+        long expires = conn.getExpiration();
+        if (expires != 0) {
+            resp.getHeaders().put(PlatypusHttpConstants.HEADER_EXPIRES, new Date(expires));
+        }
+        long lastModified = conn.getLastModified();
+        if (lastModified != 0) {
+            resp.getHeaders().put(PlatypusHttpConstants.HEADER_LAST_MODIFIED, new Date(lastModified));
+        }
+        return resp;
     }
     public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to " + SettingsConstants.COMMON_ENCODING;
 

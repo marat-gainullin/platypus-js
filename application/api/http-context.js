@@ -252,7 +252,6 @@
         }
 
         function Cookie(aNativeCookie) {
-
             /**
              * The comment describing the purpose of this cookie, or <code>null</code> if the cookie has no comment.
              */
@@ -292,9 +291,11 @@
             /**
              * The name of the cookie.
              */
-            this.name = function() {
-                return aNativeCookie.getName();
-            };
+            Object.defineProperty(this, "name", {
+                get : function() {
+                    return aNativeCookie.getName();
+                }
+            });
 
             /**
              * The path on the server to which the browser returns this cookie. The cookie is visible to all subpaths on the server.

@@ -4,7 +4,6 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.PropertiesAnnotationsMiner;
@@ -39,9 +38,9 @@ public class ScriptDocument {
         super();
     }
 
-    public static ScriptDocument parse(String aSource) {
+    public static ScriptDocument parse(String aSource, String aName) {
         ScriptDocument doc = new ScriptDocument();
-        doc.readScriptAnnotations(aSource);
+        doc.readScriptAnnotations(aSource, aName);
         return doc;
     }
 
@@ -71,6 +70,11 @@ public class ScriptDocument {
         });
     }
 
+    public Tag getModuleAnnotation(String anAnnotation) {
+        return moduleAnnotations != null ? moduleAnnotations.stream().filter((Tag aTag) -> {
+            return aTag.getName().equalsIgnoreCase(anAnnotation);
+        }).findAny().get() : null;
+    }
     /**
      * Reads script annotations. Annotations, accompanied with
      *
@@ -79,13 +83,13 @@ public class ScriptDocument {
      * annotations will be taken into account while accessing through modules.
      * @param aSource
      */
-    private void readScriptAnnotations(String aSource) {
+    private void readScriptAnnotations(String aSource, String aName) {
         assert aSource != null : "JavaScript source can't be null";
         moduleAnnotations = new ArrayList<>();
         propertyAllowedRoles.clear();
-        Source source = Source.sourceFor("", aSource);
+        Source source = Source.sourceFor(aName, aSource);
         FunctionNode ast = ScriptUtils.parseJs(aSource);
-        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast);
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast, aName);
         ast.accept(new PropertiesAnnotationsMiner(source, ScriptUtils.getThisAliases(moduleConstructor)) {
 
             @Override

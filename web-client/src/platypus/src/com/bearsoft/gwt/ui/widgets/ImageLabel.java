@@ -18,6 +18,7 @@ public class ImageLabel extends ImageParagraph {
     protected static Element createLabelContainer() {
         Element container = Document.get().createDivElement();
         container.setAttribute("class", "gwt-Label");
+        container.getStyle().setProperty("outline", "none");
         return container;
     }
 

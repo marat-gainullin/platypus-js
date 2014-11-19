@@ -119,8 +119,12 @@ public class JsDoc {
          */
         public static final String RESIDENT_TAG = "@resident";
         /**
+         * Annotation puts a module on a specific level of parallelism
+         */
+        public static final String WAIT_TAG = "@wait";
+        /**
          * Annotation marks a module or top level function access restrictions
-         * for concrete roles Example:
+         * for specific roles example:
          *
          * @rolesAllowed admin, manager
          */
@@ -207,6 +211,7 @@ public class JsDoc {
                     || READONLY_TAG.equalsIgnoreCase(name)
                     || WRITABLE_TAG.equalsIgnoreCase(name)
                     || ACCEPTED_PROTOCOL_TAG.equalsIgnoreCase(name)
+                    || WAIT_TAG.equalsIgnoreCase(name)
                     || VALIDATOR_TAG.equalsIgnoreCase(name);
         }
 

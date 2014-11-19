@@ -135,6 +135,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
+        ScriptUtils.incAsyncsCount();
         enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
             if (aResponse instanceof ErrorResponse) {
                 if (onFailure != null) {

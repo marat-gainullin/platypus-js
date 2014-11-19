@@ -58,13 +58,15 @@ public class ScriptUtils {
     protected static JSObject collectionDefFunc;
     protected static JSObject isArrayFunc;
     protected static JSObject makeObjFunc;
+    protected static JSObject makeArrayFunc;
     protected static ScriptEngine engine;
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
-    protected static ThreadLocal<Object> request = new ThreadLocal();
-    protected static ThreadLocal<Object> response = new ThreadLocal();
-    protected static ThreadLocal<Object> session = new ThreadLocal();
-    protected static ThreadLocal<Object> principal = new ThreadLocal();
+    protected static ThreadLocal<Object> request = new ThreadLocal<>();
+    protected static ThreadLocal<Object> response = new ThreadLocal<>();
+    protected static ThreadLocal<Object> session = new ThreadLocal<>();
+    protected static ThreadLocal<Object> principal = new ThreadLocal<>();
+    protected static ThreadLocal<Integer> asyncsCount = new ThreadLocal<>();
     // Global Queue for GUI processes ONLY!
     protected static Consumer<Runnable> globalQueue;
     // services thread pool
@@ -98,6 +100,7 @@ public class ScriptUtils {
     }
 
     public static void submitTask(Runnable aTask) {
+        ScriptUtils.incAsyncsCount();
         Object closureLock = ScriptUtils.getLock();
         Object closureRequest = ScriptUtils.getRequest();
         Object closureResponse = ScriptUtils.getResponse();
@@ -122,11 +125,11 @@ public class ScriptUtils {
     }
 
     public static void jsAcceptTaskResult(JSObject aTaskCompleter) {
-        acceptTaskResult(()->{
+        acceptTaskResult(() -> {
             aTaskCompleter.call(null, new Object[]{});
         });
     }
-    
+
     public static void acceptTaskResult(Runnable aTaskCompleter) {
         if (ScriptUtils.getGlobalQueue() != null) {
             ScriptUtils.getGlobalQueue().accept(() -> {
@@ -219,6 +222,26 @@ public class ScriptUtils {
             principal.set(aSession);
         } else {
             principal.remove();
+        }
+    }
+
+    public static int getAsyncsCount() {
+        Integer var = asyncsCount.get();
+        return var != null ? var : 0;
+    }
+
+    public static void incAsyncsCount() {
+        Integer var = asyncsCount.get();
+        if (var != null) {
+            asyncsCount.set(var + 1);
+        }
+    }
+
+    public static void initAsyncs(Integer aSeed) {
+        if (aSeed == null) {
+            asyncsCount.remove();
+        } else {
+            asyncsCount.set(aSeed);
         }
     }
 
@@ -315,14 +338,19 @@ public class ScriptUtils {
         assert isArrayFunc == null;
         isArrayFunc = aValue;
     }
-    
+
     public static void setMakeObjFunc(JSObject aValue) {
         assert makeObjFunc == null;
         makeObjFunc = aValue;
-    }    
+    }
+
+    public static void setMakeArrayFunc(JSObject aValue) {
+        assert makeArrayFunc == null;
+        makeArrayFunc = aValue;
+    }
 
     public static Object toJava(Object aValue) {
-        if(aValue instanceof ScriptObject){
+        if (aValue instanceof ScriptObject) {
             aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
         }
         if (aValue instanceof JSObject) {
@@ -479,11 +507,11 @@ public class ScriptUtils {
         if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
             aObj = null;
         }
-        if (aObj instanceof JSObject || aObj instanceof String
+        if (aObj instanceof JSObject || aObj instanceof CharSequence
                 || aObj instanceof Number || aObj instanceof Boolean || aObj instanceof ScriptObject || aObj == null) {
             return JSType.toString(writeJsonFunc.call(null, new Object[]{aObj}));
         } else {
-            throw new IllegalArgumentException("Could not convert to JSON Java object!");
+            throw new IllegalArgumentException("Java object couldn't be converted to JSON!");
         }
     }
 
@@ -508,12 +536,18 @@ public class ScriptUtils {
         return Boolean.TRUE.equals(oResult);
     }
 
-    public static JSObject makeObj(){
+    public static JSObject makeObj() {
         assert makeObjFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = makeObjFunc.call(null, new Object[]{});
-        return (JSObject)oResult;
+        return (JSObject) oResult;
     }
-    
+
+    public static JSObject makeArray() {
+        assert makeArrayFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = makeArrayFunc.call(null, new Object[]{});
+        return (JSObject) oResult;
+    }
+
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});

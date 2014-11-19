@@ -119,9 +119,9 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public PlatypusWindow() {
 		this(new AnchorsPane());
-		Publisher.publish((AnchorsPane)view);
+		Publisher.publish((AnchorsPane) view);
 	}
-	
+
 	public PlatypusWindow(Widget aView) {
 		super();
 		view = aView;
@@ -827,7 +827,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setWidth(double aValue) {
 		super.setWidth(aValue + "px");
-		if(viewSize == null)
+		if (viewSize == null)
 			viewPreferredWidth = aValue;
 	}
 
@@ -837,8 +837,31 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setHeight(double aValue) {
 		super.setHeight(aValue + "px");
-		if(viewSize == null)
+		if (viewSize == null)
 			viewPreferredHeight = aValue;
+	}
+
+	@Override
+	public void setMinimizable(boolean aValue) {
+		if (aValue != minimizable) {
+			super.setMinimizable(aValue);
+			caption.updateToolsVisibility();
+		}
+	}
+
+	@Override
+	public void setMaximizable(boolean aValue) {
+		if (maximizable != aValue) {
+			super.setMaximizable(aValue);
+			caption.updateToolsVisibility();
+		}
+	}
+
+	public void setClosable(boolean aValue) {
+		if (closable != aValue) {
+			super.setClosable(aValue);
+			caption.updateToolsVisibility();
+		}
 	}
 
 	public ImageResource getIcon() {

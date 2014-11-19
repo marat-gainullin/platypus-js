@@ -104,4 +104,7 @@
     ScriptUtils.setMakeObjFunc(function(){
         return {}; 
     });        
+    ScriptUtils.setMakeArrayFunc(function(){
+        return []; 
+    });        
 })();

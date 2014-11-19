@@ -317,8 +317,15 @@ public class WidgetsFactory {
 	}
 
 	private void setIconAndAlign(final ImageParagraph component, Element aTag) throws Exception {
-		if (aTag.hasAttribute("text"))
-			component.setText(aTag.getAttribute("text"));
+		if (aTag.hasAttribute("text")){
+			String text = aTag.getAttribute("text");
+			boolean html = text != null && text.startsWith("<html>");
+			if(html){
+				component.setHTML(text.substring("<html>".length()));
+			}else{
+				component.setText(text);
+			}
+		}
 		if (aTag.hasAttribute("iconTextGap"))
 			component.setIconTextGap(Utils.getIntegerAttribute(aTag, "iconTextGap", 4));
 		if (aTag.hasAttribute("horizontalTextPosition"))

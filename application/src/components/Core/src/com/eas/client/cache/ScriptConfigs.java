@@ -38,7 +38,7 @@ public class ScriptConfigs extends ActualCache<ScriptDocument> {
         assert files.size() == 1;
         File sourceFile = files.iterator().next();
         String source = FileUtils.readString(sourceFile, SettingsConstants.COMMON_ENCODING);
-        return ScriptDocument.parse(source);
+        return ScriptDocument.parse(source, sourceFile.getPath());
     }
 
 }

@@ -173,7 +173,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     @Override
     public synchronized void setAstRoot(FunctionNode anAstRoot) {
         astRoot = anAstRoot;
-        constructor = astRoot != null ? PlatypusFilesSupport.extractModuleConstructor(astRoot) : null;
+        constructor = astRoot != null ? PlatypusFilesSupport.extractModuleConstructor(astRoot, getPrimaryFile().getPath()) : null;
         astIsValid = (astRoot != null);
     }
 
@@ -205,7 +205,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 if (parseResult != null) {
                     astIsValid = true;
                     astRoot = parseResult;
-                    constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+                    constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot, getPrimaryFile().getPath());
                 } else {
                     astIsValid = false;
                 }
@@ -355,7 +355,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     private String getCopyModuleContent(Project project, String aJsContent) {
-        FunctionNode constructorFunc = PlatypusFilesSupport.extractModuleConstructor(aJsContent);
+        FunctionNode constructorFunc = PlatypusFilesSupport.extractModuleConstructor(aJsContent, getPrimaryFile().getPath());
         if (constructorFunc != null) {
             String oldName = constructorFunc.getName();
             String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(project, oldName);
