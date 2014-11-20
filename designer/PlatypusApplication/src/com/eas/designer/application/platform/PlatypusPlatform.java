@@ -5,7 +5,10 @@
 package com.eas.designer.application.platform;
 
 import com.eas.designer.application.utils.DatabaseServerType;
+import com.eas.designer.application.utils.LifecycleSupport;
 import com.eas.util.FileUtils;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -21,17 +24,23 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
-import org.openide.ErrorManager;
+import org.openide.*;
+import org.openide.awt.HtmlBrowser;
+import org.openide.awt.Notification;
+import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
 /**
@@ -41,6 +50,8 @@ import org.openide.util.Utilities;
  */
 public class PlatypusPlatform {
 
+    public static final ResourceBundle res = ResourceBundle.getBundle(PlatypusPlatform.class.getPackage().getName() + ".updatermessages");
+    private static final ImageIcon icon = ImageUtilities.loadImageIcon("com/eas/designer/application/utils/restart.png", false);
     public static final String PLATYPUS_DIR_NAME = "Platypus"; //NOI18N
     public static final String PLATYPUS_FILE_NAME = "platform"; //NOI18N
     public static final String PLATFORM_HOME_PATH_ATTR_NAME = "path"; //NOI18N
@@ -55,8 +66,13 @@ public class PlatypusPlatform {
 //    private static final String MAC_UPDATE_EXECUTABLE = "update-mac.sh";
     private static final String WINDOWS_UPDATE_EXECUTABLE = "lookup-x86.exe";
     private static final String WINDOWS_UPDATE_EXECUTABLE_x64 = "lookup-x64.exe";
-    private static Process updaterProcess;
     private static final Map<String, File> jarsCache = new HashMap<>();
+    private static final int NEW_VERSION_CODE = 10;
+    private static final int UPGRADE_VERSION_CODE = 12;
+    private static final int NOT_NEED_UPDATE = 11;
+    private static String UPDATER_EXECUTABLE;
+    private static Notification notification;
+    private static String URL_PLATYPUS_HOME = "http://platypus-platform.org/download.html";
 
     static {
         String platformPath = getPlatformHomePath();
@@ -72,27 +88,75 @@ public class PlatypusPlatform {
                 } else {
                     executableName = WINDOWS_UPDATE_EXECUTABLE_x64;
                 }
-            } 
-//            else if (Utilities.isMac()) {
-//                executableName = MAC_UPDATE_EXECUTABLE;
-//            } 
+            } //            else if (Utilities.isMac()) {
+            //                executableName = MAC_UPDATE_EXECUTABLE;
+            //            } 
             else {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            
-            String updaterPath = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
-            String[] command = new String[]{updaterPath,"newversion","-silent","true"};
-            if (Utilities.isWindows()) {
-                command[0] = ("\"" + updaterPath + "\"");
-            } else {
-                command[0] = updaterPath;
-            }
-            
+            UPDATER_EXECUTABLE = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
+            String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"newversion", "-silent", "true"});
+
             try {
-               updaterProcess = Runtime.getRuntime().exec(command);
-               int some = updaterProcess.waitFor();
-               
+                Process updaterProcess = Runtime.getRuntime().exec(command);
+                int updateStatus = updaterProcess.waitFor();
+                ActionListener updateAction = null;
+                String detailsText = res.getString("confirmUpdate");
+                switch (updateStatus) {
+                    case NEW_VERSION_CODE: {
+                        detailsText = res.getString("confirmUpdate");
+                        updateAction = new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false"});
+                                try {
+                                    Process updaterProcess = Runtime.getRuntime().exec(command);
+                                    notification.clear();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(PlatypusPlatform.class.getName())
+                                            .log(Level.SEVERE, null, ex); // NOI18N
+                                }
+                            }
+                        };
+
+                        break;
+                    }
+                    case UPGRADE_VERSION_CODE: {
+                        detailsText = res.getString("mesDownloadNew");
+                        updateAction = new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                try {
+                                    HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(URL_PLATYPUS_HOME));
+                                     notification.clear();
+                                } catch (Exception ex) {
+                                    Logger.getLogger(PlatypusPlatform.class.getName())
+                                            .log(Level.SEVERE, null, ex); // NOI18N
+                                }
+                            }
+                        };
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+
+                if (updateStatus == NEW_VERSION_CODE || updateStatus == UPGRADE_VERSION_CODE) {
+                    try {
+                        notification = NotificationDisplayer.getDefault().notify(res.getString("title"),
+                                icon,
+                                detailsText,
+                                updateAction,
+                                NotificationDisplayer.Priority.HIGH,
+                                NotificationDisplayer.Category.WARNING);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusPlatform.class.getName())
+                                .log(Level.SEVERE, null, ex); // NOI18N
+                    }
+                }
+
             } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName())
                         .log(Level.SEVERE, null, ex); // NOI18N
@@ -103,14 +167,17 @@ public class PlatypusPlatform {
         }
     }
 
-    /**
-     * 
-     * @return link to updater process
-     */
-    public static Process getUpdaterProcess(){
-        return updaterProcess;
+    public static String[] createUpdaterCommand(String aExecutable, String[] aParams) {
+        String[] command = new String[aParams.length + 1];
+        System.arraycopy(aParams, 0, command, 1, aParams.length);
+        if (Utilities.isWindows()) {
+            command[0] = ("\"" + aExecutable + "\"");
+        } else {
+            command[0] = aExecutable;
+        }
+        return command;
     }
-    
+
     /**
      * Gets the platform home directory.
      *

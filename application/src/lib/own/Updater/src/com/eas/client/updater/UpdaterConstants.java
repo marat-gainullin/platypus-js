@@ -30,7 +30,8 @@ public class UpdaterConstants {
     public static final int NOT_EQUALS = 2;
     public static final int FATAL_NOT_EQUALS = 4;
     
-    public static final byte NOT_NEED_UPDATE = 0;
+    public static final byte NOT_NEED_UPDATE = 11;
+    public static final byte NEED_UPGRADE = 12;
     public static final byte NEED_UPDATE = 10;
     public static final byte ERROR = 2;
 

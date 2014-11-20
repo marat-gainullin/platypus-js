@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "hello there"
 IS_SILENT="false"
 while [ 1 ]; do
 	if [ "$1" = "-silent" ] ; then
@@ -51,6 +52,7 @@ fi
 CONFIG_NAME="${CONFIG_NAME_PATH}${CONFIG_NAME}"
 if [ -n "$MODE" ] ; then
     $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS $MODE -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "${PLATYPUS_HOME}/"
+   exit $? 
 else 
      $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS newversion -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "$PLATYPUS_HOME/" 
     if [ $? -eq 10 ]; then 
