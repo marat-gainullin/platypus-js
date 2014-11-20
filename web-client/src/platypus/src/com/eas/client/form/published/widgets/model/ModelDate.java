@@ -22,7 +22,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
-    private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
+	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 	protected String format;
 
 	public ModelDate() {
@@ -31,18 +31,19 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 	}
 
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<Date>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Date>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<Date> event) {
-					ActionEvent.fire(ModelDate.this, ModelDate.this);
-                }
+				public void onValueChange(ValueChangeEvent<Date> event) {
+					if (!settingValue)
+						ActionEvent.fire(ModelDate.this, ModelDate.this);
+				}
 
 			});
 		}
@@ -53,9 +54,9 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -70,25 +71,25 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 		if (format != null)
 			format = ControlsUtils.convertDateFormatString(format);
 		DateTimeFormat dtFormat = format != null ? DateTimeFormat.getFormat(format) : DateTimeFormat.getFormat("dd.MM.yyyy");
-		((DateTimeBox)decorated).setFormat(new DateBox.DefaultFormat(dtFormat));
+		((DateTimeBox) decorated).setFormat(new DateBox.DefaultFormat(dtFormat));
 	}
 
 	public String getText() {
-		DateTimeBox box = (DateTimeBox)decorated;
+		DateTimeBox box = (DateTimeBox) decorated;
 		return box.getText();
 	}
-	
+
 	@Override
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-		
+
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {
@@ -138,6 +139,12 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 			setValue((Date) javaValue, true);
 		else
 			throw new IllegalArgumentException("A value of type 'Date' expected");
+	}
+
+	@Override
+	protected void clearValue() {
+		super.clearValue();
+		ActionEvent.fire(this, this);
 	}
 
 	@Override

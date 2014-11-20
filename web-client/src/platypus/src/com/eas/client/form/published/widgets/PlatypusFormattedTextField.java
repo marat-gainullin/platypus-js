@@ -31,17 +31,20 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusFormattedTextField extends FormattedObjectBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasActionHandlers, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusFormattedTextField extends FormattedObjectBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasActionHandlers, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
+        HasResizeHandlers, RequiresResize {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String emptyText;
 	protected String name;
 	protected JavaScriptObject published;
+	//
+	protected boolean settingValue;
 
 	public PlatypusFormattedTextField() {
 		super();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -51,7 +54,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	@Override
 	public void onResize() {
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -80,18 +83,19 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	}
 
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<Object>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Object>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<Object> event) {
-					ActionEvent.fire(PlatypusFormattedTextField.this, PlatypusFormattedTextField.this);
-                }
+				public void onValueChange(ValueChangeEvent<Object> event) {
+					if (!settingValue)
+						ActionEvent.fire(PlatypusFormattedTextField.this, PlatypusFormattedTextField.this);
+				}
 
 			});
 		}
@@ -102,9 +106,9 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusFormattedTextField";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusFormattedTextField";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -164,6 +168,16 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	public void setJsValue(Object aValue) throws Exception {
 		setValue(Utils.toJava(aValue), true);
+	}
+
+	@Override
+	public void setValue(Object aValue, boolean fireEvents) {
+		settingValue = true;
+		try {
+			super.setValue(aValue, fireEvents);
+		} finally {
+			settingValue = false;
+		}
 	}
 
 	@Override

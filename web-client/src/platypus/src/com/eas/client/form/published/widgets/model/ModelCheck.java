@@ -26,12 +26,12 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> implements HasAct
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = ((CheckBox)decorated).addClickHandler(new ClickHandler() {
+			clickReg = ((CheckBox) decorated).addClickHandler(new ClickHandler() {
 
 				@Override
-                public void onClick(ClickEvent event) {
+				public void onClick(ClickEvent event) {
 					ActionEvent.fire(ModelCheck.this, ModelCheck.this);
-                }
+				}
 
 			});
 		}
@@ -110,5 +110,11 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> implements HasAct
 	@Override
 	public void setBinding(Field aField) throws Exception {
 		super.setBinding(aField, new BooleanRowValueConverter());
+	}
+	
+	@Override
+	protected void clearValue() {
+	    super.clearValue();
+		ActionEvent.fire(this, this);
 	}
 }

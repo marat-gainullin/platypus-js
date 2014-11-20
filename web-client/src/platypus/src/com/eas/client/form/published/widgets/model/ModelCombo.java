@@ -85,20 +85,21 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	public ModelCombo() {
 		super(new StyledListBox<Row>());
 	}
-		
+
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<Row>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Row>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<Row> event) {
-					ActionEvent.fire(ModelCombo.this, ModelCombo.this);
-                }
+				public void onValueChange(ValueChangeEvent<Row> event) {
+					if (!settingValue)
+						ActionEvent.fire(ModelCombo.this, ModelCombo.this);
+				}
 
 			});
 		}
@@ -109,9 +110,9 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -127,13 +128,19 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 	public void setValue(Row value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
-		try {			
-			if(!list){
+		try {
+			if (!list) {
 				redraw();
 			}
 		} catch (Exception e) {
 			Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, null, e);
 		}
+	}
+
+	@Override
+	protected void clearValue() {
+		super.clearValue();
+		ActionEvent.fire(this, this);
 	}
 
 	public boolean isValidBindings() {
@@ -206,9 +213,9 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public String getText() {
-		return ((StyledListBox<Row>)decorated).getText();
+		return ((StyledListBox<Row>) decorated).getText();
 	}
-	
+
 	@Override
 	public String getEmptyText() {
 		return emptyText;
@@ -391,6 +398,6 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public void clear() {
-		((StyledListBox<Row>)decorated).clear();
-    }
+		((StyledListBox<Row>) decorated).clear();
+	}
 }

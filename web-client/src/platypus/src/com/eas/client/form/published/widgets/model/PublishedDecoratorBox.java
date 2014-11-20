@@ -10,6 +10,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.HasHideHandlers;
 import com.eas.client.form.events.HasShowHandlers;
 import com.eas.client.form.events.HideEvent;
@@ -49,6 +50,8 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 	protected JavaScriptObject onSelect;
 	protected boolean editable = true;
 	protected boolean selectOnly;
+	//
+	protected boolean settingValue;
 
 	public PublishedDecoratorBox(HasValue<T> aDecorated) {
 		super(aDecorated);
@@ -211,24 +214,29 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 	protected PublishedCell cellToRender;
 
 	public void setValue(T value, boolean fireEvents) {
-		super.setValue(value, fireEvents);
-		try {
-			if (onRender != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null) {
-				cellToRender = ControlsUtils.calcStandalonePublishedCell(published, onRender, modelElement.entity.getRowset().getCurrentRow(), null, modelElement, cellToRender);
-			}
-			if (cellToRender != null) {
-				if (cellToRender.getDisplayCallback() == null) {
-					cellToRender.setDisplayCallback(new Runnable() {
-						@Override
-						public void run() {
-							cellToRender.styleToElement(getElement());
-						}
-					});
+		settingValue = true;
+		try{
+			super.setValue(value, fireEvents);
+			try {
+				if (onRender != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null) {
+					cellToRender = ControlsUtils.calcStandalonePublishedCell(published, onRender, modelElement.entity.getRowset().getCurrentRow(), null, modelElement, cellToRender);
 				}
-				cellToRender.styleToElement(getElement());
+				if (cellToRender != null) {
+					if (cellToRender.getDisplayCallback() == null) {
+						cellToRender.setDisplayCallback(new Runnable() {
+							@Override
+							public void run() {
+								cellToRender.styleToElement(getElement());
+							}
+						});
+					}
+					cellToRender.styleToElement(getElement());
+				}
+			} catch (Exception ex) {
+				Logger.getLogger(PublishedDecoratorBox.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
-		} catch (Exception ex) {
-			Logger.getLogger(PublishedDecoratorBox.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+		}finally{
+			settingValue = false;
 		}
 	}
 

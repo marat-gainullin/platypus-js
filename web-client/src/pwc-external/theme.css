@@ -158,6 +158,11 @@
     background-image:linear-gradient(to bottom, #75bd35,#a0d44d);
 }
 
+.gwt-Button[disabled]{
+    background-image:none;
+    background-color:lightgray;
+}
+
 .gwt-DatePicker {
   border: 1px solid #ccc;
   border-radius: 2px;

@@ -1,7 +1,5 @@
 package com.eas.client.form.published.widgets.model;
 
-import java.util.Date;
-
 import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DoubleRowValueConverter;
@@ -19,24 +17,25 @@ import com.google.gwt.event.shared.HandlerRegistration;
 public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
-	
+
 	public ModelSpin() {
 		super(new ConstraintedSpinnerBox(new ExplicitDoubleBox()));
 	}
 
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<Double>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Double>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<Double> event) {
-					ActionEvent.fire(ModelSpin.this, ModelSpin.this);
-                }
+				public void onValueChange(ValueChangeEvent<Double> event) {
+					if (!settingValue)
+						ActionEvent.fire(ModelSpin.this, ModelSpin.this);
+				}
 
 			});
 		}
@@ -47,9 +46,9 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelSpin";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelSpin";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -59,13 +58,13 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {
@@ -107,7 +106,7 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 			},
 			set : function(aValue) {
 				var v = parseFloat(aValue);
-				if(!isNaN(v))
+				if (!isNaN(v))
 					aPublished.value = v;
 			}
 		});
@@ -175,6 +174,12 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 	@Override
 	public void setValue(Double value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
+	}
+
+	@Override
+	protected void clearValue() {
+		super.clearValue();
+		ActionEvent.fire(this, this);
 	}
 
 	@Override
