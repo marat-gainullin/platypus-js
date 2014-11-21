@@ -11,8 +11,6 @@ import com.eas.dbcontrols.date.DbDateDesignInfo;
 import com.eas.dbcontrols.grid.DbGridDesignInfo;
 import com.eas.dbcontrols.image.DbImageDesignInfo;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;
-import com.eas.dbcontrols.map.DbMapDesignInfo;
-import com.eas.dbcontrols.scheme.DbSchemeDesignInfo;
 import com.eas.dbcontrols.spin.DbSpinDesignInfo;
 import com.eas.dbcontrols.text.DbTextDesignInfo;
 
@@ -33,13 +31,10 @@ public interface DbControlsDesignInfoVisitor extends ControlsDesignInfoVisitor {
 
     public void visit(DbLabelDesignInfo aInfo);
 
-    public void visit(DbSchemeDesignInfo aInfo);
-
     public void visit(DbSpinDesignInfo aInfo);
 
     public void visit(DbTextDesignInfo aInfo);
 
     public void visit(DbGridDesignInfo aInfo);
 
-    public void visit(DbMapDesignInfo aInfo);
 }

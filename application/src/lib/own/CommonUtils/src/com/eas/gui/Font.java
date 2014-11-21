@@ -14,13 +14,10 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class Font implements HasPublished {
+public class Font extends java.awt.Font implements HasPublished {
 
     private static JSObject publisher;
     
-    protected String family;
-    protected int style;
-    protected int size;
     protected JSObject published;
 
     @ScriptFunction(params = {"family", "style", "size"}, jsDoc = "/**\n"
@@ -30,10 +27,7 @@ public class Font implements HasPublished {
             + "* @param size the size of the font\n"
             + "*/")
     public Font(String aFamily, int aStyle, int aSize) {
-        super();
-        family = aFamily;
-        style = aStyle;
-        size = aSize;
+        super(aFamily, aStyle, aSize);
     }
 
     public boolean isEqual(Font obj) {
@@ -50,30 +44,30 @@ public class Font implements HasPublished {
         if (this.size != other.size) {
             return false;
         }
-        if (this.family != other.family && (this.family == null || !this.family.equals(other.family))) {
-            return false;
-        }
-        return true;
+        return this.name == null ? other.name == null : this.name.equals(other.name);
     }
 
+    @Override
     public String getFamily() {
-        return family;
+        return super.getFamily();
     }
 /*
     public void setFammily(String aValue) {
         family = aValue;
     }
 */
+    @Override
     public int getStyle() {
-        return style;
+        return super.getStyle();
     }
 /*
     public void setStyle(int aValue) {
         style = aValue;
     }
 */
+    @Override
     public int getSize() {
-        return size;
+        return super.getSize();
     }
 /*
     public void setSize(int aValue) {
@@ -82,7 +76,7 @@ public class Font implements HasPublished {
 */
     @Override
     public String toString() {
-        return String.format("Font [family:%s, size:%d, style:%s]", family, size, fontStyleToString(style));
+        return String.format("Font [family:%s, size:%d, style:%s]", name, size, fontStyleToString(style));
     }
     
     @Override

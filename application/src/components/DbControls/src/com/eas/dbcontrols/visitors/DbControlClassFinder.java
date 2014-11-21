@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.dbcontrols.visitors;
 
 import com.eas.controls.visitors.ControlClassFinder;
@@ -19,10 +18,6 @@ import com.eas.dbcontrols.image.DbImage;
 import com.eas.dbcontrols.image.DbImageDesignInfo;
 import com.eas.dbcontrols.label.DbLabel;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;
-import com.eas.dbcontrols.map.DbMap;
-import com.eas.dbcontrols.map.DbMapDesignInfo;
-import com.eas.dbcontrols.scheme.DbScheme;
-import com.eas.dbcontrols.scheme.DbSchemeDesignInfo;
 import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.spin.DbSpinDesignInfo;
 import com.eas.dbcontrols.text.DbText;
@@ -32,7 +27,7 @@ import com.eas.dbcontrols.text.DbTextDesignInfo;
  *
  * @author mg
  */
-public class DbControlClassFinder extends ControlClassFinder implements DbControlsDesignInfoVisitor{
+public class DbControlClassFinder extends ControlClassFinder implements DbControlsDesignInfoVisitor {
 
     @Override
     public void visit(DbCheckDesignInfo aInfo) {
@@ -60,11 +55,6 @@ public class DbControlClassFinder extends ControlClassFinder implements DbContro
     }
 
     @Override
-    public void visit(DbSchemeDesignInfo aInfo) {
-        result = DbScheme.class;
-    }
-
-    @Override
     public void visit(DbSpinDesignInfo aInfo) {
         result = DbSpin.class;
     }
@@ -77,10 +67,5 @@ public class DbControlClassFinder extends ControlClassFinder implements DbContro
     @Override
     public void visit(DbGridDesignInfo aInfo) {
         result = DbGrid.class;
-    }
-
-    @Override
-    public void visit(DbMapDesignInfo aInfo) {
-        result = DbMap.class;
     }
 }

@@ -63,9 +63,7 @@ public class DbGridColumnTest {
         sample1.setEnabled(false);
         style1.setFont(DbControlsUtils.toFont(Font.decode(Font.SANS_SERIF)));
         sample1.setName("column_1");
-        sample1.setPlain(false);
         sample1.setSelectOnly(true);
-        sample1.setSubstitute(true);
         sample1.setTitle("column_1_title");
         sample1.setVisible(false);
         sample1.setWidth(7895);
@@ -84,10 +82,8 @@ public class DbGridColumnTest {
         assertEquals(sample2.isEnabled(), false);
         assertTrue(sample2.getHeaderStyle().getFont().isEqual(DbControlsUtils.toFont(Font.decode(Font.SANS_SERIF))));
         assertEquals(sample2.getName(), "column_1");
-        assertEquals(sample2.isPlain(), false);
         assertEquals(sample2.isSelectOnly(), true);
         assertTrue(sample2.getHeaderStyle().isEqual(style1));
-        assertEquals(sample2.isSubstitute(), true);
         assertEquals(sample2.getTitle(), "column_1_title");
         assertEquals(sample2.isVisible(), false);
         assertEquals(sample2.getWidth(), 7895);

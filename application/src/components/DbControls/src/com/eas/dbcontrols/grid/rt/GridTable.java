@@ -11,7 +11,6 @@ import com.bearsoft.rowset.Rowset;
 import com.eas.dbcontrols.DbControlEditingListener;
 import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.view.AnchorTableColumn;
 import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
 import com.eas.gui.CascadedStyle;
@@ -245,7 +244,7 @@ public class GridTable extends JTable implements DbControlEditingListener {
         for (int i = rightColumns.size() - 1; i >= 0; i--) {
             TableColumn tCol = rightColumns.get(i);
             rightWidth += tCol.getWidth();
-            if (tCol instanceof RowHeaderTableColumn || tCol instanceof AnchorTableColumn
+            if (tCol instanceof RowHeaderTableColumn 
                     || !tCol.getResizable()) {
                 rightColumns.remove(i);
                 rightWidthRemoved += tCol.getWidth();
@@ -329,8 +328,7 @@ public class GridTable extends JTable implements DbControlEditingListener {
     }
 
     public static boolean skipableColumn(TableColumn tc) {
-        return tc instanceof AnchorTableColumn
-                || (tc.getWidth() == 0 && tc.getMinWidth() == 0 && tc.getMaxWidth() == 0);
+        return (tc.getWidth() == 0 && tc.getMinWidth() == 0 && tc.getMaxWidth() == 0);
     }
 
     public void setEditable(boolean aValue) {

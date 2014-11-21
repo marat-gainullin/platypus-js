@@ -42,8 +42,6 @@ import com.eas.dbcontrols.date.DbDateDesignInfo;
 import com.eas.dbcontrols.grid.rt.*;
 import com.eas.dbcontrols.grid.rt.columns.ScriptableColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.model.RowModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.view.AnchorTableColumn;
 import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
 import com.eas.dbcontrols.grid.rt.models.RowsetsTableModel;
@@ -51,9 +49,6 @@ import com.eas.dbcontrols.grid.rt.models.RowsetsTreedModel;
 import com.eas.dbcontrols.grid.rt.rowheader.FixedDbGridColumn;
 import com.eas.dbcontrols.grid.rt.rowheader.RowHeaderCellEditor;
 import com.eas.dbcontrols.grid.rt.rowheader.RowHeaderCellRenderer;
-import com.eas.dbcontrols.grid.rt.veers.ColumnsRiddler;
-import com.eas.dbcontrols.grid.rt.veers.ColumnsSource;
-import com.eas.dbcontrols.grid.rt.veers.VeerColumnsHandler;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
@@ -308,91 +303,52 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     groups.put(tCol, group);
                     columnModel.addColumn(tCol);
                 } else {
-                    if (dCol.isPlain()) { // Plain
-                        Rowset rs = DbControlsUtils.resolveRowset(model, dCol.getDatamodelElement());
-                        int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
-                        if (fidx < 1) {
-                            if (dCol.getDatamodelElement() != null) {
-                                Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Bad column configuration: {0}''s model binding can''t be resolved", dCol.getName());
-                            }
-                        }
-                        // Model column setup
-                        FieldModelColumn mCol = new FieldModelColumn(rs, fidx, null, null, group.isReadonly(), () -> style, null, null);
-                        rowsModel.addColumn(mCol);
-                        // View column setup
-                        TableColumn tCol = new TableColumn(rowsModel.getColumnCount() - 1);
-                        tCol.setMinWidth(group.getMinWidth());
-                        tCol.setMaxWidth(group.getMaxWidth());
-                        tCol.setPreferredWidth(dCol.getWidth());
-                        tCol.setWidth(dCol.getWidth());
-                        tCol.setResizable(!dCol.isFixed());
-                        if (dCol.getControlInfo() != null) {
-                            TableCellRenderer cellRenderer = dCol.createCellRenderer();
-                            tCol.setCellRenderer(cellRenderer);
-                            if (cellRenderer instanceof ScalarDbControl) {
-                                ((ScalarDbControl) cellRenderer).setModel(model);
-                                mCol.setView((ScalarDbControl) cellRenderer);
-                            }
-                            TableCellEditor cellEditor = dCol.createCellEditor();
-                            tCol.setCellEditor(cellEditor);
-                            if (cellEditor instanceof ScalarDbControl) {
-                                Field field = DbControlsUtils.resolveField(model, dCol.getDatamodelElement());
-                                ((ScalarDbControl) cellEditor).setModel(model);
-                                ((ScalarDbControl) cellEditor).extraCellControls(null, field != null ? field.isNullable() : false);
-                                mCol.setEditor((ScalarDbControl) cellEditor);
-                            }
-                        }
-                        String title = group.getTitle();
-                        if (title == null || title.isEmpty()) {
-                            title = group.getName();
-                        }
-                        tCol.setHeaderValue(title);
-                        // view - model link
-                        tCol.setIdentifier(mCol);
-                        // groups-view link
-                        group.setTableColumn(tCol);
-                        group.setResizeable(tCol.getResizable());
-                        groups.put(tCol, group);
-                        columnModel.addColumn(tCol);
-                        scriptableColumns.add(new ScriptableColumn(dCol, mCol, tCol, columnModel.getColumnCount() - 1, columnModel, rowsModel, groups));
-                    } else { // Veer
-                        Rowset colsRs = DbControlsUtils.resolveRowset(model, dCol.getColumnsDatasource());
-                        int colTitleColIdx = DbControlsUtils.resolveFieldIndex(model, dCol.getColumnsDisplayField());
-                        Rowset cellsRs = DbControlsUtils.resolveRowset(model, dCol.getCellsDatasource());
-                        int cellsRowKeyIdx = DbControlsUtils.resolveFieldIndex(model, dCol.getCellDesignInfo().getRowsKeyField());
-                        int cellsColumKeyIdx = DbControlsUtils.resolveFieldIndex(model, dCol.getCellDesignInfo().getColumnsKeyField());
-                        Rowset cellsValuesRs = DbControlsUtils.resolveRowset(model, dCol.getCellDesignInfo().getCellValueField());
-                        int cellsValuesFieldIdx = DbControlsUtils.resolveFieldIndex(model, dCol.getCellDesignInfo().getCellValueField());
-                        if (colsRs != null && cellsRs != null && cellsValuesRs != null
-                                && colTitleColIdx != 0
-                                && cellsRowKeyIdx != 0
-                                && cellsColumKeyIdx != 0
-                                && cellsValuesFieldIdx != 0) {
-                            Locator colsLoc = createPksLocator(colsRs);
-                            Locator cellsLoc = cellsRs.createLocator();
-                            cellsLoc.beginConstrainting();
-                            try {
-                                cellsLoc.addConstraint(cellsRowKeyIdx);
-                                cellsLoc.addConstraint(cellsColumKeyIdx);
-                            } finally {
-                                cellsLoc.endConstrainting();
-                            }
-                            AnchorTableColumn anchorCol = new AnchorTableColumn(0);
-                            String title = group.getTitle();
-                            if (title == null || title.isEmpty()) {
-                                title = group.getName();
-                            }
-                            anchorCol.setHeaderValue(title);
-                            anchorCol.setMinWidth(0);
-                            anchorCol.setPreferredWidth(0);
-                            anchorCol.setMaxWidth(0);
-                            anchorCol.setWidth(0);
-                            ColumnsSource cs = new ColumnsSource(group, anchorCol, colsLoc, colTitleColIdx, cellsLoc, cellsValuesRs, cellsValuesFieldIdx, new VeerColumnsHandler(model, dCol), null, null);
-                            anchorCol.setColumnsSource(cs);
-                            //groups.put(anchorCol, group);
-                            columnModel.addColumn(anchorCol);
+                    Rowset rs = DbControlsUtils.resolveRowset(model, dCol.getDatamodelElement());
+                    int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
+                    if (fidx < 1) {
+                        if (dCol.getDatamodelElement() != null) {
+                            Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Bad column configuration: {0}''s model binding can''t be resolved", dCol.getName());
                         }
                     }
+                    // Model column setup
+                    FieldModelColumn mCol = new FieldModelColumn(rs, fidx, null, null, group.isReadonly(), () -> style, null, null);
+                    rowsModel.addColumn(mCol);
+                    // View column setup
+                    TableColumn tCol = new TableColumn(rowsModel.getColumnCount() - 1);
+                    tCol.setMinWidth(group.getMinWidth());
+                    tCol.setMaxWidth(group.getMaxWidth());
+                    tCol.setPreferredWidth(dCol.getWidth());
+                    tCol.setWidth(dCol.getWidth());
+                    tCol.setResizable(!dCol.isFixed());
+                    if (dCol.getControlInfo() != null) {
+                        TableCellRenderer cellRenderer = dCol.createCellRenderer();
+                        tCol.setCellRenderer(cellRenderer);
+                        if (cellRenderer instanceof ScalarDbControl) {
+                            ((ScalarDbControl) cellRenderer).setModel(model);
+                            mCol.setView((ScalarDbControl) cellRenderer);
+                        }
+                        TableCellEditor cellEditor = dCol.createCellEditor();
+                        tCol.setCellEditor(cellEditor);
+                        if (cellEditor instanceof ScalarDbControl) {
+                            Field field = DbControlsUtils.resolveField(model, dCol.getDatamodelElement());
+                            ((ScalarDbControl) cellEditor).setModel(model);
+                            ((ScalarDbControl) cellEditor).extraCellControls(null, field != null ? field.isNullable() : false);
+                            mCol.setEditor((ScalarDbControl) cellEditor);
+                        }
+                    }
+                    String title = group.getTitle();
+                    if (title == null || title.isEmpty()) {
+                        title = group.getName();
+                    }
+                    tCol.setHeaderValue(title);
+                    // view - model link
+                    tCol.setIdentifier(mCol);
+                    // groups-view link
+                    group.setTableColumn(tCol);
+                    group.setResizeable(tCol.getResizable());
+                    groups.put(tCol, group);
+                    columnModel.addColumn(tCol);
+                    scriptableColumns.add(new ScriptableColumn(dCol, mCol, tCol, columnModel.getColumnCount() - 1, columnModel, rowsModel, groups));
                 }
             }
         }
@@ -409,16 +365,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     if (col.getIdentifier() instanceof FieldModelColumn) {
                         tCol = col;
                         break;
-                    }
-                }
-                // If no such column, client code should worry about stability of the first model's column
-                if (tCol == null) {
-                    for (int i = 0; i < columnModel.getColumnCount(); i++) {
-                        TableColumn col = columnModel.getColumn(i);
-                        if (col.getIdentifier() instanceof RowModelColumn) {
-                            tCol = col;
-                            break;
-                        }
                     }
                 }
                 assert tCol != null;
@@ -551,10 +497,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     protected RowsetsModel rowsModel;
     protected TableModel deepModel;
     protected TabularRowsSorter<? extends TableModel> rowSorter;
-    protected ColumnsRiddler lriddler;
-    protected ColumnsRiddler rriddler;
-    protected Map<Rowset, List<ColumnsSource>> lcolumnsSources = new HashMap<>();
-    protected Map<Rowset, List<ColumnsSource>> rcolumnsSources = new HashMap<>();
     protected Set<Row> processedRows = new HashSet<>();
     protected JSObject generalOnRender;
     protected int rowsHeaderType = DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL;
@@ -1130,14 +1072,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             rowsEntity.getRowset().removeRowsetListener(scrollReflector);
         }
         rowsEntity = null;
-        if (lriddler != null) {
-            lriddler.die();
-            lriddler = null;
-        }
-        if (rriddler != null) {
-            rriddler.die();
-            rriddler = null;
-        }
         if (columnModel != null) {
             for (int i = columnModel.getColumnCount() - 1; i >= 0; i--) {
                 columnModel.removeColumn(columnModel.getColumn(i));
@@ -1147,8 +1081,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         rowsModel = null;
         deepModel = null;
         rowSorter = null;
-        lcolumnsSources = new HashMap<>();
-        rcolumnsSources = new HashMap<>();
         tlTable = null;
         trTable = null;
         blTable = null;
@@ -1293,7 +1225,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
                 lheader.setColumnModel(tlTable.getColumnModel());
                 lheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, 0, fixedColumns - 1));
-                lcolumnsSources.putAll(filterColumnsSources(columnModel, 0, fixedColumns - 1));
                 lheader.setRowSorter(rowSorter);
                 // right header setup
                 rheader = new MultiLevelHeader();
@@ -1302,7 +1233,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
                 rheader.setColumnModel(trTable.getColumnModel());
                 rheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, fixedColumns, columnModel.getColumnCount() - 1));
-                rcolumnsSources.putAll(filterColumnsSources(columnModel, fixedColumns, columnModel.getColumnCount() - 1));
                 rheader.setRowSorter(rowSorter);
                 scriptableColumns.stream().forEach((sCol) -> {
                     if (rheader.getColumnsParents().containsKey(sCol.getViewColumn())) {
@@ -1345,14 +1275,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 setLayout(new BorderLayout());
                 add(gridScroll, BorderLayout.CENTER);
                 //
-                lriddler = new ColumnsRiddler(lheader.getColumnsParents(), columnModel, lheader, rowsModel, lcolumnsSources, () -> style, scriptableColumns);
-                lriddler.setLeftConstraint(leftColsConstraint);
-                lriddler.setRightConstraint(rightColsConstraint);
-                lriddler.fill();
-
-                rriddler = new ColumnsRiddler(rheader.getColumnsParents(), columnModel, rheader, rowsModel, rcolumnsSources, () -> style, scriptableColumns);
-                rriddler.fill();
-
                 lheader.setNeightbour(rheader);
                 rheader.setNeightbour(lheader);
                 lheader.setRegenerateable(true);
@@ -1628,25 +1550,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         return table2Group;
     }
 
-    protected Map<Rowset, List<ColumnsSource>> filterColumnsSources(TableColumnModel aTableColumnModel, int begIdx, int endIdx) {
-        Map<Rowset, List<ColumnsSource>> rowsetsToColumnsSource = new HashMap<>();
-        for (int i = begIdx; i <= endIdx; i++) {
-            TableColumn tCol = aTableColumnModel.getColumn(i);
-            if (tCol instanceof AnchorTableColumn) {
-                AnchorTableColumn anchorCol = (AnchorTableColumn) tCol;
-                ColumnsSource colSource = anchorCol.getColumnsSource();
-                Rowset colsRowset = colSource.getColumnsLocator().getRowset();
-                List<ColumnsSource> colSources = rowsetsToColumnsSource.get(colsRowset);
-                if (colSources == null) {
-                    colSources = new ArrayList<>();
-                    rowsetsToColumnsSource.put(colsRowset, colSources);
-                }
-                colSources.add(colSource);
-            }
-        }
-        return rowsetsToColumnsSource;
-    }
-
     public TableColumnModel getColumnModel() {
         return columnModel;
     }
@@ -1919,7 +1822,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
         int curentColumn = 0;
         for (int col = minCol; col < getColumnModel().getColumnCount(); col++) {
             TableColumn tc = getColumnModel().getColumn(col);
-            if (tc.getWidth() > 0 && !(tc instanceof AnchorTableColumn) && !(tc instanceof RowHeaderTableColumn)) {
+            if (tc.getWidth() > 0 && !(tc instanceof RowHeaderTableColumn)) {
                 if (selectedOnly) {
                     if (getColumnsSelectionModel().isSelectedIndex(col)) {
                         res[curentColumn] = transformCellValue(view.getValueAt(aRow, tc.getModelIndex()), col, isData);
@@ -2087,7 +1990,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     if (e.getSource() == tlTable) {
                         if (blTable != null && blTable.getRowCount() > 0 && tlTable.getSelectionModel().getLeadSelectionIndex() == tlTable.getRowCount() - 1) {
                             int colIndex = tlTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
-                            EventQueue.invokeLater(() -> {;
+                            EventQueue.invokeLater(() -> {
                                 tlTable.clearSelection();
                                 blTable.getSelectionModel().setSelectionInterval(0, 0);
                                 blTable.getColumnModel().getSelectionModel().setSelectionInterval(colIndex, colIndex);
@@ -2096,7 +1999,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     } else if (e.getSource() == trTable) {
                         if (brTable != null && brTable.getRowCount() > 0 && trTable.getSelectionModel().getLeadSelectionIndex() == trTable.getRowCount() - 1) {
-                            EventQueue.invokeLater(() -> {;
+                            EventQueue.invokeLater(() -> {
                                 int colIndex = trTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
                                 trTable.clearSelection();
                                 brTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -2135,13 +2038,9 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             blLeadIndex++;
                         }
                         if (brTable != null && brTable.getColumnCount() > 0
-                                && (blLeadIndex == blColCount - 1
-                                || (blLeadIndex == blColCount - 2 && blTable.getColumnModel().getColumn(blColCount - 1) instanceof AnchorTableColumn))) {
+                                && blLeadIndex == blColCount - 1) {
                             int lColIndex = 0;
                             if (!(brTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
-                                if (brTable.getColumnModel().getColumn(lColIndex) instanceof AnchorTableColumn) {
-                                    lColIndex = 1;
-                                }
                                 while (GridTable.skipableColumn(brTable.getColumnModel().getColumn(lColIndex))) {
                                     lColIndex++;
                                 }
@@ -2160,12 +2059,9 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         while (tlLeadIndex < tlColCount - 1 && GridTable.skipableColumn(tlTable.getColumnModel().getColumn(tlLeadIndex + 1))) {
                             tlLeadIndex++;
                         }
-                        if (trTable != null && trTable.getColumnCount() > 0 && (tlLeadIndex == tlColCount - 1 || (tlLeadIndex == tlColCount - 2 && tlTable.getColumnModel().getColumn(tlColCount - 1) instanceof AnchorTableColumn))) {
+                        if (trTable != null && trTable.getColumnCount() > 0 && (tlLeadIndex == tlColCount - 1)) {
                             int lColIndex = 0;
                             if (!(trTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
-                                if (trTable.getColumnModel().getColumn(lColIndex) instanceof AnchorTableColumn) {
-                                    lColIndex = 1;
-                                }
                                 while (GridTable.skipableColumn(trTable.getColumnModel().getColumn(lColIndex))) {
                                     lColIndex++;
                                 }
@@ -2186,8 +2082,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             trLeadIndex--;
                         }
                         if (tlTable != null && tlTable.getColumnCount() > 0
-                                && (trLeadIndex == 0
-                                || (trLeadIndex == 1 && (trTable.getColumnModel().getColumn(trLeadIndex - 1) instanceof AnchorTableColumn)))) {
+                                && trLeadIndex == 0) {
                             if (tlTable.getColumnModel().getColumnCount() > 0) {
                                 int lColIndex = tlTable.getColumnModel().getColumnCount() - 1;
                                 if (!(tlTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
@@ -2210,8 +2105,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             brLeadIndex--;
                         }
                         if (blTable != null && blTable.getColumnCount() > 0
-                                && (brLeadIndex == 0
-                                || (brLeadIndex == 1 && brTable.getColumnModel().getColumn(brLeadIndex - 1) instanceof AnchorTableColumn))) {
+                                && brLeadIndex == 0) {
                             if (blTable.getColumnModel().getColumnCount() > 0) {
                                 int lColIndex = blTable.getColumnModel().getColumnCount() - 1;
                                 if (!(blTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {

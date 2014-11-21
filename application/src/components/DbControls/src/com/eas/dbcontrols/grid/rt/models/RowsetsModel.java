@@ -15,9 +15,6 @@ import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.model.RowModelColumn;
-import com.eas.dbcontrols.grid.rt.veers.CellsRowsetsListener;
-import com.eas.dbcontrols.grid.rt.veers.ColumnRowsetListener;
 import com.eas.gui.CascadedStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,13 +100,6 @@ public abstract class RowsetsModel {
                     if (checkColumnRowset(column, anElement)) {
                         return getRowsetsData(column, anElement);
                     }
-                } else if (column instanceof RowModelColumn) {
-                    RowModelColumn rCol = (RowModelColumn) column;
-                    Row cellRow = achieveCellRow(rCol, anElement, false);
-                    if (cellRow != null) {
-                        Object value = cellRow.getColumnObject(rCol.getCellsValuesFieldIndex());
-                        return complementCellData(new CellData(new CascadedStyle(column.getStyle()), value, column.getView() != null ? column.getView().achiveDisplayValue(value) : value), cellRow, column);
-                    }
                 }
             } catch (Exception ex) {
                 severe(ex.getMessage());
@@ -131,12 +121,6 @@ public abstract class RowsetsModel {
                         }
                     } finally {
                         restoreRowsRowsetCursorPos(rowsRowset, oldCursorPos);
-                    }
-                } else if (column instanceof RowModelColumn) {
-                    RowModelColumn rCol = (RowModelColumn) column;
-                    Row cellRow = achieveCellRow(rCol, anElement, true);
-                    if (cellRow != null) {
-                        cellRow.setColumnObject(rCol.getCellsValuesFieldIndex(), aValue);
                     }
                 }
             } catch (Exception ex) {
@@ -250,55 +234,6 @@ public abstract class RowsetsModel {
         }
     }
 
-    /**
-     * Returns a row of cell's values rowset, bound to <code>rCol</code>
-     *
-     * @param rCol RowModelColumn instance.
-     * @param aRow Row instance, typically from rows rowset.
-     * @param aForceInsert
-     * @return Row instance, the cell's value will be achieved from.
-     * @throws Exception
-     * @see RowModelColumn
-     * @see Row
-     */
-    protected Row achieveCellRow(RowModelColumn rCol, Row aRow, boolean aForceInsert) throws Exception {
-        Row cRow = rCol.getRow();
-        Locator cellsLocator = rCol.getCellsLocator();
-        if (cRow != null && aRow != null && cellsLocator != null) {
-            Object[] rKeys = aRow.getPKValues();
-            Object[] cKeys = cRow.getPKValues();
-            if (rKeys.length == 0) {
-                throw new IllegalStateException("Row key is not found for " + rowsEntity.getFormattedNameAndTitle());
-            }
-            if (rKeys.length > 1) {
-                throw new IllegalStateException("Row key is ambiguous for " + rowsEntity.getFormattedNameAndTitle());
-            }
-            if (cKeys.length == 0) {
-                throw new IllegalStateException("Column key is not found for " + rowsEntity.getFormattedNameAndTitle());
-            }
-            if (cKeys.length > 1) {
-                throw new IllegalStateException("Column key is ambiguous for " + rowsEntity.getFormattedNameAndTitle());
-            }
-            Object[] cellsKeys = new Object[rKeys.length + cKeys.length];
-            System.arraycopy(rKeys, 0, cellsKeys, 0, rKeys.length);
-            System.arraycopy(cKeys, 0, cellsKeys, rKeys.length, cKeys.length);
-            if (aForceInsert && !cellsLocator.find(cellsKeys)) {
-                List<Integer> cellColsIndicies = cellsLocator.getFields();
-                assert cellColsIndicies.size() == cellsKeys.length : "Rowsets veer. Cells locator's columns indices and supplied keys values array must be the same length.";
-                Object[] cellInitingValues = new Object[cellColsIndicies.size() * 2];
-                for (int i = 0; i < cellColsIndicies.size(); i++) {
-                    cellInitingValues[i * 2] = cellColsIndicies.get(i);
-                    cellInitingValues[i * 2 + 1] = cellsKeys[i];
-                }
-                cellsLocator.getRowset().insert(cellInitingValues);
-            }
-            if (cellsLocator.find(cellsKeys)) {
-                    return cellsLocator.getRow(0);
-            }
-        }
-        return null;
-    }
-
     protected void severe(String aMsg) {
         Logger.getLogger(RowsetsTableModel.class.getName()).log(Level.SEVERE, aMsg);
     }
@@ -381,21 +316,6 @@ public abstract class RowsetsModel {
      */
     public void addColumn(int aIndex, ModelColumn aColumn) {
         columns.add(aIndex, aColumn);
-        if (aColumn instanceof FieldModelColumn) {
-            FieldModelColumn fieldColumn = (FieldModelColumn) aColumn;
-            if (fieldColumn.getRowset() != null) {
-                if (fieldColumn.getRowset() != rowsRowset) {
-                    fieldColumn.setRowsetListener(new ColumnRowsetListener(this, fieldColumn));
-                }
-            } else {
-                Logger.getLogger(RowsetsModel.class.getName()).log(Level.CONFIG, String.format(BAD_COLUMN_MSG, aIndex));
-            }
-        } else {
-            RowModelColumn rowColumn = (RowModelColumn) aColumn;
-            if (rowColumn.getCellsValuesRowset() != null) {
-                rowColumn.setValuesListener(new CellsRowsetsListener(this, rowColumn));
-            }
-        }
         invalidateColumnIndicies();
     }
 
@@ -406,23 +326,12 @@ public abstract class RowsetsModel {
      */
     public void removeColumn(int aColumnIndex) {
         ModelColumn aColumn = columns.remove(aColumnIndex);
-        if (aColumn instanceof FieldModelColumn) {
-            FieldModelColumn fieldColumn = (FieldModelColumn) aColumn;
-            if (fieldColumn.getRowset() != rowsRowset) {
-                fieldColumn.setRowsetListener(null);
-            }
-        } else {
-            RowModelColumn rowColumn = (RowModelColumn) aColumn;
-            if (rowColumn.getCellsValuesRowset() != null) {
-                rowColumn.setValuesListener(null);
-            }
-        }
         invalidateColumnIndicies();
     }
 
     /**
      * Fires an event, occuring when data or rowset structure of column's rowset
-     * is changed. It takes place when column's rowset and rows rowset are not
+     * is changed. It takes place when column's rowset and rows rowset are not the
      * same.
      *
      * @param aColumn ModelColumn instance, the change is related to.
@@ -469,10 +378,6 @@ public abstract class RowsetsModel {
         if (lOnRender != null) {
             Object rowPkValue = getRowPkValue4Script(aRow);
             Object colPkValue = null;
-            if (aColumn instanceof RowModelColumn) {
-                RowModelColumn rmc = (RowModelColumn) aColumn;
-                colPkValue = getRowPkValue4Script(rmc.getRow());
-            }
             CellRenderEvent event = new CellRenderEvent(aColumn, rowPkValue, colPkValue, aCellData, aRow);
             lOnRender.call(aColumn.getPublished(), new Object[]{event.getPublished()});
         }

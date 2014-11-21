@@ -24,10 +24,6 @@ import com.eas.dbcontrols.image.DbImage;
 import com.eas.dbcontrols.image.DbImageDesignInfo;
 import com.eas.dbcontrols.label.DbLabel;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;
-import com.eas.dbcontrols.map.DbMap;
-import com.eas.dbcontrols.map.DbMapDesignInfo;
-import com.eas.dbcontrols.scheme.DbScheme;
-import com.eas.dbcontrols.scheme.DbSchemeDesignInfo;
 import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.spin.DbSpinDesignInfo;
 import com.eas.dbcontrols.text.DbText;
@@ -160,18 +156,6 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
     }
 
     @Override
-    public void visit(DbSchemeDesignInfo aInfo) {
-        try {
-            visitControl(aInfo);
-            assert comp instanceof DbScheme;
-            processControlEvents(aInfo);
-            visitModelScalarControl(aInfo);
-        } catch (Exception ex) {
-            Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
     public void visit(DbSpinDesignInfo aInfo) {
         try {
             visitControl(aInfo);
@@ -257,23 +241,6 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             grid.setRowsHeight(aInfo.getRowsHeight());
             grid.setOddRowsColor(aInfo.getOddRowsColor());
             grid.setGridColor(aInfo.getGridColor());
-        } catch (Exception ex) {
-            Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public void visit(final DbMapDesignInfo aInfo) {
-        try {
-            visitControl(aInfo);
-            assert comp instanceof DbMap;
-            final DbMap map = (DbMap) comp;
-            processControlEvents(aInfo);
-            map.setModel(model);
-            map.setMapTitle(aInfo.getMapTitle());
-            map.setBackingUrl(aInfo.getBackingUrl());
-            map.setCrsWkt(aInfo.getCrsWkt());
-            map.getFeatures().addAll(aInfo.getFeatures());
         } catch (Exception ex) {
             Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
         }

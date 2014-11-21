@@ -11,6 +11,7 @@ import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetListener;
+import com.bearsoft.rowset.events.RowsetNetErrorEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
@@ -364,6 +365,14 @@ public class GridBaseTest {
 
         @Override
         public void rowsetRolledback(RowsetRollbackEvent rre) {
+        }
+
+        @Override
+        public void beforeRequery(RowsetRequeryEvent rre) {
+        }
+
+        @Override
+        public void rowsetNetError(RowsetNetErrorEvent rnee) {
         }
     }
 }

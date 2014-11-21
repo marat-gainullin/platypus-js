@@ -58,8 +58,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
     public static final String FIXED = "fixed";
     //
     protected DbGridColumn parent;
-    // flag indicating whethier column is plain or fliped
-    protected boolean plain = true;
     // plain columns
     protected ModelElementRef datamodelElement;
     protected DbControlDesignInfo controlInfo;
@@ -75,8 +73,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
     protected ModelEntityRef cellsDatasource = new ModelEntityRef();
     protected ModelElementRef columnsDisplayField = new ModelElementRef();
     protected DbGridCellDesignInfo cellDesignInfo = new DbGridCellDesignInfo();
-    // flag indicating whethier this column should remain in place or be substituted by it's flipping ds
-    protected boolean substitute = false;
     protected boolean selectOnly = false;
     // runtime needed temporary data
     public int rtMinimumWidth = -1;
@@ -184,8 +180,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             setWidth(aSource.getWidth());
             setReadonly(aSource.isReadonly());
             setVisible(aSource.isVisible());
-            setPlain(aSource.isPlain());
-            setSubstitute(aSource.isSubstitute());
             setSelectOnly(aSource.isSelectOnly());
             setFixed(aSource.isFixed());
             if (aSource.getTitle() != null) {
@@ -210,8 +204,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             setReadonly(false);
             setEnabled(true);
             setVisible(true);
-            setPlain(true);
-            setSubstitute(false);
             setTitle(null);
             setName(null);
             setSelectOnly(false);
@@ -249,12 +241,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             return false;
         }
         if (this.visible != other.visible) {
-            return false;
-        }
-        if (this.plain != other.plain) {
-            return false;
-        }
-        if (this.substitute != other.substitute) {
             return false;
         }
         if (this.selectOnly != other.selectOnly) {
@@ -429,43 +415,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         boolean old = selectOnly;
         selectOnly = aValue;
         firePropertyChange(SELECTONLY, old, aValue);
-    }
-
-    @Undesignable
-    @Serial
-    public boolean isPlain() {
-        return plain;
-    }
-
-    @Serial
-    public void setPlain(boolean aValue) {
-        boolean old = plain;
-        plain = aValue;
-        firePropertyChange(PLAIN, old, aValue);
-    }
-    
-    @Designable(displayName = "expandable", description = "<code>true</code> if the column is in a expanded mode and <code>false</code> otherwise.")
-    public boolean isVeer() {
-        return !isPlain();
-    }
-
-    public void setVeer(boolean aValue) {
-        boolean old = !plain;
-        plain = !aValue;
-        firePropertyChange(VEER, old, !plain);
-    }
-
-    @Designable(category="veer")
-    @Serial
-    public boolean isSubstitute() {
-        return substitute;
-    }
-
-    @Serial
-    public void setSubstitute(boolean aValue) {
-        boolean old = substitute;
-        substitute = aValue;
-        firePropertyChange(SUBSTITUTE, old, aValue);
     }
 
     @Serial
@@ -715,6 +664,5 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         group.setTitle(getTitle());
         group.setVisible(isVisible());
         group.setWidth(getWidth());
-        group.setSubstitute(isSubstitute());
     }
 }

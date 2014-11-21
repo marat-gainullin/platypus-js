@@ -24,10 +24,6 @@ import com.eas.dbcontrols.image.DbImage;
 import com.eas.dbcontrols.image.DbImageDesignInfo;
 import com.eas.dbcontrols.label.DbLabel;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;
-import com.eas.dbcontrols.map.DbMap;
-import com.eas.dbcontrols.map.DbMapDesignInfo;
-import com.eas.dbcontrols.scheme.DbScheme;
-import com.eas.dbcontrols.scheme.DbSchemeDesignInfo;
 import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.spin.DbSpinDesignInfo;
 import com.eas.dbcontrols.text.DbText;
@@ -109,16 +105,16 @@ public class DbControlsUtils {
         });
         // Binaries
         typesControls.put(java.sql.Types.VARBINARY, new Class<?>[]{
-            DbImage.class, DbScheme.class
+            DbImage.class
         });
         typesControls.put(java.sql.Types.BINARY, new Class<?>[]{
-            DbImage.class, DbScheme.class
+            DbImage.class
         });
         typesControls.put(java.sql.Types.BLOB, new Class<?>[]{
-            DbImage.class, DbScheme.class
+            DbImage.class
         });
         typesControls.put(java.sql.Types.LONGVARBINARY, new Class<?>[]{
-            DbImage.class, DbScheme.class
+            DbImage.class
         });
         // Strings
         typesControls.put(java.sql.Types.CHAR, new Class<?>[]{
@@ -172,11 +168,8 @@ public class DbControlsUtils {
         controlsDesignClasses.put(DbGrid.class, DbGridDesignInfo.class);
         controlsDesignClasses.put(DbImage.class, DbImageDesignInfo.class);
         controlsDesignClasses.put(DbLabel.class, DbLabelDesignInfo.class);
-        controlsDesignClasses.put(DbScheme.class, DbSchemeDesignInfo.class);
         controlsDesignClasses.put(DbSpin.class, DbSpinDesignInfo.class);
         controlsDesignClasses.put(DbText.class, DbTextDesignInfo.class);
-        controlsDesignClasses.put(DbMap.class, DbMapDesignInfo.class);
-
     }
 
     public static Object createDesignInfoBySimpleClassName(String aSimpleClassName) {
