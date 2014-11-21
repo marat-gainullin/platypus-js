@@ -347,18 +347,18 @@ public class ScriptedResource {
                         if (typeCharset.length == 2 && typeCharset[1] != null) {
                             encoding = typeCharset[1];
                         } else {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, CHARSET_MISSING_MSG);
                             encoding = SettingsConstants.COMMON_ENCODING;
                         }
                     } else {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, CHARSET_MISSING_MSG);
                         encoding = SettingsConstants.COMMON_ENCODING;
                     }
                 } else {
                     encoding = null;// assume binary response
                 }
             } else {
-                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG);
+                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, CHARSET_MISSING_MSG);
                 encoding = SettingsConstants.COMMON_ENCODING;
             }
         }
@@ -404,7 +404,7 @@ public class ScriptedResource {
         }
         return resp;
     }
-    public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to " + SettingsConstants.COMMON_ENCODING;
+    public static final String CHARSET_MISSING_MSG = "Charset missing in http response. Falling back to " + SettingsConstants.COMMON_ENCODING;
 
     protected static String normalizeResourcePath(String aPath) throws Exception {
         if (aPath.startsWith("/")) {

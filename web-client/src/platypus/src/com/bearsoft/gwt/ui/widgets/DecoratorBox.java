@@ -8,8 +8,24 @@ package com.bearsoft.gwt.ui.widgets;
 import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasBlurHandlers;
+import com.google.gwt.event.dom.client.HasFocusHandlers;
+import com.google.gwt.event.dom.client.HasKeyDownHandlers;
+import com.google.gwt.event.dom.client.HasKeyPressHandlers;
+import com.google.gwt.event.dom.client.HasKeyUpHandlers;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -28,12 +44,17 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  * @param <T>
  */
-public abstract class DecoratorBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, Focusable, HasEnabled {
+public abstract class DecoratorBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, Focusable, HasEnabled, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
 
 	protected FlowPanel container = new FlowPanel();
 	protected HasValue<T> decorated;
 	protected boolean enabled = true;
 	protected HandlerRegistration changeValueHandler;
+	protected HandlerRegistration keyDownHandler;
+	protected HandlerRegistration keyUpHandler;
+	protected HandlerRegistration keyPressHandler;
+	protected HandlerRegistration focusHandler;
+	protected HandlerRegistration blurHandler;
 	protected SimplePanel contentWrapper = new SimplePanel();
 	protected SimplePanel selectButton = new SimplePanel();
 	protected SimplePanel clearButton = new SimplePanel();
@@ -56,12 +77,12 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		contentWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
 		contentWrapper.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		contentWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-		
+
 		selectButton.getElement().addClassName("decorator-select");
 		selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		selectButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
-	    selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		clearButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
@@ -85,13 +106,27 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			}
 		}, ClickEvent.getType());
 		organizeButtonsContent();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
-	public Widget getWidget(){
-		return decorated instanceof Widget ? (Widget)decorated : null;
+	public Widget getWidget() {
+		return decorated instanceof Widget ? (Widget) decorated : null;
 	}
-	
+
+	@Override
+	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+		return super.addHandler(handler, KeyDownEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+		return super.addHandler(handler, KeyPressEvent.getType());
+	}
+
+	public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+		return super.addHandler(handler, KeyUpEvent.getType());
+	}
+
 	@Override
 	public boolean isEnabled() {
 		return enabled;
@@ -101,10 +136,10 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -146,6 +181,16 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			if (changeValueHandler != null) {
 				changeValueHandler.removeHandler();
 			}
+			if (keyDownHandler != null)
+				keyDownHandler.removeHandler();
+			if (keyUpHandler != null)
+				keyUpHandler.removeHandler();
+			if (keyPressHandler != null)
+				keyPressHandler.removeHandler();
+			if (focusHandler != null)
+				focusHandler.removeHandler();
+			if (blurHandler != null)
+				blurHandler.removeHandler();
 			if (decorated instanceof Widget) {
 				((Widget) decorated).removeFromParent();
 			}
@@ -173,6 +218,53 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 					style.setWidth(100, Style.Unit.PCT);
 					contentWrapper.setWidget((Widget) decorated);
 				}
+				if (decorated instanceof HasKeyDownHandlers) {
+					keyDownHandler = ((HasKeyDownHandlers) decorated).addKeyDownHandler(new KeyDownHandler() {
+
+						@Override
+						public void onKeyDown(KeyDownEvent event) {
+							KeyDownEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+						}
+					});
+				}
+				if (decorated instanceof HasKeyUpHandlers) {
+					keyUpHandler = ((HasKeyUpHandlers) decorated).addKeyUpHandler(new KeyUpHandler() {
+
+						@Override
+						public void onKeyUp(KeyUpEvent event) {
+							KeyUpEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+						}
+					});
+				}
+				if (decorated instanceof HasKeyPressHandlers) {
+					keyPressHandler = ((HasKeyPressHandlers) decorated).addKeyPressHandler(new KeyPressHandler() {
+
+						@Override
+						public void onKeyPress(KeyPressEvent event) {
+							KeyPressEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+						}
+					});
+				}
+				if (decorated instanceof HasFocusHandlers) {
+					focusHandler = ((HasFocusHandlers) decorated).addFocusHandler(new FocusHandler() {
+
+						@Override
+						public void onFocus(FocusEvent event) {
+							FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+						}
+
+					});
+				}
+				if (decorated instanceof HasBlurHandlers) {
+					blurHandler = ((HasBlurHandlers) decorated).addBlurHandler(new BlurHandler() {
+
+						@Override
+						public void onBlur(BlurEvent event) {
+							BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+						}
+
+					});
+				}
 			}
 		}
 	}
@@ -181,19 +273,19 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}
 
-	protected void organizeButtonsContent(){
+	protected void organizeButtonsContent() {
 		int right = 0;
-		if(isClearButtonVisible()){
+		if (isClearButtonVisible()) {
 			clearButton.getElement().getStyle().setRight(right, Style.Unit.PX);
 			right += clearButton.getElement().getOffsetWidth();
 		}
-		if(isSelectButtonVisible()){
+		if (isSelectButtonVisible()) {
 			selectButton.getElement().getStyle().setRight(right, Style.Unit.PX);
 			right += selectButton.getElement().getOffsetWidth();
 		}
 		contentWrapper.getElement().getStyle().setRight(right, Style.Unit.PX);
 	}
-	
+
 	public boolean isSelectButtonVisible() {
 		return !Style.Display.NONE.getCssName().equalsIgnoreCase(selectButton.getElement().getStyle().getDisplay());
 	}
@@ -245,16 +337,26 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	}
 
 	@Override
+	public HandlerRegistration addFocusHandler(FocusHandler handler) {
+		return addHandler(handler, FocusEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addBlurHandler(BlurHandler handler) {
+		return addHandler(handler, BlurEvent.getType());
+	}
+
+	@Override
 	public void onResize() {
 		if (decorated instanceof RequiresResize) {
 			((RequiresResize) decorated).onResize();
 		}
 		organizeButtonsContent();
 	}
-	
+
 	@Override
 	protected void onAttach() {
-	    super.onAttach();
+		super.onAttach();
 		organizeButtonsContent();
 	}
 }

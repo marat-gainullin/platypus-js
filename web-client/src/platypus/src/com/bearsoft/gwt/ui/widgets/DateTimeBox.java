@@ -13,8 +13,24 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasBlurHandlers;
+import com.google.gwt.event.dom.client.HasFocusHandlers;
+import com.google.gwt.event.dom.client.HasKeyDownHandlers;
+import com.google.gwt.event.dom.client.HasKeyPressHandlers;
+import com.google.gwt.event.dom.client.HasKeyUpHandlers;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -34,7 +50,7 @@ import java.util.Date;
  * 
  * @author mg
  */
-public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>>, Focusable {
+public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>>, Focusable, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
 
 	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 
@@ -120,6 +136,75 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		}, ClickEvent.getType());
 		organizeFieldWrapperRight();
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
+		if (field.getTextBox() instanceof HasKeyDownHandlers) {
+			((HasKeyDownHandlers) field.getTextBox()).addKeyDownHandler(new KeyDownHandler() {
+
+				@Override
+				public void onKeyDown(KeyDownEvent event) {
+					KeyDownEvent.fireNativeEvent(event.getNativeEvent(), DateTimeBox.this);
+				}
+			});
+		}
+		if (field.getTextBox() instanceof HasKeyUpHandlers) {
+			((HasKeyUpHandlers) field.getTextBox()).addKeyUpHandler(new KeyUpHandler() {
+
+				@Override
+				public void onKeyUp(KeyUpEvent event) {
+					KeyUpEvent.fireNativeEvent(event.getNativeEvent(), DateTimeBox.this);
+				}
+			});
+		}
+		if (field.getTextBox() instanceof HasKeyPressHandlers) {
+			((HasKeyPressHandlers) field.getTextBox()).addKeyPressHandler(new KeyPressHandler() {
+
+				@Override
+				public void onKeyPress(KeyPressEvent event) {
+					KeyPressEvent.fireNativeEvent(event.getNativeEvent(), DateTimeBox.this);
+				}
+			});
+		}
+		if (field.getTextBox() instanceof HasFocusHandlers) {
+			((HasFocusHandlers) field.getTextBox()).addFocusHandler(new FocusHandler() {
+
+				@Override
+				public void onFocus(FocusEvent event) {
+					FocusEvent.fireNativeEvent(event.getNativeEvent(), DateTimeBox.this);
+				}
+			});
+		}
+		if (field.getTextBox() instanceof HasBlurHandlers) {
+			((HasBlurHandlers) field.getTextBox()).addBlurHandler(new BlurHandler() {
+
+				@Override
+				public void onBlur(BlurEvent event) {
+					BlurEvent.fireNativeEvent(event.getNativeEvent(), DateTimeBox.this);
+				}
+			});
+		}
+	}
+
+	@Override
+	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+		return super.addHandler(handler, KeyDownEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+		return super.addHandler(handler, KeyPressEvent.getType());
+	}
+
+	public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+		return super.addHandler(handler, KeyUpEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addFocusHandler(FocusHandler handler) {
+		return addHandler(handler, FocusEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addBlurHandler(BlurHandler handler) {
+		return addHandler(handler, BlurEvent.getType());
 	}
 
 	protected void organizeFieldWrapperRight() {

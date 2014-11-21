@@ -104,6 +104,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected float opacity = 1.0f;
 	protected boolean alwaysOnTop;
 	protected boolean locationByPlatform;
+	protected boolean autoHide;
 	protected JavaScriptObject windowOpened;
 	protected JavaScriptObject windowClosing;
 	protected JavaScriptObject windowClosed;
@@ -266,7 +267,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	}
 
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
-		popup = new WindowPopupPanel(this, false, aModal);
+		popup = new WindowPopupPanel(this, autoHide, aModal);
 		popup.setWidget(view);
 		boolean wasSize = viewSize != null;
 		double actualWidth = wasSize ? viewSize.getX() : viewPreferredWidth;
@@ -615,6 +616,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setHeight(D)(aValue * 1);
 	        } 
         });
+        Object.defineProperty(aPublished, "autoHide", {
+	        get:function() {
+	        	return aForm.@com.eas.client.form.PlatypusWindow::isAutoHide()();
+	        },
+	        set:function(aValue) {
+	        	aForm.@com.eas.client.form.PlatypusWindow::setAutoHide(Z)(!!aValue);
+	        } 
+        });
         Object.defineProperty(aPublished, "onWindowOpened", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowOpened()();
@@ -769,6 +778,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
+	public boolean isAutoHide() {
+		return autoHide;
+	}
+
+	public void setAutoHide(boolean aValue) {
+		autoHide = aValue;
+	}
+
 	public float getOpacity() {
 		return opacity;
 	}
@@ -792,9 +809,10 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	@Override
 	public void setPosition(double aLeft, double aTop) {
-		super.setPosition(aLeft, aTop);
-		if (popup != null)
+		if (popup != null) {
+			super.setPosition(aLeft, aTop);
 			popup.setPosition(aLeft, aTop);
+		}
 	}
 
 	public double getLeft() {
