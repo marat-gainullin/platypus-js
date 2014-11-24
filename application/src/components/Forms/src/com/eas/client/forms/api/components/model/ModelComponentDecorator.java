@@ -1,38 +1,90 @@
-package com.eas.dbcontrols;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.eas.client.forms.api.components.model;
 
-import com.bearsoft.gui.grid.data.CellData;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.ModelElementRef;
-import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationModel;
-import com.eas.controls.DummyControlValue;
 import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.design.Designable;
-import com.eas.design.Undesignable;
+import com.eas.dbcontrols.CellRenderEvent;
+import com.eas.dbcontrols.DbControl;
+import com.eas.dbcontrols.DbControlEditingListener;
+import com.eas.dbcontrols.DbControlRowsetListener;
+import com.eas.dbcontrols.DbControlsUtils;
+import com.eas.dbcontrols.IconCache;
+import com.eas.dbcontrols.InitializingMethod;
 import com.eas.gui.CascadedStyle;
-import com.eas.script.ScriptUtils;
-import java.awt.*;
-import java.awt.event.*;
+import com.eas.script.EventMethod;
+import com.eas.script.ScriptFunction;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.beans.PropertyChangeListener;
 import java.text.ParseException;
-import java.util.*;
+import java.util.EventObject;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
+/*
+ === from setValueToRowset ===
+ if (rsEntity != null && rsEntity.getRowset() != null && colIndex != 0
+ && !setValue2Rowset(value)) {
+ // if the value has been rejected by rowset we must
+ // reflect rowset's value in the control.
+ setEditingValue(getValueFromRowset());
+ }
+ === from setValue ===
+ if (aValue instanceof Number) {
+ aValue = Double.valueOf(((Number) aValue).doubleValue());
+ }
+ */
 /**
  *
  * @author mg
+ * @param <D>
+ * @param <V>
  */
-public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
+public abstract class ModelComponentDecorator<D extends JComponent, V> extends JComponent implements ScalarModelWidget<V> {
 
     protected static RowsetConverter converter = new RowsetConverter();
     protected JTextField prefSizeCalculator = new JTextField();// DON't move to design!!!
@@ -40,7 +92,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected JToolBar extraTools = new JToolBar();
     protected Set<CellEditorListener> editorListeners = new HashSet<>();
     protected Set<ActionListener> actionListeners = new HashSet<>();
-    protected Object editingValue;
+    protected V value;
     protected int updateCounter;
     protected boolean borderless = true;
     protected int align = SwingConstants.LEFT;
@@ -48,6 +100,21 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected boolean editable = true;
     protected boolean selectOnly;
     private boolean design;
+    // Model interacting
+    protected DbControlRowsetListener rowsetListener;
+    protected JSObject published;
+    protected static final Color WDIGETS_BORDER_COLOR = controlsBorderColor();
+    public static final int WIDGETS_DEFAULT_WIDTH = 100;
+    public static final int DB_CONTROLS_DEFAULT_HEIGHT = 100;
+
+    private static Color controlsBorderColor() {
+        Color lafGridColor = UIManager.getColor("Table.gridColor");
+        if (lafGridColor != null) {
+            return lafGridColor;
+        } else {
+            return new Color(103, 144, 185);
+        }
+    }
 
     /**
      * This class is intended to substitute standard action of "enter" in case
@@ -75,7 +142,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
-    protected class DbControlFocusAdapter extends FocusAdapter {
+    protected class ModelWidgetFocusAdapter extends FocusAdapter {
 
         @Override
         public void focusGained(FocusEvent e) {
@@ -98,7 +165,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     public void initializeBorder() {
         if (standalone) {
-            super.setBorder(new LineBorder(DbControlsUtils.DB_CONTROLS_BORDER_COLOR));
+            super.setBorder(new LineBorder(WDIGETS_BORDER_COLOR));
         } else {
             setBorder(null);
         }
@@ -108,8 +175,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     public Dimension getPreferredSize() {
         int width = super.getPreferredSize().width;
         int height = prefSizeCalculator.getPreferredSize().height;
-        if (width < DbControlsUtils.DB_CONTROLS_DEFAULT_WIDTH) {
-            width = DbControlsUtils.DB_CONTROLS_DEFAULT_WIDTH;
+        if (width < WIDGETS_DEFAULT_WIDTH) {
+            width = WIDGETS_DEFAULT_WIDTH;
         }
         return new Dimension(width, height);
     }
@@ -143,12 +210,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         public void focusLost(FocusEvent e) {
             try {
                 if (standalone) {
-                    if (rsEntity != null && rsEntity.getRowset() != null && colIndex != 0
-                            && !setValue2Rowset(editingValue)) {
-                        // if the value has been rejected by rowset we must
-                        // reflect rowset's value in the control.
-                        setEditingValue(getValueFromRowset());
-                    }
                 }
             } catch (Exception ex) {
                 Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -165,12 +226,12 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
-    public DbControlPanel() {
+    public ModelComponentDecorator() {
         super();
         extraTools.setBorder(null);
         extraTools.setBorderPainted(false);
         extraTools.setFloatable(false);
-        addFocusListener(new DbControlFocusAdapter());
+        addFocusListener(new ModelWidgetFocusAdapter());
         setOpaque(true);
         iconLabel.setOpaque(true);
         initializeDesign();
@@ -204,7 +265,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         applyEditable2NonField();
     }
 
-    @Override
     public void fireCellEditingCompleted() {
         editorListeners.stream().forEach((l) -> {
             if (l instanceof DbControlEditingListener) {
@@ -214,7 +274,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void checkEvents(Component aComp) {
-        if (aComp != null && model != null) {
+        if (aComp != null) {
             ControlEventsIProxy.reflectionInvokeARListener(aComp, "addActionListener", ActionListener.class, (ActionListener) (ActionEvent e) -> {
                 fireActionPerformed(e);
             });
@@ -223,7 +283,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mouseClicked(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseListener ml : mls) {
                             ml.mouseClicked(e);
                         }
@@ -234,7 +294,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mousePressed(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseListener ml : mls) {
                             ml.mousePressed(e);
                         }
@@ -245,7 +305,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mouseReleased(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseListener ml : mls) {
                             ml.mouseReleased(e);
                         }
@@ -256,7 +316,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mouseEntered(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseListener ml : mls) {
                             ml.mouseEntered(e);
                         }
@@ -267,7 +327,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mouseExited(MouseEvent e) {
                     MouseListener[] mls = getMouseListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseListener ml : mls) {
                             ml.mouseExited(e);
                         }
@@ -279,7 +339,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mouseDragged(MouseEvent e) {
                     MouseMotionListener[] mls = getMouseMotionListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseMotionListener mml : mls) {
                             mml.mouseDragged(e);
                         }
@@ -290,7 +350,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void mouseMoved(MouseEvent e) {
                     MouseMotionListener[] mls = getMouseMotionListeners();
                     if (mls != null && e.getSource() instanceof Component) {
-                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                        e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                         for (MouseMotionListener mml : mls) {
                             mml.mouseMoved(e);
                         }
@@ -300,7 +360,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
             aComp.addMouseWheelListener((MouseWheelEvent e) -> {
                 MouseWheelListener[] mls = getMouseWheelListeners();
                 if (mls != null && e.getSource() instanceof Component) {
-                    e = (MouseWheelEvent) SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbControlPanel.this);
+                    e = (MouseWheelEvent) SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelComponentDecorator.this);
                     for (MouseWheelListener mwl : mls) {
                         mwl.mouseWheelMoved(e);
                     }
@@ -312,9 +372,9 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void focusGained(FocusEvent e) {
                     FocusListener[] fls = getFocusListeners();
                     if (fls != null) {
-                        e.setSource(DbControlPanel.this);
+                        e.setSource(ModelComponentDecorator.this);
                         for (FocusListener fl : fls) {
-                            if (!(fl instanceof DbControlFocusAdapter)) {
+                            if (!(fl instanceof ModelComponentDecorator.ModelWidgetFocusAdapter)) {
                                 fl.focusGained(e);
                             }
                         }
@@ -325,9 +385,9 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void focusLost(FocusEvent e) {
                     FocusListener[] fls = getFocusListeners();
                     if (fls != null) {
-                        e.setSource(DbControlPanel.this);
+                        e.setSource(ModelComponentDecorator.this);
                         for (FocusListener fl : fls) {
-                            if (!(fl instanceof DbControlFocusAdapter)) {
+                            if (!(fl instanceof ModelComponentDecorator.ModelWidgetFocusAdapter)) {
                                 fl.focusLost(e);
                             }
                         }
@@ -340,7 +400,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void keyTyped(KeyEvent e) {
                     KeyListener[] kls = getKeyListeners();
                     if (kls != null) {
-                        e.setSource(DbControlPanel.this);
+                        e.setSource(ModelComponentDecorator.this);
                         for (KeyListener kl : kls) {
                             kl.keyTyped(e);
                         }
@@ -351,7 +411,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void keyPressed(KeyEvent e) {
                     KeyListener[] kls = getKeyListeners();
                     if (kls != null) {
-                        e.setSource(DbControlPanel.this);
+                        e.setSource(ModelComponentDecorator.this);
                         for (KeyListener kl : kls) {
                             kl.keyPressed(e);
                         }
@@ -362,7 +422,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 public void keyReleased(KeyEvent e) {
                     KeyListener[] kls = getKeyListeners();
                     if (kls != null) {
-                        e.setSource(DbControlPanel.this);
+                        e.setSource(ModelComponentDecorator.this);
                         for (KeyListener kl : kls) {
                             kl.keyReleased(e);
                         }
@@ -385,7 +445,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         initializeBorder();
     }
 
-    @Override
     public void applyStyle(CascadedStyle aStyle) {
         if (aStyle != null) {
             setFont(DbControlsUtils.toNativeFont(aStyle.getFont()));
@@ -406,7 +465,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void applyAlign() {
-        if (align == SwingConstants.RIGHT && kind != InitializingMethod.EDITOR) {
+        if (align == SwingConstants.RIGHT) {
             add(new JLabel(" "), BorderLayout.EAST);
         }
     }
@@ -498,7 +557,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         return super.isFocusable() && isEnabled();
     }
 
-    @Undesignable
     public Icon getIcon() {
         return icon;
     }
@@ -526,6 +584,143 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         super.setEnabled(enabled);
         applyEnabled();
     }
+
+    // binding
+    protected JSObject data;
+    protected String field;
+    private static final String FIELD_JSDOC = ""
+            + "/**\n"
+            + "* Model binding field.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = FIELD_JSDOC)
+    public String getField() {
+        return field;
+    }
+
+    @ScriptFunction
+    public void setField(String aField) throws Exception {
+        if (field == null ? aField != null : !field.equals(aField)) {
+            field = aField;
+            configure();
+            revalidate();
+            repaint();
+        }
+    }
+
+    private static final String ON_SELECT_JSDOC = ""
+            + "/**\n"
+            + "* Component's selection event handler function.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_SELECT_JSDOC)
+    @Override
+    public JSObject getOnSelect() {
+        return onSelect;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnSelect(JSObject aValue) throws Exception {
+        onSelect = aValue;
+        createFieldExtraEditingControls(onSelect, true);
+        revalidate();
+        repaint();
+    }
+
+    private static final String ON_RENDER_JSDOC = ""
+            + "/**\n"
+            + "* Component's rendering event handler function.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
+    @EventMethod(eventClass = CellRenderEvent.class)
+    @Override
+    public JSObject getOnRender() {
+        return onRender;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnRender(JSObject aValue) {
+        onRender = aValue;
+    }
+
+    private static final String VALUE_JSDOC = ""
+            + "/**\n"
+            + "* Widget's value.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @Override
+    public V getValue() {
+        return value;
+    }
+
+    @Override
+    public void setValue(V aValue) {
+        V oldValue = value;
+        value = aValue;
+        if (standalone) {
+            firePropertyChange(VALUE_PROP_NAME, oldValue, aValue);
+        } else {
+            fireCellEditingCompleted();
+        }
+    }
+
+    @Override
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+    private static final String VALUE_PROP_NAME = "value";
+
+    protected String error;
+    protected JPanel errorPanel = new JPanel();
+
+    private static final String ERROR_JSDOC = ""
+            + "/**\n"
+            + "* Widget's error message.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ERROR_JSDOC)
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String aValue) {
+        error = aValue;
+        remove(errorPanel);
+        if (aValue != null) {
+            errorPanel.setBackground(Color.red);
+            errorPanel.setToolTipText(aValue);
+            errorPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 2));
+            add(errorPanel, BorderLayout.SOUTH);
+        }
+        revalidate();
+        repaint();
+    }
+
+    private static final String REDRAW_JSDOC = ""
+            + "/**\n"
+            + "* Redraw the component.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = REDRAW_JSDOC)
+    public void redraw() {
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void setOpaque(boolean isOpaque) {
+        if (standalone) {
+            super.setOpaque(isOpaque);
+            applyOpaque();
+        } else {
+            super.setOpaque(false);
+        }
+    }
+
     // table or tree cell editing
     protected InitializingMethod kind = InitializingMethod.UNDEFINED;
 
@@ -554,35 +749,17 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
-    @Override
-    public void setOpaque(boolean isOpaque) {
-        if (standalone) {
-            super.setOpaque(isOpaque);
-            applyOpaque();
+    protected void setupCellBorder(boolean hasFocus) {
+        assert !standalone;
+        if (hasFocus) {
+            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
         } else {
-            super.setOpaque(false);
+            super.setBorder(null);
         }
     }
 
-    @Override
-    public void beginUpdate() {
-        assert (updateCounter >= 0);
-        updateCounter++;
-    }
-
-    @Override
-    public boolean isUpdating() {
-        return updateCounter > 0;
-    }
-
-    @Override
-    public void endUpdate() {
-        assert (updateCounter > 0);
-        updateCounter--;
-    }
-
     protected void setupEditor(JTable table) {
-        if (!standalone && !isUpdating()) {
+        if (!standalone) {
             extraTools.setVisible(false);
             EventQueue.invokeLater(this::invokingLaterProcessControls);
         }
@@ -598,83 +775,20 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         extraTools.setVisible(false);
     }
 
-    protected void setupCellBorder(boolean hasFocus) {
-        assert !standalone;
-        if (hasFocus) {
-            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-        } else {
-            super.setBorder(null);
-        }
-    }
-    protected CascadedStyle styleValue;
-    protected Object displayingValue;
-
-    @Override
-    public Object achiveDisplayValue(Object aValue) throws Exception {
-        return aValue;
-    }
-
-    protected void acceptCellValue(Object aValue) throws Exception {
-        if (standalone && published != null
-                && onRender != null) {
-            Object dataToProcess = aValue instanceof CellData ? ((CellData) aValue).data : aValue;
-            final CellData cd = new CellData(new CascadedStyle(), dataToProcess, achiveDisplayValue(dataToProcess));
-            Boolean handled;
-            Row row = null;
-            if (rsEntity != null && !rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
-                row = rsEntity.getRowset().getCurrentRow();
-            }
-            Object[] rowIds = null;
-            if (row != null) {
-                rowIds = row.getPKValues();
-            }
-            CellRenderEvent event = new CellRenderEvent(new DummyHasPublished(published), rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row);
-            Object retValue = ScriptUtils.toJava(onRender.call(published, new Object[]{event.getPublished()}));
-            if (retValue instanceof Boolean) {
-                handled = (Boolean) retValue;
-            } else {
-                handled = false;
-            }
-            if (Boolean.TRUE.equals(handled)) {
-                try {
-                    cd.data = ScriptUtils.toJava(cd.data);
-                    cd.display = ScriptUtils.toJava(cd.display);
-                    aValue = cd;
-                } catch (Exception ex) {
-                    Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        if (aValue instanceof CellData) {
-            CellData cd = (CellData) aValue;
-            editingValue = cd.data;
-            styleValue = cd.style;
-            displayingValue = cd.display;
-        } else {
-            editingValue = aValue;
-            styleValue = null;
-            displayingValue = null;
-        }
-    }
-
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         try {
-            assert model != null;
             initializeRenderer();
-            acceptCellValue(value);
+            setValue((V) value);
             setupRenderer(table, row, column, isSelected);
             setupCellBorder(hasFocus);
             if (isSelected) {
                 setBackground(table.getSelectionBackground());
+                setOpaque(true);
             } else {
                 setBackground(table.getBackground());
+                setOpaque(false);
             }
-            applyStyle(styleValue);
-            if (isSelected) {
-                setBackground(table.getSelectionBackground());
-            }
-            setOpaque(false);
             return this;
         } catch (Exception ex) {
             Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -685,11 +799,9 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         try {
-            assert model != null;
             initializeEditor();
-            acceptCellValue(value);
+            setValue((V) value);
             setupEditor(table);
-            applyStyle(styleValue);
             return this;
         } catch (Exception ex) {
             Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -767,46 +879,14 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         });
     }
 
-    // datamodel interacting
-    protected ModelElementRef datamodelElement;
-    protected ApplicationModel<?, ?> model;
-    protected ApplicationEntity<?, ?, ?> rsEntity;
-    protected int colIndex;
-    protected DbControlRowsetListener rowsetListener;
-    protected JSObject published;
-
-    protected void bind() throws Exception {
-        assert model != null;
-        if (datamodelElement != null) {
-            ApplicationEntity<?, ?, ?> entity = model.getEntityById(datamodelElement.getEntityId());
-            if (entity != null && datamodelElement.getFieldName() != null && !datamodelElement.getFieldName().isEmpty()) {
-                Rowset rowset = entity.getRowset();
-                if (rowset != null) {
-                    rsEntity = entity;
-                    colIndex = rowset.getFields().find(datamodelElement.getFieldName());
-                    if (rowsetListener != null) {
-                        rowset.removeRowsetListener(rowsetListener);
-                    }
-                    rowsetListener = new DbControlRowsetListener(this);
-                    rowset.addRowsetListener(rowsetListener);
-                }
-            }
-        }
-    }
-
     @Override
     public boolean isSelectOnly() {
-        if (kind != InitializingMethod.UNDEFINED) {
-            return selectOnly;
-        }
-        return false;
+        return selectOnly;
     }
 
     @Override
     public void setSelectOnly(boolean aValue) {
-        if (kind != InitializingMethod.UNDEFINED) {
-            selectOnly = aValue;
-        }
+        selectOnly = aValue;
         applyEditable();
     }
 
@@ -820,78 +900,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
-    @Override
-    public ApplicationEntity<?, ?, ?> getBaseEntity() {
-        return rsEntity;
-    }
-
-    ///// script interface /////
-    public Object getValue() throws Exception {
-        return editingValue;
-    }
-
-    public void setValue(Object aValue) throws Exception {
-        if (standalone) {
-            if (rsEntity == null || rsEntity.getRowset() == null || colIndex == 0) {
-                setEditingValue(aValue);
-            } else if (!setValue2Rowset(aValue)) {
-                // if the value has been rejected by rowset we must
-                // reflect rowset's value in the control.
-                setEditingValue(getValueFromRowset());
-            }
-        } else {
-            setEditingValue(aValue);
-            fireCellEditingCompleted();
-        }
-    }
-    //////////////////////////////
-
-    @Override
-    public void setEditingValue(Object aValue) {
-        try {
-            acceptCellValue(aValue);
-            setupEditor(null);
-            if (styleValue != null) {
-                applyStyle(styleValue);
-            }
-            repaint();
-        } catch (Exception ex) {
-            Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-        }
-    }
-
-    @Override
-    public Object getValueFromRowset() throws Exception {
-        if (rsEntity != null && rsEntity.getRowset() != null && colIndex > 0) {
-            if (!rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
-                Object value = rsEntity.getRowset().getObject(colIndex);
-                /*
-                if (value == null && datamodelElement != null) {
-                    value = rsEntity.getSubstituteRowsetObject(datamodelElement.getFieldName());
-                }
-                */
-                return value;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public boolean setValue2Rowset(Object aValue) throws Exception {
-        if (!(aValue instanceof DummyControlValue) && !isUpdating() && rsEntity != null
-                && rsEntity.getRowset() != null && colIndex > 0) {
-            if (!rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
-                try {
-                    return rsEntity.getRowset().updateObject(colIndex, aValue);
-                } catch (Exception ex) {
-                    setEditingValue(rsEntity.getRowset().getObject(colIndex));
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
     public void setBorderless(boolean aBorderless) {
         borderless = aBorderless;
         if (borderless) {
@@ -906,135 +914,53 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     @Override
     public boolean isFieldContentModified() {
-        return model == null;
+        return data == null;
     }
 
-    @Override
-    public int getColIndex() {
-        return colIndex;
-    }
-
-    @Override
-    public ApplicationModel<?, ?> getModel() {
-        return model;
-    }
-
-    @Override
-    public void setModel(ApplicationModel<?, ?> aModel) throws Exception {
-        ApplicationModel<?, ?> oldValue = model;
-        if (model != aModel) {
-            if (model != null) {
-                unbind();
-            }
-            model = aModel;
-            firePropertyChange("datamodel", oldValue, model);
-        }
-    }
-
-    @Designable(displayName = "field", category = "model")
-    @Override
-    public ModelElementRef getDatamodelElement() {
-        return datamodelElement;
-    }
-
-    @Override
-    public void setDatamodelElement(ModelElementRef aValue) throws Exception {
-        if (datamodelElement != aValue) {
-            datamodelElement = aValue;
-        }
-    }
     protected boolean standalone = true;
     protected JSObject onSelect;
     protected JSObject onRender;
 
-    @Override
-    public void cleanup() {
+    protected void cleanup() {
         removeAll();
     }
 
-    @Override
-    public void configure() throws Exception {
+    protected void configure() throws Exception {
         cleanup();
         if (standalone) {
-            if (model != null) {
-                kind = InitializingMethod.UNDEFINED;
-                unbind();
-                bind();
-                createFieldExtraEditingControls();
-                removeAll();
-                initializeEditor();
-                extraTools.setVisible(editable);
-                initializeBorder();
-                initializeFocusListener();
-            } else {
-                initializeDesign();
-            }
-        } else {
-            // addExtraControls(createCellExtraEditingControls());
-            // This work is moved to client code (grid or veer columns initializing)
+            kind = InitializingMethod.UNDEFINED;
+            createFieldExtraEditingControls(onSelect, true);
+            initializeEditor();
+            extraTools.setVisible(editable);
+            initializeBorder();
+            initializeFocusListener();
         }
     }
 
-    protected void createFieldExtraEditingControls() throws Exception {
-        boolean nullable = true;
+    protected void createFieldExtraEditingControls(JSObject aSelectFunction, boolean nullable) throws Exception {
         extraTools.removeAll();
-        if (rsEntity != null) {
-            Fields fields = rsEntity.getFields();
-            Field field = fields.get(colIndex);
-            if (field != null) {
-                if (onSelect != null) {
-                    JButton btnSelectingField = new JButton();
-                    btnSelectingField.setAction(new FieldValueSelectorAction());
-                    btnSelectingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
-                    btnSelectingField.setFocusable(false);
-                    extraTools.add(btnSelectingField);
-                }
-                nullable = field.isNullable();
-            }
-        }
-        if (nullable) {
-            JButton btnNullingField = new JButton();
-            btnNullingField.setAction(new FieldNullerAction());
-            btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
-            btnNullingField.setFocusable(false);
-            extraTools.add(btnNullingField);
-        }
-    }
-
-    @Override
-    public void extraCellControls(JSObject aSelectFunction, boolean nullable) throws Exception {
-        extraTools.removeAll();
-        extraTools.setBorder(null);
-        extraTools.setFloatable(false);
         if (aSelectFunction != null) {
             JButton btnSelectingField = new JButton();
-            btnSelectingField.setAction(new CellValueSelectorAction(aSelectFunction));
+            btnSelectingField.setAction(new ModelComponentDecorator.ValueSelectorAction(aSelectFunction));
             btnSelectingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
             btnSelectingField.setFocusable(false);
             extraTools.add(btnSelectingField);
         }
         if (nullable) {
             JButton btnNullingField = new JButton();
-            btnNullingField.setAction(new CellNullerAction());
+            btnNullingField.setAction(new NullerAction());
             btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
             btnNullingField.setFocusable(false);
             extraTools.add(btnNullingField);
         }
     }
 
-    protected void unbind() throws Exception {
-        if (rsEntity != null && rowsetListener != null) {
-            rsEntity.getRowset().removeRowsetListener(rowsetListener);
-        }
-    }
-
-    @Override
     public boolean haveNullerAction() {
         Component[] comps = extraTools.getComponents();
         for (Component comp : comps) {
             if (comp instanceof AbstractButton) {
                 AbstractButton ab = (AbstractButton) comp;
-                if (ab.getAction() instanceof NullerAction) {
+                if (ab.getAction() instanceof ModelComponentDecorator.NullerAction) {
                     return true;
                 }
             }
@@ -1042,7 +968,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         return false;
     }
 
-    private abstract class NullerAction extends AbstractAction {
+    private class NullerAction extends AbstractAction {
 
         NullerAction() {
             super();
@@ -1051,100 +977,37 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
             putValue(Action.SMALL_ICON, IconCache.getIcon("16x16/delete.png"));
         }
 
-        protected abstract void applyValue(Object aObject) throws Exception;
-
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                applyValue(null);
+                setValue(null);
             } catch (Exception ex) {
                 Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    private class FieldNullerAction extends NullerAction {
+    private class ValueSelectorAction extends AbstractAction {
 
-        @Override
-        protected void applyValue(Object aObject) throws Exception {
-            setValue(null);
-        }
-    }
+        protected JSObject selector;
 
-    private class CellNullerAction extends NullerAction {
-
-        @Override
-        protected void applyValue(Object aObject) throws Exception {
-            setEditingValue(null);
-            fireCellEditingCompleted();
-        }
-    }
-
-    private abstract class ValueSelectorAction extends AbstractAction {
-
-        ValueSelectorAction() {
+        ValueSelectorAction(JSObject aSelector) {
             super();
             putValue(Action.NAME, "...");
             putValue(Action.SHORT_DESCRIPTION, DbControlsUtils.getLocalizedString(ValueSelectorAction.class.getSimpleName()));
+            selector = aSelector;
         }
-
-        protected abstract JSObject getSelectFunction();
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final JSObject onSelect = getSelectFunction();
-            if (onSelect != null && published != null) {
+            if (selector != null && published != null) {
                 try {
-                    onSelect.call(published, new Object[]{published});
+                    selector.call(published, new Object[]{published});
                 } catch (Exception ex) {
                     Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
-    }
-
-    private class FieldValueSelectorAction extends ValueSelectorAction {
-
-        @Override
-        protected JSObject getSelectFunction() {
-            return onSelect;
-        }
-    }
-
-    private class CellValueSelectorAction extends ValueSelectorAction {
-
-        protected JSObject selectFunction;
-
-        public CellValueSelectorAction(JSObject aSelectFunction) {
-            super();
-            selectFunction = aSelectFunction;
-        }
-
-        @Override
-        protected JSObject getSelectFunction() {
-            return selectFunction;
-        }
-    }
-
-    @Override
-    public JSObject getOnSelect() {
-        return onSelect;
-    }
-
-    @Override
-    public void setOnSelect(JSObject aHandler) throws Exception {
-        onSelect = aHandler;
-        createFieldExtraEditingControls();
-    }
-
-    @Override
-    public JSObject getOnRender() {
-        return onRender;
-    }
-
-    @Override
-    public void setOnRender(JSObject aHandler) {
-        onRender = aHandler;
     }
 
     @Override

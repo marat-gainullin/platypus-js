@@ -13,7 +13,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelSpin extends ScalarModelComponent<DbSpin> {
+public class ModelSpin extends ModelComponentDecorator<DbSpin> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"

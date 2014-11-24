@@ -9,7 +9,7 @@ import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.dbcontrols.DbControlEditingListener;
-import com.eas.dbcontrols.ScalarDbControl;
+import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;

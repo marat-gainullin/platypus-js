@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelDate extends ScalarModelComponent<DbDate> {
+public class ModelDate extends ModelComponentDecorator<DbDate> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"

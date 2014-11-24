@@ -5,7 +5,7 @@
 package com.eas.dbcontrols.grid.rt.columns.model;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.dbcontrols.ScalarDbControl;
+import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.HasStyle;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.HasPublished;

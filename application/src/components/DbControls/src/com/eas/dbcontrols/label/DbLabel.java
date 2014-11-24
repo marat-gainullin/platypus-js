@@ -6,7 +6,7 @@ package com.eas.dbcontrols.label;
 
 import com.eas.client.SQLUtils;
 import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.IconCache;
 import com.eas.dbcontrols.InitializingMethod;
 import com.eas.dbcontrols.label.rt.ModifiableTextField;

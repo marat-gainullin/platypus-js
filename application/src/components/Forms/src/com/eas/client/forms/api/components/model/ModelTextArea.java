@@ -14,7 +14,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelTextArea extends ScalarModelComponent<DbText> {
+public class ModelTextArea extends ModelComponentDecorator<DbText> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"

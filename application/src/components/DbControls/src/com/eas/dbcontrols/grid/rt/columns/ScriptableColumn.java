@@ -6,7 +6,7 @@ package com.eas.dbcontrols.grid.rt.columns;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
-import com.eas.dbcontrols.ScalarDbControl;
+import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;

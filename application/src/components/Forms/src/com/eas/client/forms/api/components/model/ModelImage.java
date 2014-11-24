@@ -13,7 +13,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelImage extends ScalarModelComponent<DbImage> {
+public class ModelImage extends ModelComponentDecorator<DbImage> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"

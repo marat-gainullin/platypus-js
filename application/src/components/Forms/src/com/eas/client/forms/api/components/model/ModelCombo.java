@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelCombo extends ScalarModelComponent<DbCombo> {
+public class ModelCombo extends ModelComponentDecorator<DbCombo> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"

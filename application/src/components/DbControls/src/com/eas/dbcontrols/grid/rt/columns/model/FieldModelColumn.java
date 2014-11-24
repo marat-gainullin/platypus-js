@@ -6,7 +6,7 @@ package com.eas.dbcontrols.grid.rt.columns.model;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
-import com.eas.dbcontrols.ScalarDbControl;
+import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.HasStyle;
 import jdk.nashorn.api.scripting.JSObject;
 

@@ -6,7 +6,7 @@ package com.eas.dbcontrols.check;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.InitializingMethod;
 import com.eas.dbcontrols.check.rt.NullableCheckBox;
 import java.awt.BorderLayout;

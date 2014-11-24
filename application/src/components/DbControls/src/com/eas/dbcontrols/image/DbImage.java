@@ -7,7 +7,7 @@ package com.eas.dbcontrols.image;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.dbcontrols.IconCache;
 import com.eas.dbcontrols.InitializingMethod;

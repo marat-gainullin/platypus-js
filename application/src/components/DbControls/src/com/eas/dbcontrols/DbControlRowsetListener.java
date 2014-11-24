@@ -1,5 +1,6 @@
 package com.eas.dbcontrols;
 
+import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetFilterEvent;

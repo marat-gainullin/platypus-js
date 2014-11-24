@@ -53,7 +53,7 @@ public class ModelGrid extends Component<DbGrid> {
             try {
                 delegate.configure();
             } catch (Exception ex) {
-                Logger.getLogger(ScalarModelComponent.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

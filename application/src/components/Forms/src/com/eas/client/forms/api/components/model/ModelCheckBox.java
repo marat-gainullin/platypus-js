@@ -13,7 +13,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
+public class ModelCheckBox extends ModelComponentDecorator<DbCheck> {
 
     public ModelCheckBox() throws Exception {
         super();

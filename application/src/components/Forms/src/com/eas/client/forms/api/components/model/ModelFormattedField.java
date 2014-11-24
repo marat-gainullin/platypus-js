@@ -16,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
+public class ModelFormattedField extends ModelComponentDecorator<DbLabel> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"

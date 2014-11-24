@@ -12,7 +12,7 @@ import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.queries.Query;
-import com.eas.dbcontrols.RowsetDbControl;
+import com.eas.client.forms.api.components.model.RowsetDbControl;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;

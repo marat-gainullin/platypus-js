@@ -1,5 +1,7 @@
 package com.eas.dbcontrols.grid;
 
+import com.eas.client.forms.api.components.model.ScalarDbControl;
+import com.eas.client.forms.api.components.model.RowsetDbControl;
 import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.constraints.LinearConstraint;
 import com.bearsoft.gui.grid.data.CachingTableModel;

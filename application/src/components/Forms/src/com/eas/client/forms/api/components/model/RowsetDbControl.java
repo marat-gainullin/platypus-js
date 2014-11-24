@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols;
+package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.Row;
+import com.eas.dbcontrols.DbControl;
 
 /**
  * Interace for rowset data aware control.

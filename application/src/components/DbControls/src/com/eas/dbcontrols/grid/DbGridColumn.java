@@ -10,7 +10,7 @@ import com.eas.client.model.ModelEntityRef;
 import com.eas.controls.DesignInfo;
 import com.eas.dbcontrols.DbControlDesignInfo;
 import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.ScalarDbControl;
+import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.eas.dbcontrols.grid.rt.DummyCellEditor;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.design.Designable;

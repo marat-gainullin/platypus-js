@@ -23,7 +23,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.InitializingMethod;
 import com.eas.dbcontrols.combo.rt.DbComboBox;
 import com.eas.dbcontrols.combo.rt.SemiBorderTextField;

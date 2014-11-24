@@ -5,7 +5,7 @@
 package com.eas.dbcontrols.spin;
 
 import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.InitializingMethod;
 import com.eas.controls.AdaptiveDecimalFormatter;
 import com.eas.dbcontrols.spin.rt.NullableSpinner;
