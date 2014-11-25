@@ -8,27 +8,7 @@ import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
 import com.eas.client.forms.api.HasEmptyText;
 import com.eas.client.forms.api.HasJsName;
-import static com.eas.client.forms.api.HasJsName.JS_NAME_DOC;
 import com.eas.client.forms.api.Widget;
-import static com.eas.client.forms.api.Widget.BACKGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.COMPONENT_POPUP_MENU_JSDOC;
-import static com.eas.client.forms.api.Widget.CURSOR_JSDOC;
-import static com.eas.client.forms.api.Widget.ENABLED_JSDOC;
-import static com.eas.client.forms.api.Widget.ERROR_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUSABLE_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUS_JSDOC;
-import static com.eas.client.forms.api.Widget.FONT_JSDOC;
-import static com.eas.client.forms.api.Widget.FOREGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.GET_NEXT_FOCUSABLE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.HEIGHT_JSDOC;
-import static com.eas.client.forms.api.Widget.LEFT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_ELEMENT_JSDOC;
-import static com.eas.client.forms.api.Widget.OPAQUE_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOOLTIP_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOP_JSDOC;
-import static com.eas.client.forms.api.Widget.VISIBLE_JSDOC;
-import static com.eas.client.forms.api.Widget.WIDTH_JSDOC;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
@@ -44,7 +24,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.text.DecimalFormat;
+import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -54,7 +34,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class TextField extends JTextField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
+public class TextField extends JTextField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, HasValue<String>, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -70,6 +50,33 @@ public class TextField extends JTextField implements HasPublished, HasComponentE
     public TextField() {
         this((String) null);
     }
+
+    private static final String VALUE_JSDOC = ""
+            + "/**\n"
+            + "* Widget's value.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @Override
+    public String getValue() {
+        return nullValue ? null : super.getText();
+    }
+
+    private boolean nullValue;
+    
+    @ScriptFunction
+    @Override
+    public void setValue(String aValue) {
+        nullValue = aValue == null;
+        setText(aValue != null ? aValue : "");
+    }
+
+    @Override
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+    
+    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override
@@ -314,21 +321,6 @@ public class TextField extends JTextField implements HasPublished, HasComponentE
     @Override
     public void setText(String aValue) {
         super.setText(aValue);
-    }
-
-    @ScriptFunction
-    public Object getValue() {
-        return getText();
-    }
-
-    @ScriptFunction
-    public void setValue(Object aValue) {
-        if (aValue instanceof Number) {
-            Number n = (Number) aValue;
-            DecimalFormat df = new DecimalFormat();
-            aValue = df.format(n.doubleValue());
-        }
-        setText(aValue != null ? aValue.toString() : null);
     }
 
     protected String emptyText;

@@ -9,7 +9,7 @@ import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.dbcontrols.DbControl;
 import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.IconCache;
+import com.eas.client.forms.IconCache;
 import com.eas.dbcontrols.InitializingMethod;
 import com.eas.dbcontrols.image.rt.AllwaysOpaqueLabel;
 import com.eas.dbcontrols.image.rt.ImagePanel;

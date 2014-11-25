@@ -43,6 +43,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
@@ -350,6 +351,11 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
         super.setValue(aValue);
     }
 
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+    
+    private static final String VALUE_PROP_NAME = "value";
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * String representation of the current progress.\n"

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols;
+package com.eas.client.forms;
 
 import java.awt.Image;
 import java.net.URL;

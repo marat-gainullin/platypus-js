@@ -7,7 +7,7 @@ package com.eas.dbcontrols.grid.rt.rowheader;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.IconCache;
+import com.eas.client.forms.IconCache;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
 import java.awt.BorderLayout;

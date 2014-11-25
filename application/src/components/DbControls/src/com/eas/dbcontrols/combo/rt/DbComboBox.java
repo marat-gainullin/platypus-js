@@ -6,7 +6,7 @@ package com.eas.dbcontrols.combo.rt;
 
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.IconCache;
+import com.eas.client.forms.IconCache;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;

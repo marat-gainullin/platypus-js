@@ -23,7 +23,7 @@ import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.IconCache;
+import com.eas.client.forms.IconCache;
 import com.eas.dbcontrols.grid.rt.models.RowsetsTableModel;
 import com.eas.gui.CascadedStyle;
 import java.awt.Color;

@@ -7,32 +7,13 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
 import com.eas.client.forms.api.HasJsName;
-import static com.eas.client.forms.api.HasJsName.JS_NAME_DOC;
 import com.eas.client.forms.api.Widget;
-import static com.eas.client.forms.api.Widget.BACKGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.COMPONENT_POPUP_MENU_JSDOC;
-import static com.eas.client.forms.api.Widget.CURSOR_JSDOC;
-import static com.eas.client.forms.api.Widget.ENABLED_JSDOC;
-import static com.eas.client.forms.api.Widget.ERROR_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUSABLE_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUS_JSDOC;
-import static com.eas.client.forms.api.Widget.FONT_JSDOC;
-import static com.eas.client.forms.api.Widget.FOREGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.GET_NEXT_FOCUSABLE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.HEIGHT_JSDOC;
-import static com.eas.client.forms.api.Widget.LEFT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_ELEMENT_JSDOC;
-import static com.eas.client.forms.api.Widget.OPAQUE_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOOLTIP_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOP_JSDOC;
-import static com.eas.client.forms.api.Widget.VISIBLE_JSDOC;
-import static com.eas.client.forms.api.Widget.WIDTH_JSDOC;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.dbcontrols.IconCache;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -43,6 +24,9 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Objects;
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -52,7 +36,10 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class CheckBox extends JCheckBox implements HasPublished, HasComponentEvents, HasJsName, Widget {
+public class CheckBox extends JCheckBox implements HasPublished, HasComponentEvents, HasJsName, HasValue<Boolean>, Widget {
+
+    protected static Icon nullIcon = IconCache.getIcon("16x16/nullCheck.gif");
+    protected Icon ordinaryIcon;
 
     public CheckBox(String aText, boolean aSelected) {
         this(aText, aSelected, null);
@@ -69,6 +56,7 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super(aText, aSelected);
+        ordinaryIcon = getIcon();
         setOnActionPerformed(aActionPerformedHandler);
     }
 
@@ -79,6 +67,35 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
     public CheckBox() {
         this(null, false);
     }
+
+    private static final String VALUE_JSDOC = ""
+            + "/**\n"
+            + "* Widget's value.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @Override
+    public Boolean getValue() {
+        return getIcon() == nullIcon ? null : super.isSelected();
+    }
+
+    @Override
+    public void setValue(Boolean aValue) {
+        if (aValue == null) {
+            setIcon(nullIcon);
+            super.setSelected(false);
+        } else {
+            setIcon(ordinaryIcon);
+            super.setSelected(aValue);
+        }
+    }
+
+    @Override
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override

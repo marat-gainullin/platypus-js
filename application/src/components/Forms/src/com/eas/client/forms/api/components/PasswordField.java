@@ -8,27 +8,7 @@ import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
 import com.eas.client.forms.api.HasEmptyText;
 import com.eas.client.forms.api.HasJsName;
-import static com.eas.client.forms.api.HasJsName.JS_NAME_DOC;
 import com.eas.client.forms.api.Widget;
-import static com.eas.client.forms.api.Widget.BACKGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.COMPONENT_POPUP_MENU_JSDOC;
-import static com.eas.client.forms.api.Widget.CURSOR_JSDOC;
-import static com.eas.client.forms.api.Widget.ENABLED_JSDOC;
-import static com.eas.client.forms.api.Widget.ERROR_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUSABLE_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUS_JSDOC;
-import static com.eas.client.forms.api.Widget.FONT_JSDOC;
-import static com.eas.client.forms.api.Widget.FOREGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.GET_NEXT_FOCUSABLE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.HEIGHT_JSDOC;
-import static com.eas.client.forms.api.Widget.LEFT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_ELEMENT_JSDOC;
-import static com.eas.client.forms.api.Widget.OPAQUE_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOOLTIP_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOP_JSDOC;
-import static com.eas.client.forms.api.Widget.VISIBLE_JSDOC;
-import static com.eas.client.forms.api.Widget.WIDTH_JSDOC;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
@@ -44,6 +24,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPasswordField;
 import javax.swing.JPopupMenu;
@@ -53,7 +34,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PasswordField extends JPasswordField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
+public class PasswordField extends JPasswordField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, HasValue<String>, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -306,7 +287,7 @@ public class PasswordField extends JPasswordField implements HasPublished, HasCo
             + " */")
     @Override
     public String getText() {
-        return new String(super.getPassword());
+        return super.getPassword() != null ? new String(super.getPassword()) : null;
     }
 
     @ScriptFunction
@@ -319,14 +300,26 @@ public class PasswordField extends JPasswordField implements HasPublished, HasCo
             + "/**\n"
             + " * The value of this component.\n"
             + " */")
+    @Override
     public String getValue() {
-        return new String(super.getPassword());
+        return nullValue ? null : new String(super.getPassword());
     }
 
+    private boolean nullValue;
+    
     @ScriptFunction
+    @Override
     public void setValue(String aValue) {
-        super.setText(aValue);
+        nullValue = aValue == null;
+        setText(aValue != null ? aValue : "");
     }
+
+    @Override
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    private static final String VALUE_PROP_NAME = "value";
 
     protected String emptyText;
 
