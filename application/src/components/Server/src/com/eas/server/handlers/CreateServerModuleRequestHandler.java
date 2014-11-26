@@ -41,6 +41,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
         if (moduleName == null || moduleName.isEmpty()) {
             onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
         } else {
+            Date clientModuleTime = getRequest().getTimeStamp();
             try {
                 ScriptedResource._require(new String[]{moduleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
                     try {
@@ -50,7 +51,6 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                             Set<String> functionProps = new HashSet<>();
                             CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(null);
                             Date serverModuleTime = files.getLastModified();
-                            Date clientModuleTime = getRequest().getTimeStamp();
                             if (clientModuleTime == null || serverModuleTime.after(clientModuleTime)) {
                                 ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
                                 checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
@@ -89,7 +89,13 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         }
                     } catch (AccessControlException ex) {
                         CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false));
-                        response.setTimeStamp(new Date(0));
+                        if (clientModuleTime == null) {
+                            // If a client has no the resource, let's give it a chance to update the resource, when it will be permitted
+                            response.setTimeStamp(new Date(0));
+                        } else {
+                            // Let's override client's resource timestamp to guarantee, that permitted == false will be accepted
+                            response.setTimeStamp(new Date(clientModuleTime.getTime() + 1000));
+                        }
                         onSuccess.accept(response);
                     } catch (Exception ex) {
                         onFailure.accept(ex);

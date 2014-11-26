@@ -60,24 +60,19 @@ public class TaggedFeedEndPoint {
                     if (tag != null) {
                         tag = tag.trim();
                         if (!tag.isEmpty()) {
-                            Principal principal = aPeer.getUserPrincipal();
-                            if (core.isUserInApplicationRole(principal != null ? principal.getName() : null, tag)) {
-                                Set<Session> taggedPeers = peersByTag.get(tag);
-                                if (taggedPeers == null) {
-                                    taggedPeers = new HashSet<>();
-                                    peersByTag.put(tag, taggedPeers);
-                                }
-                                taggedPeers.add(aPeer);
-
-                                Set<String> tags = tagsByPeer.get(aPeer.getId());
-                                if (tags == null) {
-                                    tags = new HashSet<>();
-                                    tagsByPeer.put(aPeer.getId(), tags);
-                                }
-                                tags.add(tag);
-                            } else {
-                                Logger.getLogger(TaggedFeedEndPoint.class.getName()).log(Level.SEVERE, String.format("User %s is not allowed to sign on tag %s", principal != null ? principal.getName() : String.valueOf(null), tag));
+                            Set<Session> taggedPeers = peersByTag.get(tag);
+                            if (taggedPeers == null) {
+                                taggedPeers = new HashSet<>();
+                                peersByTag.put(tag, taggedPeers);
                             }
+                            taggedPeers.add(aPeer);
+
+                            Set<String> tags = tagsByPeer.get(aPeer.getId());
+                            if (tags == null) {
+                                tags = new HashSet<>();
+                                tagsByPeer.put(aPeer.getId(), tags);
+                            }
+                            tags.add(tag);
                         }
                     }
                 }

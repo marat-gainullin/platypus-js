@@ -154,6 +154,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                                             synchronized (leveledLock) {
                                                 ScriptUtils.setLock(leveledLock);// provide lock to callback threads
                                                 try {
+                                                    CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getPropertyAllowedRoles().get(methodName), methodName);
                                                     Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
                                                     int asyncs = ScriptUtils.getAsyncsCount();
                                                     if (!(result instanceof Undefined) || asyncs == 0) {
