@@ -29,7 +29,6 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
 
     // protocol, acceptors
     private final Map<String, String> acceptors = new HashMap<>();
-    private final Set<String> authorizers = new HashSet<>();
     private final Set<String> residents = new HashSet<>();
 
     private final Map<String, Collection<String>> validators = new HashMap<>();
@@ -71,12 +70,6 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
                         }
                     });
                     if (annotations.stream().anyMatch((JsDoc.Tag tag) -> {
-                        return JsDoc.Tag.AUTHORIZER_TAG.equalsIgnoreCase(tag.getName());
-                    })) {
-                        authorizers.add(aAppElementName);
-                        Logger.getLogger(ServerTasksScanner.class.getName()).log(Level.INFO, "Authorizer \"{0}\" has been registered", aAppElementName);
-                    }
-                    if (annotations.stream().anyMatch((JsDoc.Tag tag) -> {
                         return JsDoc.Tag.RESIDENT_TAG.equalsIgnoreCase(tag.getName());
                     })) {
                         residents.add(aAppElementName);
@@ -96,10 +89,6 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
 
     public Map<String, String> getAcceptors() {
         return acceptors;
-    }
-
-    public Set<String> getAuthorizers() {
-        return authorizers;
     }
 
     public Set<String> getResidents() {

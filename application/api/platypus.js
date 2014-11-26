@@ -1176,7 +1176,7 @@
                             };
                         });
                     } else {
-                        throw "Access denied for module" + aModuleName + ". May be denied public access.";
+                        throw "Access denied for module " + aModuleName + ". May be denied public access.";
                     }
                 } else {
                     throw "This architecture does not support server modules.";

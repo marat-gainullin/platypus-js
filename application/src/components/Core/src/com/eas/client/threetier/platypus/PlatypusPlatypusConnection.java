@@ -199,7 +199,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     }
 
     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
-        startRequestTask(() -> {
+        Runnable doer = () -> {
             try {
                 IoSession ioSession = sessionsPool.achieveResource();
                 ioSession.setAttribute(RequestCallback.class.getSimpleName(), rqc);
@@ -274,14 +274,18 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     onFailure.accept(ex);
                 }
             }
-        });
+        };
+        if (onFailure != null) {
+            startRequestTask(doer);
+        } else {
+            doer.run();
+        }
     }
 
     @Override
     public <R extends Response> R executeRequest(Request rq) throws Exception {
         RequestCallback rqc = new RequestCallback(new RequestEnvelope(rq, null, null, null), null);
         enqueue(rqc, null);
-        rqc.waitCompletion();
         if (rqc.response instanceof ErrorResponse) {
             throw handleErrorResponse((ErrorResponse) rqc.response);
         } else {

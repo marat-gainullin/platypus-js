@@ -186,7 +186,7 @@ public class Application {
 		
 		Object.defineProperty(principal, "name", {get: function(){
 			var appClient = @com.eas.client.application.AppClient::getInstance()();
-			return '' + appClient.@com.eas.client.application.AppClient::getPrincipal();
+			return '' + appClient.@com.eas.client.application.AppClient::getPrincipal()();
 		}});
 		Object.defineProperty(principal, "hasRole", {value: function(){
 			return true;

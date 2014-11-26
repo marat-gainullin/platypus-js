@@ -148,7 +148,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     public void visit(CreateServerModuleRequest.Response resp) throws Exception {
         CreateServerModuleRequest.Response csmr = (CreateServerModuleRequest.Response) resp;
         if (csmr.getInfo() != null) {
-            assert resp.getTimeStamp() != null;
+            assert resp.getTimeStamp() == null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
             writeJsonResponse(moduleResponseToJson(csmr.getInfo().getFunctionsNames(), csmr.getInfo().isPermitted()), servletResponse);
         } else {

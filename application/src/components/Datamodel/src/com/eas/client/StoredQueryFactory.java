@@ -179,10 +179,10 @@ public class StoredQueryFactory {
         preserveDatasources = aPreserveDatasources;
     }
 
-    public String compileSubqueries(String aSqlText, QueryModel aModel) throws Exception{
+    public String compileSubqueries(String aSqlText, QueryModel aModel) throws Exception {
         return aSqlText;
     }
-    
+
     private void putParametersMetadata(SqlQuery aQuery, QueryModel aModel) {
         for (int i = 1; i <= aModel.getParameters().getParametersCount(); i++) {
             Parameter p = aModel.getParameters().get(i);
@@ -236,12 +236,17 @@ public class StoredQueryFactory {
                 switch (tag.getName().toLowerCase()) {
                     case JsDoc.Tag.ROLES_ALLOWED_TAG:
                         aQuery.getReadRoles().addAll(tag.getParams());
-                        aQuery.getWriteRoles().addAll(tag.getParams());
+                        if (aQuery.getWriteRoles().isEmpty()) {
+                            aQuery.getWriteRoles().addAll(tag.getParams());
+                        }
                         break;
                     case JsDoc.Tag.ROLES_ALLOWED_READ_TAG:
                         aQuery.getReadRoles().addAll(tag.getParams());
                         break;
                     case JsDoc.Tag.ROLES_ALLOWED_WRITE_TAG:
+                        if (!aQuery.getWriteRoles().isEmpty()) {
+                            aQuery.getWriteRoles().clear();
+                        }
                         aQuery.getWriteRoles().addAll(tag.getParams());
                         break;
                     case JsDoc.Tag.READONLY_TAG:
@@ -397,8 +402,9 @@ public class StoredQueryFactory {
      * query fields if <code>aTablyName</code> is query tably name in format:
      * #&lt;id&gt;.
      *
-     * @param aDatasourceName Database identifier, the query belongs to. That database is
-     * query-inner table metadata source, but query is stored in application.
+     * @param aDatasourceName Database identifier, the query belongs to. That
+     * database is query-inner table metadata source, but query is stored in
+     * application.
      * @param aTablyName Table or query tably name.
      * @return Fields instance.
      * @throws Exception

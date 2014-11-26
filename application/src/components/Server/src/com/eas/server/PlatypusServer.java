@@ -54,8 +54,8 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, ScriptConfigs aScriptsConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
-        super(aIndexer, aModules, aQueries, aDatabasesClient, aScriptsConfigs, aDefaultAppElement, aAuthorizers);
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, ScriptConfigs aScriptsConfigs, String aDefaultAppElement) throws Exception {
+        super(aIndexer, aModules, aQueries, aDatabasesClient, aScriptsConfigs, aDefaultAppElement);
         if (aAddresses == null) {
             throw new NullPointerException("listenAddresses is null");
         } else if (aAddresses.length == 0) {

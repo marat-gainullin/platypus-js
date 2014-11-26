@@ -61,7 +61,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     basesProxy = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true, tasksScanner.getValidators(), aMaximumJdbcThreads);
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
                     basesProxy.setQueries(queries);
-                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName, tasksScanner.getAuthorizers());
+                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName);
                     basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
                     instance.startResidents(tasksScanner.getResidents());
@@ -85,13 +85,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ApplicationSourceIndexer indexer;
     protected ModulesProxy modules;
     protected QueriesProxy<SqlQuery> queries;
-    protected final Set<String> extraAuthorizers = new HashSet<>();
     protected ScriptConfigs scriptsConfigs;
     protected FormsDocuments forms = new FormsDocuments();
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptConfigs aSecurityConfigs, String aDefaultAppElement, Set<String> aAuthorizers) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
@@ -100,7 +99,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         sessionManager = new SessionManager(this);
         defaultAppElement = aDefaultAppElement;
         scriptsConfigs = aSecurityConfigs;
-        extraAuthorizers.addAll(aAuthorizers);
     }
 
     public ApplicationSourceIndexer getIndexer() {
@@ -152,16 +150,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     public String getDefaultAppElement() {
         return defaultAppElement;
-    }
-
-    public boolean isUserInApplicationRole(String aUser, String aRole) throws Exception {
-        for (String moduleName : extraAuthorizers) {
-            Object result = executeServerModuleMethod(moduleName, "isUserInRole", new Object[]{aUser, aRole}, null, null);
-            if (Boolean.TRUE.equals(result)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

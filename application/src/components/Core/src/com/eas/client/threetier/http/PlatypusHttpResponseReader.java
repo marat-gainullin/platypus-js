@@ -60,7 +60,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     protected int responseCode;
     protected Converter converter;
     protected Request request;
-    protected String bodyText;
+    private byte[] bodyContent;
 
     public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, Converter aConverter, PlatypusHttpConnection aPConn) throws IOException {
         super();
@@ -88,7 +88,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     protected String extractText() throws IOException {
         try (InputStream in = conn.getInputStream()) {
-            byte[] content = BinaryUtils.readStream(in, -1);
+            bodyContent = BinaryUtils.readStream(in, -1);
             String contentType = conn.getContentType();
             String[] contentTypeCharset = contentType.split(";");
             if (contentTypeCharset == null || contentTypeCharset.length == 0) {
@@ -105,9 +105,9 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
                 if (!charsetNameValue[0].equalsIgnoreCase("charset")) {
                     throw new IOException("Response ContentType must be formatted as following: text/...;charset=...");
                 }
-                return new String(content, charsetNameValue[1].trim());
+                return new String(bodyContent, charsetNameValue[1].trim());
             } else {
-                return new String(content, SettingsConstants.COMMON_ENCODING);
+                return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
             }
         }
     }
@@ -219,9 +219,13 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
-            try (InputStream is = conn.getInputStream()) {
-                byte[] content = BinaryUtils.readStream(is, -1);
-                rsp.setContent(content);
+            if (bodyContent != null) {
+                rsp.setContent(bodyContent);
+            } else {
+                try (InputStream is = conn.getInputStream()) {
+                    byte[] content = BinaryUtils.readStream(is, -1);
+                    rsp.setContent(content);
+                }
             }
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
             rsp.setContent(null);

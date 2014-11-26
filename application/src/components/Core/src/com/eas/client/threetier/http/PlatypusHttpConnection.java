@@ -72,7 +72,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     public void checkedAddBasicAuthentication(HttpURLConnection aConn) throws UnsupportedEncodingException {
         Credentials creds = basicCredentials; // To avoid multithreading issues
-        if(creds != null){
+        if (creds != null) {
             addBasicAuthentication(aConn, creds.userName, creds.password);
         }
     }
@@ -185,7 +185,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     private void enqueue(final RequestCallback rqc, Consumer<Exception> onFailure) {
-        startRequestTask(() -> {
+        Runnable doer = () -> {
             try {
                 PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
                 rqc.requestEnv.request.accept(httpSender);// wait completion analog
@@ -207,14 +207,18 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                     onFailure.accept(ex);
                 }
             }
-        });
+        };
+        if (onFailure != null) {
+            startRequestTask(doer);
+        } else {
+            doer.run();
+        }
     }
 
     @Override
     public <R extends Response> R executeRequest(Request rq) throws Exception {
         RequestCallback rqc = new RequestCallback(new RequestEnvelope(rq, null, null, null), null);
         enqueue(rqc, null);
-        rqc.waitCompletion();
         if (rqc.response instanceof ErrorResponse) {
             throw handleErrorResponse((ErrorResponse) rqc.response);
         } else {

@@ -145,7 +145,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             return res;
         };
         HttpResult res = performer.call(onHeaders);
-        if (res.isUnauthorized()) {
+        if (res.isUnauthorized() && res.authScheme != null && !res.authScheme.isEmpty()) {
             sequence.in(() -> {
                 // Probably new cookies from another thread...
                 res.assign(performer.call(onHeaders));
