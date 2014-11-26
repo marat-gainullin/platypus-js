@@ -132,10 +132,3 @@ try {
 } catch (e) {
     printf('rowsets API skipped.');
 }
-
-try {
-    load('classpath:server/session.js');
-    printf('server API loaded.');
-} catch (e) {
-    printf('server API skipped.');
-}

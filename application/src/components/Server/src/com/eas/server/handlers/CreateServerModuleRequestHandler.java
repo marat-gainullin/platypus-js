@@ -88,7 +88,9 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                             onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
                         }
                     } catch (AccessControlException ex) {
-                        onSuccess.accept(new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false)));
+                        CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false));
+                        response.setTimeStamp(new Date(0));
+                        onSuccess.accept(response);
                     } catch (Exception ex) {
                         onFailure.accept(ex);
                     }
