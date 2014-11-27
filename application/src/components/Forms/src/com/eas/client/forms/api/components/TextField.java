@@ -22,6 +22,8 @@ import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
@@ -41,20 +43,41 @@ public class TextField extends JTextField implements HasPublished, HasComponentE
             + "* Text field component. \n"
             + "* @param text the initial text for the component (optional)\n"
             + "*/";
+    private String oldValue;
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public TextField(String aText) {
         super(aText);
+        super.setText(aText != null ? aText : "");
+        if (aText == null) {
+            nullValue = true;
+        }
+        oldValue = aText;
+        super.addFocusListener(new FocusAdapter() {
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                checkValueChanged();
+            }
+
+        });
+        super.addActionListener((java.awt.event.ActionEvent e) -> {
+            checkValueChanged();
+        });
     }
 
     public TextField() {
         this((String) null);
     }
 
-    private static final String VALUE_JSDOC = ""
-            + "/**\n"
-            + "* Widget's value.\n"
-            + "*/";
+    private void checkValueChanged() {
+        String newValue = getValue();
+        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
+            String wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
+    }
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
@@ -68,7 +91,8 @@ public class TextField extends JTextField implements HasPublished, HasComponentE
     @Override
     public void setValue(String aValue) {
         nullValue = aValue == null;
-        setText(aValue != null ? aValue : "");
+        super.setText(aValue != null ? aValue : "");
+        checkValueChanged();
     }
 
     @Override
@@ -320,7 +344,9 @@ public class TextField extends JTextField implements HasPublished, HasComponentE
     @ScriptFunction
     @Override
     public void setText(String aValue) {
-        super.setText(aValue);
+        nullValue = false;
+        super.setText(aValue != null ? aValue : "");
+        checkValueChanged();
     }
 
     protected String emptyText;

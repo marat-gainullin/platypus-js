@@ -28,6 +28,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -43,10 +44,16 @@ public class Slider extends JSlider implements HasPublished, HasComponentEvents,
             + "* @param max the maximum value (optional)\n"
             + "* @param value the initial value (optional)\n"
             + "*/";
+    
+    private int oldValue;
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
     public Slider(int aOrientation, int min, int max, int value) {
         super(aOrientation, min, max, value);
+        oldValue = value;
+        super.addChangeListener((ChangeEvent e) -> {
+            checkValueChanged();
+        });
     }
 
     public Slider() {
@@ -60,6 +67,37 @@ public class Slider extends JSlider implements HasPublished, HasComponentEvents,
     public Slider(int min, int max, int value) {
         this(Orientation.HORIZONTAL, min, max, value);
     }
+
+    private void checkValueChanged() {
+        int newValue = getValue();
+        if (oldValue != newValue) {
+            int wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**"
+            + " * Slider's value. Can't be null."
+            + " */")
+    @Override
+    public int getValue() {
+        return super.getValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setValue(int aValue) {
+        super.setValue(aValue);
+        checkValueChanged();
+    }
+
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+    
+    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override
@@ -342,27 +380,6 @@ public class Slider extends JSlider implements HasPublished, HasComponentEvents,
         super.setMaximum(aValue);
     }
 
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * The slider's current value.\n"
-            + " */")
-    @Override
-    public int getValue() {
-        return super.getValue();
-    }
-
-    @ScriptFunction
-    @Override
-    public void setValue(int aValue) {
-        super.setValue(aValue);
-    }
-
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-    
-    private static final String VALUE_PROP_NAME = "value";
-    
     @ScriptFunction
     public String getText() throws Exception {
         int value = super.getValue();

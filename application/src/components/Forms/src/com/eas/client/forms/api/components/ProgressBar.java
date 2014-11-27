@@ -7,27 +7,7 @@ package com.eas.client.forms.api.components;
 import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
 import com.eas.client.forms.api.HasJsName;
-import static com.eas.client.forms.api.HasJsName.JS_NAME_DOC;
 import com.eas.client.forms.api.Widget;
-import static com.eas.client.forms.api.Widget.BACKGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.COMPONENT_POPUP_MENU_JSDOC;
-import static com.eas.client.forms.api.Widget.CURSOR_JSDOC;
-import static com.eas.client.forms.api.Widget.ENABLED_JSDOC;
-import static com.eas.client.forms.api.Widget.ERROR_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUSABLE_JSDOC;
-import static com.eas.client.forms.api.Widget.FOCUS_JSDOC;
-import static com.eas.client.forms.api.Widget.FONT_JSDOC;
-import static com.eas.client.forms.api.Widget.FOREGROUND_JSDOC;
-import static com.eas.client.forms.api.Widget.GET_NEXT_FOCUSABLE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.HEIGHT_JSDOC;
-import static com.eas.client.forms.api.Widget.LEFT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_COMPONENT_JSDOC;
-import static com.eas.client.forms.api.Widget.NATIVE_ELEMENT_JSDOC;
-import static com.eas.client.forms.api.Widget.OPAQUE_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOOLTIP_TEXT_JSDOC;
-import static com.eas.client.forms.api.Widget.TOP_JSDOC;
-import static com.eas.client.forms.api.Widget.VISIBLE_JSDOC;
-import static com.eas.client.forms.api.Widget.WIDTH_JSDOC;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
@@ -47,6 +27,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
+import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -62,10 +43,16 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
             + "* @param max the maximum value (optional)\n"
             + "*/";
 
+    private int oldValue;
+    
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max"})
     public ProgressBar(int min, int max) {
         super(JProgressBar.HORIZONTAL, min, max);
         super.setStringPainted(true);
+        oldValue = min;
+        super.addChangeListener((ChangeEvent e) -> {
+            checkValueChanged();
+        });
     }
 
     public ProgressBar(int min) {
@@ -74,6 +61,15 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
 
     public ProgressBar() {
         this(0, 0);
+    }
+
+    private void checkValueChanged() {
+        int newValue = getValue();
+        if (oldValue != newValue) {
+            int wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -349,13 +345,15 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
     @Override
     public void setValue(int aValue) {
         super.setValue(aValue);
+        checkValueChanged();
     }
 
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
-    
+
     private static final String VALUE_PROP_NAME = "value";
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * String representation of the current progress.\n"

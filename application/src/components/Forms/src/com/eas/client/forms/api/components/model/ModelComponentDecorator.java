@@ -646,11 +646,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         onRender = aValue;
     }
 
-    private static final String VALUE_JSDOC = ""
-            + "/**\n"
-            + "* Widget's value.\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public V getValue() {

@@ -30,6 +30,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
+import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -39,6 +40,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class RadioButton extends JRadioButton implements HasPublished, HasComponentEvents, HasGroup, HasJsName, HasValue<Boolean>, Widget {
 
     protected ButtonGroup group;
+    private Boolean oldValue;
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -52,6 +54,10 @@ public class RadioButton extends JRadioButton implements HasPublished, HasCompon
     public RadioButton(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super(aText, aSelected);
         setOnActionPerformed(aActionPerformedHandler);
+        oldValue = aSelected;
+        super.getModel().addChangeListener((ChangeEvent e) -> {
+            checkValueChanged();
+        });
     }
 
     public RadioButton(String aText, boolean aSelected) {
@@ -66,10 +72,14 @@ public class RadioButton extends JRadioButton implements HasPublished, HasCompon
         this(null, false);
     }
 
-    private static final String VALUE_JSDOC = ""
-            + "/**\n"
-            + "* Widget's value.\n"
-            + "*/";
+    private void checkValueChanged() {
+        Boolean newValue = getValue();
+        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
+            Boolean wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
+    }
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override

@@ -14,6 +14,11 @@ import java.beans.PropertyChangeListener;
  */
 public interface HasValue<V> {
 
+    public static final String VALUE_JSDOC = ""
+            + "/**\n"
+            + "* Widget's value.\n"
+            + "*/";
+
     public V getValue();
 
     public void setValue(V aValue);

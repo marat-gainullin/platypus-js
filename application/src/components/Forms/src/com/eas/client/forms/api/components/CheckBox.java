@@ -25,11 +25,12 @@ import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Objects;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -40,6 +41,7 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
 
     protected static Icon nullIcon = IconCache.getIcon("16x16/nullCheck.gif");
     protected Icon ordinaryIcon;
+    private Boolean oldValue;
 
     public CheckBox(String aText, boolean aSelected) {
         this(aText, aSelected, null);
@@ -58,6 +60,10 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
         super(aText, aSelected);
         ordinaryIcon = getIcon();
         setOnActionPerformed(aActionPerformedHandler);
+        oldValue = aSelected;
+        super.getModel().addChangeListener((ChangeEvent e) -> {
+            checkValueChanged();
+        });
     }
 
     public CheckBox(String aText) {
@@ -68,10 +74,14 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
         this(null, false);
     }
 
-    private static final String VALUE_JSDOC = ""
-            + "/**\n"
-            + "* Widget's value.\n"
-            + "*/";
+    private void checkValueChanged() {
+        Boolean newValue = getValue();
+        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
+            Boolean wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
+    }
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
@@ -88,6 +98,7 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
             setIcon(ordinaryIcon);
             super.setSelected(aValue);
         }
+        checkValueChanged();
     }
 
     @Override

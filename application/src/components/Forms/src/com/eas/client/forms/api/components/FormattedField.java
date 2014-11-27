@@ -295,24 +295,19 @@ public class FormattedField extends JFormattedTextField implements HasPublished,
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     @Override
     public String getText() {
-        return super.getText();
+        return super.getText() != null ? super.getText() : "";
     }
 
     @ScriptFunction
     @Override
     public void setText(String aValue) {
         try {
-            super.setText(aValue);
+            super.setText(aValue != null ? aValue  : "");
             super.commitEdit();
         } catch (ParseException ex) {
             Logger.getLogger(FormattedField.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    private static final String VALUE_JSDOC = ""
-            + "/**\n"
-            + "* The value of this component.\n"
-            + "*/";
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override

@@ -30,6 +30,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
+import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -39,6 +40,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ToggleButton extends JToggleButton implements HasPublished, HasComponentEvents, HasGroup, HasJsName, HasValue<Boolean>, Widget {
 
     protected ButtonGroup group;
+    private Boolean oldValue;
 
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap) {
         this(aText, aIcon, aSelected, aIconTextGap, null);
@@ -59,6 +61,10 @@ public class ToggleButton extends JToggleButton implements HasPublished, HasComp
         super(aText, aIcon, aSelected);
         super.setIconTextGap(aIconTextGap);
         setOnActionPerformed(aActionPerformedHandler);
+        oldValue = aSelected;
+        super.getModel().addChangeListener((ChangeEvent e) -> {
+            checkValueChanged();
+        });
     }
 
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, JSObject aActionPerformedHandler) {
@@ -81,10 +87,14 @@ public class ToggleButton extends JToggleButton implements HasPublished, HasComp
         this(null, null, false, 4);
     }
 
-    private static final String VALUE_JSDOC = ""
-            + "/**\n"
-            + "* Widget's value.\n"
-            + "*/";
+    private void checkValueChanged() {
+        Boolean newValue = getValue();
+        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
+            Boolean wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
+    }
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
