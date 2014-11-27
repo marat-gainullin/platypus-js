@@ -10,12 +10,11 @@ import com.eas.client.forms.api.HasComponentEvents;
 import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.HasJsName;
 import com.eas.client.forms.api.Widget;
-import com.eas.client.forms.api.components.HasValue;
-import static com.eas.client.forms.api.components.HasValue.VALUE_JSDOC;
 import com.eas.client.forms.api.containers.ButtonGroup;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VRadioButtonMenuItem;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -28,22 +27,18 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class RadioMenuItem extends JRadioButtonMenuItem implements HasPublished, HasComponentEvents, HasGroup, HasJsName, HasValue<Boolean>, Widget {
+public class RadioMenuItem extends VRadioButtonMenuItem implements HasPublished, HasComponentEvents, HasGroup, HasJsName, Widget {
 
     protected ButtonGroup group;
-    private Boolean oldValue;
 
     public RadioMenuItem(String aText, boolean aSelected) {
         this(aText, aSelected, null);
@@ -61,10 +56,6 @@ public class RadioMenuItem extends JRadioButtonMenuItem implements HasPublished,
     public RadioMenuItem(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super(aText, aSelected);
         setOnActionPerformed(aActionPerformedHandler);
-        oldValue = aSelected;
-        super.getModel().addChangeListener((ChangeEvent e) -> {
-            checkValueChanged();
-        });
     }
 
     public RadioMenuItem(String aText) {
@@ -75,32 +66,16 @@ public class RadioMenuItem extends JRadioButtonMenuItem implements HasPublished,
         this(null, false);
     }
 
-    private void checkValueChanged() {
-        Boolean newValue = RadioMenuItem.this.getValue();
-        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
-            Boolean wasOldValue = oldValue;
-            oldValue = RadioMenuItem.this.getValue();
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
-    }
-
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public Boolean getValue() {
-        return super.isSelected();
+        return super.getValue();
     }
 
     @Override
     public void setValue(Boolean aValue) {
-        super.setSelected(aValue != null ? aValue : false);
+        super.setValue(aValue);
     }
-
-    @Override
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-    
-    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override

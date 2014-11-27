@@ -13,6 +13,7 @@ import com.eas.client.forms.api.containers.ButtonGroup;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VToggleButton;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -25,22 +26,18 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
-import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ToggleButton extends JToggleButton implements HasPublished, HasComponentEvents, HasGroup, HasJsName, HasValue<Boolean>, Widget {
+public class ToggleButton extends VToggleButton implements HasPublished, HasComponentEvents, HasGroup, HasJsName, Widget {
 
     protected ButtonGroup group;
-    private Boolean oldValue;
 
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap) {
         this(aText, aIcon, aSelected, aIconTextGap, null);
@@ -58,13 +55,8 @@ public class ToggleButton extends JToggleButton implements HasPublished, HasComp
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "selected", "iconTextGap", "actionPerformed"})
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, JSObject aActionPerformedHandler) {
-        super(aText, aIcon, aSelected);
-        super.setIconTextGap(aIconTextGap);
+        super(aText, aIcon, aSelected, aIconTextGap);
         setOnActionPerformed(aActionPerformedHandler);
-        oldValue = aSelected;
-        super.getModel().addChangeListener((ChangeEvent e) -> {
-            checkValueChanged();
-        });
     }
 
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, JSObject aActionPerformedHandler) {
@@ -87,33 +79,16 @@ public class ToggleButton extends JToggleButton implements HasPublished, HasComp
         this(null, null, false, 4);
     }
 
-    private void checkValueChanged() {
-        Boolean newValue = getValue();
-        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
-            Boolean wasOldValue = oldValue;
-            oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
-    }
-
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public Boolean getValue() {
-        return super.isSelected();
+        return super.getValue();
     }
 
     @Override
     public void setValue(Boolean aValue) {
-        super.setSelected(aValue != null ? aValue : false);
+        super.setValue(aValue);
     }
-
-    @Override
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-    
-    
-    private static final String VALUE_PROP_NAME = "value";
     
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override

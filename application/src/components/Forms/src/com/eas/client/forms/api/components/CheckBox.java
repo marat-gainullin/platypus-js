@@ -11,9 +11,9 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VCheckBox;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
-import com.eas.dbcontrols.IconCache;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -24,24 +24,15 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
-import javax.swing.Icon;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class CheckBox extends JCheckBox implements HasPublished, HasComponentEvents, HasJsName, HasValue<Boolean>, Widget {
-
-    protected static Icon nullIcon = IconCache.getIcon("16x16/nullCheck.gif");
-    protected Icon ordinaryIcon;
-    private Boolean oldValue;
+public class CheckBox extends VCheckBox implements HasPublished, HasComponentEvents, HasJsName, Widget {
 
     public CheckBox(String aText, boolean aSelected) {
         this(aText, aSelected, null);
@@ -58,12 +49,7 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super(aText, aSelected);
-        ordinaryIcon = getIcon();
         setOnActionPerformed(aActionPerformedHandler);
-        oldValue = aSelected;
-        super.getModel().addChangeListener((ChangeEvent e) -> {
-            checkValueChanged();
-        });
     }
 
     public CheckBox(String aText) {
@@ -74,40 +60,17 @@ public class CheckBox extends JCheckBox implements HasPublished, HasComponentEve
         this(null, false);
     }
 
-    private void checkValueChanged() {
-        Boolean newValue = getValue();
-        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
-            Boolean wasOldValue = oldValue;
-            oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
-    }
-
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public Boolean getValue() {
-        return getIcon() == nullIcon ? null : super.isSelected();
+        return super.getValue();
     }
 
     @Override
     public void setValue(Boolean aValue) {
-        if (aValue == null) {
-            setIcon(nullIcon);
-            super.setSelected(false);
-        } else {
-            setIcon(ordinaryIcon);
-            super.setSelected(aValue);
-        }
-        checkValueChanged();
+        super.setValue(aValue);
     }
-
-    @Override
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-
-    private static final String VALUE_PROP_NAME = "value";
-
+    
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override
     public String getName() {
