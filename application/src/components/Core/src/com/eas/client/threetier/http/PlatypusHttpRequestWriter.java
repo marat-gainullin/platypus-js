@@ -117,8 +117,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         private boolean isUnauthorized() {
             return (redirectLocation != null && redirectLocation.toLowerCase().contains(J_SECURITY_CHECK_ACTION_NAME))
                     || (authScheme != null && !authScheme.isEmpty())
-                    || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
-                    || responseCode == HttpURLConnection.HTTP_FORBIDDEN;
+                    || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
         }
     }
 
@@ -160,6 +159,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                                 res.assign(performer.call(onHeaders));
                                 if (!res.isUnauthorized()) {
                                     PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
+                                    pConn.reloggedIn();
                                 }
                                 return null;
                                 //} else if (authScheme.toLowerCase().contains(PlatypusHttpConstants.DIGEST_AUTH_NAME.toLowerCase())) {
@@ -183,6 +183,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                                 res.assign(performer.call(onHeaders));
                                 if (!res.isUnauthorized()) {
                                     PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
+                                    pConn.reloggedIn();
                                 }
                                 return null;
                             } else {
@@ -206,12 +207,16 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             authScheme = conn.getHeaderField(PlatypusHttpConstants.HEADER_WWW_AUTH);
             response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
+            ((ErrorResponse) response).setAccessControl(true);
+            ((ErrorResponse) response).setNotLoggedIn(true);
         } else if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
                 && conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION) != null
                 && conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION).toLowerCase().contains(PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION.toLowerCase())) {
             redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
             authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
             response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
+            ((ErrorResponse) response).setAccessControl(true);
+            ((ErrorResponse) response).setNotLoggedIn(true);
         } else {
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
                 PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, new RowsetConverter(), pConn);
@@ -219,6 +224,8 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                     redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
                     authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
                     response = new ErrorResponse(HttpURLConnection.HTTP_UNAUTHORIZED + "");
+                    ((ErrorResponse) response).setAccessControl(true);
+                    ((ErrorResponse) response).setNotLoggedIn(true);
                 } else {
                     PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
                     aRequest.accept(responseFactory);

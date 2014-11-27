@@ -47,6 +47,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.security.auth.AuthPermission;
 import javax.swing.JOptionPane;
 
 /**
@@ -113,6 +114,8 @@ public abstract class PlatypusConnection implements AppConnection {
     };
     protected Callable<Credentials> onCredentials;
     protected int maximumAuthenticateAttempts = 1;
+    protected Runnable onLogin;
+    protected Runnable onLogout;
 
     public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
         super();
@@ -125,13 +128,30 @@ public abstract class PlatypusConnection implements AppConnection {
         return url;
     }
 
+    public Runnable getOnLogin() {
+        return onLogin;
+    }
+
+    public void setOnLogin(Runnable aValue) {
+        onLogin = aValue;
+    }
+
+    public Runnable getOnLogout() {
+        return onLogout;
+    }
+
+    public void setOnLogout(Runnable aValue) {
+        onLogout = aValue;
+    }
+
     public Exception handleErrorResponse(ErrorResponse aResponse) {
         if (aResponse.getSqlErrorCode() != null || aResponse.getSqlState() != null) {
             Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode()});
             return new SQLException(aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode());
         } else if (aResponse.isAccessControl()) {
             Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage()});
-            return new AccessControlException(((ErrorResponse) aResponse).getErrorMessage());
+            ErrorResponse errorResp = (ErrorResponse) aResponse;
+            return new AccessControlException(errorResp.getErrorMessage(), errorResp.isNotLoggedIn() ? new AuthPermission("*") : null);
         } else {
             String msg = "Exception from server. " + ((ErrorResponse) aResponse).getErrorMessage();
             Logger.getLogger(PlatypusConnection.class.getName()).log(Level.WARNING, msg);

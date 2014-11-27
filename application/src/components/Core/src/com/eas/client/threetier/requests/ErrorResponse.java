@@ -7,6 +7,7 @@ package com.eas.client.threetier.requests;
 import com.eas.client.threetier.Response;
 import java.security.AccessControlException;
 import java.sql.SQLException;
+import javax.security.auth.AuthPermission;
 
 /**
  *
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 public class ErrorResponse extends Response {
 
     private String errorMessage;
+    private boolean notLoggedIn;
     private boolean accessControl;
     private String sqlState;
     private Integer sqlErrorCode;
@@ -40,8 +42,11 @@ public class ErrorResponse extends Response {
 
     public ErrorResponse(AccessControlException aException) {
         super();
+        errorMessage = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.getClass().getSimpleName();        
         accessControl = true;
-        errorMessage = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.getClass().getSimpleName();
+        if(aException.getPermission() instanceof AuthPermission){
+            notLoggedIn = true;
+        }
     }
 
     public String getErrorMessage() {
@@ -74,6 +79,14 @@ public class ErrorResponse extends Response {
 
     public void setAccessControl(boolean aValue) {
         accessControl = aValue;
+    }
+
+    public boolean isNotLoggedIn() {
+        return notLoggedIn;
+    }
+
+    public void setNotLoggedIn(boolean aValue) {
+        notLoggedIn = aValue;
     }
 
     @Override

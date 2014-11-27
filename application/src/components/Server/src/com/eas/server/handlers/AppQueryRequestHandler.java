@@ -8,6 +8,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.AuthPermission;
 
 /**
  *
@@ -48,7 +50,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
                     if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {
-                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), aSession.getPrincipal().getName()));
+                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), aSession.getPrincipal().getName()), aSession.getPrincipal() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     assert query.getEntityId().equals(getRequest().getQueryName());
                     /**

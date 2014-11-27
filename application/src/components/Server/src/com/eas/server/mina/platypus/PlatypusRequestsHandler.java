@@ -12,6 +12,7 @@ import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
 import com.eas.server.SessionRequestHandler;
 import com.eas.server.DatabaseAuthorizer;
+import java.net.NetPermission;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 import java.util.function.Consumer;
@@ -121,7 +122,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                             if (session != null) {
                                 ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
                             } else {
-                                onError.accept(new AccessControlException("Bad session ticket."));
+                                onError.accept(new AccessControlException("Bad session ticket.", new NetPermission("*")));
                             }
                         }
                     } else {

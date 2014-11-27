@@ -157,6 +157,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                         ScriptUtils.getGlobalQueue().accept(() -> {
                             if (rq instanceof LogoutRequest) {
                                 sessionTicket = null;
+                                if (onLogout != null) {
+                                    onLogout.run();
+                                }
                             }
                             onSuccess.accept((R) aResponse);
                         });
@@ -165,6 +168,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                         synchronized (lock) {
                             if (rq instanceof LogoutRequest) {
                                 sessionTicket = null;
+                                if (onLogout != null) {
+                                    onLogout.run();
+                                }
                             }
                             onSuccess.accept((R) aResponse);
                         }
@@ -223,19 +229,19 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     // Try to communicate with the server
                     performer.call();
                     if (rqc.response instanceof ErrorResponse
-                            && ((ErrorResponse) rqc.response).isAccessControl()) {
+                            && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
                         sequence.in(() -> {
                             // probably new ticket from another thread...
                             rqc.requestEnv.userName = null;
                             rqc.requestEnv.password = null;
                             performer.call();
                             if (rqc.response instanceof ErrorResponse
-                                    && ((ErrorResponse) rqc.response).isAccessControl()) {
+                                    && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
                                 // nice try :-(
                                 int authenticateAttempts = 0;
                                 // Try to authenticate
                                 while (rqc.response instanceof ErrorResponse
-                                        && ((ErrorResponse) rqc.response).isAccessControl()
+                                        && ((ErrorResponse) rqc.response).isNotLoggedIn()
                                         && authenticateAttempts++ < maximumAuthenticateAttempts) {
                                     Credentials credentials = onCredentials.call();
                                     if (credentials != null) {
@@ -245,6 +251,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                                         performer.call();
                                         if (!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()) {
                                             PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
+                                            if (onLogin != null) {
+                                                onLogin.run();
+                                            }
                                         }
                                     } else {// Credentials are inaccessible, so leave things as is...
                                         authenticateAttempts = Integer.MAX_VALUE;
@@ -291,6 +300,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         } else {
             if (rq instanceof LogoutRequest) {
                 sessionTicket = null;
+                if (onLogout != null) {
+                    onLogout.run();
+                }
             }
             return (R) rqc.response;
         }

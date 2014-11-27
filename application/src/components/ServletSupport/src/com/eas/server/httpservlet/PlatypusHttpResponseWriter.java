@@ -60,6 +60,15 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ErrorResponse resp) throws Exception {
         if (resp.isAccessControl()) {
+            /*
+            // we can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
+            // of J2EE container.
+            if (resp.isNotLoggedIn()) {
+                servletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, resp.getErrorMessage());
+            } else {
+                servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
+            }
+            */
             servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
         } else {
             servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp.getErrorMessage());

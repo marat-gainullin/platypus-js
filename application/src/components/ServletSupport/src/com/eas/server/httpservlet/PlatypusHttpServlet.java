@@ -135,21 +135,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                 synchronized (logoutLock) {
                     HttpSession httpSession = request.getSession(true);
                     if (httpSession != null) {
-                        SessionManager sessionManager = serverCore.getSessionManager();
-                        Session session;
                         PlatypusPrincipal principal = servletRequestPrincipal(request);
-                        synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is on the same point
-                            String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
-                            if (platypusSessionId == null) {
-                                platypusSessionId = httpSession.getId();
-                            }
-                            session = sessionManager.getOrCreateSession(principal, platypusSessionId);
-                            httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
-                            httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, serverCore);
-                        }
+                        Session session = platypusSessionByHttpSession(httpSession, serverCore, principal);
                         assert session != null : "Platypus session missing";
                         session.setPrincipal(principal);
-
                         PlatypusPrincipal.setInstance(session.getPrincipal());
                         ScriptUtils.setRequest(request);
                         ScriptUtils.setResponse(response);
@@ -168,9 +157,24 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
     }
 
+    public static Session platypusSessionByHttpSession(HttpSession httpSession, PlatypusServerCore aCore, PlatypusPrincipal principal) {
+        Session session;
+        SessionManager sessionManager = aCore.getSessionManager();
+        synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is done on the same point.
+            String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ATTR_NAME);
+            if (platypusSessionId == null) {
+                platypusSessionId = httpSession.getId();
+            }
+            session = sessionManager.getOrCreateSession(principal, platypusSessionId);
+            httpSession.setAttribute(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
+            httpSession.setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, aCore);
+        }
+        return session;
+    }
+
     private static PlatypusPrincipal servletRequestPrincipal(final HttpServletRequest aRequest) {
         if (aRequest.getUserPrincipal() != null) {
-            return new WebPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aRequest);
+            return new HttpPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aRequest);
         } else {
             return new AnonymousPlatypusPrincipal(aRequest.getSession().getId());
         }
@@ -203,6 +207,12 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                     try {
                         if (ex instanceof AccessControlException) {
+                            /*
+                             // we can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
+                             // of J2EE container.
+                             AccessControlException accEx = (AccessControlException)ex;
+                             aHttpResponse.sendError(accEx.getPermission() instanceof AuthPermission ? HttpServletResponse.SC_UNAUTHORIZED : HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
+                             */
                             aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
                         } else if (ex instanceof FileNotFoundException) {
                             aHttpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());

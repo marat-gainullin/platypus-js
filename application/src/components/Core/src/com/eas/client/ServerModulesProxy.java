@@ -27,6 +27,12 @@ public class ServerModulesProxy {
     public ServerModulesProxy(PlatypusConnection aConn) {
         super();
         conn = aConn;
+        conn.setOnLogin(() -> {
+            entries.clear();
+        });
+        conn.setOnLogout(() -> {
+            entries.clear();
+        });
     }
 
     public ServerModuleInfo getCachedStructure(String aName) throws Exception {
@@ -37,7 +43,7 @@ public class ServerModulesProxy {
             return null;
         }
     }
-    
+
     public ServerModuleInfo getServerModuleStructure(String aName, Consumer<ServerModuleInfo> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         ActualCacheEntry<ServerModuleInfo> entry = entries.get(aName);

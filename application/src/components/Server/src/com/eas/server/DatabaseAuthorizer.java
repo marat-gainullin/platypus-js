@@ -11,6 +11,7 @@ import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
 import java.security.AccessControlException;
 import java.util.function.Consumer;
+import javax.security.auth.AuthPermission;
 
 /**
  *
@@ -32,7 +33,7 @@ public class DatabaseAuthorizer {
                         Session created = aServerCore.getSessionManager().createSession(principal, String.valueOf(IDGenerator.genID()));
                         onSuccess.accept(created);
                     } else {
-                        onFailure.accept(new AccessControlException(LOGIN_INCORRECT_MSG));
+                        onFailure.accept(new AccessControlException(LOGIN_INCORRECT_MSG, new AuthPermission("*")));
                     }
                 }, onFailure);
             } else {

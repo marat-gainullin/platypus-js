@@ -10,6 +10,7 @@ import com.eas.client.AppElementFiles;
 import com.eas.client.ModuleStructure;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
@@ -18,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.security.AccessControlException;
 import java.util.Set;
 import java.util.function.Consumer;
+import javax.security.auth.AuthPermission;
 
 /**
  *
@@ -72,7 +74,7 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
             ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
             if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {
-                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), aSession.getPrincipal().getName()));
+                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), aSession.getPrincipal().getName()), aSession.getPrincipal() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
             }
         }
     }

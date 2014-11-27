@@ -91,6 +91,9 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         }
         if (rsp.isAccessControl()) {
             writer.put(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL);
+            if(rsp.isNotLoggedIn()){
+                writer.put(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN);
+            }
         }
         writer.flush();
     }

@@ -13,11 +13,11 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class WebPlatypusPrincipal extends PlatypusPrincipal {
+public class HttpPlatypusPrincipal extends PlatypusPrincipal {
 
     protected HttpServletRequest servletRequest;
 
-    public WebPlatypusPrincipal(String aUserName, HttpServletRequest aServletRequest) {
+    public HttpPlatypusPrincipal(String aUserName, HttpServletRequest aServletRequest) {
         super(aUserName, null, Collections.emptySet(), null);
         servletRequest = aServletRequest;
     }

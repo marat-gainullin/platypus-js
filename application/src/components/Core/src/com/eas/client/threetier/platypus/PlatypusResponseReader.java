@@ -101,7 +101,12 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE)) {
             rsp.setSqlState(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE).getString());
         }
-        rsp.setAccessControl(input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL));
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL)) {
+            rsp.setAccessControl(true);
+            if (input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN)) {
+                rsp.setNotLoggedIn(true);
+            }
+        }
     }
 
     @Override

@@ -6,10 +6,6 @@ package com.eas.script;
  * and open the template in the editor.
  */
 
-
-
-import com.eas.script.ScriptFunction;
-
 /**
  * The support class to mock a JS API.
  * @author vv

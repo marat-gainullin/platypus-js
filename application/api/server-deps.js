@@ -59,3 +59,10 @@ try {
 } catch (e) {
     printf('server API skipped.');
 }
+
+try {
+    load('classpath:servlet-support/web-socket-session.js');
+    printf('servlet-support API loaded.');
+} catch (e) {
+    printf('servlet-support API skipped.');
+}

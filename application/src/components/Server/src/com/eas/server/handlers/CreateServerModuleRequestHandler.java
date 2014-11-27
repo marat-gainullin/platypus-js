@@ -8,6 +8,7 @@ import com.eas.client.AppElementFiles;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.ServerModuleInfo;
 import com.eas.client.cache.ScriptDocument;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.AuthPermission;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -122,7 +124,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                 if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
                     throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
                             aModuleName,
-                            principal != null ? principal.getName() : null));
+                            principal != null ? principal.getName() : null), aSession.getPrincipal() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                 }
             } catch (Exception ex) {
                 throw new AccessControlException(ex.getMessage());

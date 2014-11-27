@@ -81,6 +81,12 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         basicCredentials = aValue;
     }
 
+    void reloggedIn() {
+        if (onLogin != null) {
+            onLogin.run();
+        }
+    }
+
     private static void addBasicAuthentication(HttpURLConnection aConnection, String aLogin, String aPassword) throws UnsupportedEncodingException {
         if (aLogin != null && !aLogin.isEmpty() && aPassword != null) {
             BASE64Encoder encoder = new BASE64Encoder();
@@ -142,6 +148,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                             if (rq instanceof LogoutRequest) {
                                 cookies.clear();
                                 basicCredentials = null;
+                                if (onLogout != null) {
+                                    onLogout.run();
+                                }
                             }
                             onSuccess.accept((R) aResponse);
                         });
@@ -151,6 +160,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                             if (rq instanceof LogoutRequest) {
                                 cookies.clear();
                                 basicCredentials = null;
+                                if (onLogout != null) {
+                                    onLogout.run();
+                                }
                             }
                             onSuccess.accept((R) aResponse);
                         }
@@ -225,6 +237,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             if (rq instanceof LogoutRequest) {
                 cookies.clear();
                 basicCredentials = null;
+                if (onLogout != null) {
+                    onLogout.run();
+                }
             }
             return (R) rqc.response;
         }

@@ -896,6 +896,17 @@
         };
 
         /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
          *  Gets the array of selected rows.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -904,17 +915,6 @@
         P.ModelGrid.prototype.select = function(instance) {
             var delegate = this.unwrap();
             var value = delegate.select(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
             return P.boxAsJs(value);
         };
 

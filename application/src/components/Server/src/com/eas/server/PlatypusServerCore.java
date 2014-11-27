@@ -15,26 +15,34 @@ import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
+import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
+import com.eas.server.handlers.CreateServerModuleRequestHandler;
+import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
 import java.io.File;
 import java.net.URI;
+import java.security.AccessControlException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  * The core class for platypus server infrastructure (e.g. Standalone J2SE
@@ -152,80 +160,146 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         return defaultAppElement;
     }
 
-    /**
-     * WARNING!!! This method executes a method with system permissions! You
-     * should think twice before calling it in your code.
-     *
-     * @param aModuleName
-     * @param aMethodName
-     * @param aArgs
-     * @param onSuccess
-     * @param onFailure
-     * @return
-     * @throws Exception
-     */
-    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        JSObject module = getSessionManager().getSystemSession().getModule(aModuleName);
-        PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
-        PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
-        try {
-            if (module == null) {
-                ScriptedResource.require(new String[]{aModuleName});
-                module = ScriptUtils.createModule(aModuleName);
-            }
-            if (module != null) {
-                Object oFunction = module.getMember(aMethodName);
-                if (oFunction instanceof JSObject && ((JSObject) oFunction).isFunction()) {
-                    if (onSuccess != null) {
-                        Object[] args = ScriptUtils.toJs(aArgs);
-                        List<Object> listArgs = Arrays.asList(args);
-                        listArgs.add(new AbstractJSObject() {
-
-                            @Override
-                            public Object call(final Object thiz, final Object... args) {
-                                Object result = null;
-                                if (args.length > 0) {
-                                    result = ScriptUtils.toJava(args[0]);
-                                }
-                                onSuccess.accept(result);
-                                return null;
-                            }
-
-                        });
-                        listArgs.add(new AbstractJSObject() {
-
-                            @Override
-                            public Object call(final Object thiz, final Object... args) {
-                                if (onFailure != null) {
-                                    if (args.length > 0) {
-                                        if (args[0] instanceof Exception) {
-                                            onFailure.accept((Exception) args[0]);
-                                        } else {
-                                            onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
-                                        }
+    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, Session aSession, Consumer<Object> onSuccess, Consumer<Exception> onFailure) {
+        if (aModuleName == null || aModuleName.isEmpty()) {
+            onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
+        } else {
+            if (aMethodName == null || aMethodName.isEmpty()) {
+                onFailure.accept(new Exception("Module's method name is missing."));
+            } else {
+                try {
+                    ScriptedResource._require(new String[]{aModuleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
+                        try {
+                            AppElementFiles files = indexer.nameToFiles(aModuleName);
+                            JSObject constr = ScriptUtils.lookupInGlobal(aModuleName);
+                            if (files != null && files.isModule() && constr != null) {
+                                String waitFor;
+                                ScriptDocument config = scriptsConfigs.get(aModuleName, files);
+                                // Let's perform security checks
+                                CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), aModuleName);
+                                // Let's check the if module is resident
+                                JSObject moduleInstance = sessionManager.getSystemSession().getModule(aModuleName);
+                                if (moduleInstance == null) {
+                                    if (aSession.containsModule(aModuleName)) {
+                                        waitFor = ExecuteServerModuleMethodRequestHandler.SESSION_WAIT_OPTION;
+                                        moduleInstance = aSession.getModule(aModuleName);
                                     } else {
-                                        onFailure.accept(new Exception("No error information from " + aMethodName + " method"));
+                                        if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                                            if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
+                                                moduleInstance = (JSObject) constr.newObject(new Object[]{});
+                                                waitFor = ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION;
+                                                Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module {0} from script {1}", new Object[]{aModuleName, files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION).getPath()});
+                                            } else {
+                                                throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", aModuleName));
+                                            }
+                                        } else {
+                                            throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
+                                        }
+                                    }
+                                } else {
+                                    waitFor = ExecuteServerModuleMethodRequestHandler.SERVER_WAIT_OPTION;
+                                }
+                                if (config.hasModuleAnnotation(JsDoc.Tag.WAIT_TAG)) {
+                                    JsDoc.Tag waitTag = config.getModuleAnnotation(JsDoc.Tag.WAIT_TAG);
+                                    String waitOption = waitTag.getParams() != null && !waitTag.getParams().isEmpty() ? waitTag.getParams().get(0) : ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION;
+                                    switch (waitOption.toLowerCase()) {
+                                        case ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION:
+                                        case ExecuteServerModuleMethodRequestHandler.SESSION_WAIT_OPTION:
+                                        case ExecuteServerModuleMethodRequestHandler.SERVER_WAIT_OPTION:
+                                            waitFor = waitOption.toLowerCase();
+                                            break;
+                                        default:
+                                            Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, "Unknown {0} option {1} in module {2}. Falling back to default parallelism.", new String[]{JsDoc.Tag.WAIT_TAG, waitOption, aModuleName});
                                     }
                                 }
-                                return null;
+                                if (moduleInstance != null) {
+                                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, ExecuteServerModuleMethodRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
+                                    Object oFun = moduleInstance.getMember(aMethodName);
+                                    if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                                        List<Object> args = new ArrayList<>(Arrays.asList(aArguments));
+                                        args.add(new AbstractJSObject() {
+                                            @Override
+                                            public Object call(final Object thiz, final Object... largs) {
+                                                if (!args.isEmpty()) {
+                                                    Object returned = largs.length > 0 ? largs[0] : null;
+                                                    onSuccess.accept(ScriptUtils.toJava(returned));
+                                                } else {
+                                                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, ExecuteServerModuleMethodRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                }
+                                                return null;
+                                            }
+
+                                        });
+                                        args.add(new AbstractJSObject() {
+                                            @Override
+                                            public Object call(final Object thiz, final Object... largs) {
+                                                if (!args.isEmpty()) {
+                                                    Object reason = largs.length > 0 ? ScriptUtils.toJava(largs[0]) : null;
+                                                    if (reason instanceof Exception) {
+                                                        onFailure.accept((Exception) reason);
+                                                    } else {
+                                                        onFailure.accept(new Exception(String.valueOf(reason)));
+                                                    }
+                                                } else {
+                                                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, ExecuteServerModuleMethodRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                }
+                                                return null;
+                                            }
+
+                                        });
+                                        final Object leveledLock;
+                                        switch (waitFor) {
+                                            case ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION:
+                                                leveledLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
+                                                break;
+                                            case ExecuteServerModuleMethodRequestHandler.SESSION_WAIT_OPTION:
+                                                leveledLock = aSession;
+                                                break;
+                                            case ExecuteServerModuleMethodRequestHandler.SERVER_WAIT_OPTION:
+                                                leveledLock = sessionManager.getSystemSession();
+                                                break;
+                                            default:
+                                                throw new IllegalStateException("moduleLock must be already known value.");
+                                        }
+                                        ScriptUtils.initAsyncs(0);
+                                        try {
+                                            synchronized (leveledLock) {
+                                                ScriptUtils.setLock(leveledLock);// provide lock to callback threads
+                                                try {
+                                                    CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getPropertyAllowedRoles().get(aMethodName), aMethodName);
+                                                    Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
+                                                    int asyncs = ScriptUtils.getAsyncsCount();
+                                                    if (!(result instanceof Undefined) || asyncs == 0) {
+                                                        onSuccess.accept(ScriptUtils.toJava(result));
+                                                        args.clear();
+                                                    }
+                                                } finally {
+                                                    ScriptUtils.setLock(null);
+                                                }
+                                            }
+                                        } finally {
+                                            ScriptUtils.initAsyncs(null);
+                                        }
+                                    } else {
+                                        onFailure.accept(new Exception(String.format(ExecuteServerModuleMethodRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName)));
+                                    }
+                                } else {
+                                    onFailure.accept(new Exception(String.format(ExecuteServerModuleMethodRequestHandler.MODULE_MISSING_MSG, aModuleName)));
+                                }
+                            } else {
+                                onFailure.accept(new IllegalArgumentException(String.format(ExecuteServerModuleMethodRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName)));
                             }
-                        });
-                        ((JSObject) oFunction).call(module, listArgs.toArray());
-                        return null;
-                    } else {
-                        return ScriptUtils.toJava(((JSObject) oFunction).call(module, ScriptUtils.toJs(aArgs)));
-                    }
-                } else {
-                    throw new Exception(String.format("Module %s has no function %s", aModuleName, aMethodName));
+                        } catch (Exception ex) {
+                            onFailure.accept(ex);
+                        }
+                    }, onFailure);
+                } catch (Exception ex) {
+                    onFailure.accept(ex);
                 }
-            } else {
-                throw new Exception(String.format("Module %s is not found.", aModuleName));
             }
-        } finally {
-            PlatypusPrincipal.setInstance(oldPrincipal);
         }
     }
-
+    
     public int startResidents(Set<String> aRezidents) throws Exception {
         PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
         Object oldSession = ScriptUtils.getSession();

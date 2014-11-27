@@ -9,6 +9,7 @@ import com.bearsoft.rowset.changes.*;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.CommitRequest;
@@ -24,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.AuthPermission;
 
 /**
  *
@@ -160,7 +162,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
     private AccessControlException checkWritePrincipalPermission(PlatypusPrincipal aPrincipal, String aEntityId, Set<String> writeRoles) {
         if (writeRoles != null && !writeRoles.isEmpty()) {
             if (aPrincipal == null || !aPrincipal.hasAnyRole(writeRoles)) {
-                return new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", aPrincipal != null ? aPrincipal.getName() : null));
+                return new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", aPrincipal != null ? aPrincipal.getName() : null), aPrincipal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
             }
         }
         return null;

@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.Packet;
 import com.eas.sensors.api.PacketReciever;
@@ -17,26 +18,26 @@ import com.eas.server.PlatypusServerCore;
 public class PositioningPacketReciever implements PacketReciever {
 
     public static final String RECIEVER_METHOD_NAME = "recieved";
-    protected String moduleId;
+    protected String moduleName;
     protected PlatypusServerCore serverCore;
     private final RetranslateFactory sender;
 
-    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleId, RetranslateFactory aRetranslateFactory) {
+    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleName, RetranslateFactory aRetranslateFactory) {
         super();
         serverCore = aServer;
-        moduleId = aModuleId;
+        moduleName = aModuleName;
         sender = aRetranslateFactory;
     }
 
     @Override
     public Object received(Packet aPacket) throws Exception {
-        Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket}, null, null);
-        result = ScriptUtils.toJava(result);
-        if (result != null) {
-            assert result instanceof String;
-            assert sender != null;
-            sender.send(aPacket, (String) result);
-        }
+        serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, serverCore.getSessionManager().getSystemSession(), (Object result) -> {
+            if (result != null) {
+                assert result instanceof String;
+                assert sender != null;
+                sender.send(aPacket, (String) result);
+            }
+        }, null);
         return null;
     }
 }

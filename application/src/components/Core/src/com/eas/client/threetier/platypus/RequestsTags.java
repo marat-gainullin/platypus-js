@@ -59,11 +59,12 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_RESPONSE_SQL_ERROR_CODE = 39; //int, sql exception vendor error code (if it is SQLException).
     public static final int TAG_RESPONSE_SQL_ERROR_STATE = 40; //string, sql exception SQLState property (if it is SQLException).
     public static final int TAG_RESPONSE_ACCESS_CONTROL = 41; //flag tag, indicating that access control exception occured on the server side.
+    public static final int TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN = 42;
     //StartAppElementRequest.Response
     //SetServerModulePropertyRequest.Response
-    public static final int TAG_FILE_NAME = 42;
-    public static final int TAG_FORMAT = 43;
-    public static final int TAG_RESULT_VALUE = 44;
+    public static final int TAG_FILE_NAME = 43;
+    public static final int TAG_FORMAT = 44;
+    public static final int TAG_RESULT_VALUE = 45;
     //ExecuteQueryRequest.Response
     public static final int TAG_ROWSET = 46;
     public static final int TAG_PARAMETERS = 47;

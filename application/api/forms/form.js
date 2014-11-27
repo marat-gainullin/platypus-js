@@ -6,7 +6,7 @@
     
     /**
      * Creates a form.
-     * @param aView Container instance to be used as view of created form.
+     * @param aView Container instance to be used as view of created form. Optional. If it is omitted P.AnchorsPane will be created and used as view.
      * @param aFormKey Form instance key for open windows accounting. Optional.
      * @constructor Form Form
      */
