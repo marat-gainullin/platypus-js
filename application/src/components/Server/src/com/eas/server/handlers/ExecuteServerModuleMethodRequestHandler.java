@@ -34,7 +34,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
     protected void handle2(Session aSession, Consumer<ExecuteServerModuleMethodRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), getRequest().getArguments(), aSession, (Object result) -> {
             onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
-        }, onFailure);
+        }, onFailure, null);
     }
 
     public static final String SERVER_WAIT_OPTION = "server";

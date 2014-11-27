@@ -21,14 +21,29 @@ public class WebSocketSession implements HasPublished {
 
     protected JSObject published;
     protected Session session;
+    protected com.eas.server.Session platypusSession;
+    protected Object lock;
     //
     protected JSObject onClose;
     protected JSObject onError;
     protected JSObject onMessage;
 
-    public WebSocketSession(Session aSession) {
+    public WebSocketSession(Session aSession, com.eas.server.Session aPlatypusSession) {
         super();
         session = aSession;
+        platypusSession = aPlatypusSession;
+    }
+
+    public com.eas.server.Session getPlatypusSession() {
+        return platypusSession;
+    }
+
+    public Object getLock() {
+        return lock;
+    }
+
+    public void setLock(Object aValue) {
+        lock = aValue;
     }
 
     @ScriptFunction

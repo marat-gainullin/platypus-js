@@ -160,7 +160,18 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         return defaultAppElement;
     }
 
-    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, Session aSession, Consumer<Object> onSuccess, Consumer<Exception> onFailure) {
+    /**
+     * Executes a script module according to all rules defimed within Platypus.js
+     * Such as @wait, @stateless and @rezident annotations, async-io convensions etc.
+     * 
+     * @param aModuleName
+     * @param aMethodName
+     * @param aArguments
+     * @param aSession
+     * @param onSuccess
+     * @param onFailure
+     */
+    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, Session aSession, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Consumer<Object> onLockSelected) {
         if (aModuleName == null || aModuleName.isEmpty()) {
             onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
         } else {
@@ -263,6 +274,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                         }
                                         ScriptUtils.initAsyncs(0);
                                         try {
+                                            if(onLockSelected != null)
+                                                onLockSelected.accept(leveledLock);
                                             synchronized (leveledLock) {
                                                 ScriptUtils.setLock(leveledLock);// provide lock to callback threads
                                                 try {
