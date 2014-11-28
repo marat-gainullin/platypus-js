@@ -4,7 +4,11 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.dbcontrols.check.DbCheck;
+import com.eas.client.forms.api.HasComponentEvents;
+import com.eas.client.forms.api.HasJsName;
+import com.eas.client.forms.api.Widget;
+import com.eas.client.forms.components.VCheckBox;
+import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
@@ -13,11 +17,11 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelCheckBox extends ModelComponentDecorator<DbCheck> {
+public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> implements HasPublished, HasComponentEvents, HasJsName, Widget{
 
-    public ModelCheckBox() throws Exception {
+    public ModelCheckBox() {
         super();
-        setDelegate(new DbCheck());
+        setDecorated(new VCheckBox());
     }
 
     private static final String CONSTRUCTOR_JSDOC = ""
@@ -29,12 +33,7 @@ public class ModelCheckBox extends ModelComponentDecorator<DbCheck> {
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public ModelCheckBox(String aText) throws Exception {
         this();
-        delegate.setText(aText);
-    }
-
-    protected ModelCheckBox(DbCheck aDelegate) {
-        super();
-        setDelegate(aDelegate);
+        decorated.setText(aText);
     }
 
     private static final String TEXT_JSDOC = ""
@@ -44,27 +43,12 @@ public class ModelCheckBox extends ModelComponentDecorator<DbCheck> {
 
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
-        return delegate.getText();
+        return decorated.getText();
     }
 
     @ScriptFunction
     public void setText(String aValue) {
-        delegate.setText(aValue);
-    }
-
-    private static final String EDITABLE_JSDOC = ""
-            + "/**\n"
-            + "* Determines if component is editable."
-            + "*/";
-
-    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean getEditable() {
-        return delegate.isEditable();
-    }
-
-    @ScriptFunction
-    public void setEditable(boolean aValue) {
-        delegate.setEditable(aValue);
+        decorated.setText(aValue);
     }
 
     @Override
@@ -83,5 +67,4 @@ public class ModelCheckBox extends ModelComponentDecorator<DbCheck> {
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
-
 }

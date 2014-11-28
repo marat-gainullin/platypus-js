@@ -5,7 +5,6 @@
 package com.eas.dbcontrols.date;
 
 import com.eas.dbcontrols.DbControl;
-import com.eas.client.forms.api.components.model.DbControlPanel;
 import com.eas.dbcontrols.InitializingMethod;
 import com.eas.dbcontrols.date.rt.RendererOptimisticDateFormatter;
 import de.wannawork.jcalendar.JCalendarComboBox;

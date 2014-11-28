@@ -11,6 +11,7 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VProgressBar;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -23,18 +24,15 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
-import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ProgressBar extends JProgressBar implements HasPublished, HasComponentEvents, HasJsName, Widget {
+public class ProgressBar extends VProgressBar implements HasPublished, HasComponentEvents, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -43,16 +41,9 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
             + "* @param max the maximum value (optional)\n"
             + "*/";
 
-    private int oldValue;
-    
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max"})
     public ProgressBar(int min, int max) {
-        super(JProgressBar.HORIZONTAL, min, max);
-        super.setStringPainted(true);
-        oldValue = min;
-        super.addChangeListener((ChangeEvent e) -> {
-            checkValueChanged();
-        });
+        super(min, max);
     }
 
     public ProgressBar(int min) {
@@ -61,15 +52,6 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
 
     public ProgressBar() {
         this(0, 0);
-    }
-
-    private void checkValueChanged() {
-        int newValue = getValue();
-        if (oldValue != newValue) {
-            int wasOldValue = oldValue;
-            oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -345,26 +327,21 @@ public class ProgressBar extends JProgressBar implements HasPublished, HasCompon
     @Override
     public void setValue(int aValue) {
         super.setValue(aValue);
-        checkValueChanged();
     }
-
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-
-    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * String representation of the current progress.\n"
             + " */")
+    @Override
     public String getText() {
-        return super.getString();
+        return super.getText();
     }
 
     @ScriptFunction
+    @Override
     public void setText(String aValue) {
-        super.setString(aValue);
+        super.setText(aValue);
     }
 
     protected JSObject published;

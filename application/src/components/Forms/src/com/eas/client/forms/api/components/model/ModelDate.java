@@ -9,13 +9,14 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ModelDate extends ModelComponentDecorator<DbDate> {
+public class ModelDate extends ModelComponentDecorator<DbDate, Date> {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -28,10 +29,6 @@ public class ModelDate extends ModelComponentDecorator<DbDate> {
         setDelegate(new DbDate());
     }
 
-    protected ModelDate(DbDate aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
     private static final String EDITABLE_JSDOC = ""
             + "/**\n"
             + " * Determines if component is editable.\n"

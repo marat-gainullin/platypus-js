@@ -12,6 +12,7 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VPasswordField;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -22,12 +23,9 @@ import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
-import javax.swing.JPasswordField;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -35,46 +33,21 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PasswordField extends JPasswordField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, HasValue<String>, Widget {
+public class PasswordField extends VPasswordField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Password field component.\n"
             + "* @param text the text for the component (optional).\n"
             + "*/";
-    private String oldValue;
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public PasswordField(String aText) {
-        super.setText(aText != null ? aText : "");
-        if (aText == null) {
-            nullValue = true;
-        }
-        oldValue = aText;
-        super.addFocusListener(new FocusAdapter() {
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                checkValueChanged();
-            }
-
-        });
-        super.addActionListener((java.awt.event.ActionEvent e) -> {
-            checkValueChanged();
-        });
+        super(aText);
     }
 
     public PasswordField() {
         this((String) null);
-    }
-
-    private void checkValueChanged() {
-        String newValue = getValue();
-        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
-            String wasOldValue = oldValue;
-            oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -313,15 +286,13 @@ public class PasswordField extends JPasswordField implements HasPublished, HasCo
             + " */")
     @Override
     public String getText() {
-        return super.getPassword() != null ? new String(super.getPassword()) : "";
+        return super.getText();
     }
 
     @ScriptFunction
     @Override
     public void setText(String aValue) {
-        nullValue = false;
-        super.setText(aValue != null ? aValue : "");
-        checkValueChanged();
+        super.setText(aValue);
     }
 
     @ScriptFunction(jsDoc = ""
@@ -330,26 +301,14 @@ public class PasswordField extends JPasswordField implements HasPublished, HasCo
             + " */")
     @Override
     public String getValue() {
-        return nullValue ? null : super.getPassword() != null ? new String(super.getPassword()) : "";
+        return super.getValue();
     }
-
-    private boolean nullValue;
 
     @ScriptFunction
     @Override
     public void setValue(String aValue) {
-        nullValue = aValue == null;
-        super.setText(aValue != null ? aValue : "");
-        checkValueChanged();
+        super.setValue(aValue);
     }
-
-    @Override
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-
-    private static final String VALUE_PROP_NAME = "value";
-
     protected String emptyText;
 
     @ScriptFunction(jsDoc = EMPTY_TEXT_JSDOC)

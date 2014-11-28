@@ -12,7 +12,7 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
-import com.eas.controls.ControlsUtils;
+import com.eas.client.forms.components.VFormattedField;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -26,12 +26,8 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -39,7 +35,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class FormattedField extends JFormattedTextField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, HasValue<Object>, Widget {
+public class FormattedField extends VFormattedField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -49,8 +45,7 @@ public class FormattedField extends JFormattedTextField implements HasPublished,
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"value"})
     public FormattedField(Object aValue) {
-        super();
-        setValue(aValue);
+        super(aValue);
     }
 
     public FormattedField() {
@@ -295,18 +290,13 @@ public class FormattedField extends JFormattedTextField implements HasPublished,
     @ScriptFunction(jsDoc = TEXT_JSDOC)
     @Override
     public String getText() {
-        return super.getText() != null ? super.getText() : "";
+        return super.getText();
     }
 
     @ScriptFunction
     @Override
     public void setText(String aValue) {
-        try {
-            super.setText(aValue != null ? aValue  : "");
-            super.commitEdit();
-        } catch (ParseException ex) {
-            Logger.getLogger(FormattedField.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            super.setText(aValue);
     }
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
@@ -318,21 +308,8 @@ public class FormattedField extends JFormattedTextField implements HasPublished,
     @ScriptFunction
     @Override
     public void setValue(Object aValue) {
-        if (aValue instanceof Number) {
-            aValue = ((Number) aValue).doubleValue();
-        }
-        if (super.getFormatterFactory() == null && aValue instanceof String) {
-            super.setFormatterFactory(ControlsUtils.formatterFactoryByFormat(getFormat(), ControlsUtils.MASK));
-        }
         super.setValue(ScriptUtils.toJava(aValue));
     }
-
-    @Override
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-    
-    private static final String VALUE_PROP_NAME = "value";
 
     private static final String FORMAT_JSDOC = ""
             + "/**\n"
@@ -340,26 +317,15 @@ public class FormattedField extends JFormattedTextField implements HasPublished,
             + "*/";
 
     @ScriptFunction(jsDoc = FORMAT_JSDOC)
+    @Override
     public String getFormat() {
-        if (super.getFormatter() != null) {
-            return ControlsUtils.formatByFormatter(super.getFormatter());
-        } else {
-            if (super.getFormatterFactory() != null) {
-                return ControlsUtils.formatByFormatter(super.getFormatterFactory().getFormatter(this));
-            } else {
-                return null;
-            }
-        }
+        return super.getFormat();
     }
 
     @ScriptFunction
+    @Override
     public void setFormat(String aValue) throws ParseException {
-        if (getFormat() == null ? aValue != null : !getFormat().equals(aValue)) {
-            if (super.getFormatter() != null) {
-                ControlsUtils.applyFormat(super.getFormatter(), aValue);
-                super.setText(super.getFormatter().valueToString(super.getValue()));
-            }
-        }
+        super.setFormat(aValue);
     }
 
     protected String emptyText;

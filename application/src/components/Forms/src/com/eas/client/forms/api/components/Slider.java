@@ -12,6 +12,7 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VSlider;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -24,18 +25,16 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class Slider extends JSlider implements HasPublished, HasComponentEvents, HasJsName, Widget {
+public class Slider extends VSlider implements HasPublished, HasComponentEvents, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -45,15 +44,9 @@ public class Slider extends JSlider implements HasPublished, HasComponentEvents,
             + "* @param value the initial value (optional)\n"
             + "*/";
     
-    private int oldValue;
-
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
     public Slider(int aOrientation, int min, int max, int value) {
         super(aOrientation, min, max, value);
-        oldValue = value;
-        super.addChangeListener((ChangeEvent e) -> {
-            checkValueChanged();
-        });
     }
 
     public Slider() {
@@ -66,15 +59,6 @@ public class Slider extends JSlider implements HasPublished, HasComponentEvents,
 
     public Slider(int min, int max, int value) {
         this(Orientation.HORIZONTAL, min, max, value);
-    }
-
-    private void checkValueChanged() {
-        int newValue = getValue();
-        if (oldValue != newValue) {
-            int wasOldValue = oldValue;
-            oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
     }
 
     @ScriptFunction(jsDoc = ""
@@ -90,14 +74,7 @@ public class Slider extends JSlider implements HasPublished, HasComponentEvents,
     @Override
     public void setValue(int aValue) {
         super.setValue(aValue);
-        checkValueChanged();
     }
-
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-    
-    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override

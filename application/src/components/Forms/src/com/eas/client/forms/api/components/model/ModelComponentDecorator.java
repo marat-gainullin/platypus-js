@@ -5,6 +5,9 @@
 package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.RowsetConverter;
+import com.eas.client.forms.api.components.HasValue;
+import com.eas.client.forms.components.VProgressBar;
+import com.eas.client.forms.components.VSlider;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.DbControl;
@@ -36,6 +39,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.EventObject;
@@ -77,6 +81,7 @@ import jdk.nashorn.api.scripting.JSObject;
  if (aValue instanceof Number) {
  aValue = Double.valueOf(((Number) aValue).doubleValue());
  }
+ === editable processing ? ===
  */
 /**
  *
@@ -92,12 +97,10 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected JToolBar extraTools = new JToolBar();
     protected Set<CellEditorListener> editorListeners = new HashSet<>();
     protected Set<ActionListener> actionListeners = new HashSet<>();
-    protected V value;
-    protected int updateCounter;
     protected boolean borderless = true;
+    protected D decorated;
     protected int align = SwingConstants.LEFT;
     protected Icon icon;
-    protected boolean editable = true;
     protected boolean selectOnly;
     private boolean design;
     // Model interacting
@@ -158,6 +161,28 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
+    public D getDecorated() {
+        return decorated;
+    }
+
+    protected PropertyChangeListener valueListener = (PropertyChangeEvent evt) -> {
+        if (ModelComponentDecorator.this.standalone) {
+            ModelComponentDecorator.this.firePropertyChange(VALUE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+        } else {
+            ModelComponentDecorator.this.fireCellEditingCompleted();
+        }
+    };
+
+    public void setDecorated(D aComponent) {
+        if (decorated != null) {
+            decorated.removePropertyChangeListener(VALUE_PROP_NAME, valueListener);
+        }
+        decorated = aComponent;
+        if (decorated != null) {
+            decorated.addPropertyChangeListener(VALUE_PROP_NAME, valueListener);
+        }
+    }
+
     @Override
     public void injectPublished(JSObject aValue) {
         published = aValue;
@@ -189,6 +214,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         if (f != null && prefSizeCalculator != null) {
             prefSizeCalculator.setFont(f);
         }
+        borderless = false;
+        initializeBorder();
     }
 
     @Override
@@ -235,34 +262,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         setOpaque(true);
         iconLabel.setOpaque(true);
         initializeDesign();
-    }
-
-    public boolean isEditable() {
-        return editable;
-    }
-
-    public void setEditable(boolean aEditable) {
-        editable = aEditable;
-        applyEditable();
-    }
-
-    protected abstract void applyEditable2Field();
-
-    protected void applyEditable2NonField() {
-        if (standalone) {
-            extraTools.setVisible(editable);
-        }
-    }
-
-    protected void applyEditable() {
-        boolean oldEditable = editable;
-        try {
-            editable = oldEditable && !isSelectOnly();
-            applyEditable2Field();
-        } finally {
-            editable = oldEditable;
-        }
-        applyEditable2NonField();
     }
 
     public void fireCellEditingCompleted() {
@@ -649,17 +648,24 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public V getValue() {
-        return value;
+        if (decorated instanceof HasValue<?>) {
+            return ((HasValue<V>) decorated).getValue();
+        } else if (decorated instanceof VProgressBar) {
+            return (V) Integer.valueOf(((VProgressBar) decorated).getValue());
+        } else if (decorated instanceof VSlider) {
+            return (V) Integer.valueOf(((VSlider) decorated).getValue());
+        }
+        return null;
     }
 
     @Override
     public void setValue(V aValue) {
-        V oldValue = value;
-        value = aValue;
-        if (standalone) {
-            firePropertyChange(VALUE_PROP_NAME, oldValue, aValue);
-        } else {
-            fireCellEditingCompleted();
+        if (decorated instanceof HasValue<?>) {
+            ((HasValue<V>) decorated).setValue(aValue);
+        } else if (decorated instanceof VProgressBar) {
+            ((VProgressBar) decorated).setValue(aValue instanceof Number ? ((Number) aValue).intValue() : 0);
+        } else if (decorated instanceof VSlider) {
+            ((VSlider) decorated).setValue(aValue instanceof Number ? ((Number) aValue).intValue() : 0);
         }
     }
 
@@ -736,7 +742,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         applyAlign();
         applyTooltip(getToolTipText());
         applyEnabled();
-        applyEditable();
         applyFocusable();
         applyCursor();
         if (standalone) {
@@ -882,7 +887,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setSelectOnly(boolean aValue) {
         selectOnly = aValue;
-        applyEditable();
     }
 
     @Override
@@ -926,7 +930,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             kind = InitializingMethod.UNDEFINED;
             createFieldExtraEditingControls(onSelect, true);
             initializeEditor();
-            extraTools.setVisible(editable);
             initializeBorder();
             initializeFocusListener();
         }

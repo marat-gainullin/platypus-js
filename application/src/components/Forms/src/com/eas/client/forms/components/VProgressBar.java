@@ -5,10 +5,59 @@
  */
 package com.eas.client.forms.components;
 
+import com.eas.script.ScriptFunction;
+import java.beans.PropertyChangeListener;
+import javax.swing.JProgressBar;
+import javax.swing.event.ChangeEvent;
+
 /**
  *
  * @author Марат
  */
-public class VProgressBar {
-    
+public class VProgressBar extends JProgressBar {
+
+    private int oldValue;
+
+    public VProgressBar(int min, int max) {
+        super(JProgressBar.HORIZONTAL, min, max);
+        super.setStringPainted(true);
+        oldValue = min;
+        super.addChangeListener((ChangeEvent e) -> {
+            checkValueChanged();
+        });
+    }
+
+    private void checkValueChanged() {
+        int newValue = getValue();
+        if (oldValue != newValue) {
+            int wasOldValue = oldValue;
+            oldValue = newValue;
+            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+        }
+    }
+
+    @Override
+    public int getValue() {
+        return super.getValue();
+    }
+
+    @Override
+    public void setValue(int aValue) {
+        super.setValue(aValue);
+        checkValueChanged();
+    }
+
+    public void addValueChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    private static final String VALUE_PROP_NAME = "value";
+
+    public String getText() {
+        return super.getString();
+    }
+
+    public void setText(String aValue) {
+        super.setString(aValue);
+    }
 }

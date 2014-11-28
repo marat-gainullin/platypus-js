@@ -16,11 +16,12 @@ import javax.swing.event.ChangeEvent;
  *
  * @author Марат
  */
-public class VCheckBox extends JCheckBox implements HasValue<Boolean>{
-    
+public class VCheckBox extends JCheckBox implements HasValue<Boolean> {
+
     protected static Icon nullIcon = IconCache.getIcon("16x16/nullCheck.gif");
     protected Icon ordinaryIcon;
     private Boolean oldValue;
+    protected boolean editable;
 
     public VCheckBox(String aText, boolean aSelected) {
         super(aText, aSelected);
@@ -30,7 +31,11 @@ public class VCheckBox extends JCheckBox implements HasValue<Boolean>{
             checkValueChanged();
         });
     }
-    
+
+    public VCheckBox() {
+        this(null, false);
+    }
+
     private void checkValueChanged() {
         Boolean newValue = getValue();
         if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {

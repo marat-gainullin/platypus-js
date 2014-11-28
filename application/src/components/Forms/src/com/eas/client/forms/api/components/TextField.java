@@ -12,6 +12,7 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.components.VTextField;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
@@ -22,85 +23,44 @@ import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class TextField extends JTextField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, HasValue<String>, Widget {
+public class TextField extends VTextField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Text field component. \n"
             + "* @param text the initial text for the component (optional)\n"
             + "*/";
-    private String oldValue;
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public TextField(String aText) {
         super(aText);
-        super.setText(aText != null ? aText : "");
-        if (aText == null) {
-            nullValue = true;
-        }
-        oldValue = aText;
-        super.addFocusListener(new FocusAdapter() {
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                checkValueChanged();
-            }
-
-        });
-        super.addActionListener((java.awt.event.ActionEvent e) -> {
-            checkValueChanged();
-        });
     }
 
     public TextField() {
         this((String) null);
     }
 
-    private void checkValueChanged() {
-        String newValue = getValue();
-        if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
-            String wasOldValue = oldValue;
-            oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
-        }
-    }
-
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public String getValue() {
-        return nullValue ? null : super.getText();
+        return super.getValue();
     }
 
-    private boolean nullValue;
-    
     @ScriptFunction
     @Override
     public void setValue(String aValue) {
-        nullValue = aValue == null;
-        super.setText(aValue != null ? aValue : "");
-        checkValueChanged();
+        super.setValue(aValue);
     }
-
-    @Override
-    public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
-    
-    private static final String VALUE_PROP_NAME = "value";
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override
@@ -344,9 +304,7 @@ public class TextField extends JTextField implements HasPublished, HasComponentE
     @ScriptFunction
     @Override
     public void setText(String aValue) {
-        nullValue = false;
-        super.setText(aValue != null ? aValue : "");
-        checkValueChanged();
+        super.setText(aValue);
     }
 
     protected String emptyText;
