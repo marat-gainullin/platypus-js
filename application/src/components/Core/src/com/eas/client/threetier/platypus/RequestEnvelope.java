@@ -25,4 +25,19 @@ public class RequestEnvelope {
         password = aPassword;
         ticket = aTicket;
     }
+
+    public void waitRequestCompletion() throws InterruptedException {
+        synchronized (request) {// synchronized due to J2SE javadoc on wait()/notify() methods
+            while (!request.isDone()) {
+                request.wait();
+            }
+        }
+    }
+
+    public void notifyDone() {
+        synchronized (request) {// synchronized due to J2SE javadoc on wait()/notify() methods
+            request.setDone(true);
+            request.notifyAll();
+        }
+    }
 }

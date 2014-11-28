@@ -106,10 +106,50 @@
         value: boxAsJs
     });
 
+    function invokeDelayed(aTimeout, aTarget) {
+        if (arguments.length < 2)
+            throw "invokeDelayed needs 2 arguments - timeout, callback.";
+        //
+        var lock = ScriptUtilsClass.getLock();
+        var req = ScriptUtilsClass.getRequest();
+        var resp = ScriptUtilsClass.getResponse();
+        var session = ScriptUtilsClass.getSession();
+        var principal = PlatypusPrincipalClass.getInstance();
+        //
+        ScriptTimerTaskClass.schedule(function () {
+            ScriptUtilsClass.setLock(lock);
+            ScriptUtilsClass.setRequest(req);
+            ScriptUtilsClass.setResponse(resp);
+            ScriptUtilsClass.setSession(session);
+            PlatypusPrincipalClass.setInstance(principal);
+            try {
+                ScriptUtilsClass.locked(aTarget, lock);
+            } finally {
+                ScriptUtilsClass.setLock(null);
+                ScriptUtilsClass.setRequest(null);
+                ScriptUtilsClass.setResponse(null);
+                ScriptUtilsClass.setSession(null);
+                PlatypusPrincipalClass.setInstance(null);
+            }
+        }, aTimeout);
+    }
+
+    Object.defineProperty(P, "invokeDelayed", {get: function () {
+        return invokeDelayed;
+    }});
+    
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
+        
+        function invokeLater(aTarget) {
+            invokeDelayed(1, aTarget);
+        }
+
+        Object.defineProperty(P, "invokeLater", {get: function () {
+            return invokeLater;
+        }});
         load("classpath:server-deps.js");
     } catch (e) {
         serverCoreClass = null;
@@ -128,55 +168,15 @@
         var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
         var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
         var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
-        /** 
-         * invokeLater - invokes given function in AWT event thread
-         */
-        Function.prototype.invokeLater = function () {
-            var func = this;
-            var args = arguments;
-            SwingUtilitiesClass.invokeLater(function () {
-                func.apply(func, args);
-            });
-        };
-        /** 
-         * Thread - schedules given function in the pool thread
-         */
-        Function.prototype.invokeDelayed = function () {
-            var func = this;
-            var args = arguments;
-            if (!args || !args.length || args.length < 1)
-                throw "invokeDelayed needs at least 1 argument - timeout value.";
-            var userArgs = [];
-            for (var i = 1; i < args.length; i++) {
-                userArgs.push(args[i]);
-            }
-            //
-            var lock = ScriptUtilsClass.getLock();
-            var req = ScriptUtilsClass.getRequest();
-            var resp = ScriptUtilsClass.getResponse();
-            var session = ScriptUtilsClass.getSession();
-            var principal = PlatypusPrincipalClass.getInstance();
-            //
-            ScriptTimerTaskClass.schedule(function () {
-                ScriptUtilsClass.setLock(lock);
-                ScriptUtilsClass.setRequest(req);
-                ScriptUtilsClass.setResponse(resp);
-                ScriptUtilsClass.setSession(session);
-                PlatypusPrincipalClass.setInstance(principal);
-                try {
-                    ScriptUtilsClass.locked(function () {
-                        func.apply(func, userArgs);
-                    }, lock);
-                } finally {
-                    ScriptUtilsClass.setLock(null);
-                    ScriptUtilsClass.setRequest(null);
-                    ScriptUtilsClass.setResponse(null);
-                    ScriptUtilsClass.setSession(null);
-                    PlatypusPrincipalClass.setInstance(null);
-                }
-            }, args[0]);
-            // HTML5 client doesn't support cancel feature and so, we don't support it too.
-        };
+
+        function invokeLater(aTarget) {
+            SwingUtilitiesClass.invokeLater(aTarget);
+        }
+
+        Object.defineProperty(P, "invokeLater", {get: function () {
+            return invokeLater;
+        }});
+        //
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "blue", {value: new P.Color(0, 0, 0xff)});
@@ -277,10 +277,10 @@
 
         function selectFile(curDir, aCallback) {
             if (aCallback) {
-                (function () {
+                invokeLater(function () {
                     var file = fileDialog(curDir, false);
                     aCallback(file);
-                }).invokeLater();
+                });
             } else {
                 return fileDialog(curDir, false);
             }
@@ -317,10 +317,10 @@
         directoryDialog.docString = "shows a directory dialog box";
         function selectDirectory(curDir, aCallback) {
             if (aCallback) {
-                (function () {
+                invokeLater(function () {
                     var file = directoryDialog(curDir);
                     aCallback(file);
-                }).invokeLater();
+                });
             } else {
                 return directoryDialog(curDir);
             }
@@ -354,10 +354,10 @@
         colorDialog.docString = "shows a color chooser dialog box";
         function selectColor(title, color, aCallback) {
             if (aCallback) {
-                (function () {
+                invokeLater(function () {
                     var selected = colorDialog(title, color);
                     aCallback(selected);
-                }).invokeLater();
+                });
             } else {
                 return colorDialog(title, color);
             }

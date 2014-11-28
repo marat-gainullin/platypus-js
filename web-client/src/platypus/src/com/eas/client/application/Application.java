@@ -120,32 +120,6 @@ public class Application {
 		    });
 		}
 	
-		$wnd.Function.prototype.invokeLater = function() {
-			var _func = this;
-			var _arguments = arguments;
-			@com.bearsoft.rowset.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
-				_func.apply(_func, _arguments);
-			});
-		}
-		
-		$wnd.Function.prototype.invokeDelayed = function() {
-			var _func = this;
-			var _arguments = arguments;
-		    if (!_arguments || !_arguments.length || _arguments.length < 1)
-		        throw "schedule needs at least 1 argument - timeout value.";
-		    var userArgs = [];
-		    for (var i = 1; i < _arguments.length; i++) {
-		        userArgs.push(_arguments[i]);
-		    }
-			@com.bearsoft.rowset.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(_arguments[0], function(){
-				try{
-					_func.apply(_func, userArgs);
-				}catch(e){
-					$wnd.P.Logger.severe(e);
-				}
-			});
-		}
-		
 	    // this === global;
 	    var global = $wnd;
 	    if(!global.P){
@@ -162,26 +136,56 @@ public class Application {
 	        //};
 	    }
 		
-		$wnd.P.selectFile = function(aCallback) {
+		function invokeLater(aTarget) {
+			@com.bearsoft.rowset.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+		}
+		
+        Object.defineProperty($wnd.P, "invokeLater", {get: function () {
+            return invokeLater;
+        }});
+        
+		function invokeDelayed(aTimeout, aTarget) {
+		    if (arguments.length < 2)
+		        throw "invokeDelayed needs 2 arguments - timeout, callback.";
+			@com.bearsoft.rowset.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
+		}
+		
+        Object.defineProperty($wnd.P, "invokeDelayed", {get: function () {
+            return invokeDelayed;
+        }});
+        
+		function selectFile(aCallback) {
 			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
-		$wnd.P.selectColor = function(aCallback) {
+        Object.defineProperty($wnd.P, "selectFile", {get: function () {
+            return selectFile;
+        }});
+        
+		function selectColor(aCallback) {
 			@com.eas.client.form.ControlsUtils::jsSelectColor(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
-		$wnd.P.Resource = {};
-		Object.defineProperty($wnd.P.Resource, "upload", {get : function(){
+        Object.defineProperty($wnd.P, "selectColor", {get: function () {
+            return selectColor;
+        }});
+        
+		var Resource = {};
+		Object.defineProperty(Resource, "upload", {get : function(){
 				return function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
 					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback);
 				}
 		}});
-		Object.defineProperty($wnd.P.Resource, "load", {get : function(){
+		Object.defineProperty(Resource, "load", {get : function(){
 	        return function(aResName, onSuccess, onFailure){
             	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
 	        };
 		}});
 		
+        Object.defineProperty($wnd.P, "Resource", {get: function () {
+            return Resource;
+        }});
+        
 		var principal = {};
 		
 		Object.defineProperty(principal, "name", {get: function(){

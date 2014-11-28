@@ -92,10 +92,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             public void messageReceived(IoSession session, Object message) throws Exception {
                 RequestCallback rqc = (RequestCallback) session.getAttribute(RequestCallback.class.getSimpleName());
                 rqc.response = (Response) message;
-                synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
-                    rqc.requestEnv.request.setDone(true);
-                    rqc.requestEnv.request.notifyAll();
-                }
+                rqc.requestEnv.notifyDone();
             }
 
             @Override
@@ -218,11 +215,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                         // enqueue network work
                         ioSession.write(rqc.requestEnv);
                         // wait completion from the network subsystem
-                        synchronized (rqc.requestEnv.request) {// synchronized due to J2SE javadoc on wait()/notify() methods
-                            while (!rqc.requestEnv.request.isDone()) {
-                                rqc.requestEnv.request.wait();
-                            }
-                        }
+                        rqc.requestEnv.waitRequestCompletion();
                         sessionTicket = rqc.requestEnv.ticket;
                         return null;
                     };
