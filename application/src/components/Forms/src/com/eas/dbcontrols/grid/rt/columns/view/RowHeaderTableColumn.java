@@ -4,13 +4,15 @@
  */
 package com.eas.dbcontrols.grid.rt.columns.view;
 
+import javax.swing.table.TableColumn;
+
 /**
  *
  * @author mg
  */
-public class RowHeaderTableColumn extends DummyTableColumn {
+public class RowHeaderTableColumn extends TableColumn {
 
     public RowHeaderTableColumn(int aWidth) {
-        super(aWidth);
+        super(-1, aWidth);
     }
 }

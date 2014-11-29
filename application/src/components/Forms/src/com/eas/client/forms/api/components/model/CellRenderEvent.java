@@ -2,10 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols;
+package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.gui.grid.data.CellData;
-import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -21,9 +20,9 @@ public class CellRenderEvent extends PublishedSourcedEvent {
     protected Object id;
     protected Object columnId;
     protected CellData cell;
-    protected Row object;
+    protected JSObject object;
 
-    public CellRenderEvent(HasPublished source, Object id, Object columnId, CellData cell, Row object) {
+    public CellRenderEvent(HasPublished source, Object id, Object columnId, CellData cell, JSObject object) {
         super(source);
         this.columnId = columnId;
         this.id = id;
@@ -57,9 +56,9 @@ public class CellRenderEvent extends PublishedSourcedEvent {
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
-            + " * The cell's row object.\n"
+            + " * The cell's object.\n"
             + " */")
-    public Row getObject() {
+    public JSObject getObject() {
         return object;
     }
 

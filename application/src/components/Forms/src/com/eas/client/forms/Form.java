@@ -45,6 +45,7 @@ import jdk.nashorn.api.scripting.JSObject;
         + " */")
 public class Form implements HasPublished {
 
+    protected static ResourceBundle rb = ResourceBundle.getBundle(Form.class.getPackage().getName() + "/Bundle");
     public static final String FORM_ID_AS_FIRST_REQUIRED_MSG = "First element of form key must be a valid form id.";
     public static final String FORM_KEY_REQUIRED_MSG = "Form key must be not null and must contain at least one element (form id).";
     public static final String VIEW_SCRIPT_NAME = "view";
@@ -75,6 +76,13 @@ public class Form implements HasPublished {
 
     public static void setOnChange(JSObject aValue) {
         onChange = aValue;
+    }
+
+    public static String getLocalizedString(String aKey) {
+        if (rb.containsKey(aKey)) {
+            return rb.getString(aKey);
+        }
+        return aKey;
     }
 
     private void checkUndecorated(RootPaneContainer topContainer) {

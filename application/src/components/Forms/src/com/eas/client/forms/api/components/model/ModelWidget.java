@@ -38,7 +38,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
 
     public JSObject getOnSelect();
 
-    public void setOnSelect(JSObject aValue) throws Exception;
+    public void setOnSelect(JSObject aValue);
 
     public boolean isSelectOnly();
 

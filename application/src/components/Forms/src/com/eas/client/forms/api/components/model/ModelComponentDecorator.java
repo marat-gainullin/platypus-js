@@ -5,15 +5,12 @@
 package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.RowsetConverter;
+import com.eas.client.forms.ModelCellEditingListener;
+import com.eas.client.forms.Form;
+import com.eas.client.forms.IconCache;
 import com.eas.client.forms.components.HasValue;
 import com.eas.client.forms.components.VSpinner;
-import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.dbcontrols.CellRenderEvent;
-import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlEditingListener;
-import com.eas.dbcontrols.DbControlRowsetListener;
-import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.IconCache;
+import com.eas.client.forms.events.ControlEventsIProxy;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
@@ -86,6 +83,8 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public abstract class ModelComponentDecorator<D extends JComponent, V> extends JComponent implements ModelWidget<V> {
 
+    public static final int EXTRA_BUTTON_WIDTH = 18;
+    
     protected static RowsetConverter converter = new RowsetConverter();
     protected JTextField prefSizeCalculator = new JTextField();// DON't move to design!!!
     protected JLabel iconLabel = new JLabel(" ");
@@ -99,7 +98,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected boolean selectOnly;
     private boolean design;
     // Model interacting
-    protected DbControlRowsetListener rowsetListener;
     protected JSObject published;
     protected static final Color WDIGETS_BORDER_COLOR = controlsBorderColor();
     public static final int WIDGETS_DEFAULT_WIDTH = 100;
@@ -229,8 +227,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     public void fireCellEditingCompleted() {
         editorListeners.stream().forEach((l) -> {
-            if (l instanceof DbControlEditingListener) {
-                ((DbControlEditingListener) l).cellEditingCompleted();
+            if (l instanceof ModelCellEditingListener) {
+                ((ModelCellEditingListener) l).cellEditingCompleted();
             }
         });
     }
@@ -404,7 +402,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     public void applyStyle(CascadedStyle aStyle) {
         if (aStyle != null) {
-            setFont(DbControlsUtils.toNativeFont(aStyle.getFont()));
+            setFont(aStyle.getFont());
             setBackground(aStyle.getBackground());
             setForeground(aStyle.getForeground());
             setIcon(aStyle.getIcon());
@@ -659,16 +657,16 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
-    protected PropertyChangeListener cellEditintCompletedAlerter = (PropertyChangeEvent evt) -> {
+    protected PropertyChangeListener cellEditingCompletedAlerter = (PropertyChangeEvent evt) -> {
         fireCellEditingCompleted();
     };
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         try {
-            removeValueChangeListener(cellEditintCompletedAlerter);
+            removeValueChangeListener(cellEditingCompletedAlerter);
             setValue((V) value);
-            addValueChangeListener(cellEditintCompletedAlerter);
+            addValueChangeListener(cellEditingCompletedAlerter);
             EventQueue.invokeLater(() -> {
                 extraTools.setVisible(true);
             });
@@ -793,14 +791,14 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         if (onSelect != null) {
             JButton btnSelectingField = new JButton();
             btnSelectingField.setAction(new ModelComponentDecorator.ValueSelectorAction(onSelect));
-            btnSelectingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
+            btnSelectingField.setPreferredSize(new Dimension(EXTRA_BUTTON_WIDTH, EXTRA_BUTTON_WIDTH));
             btnSelectingField.setFocusable(false);
             extraTools.add(btnSelectingField);
         }
         if (nullable) {
             JButton btnNullingField = new JButton();
             btnNullingField.setAction(new NullerAction());
-            btnNullingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
+            btnNullingField.setPreferredSize(new Dimension(EXTRA_BUTTON_WIDTH, EXTRA_BUTTON_WIDTH));
             btnNullingField.setFocusable(false);
             extraTools.add(btnNullingField);
         }
@@ -839,7 +837,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         NullerAction() {
             super();
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
-            putValue(Action.SHORT_DESCRIPTION, DbControlsUtils.getLocalizedString(NullerAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(NullerAction.class.getSimpleName()));
             putValue(Action.SMALL_ICON, IconCache.getIcon("16x16/delete.png"));
         }
 
@@ -860,7 +858,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         ValueSelectorAction(JSObject aSelector) {
             super();
             putValue(Action.NAME, "...");
-            putValue(Action.SHORT_DESCRIPTION, DbControlsUtils.getLocalizedString(ValueSelectorAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(ValueSelectorAction.class.getSimpleName()));
             selector = aSelector;
         }
 

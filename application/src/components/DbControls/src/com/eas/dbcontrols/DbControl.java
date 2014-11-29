@@ -21,7 +21,6 @@ import com.eas.client.model.application.ApplicationModel;
  */
 public interface DbControl {
 
-    public static final int EXTRA_BUTTON_WIDTH = 18;
 
     /**
      * Returns the working datamodel.

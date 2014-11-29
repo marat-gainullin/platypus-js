@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.eas.dbcontrols;
+package com.eas.client.forms;
 
 import javax.swing.event.CellEditorListener;
 
@@ -11,7 +11,7 @@ import javax.swing.event.CellEditorListener;
  *
  * @author mg
  */
-public interface DbControlEditingListener extends CellEditorListener{
+public interface ModelCellEditingListener extends CellEditorListener{
     /**
      * Invoked by cell editors when the editing has been completed,
      * but editing session hasn't been ended.

@@ -12,8 +12,6 @@ import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.dbcontrols.CellRenderEvent;
-import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import com.eas.gui.CascadedStyle;
 import java.util.ArrayList;
@@ -35,7 +33,7 @@ public abstract class RowsetsModel {
     public static final String COLUMN_MISSING_MSG = "Model column missing";
     protected List<ModelColumn> columns = new ArrayList<>();
     private Map<ModelColumn, Integer> columnsIndicies;
-    private Map<Integer, FieldModelColumn> rowsRowsetFields2ColumnsIndicies;
+    private Map<Integer, ModelColumn> rowsRowsetFields2ColumnsIndicies;
     protected ApplicationEntity<?, ?, ?> rowsEntity;
     protected Rowset rowsRowset;
     protected Locator pkLocator;
@@ -96,10 +94,8 @@ public abstract class RowsetsModel {
         if (columnIndex >= 0 && columnIndex < columns.size()) {
             try {
                 ModelColumn column = columns.get(columnIndex);
-                if (column instanceof FieldModelColumn) {
-                    if (checkColumnRowset(column, anElement)) {
-                        return getRowsetsData(column, anElement);
-                    }
+                if (checkColumnRowset(column, anElement)) {
+                    return getRowsetsData(column, anElement);
                 }
             } catch (Exception ex) {
                 severe(ex.getMessage());
@@ -113,15 +109,13 @@ public abstract class RowsetsModel {
         if (columnIndex >= 0 && columnIndex < columns.size()) {
             try {
                 ModelColumn column = columns.get(columnIndex);
-                if (column instanceof FieldModelColumn) {
-                    int oldCursorPos = rowsRowset.getCursorPos();
-                    try {
-                        if (checkColumnRowset(column, anElement)) {
-                            setRowsetsData(aValue, column, anElement);
-                        }
-                    } finally {
-                        restoreRowsRowsetCursorPos(rowsRowset, oldCursorPos);
+                int oldCursorPos = rowsRowset.getCursorPos();
+                try {
+                    if (checkColumnRowset(column, anElement)) {
+                        setRowsetsData(aValue, column, anElement);
                     }
+                } finally {
+                    restoreRowsRowsetCursorPos(rowsRowset, oldCursorPos);
                 }
             } catch (Exception ex) {
                 severe(ex.getMessage());
@@ -154,10 +148,8 @@ public abstract class RowsetsModel {
      */
     protected Object getRowsetsData(ModelColumn aColumn, Row aRow) throws Exception {
         if (aColumn != null) {
-            assert aColumn instanceof FieldModelColumn;
             if (aColumn.getRowset() != null) {
-                FieldModelColumn fieldColumn = (FieldModelColumn) aColumn;
-                Object value = aRow.getColumnObject(fieldColumn.getRowsetField());
+                Object value = aRow.getColumnObject(aColumn.getRowsetField());
                 return complementCellData(new CellData(new CascadedStyle(aColumn.getStyle()), value, aColumn.getView() != null ? aColumn.getView().achiveDisplayValue(value) : value), aRow, aColumn);
             } else {
                 return complementCellData(new CellData(new CascadedStyle(aColumn.getStyle()), null, null), aRow, aColumn);
@@ -182,17 +174,15 @@ public abstract class RowsetsModel {
      */
     protected void setRowsetsData(Object aValue, ModelColumn aColumn, Row aRow) throws Exception {
         if (aColumn != null) {
-            assert aColumn instanceof FieldModelColumn;
             if (aColumn.getRowset() != null) {
                 if (aValue instanceof CellData) {
                     aValue = ((CellData) aValue).getData();
                 }
-                FieldModelColumn fieldColumn = (FieldModelColumn) aColumn;
-                if (fieldColumn.getRowset() != rowsRowset) {
-                    fieldColumn.getRowset().updateObject(fieldColumn.getRowsetField(), aValue);
+                if (aColumn.getRowset() != rowsRowset) {
+                    aColumn.getRowset().updateObject(aColumn.getRowsetField(), aValue);
                 } else {
                     // all validating/change events posting code is inside of Row class.
-                    aRow.setColumnObject(fieldColumn.getRowsetField(), aValue);
+                    aRow.setColumnObject(aColumn.getRowsetField(), aValue);
                 }
             } else {
                 severe(COLUMN_ROWSET_MISSING_MSG);
@@ -265,10 +255,7 @@ public abstract class RowsetsModel {
             rowsRowsetFields2ColumnsIndicies = new HashMap<>();
             for (int i = 0; i < columns.size(); i++) {
                 ModelColumn col = columns.get(i);
-                if (col instanceof FieldModelColumn && col.getRowset() == rowsRowset) {
-                    FieldModelColumn fcol = (FieldModelColumn) col;
-                    rowsRowsetFields2ColumnsIndicies.put(fcol.getRowsetField(), fcol);
-                }
+                rowsRowsetFields2ColumnsIndicies.put(col.getRowsetField(), col);
             }
         }
     }
@@ -292,7 +279,7 @@ public abstract class RowsetsModel {
      */
     protected int getModelColumnIndex(int aRowsRowsetFieldIndex) {
         validateColumnIndicies();
-        FieldModelColumn fcol = rowsRowsetFields2ColumnsIndicies.get(aRowsRowsetFieldIndex);
+        ModelColumn fcol = rowsRowsetFields2ColumnsIndicies.get(aRowsRowsetFieldIndex);
         if (fcol != null) {
             return columnsIndicies.get(fcol);
         } else {
@@ -331,8 +318,8 @@ public abstract class RowsetsModel {
 
     /**
      * Fires an event, occuring when data or rowset structure of column's rowset
-     * is changed. It takes place when column's rowset and rows rowset are not the
-     * same.
+     * is changed. It takes place when column's rowset and rows rowset are not
+     * the same.
      *
      * @param aColumn ModelColumn instance, the change is related to.
      * @see ModelColumn
@@ -371,7 +358,7 @@ public abstract class RowsetsModel {
     }
 
     private CellData complementCellData(final CellData aCellData, final Row aRow, final ModelColumn aColumn) throws Exception {
-        JSObject lOnRender = aColumn.getCellsHandler();
+        JSObject lOnRender = aColumn.getOnRender();
         if (lOnRender == null) {
             lOnRender = generalOnRender;
         }

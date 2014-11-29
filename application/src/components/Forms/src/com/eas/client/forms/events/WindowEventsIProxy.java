@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls.events;
+package com.eas.client.forms.events;
 
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.Frame;

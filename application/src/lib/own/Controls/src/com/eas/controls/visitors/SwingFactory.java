@@ -18,7 +18,7 @@ import com.eas.controls.containers.ScrollDesignInfo;
 import com.eas.controls.containers.SplitDesignInfo;
 import com.eas.controls.containers.TabsDesignInfo;
 import com.eas.controls.containers.ToolbarDesignInfo;
-import com.eas.controls.events.ControlEventsIProxy;
+import com.eas.client.forms.events.ControlEventsIProxy;
 import com.eas.controls.layouts.constraints.AbsoluteConstraintsDesignInfo;
 import com.eas.controls.layouts.constraints.LayersLayoutConstraintsDesignInfo;
 import com.eas.controls.layouts.constraints.TabsConstraintsDesignInfo;

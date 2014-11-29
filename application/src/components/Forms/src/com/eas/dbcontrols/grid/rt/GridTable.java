@@ -8,8 +8,7 @@ import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.eas.dbcontrols.DbControlEditingListener;
-import com.eas.client.forms.api.components.model.ScalarDbControl;
+import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
@@ -37,7 +36,7 @@ import javax.swing.table.TableModel;
  *
  * @author mg
  */
-public class GridTable extends JTable implements DbControlEditingListener {
+public class GridTable extends JTable implements ModelCellEditingListener {
 
     protected Color oddRowsColor;
     protected boolean editable = true;
@@ -106,24 +105,9 @@ public class GridTable extends JTable implements DbControlEditingListener {
             if (ce != null && tm != null && isEditing()) {
                 int modelEditingRow = convertRowIndexToModel(getEditingRow());
                 int modelEditingColumn = convertColumnIndexToModel(getEditingColumn());
-
                 int oldRowCount = tm.getRowCount();
-
                 Object newEditorValue = ce.getCellEditorValue();
-
                 tm.setValueAt(newEditorValue, modelEditingRow, modelEditingColumn);
-
-                Object newModelValue = tm.getValueAt(modelEditingRow, modelEditingColumn);
-                if (ce instanceof ScalarDbControl) {
-                    ScalarDbControl control = (ScalarDbControl) ce;
-                    control.beginUpdate();
-                    try {
-                        control.setEditingValue(newModelValue);
-                    } finally {
-                        control.endUpdate();
-                    }
-                }
-
                 int newRowCount = tm.getRowCount();
                 if (oldRowCount != newRowCount) {
                     ce.cancelCellEditing();

@@ -185,13 +185,6 @@ public class DbControlsUtils {
         return null;
     }
 
-    public static String getLocalizedString(String aKey) {
-        if (rb.containsKey(aKey)) {
-            return rb.getString(aKey);
-        }
-        return aKey;
-    }
-
     public static Set<Class<?>> getDbControlsClasses() {
         return controlsDesignClasses.keySet();
     }
