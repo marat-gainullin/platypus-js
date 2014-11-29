@@ -5,7 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.api.components.HasValue;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeListener;
@@ -15,7 +14,7 @@ import javax.swing.JTextField;
  *
  * @author Марат
  */
-public class VTextField extends JTextField implements HasValue<String> {
+public class VTextField extends JTextField implements HasValue<String>, HasEmptyText, HasEditable {
 
     private String oldValue;
 
@@ -68,6 +67,23 @@ public class VTextField extends JTextField implements HasValue<String> {
     }
 
     private static final String VALUE_PROP_NAME = "value";
+
+    protected String emptyText;
+
+    @Override
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Override
+    public void setEmptyText(String aValue) {
+        emptyText = aValue;
+    }
+
+    @Override
+    public boolean getEditable() {
+        return super.isEditable();
+    }
 
     @Override
     public String getText() {

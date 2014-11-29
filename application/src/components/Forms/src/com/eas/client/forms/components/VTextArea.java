@@ -5,7 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.api.components.HasValue;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeListener;
@@ -15,7 +14,7 @@ import javax.swing.JTextPane;
  *
  * @author Марат
  */
-public class VTextArea extends JTextPane implements HasValue<String> {
+public class VTextArea extends JTextPane implements HasValue<String>, HasEditable, HasEmptyText {
 
     private String oldValue;
 
@@ -34,6 +33,10 @@ public class VTextArea extends JTextPane implements HasValue<String> {
             }
 
         });
+    }
+
+    public VTextArea() {
+        this(null);
     }
 
     protected void checkValueChanged() {
@@ -67,8 +70,25 @@ public class VTextArea extends JTextPane implements HasValue<String> {
     private static final String VALUE_PROP_NAME = "value";
 
     @Override
+    public boolean getEditable() {
+        return super.isEditable();
+    }
+
+    @Override
     public String getText() {
         return super.getText();
+    }
+
+    protected String emptyText;
+
+    @Override
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Override
+    public void setEmptyText(String aValue) {
+        emptyText = aValue;
     }
 
     @Override

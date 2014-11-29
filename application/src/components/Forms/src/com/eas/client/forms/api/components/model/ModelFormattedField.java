@@ -4,19 +4,20 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.controls.ControlsUtils;
-import com.eas.dbcontrols.label.DbLabel;
-import com.eas.script.NoPublisherException;
+import com.eas.client.forms.components.HasEditable;
+import com.eas.client.forms.components.HasEmptyText;
+import com.eas.client.forms.components.VFormattedField;
 import com.eas.script.ScriptFunction;
+import java.awt.BorderLayout;
 import java.text.ParseException;
-import javax.swing.JFormattedTextField;
-import jdk.nashorn.api.scripting.JSObject;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 
 /**
  *
  * @author mg
  */
-public class ModelFormattedField extends ModelComponentDecorator<DbLabel> {
+public class ModelFormattedField extends ModelComponentDecorator<VFormattedField, Object> implements HasEmptyText, HasEditable {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -26,27 +27,19 @@ public class ModelFormattedField extends ModelComponentDecorator<DbLabel> {
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelFormattedField() {
         super();
-        setDelegate(new DbLabel());
+        setDecorated(new VFormattedField());
     }
-
-    protected ModelFormattedField(DbLabel aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
-    private static final String EDITABLE_JSDOC = ""
-            + "/**\n"
-            + "* Determines if component is editable.\n"
-            + "*/";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
+    @Override
     public boolean getEditable() {
-        return delegate.isEditable();
+        return decorated.isEditable();
     }
 
     @ScriptFunction
+    @Override
     public void setEditable(boolean aValue) {
-        delegate.setEditable(aValue);
+        decorated.setEditable(aValue);
     }
 
     private static final String FORMAT_JSDOC = ""
@@ -56,80 +49,47 @@ public class ModelFormattedField extends ModelComponentDecorator<DbLabel> {
 
     @ScriptFunction(jsDoc = FORMAT_JSDOC)
     public String getFormat() {
-        if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
-            JFormattedTextField delegateFf = (JFormattedTextField) delegate.getFocusTargetComponent();
-            if (delegateFf.getFormatter() != null) {
-                return ControlsUtils.formatByFormatter(delegateFf.getFormatter());
-            } else {
-                if (delegateFf.getFormatterFactory() != null) {
-                    return ControlsUtils.formatByFormatter(delegateFf.getFormatterFactory().getFormatter(delegateFf));
-                } else {
-                    return null;
-                }
-            }
-        } else {
-            return null;
-        }
+        return decorated.getFormat();
     }
 
     @ScriptFunction
     public void setFormat(String aValue) throws ParseException {
-        if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
-            JFormattedTextField delegateFf = (JFormattedTextField) delegate.getFocusTargetComponent();
-            if (getFormat() == null ? aValue != null : !getFormat().equals(aValue)) {
-                if (delegateFf.getFormatter() != null) {
-                    ControlsUtils.applyFormat(delegateFf.getFormatter(), aValue);
-                }
-            }
-        }
+        decorated.setFormat(aValue);
     }
 
     @ScriptFunction
     public String getText() throws Exception {
-        Object value = getValue();
-        if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
-            JFormattedTextField formatField = (JFormattedTextField) delegate.getFocusTargetComponent();
-            return formatField.getText();
-        } else {
-            return value != null ? value instanceof String ? (String) value : value.toString() : null;
-        }
+        return decorated.getText();
     }
 
     @ScriptFunction
     public void setText(String aValue) throws Exception {
-        if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
-            JFormattedTextField formatField = (JFormattedTextField) delegate.getFocusTargetComponent();
-            formatField.setText(aValue);
-            formatField.commitEdit();
-            setValue(formatField.getValue());
-        }
+        decorated.setText(aValue);
     }
 
     @ScriptFunction
+    @Override
     public String getEmptyText() {
-        return delegate.getEmptyText();
+        return decorated.getEmptyText();
     }
 
     @ScriptFunction
+    @Override
     public void setEmptyText(String aValue) {
-        delegate.setEmptyText(aValue);
+        decorated.setEmptyText(aValue);
+    }
+    
+    @Override
+    protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
+        remove(decorated);
+        JLabel rendererLine = new JLabel(decorated.getText());
+        rendererLine.setOpaque(false);
+        add(rendererLine, BorderLayout.CENTER);
     }
 
     @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
-        return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
+    public boolean isFieldContentModified() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

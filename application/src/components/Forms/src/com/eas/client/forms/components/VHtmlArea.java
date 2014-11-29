@@ -5,8 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.api.components.HasValue;
-import com.eas.script.ScriptFunction;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeListener;
@@ -16,7 +14,7 @@ import javax.swing.JEditorPane;
  *
  * @author Марат
  */
-public class VHtmlArea extends JEditorPane implements HasValue<String> {
+public class VHtmlArea extends JEditorPane implements HasValue<String>, HasEmptyText, HasEditable {
 
     private String oldValue;
 
@@ -47,7 +45,6 @@ public class VHtmlArea extends JEditorPane implements HasValue<String> {
         }
     }
 
-    @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public String getValue() {
         return nullValue ? null : super.getText();
@@ -55,7 +52,6 @@ public class VHtmlArea extends JEditorPane implements HasValue<String> {
 
     private boolean nullValue;
 
-    @ScriptFunction
     @Override
     public void setValue(String aValue) {
         nullValue = aValue == null;
@@ -66,6 +62,23 @@ public class VHtmlArea extends JEditorPane implements HasValue<String> {
     @Override
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    @Override
+    public boolean getEditable() {
+        return super.isEditable();
+    }
+
+    protected String emptyText;
+
+    @Override
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Override
+    public void setEmptyText(String aValue) {
+        emptyText = aValue;
     }
 
     @Override

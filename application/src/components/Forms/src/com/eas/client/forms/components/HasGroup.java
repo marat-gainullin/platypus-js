@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api;
+package com.eas.client.forms.components;
 
 import com.eas.client.forms.api.containers.ButtonGroup;
 

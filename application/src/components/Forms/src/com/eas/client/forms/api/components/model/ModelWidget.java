@@ -4,7 +4,7 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.client.forms.api.components.HasValue;
+import com.eas.client.forms.components.HasValue;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import jdk.nashorn.api.scripting.JSObject;
@@ -16,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <V>
  * @author mg
  */
-public interface ScalarModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V> {
+public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V> {
 
     /**
      * Returns whether editing value is modified. Unfortunately, not all the
@@ -29,15 +29,6 @@ public interface ScalarModelWidget<V> extends TableCellRenderer, TableCellEditor
      * @return
      */
     public boolean isFieldContentModified();
-
-    /**
-     * Sets whether this control is standalone. Standalone means that it is
-     * ordinary control on a form, and Non-standalone means, that this instance
-     * is used within a table as renderer or editor. The default value is true.
-     *
-     * @param aValue
-     */
-    public void setStandalone(boolean aValue);
 
     public void injectPublished(JSObject aPublished);
 

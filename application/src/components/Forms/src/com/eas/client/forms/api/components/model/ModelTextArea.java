@@ -4,17 +4,26 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.dbcontrols.text.DbText;
-import com.eas.script.NoPublisherException;
+import com.eas.client.forms.components.HasEditable;
+import com.eas.client.forms.components.HasEmptyText;
+import com.eas.client.forms.components.VTextArea;
 import com.eas.script.ScriptFunction;
-import java.text.DecimalFormat;
-import jdk.nashorn.api.scripting.JSObject;
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 
 /**
  *
  * @author mg
+ *       
+ *      if(aValue instanceof Number){
+            Number n = (Number)aValue;
+            DecimalFormat df = new DecimalFormat("#.#");
+            aValue = df.format(n.doubleValue());
+        }
+
  */
-public class ModelTextArea extends ModelComponentDecorator<DbText> {
+public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> implements HasEmptyText, HasEditable{
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -24,81 +33,54 @@ public class ModelTextArea extends ModelComponentDecorator<DbText> {
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelTextArea() {
         super();
-        setDelegate(new DbText());
+        setDecorated(new VTextArea());
     }
-
-    protected ModelTextArea(DbText aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-    private static final String EDITABLE_JSDOC = ""
-            + "/**\n"
-            + " * Determines if component is editable.\n"
-            + " */";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
+    @Override
     public boolean getEditable() {
-        return delegate.isEditable();
+        return decorated.isEditable();
     }
 
     @ScriptFunction
+    @Override
     public void setEditable(boolean aValue) {
-        delegate.setEditable(aValue);
+        decorated.setEditable(aValue);
     }
 
     @ScriptFunction
+    @Override
     public String getEmptyText() {
-        return delegate.getEmptyText();
+        return decorated.getEmptyText();
     }
 
     @ScriptFunction
+    @Override
     public void setEmptyText(String aValue) {
-        delegate.setEmptyText(aValue);
-    }
-
-    @ScriptFunction
-    @Override
-    public Object getValue() throws Exception {
-        return super.getValue();
-    }
-
-    @ScriptFunction
-    @Override
-    public void setValue(Object aValue) throws Exception {
-        if(aValue instanceof Number){
-            Number n = (Number)aValue;
-            DecimalFormat df = new DecimalFormat("#.#");
-            aValue = df.format(n.doubleValue());
-        }
-        super.setValue(aValue);
+        decorated.setEmptyText(aValue);
     }
 
     @ScriptFunction
     public String getText() throws Exception {
-        Object value = getValue();
-        return value != null ? value instanceof String ? (String) value : value.toString() : null;
+        return decorated.getText();
     }
 
     @ScriptFunction
     public void setText(String aValue) throws Exception {
-        setValue(aValue);
+        decorated.setText(aValue);
     }
 
     @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
-        return published;
+    protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
+        remove(decorated);
+        JLabel rendererLine = new JLabel(decorated.getText());
+        rendererLine.setOpaque(false);
+        add(rendererLine, BorderLayout.CENTER);
     }
 
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
+    @Override
+    public boolean isFieldContentModified() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

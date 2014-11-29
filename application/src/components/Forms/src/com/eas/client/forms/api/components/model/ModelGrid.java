@@ -6,8 +6,6 @@ package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.gui.grid.editing.InsettedEditor;
 import com.bearsoft.rowset.Row;
-import com.eas.client.forms.api.Component;
-import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.ScalarDbControl;
 import com.eas.dbcontrols.grid.DbGrid;

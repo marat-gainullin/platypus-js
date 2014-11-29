@@ -4,16 +4,18 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.dbcontrols.spin.DbSpin;
-import com.eas.script.NoPublisherException;
+import com.eas.client.forms.components.HasEmptyText;
+import com.eas.client.forms.components.VSpinner;
 import com.eas.script.ScriptFunction;
-import jdk.nashorn.api.scripting.JSObject;
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 
 /**
  *
  * @author mg
  */
-public class ModelSpin extends ModelComponentDecorator<DbSpin> {
+public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> implements HasEmptyText{
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -23,13 +25,9 @@ public class ModelSpin extends ModelComponentDecorator<DbSpin> {
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelSpin() {
         super();
-        setDelegate(new DbSpin());
+        setDecorated(new VSpinner());
     }
-
-    protected ModelSpin(DbSpin aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    
     private static final String EDITABLE_JSDOC = ""
             + "/**\n"
             + " * Determines if component is editable.\n"
@@ -37,12 +35,12 @@ public class ModelSpin extends ModelComponentDecorator<DbSpin> {
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {
-        return delegate.isEditable();
+        return decorated.getEditable();
     }
 
     @ScriptFunction
     public void setEditable(boolean aValue) {
-        delegate.setEditable(aValue);
+        decorated.setEditable(aValue);
     }
     private static final String MIN_JSDOC = ""
             + "/**\n"
@@ -51,12 +49,12 @@ public class ModelSpin extends ModelComponentDecorator<DbSpin> {
 
     @ScriptFunction(jsDoc = MIN_JSDOC)
     public Double getMin() {
-        return delegate.getMin();
+        return decorated.getMin();
     }
 
     @ScriptFunction
     public void setMin(Double aValue) throws Exception {
-        delegate.setMin(aValue);
+        decorated.setMin(aValue);
     }
     private static final String MAX_JSDOC = ""
             + "/**\n"
@@ -65,12 +63,12 @@ public class ModelSpin extends ModelComponentDecorator<DbSpin> {
 
     @ScriptFunction(jsDoc = MAX_JSDOC)
     public Double getMax() {
-        return delegate.getMax();
+        return decorated.getMax();
     }
 
     @ScriptFunction
     public void setMax(Double aValue) throws Exception {
-        delegate.setMax(aValue);
+        decorated.setMax(aValue);
     }
     private static final String STEP_JSDOC = ""
             + "/**\n"
@@ -79,50 +77,46 @@ public class ModelSpin extends ModelComponentDecorator<DbSpin> {
 
     @ScriptFunction(jsDoc = STEP_JSDOC)
     public double getStep() {
-        return delegate.getStep();
+        return decorated.getStep();
     }
 
     @ScriptFunction
     public void setStep(double aValue) throws Exception {
-        delegate.setStep(aValue);
+        decorated.setStep(aValue);
     }
 
     @ScriptFunction
-    public String getEmptyText() {
-        return delegate.getEmptyText();
-    }
-
-    @ScriptFunction
-    public void setEmptyText(String aValue) {
-        delegate.setEmptyText(aValue);
-    }
-
-    @ScriptFunction
-    public String getText() throws Exception{
-        Object value = getValue();
-        return value != null ? value.toString() : null;
-    }
-    
-    @ScriptFunction
-    public void setText(String aValue) throws Exception{
-        setValue(Double.valueOf(aValue));
-    }
-    
     @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
-        return published;
+    public String getEmptyText() {
+        return decorated.getEmptyText();
     }
 
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
+    @ScriptFunction
+    @Override
+    public void setEmptyText(String aValue) {
+        decorated.setEmptyText(aValue);
     }
 
+    @ScriptFunction
+    public String getText() {
+        return decorated.getText();
+    }
+    
+    @ScriptFunction
+    public void setText(String aValue) throws Exception {
+        decorated.setText(aValue);
+    }
+
+    @Override
+    protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
+        remove(decorated);
+        JLabel rendererLine = new JLabel(decorated.getText());
+        rendererLine.setOpaque(false);
+        add(rendererLine, BorderLayout.CENTER);
+    }
+
+    @Override
+    public boolean isFieldContentModified() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

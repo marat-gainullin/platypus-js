@@ -7,7 +7,7 @@ package com.eas.client.forms.api.menu;
 import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasChildren;
 import com.eas.client.forms.api.HasComponentEvents;
-import com.eas.client.forms.api.HasGroup;
+import com.eas.client.forms.components.HasGroup;
 import com.eas.client.forms.api.HasJsName;
 import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.containers.ButtonGroup;

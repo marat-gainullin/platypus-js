@@ -5,8 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.api.components.HasValue;
-import com.eas.script.ScriptFunction;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeListener;
@@ -16,7 +14,7 @@ import javax.swing.JPasswordField;
  *
  * @author Марат
  */
-public class VPasswordField extends JPasswordField implements HasValue<String>{
+public class VPasswordField extends JPasswordField implements HasValue<String>, HasEditable, HasEmptyText{
     
     private String oldValue;
 
@@ -53,12 +51,28 @@ public class VPasswordField extends JPasswordField implements HasValue<String>{
         return super.getPassword() != null ? new String(super.getPassword()) : "";
     }
 
-    @ScriptFunction
     @Override
     public void setText(String aValue) {
         nullValue = false;
         super.setText(aValue != null ? aValue : "");
         checkValueChanged();
+    }
+
+    @Override
+    public boolean getEditable() {
+        return super.isEditable();
+    }
+
+    protected String emptyText;
+
+    @Override
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Override
+    public void setEmptyText(String aValue) {
+        emptyText = aValue;
     }
 
     @Override
@@ -68,7 +82,6 @@ public class VPasswordField extends JPasswordField implements HasValue<String>{
 
     private boolean nullValue;
 
-    @ScriptFunction
     @Override
     public void setValue(String aValue) {
         nullValue = aValue == null;

@@ -4,19 +4,20 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.dbcontrols.date.DbDate;
-import com.eas.script.NoPublisherException;
+import com.eas.client.forms.components.HasEditable;
+import com.eas.client.forms.components.HasEmptyText;
+import com.eas.client.forms.components.VDateTimeField;
 import com.eas.script.ScriptFunction;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.awt.BorderLayout;
 import java.util.Date;
-import jdk.nashorn.api.scripting.JSObject;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 
 /**
  *
  * @author mg
  */
-public class ModelDate extends ModelComponentDecorator<DbDate, Date> {
+public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> implements HasEmptyText, HasEditable {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -26,95 +27,63 @@ public class ModelDate extends ModelComponentDecorator<DbDate, Date> {
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelDate() {
         super();
-        setDelegate(new DbDate());
+        setDecorated(new VDateTimeField());
     }
-
-    private static final String EDITABLE_JSDOC = ""
-            + "/**\n"
-            + " * Determines if component is editable.\n"
-            + " */";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
+    @Override
     public boolean getEditable() {
-        return delegate.isEditable();
+        return decorated.getEditable();
     }
 
     @ScriptFunction
+    @Override
     public void setEditable(boolean aValue) {
-        delegate.setEditable(aValue);
+        decorated.setEditable(aValue);
     }
-    private static final String EXPANDED_JSDOC = ""
-            + "/**\n"
-            + "* Sets up the control appearance. If true, than calndar panel is displayed, otherwise date/time combo is displayed.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = EXPANDED_JSDOC)
-    public boolean getExpanded() {
-        return delegate.isExpanded();
-    }
-
-    @ScriptFunction
-    public void setExpanded(boolean aValue) throws Exception {
-        delegate.setExpanded(aValue);
-        delegate.revalidate();
-        delegate.repaint();
-    }
-
+    
     @ScriptFunction
     public String getDateFormat() {
-        return delegate.getDateFormat();
+        return decorated.getDateFormat();
     }
 
     @ScriptFunction
     public void setDateFormat(String aValue) throws Exception {
-        delegate.setDateFormat(aValue);
+        decorated.setDateFormat(aValue);
     }
 
     @ScriptFunction
+    @Override
     public String getEmptyText() {
-        return delegate.getEmptyText();
+        return decorated.getEmptyText();
     }
 
     @ScriptFunction
+    @Override
     public void setEmptyText(String aValue) {
-        delegate.setEmptyText(aValue);
+        decorated.setEmptyText(aValue);
     }
 
     @ScriptFunction
     public String getText() throws Exception {
-        if (delegate.getValue() == null) {
-            return null;
-        } else {
-            SimpleDateFormat format = new SimpleDateFormat(delegate.getDateFormat());
-            return format.format(delegate.getValue());
-        }
+        return decorated.getText();
     }
 
     @ScriptFunction
     public void setText(String aValue) throws Exception {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat(delegate.getDateFormat());
-            delegate.setValue(format.parse(aValue));
-        } catch (ParseException ex) {
-            // no op
-        }
+        decorated.setText(aValue);
     }
 
     @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
-        return published;
+    protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
+        remove(decorated);
+        JLabel rendererLine = new JLabel(decorated.getText());
+        rendererLine.setOpaque(false);
+        add(rendererLine, BorderLayout.CENTER);
     }
 
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
+    @Override
+    public boolean isFieldContentModified() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

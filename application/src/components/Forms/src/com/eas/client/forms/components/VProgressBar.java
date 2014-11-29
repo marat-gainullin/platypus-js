@@ -5,7 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeListener;
 import javax.swing.JProgressBar;
 import javax.swing.event.ChangeEvent;

@@ -6,7 +6,6 @@
 package com.eas.client.forms.components;
 
 import com.eas.client.forms.IconCache;
-import com.eas.client.forms.api.components.HasValue;
 import java.beans.PropertyChangeListener;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;

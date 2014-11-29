@@ -4,20 +4,15 @@
  */
 package com.eas.client.forms.api.components.model;
 
-import com.eas.client.forms.api.HasComponentEvents;
-import com.eas.client.forms.api.HasJsName;
-import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.components.VCheckBox;
-import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import jdk.nashorn.api.scripting.JSObject;
+import javax.swing.JTable;
 
 /**
  *
  * @author mg
  */
-public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> implements HasPublished, HasComponentEvents, HasJsName, Widget{
+public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> {
 
     public ModelCheckBox() {
         super();
@@ -36,6 +31,14 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
         decorated.setText(aText);
     }
 
+    @Override
+    public void setDecorated(VCheckBox aComponent) {
+        super.setDecorated(aComponent);
+        if (decorated != null) {
+            decorated.setOpaque(false);
+        }
+    }
+
     private static final String TEXT_JSDOC = ""
             + "/**\n"
             + "* Text on the check box."
@@ -52,19 +55,11 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
     }
 
     @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
-        return published;
+    protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
     }
 
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
+    @Override
+    public boolean isFieldContentModified() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

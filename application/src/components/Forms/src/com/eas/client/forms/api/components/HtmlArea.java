@@ -6,7 +6,7 @@ package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
-import com.eas.client.forms.api.HasEmptyText;
+import com.eas.client.forms.components.HasEmptyText;
 import com.eas.client.forms.api.HasJsName;
 import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
@@ -309,17 +309,16 @@ public class HtmlArea extends VHtmlArea implements HasPublished, HasComponentEve
         super.setText(aValue);
     }
 
-    protected String emptyText;
-
+    @ScriptFunction
     @Override
     public String getEmptyText() {
-        return emptyText;
+        return super.getEmptyText();
     }
 
     @ScriptFunction
     @Override
     public void setEmptyText(String aValue) {
-        emptyText = aValue;
+        super.setEmptyText(aValue);
     }
 
     protected JSObject published;

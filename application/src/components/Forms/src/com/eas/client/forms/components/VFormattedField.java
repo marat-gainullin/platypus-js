@@ -5,7 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.api.components.HasValue;
 import com.eas.controls.ControlsUtils;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
@@ -17,11 +16,15 @@ import javax.swing.JFormattedTextField;
  *
  * @author Марат
  */
-public class VFormattedField extends JFormattedTextField implements HasValue<Object> {
+public class VFormattedField extends JFormattedTextField implements HasValue<Object>, HasEmptyText, HasEditable {
 
     public VFormattedField(Object aValue) {
         super();
         setValue(aValue);
+    }
+
+    public VFormattedField() {
+        this(null);
     }
 
     @Override
@@ -81,5 +84,22 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
                 super.setText(super.getFormatter().valueToString(super.getValue()));
             }
         }
+    }
+
+    protected String emptyText;
+
+    @Override
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Override
+    public void setEmptyText(String aValue) {
+        emptyText = aValue;
+    }
+
+    @Override
+    public boolean getEditable() {
+        return super.isEditable();
     }
 }

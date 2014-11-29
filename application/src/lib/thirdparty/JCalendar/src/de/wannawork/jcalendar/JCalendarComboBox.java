@@ -58,6 +58,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSpinner;
@@ -977,7 +978,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         return (SpinnerDateModel) _spinner.getModel();
     }
 
-    public JComponent getEditorComponent() {
+    public JFormattedTextField getEditorComponent() {
         if (_spinner.getEditor() instanceof JSpinner.DateEditor) {
             return ((JSpinner.DateEditor) _spinner.getEditor()).getTextField();
         }

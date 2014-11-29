@@ -5,9 +5,8 @@
 package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.rowset.RowsetConverter;
-import com.eas.client.forms.api.components.HasValue;
-import com.eas.client.forms.components.VProgressBar;
-import com.eas.client.forms.components.VSlider;
+import com.eas.client.forms.components.HasValue;
+import com.eas.client.forms.components.VSpinner;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.DbControl;
@@ -15,7 +14,6 @@ import com.eas.dbcontrols.DbControlEditingListener;
 import com.eas.dbcontrols.DbControlRowsetListener;
 import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.dbcontrols.IconCache;
-import com.eas.dbcontrols.InitializingMethod;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
@@ -26,10 +24,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -63,7 +59,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -81,7 +76,7 @@ import jdk.nashorn.api.scripting.JSObject;
  if (aValue instanceof Number) {
  aValue = Double.valueOf(((Number) aValue).doubleValue());
  }
- === editable processing ? ===
+ === .style and .display processing ? ===
  */
 /**
  *
@@ -89,7 +84,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <D>
  * @param <V>
  */
-public abstract class ModelComponentDecorator<D extends JComponent, V> extends JComponent implements ScalarModelWidget<V> {
+public abstract class ModelComponentDecorator<D extends JComponent, V> extends JComponent implements ModelWidget<V> {
 
     protected static RowsetConverter converter = new RowsetConverter();
     protected JTextField prefSizeCalculator = new JTextField();// DON't move to design!!!
@@ -97,9 +92,9 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected JToolBar extraTools = new JToolBar();
     protected Set<CellEditorListener> editorListeners = new HashSet<>();
     protected Set<ActionListener> actionListeners = new HashSet<>();
-    protected boolean borderless = true;
     protected D decorated;
     protected int align = SwingConstants.LEFT;
+    protected JLabel gapLabel = new JLabel(" ");
     protected Icon icon;
     protected boolean selectOnly;
     private boolean design;
@@ -145,55 +140,31 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
-    protected class ModelWidgetFocusAdapter extends FocusAdapter {
-
-        @Override
-        public void focusGained(FocusEvent e) {
-            super.focusGained(e);
-            applyFocus();
-            repaint();
-        }
-
-        @Override
-        public void focusLost(FocusEvent e) {
-            super.focusLost(e);
-            repaint();
-        }
-    }
-
     public D getDecorated() {
         return decorated;
     }
 
-    protected PropertyChangeListener valueListener = (PropertyChangeEvent evt) -> {
-        if (ModelComponentDecorator.this.standalone) {
-            ModelComponentDecorator.this.firePropertyChange(VALUE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
-        } else {
-            ModelComponentDecorator.this.fireCellEditingCompleted();
-        }
+    protected PropertyChangeListener decoratedValueListener = (PropertyChangeEvent evt) -> {
+        firePropertyChange(VALUE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
     };
 
     public void setDecorated(D aComponent) {
         if (decorated != null) {
-            decorated.removePropertyChangeListener(VALUE_PROP_NAME, valueListener);
+            decorated.removePropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
         }
         decorated = aComponent;
         if (decorated != null) {
-            decorated.addPropertyChangeListener(VALUE_PROP_NAME, valueListener);
+            decorated.setOpaque(true);
+            decorated.setBorder(null);
+            decorated.setInheritsPopupMenu(true);
+            checkEvents(decorated);
+            decorated.addPropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
         }
     }
 
     @Override
     public void injectPublished(JSObject aValue) {
         published = aValue;
-    }
-
-    public void initializeBorder() {
-        if (standalone) {
-            super.setBorder(new LineBorder(WDIGETS_BORDER_COLOR));
-        } else {
-            setBorder(null);
-        }
     }
 
     @Override
@@ -214,8 +185,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         if (f != null && prefSizeCalculator != null) {
             prefSizeCalculator.setFont(f);
         }
-        borderless = false;
-        initializeBorder();
     }
 
     @Override
@@ -227,40 +196,34 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
-    protected class FocusCommitter extends FocusAdapter {
-
-        public FocusCommitter() {
-            super();
-        }
-
-        @Override
-        public void focusLost(FocusEvent e) {
-            try {
-                if (standalone) {
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    protected void initializeFocusListener() {
-        if (standalone) {
-            Component focusTarget = getFocusTargetComponent();
-            if (focusTarget != null) {
-                focusTarget.addFocusListener(new FocusCommitter());
-            }
-        }
-    }
-
     public ModelComponentDecorator() {
         super();
+        setOpaque(true);
+        iconLabel.setOpaque(false);
+        iconLabel.setBorder(null);
+        iconLabel.setFocusable(false);
+        iconLabel.setText("");
+        iconLabel.setInheritsPopupMenu(true);
+        checkEvents(iconLabel);
+        //
+        gapLabel.setOpaque(false);
+        gapLabel.setBorder(null);
+        gapLabel.setFocusable(false);
+        gapLabel.setText("");
+        gapLabel.setInheritsPopupMenu(true);
+        checkEvents(gapLabel);
+        //
         extraTools.setBorder(null);
         extraTools.setBorderPainted(false);
         extraTools.setFloatable(false);
-        addFocusListener(new ModelWidgetFocusAdapter());
-        setOpaque(true);
-        iconLabel.setOpaque(true);
+        extraTools.setOpaque(false);
+        extraTools.setFocusable(false);
+        extraTools.setInheritsPopupMenu(true);
+        checkEvents(extraTools);
+        add(extraTools, BorderLayout.EAST);
+        //
+        setBorder(new LineBorder(WDIGETS_BORDER_COLOR));
+        //
         initializeDesign();
     }
 
@@ -272,7 +235,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         });
     }
 
-    protected void checkEvents(Component aComp) {
+    protected final void checkEvents(Component aComp) {
         if (aComp != null) {
             ControlEventsIProxy.reflectionInvokeARListener(aComp, "addActionListener", ActionListener.class, (ActionListener) (ActionEvent e) -> {
                 fireActionPerformed(e);
@@ -373,9 +336,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                     if (fls != null) {
                         e.setSource(ModelComponentDecorator.this);
                         for (FocusListener fl : fls) {
-                            if (!(fl instanceof ModelComponentDecorator.ModelWidgetFocusAdapter)) {
-                                fl.focusGained(e);
-                            }
+                            fl.focusGained(e);
                         }
                     }
                 }
@@ -386,9 +347,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                     if (fls != null) {
                         e.setSource(ModelComponentDecorator.this);
                         for (FocusListener fl : fls) {
-                            if (!(fl instanceof ModelComponentDecorator.ModelWidgetFocusAdapter)) {
-                                fl.focusLost(e);
-                            }
+                            fl.focusLost(e);
                         }
                     }
                 }
@@ -441,7 +400,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             setBackground(bkCol);
             setForeground(fgCol);
         }
-        initializeBorder();
     }
 
     public void applyStyle(CascadedStyle aStyle) {
@@ -460,53 +418,27 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     public void setAlign(int aAlign) {
         align = aAlign;
-        applyAlign();
-    }
-
-    protected void applyAlign() {
         if (align == SwingConstants.RIGHT) {
-            add(new JLabel(" "), BorderLayout.EAST);
-        }
-    }
-
-    protected abstract void applyFont();
-
-    public abstract JComponent getFocusTargetComponent();
-
-    protected void applyFocus() {
-        Component comp = getFocusTargetComponent();
-        if (comp != null) {
-            comp.requestFocus();
-        }
-    }
-
-    protected void applyFocusable() {
-        Component comp = getFocusTargetComponent();
-        if (comp != null) {
-            comp.setFocusable(isFocusable());
-        }
-    }
-
-    protected void applyEnabled() {
-        for (int i = 0; i < extraTools.getComponentCount(); i++) {
-            Component comp = extraTools.getComponent(i);
-            comp.setEnabled(isEnabled());
+            add(gapLabel, BorderLayout.EAST);
+        } else {
+            remove(gapLabel);
         }
     }
 
     @Override
     public void setFocusable(boolean aValue) {
         super.setFocusable(aValue);
-        applyFocusable();
+        decorated.setFocusable(aValue);
     }
 
     @Override
     public void setToolTipText(String text) {
         super.setToolTipText(text);
-        applyTooltip(text);
+        gapLabel.setToolTipText(text);
+        iconLabel.setToolTipText(text);
+        decorated.setToolTipText(text);
+        extraTools.setToolTipText(text);
     }
-
-    protected abstract void applyTooltip(String aText);
 
     protected static void applySwingAlign2TextAlign(JTextField aTf, int aAlign) {
         switch (aAlign) {
@@ -523,33 +455,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     }
 
     @Override
-    public void setBackground(Color aColor) {
-        super.setBackground(aColor);
-        applyBackground();
-        if (iconLabel != null) {
-            iconLabel.setBackground(aColor);
-        }
-    }
-
-    @Override
-    public void setForeground(Color fg) {
-        super.setForeground(fg);
-        applyForeground();
-    }
-
-    @Override
     public void setCursor(Cursor cursor) {
         super.setCursor(cursor);
-        applyCursor();
+        decorated.setCursor(cursor);
+        iconLabel.setCursor(cursor);
+        gapLabel.setCursor(cursor);
+        extraTools.setCursor(cursor);
     }
-
-    protected abstract void applyBackground();
-
-    protected abstract void applyForeground();
-
-    protected abstract void applyCursor();
-
-    protected abstract void applyOpaque();
 
     @Override
     public boolean isFocusable() {
@@ -570,18 +482,15 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     }
 
     @Override
-    public void setBorder(Border border) {
-        if (borderless) {
-            super.setBorder(null);
-        } else {
-            super.setBorder(border);
-        }
-    }
-
-    @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        applyEnabled();
+        gapLabel.setEnabled(enabled);
+        iconLabel.setEnabled(enabled);
+        decorated.setEnabled(enabled);
+        extraTools.setEnabled(enabled);
+        for (Component comp : extraTools.getComponents()) {
+            comp.setEnabled(enabled);
+        }
     }
 
     // binding
@@ -601,7 +510,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     public void setField(String aField) throws Exception {
         if (field == null ? aField != null : !field.equals(aField)) {
             field = aField;
-            configure();
             revalidate();
             repaint();
         }
@@ -620,11 +528,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     @ScriptFunction
     @Override
-    public void setOnSelect(JSObject aValue) throws Exception {
-        onSelect = aValue;
-        createFieldExtraEditingControls(onSelect, true);
-        revalidate();
-        repaint();
+    public void setOnSelect(JSObject aValue) {
+        if (onSelect != aValue) {
+            onSelect = aValue;
+            recreateExtraEditingControls();
+            revalidate();
+            repaint();
+        }
     }
 
     private static final String ON_RENDER_JSDOC = ""
@@ -645,15 +555,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         onRender = aValue;
     }
 
+    @Override
+    public Object getCellEditorValue() {
+        return getValue();
+    }
+
     @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Override
     public V getValue() {
         if (decorated instanceof HasValue<?>) {
             return ((HasValue<V>) decorated).getValue();
-        } else if (decorated instanceof VProgressBar) {
-            return (V) Integer.valueOf(((VProgressBar) decorated).getValue());
-        } else if (decorated instanceof VSlider) {
-            return (V) Integer.valueOf(((VSlider) decorated).getValue());
+        } else if (decorated instanceof VSpinner) {
+            return (V) ((VSpinner) decorated).getValue();
         }
         return null;
     }
@@ -662,17 +575,21 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     public void setValue(V aValue) {
         if (decorated instanceof HasValue<?>) {
             ((HasValue<V>) decorated).setValue(aValue);
-        } else if (decorated instanceof VProgressBar) {
-            ((VProgressBar) decorated).setValue(aValue instanceof Number ? ((Number) aValue).intValue() : 0);
-        } else if (decorated instanceof VSlider) {
-            ((VSlider) decorated).setValue(aValue instanceof Number ? ((Number) aValue).intValue() : 0);
+        } else if (decorated instanceof VSpinner) {
+            ((VSpinner) decorated).setValue((Double) aValue);
         }
+    }
+
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
     @Override
     public void addValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
+
     private static final String VALUE_PROP_NAME = "value";
 
     protected String error;
@@ -689,16 +606,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     }
 
     public void setError(String aValue) {
-        error = aValue;
-        remove(errorPanel);
-        if (aValue != null) {
-            errorPanel.setBackground(Color.red);
-            errorPanel.setToolTipText(aValue);
-            errorPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 2));
-            add(errorPanel, BorderLayout.SOUTH);
+        if (error == null ? aValue != null : !error.equals(aValue)) {
+            error = aValue;
+            remove(errorPanel);
+            if (aValue != null) {
+                errorPanel.setBackground(Color.red);
+                errorPanel.setToolTipText(aValue);
+                errorPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 2));
+                add(errorPanel, BorderLayout.SOUTH);
+            }
+            revalidate();
+            repaint();
         }
-        revalidate();
-        repaint();
     }
 
     private static final String REDRAW_JSDOC = ""
@@ -712,76 +631,20 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         repaint();
     }
 
-    @Override
-    public void setOpaque(boolean isOpaque) {
-        if (standalone) {
-            super.setOpaque(isOpaque);
-            applyOpaque();
-        } else {
-            super.setOpaque(false);
-        }
-    }
-
-    // table or tree cell editing
-    protected InitializingMethod kind = InitializingMethod.UNDEFINED;
-
-    protected abstract void initializeRenderer();
-
-    protected abstract void setupRenderer(JTable table, int row, int column, boolean isSelected);
-
-    protected void initializeEditor() {
-        design = kind == InitializingMethod.UNDEFINED;
-        assert extraTools != null;
-        extraTools.setVisible(false);
-        add(extraTools, BorderLayout.EAST);
-        iconLabel.setText("");
-        iconLabel.setInheritsPopupMenu(true);
-        applyBackground();
-        applyForeground();
-        applyFont();
-        applyAlign();
-        applyTooltip(getToolTipText());
-        applyEnabled();
-        applyFocusable();
-        applyCursor();
-        if (standalone) {
-            applyOpaque();
-        }
-    }
-
-    protected void setupCellBorder(boolean hasFocus) {
-        assert !standalone;
-        if (hasFocus) {
-            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-        } else {
-            super.setBorder(null);
-        }
-    }
-
-    protected void setupEditor(JTable table) {
-        if (!standalone) {
-            extraTools.setVisible(false);
-            EventQueue.invokeLater(this::invokingLaterProcessControls);
-        }
-    }
-
-    protected void invokingLaterProcessControls() {
-        assert !standalone;
-        extraTools.setVisible(true);
-    }
-
-    protected void invokingLaterUnprocessControls() {
-        assert !standalone;
-        extraTools.setVisible(false);
-    }
+    protected abstract void setupCellRenderer(JTable table, int row, int column, boolean isSelected);
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         try {
-            initializeRenderer();
+            silent = true;
+            extraTools.setVisible(false);
             setValue((V) value);
-            setupRenderer(table, row, column, isSelected);
-            setupCellBorder(hasFocus);
+            setupCellRenderer(table, row, column, isSelected);
+            if (hasFocus) {
+                setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+            } else {
+                setBorder(null);
+            }
             if (isSelected) {
                 setBackground(table.getSelectionBackground());
                 setOpaque(true);
@@ -791,20 +654,27 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             }
             return this;
         } catch (Exception ex) {
-            Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return this;
         }
     }
 
+    protected PropertyChangeListener cellEditintCompletedAlerter = (PropertyChangeEvent evt) -> {
+        fireCellEditingCompleted();
+    };
+
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         try {
-            initializeEditor();
+            removeValueChangeListener(cellEditintCompletedAlerter);
             setValue((V) value);
-            setupEditor(table);
+            addValueChangeListener(cellEditintCompletedAlerter);
+            EventQueue.invokeLater(() -> {
+                extraTools.setVisible(true);
+            });
             return this;
         } catch (Exception ex) {
-            Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return this;
         }
     }
@@ -828,14 +698,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         } else {
             fireEditingCancelled();
         }
-        invokingLaterUnprocessControls();
+        EventQueue.invokeLater(() -> {
+            extraTools.setVisible(false);
+        });
         return true;
     }
 
     @Override
     public void cancelCellEditing() {
         fireEditingCancelled();
-        invokingLaterUnprocessControls();
+        EventQueue.invokeLater(() -> {
+            extraTools.setVisible(false);
+        });
     }
 
     protected void fireEditingStopped() {
@@ -892,54 +766,33 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setFont(Font aValue) {
         super.setFont(aValue);
-        applyFont();
+        decorated.setFont(aValue);
         Font f = getFont();
         if (f != null && prefSizeCalculator != null) {
             prefSizeCalculator.setFont(f);
         }
     }
 
-    public void setBorderless(boolean aBorderless) {
-        borderless = aBorderless;
-        if (borderless) {
-            setBorder(null);
-        }
-    }
-
-    @Override
-    public void setStandalone(boolean aStandalone) {
-        standalone = aStandalone;
-    }
-
-    @Override
-    public boolean isFieldContentModified() {
-        return data == null;
-    }
-
-    protected boolean standalone = true;
     protected JSObject onSelect;
     protected JSObject onRender;
+    protected boolean nullable = true;
 
-    protected void cleanup() {
-        removeAll();
+    public boolean getNullable() {
+        return nullable;
     }
 
-    protected void configure() throws Exception {
-        cleanup();
-        if (standalone) {
-            kind = InitializingMethod.UNDEFINED;
-            createFieldExtraEditingControls(onSelect, true);
-            initializeEditor();
-            initializeBorder();
-            initializeFocusListener();
+    public void setNullable(boolean aValue) {
+        if (nullable != aValue) {
+            nullable = aValue;
+            recreateExtraEditingControls();
         }
     }
 
-    protected void createFieldExtraEditingControls(JSObject aSelectFunction, boolean nullable) throws Exception {
+    protected void recreateExtraEditingControls() {
         extraTools.removeAll();
-        if (aSelectFunction != null) {
+        if (onSelect != null) {
             JButton btnSelectingField = new JButton();
-            btnSelectingField.setAction(new ModelComponentDecorator.ValueSelectorAction(aSelectFunction));
+            btnSelectingField.setAction(new ModelComponentDecorator.ValueSelectorAction(onSelect));
             btnSelectingField.setPreferredSize(new Dimension(DbControl.EXTRA_BUTTON_WIDTH, DbControl.EXTRA_BUTTON_WIDTH));
             btnSelectingField.setFocusable(false);
             extraTools.add(btnSelectingField);
@@ -951,11 +804,26 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             btnNullingField.setFocusable(false);
             extraTools.add(btnNullingField);
         }
+        for (Component comp : extraTools.getComponents()) {
+            comp.setEnabled(isEnabled());
+            checkEvents(comp);
+        }
+    }
+
+    public boolean haveSelectorAction() {
+        for (Component comp : extraTools.getComponents()) {
+            if (comp instanceof AbstractButton) {
+                AbstractButton ab = (AbstractButton) comp;
+                if (ab.getAction() instanceof ModelComponentDecorator.ValueSelectorAction) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean haveNullerAction() {
-        Component[] comps = extraTools.getComponents();
-        for (Component comp : comps) {
+        for (Component comp : extraTools.getComponents()) {
             if (comp instanceof AbstractButton) {
                 AbstractButton ab = (AbstractButton) comp;
                 if (ab.getAction() instanceof ModelComponentDecorator.NullerAction) {
@@ -980,7 +848,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             try {
                 setValue(null);
             } catch (Exception ex) {
-                Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -1002,22 +870,24 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 try {
                     selector.call(published, new Object[]{published});
                 } catch (Exception ex) {
-                    Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
     }
 
+    protected boolean silent;
+
     @Override
     protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-        if (kind == InitializingMethod.EDITOR) {
+        if (!silent) {
             super.firePropertyChange(propertyName, oldValue, newValue);
         }
     }
 
     @Override
     public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
-        if (kind == InitializingMethod.EDITOR) {
+        if (!silent) {
             super.firePropertyChange(propertyName, oldValue, newValue);
         }
     }
@@ -1028,32 +898,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
      */
     @Override
     public void repaint(long tm, int x, int y, int width, int height) {
-        if (kind == InitializingMethod.EDITOR) {
+        if (!silent) {
             super.repaint(tm, x, y, width, height);
-        }
-    }
-
-    /**
-     * Overridden for performance reasons. See the <a
-     * href="#override">Implementation Note</a> for more information.
-     */
-    @Override
-    public void repaint(Rectangle r) {
-        if (kind == InitializingMethod.EDITOR) {
-            super.repaint(r);
-        }
-    }
-
-    /**
-     * Overridden for performance reasons. See the <a
-     * href="#override">Implementation Note</a> for more information.
-     *
-     * @since 1.5
-     */
-    @Override
-    public void repaint() {
-        if (kind == InitializingMethod.EDITOR) {
-            super.repaint();
         }
     }
 }

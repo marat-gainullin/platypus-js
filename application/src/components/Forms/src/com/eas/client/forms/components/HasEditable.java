@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api;
+package com.eas.client.forms.components;
 
 import com.eas.script.ScriptFunction;
 
@@ -11,7 +11,7 @@ import com.eas.script.ScriptFunction;
  *
  * @author Марат
  */
-public interface Editable {
+public interface HasEditable {
     
     public static final String EDITABLE_JSDOC = ""
             + "/**\n"
