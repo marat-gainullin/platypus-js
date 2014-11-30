@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls;
+package com.eas.client.forms.components;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -21,7 +21,7 @@ import javax.swing.text.MaskFormatter;
  *
  * @author mg
  */
-public class ControlsUtils {
+public class FormatsUtils {
 
     /**
      * Number format (type).
@@ -56,7 +56,7 @@ public class ControlsUtils {
                 maskFormatter.setValueContainsLiteralCharacters(true);
                 value = maskFormatter;
             } catch (ParseException pex) {
-                Logger.getLogger(ControlsUtils.class.getName()).log(Level.INFO, pex.getMessage(), pex);
+                Logger.getLogger(FormatsUtils.class.getName()).log(Level.INFO, pex.getMessage(), pex);
                 value = new OptimisticMaskFormatter();
             }
         } else if (aType == DATE) {

@@ -7,7 +7,7 @@ package com.eas.dbcontrols.grid.rt.models;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
+import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.event.TableModelEvent;

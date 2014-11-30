@@ -4,7 +4,7 @@
  */
 package com.eas.client.forms.api.components;
 
-import com.eas.client.forms.api.FormEventsIProxy;
+import com.eas.client.forms.events.FormEventsIProxy;
 import com.eas.client.forms.api.HasComponentEvents;
 import com.eas.client.forms.components.HasGroup;
 import com.eas.client.forms.api.HasJsName;
@@ -14,8 +14,8 @@ import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
 import com.eas.client.forms.components.VRadioButton;
-import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.events.ControlEventsIProxy;
+import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;

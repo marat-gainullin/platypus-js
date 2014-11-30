@@ -45,7 +45,8 @@ import com.eas.dbcontrols.date.DbDateDesignInfo;
 import com.eas.dbcontrols.grid.rt.*;
 import com.eas.dbcontrols.grid.rt.columns.ScriptableColumn;
 import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
+import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
+import com.eas.dbcontrols.grid.rt.columns.RowHeaderTableColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
 import com.eas.dbcontrols.grid.rt.models.RowsetsTableModel;
 import com.eas.dbcontrols.grid.rt.models.RowsetsTreedModel;
@@ -314,7 +315,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     }
                     // Model column setup
-                    FieldModelColumn mCol = new FieldModelColumn(rs, fidx, null, null, group.isReadonly(), () -> style, null, null);
+                    ModelColumn mCol = new ModelColumn(rs, fidx, null, null, group.isReadonly(), () -> style, null, null);
                     rowsModel.addColumn(mCol);
                     // View column setup
                     TableColumn tCol = new TableColumn(rowsModel.getColumnCount() - 1);
@@ -351,7 +352,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     group.setResizeable(tCol.getResizable());
                     groups.put(tCol, group);
                     columnModel.addColumn(tCol);
-                    scriptableColumns.add(new ScriptableColumn(dCol, mCol, tCol, columnModel.getColumnCount() - 1, columnModel, rowsModel, groups));
                 }
             }
         }
@@ -546,8 +546,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             repaintRowHeader();
         }
     };
-    // script support
-    protected List<ScriptableColumn> scriptableColumns = new ArrayList<>();
     // actions
     protected Action findSomethingAction;
 

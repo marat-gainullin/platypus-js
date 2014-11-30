@@ -6,7 +6,6 @@ package com.eas.dbcontrols.grid.rt.rowheader;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.client.forms.IconCache;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
@@ -61,6 +60,7 @@ public class RowHeaderCellRenderer extends JPanel implements TableCellRenderer {
         }
     }
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int column) {
         try {
             if (check != null) {

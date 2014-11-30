@@ -5,7 +5,7 @@
 package com.eas.controls.layouts;
 
 import com.eas.controls.DesignInfo;
-import com.eas.controls.layouts.box.BoxLayout;
+import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.store.Serial;
 
 /**

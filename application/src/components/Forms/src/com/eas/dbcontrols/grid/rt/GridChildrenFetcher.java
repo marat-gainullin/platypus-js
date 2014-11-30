@@ -10,10 +10,9 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.forms.api.components.model.ArrayModelWidget;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.queries.Query;
-import com.eas.client.forms.api.components.model.RowsetDbControl;
-import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,12 +27,12 @@ import java.util.logging.Logger;
 public class GridChildrenFetcher implements ChildrenFetcher<Row> {
 
     //
-    protected RowsetDbControl hostControl;
+    protected ArrayModelWidget hostControl;
     protected ApplicationEntity<?, ?, ?> fetchWith;
     protected Parameter fetchingParameter;
     protected int parameterSourceColIndex;
 
-    public GridChildrenFetcher(RowsetDbControl aHostControl, ApplicationEntity<?, ?, ?> aFetchWith, Parameter aFetchingParameter, int aParameterSourceColIndex) {
+    public GridChildrenFetcher(ArrayModelWidget aHostControl, ApplicationEntity<?, ?, ?> aFetchWith, Parameter aFetchingParameter, int aParameterSourceColIndex) {
         super();
         hostControl = aHostControl;
         fetchWith = aFetchWith;

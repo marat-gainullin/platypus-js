@@ -5,7 +5,7 @@
 package com.eas.controls.plain;
 
 import com.eas.controls.ControlsDesignInfoVisitor;
-import com.eas.controls.ControlsUtils;
+import com.eas.client.forms.components.ControlsUtils;
 import com.eas.controls.DesignInfo;
 import com.eas.store.Serial;
 

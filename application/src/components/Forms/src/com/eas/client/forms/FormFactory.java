@@ -4,7 +4,7 @@
  */
 package com.eas.client.forms;
 
-import com.eas.client.forms.api.FormEventsIProxy;
+import com.eas.client.forms.events.FormEventsIProxy;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.dbcontrols.visitors.DbSwingFactory;

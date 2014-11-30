@@ -1,4 +1,4 @@
-package com.eas.controls.layouts.margin;
+package com.eas.client.forms.layouts;
 
 /**
  *

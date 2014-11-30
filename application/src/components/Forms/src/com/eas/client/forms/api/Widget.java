@@ -7,7 +7,7 @@ package com.eas.client.forms.api;
 
 import com.eas.client.forms.api.containers.BoxPane;
 import com.eas.client.forms.api.containers.FlowPane;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Cursor;

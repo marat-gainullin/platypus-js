@@ -13,7 +13,6 @@ import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
-import com.bearsoft.rowset.events.RowsetScrollEvent;
 import java.util.ArrayList;
 import java.util.List;
 

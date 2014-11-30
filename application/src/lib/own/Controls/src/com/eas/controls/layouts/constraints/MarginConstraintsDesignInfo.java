@@ -5,7 +5,7 @@
 package com.eas.controls.layouts.constraints;
 
 import com.eas.controls.DesignInfo;
-import com.eas.controls.layouts.margin.Margin;
+import com.eas.client.forms.layouts.Margin;
 import com.eas.store.Serial;
 
 /**
@@ -89,22 +89,6 @@ public class MarginConstraintsDesignInfo extends LayoutConstraintsDesignInfo {
     }
 
     //********************************************************
-    public static Margin parseMargin(String aValue) {
-        if (aValue != null && !aValue.trim().isEmpty()) {
-            aValue = aValue.trim();
-            if (aValue.endsWith("px")) {
-                String val = aValue.substring(0, aValue.length() - 2);
-                return new Margin(Integer.parseInt(val), true);
-            } else if (aValue.endsWith("%")) {
-                String val = aValue.substring(0, aValue.length() - 1);
-                return new Margin(Integer.parseInt(val), false);
-            } else {
-                return new Margin(Integer.parseInt(aValue), true);
-            }
-        }
-        return null;
-    }
-    
     @Serial
     public String getLeft() {
         return left != null ? left.toString() : null;

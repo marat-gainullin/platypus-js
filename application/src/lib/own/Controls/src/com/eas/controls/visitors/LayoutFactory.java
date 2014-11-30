@@ -5,9 +5,9 @@
 package com.eas.controls.visitors;
 
 import com.eas.controls.layouts.*;
-import com.eas.controls.layouts.box.BoxLayout;
-import com.eas.controls.layouts.margin.MarginLayout;
-import com.eas.controls.wrappers.PlatypusCardLayout;
+import com.eas.client.forms.layouts.BoxLayout;
+import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.forms.layouts.PlatypusCardLayout;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;

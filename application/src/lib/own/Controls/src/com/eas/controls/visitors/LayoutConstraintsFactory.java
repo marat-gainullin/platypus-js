@@ -6,7 +6,7 @@
 package com.eas.controls.visitors;
 
 import com.eas.controls.layouts.constraints.*;
-import com.eas.controls.layouts.margin.MarginConstraints;
+import com.eas.client.forms.layouts.MarginConstraints;
 import java.awt.GridBagConstraints;
 
 /**

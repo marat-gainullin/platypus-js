@@ -9,19 +9,15 @@ import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.forms.ModelCellEditingListener;
-import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.view.RowHeaderTableColumn;
-import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
+import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
+import com.eas.dbcontrols.grid.rt.columns.RowHeaderTableColumn;
 import com.eas.gui.CascadedStyle;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
@@ -81,19 +77,6 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         return allowCellEdit(row, column) && super.isCellEditable(row, column);
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        try {
-            int oldCursorPos = rowsRowset.getCursorPos();
-            try {
-                super.paintComponent(g);
-            } finally {
-                RowsetsModel.restoreRowsRowsetCursorPos(rowsRowset, oldCursorPos);
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(GridTable.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     protected boolean cellEditingCompletion;
 
     @Override

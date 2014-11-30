@@ -13,18 +13,15 @@ package com.eas.dbcontrols.grid.rt;
 import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.gui.grid.rendering.InsettedRenderer;
 import com.bearsoft.gui.grid.rows.TabularRowsSorter;
-import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.combo.DbCombo;
-import com.eas.dbcontrols.date.DbDate;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.label.DbLabel;
-import com.eas.dbcontrols.spin.DbSpin;
+import com.eas.client.forms.Form;
+import com.eas.client.forms.api.components.model.ModelGrid;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -44,7 +41,7 @@ import javax.swing.table.TableModel;
  */
 public class GridSearchView extends javax.swing.JPanel implements ListSelectionListener {
 
-    protected DbGrid grid;
+    protected ModelGrid grid;
     protected FindAction findAction = new FindAction();
     protected CloseAction closeAction = new CloseAction();
     protected SearchEntry cell2LookAt = new SearchEntry();
@@ -70,48 +67,22 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
                         renderer = ((InsettedRenderer) renderer).unwrap();
                     }
                     Component rComp = renderer.getTableCellRendererComponent(grid.getBottomRightTable(), oValue, false, false, 0, 0);
-                    if (rComp instanceof DbDate) {
-                        DbDate dbDate = (DbDate) rComp;
-                        String dateText = dbDate.getRendererText();
-                        if (dateText != null) {
-                            sValue = dateText;
-                        }
-                    } else if (rComp instanceof DbSpin) {
-                        DbSpin dbSpin = (DbSpin) rComp;
-                        String spinText = dbSpin.getRendererText();
-                        if (spinText != null) {
-                            sValue = spinText;
-                        }
-                    } else if (rComp instanceof DbLabel) {
-                        DbLabel dbLabel = (DbLabel) rComp;
-                        String labelText = dbLabel.getRendererText();
-                        if (labelText != null) {
-                            sValue = labelText;
-                        }
-                    } else if (rComp instanceof DbCombo) {
-                        DbCombo dbCombo = (DbCombo) rComp;
-                        String comboText = dbCombo.getRendererText();
-                        if (comboText != null) {
-                            sValue = comboText;
-                        }
+                    if (rComp instanceof JLabel) {
+                        sValue = ((JLabel) rComp).getText();
                     }
                 }
             }
             if (sValue == null) {
-                if (oValue != null) {
-                    if (oValue instanceof CellData) {
-                        CellData cd = (CellData) oValue;
-                        oValue = cd.display != null ? cd.display : cd.data;
-                        if (oValue != null) {
-                            sValue = oValue.toString();
-                        } else {
-                            sValue = "";
-                        }
-                    } else {
+                if (oValue instanceof CellData) {
+                    CellData cd = (CellData) oValue;
+                    oValue = cd.display != null ? cd.display : cd.data;
+                    if (oValue != null) {
                         sValue = oValue.toString();
+                    } else {
+                        sValue = "";
                     }
                 } else {
-                    sValue = "";
+                    sValue = oValue.toString();
                 }
             }
             return sValue;
@@ -237,7 +208,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
         public FindAction() {
             super();
-            putValue(Action.NAME, DbControlsUtils.getLocalizedString("btnFind"));
+            putValue(Action.NAME, Form.getLocalizedString("btnFind"));
             setEnabled(false);
         }
 
@@ -278,7 +249,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
                 if (findNext(txtText2Find.getText())) {
                     makeVisible();
                 } else {
-                    JOptionPane.showMessageDialog(GridSearchView.this, DbControlsUtils.getLocalizedString("notFound"), DbControlsUtils.getLocalizedString("Search"), JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(GridSearchView.this, Form.getLocalizedString("notFound"), Form.getLocalizedString("Search"), JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }
@@ -288,7 +259,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
         public CloseAction() {
             super();
-            putValue(Action.NAME, DbControlsUtils.getLocalizedString("btnClose"));
+            putValue(Action.NAME, Form.getLocalizedString("btnClose"));
         }
 
         public void checkEnabled() {
@@ -322,8 +293,10 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
         }
     }
 
-    /** Creates new form GridSearchView */
-    public GridSearchView(DbGrid aGrid) {
+    /**
+     * Creates new form GridSearchView
+     */
+    public GridSearchView(ModelGrid aGrid) {
         initComponents();
         grid = aGrid;
         //grid.getRowsSelectionModel().addListSelectionListener(this);
@@ -333,10 +306,10 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
         txtText2Find.getDocument().addDocumentListener(new SearchViewDocumentListener());
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -351,22 +324,22 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
         setMinimumSize(new java.awt.Dimension(330, 100));
 
-        btnFind.setText(DbControlsUtils.getLocalizedString("btnFind")); // NOI18N
+        btnFind.setText(Form.getLocalizedString("btnFind")); // NOI18N
         btnFind.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-        btnClose.setText(DbControlsUtils.getLocalizedString("btnClose")); // NOI18N
+        btnClose.setText(Form.getLocalizedString("btnClose")); // NOI18N
         btnClose.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-        lblFind.setText(DbControlsUtils.getLocalizedString("lblFind")); // NOI18N
+        lblFind.setText(Form.getLocalizedString("lblFind")); // NOI18N
 
-        chkCase.setText(DbControlsUtils.getLocalizedString("chkCase")); // NOI18N
+        chkCase.setText(Form.getLocalizedString("chkCase")); // NOI18N
         chkCase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkCaseActionPerformed(evt);
             }
         });
 
-        chkWhole.setText(DbControlsUtils.getLocalizedString("chkWhole")); // NOI18N
+        chkWhole.setText(Form.getLocalizedString("chkWhole")); // NOI18N
         chkWhole.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkWholeActionPerformed(evt);
@@ -382,13 +355,13 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
                 .addComponent(lblFind)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtText2Find, javax.swing.GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
+                    .addComponent(txtText2Find, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(chkCase)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(btnFind, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
+                                .addComponent(btnFind, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(chkWhole))))

@@ -15,7 +15,7 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
+import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;

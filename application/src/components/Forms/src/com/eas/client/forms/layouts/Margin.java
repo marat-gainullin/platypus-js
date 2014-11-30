@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls.layouts.margin;
+package com.eas.client.forms.layouts;
 
 /**
  *
@@ -60,4 +60,21 @@ public class Margin {
             value = Math.round(k * 100);
         }
     }
+    
+    public static Margin parse(String aValue) {
+        if (aValue != null && !aValue.trim().isEmpty()) {
+            aValue = aValue.trim();
+            if (aValue.endsWith("px")) {
+                String val = aValue.substring(0, aValue.length() - 2);
+                return new Margin(Integer.parseInt(val), true);
+            } else if (aValue.endsWith("%")) {
+                String val = aValue.substring(0, aValue.length() - 1);
+                return new Margin(Integer.parseInt(val), false);
+            } else {
+                return new Margin(Integer.parseInt(aValue), true);
+            }
+        }
+        return null;
+    }
+    
 }

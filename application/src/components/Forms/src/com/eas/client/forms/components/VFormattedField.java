@@ -5,7 +5,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.controls.ControlsUtils;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.logging.Level;
@@ -53,7 +52,7 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
             aValue = ((Number) aValue).doubleValue();
         }
         if (super.getFormatterFactory() == null && aValue instanceof String) {
-            super.setFormatterFactory(ControlsUtils.formatterFactoryByFormat(getFormat(), ControlsUtils.MASK));
+            super.setFormatterFactory(FormatsUtils.formatterFactoryByFormat(getFormat(), FormatsUtils.MASK));
         }
         super.setValue(aValue);
     }
@@ -67,10 +66,10 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
 
     public String getFormat() {
         if (super.getFormatter() != null) {
-            return ControlsUtils.formatByFormatter(super.getFormatter());
+            return FormatsUtils.formatByFormatter(super.getFormatter());
         } else {
             if (super.getFormatterFactory() != null) {
-                return ControlsUtils.formatByFormatter(super.getFormatterFactory().getFormatter(this));
+                return FormatsUtils.formatByFormatter(super.getFormatterFactory().getFormatter(this));
             } else {
                 return null;
             }
@@ -80,7 +79,7 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
     public void setFormat(String aValue) throws ParseException {
         if (getFormat() == null ? aValue != null : !getFormat().equals(aValue)) {
             if (super.getFormatter() != null) {
-                ControlsUtils.applyFormat(super.getFormatter(), aValue);
+                FormatsUtils.applyFormat(super.getFormatter(), aValue);
                 super.setText(super.getFormatter().valueToString(super.getValue()));
             }
         }

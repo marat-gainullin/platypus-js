@@ -6,6 +6,7 @@ package com.eas.client.forms.api.components.model;
 
 import com.bearsoft.gui.grid.data.CellData;
 import com.eas.client.events.PublishedSourcedEvent;
+import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -17,33 +18,23 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class CellRenderEvent extends PublishedSourcedEvent {
 
-    protected Object id;
-    protected Object columnId;
+    protected ModelColumn column;
     protected CellData cell;
     protected JSObject object;
 
-    public CellRenderEvent(HasPublished source, Object id, Object columnId, CellData cell, JSObject object) {
+    public CellRenderEvent(HasPublished source, ModelColumn aColumn, CellData aCell, JSObject anElement) {
         super(source);
-        this.columnId = columnId;
-        this.id = id;
-        this.cell = cell;
-        this.object = object;
+        column = aColumn;
+        cell = aCell;
+        object = anElement;
     }
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
-            + " * The primary key of the data object.\n"
+            + " * The cell's column.\n"
             + " */")
-    public Object getId() {
-        return id;
-    }
-
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * The cell's column ID.\n"
-            + " */")
-    public Object getColumnId() {
-        return columnId;
+    public ModelColumn getColumn() {
+        return column;
     }
 
     @ScriptFunction(jsDoc = ""

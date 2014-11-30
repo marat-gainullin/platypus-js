@@ -5,7 +5,7 @@
 package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Anchors;
-import com.eas.client.forms.api.FormEventsIProxy;
+import com.eas.client.forms.events.FormEventsIProxy;
 import com.eas.client.forms.api.HasChildren;
 import com.eas.client.forms.api.HasContainerEvents;
 import com.eas.client.forms.api.HasJsName;
@@ -14,11 +14,10 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
-import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.controls.layouts.constraints.MarginConstraintsDesignInfo;
-import com.eas.controls.layouts.margin.Margin;
-import com.eas.controls.layouts.margin.MarginConstraints;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.events.ControlEventsIProxy;
+import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.forms.layouts.Margin;
+import com.eas.client.forms.layouts.MarginConstraints;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -385,10 +384,10 @@ public class AbsolutePane extends JPanel implements HasPublished, HasContainerEv
         Object oTop = aAnchors.hasMember("top") ? aAnchors.getMember("top") : null;
         Object oHeight = aAnchors.hasMember("height") ? aAnchors.getMember("height") : null;
 
-        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? JSType.toString(oLeft) : null);
-        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? JSType.toString(oWidth) : null);
-        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? JSType.toString(oTop) : null);
-        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? JSType.toString(oHeight) : null);
+        Margin left = Margin.parse(oLeft != null ? JSType.toString(oLeft) : null);
+        Margin width = Margin.parse(oWidth != null ? JSType.toString(oWidth) : null);
+        Margin top = Margin.parse(oTop != null ? JSType.toString(oTop) : null);
+        Margin height = Margin.parse(oHeight != null ? JSType.toString(oHeight) : null);
         return new MarginConstraints(left, top, null, null, width, height);
     }
 
@@ -398,10 +397,10 @@ public class AbsolutePane extends JPanel implements HasPublished, HasContainerEv
         Object oTop = aAnchors.getTop();
         Object oHeight = aAnchors.getHeight();
 
-        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? JSType.toString(oLeft) : null);
-        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? JSType.toString(oWidth) : null);
-        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? JSType.toString(oTop) : null);
-        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? JSType.toString(oHeight) : null);
+        Margin left = Margin.parse(oLeft != null ? JSType.toString(oLeft) : null);
+        Margin width = Margin.parse(oWidth != null ? JSType.toString(oWidth) : null);
+        Margin top = Margin.parse(oTop != null ? JSType.toString(oTop) : null);
+        Margin height = Margin.parse(oHeight != null ? JSType.toString(oHeight) : null);
         return new MarginConstraints(left, top, null, null, width, height);
     }
 

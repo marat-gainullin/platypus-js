@@ -8,7 +8,6 @@ import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
 import java.awt.BorderLayout;

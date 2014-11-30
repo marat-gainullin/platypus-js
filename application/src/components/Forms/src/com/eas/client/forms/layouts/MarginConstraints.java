@@ -1,4 +1,4 @@
-package com.eas.controls.layouts.margin;
+package com.eas.client.forms.layouts;
 
 import java.awt.Rectangle;
 import java.util.Objects;

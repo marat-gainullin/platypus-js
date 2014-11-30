@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls.wrappers;
+package com.eas.client.forms.layouts;
 
 import java.awt.CardLayout;
 import java.awt.Component;

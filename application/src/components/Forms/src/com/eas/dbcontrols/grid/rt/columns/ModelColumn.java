@@ -6,10 +6,8 @@ package com.eas.dbcontrols.grid.rt.columns;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
-import com.eas.client.forms.api.components.model.ScalarDbControl;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
-import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
+import com.eas.client.forms.api.components.model.ModelWidget;
+import com.eas.dbcontrols.grid.rt.HasStyle;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
@@ -17,32 +15,36 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
+ * Model's column, bound with some additional information about how to achieve
+ * model data. It holds a reference to corresponding view's column. It is used
+ * when model's columns are added or removed. In such case, view's column's
+ * model index become invalid and view columns need to be reindexed.
  *
  * @author mg
  */
-public class ScriptableColumn implements HasPublished {
+public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
 
     private static JSObject publisher;
     //
+    protected String name;
+    //
     protected MultiLevelHeader header;
     protected GridColumnsGroup group;
-    protected TableColumnModel viewModel;
-    protected RowsetsModel rowsModel;
-    // design
-    protected DbGridColumn designColumn;
-    // runtime
-    protected ModelColumn modelColumn;
-    // view
-    protected TableColumn viewColumn;
+    //
+    protected String field;
+
+    protected JSObject onRender;
+    protected JSObject onSelect;
+    protected boolean readOnly;
+    protected HasStyle styleHost;
     protected JSObject published;
-    protected int viewIndex = -1;
-    protected boolean visible;
+    protected ModelWidget view;
+    protected ModelWidget editor;
+    protected boolean visible = true;
     // Temporarily stored values involved in columns show/hide process.
     protected int tempWidth;
     protected int tempMinWidth;
@@ -50,31 +52,121 @@ public class ScriptableColumn implements HasPublished {
     protected boolean tempResizable = true;
     protected boolean tempMoveable = true;
 
-    public ScriptableColumn(DbGridColumn aDesignColumn, ModelColumn aModelColumn, TableColumn aViewColumn, int aViewIndex, TableColumnModel aViewModel, RowsetsModel aRowsModel, Map<TableColumn, GridColumnsGroup> aLeaves2Groups) {
+    /**
+     * Constructs model column, bounded with view's column.
+     *
+     * @param aName
+     * @param aOnRender
+     * @param aOnSelect
+     * @param aReadOnly
+     * @param aStyleHost
+     * @param aView
+     * @param aEditor
+     * @param aGroup
+     */
+    public ModelColumn(String aName, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, HasStyle aStyleHost, ModelWidget aView, ModelWidget aEditor, GridColumnsGroup aGroup) {
         super();
-        designColumn = aDesignColumn;
-        modelColumn = aModelColumn;
-        viewColumn = aViewColumn;
-        viewIndex = aViewIndex;
-        viewModel = aViewModel;
-        rowsModel = aRowsModel;
-        visible = designColumn == null ? true : designColumn.isVisible();
-        group = aLeaves2Groups != null ? aLeaves2Groups.get(viewColumn) : null;
+        name = aName;
+        onRender = aOnRender;
+        onSelect = aOnSelect;
+        readOnly = aReadOnly;
+        styleHost = aStyleHost;
+        view = aView;
+        super.setCellRenderer(aView);
+        editor = aEditor;
+        super.setCellEditor(editor);
 
-        if (group != null) {
-            tempWidth = group.getWidth();
-            tempMinWidth = group.getMinWidth();
-            tempMaxWidth = group.getMaxWidth();
-            tempResizable = group.isResizeable();
-            tempMoveable = group.isMoveable();
-        }
-        if (!visible) {
-            hideColumn();
+        group = aGroup;
+        tempWidth = group.getWidth();
+        tempMinWidth = group.getMinWidth();
+        tempMaxWidth = group.getMaxWidth();
+        tempResizable = group.isResizeable();
+        tempMoveable = group.isMoveable();
+    }
+
+    /**
+     * Returns a column number, bounded to this model column.
+     *
+     * @return Rowset's column number. 1-based.
+     */
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String aValue) {
+        field = aValue;
+    }
+
+    public ModelWidget getView() {
+        return view;
+    }
+
+    public void setView(ModelWidget aView) {
+        if (view != aView) {
+            view = aView;
+            super.setCellRenderer(aView);
         }
     }
 
-    public void setHeader(MultiLevelHeader aValue) {
-        header = aValue;
+    public ModelWidget getEditor() {
+        return editor;
+    }
+
+    public void setEditor(ModelWidget aEditor) {
+        if (editor != aEditor) {
+            editor = aEditor;
+            editor.setOnSelect(onSelect);
+            super.setCellEditor(editor);
+        }
+    }
+
+    @Override
+    public CascadedStyle getStyle() {
+        return styleHost != null ? styleHost.getStyle() : null;
+    }
+
+    /**
+     * Returns script handler, used for calculate cell's data, display value and
+     * style.
+     *
+     * @return
+     */
+    @ScriptFunction(jsDoc = "On render column event.")
+    public JSObject getOnRender() {
+        return onRender;
+    }
+
+    @ScriptFunction
+    public void setOnRender(JSObject aValue) {
+        onRender = aValue;
+    }
+
+    /**
+     * Returns script handler, used for select a value of the cell.
+     *
+     * @return
+     */
+    @ScriptFunction(jsDoc = "On select column event.")
+    public JSObject getOnSelect() {
+        return onSelect;
+    }
+
+    @ScriptFunction
+    public void setOnSelect(JSObject aValue) throws Exception {
+        if (onSelect != aValue) {
+            onSelect = aValue;
+            if (editor != null) {
+                editor.setOnSelect(aValue);
+            }
+        }
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean aValue) {
+        readOnly = aValue;
     }
 
     @ScriptFunction(jsDoc = "Determines if column is visible.")
@@ -117,20 +209,14 @@ public class ScriptableColumn implements HasPublished {
         setWidth(tempWidth);
     }
 
-    public TableColumn getViewColumn() {
-        return viewColumn;
-    }
-
-    public DbGridColumn getDesignColumn() {
-        return designColumn;
-    }
-
     @ScriptFunction(jsDoc = "Width of the column.")
+    @Override
     public int getWidth() {
         return group.getWidth();
     }
 
     @ScriptFunction
+    @Override
     public void setWidth(int aValue) {
         if (group.isResizeable()) {
             int oldValue = getWidth();
@@ -149,17 +235,15 @@ public class ScriptableColumn implements HasPublished {
 
     @ScriptFunction(jsDoc = "The title of the column.")
     public String getTitle() {
-        if (viewColumn != null && viewColumn.getHeaderValue() != null && viewColumn.getHeaderValue() instanceof String) {
-            return (String) viewColumn.getHeaderValue();
+        if (getHeaderValue() != null && getHeaderValue() instanceof String) {
+            return (String) getHeaderValue();
         }
         return null;
     }
 
     @ScriptFunction
     public void setTitle(String aTitle) {
-        if (viewColumn != null) {
-            viewColumn.setHeaderValue(aTitle);
-        }
+        setHeaderValue(aTitle);
     }
 
     @ScriptFunction(jsDoc = "Determines if column is resizeable.")
@@ -180,7 +264,6 @@ public class ScriptableColumn implements HasPublished {
     @ScriptFunction
     public void setReadonly(boolean aValue) {
         group.setReadonly(aValue);
-        modelColumn.setReadOnly(aValue);
     }
 
     @ScriptFunction(jsDoc = "Determines if column is sortable.")
@@ -195,35 +278,12 @@ public class ScriptableColumn implements HasPublished {
 
     @ScriptFunction(jsDoc = "The name of the column.")
     public String getName() {
-        if (designColumn != null) {
-            return designColumn.getName();
-        }
-        return null;
+        return name;
     }
 
     //@ScriptFunction(jsDoc = "Column's header style.")
     public CascadedStyle getHeaderStyle() {
         return group.getStyle();
-    }
-
-    @ScriptFunction(jsDoc = "On select column event.")
-    public JSObject getOnSelect() {
-        return modelColumn.getSelectHandler();
-    }
-
-    @ScriptFunction
-    public void setOnSelect(JSObject aHandler) throws Exception {
-        modelColumn.setSelectHandler(aHandler);
-    }
-
-    @ScriptFunction(jsDoc = "On render column event.")
-    public JSObject getOnRender() {
-        return modelColumn.getCellsHandler();
-    }
-
-    @ScriptFunction
-    public void setOnRender(JSObject aHandler) {
-        modelColumn.setCellsHandler(aHandler);
     }
 
     @Override
@@ -232,7 +292,7 @@ public class ScriptableColumn implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
@@ -243,14 +303,12 @@ public class ScriptableColumn implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = jsColumn;
-        if (viewColumn != null) {
-            if (viewColumn.getCellRenderer() instanceof ScalarDbControl) {
-                ((ScalarDbControl) viewColumn.getCellRenderer()).injectPublished(published);
-            }
-        }
-        if (modelColumn != null) {
-            modelColumn.setPublished(published);
-        }
+        /*
+         if(view != null)
+         view.injectPublished(published);
+         if(editor != null)
+         editor.injectPublished(published);
+         */
     }
 
     public static void setPublisher(JSObject aPublisher) {

@@ -5,7 +5,7 @@
 package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Anchors;
-import com.eas.client.forms.api.FormEventsIProxy;
+import com.eas.client.forms.events.FormEventsIProxy;
 import com.eas.client.forms.api.HasChildren;
 import com.eas.client.forms.api.HasContainerEvents;
 import com.eas.client.forms.api.HasJsName;
@@ -14,11 +14,10 @@ import com.eas.client.forms.api.Widget;
 import com.eas.client.forms.api.events.ActionEvent;
 import com.eas.client.forms.api.events.ComponentEvent;
 import com.eas.client.forms.api.events.MouseEvent;
-import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.controls.layouts.constraints.MarginConstraintsDesignInfo;
-import com.eas.controls.layouts.margin.Margin;
-import com.eas.controls.layouts.margin.MarginConstraints;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.events.ControlEventsIProxy;
+import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.forms.layouts.Margin;
+import com.eas.client.forms.layouts.MarginConstraints;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -386,12 +385,12 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
         Object oHeight = aAnchors.hasMember("height") ? aAnchors.getMember("height") : null;
         Object oRight = aAnchors.hasMember("right") ? aAnchors.getMember("right") : null;
         Object oBottom = aAnchors.hasMember("bottom") ? aAnchors.getMember("bottom") : null;
-        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? JSType.toString(oLeft) : null);
-        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? JSType.toString(oWidth) : null);
-        Margin right = MarginConstraintsDesignInfo.parseMargin(oRight != null ? JSType.toString(oRight) : null);
-        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? JSType.toString(oTop) : null);
-        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? JSType.toString(oHeight) : null);
-        Margin bottom = MarginConstraintsDesignInfo.parseMargin(oBottom != null ? JSType.toString(oBottom) : null);
+        Margin left = Margin.parse(oLeft != null ? JSType.toString(oLeft) : null);
+        Margin width = Margin.parse(oWidth != null ? JSType.toString(oWidth) : null);
+        Margin right = Margin.parse(oRight != null ? JSType.toString(oRight) : null);
+        Margin top = Margin.parse(oTop != null ? JSType.toString(oTop) : null);
+        Margin height = Margin.parse(oHeight != null ? JSType.toString(oHeight) : null);
+        Margin bottom = Margin.parse(oBottom != null ? JSType.toString(oBottom) : null);
         return new MarginConstraints(left, top, right, bottom, width, height);
     }
 
@@ -402,12 +401,12 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
         Object oHeight = aAnchors.getHeight();
         Object oRight = aAnchors.getRight();
         Object oBottom = aAnchors.getBottom();
-        Margin left = MarginConstraintsDesignInfo.parseMargin(oLeft != null ? JSType.toString(oLeft) : null);
-        Margin width = MarginConstraintsDesignInfo.parseMargin(oWidth != null ? JSType.toString(oWidth) : null);
-        Margin right = MarginConstraintsDesignInfo.parseMargin(oRight != null ? JSType.toString(oRight) : null);
-        Margin top = MarginConstraintsDesignInfo.parseMargin(oTop != null ? JSType.toString(oTop) : null);
-        Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? JSType.toString(oHeight) : null);
-        Margin bottom = MarginConstraintsDesignInfo.parseMargin(oBottom != null ? JSType.toString(oBottom) : null);
+        Margin left = Margin.parse(oLeft != null ? JSType.toString(oLeft) : null);
+        Margin width = Margin.parse(oWidth != null ? JSType.toString(oWidth) : null);
+        Margin right = Margin.parse(oRight != null ? JSType.toString(oRight) : null);
+        Margin top = Margin.parse(oTop != null ? JSType.toString(oTop) : null);
+        Margin height = Margin.parse(oHeight != null ? JSType.toString(oHeight) : null);
+        Margin bottom = Margin.parse(oBottom != null ? JSType.toString(oBottom) : null);
         return new MarginConstraints(left, top, right, bottom, width, height);
     }
 

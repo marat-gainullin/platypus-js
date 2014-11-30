@@ -26,13 +26,13 @@
               <Component id="lblFind" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="txtText2Find" alignment="0" pref="282" max="32767" attributes="0"/>
+                  <Component id="txtText2Find" alignment="0" pref="304" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="chkCase" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="1" attributes="0">
-                              <Component id="btnFind" pref="83" max="32767" attributes="0"/>
+                              <Component id="btnFind" pref="105" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="btnClose" min="-2" pref="80" max="-2" attributes="0"/>
                           </Group>
@@ -71,7 +71,7 @@
     <Component class="javax.swing.JButton" name="btnFind">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/dbcontrols/Bundle.properties" key="btnFind" replaceFormat="DbControlsUtils.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="btnFind" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[2, 2, 2, 2]"/>
@@ -81,7 +81,7 @@
     <Component class="javax.swing.JButton" name="btnClose">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/dbcontrols/Bundle.properties" key="btnClose" replaceFormat="DbControlsUtils.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="btnClose" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[2, 2, 2, 2]"/>
@@ -91,7 +91,7 @@
     <Component class="javax.swing.JLabel" name="lblFind">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/dbcontrols/Bundle.properties" key="lblFind" replaceFormat="DbControlsUtils.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="lblFind" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -100,7 +100,7 @@
     <Component class="javax.swing.JCheckBox" name="chkCase">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/dbcontrols/Bundle.properties" key="chkCase" replaceFormat="DbControlsUtils.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="chkCase" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -110,7 +110,7 @@
     <Component class="javax.swing.JCheckBox" name="chkWhole">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/dbcontrols/Bundle.properties" key="chkWhole" replaceFormat="DbControlsUtils.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="chkWhole" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>

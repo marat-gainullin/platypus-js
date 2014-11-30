@@ -2,36 +2,30 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api;
+package com.eas.client.forms.events;
 
-import com.eas.client.forms.Form;
 import com.eas.client.forms.api.events.EventsWrapper;
-import com.eas.controls.events.WindowEventsIProxy;
-import jdk.nashorn.api.scripting.JSObject;
+import javax.swing.JComponent;
 
 /**
  *
  * @author mg
  */
-public class FormWindowEventsIProxy extends WindowEventsIProxy {
+public class FormEventsIProxy extends ControlEventsIProxy {
 
-    protected Form form;
-
-    public FormWindowEventsIProxy(Form aForm) {
+    public FormEventsIProxy() {
         super();
-        form = aForm;
+    }
+
+    public FormEventsIProxy(JComponent aHandlee) {
+        super();
+        setHandlee(aHandlee);
     }
 
     @Override
     protected Object executeEvent(int aEventId, Object anEvent) {
         if (anEvent instanceof java.awt.event.MouseEvent) {
             anEvent = EventsWrapper.wrap((java.awt.event.MouseEvent) anEvent);
-        } else if (anEvent instanceof java.awt.event.WindowEvent) {
-            if (eventThis == null) {
-                setEventThis((JSObject) form.getPublished());
-            }
-            ((java.awt.event.WindowEvent) anEvent).setSource(form);
-            anEvent = EventsWrapper.wrap((java.awt.event.WindowEvent) anEvent);
         } else if (anEvent instanceof java.awt.event.KeyEvent) {
             anEvent = EventsWrapper.wrap((java.awt.event.KeyEvent) anEvent);
         } else if (anEvent instanceof java.awt.event.FocusEvent) {

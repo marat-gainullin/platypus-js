@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls.layouts.box;
+package com.eas.client.forms.layouts;
 
 import java.awt.Component;
 import java.awt.Container;
