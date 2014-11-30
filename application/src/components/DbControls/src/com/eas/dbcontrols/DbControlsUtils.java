@@ -285,17 +285,6 @@ public class DbControlsUtils {
         return null;
     }
 
-    public static DbGrid getFirstDbGrid(Component aComp) {
-        Component lParent = aComp;
-        while (lParent != null && !(lParent instanceof DbGrid)) {
-            lParent = lParent.getParent();
-        }
-        if (lParent != null && lParent instanceof DbGrid) {
-            return (DbGrid) lParent;
-        }
-        return null;
-    }
-
     public static JTable getFirstTable(Component aComp) {
         Component lParent = aComp;
         while (lParent != null && !(lParent instanceof JTable)) {

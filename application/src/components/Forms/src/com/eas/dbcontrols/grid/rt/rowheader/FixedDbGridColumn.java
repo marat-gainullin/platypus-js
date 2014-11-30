@@ -5,8 +5,8 @@
 package com.eas.dbcontrols.grid.rt.rowheader;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
+import com.eas.dbcontrols.grid.olddesigninfos.DbGridColumn;
+import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
 
 /**
  *

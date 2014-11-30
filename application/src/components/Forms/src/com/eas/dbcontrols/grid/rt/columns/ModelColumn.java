@@ -84,6 +84,10 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
         tempMoveable = group.isMoveable();
     }
 
+    public ModelColumn() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     /**
      * Returns a column number, bounded to this model column.
      *

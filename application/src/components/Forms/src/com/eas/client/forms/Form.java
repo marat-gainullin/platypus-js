@@ -11,6 +11,7 @@ import com.eas.controls.FormDesignInfo;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.events.WindowEventsIProxy;
 import com.eas.controls.wrappers.ButtonGroupWrapper;
+import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.resources.images.IconCache;
 import com.eas.script.AlreadyPublishedException;

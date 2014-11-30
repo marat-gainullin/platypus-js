@@ -101,7 +101,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected JSObject published;
     protected static final Color WDIGETS_BORDER_COLOR = controlsBorderColor();
     public static final int WIDGETS_DEFAULT_WIDTH = 100;
-    public static final int DB_CONTROLS_DEFAULT_HEIGHT = 100;
+    public static final int WIDGETS_DEFAULT_HEIGHT = 100;
 
     private static Color controlsBorderColor() {
         Color lafGridColor = UIManager.getColor("Table.gridColor");

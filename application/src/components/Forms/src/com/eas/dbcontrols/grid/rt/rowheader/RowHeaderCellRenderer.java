@@ -4,11 +4,10 @@
  */
 package com.eas.dbcontrols.grid.rt.rowheader;
 
-import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.client.forms.IconCache;
 import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
+import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -22,6 +21,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.table.TableCellRenderer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -67,10 +67,10 @@ public class RowHeaderCellRenderer extends JPanel implements TableCellRenderer {
                 check.setSelected(table.isRowSelected(rowIndex));
             }
             int modelRow = table.convertRowIndexToModel(rowIndex);
-            DbGrid grid = DbControlsUtils.getFirstDbGrid(table);
-            Row row = grid.index2Row(modelRow);
+            DbGrid grid = DbGrid.getFirstDbGrid(table);
+            JSObject row = grid.index2Row(modelRow);
             if (row != null) {
-                if (grid.isRowProcessed(row)) {
+                if (grid.isElementProcessed(row)) {
                     indicator.setIcon(processingIcon);
                 } else if (grid.isCurrentRow(row)) {
                     indicator.setIcon(currentIcon);

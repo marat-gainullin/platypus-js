@@ -2,26 +2,21 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid;
+package com.eas.dbcontrols.grid.olddesigninfos;
 
 import com.eas.client.model.ModelEntityRef;
-import com.eas.controls.DesignInfo;
 import com.eas.store.Serial;
 
 /**
  *
  * @author mg
  */
-public class DbGridRowsColumnsDesignInfo extends DesignInfo {
+public class DbGridRowsColumnsDesignInfo {
 
     public static final String FIXEDCOLUMNS = "fixedColumns";
     public static final String FIXEDROWS = "fixedRows";
     public static final String ROWSDATASOURCE = "rowsDatasource";
     public static final String ROWSHEADERTYPE = "rowsHeaderType";
-    public static final int ROWS_HEADER_TYPE_NONE = 0;
-    public static final int ROWS_HEADER_TYPE_USUAL = 1;
-    public static final int ROWS_HEADER_TYPE_CHECKBOX = 2;
-    public static final int ROWS_HEADER_TYPE_RADIOBUTTON = 3;
     //
     protected ModelEntityRef rowsDatasource = new ModelEntityRef();
     protected int fixedRows;

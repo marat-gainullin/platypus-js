@@ -6,10 +6,9 @@ package com.eas.dbcontrols.grid.rt.rowheader;
 
 import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
-import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
+import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -30,6 +29,7 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -79,8 +79,8 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
                 check.setSelected(table.isRowSelected(editingRow));
             }
             int modelRow = table.convertRowIndexToModel(rowIndex);
-            DbGrid grid = DbControlsUtils.getFirstDbGrid(table);
-            Row row = grid.index2Row(modelRow);
+            DbGrid grid = DbGrid.getFirstDbGrid(table);
+            JSObject row = grid.index2Row(modelRow);
             if (row != null) {
                 if (grid.isCurrentRow(row)) {
                     indicator.setIcon(RowHeaderCellRenderer.currentIcon);
