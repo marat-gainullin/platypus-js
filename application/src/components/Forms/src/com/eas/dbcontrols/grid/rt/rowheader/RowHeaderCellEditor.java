@@ -42,7 +42,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
     protected JToggleButton check;
     protected JLabel indicator = new JLabel();
     protected JLabel rowDescriptor = new JLabel();
-    protected int headerType = DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL;
+    protected int headerType = DbGrid.ROWS_HEADER_TYPE_USUAL;
     // runtime
     protected JTable editingTable;
     protected int editingRow = -1;
@@ -51,11 +51,11 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
     public RowHeaderCellEditor(int aHeaderType) {
         super(new BorderLayout());
         headerType = aHeaderType;
-        if (headerType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX) {
+        if (headerType == DbGrid.ROWS_HEADER_TYPE_CHECKBOX) {
             check = new JCheckBox();
-        } else if (headerType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON) {
+        } else if (headerType == DbGrid.ROWS_HEADER_TYPE_RADIOBUTTON) {
             check = new JRadioButton();
-        } else if (headerType == DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL) {
+        } else if (headerType == DbGrid.ROWS_HEADER_TYPE_USUAL) {
         } else {
             assert false : "RowHeaderCellEditor must be used not with \"ROWS_HEADER_TYPE_NONE\" rows header type";
         }
@@ -87,6 +87,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
                 } else {
                     indicator.setIcon(null);
                 }
+                /*
                 if (row.isInserted()) {
                     rowDescriptor.setIcon(RowHeaderCellRenderer.insertingIcon);
                 } else if (row.isUpdated()) {
@@ -94,6 +95,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
                 } else {
                     rowDescriptor.setIcon(null);
                 }
+                */
             } else {
                 indicator.setIcon(null);
                 rowDescriptor.setIcon(null);

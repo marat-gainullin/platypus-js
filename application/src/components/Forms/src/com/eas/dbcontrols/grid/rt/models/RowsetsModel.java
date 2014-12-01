@@ -5,12 +5,9 @@
 package com.eas.dbcontrols.grid.rt.models;
 
 import com.bearsoft.gui.grid.data.CellData;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
-import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.eas.client.forms.api.components.model.CellRenderEvent;
 import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
-import com.eas.gui.CascadedStyle;
+import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableColumnModel;
@@ -27,12 +24,12 @@ public abstract class RowsetsModel {
     public static final String COLUMN_MISSING_MSG = "Model column missing";
     protected TableColumnModel columns;
     protected JSObject generalOnRender;
-    protected JSObject rows;
+    protected JSObject elements;
 
-    public RowsetsModel(TableColumnModel aColumns, JSObject aRows, JSObject aGeneralOnRender) {
+    public RowsetsModel(TableColumnModel aColumns, JSObject aElement, JSObject aGeneralOnRender) {
         super();
         columns = aColumns;
-        rows = aRows;
+        elements = aElement;
         generalOnRender = aGeneralOnRender;
     }
 
@@ -51,8 +48,8 @@ public abstract class RowsetsModel {
     public Object getValue(JSObject anElement, int columnIndex) {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
             try {
-                ModelColumn column = (ModelColumn)columns.getColumn(columnIndex);
-                return getRowsetsData(column, anElement);
+                ModelColumn column = (ModelColumn) columns.getColumn(columnIndex);
+                return getObjectsData(column.getField(), anElement);
             } catch (Exception ex) {
                 severe(ex.getMessage());
                 return new CellData(null, null, null);
@@ -61,68 +58,70 @@ public abstract class RowsetsModel {
         return null;
     }
 
-    public void setValue(Row anElement, int columnIndex, Object aValue) {
+    public void setValue(JSObject anElement, int columnIndex, Object aValue) {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
             try {
-                ModelColumn column = (ModelColumn)columns.getColumn(columnIndex);
-                setRowsetsData(aValue, column, anElement);
+                ModelColumn column = (ModelColumn) columns.getColumn(columnIndex);
+                setObjectsData(aValue, column.getField(), anElement);
             } catch (Exception ex) {
                 severe(ex.getMessage());
             }
         }
     }
 
-    /**
-     * Returns data from column's rowset. Takes into account that colum's rowset
-     * may be the same with rows rowset annd requires special processing.
-     *
-     * @param aColumn ModelColumn instance, containing information about
-     * rowset's column index to ge data from.
-     * @param anElement Row instance, typically from rows rowset.
-     * @return Rowset's data, from arbitrary rowset's column.
-     * @throws InvalidCursorPositionException
-     * @throws InvalidColIndexException
-     */
-    protected Object getRowsetsData(ModelColumn aColumn, JSObject anElement) throws Exception {
-        if (aColumn != null) {
-            if (aColumn.getField() != null && !aColumn.getField().isEmpty()) {
-                Object value = anElement.getColumnObject(aColumn.getRowsetField());
-                return complementCellData(new CellData(new CascadedStyle(aColumn.getStyle()), value, aColumn.getView() != null ? aColumn.getView().achiveDisplayValue(value) : value), anElement, aColumn);
-            } else {
-                //severe(COLUMN_ROWSET_MISSING_MSG);
-                // pure script columns are allowed ...
-                return complementCellData(new CellData(new CascadedStyle(aColumn.getStyle()), null, null), anElement, aColumn);
+    protected Object getObjectsData(String aField, JSObject anElement) throws Exception {
+        if (aField != null && !aField.isEmpty()) {
+            JSObject target = anElement;
+            String[] path = aField.split(".");
+            String propName = path[0];
+            for (int i = 1; i < path.length; i++) {
+                Object oTarget = anElement.getMember(propName);
+                propName = path[i];
+                if (!(oTarget instanceof JSObject)) {
+                    propName = null;
+                    break;
+                } else {
+                    target = (JSObject) oTarget;
+                }
             }
+            Object value = null;
+            if (propName != null) {
+                value = ScriptUtils.toJava(target.getMember(propName));
+            } else {
+                severe("Field path: " + aField + " doesn't exist.");
+            }
+            return value;
         } else {
-            severe(COLUMN_MISSING_MSG);
+            return null;
         }
-        return new CellData(null, null, null);
     }
 
-    /**
-     * Sets data to column's rowset. Takes into account that colum's rowset may
-     * not be the same with rows rowset and requires special processing.
-     *
-     * @param aValue Value to be setted.
-     * @param aColumn ModelColumn instance, containing information about
-     * rowset's field index to get data from.
-     * @param aRow Row instance, typically from rows rowset.
-     * @throws InvalidCursorPositionException
-     * @throws InvalidColIndexException
-     */
-    protected void setRowsetsData(Object aValue, ModelColumn aColumn, Row aRow) throws Exception {
-        if (aColumn != null) {
-            if (aColumn.getField() != null) {
-                if (aValue instanceof CellData) {
-                    aValue = ((CellData) aValue).getData();
+    protected void setObjectsData(Object aValue, String aField, JSObject anElement) throws Exception {
+        if (aField != null && !aField.isEmpty()) {
+            if (aValue instanceof CellData) {
+                aValue = ((CellData) aValue).getData();
+            }
+            // All validating/change events posting code is inside of script object class.
+            JSObject target = anElement;
+            String[] path = aField.split(".");
+            String propName = path[0];
+            for (int i = 1; i < path.length; i++) {
+                Object oTarget = anElement.getMember(propName);
+                propName = path[i];
+                if (!(oTarget instanceof JSObject)) {
+                    propName = null;
+                    break;
+                } else {
+                    target = (JSObject) oTarget;
                 }
-                // all validating/change events posting code is inside of Row class.
-                aRow.setColumnObject(aColumn.getRowsetField(), aValue);
+            }
+            if (propName != null) {
+                target.setMember(propName, ScriptUtils.toJs(aValue));
             } else {
-                severe(COLUMN_BINDING_MISSING_MSG);
+                severe("Field path: " + aField + " doesn't exist.");
             }
         } else {
-            severe(COLUMN_MISSING_MSG);
+            severe(COLUMN_BINDING_MISSING_MSG);
         }
     }
 
@@ -130,32 +129,21 @@ public abstract class RowsetsModel {
         Logger.getLogger(RowsetsTableModel.class.getName()).log(Level.SEVERE, aMsg);
     }
 
-    public static Object getRowPkValue4Script(Row aRow) {
-        Object rowPkValue = null;
-        Object[] rowPkValues = aRow.getPKValues();
-        if (rowPkValues.length == 1) {
-            rowPkValue = rowPkValues[0];
-        } else {
-            rowPkValue = rowPkValues;
-        }
-        return rowPkValue;
-    }
-
     /**
      * Fires an event, occuring when data or rowset structure of column's rowset
-     * is changed. It takes place when column's rowset and rows rowset are not
-     * the same.
+     * is changed. It takes place when column's rowset and elements rowset are
+     * not the same.
      *
      * @param aColumn ModelColumn instance, the change is related to.
      * @see ModelColumn
      */
-    public abstract void fireColumnRowsetChanged(ModelColumn aColumn);
+    public abstract void fireColumnFieldChanged(ModelColumn aColumn);
 
     /**
-     * Fires an event, that tells all listeners that data in all rows have been
-     * changed, but rows structure havn't been changed.
+     * Fires an event, that tells all listeners that data in all elements have
+     * been changed, but elements structure havn't been changed.
      */
-    public abstract void fireRowsDataChanged();
+    public abstract void fireElementsDataChanged();
 
     private CellData complementCellData(final CellData aCellData, final JSObject anElement, final ModelColumn aColumn) throws Exception {
         JSObject lOnRender = aColumn.getOnRender();

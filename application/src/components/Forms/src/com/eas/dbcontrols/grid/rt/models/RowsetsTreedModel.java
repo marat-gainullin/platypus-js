@@ -9,12 +9,6 @@ import com.bearsoft.gui.grid.events.data.ElementsAddedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsDataChangedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsRemovedEvent;
 import com.bearsoft.gui.grid.events.data.TreedModelListener;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.locators.Locator;
-import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,166 +17,130 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.table.TableColumnModel;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
-public class RowsetsTreedModel extends RowsetsModel implements TreedModel<Row> {
+public class RowsetsTreedModel extends RowsetsModel implements TreedModel<JSObject> {
 
-    protected Set<TreedModelListener<Row>> listeners = new HashSet<>();
-    // locator by primary key field is in the super model
-    // locator by parent field
-    protected Locator parentLocator;
-    protected int parentFieldIndex;
-    protected TreedRowsRowsetListener rowsRowsetListener;
+    protected Set<TreedModelListener<JSObject>> listeners = new HashSet<>();
+    protected String parentField;
+    protected String childrenField;
 
-    public RowsetsTreedModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, int aParentFieldIndex, JSObject aOnRender) {
-        super(aRowsEntity, aRowsRowset, aOnRender);
-        parentFieldIndex = aParentFieldIndex;
-        parentLocator = rowsRowset.createParentLocator(parentFieldIndex, pkLocator);
-        parentLocator.beginConstrainting();
-        try {
-            parentLocator.addConstraint(parentFieldIndex);
-        } finally {
-            parentLocator.endConstrainting();
-        }
-        rowsRowsetListener = new TreedRowsRowsetListener(this);
-        rowsRowset.addRowsetListener(rowsRowsetListener);
+    public RowsetsTreedModel(TableColumnModel aColumns, JSObject aElements, String aParentField, String aChildrenField, JSObject aOnRender) {
+        super(aColumns, aElements, aOnRender);
+        parentField = aParentField;
+        // TODO: move to ModelGrid.setData() when refactored events listening
+        //TreedRowsRowsetListener rowsRowsetListener = new TreedRowsRowsetListener(this, rowsRowset);
+        //rowsRowset.addRowsetListener(rowsRowsetListener);
     }
 
-    public int getParentFieldIndex() {
-        return parentFieldIndex;
+    public String getParentField() {
+        return parentField;
     }
 
     @Override
-    public Row getParentOf(Row anElement) {
+    public JSObject getParentOf(JSObject anElement) {
         try {
-            Row rSubject = (Row) anElement;
-            if (pkLocator.find(rSubject.getColumnObject(parentFieldIndex))) {
-                Row rParent = pkLocator.getRow(0);
-                if (rParent != rSubject) {
-                    return rParent;
-                } else {
-                    return null;
-                }
+            Object oChildren = super.getObjectsData(parentField, anElement);
+            if (oChildren instanceof JSObject) {
+                return (JSObject) oChildren;
             } else {
                 return null;
             }
-        } catch (RowsetException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(RowsetsTreedModel.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
 
     @Override
-    public List<Row> getChildrenOf(Row anElement) {
-        try {
-            Row rSubject = (Row) anElement;
-            Object rowKey = null;
-            if (rSubject != null) {
-                // According to documentation, we have to identify rows by first
-                // primary key occured
-                for (int i = 1; i <= rSubject.getFields().getFieldsCount(); i++) {
-                    if (rSubject.getFields().get(i).isPk()) {
-                        rowKey = rSubject.getColumnObject(i);
-                        break;
+    public List<JSObject> getChildrenOf(JSObject anElement) {
+        List<JSObject> children = new ArrayList<>();
+        if (anElement != null) {
+            try {
+                Object oChildren = super.getObjectsData(childrenField, anElement);
+                if (oChildren instanceof JSObject) {
+                    JSObject jsChildren = (JSObject) oChildren;
+                    int length = JSType.toInteger(jsChildren.getMember("length"));
+                    for (int i = 0; i < length; i++) {
+                        Object oChild = jsChildren.getSlot(i);
+                        if (oChild instanceof JSObject) {
+                            children.add((JSObject) oChild);
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                Logger.getLogger(RowsetsTreedModel.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (parentLocator.find(new Object[]{rowKey})) {
-                List<Row> children = new ArrayList<>();
-                for (int i = 0; i < parentLocator.getSize(); i++) {
-                    if (parentLocator.getRow(i) != anElement) {// one layer depth cycle reference avoiding
-                        children.add(parentLocator.getRow(i));
-                    }
-                }
-                return children;
-            } else {
-                return Collections.emptyList();
-            }
-        } catch (RowsetException | IllegalStateException ex) {
-            Logger.getLogger(RowsetsTreedModel.class.getName()).log(Level.SEVERE, null, ex);
-            return Collections.emptyList();
         }
+        return children;
     }
 
     @Override
-    public boolean isLeaf(Row anElement) {
-        try {
-            Row rSubject = (Row) anElement;
-            Object rowKey = null;
-            if (rSubject != null) {
-                // According to documentation, we have identify rows with first
-                // primary key occured
-                for (int i = 1; i <= rSubject.getFields().getFieldsCount(); i++) {
-                    if (rSubject.getFields().get(i).isPk()) {
-                        rowKey = rSubject.getColumnObject(i);
-                        break;
-                    }
-                }
-            }
-            return !parentLocator.find(new Object[]{rowKey});
-        } catch (Exception ex) {
-            Logger.getLogger(RowsetsTreedModel.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
+    public boolean isLeaf(JSObject anElement) {
+        List<JSObject> children = getChildrenOf(anElement);
+        return children.isEmpty();
     }
 
     @Override
-    public void addTreedModelListener(TreedModelListener<Row> aListener) {
+    public void addTreedModelListener(TreedModelListener<JSObject> aListener) {
         listeners.add(aListener);
     }
 
     @Override
-    public void removeTreedModelListener(TreedModelListener<Row> aListener) {
+    public void removeTreedModelListener(TreedModelListener<JSObject> aListener) {
         listeners.remove(aListener);
     }
 
-    public void fireElementsAdded(List<Row> aRemoved) {
-        ElementsAddedEvent<Row> ev = new ElementsAddedEvent<>(aRemoved);
-        for (TreedModelListener<Row> l : listeners) {
+    public void fireElementsAdded(List<JSObject> aRemoved) {
+        ElementsAddedEvent<JSObject> ev = new ElementsAddedEvent<>(aRemoved);
+        listeners.stream().forEach((l) -> {
             l.elementsAdded(ev);
-        }
+        });
     }
 
-    public void fireElementsRemoved(List<Row> aRemoved) {
-        ElementsRemovedEvent<Row> ev = new ElementsRemovedEvent<>(aRemoved);
-        for (TreedModelListener<Row> l : listeners) {
+    public void fireElementsRemoved(List<JSObject> aRemoved) {
+        ElementsRemovedEvent<JSObject> ev = new ElementsRemovedEvent<>(aRemoved);
+        listeners.stream().forEach((l) -> {
             l.elementsRemoved(ev);
-        }
+        });
     }
 
     @Override
-    public void fireColumnRowsetChanged(ModelColumn aColumn) {
-        ElementsDataChangedEvent<Row> ev = new ElementsDataChangedEvent<>(null, getModelColumnIndex(aColumn));
-        for (TreedModelListener<Row> l : listeners) {
+    public void fireColumnFieldChanged(ModelColumn aColumn) {
+        ElementsDataChangedEvent<JSObject> ev = new ElementsDataChangedEvent<>(null, aColumn.getModelIndex());
+        listeners.stream().forEach((l) -> {
             l.elementsDataChanged(ev);
-        }
+        });
     }
 
     @Override
-    public void fireRowsDataChanged() {
-        ElementsDataChangedEvent<Row> ev = new ElementsDataChangedEvent<>();
-        for (TreedModelListener<Row> l : listeners) {
+    public void fireElementsDataChanged() {
+        ElementsDataChangedEvent<JSObject> ev = new ElementsDataChangedEvent<>();
+        listeners.stream().forEach((l) -> {
             l.elementsDataChanged(ev);
-        }
+        });
     }
 
-    public void fireRowsRowsetRowsChanged(Row aRow, int aRowsRowsetFieldIndex, boolean aAjusting) {
-        Fields rFields = aRow.getFields();
-        boolean inPrimaryKeys = rFields.getPrimaryKeys().contains(rFields.get(aRowsRowsetFieldIndex));
-        boolean inParentKeys = aRowsRowsetFieldIndex == parentFieldIndex;
-        if (inPrimaryKeys || inParentKeys) {
-            parentLocator.invalidate();
-            for (TreedModelListener<Row> l : listeners) {
+    public void fireElementsChanged(JSObject anElement, String aElementsField, boolean aAjusting) {
+        if (aElementsField == null ? parentField == null : aElementsField.equals(parentField)) {
+            listeners.stream().forEach((l) -> {
                 l.elementsStructureChanged();
-            }
+            });
         } else {
-            ElementsDataChangedEvent<Row> ev = new ElementsDataChangedEvent<>(Collections.singletonList(aRow), getModelColumnIndex(aRowsRowsetFieldIndex), aAjusting);
-            for (TreedModelListener<Row> l : listeners) {
-                l.elementsDataChanged(ev);
+            for (int i = 0; i < columns.getColumnCount(); i++) {
+                ModelColumn col = (ModelColumn) columns.getColumn(i);
+                if (aElementsField.equals(col.getField())) {
+                    ElementsDataChangedEvent<JSObject> ev = new ElementsDataChangedEvent<>(Collections.singletonList(anElement), col.getModelIndex(), aAjusting);
+                    listeners.stream().forEach((l) -> {
+                        l.elementsDataChanged(ev);
+                    });
+                }
             }
         }
     }

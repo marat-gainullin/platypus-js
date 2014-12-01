@@ -13,12 +13,12 @@ import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
-import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
+import com.bearsoft.rowset.metadata.Field;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public class TabularRowsRowsetListener extends RowsetAdapter {
 
@@ -32,50 +32,50 @@ public class TabularRowsRowsetListener extends RowsetAdapter {
     @Override
     public void rowInserted(RowsetInsertEvent event) {
         Rowset rowset = event.getRowset();
-        model.fireRowInserted(rowset.getCursorPos() - 1);
+        model.fireElementInserted(rowset.getCursorPos() - 1);
     }
 
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {
         Rowset rowset = event.getRowset();
         if (rowset.isEmpty()) {
-            model.fireRowsChanged();
+            model.fireElementsChanged();
         } else {
-            model.fireRowDeleted(rowset.getCursorPos() - 1);
+            model.fireElementDeleted(rowset.getCursorPos() - 1);
         }
     }
 
     @Override
     public void rowChanged(RowChangeEvent event) {
         if (event.getNewRowCount() != event.getOldRowCount()) {
-            model.fireRowsChanged();
+            model.fireElementsChanged();
         } else {
-            model.fireRowsRowsetFieldChanged(event.getFieldIndex());
+            Field field = event.getChangedRow().getFields().get(event.getFieldIndex());
+            model.fireElementsFieldChanged(field.getName());
         }
     }
 
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
-        model.fireRowsChanged();
+        model.fireElementsChanged();
     }
 
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
-        model.fireRowsChanged();
+        model.fireElementsChanged();
     }
 
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
-        model.fireRowsChanged();
+        model.fireElementsChanged();
     }
 
     @Override
     public void rowsetRolledback(RowsetRollbackEvent event) {
-        model.fireRowsChanged();
+        model.fireElementsChanged();
     }
 
     @Override
     public void rowsetSorted(RowsetSortEvent event) {
-        model.fireRowsDataChanged();
     }
 }

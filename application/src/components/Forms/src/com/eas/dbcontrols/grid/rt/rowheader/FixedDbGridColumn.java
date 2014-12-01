@@ -5,8 +5,8 @@
 package com.eas.dbcontrols.grid.rt.rowheader;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.grid.olddesigninfos.DbGridColumn;
-import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
 
 /**
  *
@@ -14,7 +14,7 @@ import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
  */
 public class FixedDbGridColumn extends DbGridColumn {
 
-    protected int headerType = DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL;
+    protected int headerType = DbGrid.ROWS_HEADER_TYPE_USUAL;
 
     public FixedDbGridColumn(int aFixedWidth, int aHeaderType) {
         super();

@@ -4,7 +4,7 @@
  */
 package com.eas.dbcontrols.grid.rt.models;
 
-import com.bearsoft.rowset.Row;
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
@@ -13,107 +13,83 @@ import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
+import com.bearsoft.rowset.metadata.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public class TreedRowsRowsetListener extends RowsetAdapter {
 
     protected RowsetsTreedModel model;
-    protected List<Row> oldRows = new ArrayList<>();
+    protected Rowset rowset;
+    protected List<JSObject> oldRows = new ArrayList<>();
 
-    public TreedRowsRowsetListener(RowsetsTreedModel aModel) {
+    public TreedRowsRowsetListener(RowsetsTreedModel aModel, Rowset aRowset) {
         super();
         model = aModel;
+        rowset = aRowset;
+    }
+
+    public Rowset getRowset() {
+        return rowset;
     }
 
     @Override
     public void rowChanged(RowChangeEvent event) {
-        model.fireRowsRowsetRowsChanged(event.getChangedRow(), event.getFieldIndex(), false);
+        Field field = event.getChangedRow().getFields().get(event.getFieldIndex());
+        model.fireElementsChanged(event.getChangedRow().getPublished(), field.getName(), false);
     }
 
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {
-        oldRows.add(event.getRow());
         if (!event.isAjusting()) {
-            model.fireElementsRemoved(oldRows);
-            oldRows.clear();
+            model.fireElementsRemoved(Collections.singletonList(event.getRow().getPublished()));
+            oldRows = Rowset.toJs(rowset.getCurrent());
         }
     }
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
-        oldRows.add(event.getRow());
+        oldRows.add(event.getRow().getPublished());
         if (!event.isAjusting()) {
-            model.fireElementsAdded(oldRows);
-            oldRows.clear();
+            model.fireElementsAdded(Collections.singletonList(event.getRow().getPublished()));
         }
-        Row parentRow = model.getParentOf(event.getRow());
-        if (parentRow != null && parentRow.getColumnCount() > 0) {
-            model.fireRowsRowsetRowsChanged(parentRow, 1, event.isAjusting());
-        }
-    }
-
-    @Override
-    public boolean willFilter(RowsetFilterEvent event) {
-        oldRows.clear();
-        oldRows.addAll(model.getRowsRowset().getCurrent());
-        return super.willFilter(event);
     }
 
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
-        List<Row> oldRows1 = new ArrayList<>();
-        oldRows1.addAll(oldRows);
-        oldRows1.removeAll(model.getRowsRowset().getCurrent());
-        model.fireElementsRemoved(oldRows1);
-
-        List<Row> newRows = new ArrayList<>();
-        newRows.addAll(model.getRowsRowset().getCurrent());
-        newRows.removeAll(oldRows);
+        model.fireElementsRemoved(oldRows);
+        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        oldRows = newRows;
         model.fireElementsAdded(newRows);
-
-        oldRows.clear();
-    }
-
-    @Override
-    public boolean willRequery(RowsetRequeryEvent event) {
-        oldRows.clear();
-        oldRows.addAll(model.getRowsRowset().getCurrent());
-        return super.willRequery(event);
     }
 
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
         model.fireElementsRemoved(oldRows);
-        oldRows.clear();
-        model.fireElementsAdded(model.getRowsRowset().getCurrent());
+        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        oldRows = newRows;
+        model.fireElementsAdded(newRows);
     }
 
     @Override
     public void rowsetRolledback(RowsetRollbackEvent event) {
         model.fireElementsRemoved(oldRows);
-        oldRows.clear();
-        model.fireElementsAdded(model.getRowsRowset().getCurrent());
-    }
-
-    @Override
-    public boolean willNextPageFetch(RowsetNextPageEvent event) {
-        oldRows.clear();
-        oldRows.addAll(model.getRowsRowset().getCurrent());
-        return super.willNextPageFetch(event);
+        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        oldRows = newRows;
+        model.fireElementsAdded(newRows);
     }
 
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
-        List<Row> currentRows = new ArrayList<>();
-        currentRows.addAll(model.getRowsRowset().getCurrent());
-        boolean changed = currentRows.removeAll(oldRows);
-        assert changed;
-        model.fireElementsAdded(currentRows);
-        oldRows.clear();
+        model.fireElementsRemoved(oldRows);
+        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        oldRows = newRows;
+        model.fireElementsAdded(newRows);
     }
 }

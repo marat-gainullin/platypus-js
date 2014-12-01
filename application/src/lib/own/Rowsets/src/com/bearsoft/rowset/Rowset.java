@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Rowset serves as original and updated rows vectors holder. There are three
@@ -2213,5 +2214,13 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
             }
         }
         return insertComplemented;
+    }
+
+    public static List<JSObject> toJs(List<Row> aRows) {
+        List<JSObject> jses = new ArrayList<>();
+        aRows.forEach((Row aRow) -> {
+            jses.add(aRow.getPublished());
+        });
+        return jses;
     }
 }

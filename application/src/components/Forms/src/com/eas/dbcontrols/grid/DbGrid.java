@@ -202,10 +202,10 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
             TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
             idx = front.getIndexOf(anElement);
         } else if (deepModel instanceof RowsetsTableModel) {
-            RowsetsTableModel lmodel = (RowsetsTableModel) deepModel;
+            RowsetsTableModel tmodel = (RowsetsTableModel) deepModel;
             Object[] keys = anElement.getPKValues();
-            if (lmodel.getPkLocator().find(keys != null && keys.length > 1 ? new Object[]{keys[0]} : keys)) {
-                RowWrap rw = lmodel.getPkLocator().getSubSet().get(0);
+            if (tmodel.getPkLocator().find(keys != null && keys.length > 1 ? new Object[]{keys[0]} : keys)) {
+                RowWrap rw = tmodel.getPkLocator().getSubSet().get(0);
                 idx = rw.getIndex() - 1;
             }
         }

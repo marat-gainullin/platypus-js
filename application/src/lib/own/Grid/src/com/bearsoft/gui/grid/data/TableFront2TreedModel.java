@@ -349,6 +349,7 @@ public class TableFront2TreedModel<T> implements TableModel {
                 expanded.add(element2Expand); // To prevent re-fetching.
                 Runnable completer = new Runnable() {
 
+                    @Override
                     public void run() {
                         List<T> fetchedChildren = treedModel.getChildrenOf(element2Expand);
                         if (!fetchedChildren.isEmpty()) {
