@@ -2,10 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.models;
+package com.eas.client.forms.components.model.grid.models;
 
-import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -13,6 +15,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  * Table model, getting and setting data to an arbitrary rowset. Gets data from
@@ -20,9 +23,10 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author mg
  */
-public class RowsetsTableModel extends RowsetsModel implements TableModel {
+public class ArrayTableModel extends ArrayModel implements TableModel {
 
     protected Set<TableModelListener> listeners = new HashSet<>();
+    protected Map<Object, Integer> locator = new HashMap();
 
     /**
      * Constructor, accepting a elements rowset.
@@ -31,7 +35,7 @@ public class RowsetsTableModel extends RowsetsModel implements TableModel {
      * @param aRows
      * @param aOnRender
      */
-    public RowsetsTableModel(TableColumnModel aColumns, JSObject aRows, JSObject aOnRender) {
+    public ArrayTableModel(TableColumnModel aColumns, JSObject aRows, JSObject aOnRender) {
         super(aColumns, aRows, aOnRender);
         // TODO: move to ModelGrid.setData() when refactored events listening
         //rowsRowsetListener = new TabularRowsRowsetListener(this, rowsRowset);
@@ -40,7 +44,8 @@ public class RowsetsTableModel extends RowsetsModel implements TableModel {
 
     @Override
     public int getRowCount() {
-        return JSType.toInteger(elements.getMember("length"));
+        int rowCount = JSType.toInteger(elements.getMember("length"));
+        return rowCount > 0 && rowCount != Integer.MAX_VALUE ? rowCount : 0;
     }
 
     @Override
@@ -73,6 +78,7 @@ public class RowsetsTableModel extends RowsetsModel implements TableModel {
     }
 
     private void postEvent(TableModelEvent e) {
+        locator = null;
         listeners.stream().forEach((l) -> {
             l.tableChanged(e);
         });
@@ -146,4 +152,24 @@ public class RowsetsTableModel extends RowsetsModel implements TableModel {
             postEvent(e);
         }
     }
+
+    public int elementToIndex(JSObject anElement) {
+        if (locator == null) {
+            int length = JSType.toInteger(elements.getMember("length"));
+            if (length != Integer.MAX_VALUE) {
+                for (int i = 0; i < length; i++) {
+                    Object oElement = elements.getSlot(i);
+                    locator.put(jdk.nashorn.api.scripting.ScriptUtils.unwrap(oElement), i);
+                }
+            }
+        }
+        Integer idx = locator.get(jdk.nashorn.api.scripting.ScriptUtils.unwrap(anElement));
+        return idx != null ? idx : -1;
+    }
+    
+    public JSObject indexToElement(int aIdx) {
+        Object element = elements.getSlot(aIdx);
+        return element instanceof Undefined ? null : (JSObject)element;
+    }
+    
 }

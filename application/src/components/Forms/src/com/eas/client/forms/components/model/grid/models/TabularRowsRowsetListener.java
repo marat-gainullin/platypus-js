@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.models;
+package com.eas.client.forms.components.model.grid.models;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -22,9 +22,9 @@ import com.bearsoft.rowset.metadata.Field;
  */
 public class TabularRowsRowsetListener extends RowsetAdapter {
 
-    protected RowsetsTableModel model;
+    protected ArrayTableModel model;
 
-    public TabularRowsRowsetListener(RowsetsTableModel aModel) {
+    public TabularRowsRowsetListener(ArrayTableModel aModel) {
         super();
         model = aModel;
     }
@@ -77,5 +77,6 @@ public class TabularRowsRowsetListener extends RowsetAdapter {
 
     @Override
     public void rowsetSorted(RowsetSortEvent event) {
+        model.fireElementsChanged();
     }
 }

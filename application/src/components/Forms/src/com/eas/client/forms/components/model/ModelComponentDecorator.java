@@ -2,15 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.components.model;
+package com.eas.client.forms.components.model;
 
 import com.bearsoft.rowset.RowsetConverter;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.IconCache;
-import com.eas.client.forms.components.HasValue;
-import com.eas.client.forms.components.VSpinner;
-import com.eas.client.forms.events.ControlEventsIProxy;
+import com.eas.client.forms.components.rt.HasValue;
+import com.eas.client.forms.components.rt.VSpinner;
+import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;

@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.rowheader;
+package com.eas.client.forms.components.model.grid.columns;
 
 import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -42,7 +42,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
     protected JToggleButton check;
     protected JLabel indicator = new JLabel();
     protected JLabel rowDescriptor = new JLabel();
-    protected int headerType = DbGrid.ROWS_HEADER_TYPE_USUAL;
+    protected int headerType = ModelGrid.ROWS_HEADER_TYPE_USUAL;
     // runtime
     protected JTable editingTable;
     protected int editingRow = -1;
@@ -51,11 +51,11 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
     public RowHeaderCellEditor(int aHeaderType) {
         super(new BorderLayout());
         headerType = aHeaderType;
-        if (headerType == DbGrid.ROWS_HEADER_TYPE_CHECKBOX) {
+        if (headerType == ModelGrid.ROWS_HEADER_TYPE_CHECKBOX) {
             check = new JCheckBox();
-        } else if (headerType == DbGrid.ROWS_HEADER_TYPE_RADIOBUTTON) {
+        } else if (headerType == ModelGrid.ROWS_HEADER_TYPE_RADIOBUTTON) {
             check = new JRadioButton();
-        } else if (headerType == DbGrid.ROWS_HEADER_TYPE_USUAL) {
+        } else if (headerType == ModelGrid.ROWS_HEADER_TYPE_USUAL) {
         } else {
             assert false : "RowHeaderCellEditor must be used not with \"ROWS_HEADER_TYPE_NONE\" rows header type";
         }
@@ -79,7 +79,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
                 check.setSelected(table.isRowSelected(editingRow));
             }
             int modelRow = table.convertRowIndexToModel(rowIndex);
-            DbGrid grid = DbGrid.getFirstDbGrid(table);
+            ModelGrid grid = ModelGrid.getFirstDbGrid(table);
             JSObject row = grid.index2Row(modelRow);
             if (row != null) {
                 if (grid.isCurrentRow(row)) {

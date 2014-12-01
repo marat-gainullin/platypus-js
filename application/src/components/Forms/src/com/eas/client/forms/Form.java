@@ -2,17 +2,10 @@ package com.eas.client.forms;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.events.PublishedSourcedEvent;
-import com.eas.client.forms.events.FormWindowEventsIProxy;
-import com.eas.client.forms.api.components.DesktopPane;
-import com.eas.client.forms.api.containers.AnchorsPane;
+import com.eas.client.forms.events.rt.FormWindowEventsIProxy;
+import com.eas.client.forms.components.DesktopPane;
+import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.controls.ControlDesignInfo;
-import com.eas.controls.FormDesignInfo;
-import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.controls.events.WindowEventsIProxy;
-import com.eas.controls.wrappers.ButtonGroupWrapper;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.resources.images.IconCache;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -1176,7 +1169,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_OPENED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowOpened() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened) : null;
     }
@@ -1194,7 +1187,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSING_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowClosing() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosing) : null;
     }
@@ -1212,7 +1205,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowClosed() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosed) : null;
     }
@@ -1230,7 +1223,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_MINIMIZED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowMinimized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowIconified) : null;
     }
@@ -1248,7 +1241,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_RESTORED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowRestored() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowRestored) : null;
     }
@@ -1266,7 +1259,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_MAXIMIZED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowMaximized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowMaximized) : null;
     }
@@ -1284,7 +1277,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_ACTIVATED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowActivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowActivated) : null;
     }
@@ -1302,7 +1295,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ON_WINDOW_DEACTIVATED_JSDOC)
-    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.events.WindowEvent.class)
     public JSObject getOnWindowDeactivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowDeactivated) : null;
     }

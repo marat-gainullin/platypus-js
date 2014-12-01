@@ -6,7 +6,7 @@
 package com.eas.client.scripts;
 
 import com.eas.client.Application;
-import com.eas.client.forms.DbFormDesignInfo;
+import com.eas.dbcontrols.grid.olddesigninfos.DbFormDesignInfo;
 import com.eas.store.Object2Dom;
 import org.w3c.dom.Document;
 

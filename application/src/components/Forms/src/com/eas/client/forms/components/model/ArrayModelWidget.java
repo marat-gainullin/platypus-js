@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.components.model;
+package com.eas.client.forms.components.model;
 
 import jdk.nashorn.api.scripting.JSObject;
 

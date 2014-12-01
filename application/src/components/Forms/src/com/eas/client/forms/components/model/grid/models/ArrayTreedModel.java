@@ -2,14 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.models;
+package com.eas.client.forms.components.model.grid.models;
 
 import com.bearsoft.gui.grid.data.TreedModel;
 import com.bearsoft.gui.grid.events.data.ElementsAddedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsDataChangedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsRemovedEvent;
 import com.bearsoft.gui.grid.events.data.TreedModelListener;
-import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,13 +25,13 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author mg
  */
-public class RowsetsTreedModel extends RowsetsModel implements TreedModel<JSObject> {
+public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> {
 
     protected Set<TreedModelListener<JSObject>> listeners = new HashSet<>();
     protected String parentField;
     protected String childrenField;
 
-    public RowsetsTreedModel(TableColumnModel aColumns, JSObject aElements, String aParentField, String aChildrenField, JSObject aOnRender) {
+    public ArrayTreedModel(TableColumnModel aColumns, JSObject aElements, String aParentField, String aChildrenField, JSObject aOnRender) {
         super(aColumns, aElements, aOnRender);
         parentField = aParentField;
         // TODO: move to ModelGrid.setData() when refactored events listening
@@ -53,7 +53,7 @@ public class RowsetsTreedModel extends RowsetsModel implements TreedModel<JSObje
                 return null;
             }
         } catch (Exception ex) {
-            Logger.getLogger(RowsetsTreedModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ArrayTreedModel.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -67,15 +67,17 @@ public class RowsetsTreedModel extends RowsetsModel implements TreedModel<JSObje
                 if (oChildren instanceof JSObject) {
                     JSObject jsChildren = (JSObject) oChildren;
                     int length = JSType.toInteger(jsChildren.getMember("length"));
-                    for (int i = 0; i < length; i++) {
-                        Object oChild = jsChildren.getSlot(i);
-                        if (oChild instanceof JSObject) {
-                            children.add((JSObject) oChild);
+                    if (length > 0 && length != Integer.MAX_VALUE) {
+                        for (int i = 0; i < length; i++) {
+                            Object oChild = jsChildren.getSlot(i);
+                            if (oChild instanceof JSObject) {
+                                children.add((JSObject) oChild);
+                            }
                         }
                     }
                 }
             } catch (Exception ex) {
-                Logger.getLogger(RowsetsTreedModel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ArrayTreedModel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return children;

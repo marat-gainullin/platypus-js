@@ -4,10 +4,8 @@
  */
 package com.eas.client.forms;
 
-import com.eas.client.forms.events.FormEventsIProxy;
+import com.eas.client.forms.events.rt.FormEventsIProxy;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.controls.events.ControlEventsIProxy;
-import com.eas.dbcontrols.visitors.DbSwingFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;

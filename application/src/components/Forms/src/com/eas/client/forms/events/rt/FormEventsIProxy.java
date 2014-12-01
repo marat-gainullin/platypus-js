@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.events;
+package com.eas.client.forms.events.rt;
 
-import com.eas.client.forms.api.events.EventsWrapper;
+import com.eas.client.forms.events.EventsWrapper;
 import javax.swing.JComponent;
 
 /**

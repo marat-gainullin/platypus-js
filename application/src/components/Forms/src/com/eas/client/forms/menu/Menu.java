@@ -2,17 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.menu;
+package com.eas.client.forms.menu;
 
-import com.eas.client.forms.events.FormEventsIProxy;
-import com.eas.client.forms.api.HasChildren;
-import com.eas.client.forms.api.HasContainerEvents;
-import com.eas.client.forms.api.HasJsName;
-import com.eas.client.forms.api.Widget;
-import com.eas.client.forms.api.events.ActionEvent;
-import com.eas.client.forms.api.events.ComponentEvent;
-import com.eas.client.forms.api.events.MouseEvent;
-import com.eas.client.forms.events.ControlEventsIProxy;
+import com.eas.client.forms.events.rt.FormEventsIProxy;
+import com.eas.client.forms.HasChildren;
+import com.eas.client.forms.HasContainerEvents;
+import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.Widget;
+import com.eas.client.forms.events.ActionEvent;
+import com.eas.client.forms.events.ComponentEvent;
+import com.eas.client.forms.events.MouseEvent;
+import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;

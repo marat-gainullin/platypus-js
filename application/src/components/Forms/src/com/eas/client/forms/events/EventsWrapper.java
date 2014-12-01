@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.events;
+package com.eas.client.forms.events;
 
 /**
  * Wraps low level event in script form API event.

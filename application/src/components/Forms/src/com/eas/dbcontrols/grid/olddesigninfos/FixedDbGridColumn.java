@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.rowheader;
+package com.eas.dbcontrols.grid.olddesigninfos;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
-import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.dbcontrols.grid.olddesigninfos.DbGridColumn;
 
 /**
@@ -14,7 +14,7 @@ import com.eas.dbcontrols.grid.olddesigninfos.DbGridColumn;
  */
 public class FixedDbGridColumn extends DbGridColumn {
 
-    protected int headerType = DbGrid.ROWS_HEADER_TYPE_USUAL;
+    protected int headerType = ModelGrid.ROWS_HEADER_TYPE_USUAL;
 
     public FixedDbGridColumn(int aFixedWidth, int aHeaderType) {
         super();

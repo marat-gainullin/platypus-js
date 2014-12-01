@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.rowheader;
+package com.eas.client.forms.components.model.grid.columns;
 
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.client.forms.IconCache;
-import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.dbcontrols.grid.olddesigninfos.DbGridRowsColumnsDesignInfo;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -37,16 +37,16 @@ public class RowHeaderCellRenderer extends JPanel implements TableCellRenderer {
     protected JToggleButton check;
     protected JLabel indicator = new JLabel();
     protected JLabel rowDescriptor = new JLabel();
-    protected int headerType = DbGrid.ROWS_HEADER_TYPE_USUAL;
+    protected int headerType = ModelGrid.ROWS_HEADER_TYPE_USUAL;
 
     public RowHeaderCellRenderer(int aHeaderType) {
         super(new BorderLayout());
         headerType = aHeaderType;
-        if (headerType == DbGrid.ROWS_HEADER_TYPE_CHECKBOX) {
+        if (headerType == ModelGrid.ROWS_HEADER_TYPE_CHECKBOX) {
             check = new JCheckBox();
-        } else if (headerType == DbGrid.ROWS_HEADER_TYPE_RADIOBUTTON) {
+        } else if (headerType == ModelGrid.ROWS_HEADER_TYPE_RADIOBUTTON) {
             check = new JRadioButton();
-        } else if (headerType == DbGrid.ROWS_HEADER_TYPE_USUAL) {
+        } else if (headerType == ModelGrid.ROWS_HEADER_TYPE_USUAL) {
         } else {
             assert false : "RowHeaderCellRenderer must be used not with \"ROWS_HEADER_TYPE_NONE\" rows header type";
         }
@@ -67,7 +67,7 @@ public class RowHeaderCellRenderer extends JPanel implements TableCellRenderer {
                 check.setSelected(table.isRowSelected(rowIndex));
             }
             int modelRow = table.convertRowIndexToModel(rowIndex);
-            DbGrid grid = DbGrid.getFirstDbGrid(table);
+            ModelGrid grid = ModelGrid.getFirstDbGrid(table);
             JSObject row = grid.index2Row(modelRow);
             if (row != null) {
                 if (grid.isElementProcessed(row)) {

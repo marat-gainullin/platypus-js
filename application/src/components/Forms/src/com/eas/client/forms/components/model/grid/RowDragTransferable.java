@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.eas.dbcontrols.grid.rt;
+package com.eas.client.forms.components.model.grid;
 
 import com.bearsoft.rowset.Row;
 import java.awt.datatransfer.DataFlavor;

@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.components.model;
+package com.eas.client.forms.components.model;
 
 import com.bearsoft.gui.grid.data.CellData;
 import com.eas.client.events.PublishedSourcedEvent;
-import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;

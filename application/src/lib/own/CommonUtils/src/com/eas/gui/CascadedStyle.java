@@ -32,7 +32,7 @@ public class CascadedStyle implements HasPublished {
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected Color background = defaultBackground();
     protected Color foreground = defaultForeground();
-    protected Font font = defaultFont();
+    protected java.awt.Font font = defaultFont();
     protected Integer align = defaultAlign();
     protected Icon icon;
     protected Icon folderIcon;
@@ -48,12 +48,13 @@ public class CascadedStyle implements HasPublished {
     public CascadedStyle() {
         super();
     }
-    
+
     private static final String CONSTRUCTOR_JS_DOC = "/**\n"
             + "* Style object. Can inherit propeties from the parent style object.\n"
             + "* @param parent a parent <code>Style</code> (optional)\n"
             + "*/";
-    @ScriptFunction(name="Style", params = {"parent"}, jsDoc = CONSTRUCTOR_JS_DOC)
+
+    @ScriptFunction(name = "Style", params = {"parent"}, jsDoc = CONSTRUCTOR_JS_DOC)
     public CascadedStyle(CascadedStyle aParent) {
         this();
         parent = aParent;
@@ -62,21 +63,23 @@ public class CascadedStyle implements HasPublished {
     private static final String ICON_JS_DOC = "/**\n"
             + "* An icon associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ICON_JS_DOC)
     public Icon getIcon() {
         return icon != null ? icon : (parent != null ? parent.getIcon() : null);
     }
-    
+
     @ScriptFunction
     public void setIcon(Icon aValue) {
         Icon oldValue = icon;
         icon = aValue;
         changeSupport.firePropertyChange("icon", oldValue, icon);
     }
-    
+
     private static final String FOLDER_ICON_JS_DOC = "/**\n"
             + "* A forlder icon associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = FOLDER_ICON_JS_DOC)
     public Icon getFolderIcon() {
         return folderIcon != null ? folderIcon : (parent != null ? parent.getFolderIcon() : null);
@@ -88,10 +91,11 @@ public class CascadedStyle implements HasPublished {
         folderIcon = aValue;
         changeSupport.firePropertyChange("folderIcon", oldValue, folderIcon);
     }
-    
+
     private static final String OPEN_FOLDER_ICON_JS_DOC = "/**\n"
             + "* An open forlder icon associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = OPEN_FOLDER_ICON_JS_DOC)
     public Icon getOpenFolderIcon() {
         return openFolderIcon != null ? openFolderIcon : (parent != null ? parent.getOpenFolderIcon() : null);
@@ -107,10 +111,11 @@ public class CascadedStyle implements HasPublished {
     public void setOpenFolderIconName(String aValue) {
         setNativeOpenFolderIconName(aValue);
     }
-    
+
     private static final String LEAF_ICON_JS_DOC = "/**\n"
             + "* A leaf icon associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = LEAF_ICON_JS_DOC)
     public Icon getLeafIcon() {
         return leafIcon != null ? leafIcon : (parent != null ? parent.getLeafIcon() : null);
@@ -122,73 +127,76 @@ public class CascadedStyle implements HasPublished {
         leafIcon = aValue;
         changeSupport.firePropertyChange("leafIcon", oldValue, leafIcon);
     }
-    
+
     private static final String FONT_JS_DOC = "/**\n"
             + "* A font associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = FONT_JS_DOC)
-    public Font getFont() {
+    public java.awt.Font getFont() {
         return font != null ? font : (parent != null ? parent.getFont() : defaultFont());
     }
-    
+
     @ScriptFunction
-    public void setFont(Font aValue) {
-        Font oldValue = font;
+    public void setFont(java.awt.Font aValue) {
+        java.awt.Font oldValue = font;
         font = aValue;
         changeSupport.firePropertyChange("font", oldValue, font);
-    }    
-    
+    }
+
     private static final String FOREGROUND_JS_DOC = "/**\n"
             + "* A foreground color associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = FOREGROUND_JS_DOC)
     public Color getForeground() {
         return foreground != null ? foreground : (parent != null ? parent.getForeground() : defaultForeground());
     }
-    
+
     @ScriptFunction
     public void setForeground(Color aValue) {
         Color oldValue = foreground;
         foreground = aValue;
         changeSupport.firePropertyChange("foreground", oldValue, foreground);
     }
-    
+
     private static final String BACKGROUND_JS_DOC = "/**\n"
             + "* A background color associated with this style.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = BACKGROUND_JS_DOC)
     public Color getBackground() {
         return background != null ? background : (parent != null ? parent.getBackground() : defaultBackground());
     }
-    
+
     @ScriptFunction
     public void setBackground(Color aValue) {
         Color oldValue = background;
         background = aValue;
         changeSupport.firePropertyChange("background", oldValue, background);
     }
-    
-    
+
     private static final String ALIGN_JS_DOC = "/**\n"
             + "* An align constraint associated with this style:\n"
             + "* CENTER = 0; TOP = 1; LEFT = 2; BOTTOM = 3; RIGHT = 4.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ALIGN_JS_DOC)
     public Integer getAlign() {
         return align != null ? align : (parent != null ? parent.getAlign() : defaultAlign());
     }
-    
+
     @ScriptFunction
     public void setAlign(Integer aValue) {
         Integer oldValue = align;
         align = aValue;
         changeSupport.firePropertyChange("align", oldValue, align);
     }
-    
+
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }
-    
+
     protected void assign(CascadedStyle aSource) {
         if (aSource.getBackground() != null) {
             Color col = aSource.getBackground();
@@ -246,7 +254,7 @@ public class CascadedStyle implements HasPublished {
         if (this.foreground != other.foreground && (this.foreground == null || !this.foreground.equals(other.foreground))) {
             return false;
         }
-        if (this.font != other.font && (this.font == null || !this.font.isEqual(other.font))) {
+        if (this.font != other.font && (this.font == null || !this.font.equals(other.font))) {
             return false;
         }
         if (!Objects.equals(this.align, other.align)) {
@@ -266,9 +274,9 @@ public class CascadedStyle implements HasPublished {
         }
         return true;
     }
-    
+
     protected static Font defFont;
- 
+
     public static String encodeColor(Color aValue) {
         StringBuilder sb = new StringBuilder();
         sb.append('#');
@@ -511,14 +519,14 @@ public class CascadedStyle implements HasPublished {
         }
         return style;
     }
-    
+
     @Override
     public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
@@ -534,5 +542,5 @@ public class CascadedStyle implements HasPublished {
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
-    
+
 }

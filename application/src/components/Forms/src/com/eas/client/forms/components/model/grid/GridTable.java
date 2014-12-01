@@ -2,15 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt;
+package com.eas.client.forms.components.model.grid;
 
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
 import com.eas.client.forms.ModelCellEditingListener;
-import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.RowHeaderTableColumn;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
 import com.eas.gui.CascadedStyle;
 import java.awt.Color;
 import java.awt.Component;
@@ -37,14 +35,12 @@ public class GridTable extends JTable implements ModelCellEditingListener {
     protected Color oddRowsColor;
     protected boolean editable = true;
     protected boolean showOddRowsInOtherColor = true;
-    protected JTable aboveNeightbour = null;
-    protected Rowset rowsRowset;
+    protected JTable aboveNeightbour;
     protected TablesGridContainer gridContainer;
 
-    public GridTable(JTable aAboveNeightbour, Rowset aRowsRowset, TablesGridContainer aGridContainer) {
+    public GridTable(JTable aAboveNeightbour, TablesGridContainer aGridContainer) {
         super();
         aboveNeightbour = aAboveNeightbour;
-        rowsRowset = aRowsRowset;
         gridContainer = aGridContainer;
         setDoubleBuffered(true);
     }
@@ -303,7 +299,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         for (int column = 0; column < getColumnModel().getColumnCount(); column++) {
             TableColumn tCol = getColumnModel().getColumn(column);
             if (tCol.getCellEditor() instanceof InsettedTreeEditor<?>) {
-                InsettedTreeEditor<Row> ie = (InsettedTreeEditor<Row>) tCol.getCellEditor();
+                InsettedTreeEditor<?> ie = (InsettedTreeEditor<?>) tCol.getCellEditor();
                 ie.setEditable(editable);
             }
         }

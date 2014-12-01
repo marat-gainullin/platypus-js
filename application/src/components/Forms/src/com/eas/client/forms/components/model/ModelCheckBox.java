@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.components.model;
+package com.eas.client.forms.components.model;
 
-import com.eas.client.forms.components.VCheckBox;
+import com.eas.client.forms.components.rt.VCheckBox;
 import com.eas.script.ScriptFunction;
 import javax.swing.JTable;
 

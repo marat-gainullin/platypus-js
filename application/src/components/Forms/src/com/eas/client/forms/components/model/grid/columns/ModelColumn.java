@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.columns;
+package com.eas.client.forms.components.model.grid.columns;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
-import com.eas.client.forms.api.components.model.ModelWidget;
-import com.eas.dbcontrols.grid.rt.HasStyle;
+import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.model.grid.HasStyle;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;

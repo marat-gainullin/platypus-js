@@ -8,13 +8,12 @@
  *
  * Created on 17.12.2009, 16:05:50
  */
-package com.eas.dbcontrols.grid.rt;
+package com.eas.client.forms.components.model.grid;
 
 import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.gui.grid.rendering.InsettedRenderer;
 import com.bearsoft.gui.grid.rows.TabularRowsSorter;
 import com.eas.client.forms.Form;
-import com.eas.client.forms.api.components.model.ModelGrid;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Window;

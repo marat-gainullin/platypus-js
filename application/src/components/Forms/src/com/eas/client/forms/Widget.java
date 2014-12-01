@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api;
+package com.eas.client.forms;
 
-import com.eas.client.forms.api.containers.BoxPane;
-import com.eas.client.forms.api.containers.FlowPane;
+import com.eas.client.forms.containers.BoxPane;
+import com.eas.client.forms.containers.FlowPane;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;

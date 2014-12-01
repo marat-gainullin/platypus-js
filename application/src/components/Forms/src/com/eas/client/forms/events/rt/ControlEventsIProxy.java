@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.events;
+package com.eas.client.forms.events.rt;
 
 import com.eas.script.ScriptUtils;
 import java.awt.Component;

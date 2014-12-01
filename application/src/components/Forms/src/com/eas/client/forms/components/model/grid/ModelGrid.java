@@ -1,10 +1,13 @@
-package com.eas.dbcontrols.grid;
+package com.eas.client.forms.components.model.grid;
 
+import com.eas.client.forms.components.model.grid.TablesGridContainer;
+import com.eas.client.forms.components.model.grid.GridTableScrollablePanel;
+import com.eas.client.forms.components.model.grid.GridTable;
+import com.eas.client.forms.components.model.grid.GridSearchView;
 import com.eas.client.forms.IconCache;
 import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.constraints.LinearConstraint;
 import com.bearsoft.gui.grid.data.CachingTableModel;
-import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.gui.grid.data.TableFront2TreedModel;
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
@@ -17,39 +20,24 @@ import com.bearsoft.gui.grid.rows.TreedRowsSorter;
 import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.events.RowsetAdapter;
-import com.bearsoft.rowset.events.RowsetListener;
-import com.bearsoft.rowset.events.RowsetRollbackEvent;
-import com.bearsoft.rowset.events.RowsetSaveEvent;
-import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
-import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.forms.Form;
-import com.eas.client.forms.api.components.model.ArrayModelWidget;
-import com.eas.client.forms.api.components.model.ModelComponentDecorator;
-import com.eas.client.model.ModelElementRef;
-import com.eas.client.model.ModelEntityParameterRef;
-import com.eas.client.model.ModelEntityRef;
-import com.eas.client.model.application.ApplicationEntity;
-import com.eas.dbcontrols.*;
-import com.eas.dbcontrols.grid.rt.*;
-import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
-import com.eas.dbcontrols.grid.rt.columns.RowHeaderTableColumn;
-import com.eas.dbcontrols.grid.rt.models.RowsetsModel;
-import com.eas.dbcontrols.grid.rt.models.RowsetsTableModel;
-import com.eas.dbcontrols.grid.rt.models.RowsetsTreedModel;
-import com.eas.dbcontrols.grid.rt.rowheader.RowHeaderCellEditor;
-import com.eas.dbcontrols.grid.rt.rowheader.RowHeaderCellRenderer;
+import com.eas.client.forms.components.model.ArrayModelWidget;
+import com.eas.client.forms.components.model.CellRenderEvent;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
+import com.eas.client.forms.components.model.grid.models.ArrayModel;
+import com.eas.client.forms.components.model.grid.models.ArrayTableModel;
+import com.eas.client.forms.components.model.grid.models.ArrayTreedModel;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
-import com.eas.script.ScriptUtils;
-import com.eas.util.StringUtils;
+import com.eas.script.EventMethod;
+import com.eas.script.ScriptFunction;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
@@ -69,7 +57,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContainer {
+public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer {
 
     public static final int ROWS_HEADER_TYPE_NONE = 0;
     public static final int ROWS_HEADER_TYPE_USUAL = 1;
@@ -131,31 +119,31 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
 
     protected void applyShowHorizontalLines() {
         if (tlTable != null) {
-            tlTable.setShowHorizontalLines(isShowHorizontalLines());
+            tlTable.setShowHorizontalLines(getShowHorizontalLines());
         }
         if (trTable != null) {
-            trTable.setShowHorizontalLines(isShowHorizontalLines());
+            trTable.setShowHorizontalLines(getShowHorizontalLines());
         }
         if (blTable != null) {
-            blTable.setShowHorizontalLines(isShowHorizontalLines());
+            blTable.setShowHorizontalLines(getShowHorizontalLines());
         }
         if (brTable != null) {
-            brTable.setShowHorizontalLines(isShowHorizontalLines());
+            brTable.setShowHorizontalLines(getShowHorizontalLines());
         }
     }
 
     protected void applyShowVerticalLines() {
         if (tlTable != null) {
-            tlTable.setShowVerticalLines(isShowVerticalLines());
+            tlTable.setShowVerticalLines(getShowVerticalLines());
         }
         if (trTable != null) {
-            trTable.setShowVerticalLines(isShowVerticalLines());
+            trTable.setShowVerticalLines(getShowVerticalLines());
         }
         if (blTable != null) {
-            blTable.setShowVerticalLines(isShowVerticalLines());
+            blTable.setShowVerticalLines(getShowVerticalLines());
         }
         if (brTable != null) {
-            brTable.setShowVerticalLines(isShowVerticalLines());
+            brTable.setShowVerticalLines(getShowVerticalLines());
         }
     }
 
@@ -201,13 +189,9 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         if (deepModel instanceof TableFront2TreedModel<?>) {
             TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
             idx = front.getIndexOf(anElement);
-        } else if (deepModel instanceof RowsetsTableModel) {
-            RowsetsTableModel tmodel = (RowsetsTableModel) deepModel;
-            Object[] keys = anElement.getPKValues();
-            if (tmodel.getPkLocator().find(keys != null && keys.length > 1 ? new Object[]{keys[0]} : keys)) {
-                RowWrap rw = tmodel.getPkLocator().getSubSet().get(0);
-                idx = rw.getIndex() - 1;
-            }
+        } else if (deepModel instanceof ArrayTableModel) {
+            ArrayTableModel tmodel = (ArrayTableModel) deepModel;
+            idx = tmodel.elementToIndex(anElement);
         }
         return idx;
     }
@@ -221,15 +205,15 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
      * @throws RowsetException
      */
     public JSObject index2Row(int aIdx) throws RowsetException {
-        JSObject row = null;
+        JSObject element = null;
         if (deepModel instanceof TableFront2TreedModel<?>) {
             TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
-            row = front.getElementAt(aIdx);
-        } else if (deepModel instanceof RowsetsTableModel) {
-            RowsetsTableModel lmodel = (RowsetsTableModel) deepModel;
-            row = lmodel.getRowsRowset().getRow(aIdx + 1);
+            element = front.getElementAt(aIdx);
+        } else if (deepModel instanceof ArrayTableModel) {
+            ArrayTableModel tmodel = (ArrayTableModel) deepModel;
+            element = tmodel.indexToElement(aIdx);
         }
-        return row;
+        return element;
     }
 
     protected void putAction(Action aAction) {
@@ -250,8 +234,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
      * @return
      * @throws Exception
      */
-    private Map<TableColumn, GridColumnsGroup> fillColumnsGroup(GridColumnsGroup aParent, List<GridColumnsGroup> aContents) throws Exception {
-        Map<TableColumn, GridColumnsGroup> groups = new HashMap<>();
+    private Map<ModelColumn, GridColumnsGroup> fillColumnsGroup(GridColumnsGroup aParent, List<GridColumnsGroup> aContents) throws Exception {
+        Map<ModelColumn, GridColumnsGroup> groups = new HashMap<>();
         for (GridColumnsGroup dCol : aContents) {
             // create grid columns group
             GridColumnsGroup group = new GridColumnsGroup();
@@ -261,18 +245,10 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
             }
             // Let's take care of structure
             if (dCol.hasChildren()) {
-                Map<TableColumn, GridColumnsGroup> childGroups = fillColumnsGroup(group, dCol.getChildren(), linkSource);
+                Map<ModelColumn, GridColumnsGroup> childGroups = fillColumnsGroup(group, dCol.getChildren());
                 groups.putAll(childGroups);
-            } else // Leaf group
-            {
-                Rowset rs = DbControlsUtils.resolveRowset(model, dCol.getDatamodelElement());
-                int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
-                if (fidx < 1) {
-                    if (dCol.getDatamodelElement() != null) {
-                        Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Bad column configuration: {0}''s model binding can''t be resolved", dCol.getName());
-                    }
-                }
-                // Column setup
+            } else {
+                // Leaf group
                 ModelColumn tCol = new ModelColumn();
                 tCol.setModelIndex(columnModel.getColumnCount());
                 tCol.setMinWidth(group.getMinWidth());
@@ -314,18 +290,9 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     }
 
     private void configureTreedView() {
-        if (rowsModel instanceof RowsetsTreedModel) {
+        if (rowsModel instanceof ArrayTreedModel) {
             if (columnModel.getColumnCount() > 0) {
-                TableColumn tCol = null;
-                // Let's find first stable column
-                for (int i = 0; i < columnModel.getColumnCount(); i++) {
-                    TableColumn col = columnModel.getColumn(i);
-                    if (col.getIdentifier() instanceof FieldModelColumn) {
-                        tCol = col;
-                        break;
-                    }
-                }
-                assert tCol != null;
+                TableColumn tCol = columnModel.getColumn(0);
                 tCol.setCellRenderer(new InsettedTreeRenderer<>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, style, false)));
                 tCol.setCellEditor(new InsettedTreeEditor<>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
             }
@@ -349,16 +316,16 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
 
     private void applyShowOddRowsInOtherColor() {
         if (tlTable != null) {
-            tlTable.setShowOddRowsInOtherColor(isShowOddRowsInOtherColor());
+            tlTable.setShowOddRowsInOtherColor(getShowOddRowsInOtherColor());
         }
         if (trTable != null) {
-            trTable.setShowOddRowsInOtherColor(isShowOddRowsInOtherColor());
+            trTable.setShowOddRowsInOtherColor(getShowOddRowsInOtherColor());
         }
         if (blTable != null) {
-            blTable.setShowOddRowsInOtherColor(isShowOddRowsInOtherColor());
+            blTable.setShowOddRowsInOtherColor(getShowOddRowsInOtherColor());
         }
         if (brTable != null) {
-            brTable.setShowOddRowsInOtherColor(isShowOddRowsInOtherColor());
+            brTable.setShowOddRowsInOtherColor(getShowOddRowsInOtherColor());
         }
     }
 
@@ -410,11 +377,11 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         }
     }
 
-    private int convertFixedColumns2Leaves(List<DbGridColumn> roots, int fixedCols) {
+    private int convertFixedColumns2Leaves(List<GridColumnsGroup> roots, int fixedCols) {
         int leavesCount = 0;
         if (fixedCols > 0) {
             for (int i = 0; i < fixedCols; i++) {
-                DbGridColumn col = roots.get(i);
+                GridColumnsGroup col = roots.get(i);
                 if (!col.hasChildren()) {
                     leavesCount++;
                 } else {
@@ -426,7 +393,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     }
 
     public boolean isTreeConfigured() throws Exception {
-        return unaryLinkField != null && !unaryLinkField.isEmpty();
+        return parentField != null && !parentField.isEmpty()
+                && childrenField != null && !childrenField.isEmpty();
     }
     //
     public static final int CELLS_CACHE_SIZE = 65536;// 2^16
@@ -435,7 +403,7 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     protected TablesFocusManager tablesFocusManager = new TablesFocusManager();
     protected TablesMousePropagator tablesMousePropagator = new TablesMousePropagator();
     // design
-    protected List<DbGridColumn> header = new ArrayList<>();
+    protected List<GridColumnsGroup> header = new ArrayList<>();
     protected int rowsHeight = 20;
     protected boolean showVerticalLines = true;
     protected boolean showHorizontalLines = true;
@@ -447,12 +415,13 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     protected Color gridColor;
     protected CascadedStyle style = new CascadedStyle();
     // data
-    protected RowsetsModel rowsModel;
+    protected ArrayModel rowsModel;
     protected TableModel deepModel;
     protected TabularRowsSorter<? extends TableModel> rowSorter;
     protected Set<JSObject> processedRows = new HashSet<>();
     // tree info
-    protected String unaryLinkField;
+    protected String parentField;
+    protected String childrenField;
     // rows column info
     protected int rowsHeaderType = ROWS_HEADER_TYPE_USUAL;
     protected int fixedRows;
@@ -473,35 +442,36 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     protected GridTable trTable;
     protected GridTable blTable;
     protected GridTable brTable;
-    protected RowsetListener scrollReflector = new RowsetAdapter() {
-        protected void repaintRowHeader() {
-            if (gridScroll.getRowHeader() != null) {
-                gridScroll.getRowHeader().repaint();
-            }
-        }
+    /*
+     protected RowsetListener scrollReflector = new RowsetAdapter() {
+     protected void repaintRowHeader() {
+     if (gridScroll.getRowHeader() != null) {
+     gridScroll.getRowHeader().repaint();
+     }
+     }
 
-        @Override
-        public void rowsetScrolled(RowsetScrollEvent event) {
-            repaintRowHeader();
-        }
+     @Override
+     public void rowsetScrolled(RowsetScrollEvent event) {
+     repaintRowHeader();
+     }
 
-        @Override
-        public void rowsetRolledback(RowsetRollbackEvent event) {
-            repaintRowHeader();
-        }
+     @Override
+     public void rowsetRolledback(RowsetRollbackEvent event) {
+     repaintRowHeader();
+     }
 
-        @Override
-        public void rowsetSaved(RowsetSaveEvent event) {
-            repaintRowHeader();
-        }
-    };
+     @Override
+     public void rowsetSaved(RowsetSaveEvent event) {
+     repaintRowHeader();
+     }
+     };
+     */
     // actions
     protected Action findSomethingAction;
 
-    public DbGrid() {
+    public ModelGrid() {
         super();
         setupStyle();
-        initializeDesign();
     }
 
     protected void setupStyle() {
@@ -535,62 +505,121 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
             style.setLeafIconName("status-offline.png");
         }
     }
+    
+    private static final String ON_RENDER_JSDOC = ""
+            + "/**\n"
+            + " * General render event handler.\n"
+            + " * This hanler be called on each cell's rendering in the case when no render handler is provided for the conrete column.\n"
+            + " */";
 
+    @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
+    @EventMethod(eventClass = CellRenderEvent.class)
+    public JSObject getOnRender(){
+        return generalOnRender;
+    }
+    
+    @ScriptFunction
+    public void setOnRender(JSObject aValue){
+        generalOnRender = aValue;
+    }
+    
+    @ScriptFunction
     public void setShowHorizontalLines(boolean aValue) {
         showHorizontalLines = aValue;
         applyShowHorizontalLines();
     }
 
+    @ScriptFunction
     public void setShowVerticalLines(boolean aValue) {
         showVerticalLines = aValue;
         applyShowVerticalLines();
     }
 
+    private static final String ODD_ROW_COLOR_JSDOC = ""
+            + "/**\n"
+            + "* Odd rows color.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ODD_ROW_COLOR_JSDOC)
     @Designable(category = "appearance")
     public Color getOddRowsColor() {
         return oddRowsColor;
     }
 
+    @ScriptFunction
     public void setOddRowsColor(Color aValue) {
         oddRowsColor = aValue;
         applyOddRowsColor();
     }
 
+    private static final String SHOW_HORIZONTAL_LINES_JSDOC = ""
+            + "/**\n"
+            + "* Determines if grid shows horizontal lines.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = SHOW_HORIZONTAL_LINES_JSDOC)
     @Designable(category = "appearance")
-    public boolean isShowHorizontalLines() {
+    public boolean getShowHorizontalLines() {
         return showHorizontalLines;
     }
 
+    private static final String SHOW_VERTICAL_LINES_JSDOC = ""
+            + "/**\n"
+            + "* Determines if grid shows vertical lines.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = SHOW_VERTICAL_LINES_JSDOC)
     @Designable(category = "appearance")
-    public boolean isShowVerticalLines() {
+    public boolean getShowVerticalLines() {
         return showVerticalLines;
     }
 
+    private static final String SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC = ""
+            + "/**\n"
+            + "* Determines if grid shows odd rows if other color.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC)
     @Designable(category = "appearance")
-    public boolean isShowOddRowsInOtherColor() {
+    public boolean getShowOddRowsInOtherColor() {
         return showOddRowsInOtherColor;
     }
 
+    @ScriptFunction
     public void setShowOddRowsInOtherColor(boolean aValue) {
         showOddRowsInOtherColor = aValue;
         applyShowOddRowsInOtherColor();
     }
 
+    private static final String GRID_COLOR_JSDOC = ""
+            + "/**\n"
+            + "* The color of the grid.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = GRID_COLOR_JSDOC)
     @Designable(category = "appearance")
     public Color getGridColor() {
         return gridColor;
     }
 
+    @ScriptFunction
     public void setGridColor(Color aValue) {
         gridColor = aValue;
         applyGridColor();
     }
 
+    private static final String ROWS_HEIGHT_JSDOC = ""
+            + "/**\n"
+            + "* The height of grid's rows.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ROWS_HEIGHT_JSDOC)
     @Designable(category = "appearance")
     public int getRowsHeight() {
         return rowsHeight;
     }
 
+    @ScriptFunction
     public void setRowsHeight(int aValue) {
         if (aValue < 10) {
             aValue = 10;
@@ -602,35 +631,63 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         applyRowHeight();
     }
 
+@ScriptFunction
+@Override
+    public boolean isEnabled() {
+        return super.isEnabled();
+    }
+
+    @ScriptFunction
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         applyEnabled();
     }
 
+    @ScriptFunction
     public void setEditable(boolean aValue) {
         editable = aValue;
         applyEditable();
     }
 
+    private static final String EDITABLE_JSDOC = ""
+            + "/**\n"
+            + "* Determines if gris cells are editable.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     @Designable(category = "editing")
     public boolean isEditable() {
         return editable;
     }
 
+    @ScriptFunction
     public void setInsertable(boolean aValue) {
         insertable = aValue;
     }
 
+    private static final String INSERTABLE_JSDOC = ""
+            + "/**\n"
+            + "* Determines if grid allows row insertion.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = INSERTABLE_JSDOC)
     @Designable(category = "editing")
     public boolean isInsertable() {
         return insertable;
     }
 
+    @ScriptFunction
     public void setDeletable(boolean aValue) {
         deletable = aValue;
     }
 
+    private static final String DELETABLE_JSDOC = ""
+            + "/**\n"
+            + "* Determines if grid allows to delete rows.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = DELETABLE_JSDOC)
     @Designable(category = "editing")
     public boolean isDeletable() {
         return deletable;
@@ -660,13 +717,13 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         return columnsSelectionModel;
     }
 
-    public List<Row> getSelected() throws Exception {
-        List<Row> selectedRows = new ArrayList<>();
+    public List<JSObject> getSelected() throws Exception {
+        List<JSObject> selectedRows = new ArrayList<>();
         if (deepModel != null) {// design time is only the case
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
-                    Row row = index2Row(rowSorter.convertRowIndexToModel(i));
-                    selectedRows.add(row);
+                    JSObject element = index2Row(rowSorter.convertRowIndexToModel(i));
+                    selectedRows.add(element);
                 }
             }
         }
@@ -806,49 +863,32 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     }
 
     @Undesignable
-    public List<DbGridColumn> getHeader() {
+    public List<GridColumnsGroup> getHeader() {
         return header;
     }
 
-    public void setHeader(List<DbGridColumn> aValue) {
+    public void setHeader(List<GridColumnsGroup> aValue) {
         header = aValue;
     }
+    /*
+     @Designable(displayName = "entity", category = "model")
+     public ModelEntityRef getRowsDatasource() {
+     return rowsDatasource;
+     }
 
-    @Designable(displayName = "entity", category = "model")
-    public ModelEntityRef getRowsDatasource() {
-        return rowsDatasource;
-    }
+     public void setRowsDatasource(ModelEntityRef aValue) {
+     rowsDatasource = aValue;
+     }
 
-    public void setRowsDatasource(ModelEntityRef aValue) {
-        rowsDatasource = aValue;
-    }
+     @Designable(category = "tree")
+     public ModelElementRef getUnaryLinkField() {
+     return unaryLinkField;
+     }
 
-    @Designable(category = "tree")
-    public ModelElementRef getUnaryLinkField() {
-        return unaryLinkField;
-    }
-
-    public void setUnaryLinkField(ModelElementRef aValue) {
-        unaryLinkField = aValue;
-    }
-
-    @Designable(category = "tree")
-    public ModelEntityParameterRef getParam2GetChildren() {
-        return param2GetChildren;
-    }
-
-    public void setParam2GetChildren(ModelEntityParameterRef aValue) {
-        param2GetChildren = aValue;
-    }
-
-    @Designable(category = "tree")
-    public ModelElementRef getParamSourceField() {
-        return paramSourceField;
-    }
-
-    public void setParamSourceField(ModelElementRef aValue) {
-        paramSourceField = aValue;
-    }
+     public void setUnaryLinkField(ModelElementRef aValue) {
+     unaryLinkField = aValue;
+     }
+     */
 
     @Designable(category = "appearance")
     public int getRowsHeaderType() {
@@ -858,7 +898,6 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     public void setRowsHeaderType(int aValue) {
         if (rowsHeaderType != aValue) {
             rowsHeaderType = aValue;
-            initializeDesign();
         }
     }
 
@@ -875,89 +914,86 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     }
 
     public void insertRow() {
-        try {
-            if (insertable && !(rowsModel.getRowsRowset() instanceof ParametersRowset)) {
-                rowsSelectionModel.removeListSelectionListener(generalSelectionChangesReflector);
-                try {
-                    if (rowsModel instanceof RowsetsTreedModel) {
-                        int parentColIndex = ((RowsetsTreedModel) rowsModel).getParentFieldIndex();
-                        Object parentColValue = null;
-                        if (!rowsModel.getRowsRowset().isEmpty()
-                                && !rowsModel.getRowsRowset().isBeforeFirst()
-                                && !rowsModel.getRowsRowset().isAfterLast()) {
-                            parentColValue = rowsModel.getRowsRowset().getObject(parentColIndex);
-                        }
-                        rowsModel.getRowsRowset().insert(parentColIndex, parentColValue);
-                    } else {
-                        rowsModel.getRowsRowset().insert();
-                    }
-                } finally {
-                    rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-                }
-                Row insertedRow = rowsModel.getRowsRowset().getCurrentRow();
-                if (insertedRow.isInserted()) {
-                    makeVisible(insertedRow);
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        /*
+         try {
+         if (insertable && !(rowsModel.getRowsRowset() instanceof ParametersRowset)) {
+         rowsSelectionModel.removeListSelectionListener(generalSelectionChangesReflector);
+         try {
+         if (rowsModel instanceof ArrayTreedModel) {
+         int parentColIndex = ((ArrayTreedModel) rowsModel).getParentFieldIndex();
+         Object parentColValue = null;
+         if (!rowsModel.getRowsRowset().isEmpty()
+         && !rowsModel.getRowsRowset().isBeforeFirst()
+         && !rowsModel.getRowsRowset().isAfterLast()) {
+         parentColValue = rowsModel.getRowsRowset().getObject(parentColIndex);
+         }
+         rowsModel.getRowsRowset().insert(parentColIndex, parentColValue);
+         } else {
+         rowsModel.getRowsRowset().insert();
+         }
+         } finally {
+         rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
+         }
+         Row insertedRow = rowsModel.getRowsRowset().getCurrentRow();
+         if (insertedRow.isInserted()) {
+         makeVisible(insertedRow);
+         }
+         }
+         } catch (Exception ex) {
+         Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         */
     }
 
     public void deleteRow() {
-        try {
-            if (deletable && !(rowsModel.getRowsRowset() instanceof ParametersRowset)) {
-                ListSelectionModel savedSelection = new DefaultListSelectionModel();
-                Set<Row> rows = new HashSet<>();
-                for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
-                    if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
-                        // We have to act upon model coordinates here!
-                        Row rsRow = index2Row(rowSorter.convertRowIndexToModel(viewRowIndex));
-                        if (rsRow != null) {
-                            rows.add(rsRow);
-                        }
-                        // We have to act upon view coordinates here!
-                        savedSelection.addSelectionInterval(viewRowIndex, viewRowIndex);
-                    }
-                }
-                try {
-                    rowsModel.getRowsRowset().delete(rows);
-                } finally {
-                    // We have to act upon view coordinates here!
-                    rowsSelectionModel.clearSelection();
-                    for (int viewRowIndex = savedSelection.getMinSelectionIndex(); viewRowIndex <= savedSelection.getMaxSelectionIndex(); viewRowIndex++) {
-                        if (viewRowIndex >= 0 && viewRowIndex < rowSorter.getViewRowCount()) {
-                            rowsSelectionModel.addSelectionInterval(viewRowIndex, viewRowIndex);
-                        } else if (viewRowIndex == rowSorter.getViewRowCount()) {
-                            rowsSelectionModel.addSelectionInterval(viewRowIndex - 1, viewRowIndex - 1);
-                        }
-                    }
-                }
-            }
-        } catch (RowsetException ex) {
-            Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        /*
+         try {
+         if (deletable && !(rowsModel.getRowsRowset() instanceof ParametersRowset)) {
+         ListSelectionModel savedSelection = new DefaultListSelectionModel();
+         Set<Row> rows = new HashSet<>();
+         for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
+         if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
+         // We have to act upon model coordinates here!
+         Row rsRow = index2Row(rowSorter.convertRowIndexToModel(viewRowIndex));
+         if (rsRow != null) {
+         rows.add(rsRow);
+         }
+         // We have to act upon view coordinates here!
+         savedSelection.addSelectionInterval(viewRowIndex, viewRowIndex);
+         }
+         }
+         try {
+         rowsModel.getRowsRowset().delete(rows);
+         } finally {
+         // We have to act upon view coordinates here!
+         rowsSelectionModel.clearSelection();
+         for (int viewRowIndex = savedSelection.getMinSelectionIndex(); viewRowIndex <= savedSelection.getMaxSelectionIndex(); viewRowIndex++) {
+         if (viewRowIndex >= 0 && viewRowIndex < rowSorter.getViewRowCount()) {
+         rowsSelectionModel.addSelectionInterval(viewRowIndex, viewRowIndex);
+         } else if (viewRowIndex == rowSorter.getViewRowCount()) {
+         rowsSelectionModel.addSelectionInterval(viewRowIndex - 1, viewRowIndex - 1);
+         }
+         }
+         }
+         }
+         } catch (RowsetException ex) {
+         Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         */
     }
 
     protected class GeneralSelectionChangesReflector implements ListSelectionListener {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            // If remove !e.getValueIsAdjusting() check,
-            // then there is a bug with rowset.insert() -> rowset.field1 = ... chain 
-            // because selection restoring repositions rowset before assignment can take place.
-            if (!e.getValueIsAdjusting() && !rowsModel.getRowsRowset().isInserting() && rowsSelectionModel.getLeadSelectionIndex() != -1) {
+            if (rowsSelectionModel.getLeadSelectionIndex() != -1) {
                 try {
                     if (!try2StopAnyEditing()) {
                         try2CancelAnyEditing();
                     }
-                    Row row = index2Row(rowSorter.convertRowIndexToModel(rowsSelectionModel.getLeadSelectionIndex()));
-                    if (row != null) {
-                        rowsModel.positionRowsetWithRow(row);
-                    }
                     repaint();
                 } catch (Exception ex) {
-                    Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -1018,10 +1054,6 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     // Some cleanup
     protected void cleanup() throws Exception {
         removeAll();
-        if (rowsEntity != null && rowsEntity.getRowset() != null) {
-            rowsEntity.getRowset().removeRowsetListener(scrollReflector);
-        }
-        rowsEntity = null;
         if (columnModel != null) {
             for (int i = columnModel.getColumnCount() - 1; i >= 0; i--) {
                 columnModel.removeColumn(columnModel.getColumn(i));
@@ -1039,217 +1071,174 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
     }
 
     public void configure() throws Exception {
-        if (model != null) {
-            cleanup();
-            if (rowsHeaderType != ROWS_HEADER_TYPE_NONE) {
-                int fixedWidth = 18;
-                if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX
-                        || rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
-                    fixedWidth += 20;
-                }
-                // This place is very special, because editing while configuring takes place.
-                if (header.isEmpty() || header.get(0) == null || !(header.get(0) instanceof FixedDbGridColumn)) {
-                    header.add(0, new FixedDbGridColumn(fixedWidth, rowsHeaderType));// Space enough for two icons
-                }
-            }
-            fixedColumns = convertFixedColumns2Leaves(header, fixedColumns);
+        cleanup();
+        // TODO: remove ROWS_HEADER_TYPE and substitute it with CheckBoxColumn, RadioButtonColumn, ServiceColumn components
+        fixedColumns = convertFixedColumns2Leaves(header, fixedColumns);
 
-            // Rows configuration
-            rowsSelectionModel = new DefaultListSelectionModel();
-            rowsEntity = DbControlsUtils.resolveEntity(model, rowsDatasource);
-            Rowset rowsRowset = DbControlsUtils.resolveRowset(model, rowsDatasource);
-            if (rowsRowset != null) {
-                if (isTreeConfigured()) {
-                    final Parameter param = DbControlsUtils.resolveParameter(model, param2GetChildren);
-                    final int paramSourceFieldIndex = DbControlsUtils.resolveFieldIndex(model, paramSourceField);
-
-                    int parentColIndex = rowsRowset.getFields().find(unaryLinkField.getFieldName());
-                    rowsModel = new RowsetsTreedModel(rowsEntity, rowsRowset, parentColIndex, generalOnRender) {
-                        @Override
-                        public boolean isLeaf(Row anElement) {
-                            if (param != null && paramSourceFieldIndex != 0)// lazy tree
-                            {
-                                return false;
-                            } else {
-                                return super.isLeaf(anElement);
-                            }
-                        }
-                    };
-                    if (param != null && paramSourceFieldIndex != 0) {// lazy tree
-                        GridChildrenFetcher fetcher = new GridChildrenFetcher(this, rowsEntity, param, paramSourceFieldIndex);
-                        deepModel = new TableFront2TreedModel<>((RowsetsTreedModel) rowsModel, fetcher);
-                    } else {
-                        deepModel = new TableFront2TreedModel<>((RowsetsTreedModel) rowsModel);
-                    }
-                    rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
-                } else {
-                    rowsModel = new RowsetsTableModel(rowsEntity, rowsRowset, generalOnRender);
-                    deepModel = (TableModel) rowsModel;
-                    rowSorter = new TabularRowsSorter<>((RowsetsTableModel) deepModel, rowsSelectionModel);
-                }
-                TableModel generalModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
-
-                generalSelectionChangesReflector = new GeneralSelectionChangesReflector();
-                rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-                // Columns configuration
-                columnsSelectionModel = new DefaultListSelectionModel();
-                columnModel = new DefaultTableColumnModel();
-                Map<TableColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header, false);
-                columnModel.setSelectionModel(columnsSelectionModel);
-                columnModel.setColumnSelectionAllowed(true);
-                rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-                configureTreedView();
-
-                // constraints setup
-                LinearConstraint leftColsConstraint = new LinearConstraint(0, fixedColumns - 1);
-                LinearConstraint rightColsConstraint = new LinearConstraint(fixedColumns, Integer.MAX_VALUE);
-                LinearConstraint topRowsConstraint = new LinearConstraint(0, fixedRows - 1);
-                LinearConstraint bottomRowsConstraint = new LinearConstraint(fixedRows, Integer.MAX_VALUE);
-
-                // constrained layer models setup
-                tlTable = new GridTable(null, rowsRowset, this);
-                trTable = new GridTable(null, rowsRowset, this);
-                blTable = new GridTable(tlTable, rowsRowset, this);
-                brTable = new GridTable(trTable, rowsRowset, this);
-                tlTable.setModel(generalModel);
-                trTable.setModel(generalModel);
-                blTable.setModel(generalModel);
-                brTable.setModel(generalModel);
-
-                columnModel.setColumnSelectionAllowed(rowsHeaderType != DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX
-                        && rowsHeaderType != DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON);
-
-                tlTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
-                tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-                tlTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
-                tlTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
-
-                trTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
-                trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-                trTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
-                trTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
-
-                blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
-                blTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-                blTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
-                blTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
-
-                brTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
-                brTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-                brTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
-                brTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
-
-                tlTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                blTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                brTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-                tlTable.setAutoCreateColumnsFromModel(false);
-                trTable.setAutoCreateColumnsFromModel(false);
-                blTable.setAutoCreateColumnsFromModel(false);
-                brTable.setAutoCreateColumnsFromModel(false);
-
-                // keyboard focus flow setup
-                tlTable.addKeyListener(tablesFocusManager);
-                trTable.addKeyListener(tablesFocusManager);
-                blTable.addKeyListener(tablesFocusManager);
-                brTable.addKeyListener(tablesFocusManager);
-                // mouse propagating setup
-                tlTable.addMouseListener(tablesMousePropagator);
-                trTable.addMouseListener(tablesMousePropagator);
-                blTable.addMouseListener(tablesMousePropagator);
-                brTable.addMouseListener(tablesMousePropagator);
-                tlTable.addMouseWheelListener(tablesMousePropagator);
-                trTable.addMouseWheelListener(tablesMousePropagator);
-                blTable.addMouseWheelListener(tablesMousePropagator);
-                brTable.addMouseWheelListener(tablesMousePropagator);
-                tlTable.addMouseMotionListener(tablesMousePropagator);
-                trTable.addMouseMotionListener(tablesMousePropagator);
-                blTable.addMouseMotionListener(tablesMousePropagator);
-                brTable.addMouseMotionListener(tablesMousePropagator);
-                // grid components setup.
-                // left header setup
-                lheader = new MultiLevelHeader();
-                lheader.setTable(tlTable);
-                tlTable.getTableHeader().setResizingAllowed(true);
-                lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
-                lheader.setColumnModel(tlTable.getColumnModel());
-                lheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, 0, fixedColumns - 1));
-                lheader.setRowSorter(rowSorter);
-                // right header setup
-                rheader = new MultiLevelHeader();
-                rheader.setTable(trTable);
-                trTable.getTableHeader().setResizingAllowed(true);
-                rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
-                rheader.setColumnModel(trTable.getColumnModel());
-                rheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, fixedColumns, columnModel.getColumnCount() - 1));
-                rheader.setRowSorter(rowSorter);
-                scriptableColumns.stream().forEach((sCol) -> {
-                    if (rheader.getColumnsParents().containsKey(sCol.getViewColumn())) {
-                        sCol.setHeader(rheader);
-                    } else if (lheader.getColumnsParents().containsKey(sCol.getViewColumn())) {
-                        sCol.setHeader(lheader);
-                    }
-                });
-                // Tables are enclosed in panels to avoid table's stupid efforts
-                // to configure it's parent scroll pane.
-                JPanel tlPanel = new JPanel(new BorderLayout());
-                tlPanel.add(lheader, BorderLayout.NORTH);
-                tlPanel.add(tlTable, BorderLayout.CENTER);
-                JPanel trPanel = new JPanel(new BorderLayout());
-                trPanel.add(rheader, BorderLayout.NORTH);
-                trPanel.add(trTable, BorderLayout.CENTER);
-                JPanel blPanel = new JPanel(new BorderLayout());
-                blPanel.add(blTable, BorderLayout.CENTER);
-                JPanel brPanel = new GridTableScrollablePanel(brTable);
-                //brPanel.add(brTable, BorderLayout.CENTER);
-
-                boolean needOutlineCols = fixedColumns > 0;
-                tlPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
-                trPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, 0, FIXED_COLOR));
-                blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
-
-                progressIndicator = new JLabel(processIcon);
-                progressIndicator.setVisible(false);
-                gridScroll = new JScrollPane();
-                gridScroll.setCorner(JScrollPane.UPPER_LEFT_CORNER, tlPanel);
-                gridScroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, progressIndicator);
-                gridScroll.setColumnHeaderView(trPanel);
-                gridScroll.getColumnHeader().addChangeListener(new ColumnHeaderScroller(gridScroll.getColumnHeader(), gridScroll.getViewport()));
-                gridScroll.setRowHeaderView(blPanel);
-                if (rowsHeaderType != DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE) {
-                    gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
-                }
-                gridScroll.setViewportView(brPanel);
-
-                setLayout(new BorderLayout());
-                add(gridScroll, BorderLayout.CENTER);
-                //
-                lheader.setNeightbour(rheader);
-                rheader.setNeightbour(lheader);
-                lheader.setRegenerateable(true);
-                rheader.setRegenerateable(true);
-                lheader.regenerate();
-                rheader.regenerate();
-                rowsRowset.addRowsetListener(scrollReflector);
-                configureActions();
-            }
-            applyEnabled();
-            applyFont();
-            applyEditable();
-            applyBackground();
-            applyForeground();
-            applyComponentPopupMenu();
-            applyGridColor();
-            applyRowHeight();
-            applyShowHorizontalLines();
-            applyShowVerticalLines();
-            applyToolTipText();
-            applyShowOddRowsInOtherColor();
-            applyOddRowsColor();
-            applyComponentOrientation(getComponentOrientation());// Swing allows only argumented call. 
-            repaint();
+        // Columns configuration
+        columnsSelectionModel = new DefaultListSelectionModel();
+        columnModel = new DefaultTableColumnModel();
+        Map<ModelColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header);
+        columnModel.setSelectionModel(columnsSelectionModel);
+        columnModel.setColumnSelectionAllowed(true);
+        rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        // Rows configuration
+        rowsSelectionModel = new DefaultListSelectionModel();
+        if (isTreeConfigured()) {
+            rowsModel = new ArrayTreedModel(columnModel, null, parentField, childrenField, generalOnRender);
+            deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
+            rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
+        } else {
+            rowsModel = new ArrayTableModel(columnModel, null, generalOnRender);
+            deepModel = (TableModel) rowsModel;
+            rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
         }
+        TableModel generalModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
+
+        generalSelectionChangesReflector = new GeneralSelectionChangesReflector();
+        rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
+        configureTreedView();
+
+        // constraints setup
+        LinearConstraint leftColsConstraint = new LinearConstraint(0, fixedColumns - 1);
+        LinearConstraint rightColsConstraint = new LinearConstraint(fixedColumns, Integer.MAX_VALUE);
+        LinearConstraint topRowsConstraint = new LinearConstraint(0, fixedRows - 1);
+        LinearConstraint bottomRowsConstraint = new LinearConstraint(fixedRows, Integer.MAX_VALUE);
+
+        // constrained layer models setup
+        tlTable = new GridTable(null, this);
+        trTable = new GridTable(null, this);
+        blTable = new GridTable(tlTable, this);
+        brTable = new GridTable(trTable, this);
+        tlTable.setModel(generalModel);
+        trTable.setModel(generalModel);
+        blTable.setModel(generalModel);
+        brTable.setModel(generalModel);
+
+        columnModel.setColumnSelectionAllowed(rowsHeaderType != ROWS_HEADER_TYPE_CHECKBOX
+                && rowsHeaderType != ROWS_HEADER_TYPE_RADIOBUTTON);
+
+        tlTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
+        tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
+        tlTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
+        tlTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
+
+        trTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
+        trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
+        trTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
+        trTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
+
+        blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
+        blTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
+        blTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
+        blTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
+
+        brTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
+        brTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
+        brTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
+        brTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
+
+        tlTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        blTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        brTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        tlTable.setAutoCreateColumnsFromModel(false);
+        trTable.setAutoCreateColumnsFromModel(false);
+        blTable.setAutoCreateColumnsFromModel(false);
+        brTable.setAutoCreateColumnsFromModel(false);
+
+        // keyboard focus flow setup
+        tlTable.addKeyListener(tablesFocusManager);
+        trTable.addKeyListener(tablesFocusManager);
+        blTable.addKeyListener(tablesFocusManager);
+        brTable.addKeyListener(tablesFocusManager);
+        // mouse propagating setup
+        tlTable.addMouseListener(tablesMousePropagator);
+        trTable.addMouseListener(tablesMousePropagator);
+        blTable.addMouseListener(tablesMousePropagator);
+        brTable.addMouseListener(tablesMousePropagator);
+        tlTable.addMouseWheelListener(tablesMousePropagator);
+        trTable.addMouseWheelListener(tablesMousePropagator);
+        blTable.addMouseWheelListener(tablesMousePropagator);
+        brTable.addMouseWheelListener(tablesMousePropagator);
+        tlTable.addMouseMotionListener(tablesMousePropagator);
+        trTable.addMouseMotionListener(tablesMousePropagator);
+        blTable.addMouseMotionListener(tablesMousePropagator);
+        brTable.addMouseMotionListener(tablesMousePropagator);
+        // grid components setup.
+        // left header setup
+        lheader = new MultiLevelHeader();
+        lheader.setTable(tlTable);
+        tlTable.getTableHeader().setResizingAllowed(true);
+        lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
+        lheader.setColumnModel(tlTable.getColumnModel());
+        lheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, 0, fixedColumns - 1));
+        lheader.setRowSorter(rowSorter);
+        // right header setup
+        rheader = new MultiLevelHeader();
+        rheader.setTable(trTable);
+        trTable.getTableHeader().setResizingAllowed(true);
+        rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
+        rheader.setColumnModel(trTable.getColumnModel());
+        rheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, fixedColumns, columnModel.getColumnCount() - 1));
+        rheader.setRowSorter(rowSorter);
+        // Tables are enclosed in panels to avoid table's stupid efforts
+        // to configure it's parent scroll pane.
+        JPanel tlPanel = new JPanel(new BorderLayout());
+        tlPanel.add(lheader, BorderLayout.NORTH);
+        tlPanel.add(tlTable, BorderLayout.CENTER);
+        JPanel trPanel = new JPanel(new BorderLayout());
+        trPanel.add(rheader, BorderLayout.NORTH);
+        trPanel.add(trTable, BorderLayout.CENTER);
+        JPanel blPanel = new JPanel(new BorderLayout());
+        blPanel.add(blTable, BorderLayout.CENTER);
+        JPanel brPanel = new GridTableScrollablePanel(brTable);
+        //brPanel.add(brTable, BorderLayout.CENTER);
+
+        boolean needOutlineCols = fixedColumns > 0;
+        tlPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
+        trPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, 0, FIXED_COLOR));
+        blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
+
+        progressIndicator = new JLabel(processIcon);
+        progressIndicator.setVisible(false);
+        gridScroll = new JScrollPane();
+        gridScroll.setCorner(JScrollPane.UPPER_LEFT_CORNER, tlPanel);
+        gridScroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, progressIndicator);
+        gridScroll.setColumnHeaderView(trPanel);
+        gridScroll.getColumnHeader().addChangeListener(new ColumnHeaderScroller(gridScroll.getColumnHeader(), gridScroll.getViewport()));
+        gridScroll.setRowHeaderView(blPanel);
+        if (rowsHeaderType != ROWS_HEADER_TYPE_NONE) {
+            gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
+        }
+        gridScroll.setViewportView(brPanel);
+
+        setLayout(new BorderLayout());
+        add(gridScroll, BorderLayout.CENTER);
+        //
+        lheader.setNeightbour(rheader);
+        rheader.setNeightbour(lheader);
+        lheader.setRegenerateable(true);
+        rheader.setRegenerateable(true);
+        lheader.regenerate();
+        rheader.regenerate();
+        configureActions();
+        applyEnabled();
+        applyFont();
+        applyEditable();
+        applyBackground();
+        applyForeground();
+        applyComponentPopupMenu();
+        applyGridColor();
+        applyRowHeight();
+        applyShowHorizontalLines();
+        applyShowVerticalLines();
+        applyToolTipText();
+        applyShowOddRowsInOtherColor();
+        applyOddRowsColor();
+        applyComponentOrientation(getComponentOrientation());// Swing allows only argumented call. 
+        repaint();
     }
 
     @Override
@@ -1325,13 +1314,13 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
                 && blTable.getCellEditor() == null && brTable.getCellEditor() == null;
     }
 
-    protected Map<TableColumn, GridColumnsGroup> filterLeaves(Map<TableColumn, GridColumnsGroup> cols2groups, TableColumnModel aTableColumnModel, int begIdx, int endIdx) {
-        Set<TableColumn> allowedColumns = new HashSet<>();
+    protected Map<ModelColumn, GridColumnsGroup> filterLeaves(Map<ModelColumn, GridColumnsGroup> cols2groups, TableColumnModel aTableColumnModel, int begIdx, int endIdx) {
+        Set<ModelColumn> allowedColumns = new HashSet<>();
         for (int i = begIdx; i <= endIdx; i++) {
-            allowedColumns.add(aTableColumnModel.getColumn(i));
+            allowedColumns.add((ModelColumn) aTableColumnModel.getColumn(i));
         }
-        Map<TableColumn, GridColumnsGroup> table2Group = new HashMap<>();
-        for (Entry<TableColumn, GridColumnsGroup> entry : cols2groups.entrySet()) {
+        Map<ModelColumn, GridColumnsGroup> table2Group = new HashMap<>();
+        for (Entry<ModelColumn, GridColumnsGroup> entry : cols2groups.entrySet()) {
             if (allowedColumns.contains(entry.getKey())) {
                 table2Group.put(entry.getKey(), entry.getValue());
             }
@@ -1347,7 +1336,7 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         return deepModel;
     }
 
-    public RowsetsModel getRowsetsModel() {
+    public ArrayModel getRowsetsModel() {
         return rowsModel;
     }
 
@@ -1355,13 +1344,13 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         return rowSorter;
     }
 
-    public static DbGrid getFirstDbGrid(Component aComp) {
+    public static ModelGrid getFirstDbGrid(Component aComp) {
         Component lParent = aComp;
-        while (lParent != null && !(lParent instanceof DbGrid)) {
+        while (lParent != null && !(lParent instanceof ModelGrid)) {
             lParent = lParent.getParent();
         }
-        if (lParent != null && lParent instanceof DbGrid) {
-            return (DbGrid) lParent;
+        if (lParent != null && lParent instanceof ModelGrid) {
+            return (ModelGrid) lParent;
         }
         return null;
     }
@@ -1392,11 +1381,14 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         return processedRows.contains(anElement);
     }
 
-    public void select(JSObject anElement) throws Exception {
-        selectRow(anElement);
-    }
+    private static final String SELECT_JSDOC = ""
+            + "/**\n"
+            + " * Selects the specified element.\n"
+            + " * @param instance Entity's instance to be selected.\n"
+            + " */";
 
-    public void selectRow(JSObject anElement) throws Exception {
+    @ScriptFunction(jsDoc = SELECT_JSDOC, params = {"instance"})
+    public void select(JSObject anElement) throws Exception {
         if (anElement != null) {
             int idx = row2Index(anElement);
             if (idx != -1) {
@@ -1405,99 +1397,103 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         }
     }
 
-    public JSObject selectRow(Object aId) throws Exception {
-        if (rowsModel.getPkLocator().find(aId)) {
-            Row lRow = rowsModel.getPkLocator().getRow(0);
-            if (lRow != null) {
-                selectRow(lRow);
-            }
-            return lRow;
-        } else {
-            return null;
-        }
-    }
+    private static final String UNSELECT_JSDOC = ""
+            + "/**\n"
+            + " * Unselects the specified element.\n"
+            + " * @param instance Entity's instance to be unselected\n"
+            + " */";
 
-    public void unselect(JSObject aRow) throws Exception {
-        unselectRow(aRow);
-    }
-
-    public void unselectRow(JSObject aRow) throws Exception {
-        if (aRow != null) {
-            int idx = row2Index(aRow);
+    @ScriptFunction(jsDoc = UNSELECT_JSDOC, params = {"instance"})
+    public void unselect(JSObject anElement) throws Exception {
+        if (anElement != null) {
+            int idx = row2Index(anElement);
             if (idx != -1) {
                 rowsSelectionModel.removeSelectionInterval(idx, idx);
             }
         }
     }
 
-    public JSObject unselectRow(Object aId) throws Exception {
-        if (rowsModel.getPkLocator().find(aId)) {
-            Row lRow = rowsModel.getPkLocator().getRow(0);
-            unselectRow(lRow);
-            return lRow;
-        }
-        return null;
-    }
+    private static final String CLEAR_SELECTION_JSDOC = ""
+            + "/**\n"
+            + " * Clears current selection.\n"
+            + " */";
 
+    @ScriptFunction(jsDoc = CLEAR_SELECTION_JSDOC)
     public void clearSelection() {
         columnsSelectionModel.clearSelection();
         rowsSelectionModel.clearSelection();
     }
 
-    public void findSomething() {
+    private static final String FIND_SOMETHING_JSDOC = ""
+            + "/**\n"
+            + "* Shows find dialog.\n"
+            + "* @deprecated Use find() instead. \n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = FIND_SOMETHING_JSDOC)
+    public void find() {
         findSomethingAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "startFinding", 0));
     }
-
-    public boolean ensureFetched(ApplicationEntity<?, ?, ?> aEntity, Field aParentField, Object aTargetId) throws Exception {
-        if (deepModel instanceof TableFront2TreedModel) {
-            TableFront2TreedModel<Row> front = (TableFront2TreedModel<Row>) deepModel;
-            if (front.unwrap() instanceof RowsetsTreedModel) {
-                RowsetsTreedModel rModel = (RowsetsTreedModel) front.unwrap();
-                Rowset r = aEntity.getRowset();
-                if (!rowsModel.getPkLocator().getFields().isEmpty()) {
-                    int pkColIndex = rowsModel.getPkLocator().getFields().get(0);
-                    int parentColIndex = r.getFields().find(aParentField.getName());
-                    List<Row> toFetch = new ArrayList<>();
-                    toFetch.addAll(r.getCurrent());
-                    int fetched = toFetch.size();
-                    while (!toFetch.isEmpty() && fetched != 0) {
-                        fetched = 0;
-                        for (int i = toFetch.size() - 1; i >= 0; i--) {
-                            Row rowToFetch = toFetch.get(i);
-                            if (!rModel.getPkLocator().find(new Object[]{rowToFetch.getColumnObject(pkColIndex)})) {
-                                if (rModel.getPkLocator().find(new Object[]{rowToFetch.getColumnObject(parentColIndex)})) {
-                                    Row innerParentRow = rModel.getPkLocator().getRow(0);
-                                    front.expand(innerParentRow, false);
-                                    toFetch.remove(rowToFetch);
-                                    ++fetched;
-                                }
-                            } else {
-                                toFetch.remove(rowToFetch);
-                                ++fetched;
-                            }
-                        }
-                    }
-                    return rModel.getPkLocator().find(new Object[]{aTargetId});
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
+    /*
+     public boolean ensureFetched(ApplicationEntity<?, ?, ?> aEntity, Field aParentField, Object aTargetId) throws Exception {
+     if (deepModel instanceof TableFront2TreedModel) {
+     TableFront2TreedModel<Row> front = (TableFront2TreedModel<Row>) deepModel;
+     if (front.unwrap() instanceof ArrayTreedModel) {
+     ArrayTreedModel rModel = (ArrayTreedModel) front.unwrap();
+     Rowset r = aEntity.getRowset();
+     if (!rowsModel.getPkLocator().getFields().isEmpty()) {
+     int pkColIndex = rowsModel.getPkLocator().getFields().get(0);
+     int parentColIndex = r.getFields().find(aParentField.getName());
+     List<Row> toFetch = new ArrayList<>();
+     toFetch.addAll(r.getCurrent());
+     int fetched = toFetch.size();
+     while (!toFetch.isEmpty() && fetched != 0) {
+     fetched = 0;
+     for (int i = toFetch.size() - 1; i >= 0; i--) {
+     Row rowToFetch = toFetch.get(i);
+     if (!rModel.getPkLocator().find(new Object[]{rowToFetch.getColumnObject(pkColIndex)})) {
+     if (rModel.getPkLocator().find(new Object[]{rowToFetch.getColumnObject(parentColIndex)})) {
+     Row innerParentRow = rModel.getPkLocator().getRow(0);
+     front.expand(innerParentRow, false);
+     toFetch.remove(rowToFetch);
+     ++fetched;
+     }
+     } else {
+     toFetch.remove(rowToFetch);
+     ++fetched;
+     }
+     }
+     }
+     return rModel.getPkLocator().find(new Object[]{aTargetId});
+     } else {
+     return false;
+     }
+     } else {
+     return false;
+     }
+     } else {
+     return false;
+     }
+     }
+     */
 
     public boolean makeVisible(JSObject anElement) throws Exception {
         return makeVisible(anElement, true);
     }
 
+    private static final String MAKE_VISIBLE_JSDOC = ""
+            + "/**\n"
+            + "* Makes specified instance visible.\n"
+            + "* @param instance Entity's instance to make visible.\n"
+            + "* @param need2select true to select the instance (optional).\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC, params = {"instance", "need2select"})
     @Override
     public boolean makeVisible(JSObject anElement, boolean need2Select) throws Exception {
         if (anElement != null) {
             // Let's process possible tree paths
-            if (rowsModel instanceof RowsetsTreedModel) {
+            if (rowsModel instanceof ArrayTreedModel) {
                 assert deepModel instanceof TableFront2TreedModel<?>;
                 TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
                 List<JSObject> path = front.buildPathTo(anElement);
@@ -1532,34 +1528,29 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         }
         return false;
     }
+    /*
+     public boolean makeVisible(Object aId) throws Exception {
+     return makeVisible(aId, true);
+     }
 
-    public boolean makeVisible(Object aId) throws Exception {
-        return makeVisible(aId, true);
-    }
-
-    public boolean makeVisible(Object aId, boolean need2Select) throws Exception {
-        aId = ScriptUtils.toJava(aId);
-        aId = rowsModel.getRowsRowset().getConverter().convert2RowsetCompatible(aId, rowsModel.getRowsRowset().getFields().get(rowsModel.getPkLocator().getFields().get(0)).getTypeInfo());
-        if (rowsModel.getPkLocator().find(aId)) {
-            return makeVisible(rowsModel.getPkLocator().getRow(0), need2Select);
-        }
-        return false;
-    }
+     public boolean makeVisible(Object aId, boolean need2Select) throws Exception {
+     aId = ScriptUtils.toJava(aId);
+     aId = rowsModel.getRowsRowset().getConverter().convert2RowsetCompatible(aId, rowsModel.getRowsRowset().getFields().get(rowsModel.getPkLocator().getFields().get(0)).getTypeInfo());
+     if (rowsModel.getPkLocator().find(aId)) {
+     return makeVisible(rowsModel.getPkLocator().getRow(0), need2Select);
+     }
+     return false;
+     }
+     */
 
     public boolean isCurrentRow(JSObject anElement) {
-        return getCurrentRow() == anElement;
+        JSObject jsCursor = getCurrentRow();
+        return jdk.nashorn.api.scripting.ScriptUtils.unwrap(jsCursor) == jdk.nashorn.api.scripting.ScriptUtils.unwrap(anElement);
     }
 
-    public JSObject getCurrentRow() {
-        try {
-            if (rowsEntity != null && rowsEntity.getRowset() != null) {
-                Rowset rowset = rowsEntity.getRowset();
-                return rowset.getCurrentRow();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    protected JSObject getCurrentRow() {
+        Object oCursor = rowsModel.getElements().getMember("cursor");
+        return oCursor instanceof JSObject ? (JSObject) oCursor : null;
     }
 
     public JTable getFocusedTable() {
@@ -1578,116 +1569,117 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         }
         return focusedTable;
     }
+    /*
+     private String transformCellValue(Object aValue, int aCol, boolean isData) {
+     if (aValue != null) {
+     Object value = null;
+     if (isData) {
+     if (aValue instanceof CellData) {
+     CellData cd = (CellData) aValue;
+     value = cd.getData();
+     } else {
+     value = aValue;
+     }
+     } else {
+     TableColumn tc = getColumnModel().getColumn(aCol);
+     TableCellRenderer renderer = tc.getCellRenderer();
+     if (renderer instanceof DbCombo) {
+     try {
+     value = ((DbCombo) renderer).achiveDisplayValue(aValue instanceof CellData ? ((CellData) aValue).getData() : aValue);
+     } catch (Exception ex) {
+     Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, "Could not get cell value", ex);
+     }
+     } else {
+     if (aValue instanceof CellData) {
+     CellData cd = (CellData) aValue;
+     value = cd.getDisplay() != null ? cd.getDisplay() : cd.getData();
+     } else {
+     value = aValue;
+     }
+     }
+     }
+     if (value != null) {
+     return value.toString();
+     }
+     }
+     return "";
+     }
 
-    private String transformCellValue(Object aValue, int aCol, boolean isData) {
-        if (aValue != null) {
-            Object value = null;
-            if (isData) {
-                if (aValue instanceof CellData) {
-                    CellData cd = (CellData) aValue;
-                    value = cd.getData();
-                } else {
-                    value = aValue;
-                }
-            } else {
-                TableColumn tc = getColumnModel().getColumn(aCol);
-                TableCellRenderer renderer = tc.getCellRenderer();
-                if (renderer instanceof DbCombo) {
-                    try {
-                        value = ((DbCombo) renderer).achiveDisplayValue(aValue instanceof CellData ? ((CellData) aValue).getData() : aValue);
-                    } catch (Exception ex) {
-                        Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Could not get cell value", ex);
-                    }
-                } else {
-                    if (aValue instanceof CellData) {
-                        CellData cd = (CellData) aValue;
-                        value = cd.getDisplay() != null ? cd.getDisplay() : cd.getData();
-                    } else {
-                        value = aValue;
-                    }
-                }
-            }
-            if (value != null) {
-                return value.toString();
-            }
-        }
-        return "";
-    }
+     private String[] transformRow(int aRow, boolean selectedOnly, boolean isData) {
+     TableModel view = getDeepModel();
+     int minCol = 0;
+     int maxCol = view.getColumnCount();
+     String[] res = new String[maxCol];
+     int curentColumn = 0;
+     for (int col = minCol; col < getColumnModel().getColumnCount(); col++) {
+     TableColumn tc = getColumnModel().getColumn(col);
+     if (tc.getWidth() > 0 && !(tc instanceof RowHeaderTableColumn)) {
+     if (selectedOnly) {
+     if (getColumnsSelectionModel().isSelectedIndex(col)) {
+     res[curentColumn] = transformCellValue(view.getValueAt(aRow, tc.getModelIndex()), col, isData);
+     curentColumn++;
+     }
+     } else {
+     res[curentColumn] = transformCellValue(view.getValueAt(aRow, tc.getModelIndex()), col, isData);
+     curentColumn++;
+     }
+     }
+     }
+     return res;
+     }
 
-    private String[] transformRow(int aRow, boolean selectedOnly, boolean isData) {
-        TableModel view = getDeepModel();
-        int minCol = 0;
-        int maxCol = view.getColumnCount();
-        String[] res = new String[maxCol];
-        int curentColumn = 0;
-        for (int col = minCol; col < getColumnModel().getColumnCount(); col++) {
-            TableColumn tc = getColumnModel().getColumn(col);
-            if (tc.getWidth() > 0 && !(tc instanceof RowHeaderTableColumn)) {
-                if (selectedOnly) {
-                    if (getColumnsSelectionModel().isSelectedIndex(col)) {
-                        res[curentColumn] = transformCellValue(view.getValueAt(aRow, tc.getModelIndex()), col, isData);
-                        curentColumn++;
-                    }
-                } else {
-                    res[curentColumn] = transformCellValue(view.getValueAt(aRow, tc.getModelIndex()), col, isData);
-                    curentColumn++;
-                }
-            }
-        }
-        return res;
-    }
+     private Object[] convertView(String[][] aCells) {
+     Object[] cells = new Object[aCells.length];
+     for (int i = 0; i < aCells.length; i++) {
+     String[] row = aCells[i];
+     Object[] o = new Object[row.length];
+     System.arraycopy(row, 0, o, 0, row.length);
+     cells[i] = o;
+     }
+     return cells;
+     }
 
-    private Object[] convertView(String[][] aCells) {
-        Object[] cells = new Object[aCells.length];
-        for (int i = 0; i < aCells.length; i++) {
-            String[] row = aCells[i];
-            Object[] o = new Object[row.length];
-            System.arraycopy(row, 0, o, 0, row.length);
-            cells[i] = o;
-        }
-        return cells;
-    }
+     public Object[] getCells() {
+     Object[] cells = convertView(getGridView(false, false));
+     return cells;
+     }
 
-    public Object[] getCells() {
-        Object[] cells = convertView(getGridView(false, false));
-        return cells;
-    }
+     public Object[] getSelectedCells() {
+     Object[] selectedCells = convertView(getGridView(true, false));
+     return selectedCells;
+     }
 
-    public Object[] getSelectedCells() {
-        Object[] selectedCells = convertView(getGridView(true, false));
-        return selectedCells;
-    }
-
-    private String[][] getGridView(boolean selectedOnly, boolean isData) {
-        TableModel cellsModel = getDeepModel();
-        if (cellsModel != null) {
-            int minRow = 0;
-            int maxRow = cellsModel.getRowCount();
-            int columnCount = cellsModel.getColumnCount();
-            String[][] res = new String[maxRow][columnCount];
-            ListSelectionModel rowSelecter = getRowsSelectionModel();
-            for (int viewRow = minRow; viewRow < maxRow; viewRow++) {
-                if (selectedOnly) {
-                    if (rowSelecter.isSelectedIndex(viewRow)) {
-                        res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
-                    }
-                } else {
-                    res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
-                }
-            }
-            return res;
-        } else {
-            return new String[0][0];
-        }
-    }
+     private String[][] getGridView(boolean selectedOnly, boolean isData) {
+     TableModel cellsModel = getDeepModel();
+     if (cellsModel != null) {
+     int minRow = 0;
+     int maxRow = cellsModel.getRowCount();
+     int columnCount = cellsModel.getColumnCount();
+     String[][] res = new String[maxRow][columnCount];
+     ListSelectionModel rowSelecter = getRowsSelectionModel();
+     for (int viewRow = minRow; viewRow < maxRow; viewRow++) {
+     if (selectedOnly) {
+     if (rowSelecter.isSelectedIndex(viewRow)) {
+     res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
+     }
+     } else {
+     res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
+     }
+     }
+     return res;
+     } else {
+     return new String[0][0];
+     }
+     }
+     */
 
     protected class TablesMousePropagator implements MouseListener, MouseMotionListener, MouseWheelListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseListener l : DbGrid.this.getMouseListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseListener l : ModelGrid.this.getMouseListeners()) {
                     l.mouseClicked(e);
                 }
             }
@@ -1696,8 +1688,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mousePressed(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseListener l : DbGrid.this.getMouseListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseListener l : ModelGrid.this.getMouseListeners()) {
                     l.mousePressed(e);
                 }
             }
@@ -1706,8 +1698,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mouseReleased(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseListener l : DbGrid.this.getMouseListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseListener l : ModelGrid.this.getMouseListeners()) {
                     l.mouseReleased(e);
                 }
             }
@@ -1716,8 +1708,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mouseEntered(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseListener l : DbGrid.this.getMouseListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseListener l : ModelGrid.this.getMouseListeners()) {
                     l.mouseEntered(e);
                 }
             }
@@ -1726,8 +1718,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mouseExited(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseListener l : DbGrid.this.getMouseListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseListener l : ModelGrid.this.getMouseListeners()) {
                     l.mouseExited(e);
                 }
             }
@@ -1736,8 +1728,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mouseDragged(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseMotionListener l : DbGrid.this.getMouseMotionListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseMotionListener l : ModelGrid.this.getMouseMotionListeners()) {
                     l.mouseDragged(e);
                 }
             }
@@ -1746,8 +1738,8 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mouseMoved(MouseEvent e) {
             if (e.getSource() instanceof Component) {
-                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, DbGrid.this);
-                for (MouseMotionListener l : DbGrid.this.getMouseMotionListeners()) {
+                e = SwingUtilities.convertMouseEvent((Component) e.getSource(), e, ModelGrid.this);
+                for (MouseMotionListener l : ModelGrid.this.getMouseMotionListeners()) {
                     l.mouseMoved(e);
                 }
             }
@@ -1765,9 +1757,9 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             if (e.getSource() instanceof Component) {
-                MouseWheelEvent sended = sendWheelTo(e, DbGrid.this);
+                MouseWheelEvent sended = sendWheelTo(e, ModelGrid.this);
                 if (!sended.isConsumed()) {
-                    sendWheelTo(e, DbGrid.this.gridScroll);
+                    sendWheelTo(e, ModelGrid.this.gridScroll);
                 }
             }
         }
@@ -1927,198 +1919,199 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         public void keyReleased(KeyEvent e) {
         }
     }
+    /*
+     protected class DbGridDeleteSelectedAction extends AbstractAction {
 
-    protected class DbGridDeleteSelectedAction extends AbstractAction {
+     DbGridDeleteSelectedAction() {
+     super();
+     putValue(Action.NAME, Form.getLocalizedString(DbGridDeleteSelectedAction.class.getSimpleName()));
+     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridDeleteSelectedAction.class.getSimpleName()));
+     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.CTRL_DOWN_MASK));
+     setEnabled(false);
+     }
 
-        DbGridDeleteSelectedAction() {
-            super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridDeleteSelectedAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridDeleteSelectedAction.class.getSimpleName()));
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.CTRL_DOWN_MASK));
-            setEnabled(false);
-        }
+     @Override
+     public boolean isEnabled() {
+     return !rowsSelectionModel.isSelectionEmpty();
+     }
 
-        @Override
-        public boolean isEnabled() {
-            return !rowsSelectionModel.isSelectionEmpty();
-        }
+     @Override
+     public void actionPerformed(ActionEvent e) {
+     deleteRow();
+     }
+     }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            deleteRow();
-        }
-    }
+     protected class DbGridInsertAction extends AbstractAction {
 
-    protected class DbGridInsertAction extends AbstractAction {
+     DbGridInsertAction() {
+     super();
+     putValue(Action.NAME, Form.getLocalizedString(DbGridInsertAction.class.getSimpleName()));
+     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridInsertAction.class.getSimpleName()));
+     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
+     setEnabled(true);
+     }
 
-        DbGridInsertAction() {
-            super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridInsertAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridInsertAction.class.getSimpleName()));
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
-            setEnabled(true);
-        }
+     @Override
+     public void actionPerformed(ActionEvent e) {
+     insertRow();
+     }
+     }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            insertRow();
-        }
-    }
+     protected class DbGridInsertChildAction extends AbstractAction {
 
-    protected class DbGridInsertChildAction extends AbstractAction {
+     DbGridInsertChildAction() {
+     super();
+     putValue(Action.NAME, Form.getLocalizedString(DbGridInsertChildAction.class.getSimpleName()));
+     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridInsertChildAction.class.getSimpleName()));
+     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.ALT_DOWN_MASK));
+     setEnabled(false);
+     }
 
-        DbGridInsertChildAction() {
-            super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridInsertChildAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridInsertChildAction.class.getSimpleName()));
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.ALT_DOWN_MASK));
-            setEnabled(false);
-        }
+     @Override
+     public boolean isEnabled() {
+     return true;
+     }
 
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
+     @Override
+     public void actionPerformed(ActionEvent e) {
+     try {
+     if (insertable && !(rowsModel.getRowsRowset() instanceof ParametersRowset)) {
+     rowsSelectionModel.removeListSelectionListener(generalSelectionChangesReflector);
+     try {
+     if (rowsModel instanceof ArrayTreedModel) {
+     int parentColIndex = ((ArrayTreedModel) rowsModel).getParentFieldIndex();
+     Object parentColValue = null;
+     if (!rowsModel.getRowsRowset().isEmpty()
+     && !rowsModel.getRowsRowset().isBeforeFirst()
+     && !rowsModel.getRowsRowset().isAfterLast()) {
+     Object[] pkValues = rowsModel.getRowsRowset().getCurrentRow().getPKValues();
+     if (pkValues != null && pkValues.length == 1) {
+     parentColValue = pkValues[0];
+     }
+     }
+     rowsModel.getRowsRowset().insert(parentColIndex, parentColValue);
+     } else {
+     rowsModel.getRowsRowset().insert();
+     }
+     } finally {
+     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
+     }
+     Row insertedRow = rowsModel.getRowsRowset().getCurrentRow();
+     assert insertedRow.isInserted();
+     makeVisible(insertedRow);
+     }
+     } catch (Exception ex) {
+     Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
+     }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                if (insertable && !(rowsModel.getRowsRowset() instanceof ParametersRowset)) {
-                    rowsSelectionModel.removeListSelectionListener(generalSelectionChangesReflector);
-                    try {
-                        if (rowsModel instanceof RowsetsTreedModel) {
-                            int parentColIndex = ((RowsetsTreedModel) rowsModel).getParentFieldIndex();
-                            Object parentColValue = null;
-                            if (!rowsModel.getRowsRowset().isEmpty()
-                                    && !rowsModel.getRowsRowset().isBeforeFirst()
-                                    && !rowsModel.getRowsRowset().isAfterLast()) {
-                                Object[] pkValues = rowsModel.getRowsRowset().getCurrentRow().getPKValues();
-                                if (pkValues != null && pkValues.length == 1) {
-                                    parentColValue = pkValues[0];
-                                }
-                            }
-                            rowsModel.getRowsRowset().insert(parentColIndex, parentColValue);
-                        } else {
-                            rowsModel.getRowsRowset().insert();
-                        }
-                    } finally {
-                        rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-                    }
-                    Row insertedRow = rowsModel.getRowsRowset().getCurrentRow();
-                    assert insertedRow.isInserted();
-                    makeVisible(insertedRow);
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
+     protected class DbGridRowInfoAction extends AbstractAction {
 
-    protected class DbGridRowInfoAction extends AbstractAction {
+     DbGridRowInfoAction() {
+     super();
+     putValue(Action.NAME, Form.getLocalizedString(DbGridRowInfoAction.class.getSimpleName()));
+     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridRowInfoAction.class.getSimpleName()));
+     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+     setEnabled(false);
+     }
 
-        DbGridRowInfoAction() {
-            super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridRowInfoAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridRowInfoAction.class.getSimpleName()));
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
-            setEnabled(false);
-        }
+     @Override
+     public boolean isEnabled() {
+     return !rowsSelectionModel.isSelectionEmpty();
+     }
 
-        @Override
-        public boolean isEnabled() {
-            return !rowsSelectionModel.isSelectionEmpty();
-        }
+     @Override
+     public void actionPerformed(ActionEvent e) {
+     if (!rowsModel.getRowsRowset().isEmpty()
+     && !rowsModel.getRowsRowset().isBeforeFirst()
+     && !rowsModel.getRowsRowset().isAfterLast()) {
+     Row row = rowsModel.getRowsRowset().getCurrentRow();
+     if (row != null) {
+     JOptionPane.showInputDialog(ModelGrid.this, Form.getLocalizedString("rowPkValues"), (String) getValue(Action.SHORT_DESCRIPTION), JOptionPane.INFORMATION_MESSAGE, null, null, StringUtils.join(", ", StringUtils.toStringArray(row.getPKValues())));
+     }
+     }
+     }
+     }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (!rowsModel.getRowsRowset().isEmpty()
-                    && !rowsModel.getRowsRowset().isBeforeFirst()
-                    && !rowsModel.getRowsRowset().isAfterLast()) {
-                Row row = rowsModel.getRowsRowset().getCurrentRow();
-                if (row != null) {
-                    JOptionPane.showInputDialog(DbGrid.this, Form.getLocalizedString("rowPkValues"), (String) getValue(Action.SHORT_DESCRIPTION), JOptionPane.INFORMATION_MESSAGE, null, null, StringUtils.join(", ", StringUtils.toStringArray(row.getPKValues())));
-                }
-            }
-        }
-    }
+     protected class DbGridGotoRowAction extends AbstractAction {
 
-    protected class DbGridGotoRowAction extends AbstractAction {
+     DbGridGotoRowAction() {
+     super();
+     putValue(Action.NAME, Form.getLocalizedString(DbGridGotoRowAction.class.getSimpleName()));
+     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridGotoRowAction.class.getSimpleName()));
+     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
+     setEnabled(false);
+     }
 
-        DbGridGotoRowAction() {
-            super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridGotoRowAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridGotoRowAction.class.getSimpleName()));
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
-            setEnabled(false);
-        }
+     @Override
+     public boolean isEnabled() {
+     return true;
+     }
 
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
+     @Override
+     public void actionPerformed(ActionEvent e) {
+     if (!rowsModel.getRowsRowset().isEmpty()
+     && !rowsModel.getRowsRowset().isBeforeFirst()
+     && !rowsModel.getRowsRowset().isAfterLast()) {
+     Row row = rowsModel.getRowsRowset().getCurrentRow();
+     if (row != null) {
+     Object oInput = JOptionPane.showInputDialog(ModelGrid.this, Form.getLocalizedString("rowPkValues"), (String) getValue(Action.SHORT_DESCRIPTION), JOptionPane.INFORMATION_MESSAGE, null, null, null);
+     if (oInput != null) {
+     try {
+     makeVisible(oInput);
+     } catch (Exception ex) {
+     Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
+     }
+     }
+     }
+     }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (!rowsModel.getRowsRowset().isEmpty()
-                    && !rowsModel.getRowsRowset().isBeforeFirst()
-                    && !rowsModel.getRowsRowset().isAfterLast()) {
-                Row row = rowsModel.getRowsRowset().getCurrentRow();
-                if (row != null) {
-                    Object oInput = JOptionPane.showInputDialog(DbGrid.this, Form.getLocalizedString("rowPkValues"), (String) getValue(Action.SHORT_DESCRIPTION), JOptionPane.INFORMATION_MESSAGE, null, null, null);
-                    if (oInput != null) {
-                        try {
-                            makeVisible(oInput);
-                        } catch (Exception ex) {
-                            Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }
-        }
-    }
+     protected class DbGridCopyCellAction extends AbstractAction {
 
-    protected class DbGridCopyCellAction extends AbstractAction {
+     DbGridCopyCellAction() {
+     super();
+     putValue(Action.NAME, Form.getLocalizedString(DbGridCopyCellAction.class.getSimpleName()));
+     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridCopyCellAction.class.getSimpleName()));
+     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK));
+     setEnabled(false);
+     }
 
-        DbGridCopyCellAction() {
-            super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridCopyCellAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridCopyCellAction.class.getSimpleName()));
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK));
-            setEnabled(false);
-        }
+     @Override
+     public boolean isEnabled() {
+     return true;
+     }
 
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            StringBuilder sbCells = new StringBuilder();
-            String[][] cells = getGridView(true, false);
-            for (int i = 0; i < cells.length; i++) {
-                StringBuilder sbRow = new StringBuilder();
-                String[] row = cells[i];
-                for (int j = 0; j < row.length; j++) {
-                    String value = row[j];
-                    if (value != null) {
-                        if (sbRow.length() > 0) {
-                            sbRow.append("\t");
-                        }
-                        sbRow.append(value);
-                    }
-                }
-                if (sbRow.length() > 0) {
-                    if (sbCells.length() > 0) {
-                        sbCells.append("\n");
-                    }
-                    sbCells.append(sbRow);
-                }
-            }
-            StringSelection ss = new StringSelection(sbCells.toString());
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, ss);
-        }
-    }
+     @Override
+     public void actionPerformed(ActionEvent e) {
+     StringBuilder sbCells = new StringBuilder();
+     String[][] cells = getGridView(true, false);
+     for (int i = 0; i < cells.length; i++) {
+     StringBuilder sbRow = new StringBuilder();
+     String[] row = cells[i];
+     for (int j = 0; j < row.length; j++) {
+     String value = row[j];
+     if (value != null) {
+     if (sbRow.length() > 0) {
+     sbRow.append("\t");
+     }
+     sbRow.append(value);
+     }
+     }
+     if (sbRow.length() > 0) {
+     if (sbCells.length() > 0) {
+     sbCells.append("\n");
+     }
+     sbCells.append(sbRow);
+     }
+     }
+     StringSelection ss = new StringSelection(sbCells.toString());
+     Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, ss);
+     }
+     }
+     */
 
     protected class DbGridFindSomethingAction extends AbstractAction {
 
@@ -2144,7 +2137,7 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
                     findFrame = new JFrame(Form.getLocalizedString("Find"));
                     findFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                     findFrame.getContentPane().setLayout(new BorderLayout());
-                    findFrame.getContentPane().add(new GridSearchView(DbGrid.this), BorderLayout.CENTER);
+                    findFrame.getContentPane().add(new GridSearchView(ModelGrid.this), BorderLayout.CENTER);
                     findFrame.setIconImage(IconCache.getIcon("16x16/binocular.png").getImage());
                     findFrame.setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
                     findFrame.setAlwaysOnTop(true);
@@ -2161,31 +2154,35 @@ public class DbGrid extends JPanel implements ArrayModelWidget, TablesGridContai
         Action insertAction = null;
         Action insertChildAction = null;
         findSomethingAction = new DbGridFindSomethingAction();
-        deleteAction = new DbGridDeleteSelectedAction();
-        putAction(deleteAction);
-        insertAction = new DbGridInsertAction();
-        putAction(insertAction);
-        insertChildAction = new DbGridInsertChildAction();
-        putAction(insertChildAction);
         putAction(findSomethingAction);
-        Action rowInfoAction = new DbGridRowInfoAction();
-        putAction(rowInfoAction);
-        Action goToRowAction = new DbGridGotoRowAction();
-        putAction(goToRowAction);
-        Action copyCellAction = new DbGridCopyCellAction();
-        putAction(copyCellAction);
-        fillInputMap(tlTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction, rowInfoAction, goToRowAction, copyCellAction);
-        fillInputMap(trTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction, rowInfoAction, goToRowAction, copyCellAction);
-        fillInputMap(blTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction, rowInfoAction, goToRowAction, copyCellAction);
-        fillInputMap(brTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction, rowInfoAction, goToRowAction, copyCellAction);
+        /*
+         deleteAction = new DbGridDeleteSelectedAction();
+         putAction(deleteAction);
+         insertAction = new DbGridInsertAction();
+         putAction(insertAction);
+         insertChildAction = new DbGridInsertChildAction();
+         putAction(insertChildAction);
+         Action rowInfoAction = new DbGridRowInfoAction();
+         putAction(rowInfoAction);
+         Action goToRowAction = new DbGridGotoRowAction();
+         putAction(goToRowAction);
+         Action copyCellAction = new DbGridCopyCellAction();
+         putAction(copyCellAction);
+         */
+        fillInputMap(tlTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction/*, rowInfoAction, goToRowAction, copyCellAction*/);
+        fillInputMap(trTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction/*, rowInfoAction, goToRowAction, copyCellAction*/);
+        fillInputMap(blTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction/*, rowInfoAction, goToRowAction, copyCellAction*/);
+        fillInputMap(brTable.getInputMap(), deleteAction, insertAction, insertChildAction, findSomethingAction/*, rowInfoAction, goToRowAction, copyCellAction*/);
     }
 
     protected void fillInputMap(InputMap aInputMap, Action... actions) {
         for (Action action : actions) {
             if (action != null) {
-                if (action instanceof DbGridCopyCellAction) {
-                    aInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.CTRL_DOWN_MASK), action.getClass().getName());
-                }
+                /*
+                 if (action instanceof DbGridCopyCellAction) {
+                 aInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.CTRL_DOWN_MASK), action.getClass().getName());
+                 }
+                 */
                 KeyStroke keyStroke = (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
                 if (keyStroke != null) {
                     aInputMap.put(keyStroke, action.getClass().getName());

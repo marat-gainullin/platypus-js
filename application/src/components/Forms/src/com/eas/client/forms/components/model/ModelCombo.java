@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.components.model;
+package com.eas.client.forms.components.model;
 
-import com.eas.client.forms.components.HasEditable;
-import com.eas.client.forms.components.HasEmptyText;
-import com.eas.client.forms.components.VComboBox;
+import com.eas.client.forms.components.rt.HasEditable;
+import com.eas.client.forms.components.rt.HasEmptyText;
+import com.eas.client.forms.components.rt.VComboBox;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;

@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api;
+package com.eas.client.forms;
 
-import com.eas.client.forms.api.events.ActionEvent;
-import com.eas.client.forms.api.events.ComponentEvent;
-import com.eas.client.forms.api.events.MouseEvent;
+import com.eas.client.forms.events.ActionEvent;
+import com.eas.client.forms.events.ComponentEvent;
+import com.eas.client.forms.events.MouseEvent;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import java.awt.event.FocusEvent;

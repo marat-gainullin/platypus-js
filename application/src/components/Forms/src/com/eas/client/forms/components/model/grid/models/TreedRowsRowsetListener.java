@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.models;
+package com.eas.client.forms.components.model.grid.models;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -25,11 +25,11 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class TreedRowsRowsetListener extends RowsetAdapter {
 
-    protected RowsetsTreedModel model;
+    protected ArrayTreedModel model;
     protected Rowset rowset;
     protected List<JSObject> oldRows = new ArrayList<>();
 
-    public TreedRowsRowsetListener(RowsetsTreedModel aModel, Rowset aRowset) {
+    public TreedRowsRowsetListener(ArrayTreedModel aModel, Rowset aRowset) {
         super();
         model = aModel;
         rowset = aRowset;

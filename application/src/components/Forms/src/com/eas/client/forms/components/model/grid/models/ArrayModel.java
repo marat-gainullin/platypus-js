@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.rt.models;
+package com.eas.client.forms.components.model.grid.models;
 
 import com.bearsoft.gui.grid.data.CellData;
-import com.eas.client.forms.api.components.model.CellRenderEvent;
-import com.eas.dbcontrols.grid.rt.columns.ModelColumn;
+import com.eas.client.forms.components.model.CellRenderEvent;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,7 +17,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public abstract class RowsetsModel {
+public abstract class ArrayModel {
 
     public static final String BAD_COLUMN_MSG = "Bad column configuration detected at column index %d";
     public static final String COLUMN_BINDING_MISSING_MSG = "Column rowset missing";
@@ -26,11 +26,15 @@ public abstract class RowsetsModel {
     protected JSObject generalOnRender;
     protected JSObject elements;
 
-    public RowsetsModel(TableColumnModel aColumns, JSObject aElement, JSObject aGeneralOnRender) {
+    public ArrayModel(TableColumnModel aColumns, JSObject aElement, JSObject aGeneralOnRender) {
         super();
         columns = aColumns;
         elements = aElement;
         generalOnRender = aGeneralOnRender;
+    }
+
+    public JSObject getElements() {
+        return elements;
     }
 
     public int getColumnCount() {
@@ -126,7 +130,7 @@ public abstract class RowsetsModel {
     }
 
     protected void severe(String aMsg) {
-        Logger.getLogger(RowsetsTableModel.class.getName()).log(Level.SEVERE, aMsg);
+        Logger.getLogger(ArrayTableModel.class.getName()).log(Level.SEVERE, aMsg);
     }
 
     /**

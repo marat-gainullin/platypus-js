@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api;
+package com.eas.client.forms;
 
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;

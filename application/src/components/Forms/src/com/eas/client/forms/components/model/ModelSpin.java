@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.api.components.model;
+package com.eas.client.forms.components.model;
 
-import com.eas.client.forms.components.HasEmptyText;
-import com.eas.client.forms.components.VSpinner;
+import com.eas.client.forms.components.rt.HasEmptyText;
+import com.eas.client.forms.components.rt.VSpinner;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
