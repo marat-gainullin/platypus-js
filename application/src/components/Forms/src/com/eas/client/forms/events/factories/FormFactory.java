@@ -28,6 +28,7 @@ import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.containers.AbsolutePane;
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
@@ -48,17 +49,21 @@ import com.eas.client.forms.menu.MenuItem;
 import com.eas.client.forms.menu.MenuSeparator;
 import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.forms.menu.RadioMenuItem;
+import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.XmlDomUtils;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Element;
 
@@ -72,7 +77,7 @@ public class FormFactory {
     protected JSObject model;
     protected Form form;
     //
-    protected List<Runnable> resolvers = new ArrayList<>();
+    protected List<Consumer<Map<String, JComponent>>> resolvers = new ArrayList<>();
 
     public FormFactory(Element anElement, JSObject aModel) {
         super();
@@ -114,8 +119,8 @@ public class FormFactory {
             assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
             widgets.put(wName, widget);
         });
-        resolvers.stream().forEach((Runnable aResolver) -> {
-            aResolver.run();
+        resolvers.stream().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
+            aResolver.accept(widgets);
         });
     }
 
@@ -138,98 +143,162 @@ public class FormFactory {
         switch (type) {
             // widgets
             case "LabelDesignInfo":
-                return new Label();
+                Label label = new Label();
+                readGeneralProps(anElement, label);
+                return label;
             case "ButtonDesignInfo":
-                return new Button();
+                Button button = new Button();
+                readGeneralProps(anElement, button);
+                return button;
             case "DropDownButtonDesignInfo":
-                return new DropDownButton();
+                DropDownButton dropDownButton = new DropDownButton();
+                readGeneralProps(anElement, dropDownButton);
+                return dropDownButton;
             case "ButtonGroupDesignInfo":
-                return new ButtonGroup();
+                ButtonGroup buttonGroup = new ButtonGroup();
+                return buttonGroup;
             case "CheckDesignInfo":
-                return new CheckBox();
+                CheckBox checkBox = new CheckBox();
+                readGeneralProps(anElement, checkBox);
+                return checkBox;
             case "TextPaneDesignInfo":
-                return new TextArea();
+                TextArea textArea = new TextArea();
+                readGeneralProps(anElement, textArea);
+                return textArea;
             case "EditorPaneDesignInfo":
-                return new HtmlArea();
+                HtmlArea htmlArea = new HtmlArea();
+                readGeneralProps(anElement, htmlArea);
+                return htmlArea;
             case "FormattedFieldDesignInfo":
-                return new FormattedField();
+                FormattedField formattedField = new FormattedField();
+                readGeneralProps(anElement, formattedField);
+                return formattedField;
             case "PasswordFieldDesignInfo":
-                return new PasswordField();
+                PasswordField passwordField = new PasswordField();
+                readGeneralProps(anElement, passwordField);
+                return passwordField;
             case "ProgressBarDesignInfo":
-                return new ProgressBar();
+                ProgressBar progressBar = new ProgressBar();
+                readGeneralProps(anElement, progressBar);
+                return progressBar;
             case "RadioDesignInfo":
-                return new RadioButton();
+                RadioButton radio = new RadioButton();
+                readGeneralProps(anElement, radio);
+                return radio;
             case "SliderDesignInfo":
-                return new Slider();
+                Slider slider = new Slider();
+                readGeneralProps(anElement, slider);
+                return slider;
             case "TextFieldDesignInfo":
-                return new TextField();
+                TextField textField = new TextField();
+                readGeneralProps(anElement, textField);
+                return textField;
             case "ToggleButtonDesignInfo":
-                return new ToggleButton();
+                ToggleButton toggle = new ToggleButton();
+                readGeneralProps(anElement, toggle);
+                return toggle;
             case "DesktopDesignInfo":
-                return new DesktopPane();
+                DesktopPane desktop = new DesktopPane();
+                readGeneralProps(anElement, desktop);
+                return desktop;
             // model widgets
             case "DbCheckDesignInfo":
-                return new ModelCheckBox();
+                ModelCheckBox modelCheckBox = new ModelCheckBox();
+                readGeneralProps(anElement, modelCheckBox);
+                return modelCheckBox;
             case "DbComboDesignInfo":
-                return new ModelCombo();
+                ModelCombo modelCombo = new ModelCombo();
+                readGeneralProps(anElement, modelCombo);
+                return modelCombo;
             case "DbDateDesignInfo":
-                return new ModelDate();
+                ModelDate modelDate = new ModelDate();
+                readGeneralProps(anElement, modelDate);
+                return modelDate;
             case "DbLabelDesignInfo":
-                return new ModelFormattedField();
+                ModelFormattedField modelFormattedField = new ModelFormattedField();
+                readGeneralProps(anElement, modelFormattedField);
+                return modelFormattedField;
             case "DbSpinDesignInfo":
-                return new ModelSpin();
+                ModelSpin spin = new ModelSpin();
+                readGeneralProps(anElement, spin);
+                return spin;
             case "DbTextDesignInfo":
-                return new ModelTextArea();
+                ModelTextArea textarea = new ModelTextArea();
+                readGeneralProps(anElement, textarea);
+                return textarea;
             case "DbGridDesignInfo":
-                return new ModelGrid();
+                ModelGrid grid = new ModelGrid();
+                readGeneralProps(anElement, grid);
+                return grid;
             // containers   
             // layouted containers
             case "PanelDesignInfo":
                 Element layoutTag = XmlDomUtils.getElementByTagName(anElement, "layout");
                 assert layoutTag != null : "tag layout is required for panel containers.";
-                return createLayoutedContainer(layoutTag);
+                JComponent container = createLayoutedContainer(layoutTag);
+                readGeneralProps(anElement, container);
+                return container;
             // predefined layout containers
             case "ScrollDesignInfo":
+                ScrollPane scroll = new ScrollPane();
+                readGeneralProps(anElement, scroll);
                 boolean wheelScrollingEnabled = XmlDomUtils.readBooleanAttribute(anElement, "wheelScrollingEnabled", Boolean.TRUE);
                 int horizontalScrollBarPolicy = XmlDomUtils.readIntegerAttribute(anElement, "horizontalScrollBarPolicy", ScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
                 int verticalScrollBarPolicy = XmlDomUtils.readIntegerAttribute(anElement, "verticalScrollBarPolicy", ScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-                ScrollPane scroll = new ScrollPane();
                 scroll.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy);
                 scroll.setVerticalScrollBarPolicy(verticalScrollBarPolicy);
                 return scroll;
             case "SplitDesignInfo":
+                SplitPane split = new SplitPane();
+                readGeneralProps(anElement, split);
                 boolean oneTouchExpandable = XmlDomUtils.readBooleanAttribute(anElement, "oneTouchExpandable", true);
                 int dividerLocation = XmlDomUtils.readIntegerAttribute(anElement, "dividerLocation", 0);
                 int dividerSize = XmlDomUtils.readIntegerAttribute(anElement, "dividerSize", 5);
                 int orientation = XmlDomUtils.readIntegerAttribute(anElement, "orientation", Orientation.VERTICAL);
-                SplitPane split = new SplitPane();
                 split.setDividerLocation(dividerLocation);
                 split.setDividerSize(dividerSize);
                 split.setOrientation(orientation);
                 split.setOneTouchExpandable(oneTouchExpandable);
                 return split;
             case "TabsDesignInfo":
-                int tabPlacement = XmlDomUtils.readIntegerAttribute(anElement, "tabPlacement", TabbedPane.TOP);
                 TabbedPane tabs = new TabbedPane();
+                readGeneralProps(anElement, tabs);
+                int tabPlacement = XmlDomUtils.readIntegerAttribute(anElement, "tabPlacement", TabbedPane.TOP);
                 tabs.setTabPlacement(tabPlacement);
                 return tabs;
             case "ToolbarDesignInfo":
-                return new ToolBar();
+                ToolBar toolbar = new ToolBar();
+                readGeneralProps(anElement, toolbar);
+                return toolbar;
             // menus
             case "MenuCheckItemDesignInfo":
-                return new CheckMenuItem();
+                CheckMenuItem checkMenuItem = new CheckMenuItem();
+                readGeneralProps(anElement, checkMenuItem);
+                return checkMenuItem;
             case "MenuDesignInfo":
-                return new Menu();
+                Menu menu = new Menu();
+                readGeneralProps(anElement, menu);
+                return menu;
             case "MenuItemDesignInfo":
-                return new MenuItem();
+                MenuItem menuitem = new MenuItem();
+                readGeneralProps(anElement, menuitem);
+                return menuitem;
             case "MenuRadioItemDesignInfo":
-                return new RadioMenuItem();
+                RadioMenuItem radioMenuItem = new RadioMenuItem();
+                readGeneralProps(anElement, radioMenuItem);
+                return radioMenuItem;
             case "MenuSeparatorDesignInfo":
-                return new MenuSeparator();
+                MenuSeparator menuSeparator = new MenuSeparator();
+                readGeneralProps(anElement, menuSeparator);
+                return menuSeparator;
             case "MenubarDesignInfo":
-                return new MenuBar();
+                MenuBar menuBar = new MenuBar();
+                readGeneralProps(anElement, menuBar);
+                return menuBar;
             case "PopupDesignInfo":
-                return new PopupMenu();
+                PopupMenu popupMenu = new PopupMenu();
+                readGeneralProps(anElement, popupMenu);
+                return popupMenu;
             default:
                 return null;
         }
@@ -266,6 +335,80 @@ public class FormFactory {
                 return new AnchorsPane();
             default:
                 return null;
+        }
+    }
+
+    private void readGeneralProps(Element anElement, JComponent aTarget) {
+        if (anElement.hasAttribute("emptyText") && aTarget instanceof HasEmptyText) {
+            ((HasEmptyText) aTarget).setEmptyText(anElement.getAttribute("emptyText"));
+        }
+        if (anElement.hasAttribute("background")) {
+            ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
+            aTarget.setBackground(background);
+        }
+        if (anElement.hasAttribute("foreground")) {
+            ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
+            aTarget.setForeground(foreground);
+        }
+        if (anElement.hasAttribute("name")) {
+            aTarget.setName(anElement.getAttribute("name"));
+        }
+        aTarget.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
+        aTarget.setFocusable(XmlDomUtils.readBooleanAttribute(anElement, "focusable", Boolean.TRUE));
+        com.eas.gui.Font font = readFontTag(anElement, "font");
+        if (font != null) {
+            aTarget.setFont(font);
+        } else {
+            com.eas.gui.Font easfont = readFontTag(anElement, "easFont");
+            if (easfont != null) {
+                aTarget.setFont(easfont);
+            }
+        }
+        if (anElement.hasAttribute("nextFocusableComponent")) {
+            String nextFocusableName = anElement.getAttribute("nextFocusableComponent");
+            if (!nextFocusableName.isEmpty()) {
+                resolvers.add((Map<String, JComponent> aWidgets) -> {
+                    JComponent nextFocusable = aWidgets.get(nextFocusableName);
+                    aTarget.setNextFocusableComponent(nextFocusable);
+                });
+            }
+        }
+        if (anElement.hasAttribute("componentPopupMenu")) {
+            String popupName = anElement.getAttribute("componentPopupMenu");
+            if (!popupName.isEmpty()) {
+                resolvers.add((Map<String, JComponent> aWidgets) -> {
+                    JComponent popup = aWidgets.get(popupName);
+                    if (popup instanceof JPopupMenu) {
+                        aTarget.setComponentPopupMenu((JPopupMenu) popup);
+                    }
+                });
+            }
+        }
+        if (anElement.hasAttribute("opaque")) {
+            aTarget.setOpaque(XmlDomUtils.readBooleanAttribute(anElement, "opaque", Boolean.TRUE));
+        }
+        if (anElement.hasAttribute("toolTipText")) {
+            aTarget.setToolTipText(anElement.getAttribute("toolTipText"));
+        }
+        int cursorId = XmlDomUtils.readIntegerAttribute(anElement, "cursor", com.eas.gui.Cursor.DEFAULT_CURSOR);
+        aTarget.setCursor(new com.eas.gui.Cursor(cursorId));
+        if (anElement.hasAttribute("visible")) {
+            aTarget.setVisible(XmlDomUtils.readBooleanAttribute(anElement, "visible", Boolean.TRUE));
+        }
+    }
+
+    private com.eas.gui.Font readFontTag(Element anElement, String aSubTagName) {
+        Element easFontElement = XmlDomUtils.getElementByTagName(anElement, aSubTagName);
+        if (easFontElement != null) {
+            String name = easFontElement.getAttribute("name");
+            if (name == null || name.isEmpty()) {
+                name = Font.MONOSPACED;
+            }
+            int style = XmlDomUtils.readIntegerAttribute(easFontElement, "style", 0);
+            int size = XmlDomUtils.readIntegerAttribute(easFontElement, "size", 12);
+            return new com.eas.gui.Font(name, style, size);
+        } else {
+            return null;
         }
     }
 }
