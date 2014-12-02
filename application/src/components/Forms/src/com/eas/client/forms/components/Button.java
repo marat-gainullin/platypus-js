@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.events.rt.FormEventsIProxy;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
@@ -413,7 +412,7 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
         publisher = aPublisher;
     }
 
-    protected ControlEventsIProxy eventsProxy = new FormEventsIProxy(this);
+    protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)

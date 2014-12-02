@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components;
 
-import com.eas.client.forms.events.rt.FormEventsIProxy;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.HasJsName;
@@ -348,7 +347,7 @@ public class HtmlArea extends VHtmlArea implements HasPublished, HasComponentEve
         publisher = aPublisher;
     }
 
-    protected ControlEventsIProxy eventsProxy = new FormEventsIProxy(this);
+    protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)

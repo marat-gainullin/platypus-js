@@ -1016,7 +1016,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			footerRight.insertColumn(aIndex - frozenColumns, aColumn, null, aFooter);
 			headerRight.setColumnWidth(aColumn, aWidth);// column partners will
 			                                            // take care of width
-			                                            // seetings in other
+			                                            // settings in other
 			                                            // sections
 			//
 		}

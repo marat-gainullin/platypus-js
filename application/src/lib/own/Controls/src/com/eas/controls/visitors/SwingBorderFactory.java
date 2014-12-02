@@ -4,6 +4,7 @@
  */
 package com.eas.controls.visitors;
 
+import com.eas.client.forms.events.factories.SwingFactory;
 import com.eas.controls.borders.BevelBorderDesignInfo;
 import com.eas.controls.borders.BorderDesignInfoVisitor;
 import com.eas.controls.borders.CompoundBorderDesignInfo;

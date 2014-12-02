@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.olddesigninfos;
+package com.eas.dbcontrols.grid;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.eas.client.forms.components.model.grid.ModelGrid;
-import com.eas.dbcontrols.grid.olddesigninfos.DbGridColumn;
+import com.eas.dbcontrols.grid.DbGridColumn;
 
 /**
  *

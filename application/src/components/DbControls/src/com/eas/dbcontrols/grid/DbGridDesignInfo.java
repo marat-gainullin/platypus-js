@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.olddesigninfos;
+package com.eas.dbcontrols.grid;
 
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.ModelEntityParameterRef;

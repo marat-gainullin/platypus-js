@@ -75,7 +75,7 @@ public class CellMover extends MouseAdapter {
                         leftHighlight = false;
                     }
                     // end of ajusting block
-                    if (targetCell.getColGroup().isMoveable()) {
+                    if (targetCell.getColGroup().isMovable()) {
                         if (targetIndex < selfIndex || (targetIndex - selfIndex) > 1) {
                             if (leftHighlight) {
                                 targetCell.setLeftRolledover(true);
@@ -94,7 +94,7 @@ public class CellMover extends MouseAdapter {
         MultiLevelHeader header = cell.getHeader();
         if (selfIndex != -1 && targetIndex != -1) {
             GridColumnsGroup targetColGroup = neightbourColGroup(targetIndex);
-            if (targetColGroup == null || targetColGroup.isMoveable()) {
+            if (targetColGroup == null || targetColGroup.isMovable()) {
                 TableColumnModel columnModel = header.getColumnModel();
                 GridColumnsGroup movingColGroup = getNeightbourByIndex(selfIndex);
                 List<GridColumnsGroup> leaves = new ArrayList<>();

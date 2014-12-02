@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.menu;
 
-import com.eas.client.forms.events.rt.FormEventsIProxy;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
@@ -377,7 +376,7 @@ public class CheckMenuItem extends VCheckBoxMenuItem implements HasPublished, Ha
         publisher = aPublisher;
     }
 
-    protected ControlEventsIProxy eventsProxy = new FormEventsIProxy(this);
+    protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)

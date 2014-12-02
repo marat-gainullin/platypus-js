@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.events.rt;
 
+import com.eas.client.forms.events.EventsWrapper;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.Frame;
 import java.awt.Window;
@@ -65,6 +66,15 @@ public class WindowEventsIProxy extends ControlEventsIProxy implements
                 ((JInternalFrame) mHandlee).removeInternalFrameListener(this);
                 ((JInternalFrame) mHandlee).removePropertyChangeListener(this);
             }
+        }
+    }
+
+    @Override
+    protected Object wrapEvent(Object anEvent) {
+        if (anEvent instanceof java.awt.event.WindowEvent) {
+            return EventsWrapper.wrap((java.awt.event.WindowEvent) anEvent);
+        } else {
+            return super.wrapEvent(anEvent);
         }
     }
 

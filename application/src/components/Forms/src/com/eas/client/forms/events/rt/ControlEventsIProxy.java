@@ -4,6 +4,8 @@
  */
 package com.eas.client.forms.events.rt;
 
+import com.eas.client.forms.events.EventsWrapper;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptUtils;
 import java.awt.Component;
 import java.awt.Container;
@@ -64,6 +66,11 @@ public class ControlEventsIProxy implements MouseListener,
         super();
     }
 
+    public ControlEventsIProxy(Component aHandlee) {
+        super();
+        setHandlee(aHandlee);
+    }
+
     public JSObject getEventThis() {
         return eventThis;
     }
@@ -76,11 +83,30 @@ public class ControlEventsIProxy implements MouseListener,
         return handlers;
     }
 
+    protected Object wrapEvent(Object anEvent) {
+        if (anEvent instanceof java.awt.event.MouseEvent) {
+            anEvent = EventsWrapper.wrap((java.awt.event.MouseEvent) anEvent);
+        } else if (anEvent instanceof java.awt.event.KeyEvent) {
+            anEvent = EventsWrapper.wrap((java.awt.event.KeyEvent) anEvent);
+        } else if (anEvent instanceof java.awt.event.FocusEvent) {
+            anEvent = EventsWrapper.wrap((java.awt.event.FocusEvent) anEvent);
+        } else if (anEvent instanceof java.awt.event.ContainerEvent) {
+            anEvent = EventsWrapper.wrap((java.awt.event.ContainerEvent) anEvent);
+        } else if (anEvent instanceof java.awt.event.ComponentEvent) {
+            anEvent = EventsWrapper.wrap((java.awt.event.ComponentEvent) anEvent);
+        } else if (anEvent instanceof java.awt.event.ActionEvent) {
+            anEvent = EventsWrapper.wrap((java.awt.event.ActionEvent) anEvent);
+        } else if (anEvent instanceof javax.swing.event.ChangeEvent) {
+            anEvent = EventsWrapper.wrap((javax.swing.event.ChangeEvent) anEvent);
+        }
+        return anEvent;
+    }
+
     protected Object executeEvent(final int aEventId, final Object anEvent) {
         try {
             JSObject handler = handlers.get(aEventId);
             if (handler != null) {
-                return ScriptUtils.toJava(handler.call(eventThis, new Object[]{ScriptUtils.toJs(anEvent)}));
+                return ScriptUtils.toJava(handler.call(eventThis, new Object[]{ScriptUtils.toJs(wrapEvent(anEvent))}));
             } else {
                 return null;
             }
@@ -91,15 +117,17 @@ public class ControlEventsIProxy implements MouseListener,
         }
     }
 
-    public void setHandlee(Component aHandlee) {
+    public final void setHandlee(Component aHandlee) {
         try {
             if (mHandlee != aHandlee) {
                 if (mHandlee != null) {
                     unregisterEvents();
                 }
+                eventThis = null;
                 mHandlee = aHandlee;
                 if (mHandlee != null) {
                     registerEvents();
+                    eventThis = ((HasPublished) mHandlee).getPublished();
                 }
             }
         } catch (Exception ex) {
@@ -110,7 +138,7 @@ public class ControlEventsIProxy implements MouseListener,
     private void reflectionInvokeARListener(String name, Class aClass) {
         reflectionInvokeARListener(mHandlee, name, aClass, this);
     }
-    
+
     public static void reflectionInvokeARListener(Component mHandlee, String name, Class<?> aListenerClass, Object aListenerInstance) {
         if (mHandlee != null) {
             Class[] mparams = new Class[]{aListenerClass};

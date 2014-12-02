@@ -1,9 +1,5 @@
 package com.eas.client.forms.components.model.grid;
 
-import com.eas.client.forms.components.model.grid.TablesGridContainer;
-import com.eas.client.forms.components.model.grid.GridTableScrollablePanel;
-import com.eas.client.forms.components.model.grid.GridTable;
-import com.eas.client.forms.components.model.grid.GridSearchView;
 import com.eas.client.forms.IconCache;
 import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.constraints.LinearConstraint;
@@ -11,6 +7,7 @@ import com.bearsoft.gui.grid.data.CachingTableModel;
 import com.bearsoft.gui.grid.data.TableFront2TreedModel;
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.HeaderSplitter;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.bearsoft.gui.grid.rendering.TreeColumnLeadingComponent;
@@ -22,12 +19,10 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
-import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
 import com.eas.client.forms.components.model.grid.models.ArrayModel;
 import com.eas.client.forms.components.model.grid.models.ArrayTableModel;
@@ -41,7 +36,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -58,11 +52,6 @@ import jdk.nashorn.api.scripting.JSObject;
  * @author mg
  */
 public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer {
-
-    public static final int ROWS_HEADER_TYPE_NONE = 0;
-    public static final int ROWS_HEADER_TYPE_USUAL = 1;
-    public static final int ROWS_HEADER_TYPE_CHECKBOX = 2;
-    public static final int ROWS_HEADER_TYPE_RADIOBUTTON = 3;
 
     protected Object published;
 
@@ -225,77 +214,11 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    /**
-     * @param aParent Columns group, with will be parentfor new groups.
-     * @param aContents A list of used as a source for columns groups.
-     * @param linkSource Wether to link new column groups with source
-     * DbGridColumn-s. This also means, that LinkedGridColumnsGroup will be
-     * created.
-     * @return
-     * @throws Exception
-     */
-    private Map<ModelColumn, GridColumnsGroup> fillColumnsGroup(GridColumnsGroup aParent, List<GridColumnsGroup> aContents) throws Exception {
-        Map<ModelColumn, GridColumnsGroup> groups = new HashMap<>();
-        for (GridColumnsGroup dCol : aContents) {
-            // create grid columns group
-            GridColumnsGroup group = new GridColumnsGroup();
-            if (aParent != null) {
-                group.setParent(aParent);
-                aParent.addChild(group);
-            }
-            // Let's take care of structure
-            if (dCol.hasChildren()) {
-                Map<ModelColumn, GridColumnsGroup> childGroups = fillColumnsGroup(group, dCol.getChildren());
-                groups.putAll(childGroups);
-            } else {
-                // Leaf group
-                ModelColumn tCol = new ModelColumn();
-                tCol.setModelIndex(columnModel.getColumnCount());
-                tCol.setMinWidth(group.getMinWidth());
-                tCol.setMaxWidth(group.getMaxWidth());
-                tCol.setPreferredWidth(dCol.getWidth());
-                tCol.setWidth(dCol.getWidth());
-                tCol.setResizable(dCol.isResizable());
-                tCol.setMoveable(dCol.isMoveable());
-                String title = group.getTitle();
-                if (title == null || title.isEmpty()) {
-                    title = group.getName();
-                }
-                tCol.setTitle(title);
-                if (dCol.getControlInfo() != null) {
-                    TableCellRenderer cellRenderer = dCol.createCellRenderer();
-                    tCol.setCellRenderer(cellRenderer);
-                    if (cellRenderer instanceof ScalarDbControl) {
-                        ((ScalarDbControl) cellRenderer).setModel(model);
-                        mCol.setView((ScalarDbControl) cellRenderer);
-                    }
-                    TableCellEditor cellEditor = dCol.createCellEditor();
-                    tCol.setCellEditor(cellEditor);
-                    if (cellEditor instanceof ScalarDbControl) {
-                        Field field = DbControlsUtils.resolveField(model, dCol.getDatamodelElement());
-                        ((ScalarDbControl) cellEditor).setModel(model);
-                        ((ScalarDbControl) cellEditor).extraCellControls(null, field != null ? field.isNullable() : false);
-                        mCol.setEditor((ScalarDbControl) cellEditor);
-                    }
-                }
-                columnModel.addColumn(tCol);
-                // groups-view link
-                group.setTableColumn(tCol);
-                group.setMoveable(tCol.getMoveable());
-                group.setResizeable(tCol.isResizable());
-                groups.put(tCol, group);
-            }
-        }
-        return groups;
-    }
-
     private void configureTreedView() {
-        if (rowsModel instanceof ArrayTreedModel) {
-            if (columnModel.getColumnCount() > 0) {
-                TableColumn tCol = columnModel.getColumn(0);
-                tCol.setCellRenderer(new InsettedTreeRenderer<>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, style, false)));
-                tCol.setCellEditor(new InsettedTreeEditor<>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
-            }
+        if (rowsModel instanceof ArrayTreedModel && columnModel.getColumnCount() > 0) {
+            TableColumn tCol = columnModel.getColumn(0);
+            tCol.setCellRenderer(new InsettedTreeRenderer<>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, style, false)));
+            tCol.setCellEditor(new InsettedTreeEditor<>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
         }
     }
 
@@ -377,21 +300,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    private int convertFixedColumns2Leaves(List<GridColumnsGroup> roots, int fixedCols) {
-        int leavesCount = 0;
-        if (fixedCols > 0) {
-            for (int i = 0; i < fixedCols; i++) {
-                GridColumnsGroup col = roots.get(i);
-                if (!col.hasChildren()) {
-                    leavesCount++;
-                } else {
-                    leavesCount += convertFixedColumns2Leaves(col.getChildren(), col.getChildren().size());
-                }
-            }
-        }
-        return leavesCount;
-    }
-
     public boolean isTreeConfigured() throws Exception {
         return parentField != null && !parentField.isEmpty()
                 && childrenField != null && !childrenField.isEmpty();
@@ -423,9 +331,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected String parentField;
     protected String childrenField;
     // rows column info
-    protected int rowsHeaderType = ROWS_HEADER_TYPE_USUAL;
-    protected int fixedRows;
-    protected int fixedColumns;
+    protected int frozenRows;
+    protected int frozenColumns;
     // view
     protected TableColumnModel columnModel;
     protected JSObject generalOnRender;
@@ -474,7 +381,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         setupStyle();
     }
 
-    protected void setupStyle() {
+    protected final void setupStyle() {
         JTable tbl = new JTable();
         gridColor = tbl.getGridColor();
         style = new CascadedStyle(null);
@@ -505,7 +412,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
             style.setLeafIconName("status-offline.png");
         }
     }
-    
+
     private static final String ON_RENDER_JSDOC = ""
             + "/**\n"
             + " * General render event handler.\n"
@@ -514,15 +421,15 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
     @EventMethod(eventClass = CellRenderEvent.class)
-    public JSObject getOnRender(){
+    public JSObject getOnRender() {
         return generalOnRender;
     }
-    
+
     @ScriptFunction
-    public void setOnRender(JSObject aValue){
+    public void setOnRender(JSObject aValue) {
         generalOnRender = aValue;
     }
-    
+
     @ScriptFunction
     public void setShowHorizontalLines(boolean aValue) {
         showHorizontalLines = aValue;
@@ -631,8 +538,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         applyRowHeight();
     }
 
-@ScriptFunction
-@Override
+    @ScriptFunction
+    @Override
     public boolean isEnabled() {
         return super.isEnabled();
     }
@@ -845,21 +752,27 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     @Designable(category = "appearance")
-    public int getFixedColumns() {
-        return fixedColumns;
+    public int getFrozenColumns() {
+        return frozenColumns;
     }
 
-    public void setFixedColumns(int aValue) {
-        fixedColumns = aValue;
+    public void setFrozenColumns(int aValue) {
+        if (frozenColumns != aValue) {
+            frozenColumns = aValue;
+            applySplittedColumns();
+            applyHeader();
+        }
     }
 
     @Designable(category = "appearance")
-    public int getFixedRows() {
-        return fixedRows;
+    public int getFrozenRows() {
+        return frozenRows;
     }
 
-    public void setFixedRows(int aValue) {
-        fixedRows = aValue;
+    public void setFrozenRows(int aValue) {
+        if (frozenRows != aValue) {
+            frozenRows = aValue;
+        }
     }
 
     @Undesignable
@@ -868,8 +781,40 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     public void setHeader(List<GridColumnsGroup> aValue) {
-        header = aValue;
+        if (header != aValue) {
+            header = aValue;
+            applyHeader();
+        }
     }
+
+    protected void applySplittedColumns() {
+        // columns constraints setup
+        LinearConstraint leftColsConstraint = new LinearConstraint(0, frozenColumns - 1);
+        LinearConstraint rightColsConstraint = new LinearConstraint(frozenColumns, Integer.MAX_VALUE);
+        // tables column models setup
+        tlTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
+        tlTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
+        trTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
+        trTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
+        brTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
+        brTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
+        blTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
+        blTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
+        // headers setup
+        lheader.setColumnModel(tlTable.getColumnModel());
+        rheader.setColumnModel(trTable.getColumnModel());
+    }
+
+    protected void applyHeader() {
+        // set header
+        List<GridColumnsGroup> lgroups = HeaderSplitter.split(header, 0, frozenColumns - 1);
+        List<GridColumnsGroup> rgroups = HeaderSplitter.split(header, frozenColumns, Integer.MAX_VALUE);
+        lheader.setRoots(lgroups);
+        rheader.setRoots(rgroups);
+        lheader.regenerate();
+        rheader.regenerate();
+    }
+
     /*
      @Designable(displayName = "entity", category = "model")
      public ModelEntityRef getRowsDatasource() {
@@ -889,18 +834,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      unaryLinkField = aValue;
      }
      */
-
-    @Designable(category = "appearance")
-    public int getRowsHeaderType() {
-        return rowsHeaderType;
-    }
-
-    public void setRowsHeaderType(int aValue) {
-        if (rowsHeaderType != aValue) {
-            rowsHeaderType = aValue;
-        }
-    }
-
     @Undesignable
     public JSObject getGeneralOnRender() {
         return generalOnRender;
@@ -1038,7 +971,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
         @Override
         public void stateChanged(ChangeEvent e) {
-            if (!working && fixedColumns > 0) {
+            if (!working && frozenColumns > 0) {
                 working = true;
                 try {
                     Point contentPos = content.getViewPosition();
@@ -1072,13 +1005,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     public void configure() throws Exception {
         cleanup();
-        // TODO: remove ROWS_HEADER_TYPE and substitute it with CheckBoxColumn, RadioButtonColumn, ServiceColumn components
-        fixedColumns = convertFixedColumns2Leaves(header, fixedColumns);
-
+        // TODO: remove ROWS_HEADER_TYPE and substitute it with ServiceColumn component
         // Columns configuration
         columnsSelectionModel = new DefaultListSelectionModel();
         columnModel = new DefaultTableColumnModel();
-        Map<ModelColumn, GridColumnsGroup> cols2groups = fillColumnsGroup(null, header);
         columnModel.setSelectionModel(columnsSelectionModel);
         columnModel.setColumnSelectionAllowed(true);
         rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -1099,11 +1029,9 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
         configureTreedView();
 
-        // constraints setup
-        LinearConstraint leftColsConstraint = new LinearConstraint(0, fixedColumns - 1);
-        LinearConstraint rightColsConstraint = new LinearConstraint(fixedColumns, Integer.MAX_VALUE);
-        LinearConstraint topRowsConstraint = new LinearConstraint(0, fixedRows - 1);
-        LinearConstraint bottomRowsConstraint = new LinearConstraint(fixedRows, Integer.MAX_VALUE);
+        // rows constraints setup
+        LinearConstraint topRowsConstraint = new LinearConstraint(0, frozenRows - 1);
+        LinearConstraint bottomRowsConstraint = new LinearConstraint(frozenRows, Integer.MAX_VALUE);
 
         // constrained layer models setup
         tlTable = new GridTable(null, this);
@@ -1115,28 +1043,16 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         blTable.setModel(generalModel);
         brTable.setModel(generalModel);
 
-        columnModel.setColumnSelectionAllowed(rowsHeaderType != ROWS_HEADER_TYPE_CHECKBOX
-                && rowsHeaderType != ROWS_HEADER_TYPE_RADIOBUTTON);
-
         tlTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
         tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-        tlTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
-        tlTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
-
         trTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
         trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-        trTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
-        trTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
 
         blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
         blTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-        blTable.setColumnModel(new ConstrainedColumnModel(columnModel, leftColsConstraint));
-        blTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, leftColsConstraint));
 
         brTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
         brTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-        brTable.setColumnModel(new ConstrainedColumnModel(columnModel, rightColsConstraint));
-        brTable.getColumnModel().setSelectionModel(new ConstrainedListSelectionModel(columnsSelectionModel, rightColsConstraint));
 
         tlTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -1166,23 +1082,20 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         trTable.addMouseMotionListener(tablesMousePropagator);
         blTable.addMouseMotionListener(tablesMousePropagator);
         brTable.addMouseMotionListener(tablesMousePropagator);
-        // grid components setup.
+        // grid columns setup.
         // left header setup
         lheader = new MultiLevelHeader();
         lheader.setTable(tlTable);
         tlTable.getTableHeader().setResizingAllowed(true);
         lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
-        lheader.setColumnModel(tlTable.getColumnModel());
-        lheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, 0, fixedColumns - 1));
         lheader.setRowSorter(rowSorter);
         // right header setup
         rheader = new MultiLevelHeader();
         rheader.setTable(trTable);
         trTable.getTableHeader().setResizingAllowed(true);
         rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
-        rheader.setColumnModel(trTable.getColumnModel());
-        rheader.getColumnsParents().putAll(filterLeaves(cols2groups, columnModel, fixedColumns, columnModel.getColumnCount() - 1));
         rheader.setRowSorter(rowSorter);
+
         // Tables are enclosed in panels to avoid table's stupid efforts
         // to configure it's parent scroll pane.
         JPanel tlPanel = new JPanel(new BorderLayout());
@@ -1196,9 +1109,9 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         JPanel brPanel = new GridTableScrollablePanel(brTable);
         //brPanel.add(brTable, BorderLayout.CENTER);
 
-        boolean needOutlineCols = fixedColumns > 0;
-        tlPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
-        trPanel.setBorder(new MatteBorder(0, 0, fixedRows > 0 ? 1 : 0, 0, FIXED_COLOR));
+        boolean needOutlineCols = frozenColumns > 0;
+        tlPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
+        trPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, 0, FIXED_COLOR));
         blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
 
         progressIndicator = new JLabel(processIcon);
@@ -1209,9 +1122,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         gridScroll.setColumnHeaderView(trPanel);
         gridScroll.getColumnHeader().addChangeListener(new ColumnHeaderScroller(gridScroll.getColumnHeader(), gridScroll.getViewport()));
         gridScroll.setRowHeaderView(blPanel);
-        if (rowsHeaderType != ROWS_HEADER_TYPE_NONE) {
-            gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
-        }
+        gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
         gridScroll.setViewportView(brPanel);
 
         setLayout(new BorderLayout());
@@ -1219,10 +1130,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         //
         lheader.setNeightbour(rheader);
         rheader.setNeightbour(lheader);
-        lheader.setRegenerateable(true);
-        rheader.setRegenerateable(true);
-        lheader.regenerate();
-        rheader.regenerate();
+
         configureActions();
         applyEnabled();
         applyFont();
@@ -1312,20 +1220,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
         return tlTable.getCellEditor() == null && trTable.getCellEditor() == null
                 && blTable.getCellEditor() == null && brTable.getCellEditor() == null;
-    }
-
-    protected Map<ModelColumn, GridColumnsGroup> filterLeaves(Map<ModelColumn, GridColumnsGroup> cols2groups, TableColumnModel aTableColumnModel, int begIdx, int endIdx) {
-        Set<ModelColumn> allowedColumns = new HashSet<>();
-        for (int i = begIdx; i <= endIdx; i++) {
-            allowedColumns.add((ModelColumn) aTableColumnModel.getColumn(i));
-        }
-        Map<ModelColumn, GridColumnsGroup> table2Group = new HashMap<>();
-        for (Entry<ModelColumn, GridColumnsGroup> entry : cols2groups.entrySet()) {
-            if (allowedColumns.contains(entry.getKey())) {
-                table2Group.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return table2Group;
     }
 
     public TableColumnModel getColumnModel() {

@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.eas.controls.visitors;
+package com.eas.client.forms.events.factories;
 
 import com.eas.controls.layouts.constraints.*;
 import com.eas.client.forms.layouts.MarginConstraints;

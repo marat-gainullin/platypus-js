@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls.visitors;
+package com.eas.client.forms.events.factories;
 
 import com.eas.controls.ContainerDesignInfo;
 import com.eas.controls.ControlDesignInfo;
@@ -44,6 +44,10 @@ import com.eas.controls.plain.TextFieldDesignInfo;
 import com.eas.controls.plain.TextPaneDesignInfo;
 import com.eas.controls.plain.ToggleButtonDesignInfo;
 import com.eas.client.forms.layouts.ButtonGroupWrapper;
+import com.eas.controls.visitors.ControlClassFinder;
+import com.eas.controls.visitors.LayoutConstraintsFactory;
+import com.eas.controls.visitors.LayoutFactory;
+import com.eas.controls.visitors.SwingBorderFactory;
 import com.eas.gui.JDropDownButton;
 import com.eas.resources.images.IconCache;
 import java.awt.Component;
@@ -762,10 +766,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         }
     }
 */
-    public Icon resolveIcon(String aIconName) {
-        return IconCache.getIcon(aIconName);
-    }
-
     private <T> T resolveComponent(String aName) {
         Object res = components.get(aName);
         if (res == null) {

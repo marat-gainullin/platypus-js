@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.visitors;
+package com.eas.client.forms.events.factories;
 
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.controls.ControlDesignInfo;

@@ -45,16 +45,6 @@ public class GridColumnsTest {
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
-        col.setName("some name");
-        assertFalse(col.isEqual(col1));
-        col.assign(col1);
-        assertTrue(col.isEqual(col1));
-
-        col.setPlain(!col.isPlain());
-        assertFalse(col.isEqual(col1));
-        col.assign(col1);
-        assertTrue(col.isEqual(col1));
-
         col.setReadonly(!col.isReadonly());
         assertFalse(col.isEqual(col1));
         col.assign(col1);

@@ -19,22 +19,20 @@ import javax.swing.table.TableColumn;
  */
 public class GridColumnsGroup {
 
-    protected GridColumnsGroup parent = null;
-    // flag indicating whethier column is plain or fliped
-    protected boolean plain = true;
+    protected GridColumnsGroup parent;
     protected int minWidth = 0;
     protected int maxWidth = Integer.MAX_VALUE / 2;
-    protected boolean moveable = true;
-    protected boolean resizeable = true;
+    protected boolean movable = true;
+    protected boolean resizable = true;
     protected boolean sortable = true;
-    protected boolean readonly = false;
+    protected boolean readonly;
     protected boolean enabled = true;
     protected boolean visible = true;
-    protected String title = null;
-    protected String name = null;
+    protected String title;
+    protected String name;
     // flag indicating whether this column should remain in place or be substituted by it's flipping сhildren
-    protected boolean substitute = false;
-    protected boolean selectOnly = false;
+    protected boolean substitute;
+    protected boolean selectOnly;
     protected CascadedStyle style = new CascadedStyle();
     protected List<GridColumnsGroup> children = new ArrayList<>();
     protected TableColumn tableColumn;
@@ -72,13 +70,13 @@ public class GridColumnsGroup {
      * Constructor of grid columns group based on table column information. It's
      * allowed only if this column group is a leaf group.
      *
-     * @param tableColumn Table column instance to get information from.
+     * @param aCol Table column instance to get information from.
      * @see TableColumn
      * @see GridColumnsGroup
      */
     public GridColumnsGroup(TableColumn aCol) {
         this();
-        tableColumn = aCol;
+        setTableColumn(aCol);
     }
 
     public PropertyChangeSupport getChangeSupport() {
@@ -97,12 +95,16 @@ public class GridColumnsGroup {
     }
 
     public void setStyle(CascadedStyle aValue) {
-        if (style != null) {
-            style.getChangeSupport().removePropertyChangeListener(styleListener);
-        }
-        style = aValue;
-        if (style != null) {
-            style.getChangeSupport().addPropertyChangeListener(styleListener);
+        if (style != aValue) {
+            CascadedStyle oldValue = style;
+            if (style != null) {
+                style.getChangeSupport().removePropertyChangeListener(styleListener);
+            }
+            style = aValue;
+            if (style != null) {
+                style.getChangeSupport().addPropertyChangeListener(styleListener);
+            }
+            changeSupport.firePropertyChange("style", oldValue, style);
         }
     }
 
@@ -118,7 +120,33 @@ public class GridColumnsGroup {
         return tableColumn;
     }
 
-    public void setTableColumn(TableColumn aColumn) {
+    protected PropertyChangeListener columnListener = new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("headerValue".equals(evt.getPropertyName())
+                    && evt.getNewValue() instanceof String) {
+                setTitle((String) evt.getNewValue());
+            } else if ("width".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
+                changeSupport.firePropertyChange("width", evt.getOldValue(), evt.getNewValue());
+            } else if ("minWidth".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
+                minWidth = (Integer) evt.getNewValue();
+            } else if ("maxWidth".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
+                maxWidth = (Integer) evt.getNewValue();
+            } else if ("movable".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Boolean) {
+                movable = (Boolean) evt.getNewValue();
+            } else if ("resizable".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Boolean) {
+                resizable = (Boolean) evt.getNewValue();
+            } else if ("sortable".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Boolean) {
+                sortable = (Boolean) evt.getNewValue();
+            }
+        }
+    };
+
+    public final void setTableColumn(TableColumn aColumn) {
+        if (tableColumn != null) {
+            tableColumn.removePropertyChangeListener(columnListener);
+        }
         if (aColumn == null && tableColumn != null) {
             minWidth = tableColumn.getMinWidth();
             maxWidth = tableColumn.getMaxWidth();
@@ -127,6 +155,9 @@ public class GridColumnsGroup {
             }
         }
         tableColumn = aColumn;
+        if (tableColumn != null) {
+            tableColumn.addPropertyChangeListener(columnListener);
+        }
     }
 
     public void lightAssign(GridColumnsGroup aSource) {
@@ -136,22 +167,13 @@ public class GridColumnsGroup {
             maxWidth = aSource.getMaxWidth();
             readonly = aSource.isReadonly();
             visible = aSource.isVisible();
-            plain = aSource.isPlain();
             substitute = aSource.isSubstitute();
             selectOnly = aSource.isSelectOnly();
-            moveable = aSource.isMoveable();
-            resizeable = aSource.isResizeable();
+            movable = aSource.isMovable();
+            resizable = aSource.isResizable();
             sortable = aSource.isSortable();
-            if (aSource.getTitle() != null) {
-                title = new String(aSource.getTitle().toCharArray());
-            } else {
-                title = null;
-            }
-            if (aSource.getName() != null) {
-                name = new String(aSource.getName().toCharArray());
-            } else {
-                name = null;
-            }
+            title = aSource.getTitle();
+            //name = aSource.getName();
             if (aSource.getStyle() != null) {
                 style = aSource.getStyle().copy();
             } else {
@@ -161,14 +183,13 @@ public class GridColumnsGroup {
             readonly = false;
             enabled = true;
             visible = true;
-            plain = true;
             substitute = false;
             title = null;
             name = null;
             selectOnly = false;
             style = null;
-            moveable = true;
-            resizeable = true;
+            movable = true;
+            resizable = true;
             sortable = true;
         }
     }
@@ -197,19 +218,16 @@ public class GridColumnsGroup {
         if (this.visible != other.visible) {
             return false;
         }
-        if (this.plain != other.plain) {
-            return false;
-        }
         if (this.substitute != other.substitute) {
             return false;
         }
         if (this.selectOnly != other.selectOnly) {
             return false;
         }
-        if (this.moveable != other.moveable) {
+        if (this.movable != other.movable) {
             return false;
         }
-        if (this.resizeable != other.resizeable) {
+        if (this.resizable != other.resizable) {
             return false;
         }
         if (this.sortable != other.sortable) {
@@ -247,7 +265,6 @@ public class GridColumnsGroup {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 37 * hash + (this.plain ? 1 : 0);
         hash = 37 * hash + this.minWidth;
         hash = 37 * hash + this.maxWidth;
         hash = 37 * hash + (this.readonly ? 1 : 0);
@@ -420,14 +437,6 @@ public class GridColumnsGroup {
         selectOnly = aValue;
     }
 
-    public boolean isPlain() {
-        return plain;
-    }
-
-    public void setPlain(boolean aValue) {
-        plain = aValue;
-    }
-
     public boolean isSubstitute() {
         return substitute;
     }
@@ -468,20 +477,20 @@ public class GridColumnsGroup {
         visible = aValue;
     }
 
-    public boolean isMoveable() {
-        return moveable;
+    public boolean isMovable() {
+        return movable;
     }
 
-    public void setMoveable(boolean aValue) {
-        moveable = aValue;
+    public void setMovable(boolean aValue) {
+        movable = aValue;
     }
 
-    public boolean isResizeable() {
-        return resizeable;
+    public boolean isResizable() {
+        return resizable;
     }
 
-    public void setResizeable(boolean aValue) {
-        resizeable = aValue;
+    public void setResizable(boolean aValue) {
+        resizable = aValue;
     }
 
     public boolean isSortable() {
@@ -505,20 +514,21 @@ public class GridColumnsGroup {
     }
 
     public void setTitle(String aTitle) {
-        if (tableColumn != null) {
-            tableColumn.setHeaderValue(aTitle);
-        } else {
+        if (title == null ? aTitle != null : !title.equals(aTitle)) {
+            String oldTtile = title;
             title = aTitle;
+            changeSupport.firePropertyChange("title", oldTtile, title);
         }
     }
+    /*
+     public String getName() {
+     return name;
+     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String aName) {
-        name = aName;
-    }
+     public void setName(String aName) {
+     name = aName;
+     }
+     */
 
     public Color getBackground() {
         return style.getBackground();

@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.containers;
 
-import com.eas.client.forms.events.rt.FormEventsIProxy;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HasContainerEvents;
 import com.eas.client.forms.HasJsName;
@@ -52,6 +51,30 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
 
     public ScrollPane() {
         this((JComponent) null);
+    }
+
+    @ScriptFunction
+    @Override
+    public int getHorizontalScrollBarPolicy() {
+        return super.getHorizontalScrollBarPolicy();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setHorizontalScrollBarPolicy(int policy) {
+        super.setHorizontalScrollBarPolicy(policy);
+    }
+
+    @ScriptFunction
+    @Override
+    public int getVerticalScrollBarPolicy() {
+        return super.getVerticalScrollBarPolicy();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setVerticalScrollBarPolicy(int policy) {
+        super.setVerticalScrollBarPolicy(policy);
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -409,7 +432,7 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
         publisher = aPublisher;
     }
 
-    protected ControlEventsIProxy eventsProxy = new FormEventsIProxy(this);
+    protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)

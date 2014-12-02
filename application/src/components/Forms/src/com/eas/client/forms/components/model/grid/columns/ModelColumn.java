@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components.model.grid.columns;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.HasStyle;
@@ -13,8 +12,9 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import java.util.ArrayList;
-import java.util.List;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import javax.swing.table.TableColumn;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -31,12 +31,13 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
     private static JSObject publisher;
     //
     protected String name;
-    //
     protected MultiLevelHeader header;
-    protected GridColumnsGroup group;
     //
+    protected boolean moveable = true;
+    protected boolean readonly;
+    protected boolean sortable = true;
     protected String field;
-
+    //
     protected JSObject onRender;
     protected JSObject onSelect;
     protected boolean readOnly;
@@ -45,6 +46,8 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
     protected ModelWidget view;
     protected ModelWidget editor;
     protected boolean visible = true;
+    //
+    protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     // Temporarily stored values involved in columns show/hide process.
     protected int tempWidth;
     protected int tempMinWidth;
@@ -62,9 +65,8 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
      * @param aStyleHost
      * @param aView
      * @param aEditor
-     * @param aGroup
      */
-    public ModelColumn(String aName, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, HasStyle aStyleHost, ModelWidget aView, ModelWidget aEditor, GridColumnsGroup aGroup) {
+    public ModelColumn(String aName, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, HasStyle aStyleHost, ModelWidget aView, ModelWidget aEditor) {
         super();
         name = aName;
         onRender = aOnRender;
@@ -76,16 +78,34 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
         editor = aEditor;
         super.setCellEditor(editor);
 
-        group = aGroup;
-        tempWidth = group.getWidth();
-        tempMinWidth = group.getMinWidth();
-        tempMaxWidth = group.getMaxWidth();
-        tempResizable = group.isResizeable();
-        tempMoveable = group.isMoveable();
+        tempWidth = super.getWidth();
+        tempMinWidth = super.getMinWidth();
+        tempMaxWidth = super.getMaxWidth();
+        tempResizable = super.getResizable();
+        tempMoveable = moveable;
+        
+        super.addPropertyChangeListener((PropertyChangeEvent evt)->{
+            changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+        });
+    }
+
+    @Override
+    public synchronized void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+
+    @Override
+    public synchronized void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
+    }
+
+    @Override
+    public synchronized PropertyChangeListener[] getPropertyChangeListeners() {
+        return changeSupport.getPropertyChangeListeners();
     }
 
     public ModelColumn() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this("column", null, null, false, null, null, null);
     }
 
     /**
@@ -191,58 +211,57 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
     }
 
     private void hideColumn() {
-        tempWidth = group.getWidth();
-        tempMinWidth = group.getMinWidth();
-        tempMaxWidth = group.getMaxWidth();
-        tempResizable = group.isResizeable();
-        tempMoveable = group.isMoveable();
+        tempWidth = super.getWidth();
+        tempMinWidth = super.getMinWidth();
+        tempMaxWidth = super.getMaxWidth();
+        tempResizable = super.getResizable();
+        tempMoveable = moveable;
 
-        group.setResizeable(false);
-        group.setMoveable(false);
-        group.setMinWidth(0);
-        group.setWidth(0);
-        group.setMaxWidth(0);
+        setResizeable(false);
+        setMoveable(false);
+        setMinWidth(0);
+        setWidth(0);
+        setMaxWidth(0);
     }
 
     private void showColumn() {
         //int oldWidth = getWidth();
-        group.setMaxWidth(tempMaxWidth);
-        group.setMinWidth(tempMinWidth);
-        group.setResizeable(tempResizable);
-        group.setMoveable(tempMoveable);
+        setMaxWidth(tempMaxWidth);
+        setMinWidth(tempMinWidth);
+        setResizeable(tempResizable);
+        setMoveable(tempMoveable);
         setWidth(tempWidth);
     }
 
     @ScriptFunction(jsDoc = "Width of the column.")
     @Override
     public int getWidth() {
-        return group.getWidth();
+        return super.getWidth();
     }
 
     @ScriptFunction
     @Override
     public void setWidth(int aValue) {
-        if (group.isResizeable()) {
-            int oldValue = getWidth();
-            if (header != null) {
-                List<GridColumnsGroup> leaves = new ArrayList<>();
-                MultiLevelHeader.achieveLeaves(group, leaves);
-                header.setResizingColGroup(group);
-                try {
-                    header.setPreferredWidth2LeafColGroups(leaves, oldValue, aValue);
-                } finally {
-                    header.setResizingColGroup(null);
-                }
-            }
+        if (isResizeable()) {
+            super.setWidth(aValue);
+            /*
+             if (header != null) {
+             List<GridColumnsGroup> leaves = new ArrayList<>();
+             MultiLevelHeader.achieveLeaves(group, leaves);
+             header.setResizingColGroup(group);
+             try {
+             header.setPreferredWidth2LeafColGroups(leaves, oldValue, aValue);
+             } finally {
+             header.setResizingColGroup(null);
+             }
+             }
+             */
         }
     }
 
     @ScriptFunction(jsDoc = "The title of the column.")
     public String getTitle() {
-        if (getHeaderValue() != null && getHeaderValue() instanceof String) {
-            return (String) getHeaderValue();
-        }
-        return null;
+        return getHeaderValue() != null && getHeaderValue() instanceof String ? (String) getHeaderValue() : null;
     }
 
     @ScriptFunction
@@ -250,44 +269,63 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
         setHeaderValue(aTitle);
     }
 
+    public boolean isMoveable() {
+        return moveable;
+    }
+
+    public void setMoveable(boolean aValue) {
+        if (moveable != aValue) {
+            boolean oldValue = moveable;
+            moveable = aValue;
+            changeSupport.firePropertyChange("moveable", oldValue, moveable);
+        }
+    }
+
     @ScriptFunction(jsDoc = "Determines if column is resizeable.")
     public boolean isResizeable() {
-        return group.isResizeable();
+        return super.isResizable;
     }
 
     @ScriptFunction
     public void setResizeable(boolean aValue) {
-        group.setResizeable(aValue);
+        if (super.getResizable() != aValue) {
+            boolean oldValue = super.getResizable();
+            super.isResizable = aValue;
+            changeSupport.firePropertyChange("resizable", oldValue, aValue);
+        }
     }
 
     @ScriptFunction(jsDoc = "Determines if column is readonly.")
     public boolean isReadonly() {
-        return group.isReadonly();
+        return readonly;
     }
 
     @ScriptFunction
     public void setReadonly(boolean aValue) {
-        group.setReadonly(aValue);
+        if (readonly != aValue) {
+            boolean oldValue = readonly;
+            readonly = aValue;
+            changeSupport.firePropertyChange("readonly", oldValue, readonly);
+        }
     }
 
     @ScriptFunction(jsDoc = "Determines if column is sortable.")
     public boolean isSortable() {
-        return group.isSortable();
+        return sortable;
     }
 
     @ScriptFunction
     public void setSortable(boolean aValue) {
-        group.setSortable(aValue);
+        if (sortable != aValue) {
+            boolean oldValue = sortable;
+            sortable = aValue;
+            changeSupport.firePropertyChange("sortable", oldValue, sortable);
+        }
     }
 
     @ScriptFunction(jsDoc = "The name of the column.")
     public String getName() {
         return name;
-    }
-
-    //@ScriptFunction(jsDoc = "Column's header style.")
-    public CascadedStyle getHeaderStyle() {
-        return group.getStyle();
     }
 
     @Override

@@ -41,7 +41,6 @@ public class MultiLevelHeaderTest {
     public void prepareColumns() {
 
         header = new MultiLevelHeader();
-        header.setRegenerateable(true);
 
         for (int i = 0; i < 5; i++) {
             TableColumn col = new TableColumn(i);
@@ -85,11 +84,7 @@ public class MultiLevelHeaderTest {
         roots.add(g11);
         roots.add(g12);
 
-        header.getColumnsParents().put(columns.getColumn(0), g21);
-        header.getColumnsParents().put(columns.getColumn(1), g22);
-        header.getColumnsParents().put(columns.getColumn(2), g33);
-        header.getColumnsParents().put(columns.getColumn(3), g34);
-        header.getColumnsParents().put(columns.getColumn(4), g24);
+        header.setRoots(roots);
     }
 
     @Test
@@ -175,6 +170,7 @@ public class MultiLevelHeaderTest {
             putValue(Action.NAME, "check header integrity");
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             checkHeaderStructure();
         }

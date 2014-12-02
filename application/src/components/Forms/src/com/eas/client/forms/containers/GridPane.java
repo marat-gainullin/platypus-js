@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.containers;
 
-import com.eas.client.forms.events.rt.FormEventsIProxy;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HasContainerEvents;
 import com.eas.client.forms.HasJsName;
@@ -471,7 +470,7 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
         publisher = aPublisher;
     }
 
-    protected ControlEventsIProxy eventsProxy = new FormEventsIProxy(this);
+    protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)

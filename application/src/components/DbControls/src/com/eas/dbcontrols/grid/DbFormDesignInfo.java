@@ -2,15 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.olddesigninfos;
+package com.eas.dbcontrols.grid;
 
 import com.eas.client.geo.RowsetFeatureDescriptor;
 import com.eas.controls.FormDesignInfo;
 import com.eas.dbcontrols.check.DbCheckDesignInfo;
 import com.eas.dbcontrols.combo.DbComboDesignInfo;
 import com.eas.dbcontrols.date.DbDateDesignInfo;
-import com.eas.dbcontrols.grid.olddesigninfos.DbGridColumn;
-import com.eas.dbcontrols.grid.olddesigninfos.DbGridDesignInfo;
+import com.eas.dbcontrols.grid.DbGridColumn;
+import com.eas.dbcontrols.grid.DbGridDesignInfo;
 import com.eas.dbcontrols.image.DbImageDesignInfo;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;
 import com.eas.dbcontrols.map.DbMapDesignInfo;

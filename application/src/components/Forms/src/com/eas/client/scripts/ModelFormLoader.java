@@ -6,8 +6,9 @@
 package com.eas.client.scripts;
 
 import com.eas.client.Application;
-import com.eas.dbcontrols.grid.olddesigninfos.DbFormDesignInfo;
-import com.eas.store.Object2Dom;
+import com.eas.client.forms.Form;
+import com.eas.client.forms.events.factories.FormFactory;
+import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
 
 /**
@@ -16,9 +17,9 @@ import org.w3c.dom.Document;
  */
 public class ModelFormLoader {
     
-    public static DbFormDesignInfo load(Document aDoc, Application<?> aApp) {
-        DbFormDesignInfo di = new DbFormDesignInfo();
-        Object2Dom.transform(di, aDoc);
-        return di;
+    public static Form load(Document aDoc, Application<?> aApp, JSObject aModel) throws Exception {
+        FormFactory factory = new FormFactory(aDoc.getDocumentElement(), aModel);
+        factory.parse();
+        return factory.getForm();
     }
 }

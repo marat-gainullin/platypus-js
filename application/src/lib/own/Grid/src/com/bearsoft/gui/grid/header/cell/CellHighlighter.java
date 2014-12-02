@@ -49,8 +49,8 @@ public class CellHighlighter extends MouseAdapter {
         if ((pressedColGroup == null && movingColGroup == null)
                 || (pressedColGroup == cell.getColGroup() || movingColGroup == cell.getColGroup())) {
             if (cell.getColGroup().isSortable()
-                    || cell.getColGroup().isMoveable()
-                    || cell.getColGroup().isResizeable()) {
+                    || cell.getColGroup().isMovable()
+                    || cell.getColGroup().isResizable()) {
                 originalBackground = cell.getBackground();
                 cell.setBackground(originalBackground.brighter());
                 cell.setRolledover(true);
@@ -78,7 +78,7 @@ public class CellHighlighter extends MouseAdapter {
         Dimension d = cell.getSize();
         if (e.getX() >= MultiLevelHeader.PICK_MARGIN_SIZE
                 && e.getX() < d.width - MultiLevelHeader.PICK_MARGIN_SIZE - 1) {
-            if (cell.getColGroup().isSortable() || cell.getColGroup().isMoveable()) {
+            if (cell.getColGroup().isSortable() || cell.getColGroup().isMovable()) {
                 cell.setBorder(pressedBorder);
                 innerPressed = true;
             }

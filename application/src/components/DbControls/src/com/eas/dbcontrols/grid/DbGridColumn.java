@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.dbcontrols.grid.olddesigninfos;
+package com.eas.dbcontrols.grid;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.eas.client.model.ModelElementRef;
@@ -12,7 +12,7 @@ import com.eas.dbcontrols.DbControlDesignInfo;
 import com.eas.dbcontrols.DbControlsUtils;
 import com.eas.client.forms.api.components.model.ScalarDbControl;
 import com.eas.client.forms.components.model.grid.DummyCellEditor;
-import com.eas.dbcontrols.visitors.DbSwingFactory;
+import com.eas.client.forms.events.factories.DbSwingFactory;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
