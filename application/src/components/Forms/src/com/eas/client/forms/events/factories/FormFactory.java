@@ -563,6 +563,17 @@ public class FormFactory {
                 aTarget.setFont(easfont);
             }
         }
+        if (anElement.hasAttribute("opaque")) {
+            aTarget.setOpaque(XmlDomUtils.readBooleanAttribute(anElement, "opaque", Boolean.TRUE));
+        }
+        if (anElement.hasAttribute("toolTipText")) {
+            aTarget.setToolTipText(anElement.getAttribute("toolTipText"));
+        }
+        int cursorId = XmlDomUtils.readIntegerAttribute(anElement, "cursor", com.eas.gui.Cursor.DEFAULT_CURSOR);
+        aTarget.setCursor(new com.eas.gui.Cursor(cursorId));
+        if (anElement.hasAttribute("visible")) {
+            aTarget.setVisible(XmlDomUtils.readBooleanAttribute(anElement, "visible", Boolean.TRUE));
+        }
         if (anElement.hasAttribute("nextFocusableComponent")) {
             String nextFocusableName = anElement.getAttribute("nextFocusableComponent");
             if (!nextFocusableName.isEmpty()) {
@@ -595,16 +606,14 @@ public class FormFactory {
                 });
             }
         }
-        if (anElement.hasAttribute("opaque")) {
-            aTarget.setOpaque(XmlDomUtils.readBooleanAttribute(anElement, "opaque", Boolean.TRUE));
-        }
-        if (anElement.hasAttribute("toolTipText")) {
-            aTarget.setToolTipText(anElement.getAttribute("toolTipText"));
-        }
-        int cursorId = XmlDomUtils.readIntegerAttribute(anElement, "cursor", com.eas.gui.Cursor.DEFAULT_CURSOR);
-        aTarget.setCursor(new com.eas.gui.Cursor(cursorId));
-        if (anElement.hasAttribute("visible")) {
-            aTarget.setVisible(XmlDomUtils.readBooleanAttribute(anElement, "visible", Boolean.TRUE));
+        if (anElement.hasAttribute("parent")) {
+            String parentName = anElement.getAttribute("parent");
+            if (!parentName.isEmpty()) {
+                resolvers.add((Map<String, JComponent> aWidgets) -> {
+                    JComponent parent = aWidgets.get(parentName);
+                    addToParent(anElement, aTarget, parent);
+                });
+            }
         }
     }
 
@@ -620,6 +629,25 @@ public class FormFactory {
             return new com.eas.gui.Font(name, style, size);
         } else {
             return null;
+        }
+    }
+
+    private void addToParent(Element anElement, JComponent aTarget, JComponent parent) {
+        Element constraintsElement = XmlDomUtils.getElementByTagName(anElement, "constraints");
+        if (parent instanceof MenuBar) {
+        } else if (parent instanceof PopupMenu) {
+        } else if (parent instanceof Menu) {
+        } else if (parent instanceof ToolBar) {
+        } else if (parent instanceof TabbedPane) {
+        } else if (parent instanceof SplitPane) {
+        } else if (parent instanceof ScrollPane) {
+        } else if (parent instanceof BorderPane) {
+        } else if (parent instanceof BoxPane) {
+        } else if (parent instanceof CardPane) {
+        } else if (parent instanceof FlowPane) {
+        } else if (parent instanceof GridPane) {
+        } else if (parent instanceof AbsolutePane) {
+        } else if (parent instanceof AnchorsPane) {
         }
     }
 }
