@@ -4,9 +4,12 @@
  */
 package com.eas.client.forms.events.factories;
 
+import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.eas.client.forms.Form;
+import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.IconResources;
 import com.eas.client.forms.Orientation;
+import com.eas.client.forms.VerticalPosition;
 import com.eas.client.forms.components.Button;
 import com.eas.client.forms.components.CheckBox;
 import com.eas.client.forms.components.DesktopPane;
@@ -27,7 +30,9 @@ import com.eas.client.forms.components.model.ModelDate;
 import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
+import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.rt.ButtonGroupWrapper;
 import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasEditable;
@@ -46,6 +51,8 @@ import com.eas.client.forms.containers.SplitPane;
 import com.eas.client.forms.containers.TabbedPane;
 import com.eas.client.forms.containers.ToolBar;
 import com.eas.client.forms.layouts.BoxLayout;
+import com.eas.client.forms.layouts.Margin;
+import com.eas.client.forms.layouts.MarginConstraints;
 import com.eas.client.forms.menu.CheckMenuItem;
 import com.eas.client.forms.menu.Menu;
 import com.eas.client.forms.menu.MenuBar;
@@ -55,6 +62,7 @@ import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.forms.menu.RadioMenuItem;
 import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.XmlDomUtils;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
@@ -81,12 +89,21 @@ public class FormFactory {
     protected Element element;
     protected JSObject model;
     protected Form form;
+    protected boolean forceColumns;
     //
     protected List<Consumer<Map<String, JComponent>>> resolvers = new ArrayList<>();
 
     public FormFactory(Element anElement, JSObject aModel) {
         super();
         model = aModel;
+    }
+
+    public boolean isForceColumns() {
+        return forceColumns;
+    }
+
+    public void setForceColumns(boolean aValue) {
+        forceColumns = aValue;
     }
 
     public Form getForm() {
@@ -106,15 +123,7 @@ public class FormFactory {
         form.setOpacity(XmlDomUtils.readFloatAttribute(element, "opacity", 1.0f));
         form.setAlwaysOnTop(XmlDomUtils.readBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
         form.setLocationByPlatform(XmlDomUtils.readBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
-        Dimension prefSize = new Dimension();
-        String prefWidth = element.getAttribute("prefWidth");
-        String prefHeight = element.getAttribute("prefHeight");
-        if (prefWidth.length() > 2 && prefWidth.endsWith("px")) {
-            prefSize.width = Integer.parseInt(prefWidth.substring(0, prefWidth.length() - 2));
-        }
-        if (prefHeight.length() > 2 && prefHeight.endsWith("px")) {
-            prefSize.height = Integer.parseInt(prefHeight.substring(0, prefHeight.length() - 2));
-        }
+        Dimension prefSize = readPrefSize(element);
         form.setDesignedViewSize(prefSize);
         List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
         Map<String, JComponent> widgets = new HashMap<>();
@@ -127,6 +136,19 @@ public class FormFactory {
         resolvers.stream().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
             aResolver.accept(widgets);
         });
+    }
+
+    protected Dimension readPrefSize(Element anElement) throws NumberFormatException {
+        Dimension prefSize = new Dimension();
+        String prefWidth = anElement.getAttribute("prefWidth");
+        String prefHeight = anElement.getAttribute("prefHeight");
+        if (prefWidth.length() > 2 && prefWidth.endsWith("px")) {
+            prefSize.width = Integer.parseInt(prefWidth.substring(0, prefWidth.length() - 2));
+        }
+        if (prefHeight.length() > 2 && prefHeight.endsWith("px")) {
+            prefSize.height = Integer.parseInt(prefHeight.substring(0, prefHeight.length() - 2));
+        }
+        return prefSize;
     }
 
     private ImageIcon resolveIcon(String aIconName) {
@@ -391,13 +413,23 @@ public class FormFactory {
                     String gridColorDesc = anElement.getAttribute("gridColor");
                     grid.setGridColor(new ScriptColor(gridColorDesc));
                 }
+                if (anElement.hasAttribute("parentField")) {
+                    String parentFieldPath = anElement.getAttribute("parentField");
+                    grid.setParentField(parentFieldPath);
+                }
+                if (anElement.hasAttribute("childrenField")) {
+                    String childrenFieldPath = anElement.getAttribute("childrenField");
+                    grid.setChildrenField(childrenFieldPath);
+                }
+                List<GridColumnsGroup> columnsRoots = readColumns(grid, XmlDomUtils.elementsByTagName(anElement, "column"));
+                grid.setHeader(columnsRoots);
                 return grid;
             // containers   
             // layouted containers
             case "PanelDesignInfo":
                 Element layoutTag = XmlDomUtils.getElementByTagName(anElement, "layout");
                 assert layoutTag != null : "tag layout is required for panel containers.";
-                JComponent container = createLayoutedContainer(layoutTag);
+                JComponent container = readLayoutedContainer(layoutTag);
                 readGeneralProps(anElement, container);
                 return container;
             // predefined layout containers
@@ -421,6 +453,20 @@ public class FormFactory {
                 split.setDividerSize(dividerSize);
                 split.setOrientation(orientation);
                 split.setOneTouchExpandable(oneTouchExpandable);
+                if (anElement.hasAttribute("leftComponent")) {
+                    String leftComponentName = anElement.getAttribute("leftComponent");
+                    resolvers.add((Map<String, JComponent> aWidgets) -> {
+                        JComponent leftComponent = aWidgets.get(leftComponentName);
+                        split.setLeftComponent(leftComponent);
+                    });
+                }
+                if (anElement.hasAttribute("rightComponent")) {
+                    String rightComponentName = anElement.getAttribute("rightComponent");
+                    resolvers.add((Map<String, JComponent> aWidgets) -> {
+                        JComponent rightComponent = aWidgets.get(rightComponentName);
+                        split.setRightComponent(rightComponent);
+                    });
+                }
                 return split;
             case "TabsDesignInfo":
                 TabbedPane tabs = new TabbedPane();
@@ -500,7 +546,7 @@ public class FormFactory {
         button.setVerticalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "verticalTextPosition", Button.CENTER));
     }
 
-    private JComponent createLayoutedContainer(Element aLayoutElement) {
+    private JComponent readLayoutedContainer(Element aLayoutElement) {
         String type = aLayoutElement.getAttribute("type");
         assert type != null && !type.isEmpty() : "type attribute is required for layouts to be read from a file";
         int hgap = XmlDomUtils.readIntegerAttribute(aLayoutElement, "hgap", 0);
@@ -535,12 +581,24 @@ public class FormFactory {
     }
 
     private void readGeneralProps(Element anElement, JComponent aTarget) {
+        if (anElement.hasAttribute("name")) {
+            aTarget.setName(anElement.getAttribute("name"));
+        }
         if (anElement.hasAttribute("editable") && aTarget instanceof HasEditable) {
             ((HasEditable) aTarget).setEditable(XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE));
         }
         if (anElement.hasAttribute("emptyText") && aTarget instanceof HasEmptyText) {
             ((HasEmptyText) aTarget).setEmptyText(anElement.getAttribute("emptyText"));
         }
+        if (anElement.hasAttribute("field") && aTarget instanceof ModelWidget) {
+            String fieldPath = anElement.getAttribute("field");
+            try {
+                ((ModelWidget) aTarget).setField(fieldPath);
+            } catch (Exception ex) {
+                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field ({0}) to widget {1} exception occured: {2}", new Object[]{fieldPath, aTarget.getName(), ex.getMessage()});
+            }
+        }
+
         if (anElement.hasAttribute("background")) {
             ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
             aTarget.setBackground(background);
@@ -548,9 +606,6 @@ public class FormFactory {
         if (anElement.hasAttribute("foreground")) {
             ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
             aTarget.setForeground(foreground);
-        }
-        if (anElement.hasAttribute("name")) {
-            aTarget.setName(anElement.getAttribute("name"));
         }
         aTarget.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
         aTarget.setFocusable(XmlDomUtils.readBooleanAttribute(anElement, "focusable", Boolean.TRUE));
@@ -635,19 +690,129 @@ public class FormFactory {
     private void addToParent(Element anElement, JComponent aTarget, JComponent parent) {
         Element constraintsElement = XmlDomUtils.getElementByTagName(anElement, "constraints");
         if (parent instanceof MenuBar) {
+            ((MenuBar) parent).add(aTarget);
         } else if (parent instanceof PopupMenu) {
+            ((PopupMenu) parent).add(aTarget);
         } else if (parent instanceof Menu) {
+            ((Menu) parent).add(aTarget);
         } else if (parent instanceof ToolBar) {
+            ((ToolBar) parent).add(aTarget);
         } else if (parent instanceof TabbedPane) {
+            String tabTitle = constraintsElement.getAttribute("tabTitle");
+            String tabIconName = constraintsElement.getAttribute("tabIcon");
+            String tabTooltipText = constraintsElement.getAttribute("tabTooltipText");
+            ((TabbedPane) parent).add(aTarget, tabTitle, resolveIcon(tabIconName));
         } else if (parent instanceof SplitPane) {
+            // Split pane children are:
+            // - left component
+            // - right component
+            // Theese children are setted while resolving component references of a split pane.
         } else if (parent instanceof ScrollPane) {
+            ScrollPane scroll = (ScrollPane) parent;
+            Dimension prefSize = readPrefSize(anElement);
+            aTarget.setPreferredSize(prefSize);
+            scroll.setView(aTarget);
         } else if (parent instanceof BorderPane) {
+            Dimension prefSize = readPrefSize(anElement);
+            Integer place = HorizontalPosition.CENTER;
+            Integer size = null;
+            if (constraintsElement.hasAttribute("place")) {
+                String placeName = constraintsElement.getAttribute("place");
+                switch (placeName) {
+                    case BorderLayout.WEST:
+                        place = HorizontalPosition.LEFT;
+                        size = prefSize.width;
+                        break;
+                    case BorderLayout.EAST:
+                        place = HorizontalPosition.RIGHT;
+                        size = prefSize.width;
+                        break;
+                    case BorderLayout.NORTH:
+                        place = VerticalPosition.TOP;
+                        size = prefSize.height;
+                        break;
+                    case BorderLayout.SOUTH:
+                        place = VerticalPosition.BOTTOM;
+                        size = prefSize.height;
+                        break;
+                    case BorderLayout.CENTER:
+                        place = HorizontalPosition.CENTER;
+                        break;
+                    default:
+                        place = HorizontalPosition.CENTER;
+                }
+            }
+            ((BorderPane) parent).add(aTarget, place, size);
         } else if (parent instanceof BoxPane) {
+            Dimension prefSize = readPrefSize(anElement);
+            BoxPane box = (BoxPane) parent;
+            if (box.getOrientation() == Orientation.HORIZONTAL) {
+                box.add(aTarget, prefSize.width);
+            } else {
+                box.add(aTarget, prefSize.height);
+            }
         } else if (parent instanceof CardPane) {
+            String cardName = constraintsElement.getAttribute("cardName");
+            ((CardPane) parent).add(aTarget, cardName);
         } else if (parent instanceof FlowPane) {
+            Dimension prefSize = readPrefSize(anElement);
+            aTarget.setPreferredSize(prefSize);
+            ((FlowPane) parent).add(aTarget);
         } else if (parent instanceof GridPane) {
+            ((GridPane) parent).add(aTarget);
         } else if (parent instanceof AbsolutePane) {
+            AbsolutePane absolute = (AbsolutePane) parent;
+            MarginConstraints constraints = readMarginConstraints(constraintsElement);
+            absolute.add(aTarget, constraints);
         } else if (parent instanceof AnchorsPane) {
+            AnchorsPane anchors = (AnchorsPane) parent;
+            MarginConstraints constraints = readMarginConstraints(constraintsElement);
+            anchors.add(aTarget, constraints);
         }
+    }
+
+    private static MarginConstraints readMarginConstraints(Element anElement) {
+        MarginConstraints result = new MarginConstraints();
+        if (anElement.hasAttribute("left")) {
+            result.setLeft(Margin.parse(anElement.getAttribute("left")));
+        }
+        if (anElement.hasAttribute("right")) {
+            result.setRight(Margin.parse(anElement.getAttribute("right")));
+        }
+        if (anElement.hasAttribute("top")) {
+            result.setTop(Margin.parse(anElement.getAttribute("top")));
+        }
+        if (anElement.hasAttribute("bottom")) {
+            result.setBottom(Margin.parse(anElement.getAttribute("bottom")));
+        }
+        if (anElement.hasAttribute("width")) {
+            result.setWidth(Margin.parse(anElement.getAttribute("width")));
+        }
+        if (anElement.hasAttribute("height")) {
+            result.setHeight(Margin.parse(anElement.getAttribute("height")));
+        }
+        return result;
+    }
+
+    private List<GridColumnsGroup> readColumns(ModelGrid grid, List<Element> columnsElements) {
+        List<GridColumnsGroup> groups = new ArrayList<>();
+        columnsElements.stream().sequential().forEach((columnElement) -> {
+            GridColumnsGroup group = new GridColumnsGroup();
+            groups.add(group);
+            List<Element> subColumnsElements = XmlDomUtils.elementsByTagName(columnElement, "column");
+            if (subColumnsElements.isEmpty() || forceColumns) {
+                // Leaf or design -> Both GridColumnsGroup and ModelColumn should be created
+                ModelColumn col = new ModelColumn();
+                group.setTableColumn(col);
+                grid.addColumn(col);
+            }
+            if(!subColumnsElements.isEmpty()){
+                List<GridColumnsGroup> subGroups = readColumns(grid, subColumnsElements);
+                subGroups.stream().sequential().forEach((GridColumnsGroup aGroup) -> {
+                    group.addChild(aGroup);
+                });
+            }
+        });
+        return groups;
     }
 }

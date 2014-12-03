@@ -295,7 +295,11 @@ public class AbsolutePane extends JPanel implements HasPublished, HasContainerEv
         if (aComp != null) {
             MarginConstraints c;
             if (oAnchors != null) {
-                c = oAnchors instanceof Anchors ? anchors2AbsoluteConstraints((Anchors) oAnchors) : scriptable2AbsoluteConstraints((JSObject) oAnchors);
+                if (oAnchors instanceof MarginConstraints) {
+                    c = (MarginConstraints) oAnchors;
+                } else {
+                    c = oAnchors instanceof Anchors ? anchors2AbsoluteConstraints((Anchors) oAnchors) : scriptable2AbsoluteConstraints((JSObject) oAnchors);
+                }
             } else {
                 Point location = aComp.getLocation();
                 Dimension size = aComp.getSize();

@@ -295,7 +295,11 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
         if (aComp != null) {
             MarginConstraints c;
             if (oAnchors != null) {
-                c = oAnchors instanceof Anchors ? anchors2MarginConstraints((Anchors) oAnchors) : scriptable2MarginConstraints((JSObject) oAnchors);
+                if (oAnchors instanceof MarginConstraints) {
+                    c = (MarginConstraints) oAnchors;
+                } else {
+                    c = oAnchors instanceof Anchors ? anchors2MarginConstraints((Anchors) oAnchors) : scriptable2MarginConstraints((JSObject) oAnchors);
+                }
             } else {
                 Point location = aComp.getLocation();
                 Dimension size = aComp.getSize();

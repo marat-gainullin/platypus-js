@@ -500,11 +500,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             + "*/";
 
     @ScriptFunction(jsDoc = FIELD_JSDOC)
+    @Override
     public String getField() {
         return field;
     }
 
     @ScriptFunction
+    @Override
     public void setField(String aField) throws Exception {
         if (field == null ? aField != null : !field.equals(aField)) {
             field = aField;

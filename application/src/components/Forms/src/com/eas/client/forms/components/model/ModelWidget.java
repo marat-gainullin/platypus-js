@@ -18,6 +18,10 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V> {
 
+    public String getField();
+    
+    public void setField(String aFieldPath) throws Exception;
+    
     /**
      * Returns whether editing value is modified. Unfortunately, not all the
      * controls have straight criterion of editing completed, like an action.

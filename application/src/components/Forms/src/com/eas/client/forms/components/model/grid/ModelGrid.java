@@ -23,6 +23,7 @@ import com.eas.client.forms.Form;
 import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
 import com.eas.client.forms.components.model.grid.models.ArrayModel;
 import com.eas.client.forms.components.model.grid.models.ArrayTableModel;
@@ -900,7 +901,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     public void setFrozenColumns(int aValue) {
         if (frozenColumns != aValue) {
             frozenColumns = aValue;
-            applySplittedColumns();
+            applyColumns();
             applyHeader();
         }
     }
@@ -962,7 +963,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    protected void applySplittedColumns() {
+    protected void applyColumns() {
         // columns constraints setup
         LinearConstraint leftColsConstraint = new LinearConstraint(0, frozenColumns - 1);
         LinearConstraint rightColsConstraint = new LinearConstraint(frozenColumns, Integer.MAX_VALUE);
@@ -1159,7 +1160,32 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    // Some cleanup
+    public void addColumn(ModelColumn aColumn) {
+        addColumn(columnModel.getColumnCount(), aColumn);
+    }
+
+    public void removeColumn(int aIndex) {
+        removeColumn((ModelColumn)columnModel.getColumn(aIndex));
+    }
+
+    public void addColumn(int aIndex, ModelColumn aColumn) {
+        columnModel.addColumn(aColumn);
+        columnModel.moveColumn(columnModel.getColumnCount() - 1, aIndex);
+        // edit header...
+        // apply changes        
+        applyColumns();
+        applyHeader();
+    }
+
+    public void removeColumn(ModelColumn aColumn) {
+        columnModel.removeColumn(aColumn);
+        // edit header...
+        // apply changes        
+        applyColumns();
+        applyHeader();
+    }
+
+    // Cleanup
     protected void cleanup() throws Exception {
         removeAll();
         if (columnModel != null) {
