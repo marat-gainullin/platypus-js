@@ -4,15 +4,17 @@
  */
 package com.eas.client.forms;
 
+import javax.swing.SwingConstants;
+
 /**
  *
  * @author mg
  */
 public class HorizontalPosition {
 
-    public static final int LEFT = 2;
-    public static final int CENTER = 0;
-    public static final int RIGHT = 4;
+    public static final int LEFT = SwingConstants.LEFT;
+    public static final int CENTER = SwingConstants.CENTER;
+    public static final int RIGHT = SwingConstants.RIGHT;
 
     protected Object published;
 

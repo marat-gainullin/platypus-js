@@ -323,8 +323,23 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction
     @Override
-    public void setFormat(String aValue) throws ParseException {
+    public void setFormat(String aValue) {
         super.setFormat(aValue);
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**"
+            + " * ValueType hint for the field. It is used to determine, how to interpret format pattern."
+            + " */")
+    @Override
+    public int getValueType() {
+        return super.getValueType();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setValueType(int aValue) {
+        super.setValueType(aValue); 
     }
 
     @ScriptFunction(jsDoc = EMPTY_TEXT_JSDOC)

@@ -57,6 +57,19 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
         decorated.setFormat(aValue);
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**"
+            + " * ValueType hint for the field. It is used to determine, how to interpret format pattern."
+            + " */")
+    public int getValueType(){
+        return decorated.getValueType();
+    }
+    
+    @ScriptFunction
+    public void setValueType(int aValue){
+        decorated.setValueType(aValue);
+    }
+    
     @ScriptFunction
     public String getText() throws Exception {
         return decorated.getText();

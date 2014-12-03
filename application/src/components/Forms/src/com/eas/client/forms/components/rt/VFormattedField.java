@@ -13,9 +13,12 @@ import javax.swing.JFormattedTextField;
 
 /**
  *
- * @author Марат
+ * @author mg
  */
 public class VFormattedField extends JFormattedTextField implements HasValue<Object>, HasEmptyText, HasEditable {
+
+    protected String format;
+    protected int valueType;
 
     public VFormattedField(Object aValue) {
         super();
@@ -24,6 +27,28 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
 
     public VFormattedField() {
         this(null);
+    }
+
+    public int getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(int aValue) {
+        if (valueType != aValue) {
+            valueType = aValue;
+            setFormatterFactory(FormatsUtils.formatterFactoryByFormat(format, valueType));
+        }
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String aValue) {
+        if (format == null ? aValue != null : !format.equals(aValue)) {
+            format = aValue;
+            setFormatterFactory(FormatsUtils.formatterFactoryByFormat(format, valueType));
+        }
     }
 
     @Override
@@ -63,27 +88,6 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
     }
 
     private static final String VALUE_PROP_NAME = "value";
-
-    public String getFormat() {
-        if (super.getFormatter() != null) {
-            return FormatsUtils.formatByFormatter(super.getFormatter());
-        } else {
-            if (super.getFormatterFactory() != null) {
-                return FormatsUtils.formatByFormatter(super.getFormatterFactory().getFormatter(this));
-            } else {
-                return null;
-            }
-        }
-    }
-
-    public void setFormat(String aValue) throws ParseException {
-        if (getFormat() == null ? aValue != null : !getFormat().equals(aValue)) {
-            if (super.getFormatter() != null) {
-                FormatsUtils.applyFormat(super.getFormatter(), aValue);
-                super.setText(super.getFormatter().valueToString(super.getValue()));
-            }
-        }
-    }
 
     protected String emptyText;
 

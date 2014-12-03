@@ -28,7 +28,11 @@ import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.rt.ButtonGroupWrapper;
+import com.eas.client.forms.components.rt.FormatsUtils;
+import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
+import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.containers.AbsolutePane;
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
@@ -60,6 +64,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -145,14 +150,46 @@ public class FormFactory {
             case "LabelDesignInfo":
                 Label label = new Label();
                 readGeneralProps(anElement, label);
+                if (anElement.hasAttribute("icon")) {
+                    label.setIcon(resolveIcon(anElement.getAttribute("icon")));
+                }
+                if (anElement.hasAttribute("text")) {
+                    label.setText(anElement.getAttribute("text"));
+                }
+                label.setHorizontalAlignment(XmlDomUtils.readIntegerAttribute(anElement, "horizontalAlignment", Label.LEADING));
+                label.setVerticalAlignment(XmlDomUtils.readIntegerAttribute(anElement, "verticalAlignment", Label.CENTER));
+                label.setIconTextGap(XmlDomUtils.readIntegerAttribute(anElement, "iconTextGap", 4));
+                label.setHorizontalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "horizontalTextPosition", Label.TRAILING));
+                label.setVerticalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "verticalTextPosition", Label.CENTER));
+                if (anElement.hasAttribute("labelFor")) {
+                    String labelForName = anElement.getAttribute("labelFor");
+                    resolvers.add((Map<String, JComponent> aWidgets) -> {
+                        if (aWidgets.containsKey(labelForName)) {
+                            label.setLabelFor(aWidgets.get(labelForName));
+                        }
+                    });
+                }
                 return label;
             case "ButtonDesignInfo":
                 Button button = new Button();
                 readGeneralProps(anElement, button);
+                readButton(anElement, button);
                 return button;
             case "DropDownButtonDesignInfo":
                 DropDownButton dropDownButton = new DropDownButton();
                 readGeneralProps(anElement, dropDownButton);
+                readButton(anElement, dropDownButton);
+                if (anElement.hasAttribute("dropDownMenu")) {
+                    String dropDownMenuName = anElement.getAttribute("dropDownMenu");
+                    resolvers.add((Map<String, JComponent> aWidgets) -> {
+                        if (aWidgets.containsKey(dropDownMenuName)) {
+                            JComponent compMenu = aWidgets.get(dropDownMenuName);
+                            if (compMenu instanceof JPopupMenu) {
+                                dropDownButton.setDropDownMenu((JPopupMenu) compMenu);
+                            }
+                        }
+                    });
+                }
                 return dropDownButton;
             case "ButtonGroupDesignInfo":
                 ButtonGroup buttonGroup = new ButtonGroup();
@@ -160,42 +197,95 @@ public class FormFactory {
             case "CheckDesignInfo":
                 CheckBox checkBox = new CheckBox();
                 readGeneralProps(anElement, checkBox);
+                readButton(anElement, checkBox);
+                if (anElement.hasAttribute("selected")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "selected", Boolean.FALSE);
+                    checkBox.setSelected(selected);
+                }
+                if (anElement.hasAttribute("text")) {
+                    checkBox.setText(anElement.getAttribute("text"));
+                }
                 return checkBox;
             case "TextPaneDesignInfo":
                 TextArea textArea = new TextArea();
                 readGeneralProps(anElement, textArea);
+                if (anElement.hasAttribute("text")) {
+                    textArea.setText(anElement.getAttribute("text"));
+                }
                 return textArea;
             case "EditorPaneDesignInfo":
                 HtmlArea htmlArea = new HtmlArea();
                 readGeneralProps(anElement, htmlArea);
+                if (anElement.hasAttribute("text")) {
+                    htmlArea.setText(anElement.getAttribute("text"));
+                }
                 return htmlArea;
-            case "FormattedFieldDesignInfo":
+            case "FormattedFieldDesignInfo": {
                 FormattedField formattedField = new FormattedField();
                 readGeneralProps(anElement, formattedField);
+                String format = anElement.getAttribute("format");
+                int valueType = XmlDomUtils.readIntegerAttribute(anElement, "valueType", FormatsUtils.MASK);
+                formattedField.setValueType(valueType);
+                formattedField.setFormat(format);
+                if (anElement.hasAttribute("text")) {
+                    formattedField.setText(anElement.getAttribute("text"));
+                }
                 return formattedField;
+            }
             case "PasswordFieldDesignInfo":
                 PasswordField passwordField = new PasswordField();
                 readGeneralProps(anElement, passwordField);
+                if (anElement.hasAttribute("text")) {
+                    passwordField.setText(anElement.getAttribute("text"));
+                }
                 return passwordField;
-            case "ProgressBarDesignInfo":
+            case "ProgressBarDesignInfo": {
                 ProgressBar progressBar = new ProgressBar();
                 readGeneralProps(anElement, progressBar);
+                int minimum = XmlDomUtils.readIntegerAttribute(anElement, "minimum", 0);
+                int value = XmlDomUtils.readIntegerAttribute(anElement, "value", 0);
+                int maximum = XmlDomUtils.readIntegerAttribute(anElement, "maximum", 100);
+                progressBar.setMinimum(minimum);
+                progressBar.setMaximum(maximum);
+                progressBar.setValue(value);
+                if (anElement.hasAttribute("string")) {
+                    progressBar.setText(anElement.getAttribute("string"));
+                }
                 return progressBar;
+            }
             case "RadioDesignInfo":
                 RadioButton radio = new RadioButton();
                 readGeneralProps(anElement, radio);
+                readButton(anElement, radio);
+                if (anElement.hasAttribute("selected")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "selected", Boolean.FALSE);
+                    radio.setSelected(selected);
+                }
+                if (anElement.hasAttribute("text")) {
+                    radio.setText(anElement.getAttribute("text"));
+                }
                 return radio;
             case "SliderDesignInfo":
                 Slider slider = new Slider();
                 readGeneralProps(anElement, slider);
+                int minimum = XmlDomUtils.readIntegerAttribute(anElement, "minimum", 0);
+                int value = XmlDomUtils.readIntegerAttribute(anElement, "value", 0);
+                int maximum = XmlDomUtils.readIntegerAttribute(anElement, "maximum", 100);
+                slider.setMinimum(minimum);
+                slider.setMaximum(maximum);
+                slider.setValue(value);
                 return slider;
             case "TextFieldDesignInfo":
                 TextField textField = new TextField();
                 readGeneralProps(anElement, textField);
+                if (anElement.hasAttribute("text")) {
+                    textField.setText(anElement.getAttribute("text"));
+                }
                 return textField;
             case "ToggleButtonDesignInfo":
                 ToggleButton toggle = new ToggleButton();
                 readGeneralProps(anElement, toggle);
+                readButton(anElement, toggle);
                 return toggle;
             case "DesktopDesignInfo":
                 DesktopPane desktop = new DesktopPane();
@@ -205,30 +295,102 @@ public class FormFactory {
             case "DbCheckDesignInfo":
                 ModelCheckBox modelCheckBox = new ModelCheckBox();
                 readGeneralProps(anElement, modelCheckBox);
+                if (anElement.hasAttribute("text")) {
+                    modelCheckBox.setText(anElement.getAttribute("text"));
+                }
                 return modelCheckBox;
             case "DbComboDesignInfo":
                 ModelCombo modelCombo = new ModelCombo();
                 readGeneralProps(anElement, modelCombo);
+                boolean list = XmlDomUtils.readBooleanAttribute(anElement, "list", Boolean.TRUE);
+                if (anElement.hasAttribute("valueField")) {
+                    String valueField = anElement.getAttribute("valueField");
+                }
+                if (anElement.hasAttribute("displayField")) {
+                    String displayField = anElement.getAttribute("displayField");
+                }
                 return modelCombo;
             case "DbDateDesignInfo":
                 ModelDate modelDate = new ModelDate();
                 readGeneralProps(anElement, modelDate);
+                if (anElement.hasAttribute("dateFormat")) {
+                    String dateFormat = anElement.getAttribute("dateFormat");
+                    try {
+                        modelDate.setDateFormat(dateFormat);
+                    } catch (Exception ex) {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
                 return modelDate;
             case "DbLabelDesignInfo":
                 ModelFormattedField modelFormattedField = new ModelFormattedField();
                 readGeneralProps(anElement, modelFormattedField);
+                try {
+                    String format = anElement.getAttribute("format");
+                    int valueType = XmlDomUtils.readIntegerAttribute(anElement, "valueType", FormatsUtils.MASK);
+                    modelFormattedField.setValueType(valueType);
+                    modelFormattedField.setFormat(format);
+                    if (anElement.hasAttribute("text")) {
+                        modelFormattedField.setText(anElement.getAttribute("text"));
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 return modelFormattedField;
             case "DbSpinDesignInfo":
-                ModelSpin spin = new ModelSpin();
-                readGeneralProps(anElement, spin);
-                return spin;
+                ModelSpin modelSpin = new ModelSpin();
+                readGeneralProps(anElement, modelSpin);
+                double min = XmlDomUtils.readDoubleAttribute(anElement, "min", 0.0d);
+                double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 0.0d);
+                double max = XmlDomUtils.readDoubleAttribute(anElement, "max", 100.0d);
+                try {
+                    modelSpin.setMin(min);
+                    modelSpin.setMax(max);
+                    modelSpin.setStep(step);
+                } catch (Exception ex) {
+                    Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return modelSpin;
             case "DbTextDesignInfo":
                 ModelTextArea textarea = new ModelTextArea();
                 readGeneralProps(anElement, textarea);
+                if (anElement.hasAttribute("text")) {
+                    try {
+                        textarea.setText(anElement.getAttribute("text"));
+                    } catch (Exception ex) {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
                 return textarea;
             case "DbGridDesignInfo":
                 ModelGrid grid = new ModelGrid();
                 readGeneralProps(anElement, grid);
+                int fixedColumns = XmlDomUtils.readIntegerAttribute(anElement, "fixedColumns", 0);
+                int fixedRows = XmlDomUtils.readIntegerAttribute(anElement, "fixedRows", 0);
+                boolean insertable = XmlDomUtils.readBooleanAttribute(anElement, "insertable", Boolean.TRUE);
+                boolean deletable = XmlDomUtils.readBooleanAttribute(anElement, "deletable", Boolean.TRUE);
+                boolean editable = XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE);
+                boolean showHorizontalLines = XmlDomUtils.readBooleanAttribute(anElement, "showHorizontalLines", Boolean.TRUE);
+                boolean showVerticalLines = XmlDomUtils.readBooleanAttribute(anElement, "showVerticalLines", Boolean.TRUE);
+                boolean showOddRowsInOtherColor = XmlDomUtils.readBooleanAttribute(anElement, "showOddRowsInOtherColor", Boolean.TRUE);
+                int rowsHeight = XmlDomUtils.readIntegerAttribute(anElement, "rowsHeight", 20);
+                grid.setRowsHeight(rowsHeight);
+                grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
+                grid.setShowVerticalLines(showVerticalLines);
+                grid.setShowHorizontalLines(showHorizontalLines);
+                grid.setEditable(editable);
+                grid.setDeletable(deletable);
+                grid.setInsertable(insertable);
+                grid.setFrozenColumns(fixedColumns);
+                grid.setFrozenRows(fixedRows);
+                if (anElement.hasAttribute("oddRowsColor")) {
+                    String oddRowsColorDesc = anElement.getAttribute("oddRowsColor");
+                    grid.setOddRowsColor(new ScriptColor(oddRowsColorDesc));
+                }
+                if (anElement.hasAttribute("gridColor")) {
+                    String gridColorDesc = anElement.getAttribute("gridColor");
+                    grid.setGridColor(new ScriptColor(gridColorDesc));
+                }
                 return grid;
             // containers   
             // layouted containers
@@ -274,6 +436,14 @@ public class FormFactory {
             case "MenuCheckItemDesignInfo":
                 CheckMenuItem checkMenuItem = new CheckMenuItem();
                 readGeneralProps(anElement, checkMenuItem);
+                readButton(anElement, checkMenuItem);
+                if (anElement.hasAttribute("selected")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "selected", Boolean.FALSE);
+                    checkMenuItem.setSelected(selected);
+                }
+                if (anElement.hasAttribute("text")) {
+                    checkMenuItem.setText(anElement.getAttribute("text"));
+                }
                 return checkMenuItem;
             case "MenuDesignInfo":
                 Menu menu = new Menu();
@@ -282,10 +452,22 @@ public class FormFactory {
             case "MenuItemDesignInfo":
                 MenuItem menuitem = new MenuItem();
                 readGeneralProps(anElement, menuitem);
+                readButton(anElement, menuitem);
+                if (anElement.hasAttribute("text")) {
+                    menuitem.setText(anElement.getAttribute("text"));
+                }
                 return menuitem;
             case "MenuRadioItemDesignInfo":
                 RadioMenuItem radioMenuItem = new RadioMenuItem();
                 readGeneralProps(anElement, radioMenuItem);
+                readButton(anElement, radioMenuItem);
+                if (anElement.hasAttribute("selected")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "selected", Boolean.FALSE);
+                    radioMenuItem.setSelected(selected);
+                }
+                if (anElement.hasAttribute("text")) {
+                    radioMenuItem.setText(anElement.getAttribute("text"));
+                }
                 return radioMenuItem;
             case "MenuSeparatorDesignInfo":
                 MenuSeparator menuSeparator = new MenuSeparator();
@@ -302,6 +484,20 @@ public class FormFactory {
             default:
                 return null;
         }
+    }
+
+    protected void readButton(Element anElement, AbstractButton button) {
+        if (anElement.hasAttribute("icon")) {
+            button.setIcon(resolveIcon(anElement.getAttribute("icon")));
+        }
+        if (anElement.hasAttribute("text")) {
+            button.setText(anElement.getAttribute("text"));
+        }
+        button.setHorizontalAlignment(XmlDomUtils.readIntegerAttribute(anElement, "horizontalAlignment", Button.LEADING));
+        button.setVerticalAlignment(XmlDomUtils.readIntegerAttribute(anElement, "verticalAlignment", Button.CENTER));
+        button.setIconTextGap(XmlDomUtils.readIntegerAttribute(anElement, "iconTextGap", 4));
+        button.setHorizontalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "horizontalTextPosition", Button.TRAILING));
+        button.setVerticalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "verticalTextPosition", Button.CENTER));
     }
 
     private JComponent createLayoutedContainer(Element aLayoutElement) {
@@ -339,6 +535,9 @@ public class FormFactory {
     }
 
     private void readGeneralProps(Element anElement, JComponent aTarget) {
+        if (anElement.hasAttribute("editable") && aTarget instanceof HasEditable) {
+            ((HasEditable) aTarget).setEditable(XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE));
+        }
         if (anElement.hasAttribute("emptyText") && aTarget instanceof HasEmptyText) {
             ((HasEmptyText) aTarget).setEmptyText(anElement.getAttribute("emptyText"));
         }
@@ -380,6 +579,18 @@ public class FormFactory {
                     JComponent popup = aWidgets.get(popupName);
                     if (popup instanceof JPopupMenu) {
                         aTarget.setComponentPopupMenu((JPopupMenu) popup);
+                    }
+                });
+            }
+        }
+        if (anElement.hasAttribute("buttonGroup") && aTarget instanceof HasGroup) {
+            String buttonGroupName = anElement.getAttribute("buttonGroup");
+            if (!buttonGroupName.isEmpty()) {
+                resolvers.add((Map<String, JComponent> aWidgets) -> {
+                    JComponent buttonGroup = aWidgets.get(buttonGroupName);
+                    if (buttonGroup instanceof ButtonGroupWrapper) {
+                        ButtonGroupWrapper bgw = (ButtonGroupWrapper) buttonGroup;
+                        bgw.add(aTarget);
                     }
                 });
             }

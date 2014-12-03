@@ -4,14 +4,16 @@
  */
 package com.eas.client.forms;
 
+import javax.swing.SwingConstants;
+
 /**
  *
  * @author mg
  */
 public class Orientation {
 
-    public static final int HORIZONTAL = 0;
-    public static final int VERTICAL = 1;
+    public static final int HORIZONTAL = SwingConstants.HORIZONTAL;
+    public static final int VERTICAL = SwingConstants.VERTICAL;
 
     public static int getHORIZONTAL() {
         return HORIZONTAL;

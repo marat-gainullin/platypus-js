@@ -300,7 +300,37 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    public boolean isTreeConfigured() throws Exception {
+    public String getParentField() {
+        return parentField;
+    }
+
+    public void setParentField(String aValue) {
+        if (parentField == null ? aValue != null : !parentField.equals(aValue)) {
+            boolean wasTree = isTreeConfigured();
+            parentField = aValue;
+            boolean isTree = isTreeConfigured();
+            if (wasTree != isTree) {
+                applyRows();
+            }
+        }
+    }
+
+    public String getChildrenField() {
+        return childrenField;
+    }
+
+    public void setChildrenField(String aValue) {
+        if (childrenField == null ? aValue != null : !childrenField.equals(aValue)) {
+            boolean wasTree = isTreeConfigured();
+            childrenField = aValue;
+            boolean isTree = isTreeConfigured();
+            if (wasTree != isTree) {
+                applyRows();
+            }
+        }
+    }
+
+    public final boolean isTreeConfigured() {
         return parentField != null && !parentField.isEmpty()
                 && childrenField != null && !childrenField.isEmpty();
     }
@@ -378,6 +408,117 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     public ModelGrid() {
         super();
+        // TODO: remove ROWS_HEADER_TYPE and substitute it with ServiceColumn component
+        // Columns configuration
+        columnsSelectionModel = new DefaultListSelectionModel();
+        columnModel = new DefaultTableColumnModel();
+        columnModel.setSelectionModel(columnsSelectionModel);
+        columnModel.setColumnSelectionAllowed(true);
+        rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        // rows configuration
+        rowsSelectionModel = new DefaultListSelectionModel();
+
+        generalSelectionChangesReflector = new GeneralSelectionChangesReflector();
+        rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
+
+        // constrained layer models setup
+        tlTable = new GridTable(null, this);
+        trTable = new GridTable(null, this);
+        blTable = new GridTable(tlTable, this);
+        brTable = new GridTable(trTable, this);
+
+        tlTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        blTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        brTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        tlTable.setAutoCreateColumnsFromModel(false);
+        trTable.setAutoCreateColumnsFromModel(false);
+        blTable.setAutoCreateColumnsFromModel(false);
+        brTable.setAutoCreateColumnsFromModel(false);
+
+        // keyboard focus flow setup
+        tlTable.addKeyListener(tablesFocusManager);
+        trTable.addKeyListener(tablesFocusManager);
+        blTable.addKeyListener(tablesFocusManager);
+        brTable.addKeyListener(tablesFocusManager);
+        // mouse propagating setup
+        tlTable.addMouseListener(tablesMousePropagator);
+        trTable.addMouseListener(tablesMousePropagator);
+        blTable.addMouseListener(tablesMousePropagator);
+        brTable.addMouseListener(tablesMousePropagator);
+        tlTable.addMouseWheelListener(tablesMousePropagator);
+        trTable.addMouseWheelListener(tablesMousePropagator);
+        blTable.addMouseWheelListener(tablesMousePropagator);
+        brTable.addMouseWheelListener(tablesMousePropagator);
+        tlTable.addMouseMotionListener(tablesMousePropagator);
+        trTable.addMouseMotionListener(tablesMousePropagator);
+        blTable.addMouseMotionListener(tablesMousePropagator);
+        brTable.addMouseMotionListener(tablesMousePropagator);
+        // grid columns setup.
+        // left header setup
+        lheader = new MultiLevelHeader();
+        lheader.setTable(tlTable);
+        tlTable.getTableHeader().setResizingAllowed(true);
+        lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
+        lheader.setRowSorter(rowSorter);
+        // right header setup
+        rheader = new MultiLevelHeader();
+        rheader.setTable(trTable);
+        trTable.getTableHeader().setResizingAllowed(true);
+        rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
+        rheader.setRowSorter(rowSorter);
+
+        // Tables are enclosed in panels to avoid table's stupid efforts
+        // to configure it's parent scroll pane.
+        JPanel tlPanel = new JPanel(new BorderLayout());
+        tlPanel.add(lheader, BorderLayout.NORTH);
+        tlPanel.add(tlTable, BorderLayout.CENTER);
+        JPanel trPanel = new JPanel(new BorderLayout());
+        trPanel.add(rheader, BorderLayout.NORTH);
+        trPanel.add(trTable, BorderLayout.CENTER);
+        JPanel blPanel = new JPanel(new BorderLayout());
+        blPanel.add(blTable, BorderLayout.CENTER);
+        JPanel brPanel = new GridTableScrollablePanel(brTable);
+        //brPanel.add(brTable, BorderLayout.CENTER);
+
+        boolean needOutlineCols = frozenColumns > 0;
+        tlPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
+        trPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, 0, FIXED_COLOR));
+        blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
+
+        progressIndicator = new JLabel(processIcon);
+        progressIndicator.setVisible(false);
+        gridScroll = new JScrollPane();
+        gridScroll.setCorner(JScrollPane.UPPER_LEFT_CORNER, tlPanel);
+        gridScroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, progressIndicator);
+        gridScroll.setColumnHeaderView(trPanel);
+        gridScroll.getColumnHeader().addChangeListener(new ColumnHeaderScroller(gridScroll.getColumnHeader(), gridScroll.getViewport()));
+        gridScroll.setRowHeaderView(blPanel);
+        gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
+        gridScroll.setViewportView(brPanel);
+
+        setLayout(new BorderLayout());
+        add(gridScroll, BorderLayout.CENTER);
+        //
+        lheader.setNeightbour(rheader);
+        rheader.setNeightbour(lheader);
+
+        configureActions();
+        applyEnabled();
+        applyFont();
+        applyEditable();
+        applyBackground();
+        applyForeground();
+        applyComponentPopupMenu();
+        applyGridColor();
+        applyRowHeight();
+        applyShowHorizontalLines();
+        applyShowVerticalLines();
+        applyToolTipText();
+        applyShowOddRowsInOtherColor();
+        applyOddRowsColor();
+        applyComponentOrientation(getComponentOrientation());// Swing allows only argumented call. 
         setupStyle();
     }
 
@@ -772,7 +913,41 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     public void setFrozenRows(int aValue) {
         if (frozenRows != aValue) {
             frozenRows = aValue;
+            applyRows();
         }
+    }
+
+    protected void applyRows() {
+        if (isTreeConfigured()) {
+            rowsModel = new ArrayTreedModel(columnModel, null, parentField, childrenField, generalOnRender);
+            deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
+            rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
+        } else {
+            rowsModel = new ArrayTableModel(columnModel, null, generalOnRender);
+            deepModel = (TableModel) rowsModel;
+            rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
+        }
+        TableModel generalModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
+
+        // rows constraints setup
+        LinearConstraint topRowsConstraint = new LinearConstraint(0, frozenRows - 1);
+        LinearConstraint bottomRowsConstraint = new LinearConstraint(frozenRows, Integer.MAX_VALUE);
+        tlTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
+        trTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
+        blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
+        brTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
+        //
+        tlTable.setModel(generalModel);
+        trTable.setModel(generalModel);
+        blTable.setModel(generalModel);
+        brTable.setModel(generalModel);
+        tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
+        trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
+
+        blTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
+
+        brTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
+        configureTreedView();
     }
 
     @Undesignable
@@ -1001,152 +1176,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         blTable = null;
         brTable = null;
         gridScroll = null;
-    }
-
-    public void configure() throws Exception {
-        cleanup();
-        // TODO: remove ROWS_HEADER_TYPE and substitute it with ServiceColumn component
-        // Columns configuration
-        columnsSelectionModel = new DefaultListSelectionModel();
-        columnModel = new DefaultTableColumnModel();
-        columnModel.setSelectionModel(columnsSelectionModel);
-        columnModel.setColumnSelectionAllowed(true);
-        rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        // Rows configuration
-        rowsSelectionModel = new DefaultListSelectionModel();
-        if (isTreeConfigured()) {
-            rowsModel = new ArrayTreedModel(columnModel, null, parentField, childrenField, generalOnRender);
-            deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
-            rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
-        } else {
-            rowsModel = new ArrayTableModel(columnModel, null, generalOnRender);
-            deepModel = (TableModel) rowsModel;
-            rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
-        }
-        TableModel generalModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
-
-        generalSelectionChangesReflector = new GeneralSelectionChangesReflector();
-        rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-        configureTreedView();
-
-        // rows constraints setup
-        LinearConstraint topRowsConstraint = new LinearConstraint(0, frozenRows - 1);
-        LinearConstraint bottomRowsConstraint = new LinearConstraint(frozenRows, Integer.MAX_VALUE);
-
-        // constrained layer models setup
-        tlTable = new GridTable(null, this);
-        trTable = new GridTable(null, this);
-        blTable = new GridTable(tlTable, this);
-        brTable = new GridTable(trTable, this);
-        tlTable.setModel(generalModel);
-        trTable.setModel(generalModel);
-        blTable.setModel(generalModel);
-        brTable.setModel(generalModel);
-
-        tlTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
-        tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-        trTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
-        trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-
-        blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
-        blTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-
-        brTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
-        brTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-
-        tlTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        blTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        brTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-        tlTable.setAutoCreateColumnsFromModel(false);
-        trTable.setAutoCreateColumnsFromModel(false);
-        blTable.setAutoCreateColumnsFromModel(false);
-        brTable.setAutoCreateColumnsFromModel(false);
-
-        // keyboard focus flow setup
-        tlTable.addKeyListener(tablesFocusManager);
-        trTable.addKeyListener(tablesFocusManager);
-        blTable.addKeyListener(tablesFocusManager);
-        brTable.addKeyListener(tablesFocusManager);
-        // mouse propagating setup
-        tlTable.addMouseListener(tablesMousePropagator);
-        trTable.addMouseListener(tablesMousePropagator);
-        blTable.addMouseListener(tablesMousePropagator);
-        brTable.addMouseListener(tablesMousePropagator);
-        tlTable.addMouseWheelListener(tablesMousePropagator);
-        trTable.addMouseWheelListener(tablesMousePropagator);
-        blTable.addMouseWheelListener(tablesMousePropagator);
-        brTable.addMouseWheelListener(tablesMousePropagator);
-        tlTable.addMouseMotionListener(tablesMousePropagator);
-        trTable.addMouseMotionListener(tablesMousePropagator);
-        blTable.addMouseMotionListener(tablesMousePropagator);
-        brTable.addMouseMotionListener(tablesMousePropagator);
-        // grid columns setup.
-        // left header setup
-        lheader = new MultiLevelHeader();
-        lheader.setTable(tlTable);
-        tlTable.getTableHeader().setResizingAllowed(true);
-        lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
-        lheader.setRowSorter(rowSorter);
-        // right header setup
-        rheader = new MultiLevelHeader();
-        rheader.setTable(trTable);
-        trTable.getTableHeader().setResizingAllowed(true);
-        rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
-        rheader.setRowSorter(rowSorter);
-
-        // Tables are enclosed in panels to avoid table's stupid efforts
-        // to configure it's parent scroll pane.
-        JPanel tlPanel = new JPanel(new BorderLayout());
-        tlPanel.add(lheader, BorderLayout.NORTH);
-        tlPanel.add(tlTable, BorderLayout.CENTER);
-        JPanel trPanel = new JPanel(new BorderLayout());
-        trPanel.add(rheader, BorderLayout.NORTH);
-        trPanel.add(trTable, BorderLayout.CENTER);
-        JPanel blPanel = new JPanel(new BorderLayout());
-        blPanel.add(blTable, BorderLayout.CENTER);
-        JPanel brPanel = new GridTableScrollablePanel(brTable);
-        //brPanel.add(brTable, BorderLayout.CENTER);
-
-        boolean needOutlineCols = frozenColumns > 0;
-        tlPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
-        trPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, 0, FIXED_COLOR));
-        blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
-
-        progressIndicator = new JLabel(processIcon);
-        progressIndicator.setVisible(false);
-        gridScroll = new JScrollPane();
-        gridScroll.setCorner(JScrollPane.UPPER_LEFT_CORNER, tlPanel);
-        gridScroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, progressIndicator);
-        gridScroll.setColumnHeaderView(trPanel);
-        gridScroll.getColumnHeader().addChangeListener(new ColumnHeaderScroller(gridScroll.getColumnHeader(), gridScroll.getViewport()));
-        gridScroll.setRowHeaderView(blPanel);
-        gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
-        gridScroll.setViewportView(brPanel);
-
-        setLayout(new BorderLayout());
-        add(gridScroll, BorderLayout.CENTER);
-        //
-        lheader.setNeightbour(rheader);
-        rheader.setNeightbour(lheader);
-
-        configureActions();
-        applyEnabled();
-        applyFont();
-        applyEditable();
-        applyBackground();
-        applyForeground();
-        applyComponentPopupMenu();
-        applyGridColor();
-        applyRowHeight();
-        applyShowHorizontalLines();
-        applyShowVerticalLines();
-        applyToolTipText();
-        applyShowOddRowsInOtherColor();
-        applyOddRowsColor();
-        applyComponentOrientation(getComponentOrientation());// Swing allows only argumented call. 
-        repaint();
     }
 
     @Override
