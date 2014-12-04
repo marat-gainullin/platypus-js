@@ -545,15 +545,19 @@ public class ScriptedResource {
             if (!required.contains(aScriptName)) {
                 required.add(aScriptName);
                 ModuleStructure structure = app.getModules().getModule(aScriptName, null, null);
-                AppElementFiles files = structure.getParts();
-                File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-                URL sourceUrl = sourceFile.toURI().toURL();
-                if (files.isModule()) {
-                    qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null);
-                    sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
+                if (structure != null) {
+                    AppElementFiles files = structure.getParts();
+                    File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                    URL sourceUrl = sourceFile.toURI().toURL();
+                    if (files.isModule()) {
+                        qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null);
+                        sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
+                    }
+                    _require(structure.getClientDependencies().toArray(new String[]{}), required);
+                    ScriptUtils.exec(sourceUrl);
+                } else {
+                    throw new FileNotFoundException(aScriptName);
                 }
-                _require(structure.getClientDependencies().toArray(new String[]{}), required);
-                ScriptUtils.exec(sourceUrl);
             }
         }
     }

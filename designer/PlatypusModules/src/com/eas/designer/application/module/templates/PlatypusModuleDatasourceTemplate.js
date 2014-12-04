@@ -28,7 +28,7 @@ function ${appElementName}(){
      * @param aParams Object, with properties as defined in this.params.
      * Properties values are setted by platypus runtime engine.
      * @param aOnSuccess Succes callback for asynchronous version.
-     * @param aOnSuccess Failure callback for asynchronous version.
+     * @param aOnFailure Failure callback for asynchronous version.
      */
     this.fetch = function(aParams, aOnSuccess, aOnFailure) {
         if(aOnSuccess){
@@ -52,7 +52,7 @@ function ${appElementName}(){
      * Method invoked by platypus runtime in data applying purposes.
      * @param aLog Array of changes - log of changes made by clients or server side data driven code to be applied.
      * @param aOnSuccess Succes callback for asynchronous version.
-     * @param aOnSuccess Failure callback for asynchronous version.
+     * @param aOnFailure Failure callback for asynchronous version.
      */
     this.apply = function(aLog, aOnSuccess, aOnFailure) {
         P.Logger.info("${appElementName}. aLog.length: " + aLog.length + ";");

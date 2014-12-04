@@ -146,7 +146,7 @@ public class Entity implements RowsetListener, HasPublished{
 		function propsToArray(aObj){
 			var linearProps = [];
 			for(var pName in aObj){
-				if(isNaN(pName) && pName != 'length'){
+				if(isNaN(pName) && pName != "length"){
 					linearProps.push(pName);
 					linearProps.push(aObj[pName]);
 				}
@@ -589,20 +589,22 @@ public class Entity implements RowsetListener, HasPublished{
 		// entity.params
 		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
 		var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
+		var paramsCount = nativeParams.@com.bearsoft.rowset.metadata.Parameters::getParametersCount()();
 		var publishedParams = {};  
-		Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-		Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
-		for(var i = 0; i < publishedParams.schema.length; i++){
+		var publishedParamsSchema = @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity);
+		for(var i = 0; i < paramsCount; i++){
 			(function(){
 				var _i = i;
 				var propDesc = {
-					 get : function(){ return publishedParams.schema[_i].value; },
-					 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
+					 get : function(){ return publishedParamsSchema[_i].value; },
+					 set : function(aValue){ publishedParamsSchema[_i].value = aValue; }
 				};
-				Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
+				Object.defineProperty(publishedParams, publishedParamsSchema[_i].name, propDesc);
 				Object.defineProperty(publishedParams, _i, propDesc);
 			})();
 		}			
+		if(!publishedParams.schema)
+			Object.defineProperty(publishedParams, "schema", { get : function(){ return publishedParamsSchema; }});
 		Object.defineProperty(published, "params", {
 			get : function(){
 				return publishedParams;
@@ -720,16 +722,17 @@ public class Entity implements RowsetListener, HasPublished{
 						return aRow;
 					}
 				}});
-				Object.defineProperty(published, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
-				Object.defineProperty(published, "length", { get : function(){ return published.schema.length; }});
-				for(var i = 0; i < published.schema.length; i++){
+				var nativeFields = aEntity.@com.eas.client.model.Entity::getFields()();
+				var fieldsCount = nativeFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();
+				var schema = @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeFields, aEntity);
+				for(var i = 0; i < fieldsCount; i++){
 					(function(){
 						var _i = i;
 						var propDesc = {
-							 get : function(){ return $wnd.P.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(published.schema[_i].name)); },
-							 set : function(aValue){ aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[_i].name, $wnd.P.boxAsJava(aValue)); }
+							 get : function(){ return $wnd.P.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(schema[_i].name)); },
+							 set : function(aValue){ aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(schema[_i].name, $wnd.P.boxAsJava(aValue)); }
 						};
-						Object.defineProperty(published, published.schema[_i].name, propDesc);
+						Object.defineProperty(published, schema[_i].name, propDesc);
 						Object.defineProperty(published, (_i+""),     propDesc);
 					})();
 				}
@@ -772,9 +775,9 @@ public class Entity implements RowsetListener, HasPublished{
 				
 				Object.defineProperty(published, "empty", { get : function(){ return published.isEmpty()}});
 				Object.defineProperty(published, "tableDescription", { get : function(){ return published.getTableDescription()}});
-				Object.defineProperty(published, "length", { get : function(){ return published.getFieldsCount()}});
+				var fieldsCount = published.getFieldsCount();
 				
-				for(var i = 0; i < published.length; i++)
+				for(var i = 0; i < fieldsCount; i++)
 				{
 					(function(){
 						var _i = i;
@@ -2351,10 +2354,10 @@ public class Entity implements RowsetListener, HasPublished{
 			// value
 			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
 		}
-		Row inserted = rowset.insertAt(aIndex, initingValues);
-		if(inserted != null){
-			publishRowFacade(inserted, this, aTarget);
-		}
+		Row inserted = new Row();
+		inserted.setFields(fields);
+		publishRowFacade(inserted, this, aTarget);
+		rowset.insertAt(inserted, false, aIndex, initingValues);
 	}
 
 	public void setPublished(JavaScriptObject aPublished) {

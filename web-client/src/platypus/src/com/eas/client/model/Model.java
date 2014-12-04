@@ -40,11 +40,6 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class Model implements HasPublished {
 
-	public static final String SCRIPT_MODEL_NAME = "model";
-	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
-	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
-	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-
 	protected AppClient client;
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();

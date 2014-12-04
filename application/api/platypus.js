@@ -4,13 +4,6 @@
     var global = this;
     var oldP = global.P;
     global.P = {};
-    Object.defineProperty(global.P, "restore", {
-        value: function () {
-            var ns = global.P;
-            global.P = oldP;
-            return ns;
-        }
-    });
     /*
      global.P = this; // global scope of api - for legacy applications
      global.P.restore = function() {
@@ -741,8 +734,6 @@
                 Object.defineProperty(target, n, valueAccessorDesc);
             })();
         }
-        if (!target.schema)
-            Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
         // ORM mutable scalar and readonly collection properties
         var ormDefs = nnFields.getOrmDefinitions();
         for each (var o in ormDefs.keySet()) {
@@ -822,12 +813,18 @@
                 var justInserted;
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
-                        justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        var initing = objectToInsertIniting(arguments[a]);
+                        var justInserted = new RowClass();
+                        justInserted.setFields(rowset.getFields());
                         justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                        rowset.insertAt(justInserted, rowset.size() + 1, a < arguments.length - 1, initing);
                     }
                 } else if (arguments.length === 1) {
-                    justInserted = rowset.insertAt(rowset.size() + 1, true, objectToInsertIniting(arguments[0]));
+                    var initing = objectToInsertIniting(arguments[0]);
+                    var justInserted = new RowClass();
+                    justInserted.setFields(rowset.getFields());
                     justInserted.setPublished(publishRow(justInserted, arguments[0]));
+                    rowset.insertAt(justInserted, rowset.size() + 1, true, initing);
                     Array.prototype.push.call(target, justInserted.getPublished());
                 }
                 return target.length;
@@ -884,8 +881,11 @@
                     }
                     var insertAt = beginToDeleteAt;
                     for (var a = 2; a < arguments.length; a++) {
-                        var justInserted = rowset.insertAt(insertAt + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        var initing = objectToInsertIniting(arguments[a]);
+                        var justInserted = new RowClass();
+                        justInserted.setFields(rowset.getFields());
                         justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                        rowset.insertAt(justInserted, insertAt + 1, a < arguments.length - 1, initing);
                         insertAt++;
                     }
                     return deleted;
@@ -900,12 +900,18 @@
                 var justInserted;
                 if (arguments.length > 1) {
                     for (var a = 0; a < arguments.length; a++) {
-                        justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        var initing = objectToInsertIniting(arguments[a]);
+                        var justInserted = new RowClass();
+                        justInserted.setFields(rowset.getFields());
                         justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                        rowset.insertAt(justInserted, a + 1, a < arguments.length - 1, initing);
                     }
                 } else if (arguments.length === 1) {
-                    justInserted = rowset.insertAt(1, true, objectToInsertIniting(arguments[0]));
+                    var initing = objectToInsertIniting(arguments[0]);
+                    var justInserted = new RowClass();
+                    justInserted.setFields(rowset.getFields());
                     justInserted.setPublished(publishRow(justInserted, arguments[0]));
+                    rowset.insertAt(justInserted, 1, true, initing);
                     Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
                 return target.length;
@@ -1002,9 +1008,6 @@
                 });
             })();
         }
-        Object.defineProperty(target, "length", {
-            value: nFields.size()
-        });
         return target;
     });
 
@@ -1080,16 +1083,11 @@
                     Object.defineProperty(pParams, p, pDesc);
                 })();
             }
-            Object.defineProperty(pParams, "length", {value: ncParameters.size()});
             Object.defineProperty(published, "params", {value: pParams});
             // entity.params.schema.p1 syntax
             var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
-            Object.defineProperty(pParams, "schema", {value: pParamsSchema});
-            Object.defineProperty(pSchema, "length", {
-                get: function () {
-                    return nFields.size();
-                }
-            });
+            if(!pParams.schema)
+                Object.defineProperty(pParams, "schema", {value: pParamsSchema});
             return published;
         }
         var entities = model.entities();
@@ -1388,6 +1386,22 @@ if (!P) {
      */
     P.loadTemplate = function (aModuleName, aData) {
     };
+    /**
+     * Consists of show forms.
+     * @type Array
+     */
+    P.Form.shown = [];
+    /**
+     * Fast scan of P.Form.shown.
+     * @param aFormKey form key value.
+     * @returns {P.Form} instance
+     */
+    P.Form.getShownForm = function(aFormKey){};
+    /**
+     * P.Form.shown change handler.
+     * @returns {Function}
+     */
+    P.Form.onChange = function(){};
     /**
      * Constructs server module network proxy.
      * @constructor

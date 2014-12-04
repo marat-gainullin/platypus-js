@@ -1167,7 +1167,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                 assert fields != null;
                 Row row = rowsClass.newInstance();
                 row.setFields(fields);
-                insertAt(row, aAjusting, insertAt, initingValues);
+                insertAt(row, insertAt, aAjusting, initingValues);
                 return row;
             } catch (InstantiationException | IllegalAccessException ex) {
                 throw new RowsetException(ex);
@@ -1212,7 +1212,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         } else {
             insertAtPosition = currentRowPos + 1;
         }
-        insertAt(toInsert, aAjusting, insertAtPosition, initingValues);
+        insertAt(toInsert, insertAtPosition, aAjusting, initingValues);
     }
 
     /**
@@ -1229,7 +1229,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      * @param initingValues Values inserting row to be initialized with.
      * @throws RowsetException
      */
-    public void insertAt(Row toInsert, boolean aAjusting, int insertAt, Object... initingValues) throws RowsetException {
+    public void insertAt(Row toInsert, int insertAt, boolean aAjusting, Object... initingValues) throws RowsetException {
         if (!showOriginal) {
             assert fields != null;
             if (toInsert == null) {

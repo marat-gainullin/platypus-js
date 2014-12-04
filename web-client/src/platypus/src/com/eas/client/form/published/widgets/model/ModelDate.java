@@ -135,7 +135,7 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
-		if (javaValue instanceof Date)
+		if (javaValue == null || javaValue instanceof Date)
 			setValue((Date) javaValue, true);
 		else
 			throw new IllegalArgumentException("A value of type 'Date' expected");

@@ -16,6 +16,7 @@ import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -65,16 +66,18 @@ public class GridSection<T> extends CellTable<T> {
 
 	@Override
 	public void setKeyboardSelectedRow(int row, int subrow, boolean stealFocus) {
-		onBlur();// When selecting cells with shift key, focused cell is not cleared without such hack. 
-	    super.setKeyboardSelectedRow(row, subrow, stealFocus);
+		onBlur();// When selecting cells with shift key, focused cell is not
+		         // cleared without such hack.
+		super.setKeyboardSelectedRow(row, subrow, stealFocus);
 	}
-	
+
 	@Override
 	public void setKeyboardSelectedColumn(int column, boolean stealFocus) {
-		onBlur();// When selecting cells with shift key, focused cell is not cleared without such hack. 
-	    super.setKeyboardSelectedColumn(column, stealFocus);
+		onBlur();// When selecting cells with shift key, focused cell is not
+		         // cleared without such hack.
+		super.setKeyboardSelectedColumn(column, stealFocus);
 	}
-	
+
 	public void setColumnsPartners(AbstractCellTable<T>[] aPartners) {
 		columnsPartners = aPartners;
 	}
@@ -151,17 +154,26 @@ public class GridSection<T> extends CellTable<T> {
 	public boolean hideColumn(Column<T, ?> aColumn) {
 		if (!isColumnHidden(aColumn)) {
 			hiddenColumns.put(aColumn, getColumnWidth(aColumn));
-			setColumnWidth(aColumn, "0px");
+			super.setColumnWidth(aColumn, "0px");
 			return true;
 		} else {
 			return false;
 		}
 	}
 
+	@Override
+	public void setColumnWidth(Column<T, ?> aColumn, String width) {
+		if (isColumnHidden(aColumn)) {
+			super.setColumnWidth(aColumn, "0px");
+		} else {
+			super.setColumnWidth(aColumn, width);
+		}
+	}
+
 	public boolean showColumn(Column<T, ?> aColumn) {
 		if (isColumnHidden(aColumn)) {
 			String wasWidth = hiddenColumns.remove(aColumn);
-			setColumnWidth(aColumn, wasWidth);
+			super.setColumnWidth(aColumn, wasWidth);
 			return true;
 		} else {
 			return false;

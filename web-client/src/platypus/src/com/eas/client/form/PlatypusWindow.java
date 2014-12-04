@@ -695,16 +695,19 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        aPublished.show = function() {
 		        closeCallback = null;
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, null);
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.showModal = function(aCallback) {
 		        closeCallback = aCallback;
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(true, aCallback, null);
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.showOnPanel = function(aPanel) {
 	        	$wnd.P.Logger.info("showOnPanel is unsupported. Use widget.showOn(...) method instead.");
 	        };
 	        aPublished.showInternalFrame = function(aPanel) {
 	        	showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, aPanel != null ? aPanel.unwrap() : null);
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.minimize = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::minimize()();
@@ -714,6 +717,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        };
 	        aPublished.toFront = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::toFront()();
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.restore = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::restore()();
