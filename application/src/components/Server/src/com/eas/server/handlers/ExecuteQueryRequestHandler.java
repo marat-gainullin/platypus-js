@@ -37,7 +37,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
     @Override
     protected void handle2(Session aSession, Consumer<ExecuteQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            ((LocalQueriesProxy)getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
+            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityId() == null) {
                         throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
@@ -67,7 +67,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
         }
     }
 
-    public void handleQuery(SqlQuery aQuery, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception, RowsetException {
+    public void handleQuery(SqlQuery aQuery, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception  {
         Parameters queryParams = aQuery.getParameters();
         assert queryParams.getParametersCount() == getRequest().getParams().getParametersCount();
         for (int i = 1; i <= queryParams.getParametersCount(); i++) {

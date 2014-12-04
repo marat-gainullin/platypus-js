@@ -81,6 +81,19 @@ public class ScriptedFlowProvider implements FlowProvider {
         }
     }
 
+    private class ExecutionChecker {
+
+        boolean isExecutionNeeded;
+
+        public boolean isExecutionNeeded() {
+            return isExecutionNeeded;
+        }
+
+        public void setExecutionNeeded(boolean state) {
+            isExecutionNeeded = state;
+        }
+    }
+
     @Override
     public Rowset refresh(final Parameters aParameters, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("fetch")) {
@@ -94,24 +107,27 @@ public class ScriptedFlowProvider implements FlowProvider {
                         jsParams.setMember(p.getName(), ScriptUtils.toJs(p.getValue()));
                     }
                     if (onSuccess != null) {
+                        final ExecutionChecker exChecker = new ExecutionChecker();
                         Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{
                             jsParams,
                             new AbstractJSObject() {
 
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
-                                    try {
-                                        Object ojsRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
-                                        Rowset rowset = new Rowset(expectedFields);
-                                        readRowset(ojsRowset, rowset);
+                                    if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            onSuccess.accept(rowset);
+                                            Object ojsRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
+                                            Rowset rowset = new Rowset(expectedFields);
+                                            readRowset(ojsRowset, rowset);
+                                            try {
+                                                onSuccess.accept(rowset);
+                                            } catch (Exception ex) {
+                                                Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
                                         } catch (Exception ex) {
-                                            Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                    } catch (Exception ex) {
-                                        if (onFailure != null) {
-                                            onFailure.accept(ex);
+                                            if (onFailure != null) {
+                                                onFailure.accept(ex);
+                                            }
                                         }
                                     }
                                     return null;
@@ -121,28 +137,30 @@ public class ScriptedFlowProvider implements FlowProvider {
 
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
-                                    if (onFailure != null) {
-                                        if (args.length > 0) {
-                                            if (args[0] instanceof Exception) {
-                                                onFailure.accept((Exception) args[0]);
+                                    if (exChecker.isExecutionNeeded()) {
+                                        if (onFailure != null) {
+                                            if (args.length > 0) {
+                                                if (args[0] instanceof Exception) {
+                                                    onFailure.accept((Exception) args[0]);
+                                                } else {
+                                                    onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                }
                                             } else {
-                                                onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                onFailure.accept(new Exception("No error information from fetch method"));
                                             }
-                                        } else {
-                                            onFailure.accept(new Exception("No error information from fetch method"));
                                         }
                                     }
                                     return null;
                                 }
                             }
                         }));
-                        if (oRowset == null || oRowset instanceof Undefined) {
-                            return null;
-                        } else {
+                        if (oRowset != null && !(oRowset instanceof Undefined)) {
                             Rowset rowset = new Rowset(expectedFields);
                             readRowset((JSObject) oRowset, rowset);
-                            return rowset;
+                            onSuccess.accept(rowset);
+                            exChecker.setExecutionNeeded(false);
                         }
+                        return null;
                     } else {
                         Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{jsParams}));
                         if (oRowset == null || oRowset instanceof Undefined) {
@@ -161,29 +179,33 @@ public class ScriptedFlowProvider implements FlowProvider {
 
     @Override
     public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+
         if (source.hasMember("nextPage")) {
             Object oNextPage = source.getMember("nextPage");
             if (oNextPage instanceof JSObject) {
                 JSObject jsNextPage = (JSObject) oNextPage;
                 if (jsNextPage.isFunction()) {
                     if (onSuccess != null) {
+                        final ExecutionChecker exChecker = new ExecutionChecker();
                         Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{
                             new AbstractJSObject() {
 
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
-                                    try {
-                                        Object pjsRowset = args.length > 0 ? args[0] : null;
-                                        Rowset rowset = new Rowset(expectedFields);
-                                        readRowset(pjsRowset, rowset);
+                                    if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            onSuccess.accept(rowset);
-                                        } catch (Exception ex) {
-                                            Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                    } catch (RowsetMissingException | RowsetException ex) {
-                                        if (onFailure != null) {
-                                            onFailure.accept(ex);
+                                            Object pjsRowset = args.length > 0 ? args[0] : null;
+                                            Rowset rowset = new Rowset(expectedFields);
+                                            readRowset(pjsRowset, rowset);
+                                            try {
+                                                onSuccess.accept(rowset);
+                                            } catch (Exception ex) {
+                                                Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                        } catch (RowsetMissingException | RowsetException ex) {
+                                            if (onFailure != null) {
+                                                onFailure.accept(ex);
+                                            }
                                         }
                                     }
                                     return null;
@@ -194,28 +216,30 @@ public class ScriptedFlowProvider implements FlowProvider {
 
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
-                                    if (onFailure != null) {
-                                        if (args.length > 0) {
-                                            if (args[0] instanceof Exception) {
-                                                onFailure.accept((Exception) args[0]);
+                                    if (exChecker.isExecutionNeeded()) {
+                                        if (onFailure != null) {
+                                            if (args.length > 0) {
+                                                if (args[0] instanceof Exception) {
+                                                    onFailure.accept((Exception) args[0]);
+                                                } else {
+                                                    onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                }
                                             } else {
-                                                onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                onFailure.accept(new Exception("No error information from nextPage method"));
                                             }
-                                        } else {
-                                            onFailure.accept(new Exception("No error information from nextPage method"));
                                         }
                                     }
                                     return null;
                                 }
                             }
                         }));
-                        if (oRowset == null || oRowset instanceof Undefined) {
-                            return null;
-                        } else {
+                        if (oRowset != null && !(oRowset instanceof Undefined)) {
                             Rowset rowset = new Rowset(expectedFields);
                             readRowset((JSObject) oRowset, rowset);
-                            return rowset;
+                            onSuccess.accept(rowset);
+                            exChecker.setExecutionNeeded(false);
                         }
+                        return null;
                     } else {
                         Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
                         if (oRowset == null || oRowset instanceof Undefined) {
