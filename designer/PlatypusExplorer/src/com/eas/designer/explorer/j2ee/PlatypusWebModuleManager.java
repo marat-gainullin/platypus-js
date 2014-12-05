@@ -57,7 +57,6 @@ public class PlatypusWebModuleManager {
 
     public static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
     public static final String PLATYPUS_SERVLET_URL_PATTERN = "/application/*"; //NOI18N
-    public static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
     public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
     public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
     public static final String START_PAGE_FILE_NAME = "application-start.html"; //NOI18N
@@ -295,7 +294,6 @@ public class PlatypusWebModuleManager {
 
     private void configureParams(WebApplication wa) throws Exception {
         wa.addInitParam(new ContextParam(PlatypusServerConfig.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
-        wa.addInitParam(new ContextParam(PlatypusServerConfig.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
         wa.addInitParam(new ContextParam(PlatypusServerConfig.APPELEMENT_CONF_PARAM, PlatypusProjectSettings.START_JS_FILE_NAME));
     }
 

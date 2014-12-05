@@ -57,7 +57,10 @@ public class PlatypusHttpServlet extends HttpServlet {
         try {
             super.init(config);
             PlatypusServerConfig scp = PlatypusServerConfig.parse(config);
-            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getAppElementName(), scp.getMaximumJdbcThreads(), scp.getMaximumServicesTreads());
+            String realRootPath = config.getServletContext().getRealPath("/");
+            File realRoot = new File(realRootPath);     
+            String realRootUrl = realRoot.toURI().toURL().toString();
+            serverCore = PlatypusServerCore.getInstance(realRootUrl, scp.getDefaultDatasourceName(), scp.getAppElementName(), scp.getMaximumJdbcThreads(), scp.getMaximumServicesTreads());
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
