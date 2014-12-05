@@ -37,7 +37,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.bearsoft.rowset.events.RowChangeEvent;
 
 public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText, HasActionHandlers {
-	
 
 	protected CrossUpdater updater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
 
@@ -59,15 +58,18 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 								if (change.getRowset() == displayRowset && change.getFieldIndex() == displayElement.getColIndex() || change.getRowset() == valueRowset
 								        && change.getFieldIndex() == valueElement.getColIndex()) {
 									setValue(lookup.lookupRow(valueKey), true);
-									redraw();
+									if (list)
+										redraw();
 								}
 							} else {
 								setValue(lookup.lookupRow(valueKey), true);
-								redraw();
+								if (list)
+									redraw();
 							}
 						} else {
 							setValue(lookup.lookupRow(valueKey), true);
-							redraw();
+							if (list)
+								redraw();
 						}
 					}
 				} catch (Exception e) {
@@ -175,17 +177,12 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 				rowsLocator.clear();
 				if (isValidBindings()) {
 					Rowset valuesRowset = valueElement.entity.getRowset();
-					Rowset displaysRowset = displayElement.entity.getRowset();
 					box.addItem(emptyText != null ? emptyText : "", emptyValueKey, null, "");
 					OptionElement option = box.getItem(box.getItemCount() - 1);
 					option.getStyle().setDisplay(Style.Display.NONE);
 					if (ModelCombo.this.list) {
 						for (Row row : valuesRowset.getCurrent()) {
 							Row displayRow = row;
-							if (valuesRowset != displaysRowset) {
-								valueElement.entity.scrollTo(row);
-								displayRow = displaysRowset.getCurrentRow();
-							}
 							String label = displayRow != null ? converter.convert(displayRow.getColumnObject(displayElement.getColIndex())) : "";
 							box.addItem(label, String.valueOf(row.getColumnObject(valueElement.getColIndex())), row, "");
 						}
@@ -390,8 +387,8 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public Object getJsValue() throws Exception {
-		//Row row = getValue();
-		//Object key = lookupRowValue(row);
+		// Row row = getValue();
+		// Object key = lookupRowValue(row);
 		return Utils.toJs(valueKey);
 	}
 
