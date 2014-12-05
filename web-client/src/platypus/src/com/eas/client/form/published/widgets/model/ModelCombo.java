@@ -200,13 +200,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		StyledListBox<Row> box = (StyledListBox<Row>) decorated;
 		if (box.getSelectedIndex() == -1 && isValidBindings()) {
 			if (valueRow != null) {
-				Rowset valuesRowset = valueElement.entity.getRowset();
-				Rowset displaysRowset = displayElement.entity.getRowset();
 				Row displayRow = valueRow;
-				if (valuesRowset != displaysRowset) {
-					valueElement.entity.scrollTo(valueRow);
-					displayRow = displaysRowset.getCurrentRow();
-				}
 				String label = displayRow != null ? converter.convert(displayRow.getColumnObject(displayElement.getColIndex())) : "";
 				box.addItem(label, String.valueOf(valueRow.getColumnObject(valueElement.getColIndex())), valueRow, "");
 			}
