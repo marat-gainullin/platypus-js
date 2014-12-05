@@ -6,6 +6,8 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Relation;
+import com.eas.client.model.visitors.ApplicationModelVisitor;
+import com.eas.client.model.visitors.ModelVisitor;
 
 /**
  * Relation for design puporses. It's not serialized and is used only in
@@ -60,5 +62,10 @@ public class ReferenceRelation<E extends ApplicationEntity<?, ?, E>> extends Rel
         ((ReferenceRelation<E>)target).setScalarPropertyName(scalarPropertyName);
         ((ReferenceRelation<E>)target).setCollectionPropertyName(collectionPropertyName);
     }
-    
+
+    @Override
+    public void accept(ModelVisitor<E, ?> visitor) {
+        ((ApplicationModelVisitor)visitor).visit(this);
+    }
+ 
 }

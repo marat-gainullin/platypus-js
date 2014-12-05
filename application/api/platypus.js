@@ -1549,4 +1549,19 @@ if (!P) {
      */
     P.async = function (aWorkerFunc, aOnSuccess, aOnFailure) {
     };
+    /**
+     * Posts an execution request into browser's event loop.
+     * @param {Function} aCallback
+     * @returns {undefined}
+     */
+    P.invokeLater = function (aCallback) {
+    };
+    /**
+     * Utilizes browser's setTimeput in a safe way to calls aCallback after some period of time.
+     * @param {Number} aTimeout Period of time to delay.
+     * @param {Function} aCallback
+     * @returns {undefined}
+     */
+    P.invokeDelayed = function (aTimeout, aCallback) {
+    };
 }

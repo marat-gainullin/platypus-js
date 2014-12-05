@@ -54,23 +54,23 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 
 	@Override
 	public void resolveField() throws Exception {
-	    super.resolveField();
+		super.resolveField();
 		registerOnRowsetEvents();
 	}
-	
+
 	public HasValue<T> getWidget() {
 		return widget;
 	}
 
-	public void setWidget(HasValue<T> aCellComponent) {
-		if (widget != aCellComponent) {
-			if (valueChangeHandlerRegistration != null)
+	public void setWidget(HasValue<T> aWidget) {
+		if (widget != aWidget) {
+			if (valueChangeHandlerRegistration != null) {
 				valueChangeHandlerRegistration.removeHandler();
-			widget = aCellComponent;
+				valueChangeHandlerRegistration = null;
+			}
+			widget = aWidget;
 			if (widget != null) {
 				valueChangeHandlerRegistration = widget.addValueChangeHandler(this);
-			} else {
-				valueChangeHandlerRegistration = null;
 			}
 		}
 	}
@@ -81,16 +81,16 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 			try {
 				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast()) {
 					Object prevValue = entity.getRowset().getObject(getColIndex());
-					if(widget instanceof ModelCombo){
-						ModelCombo mCombo = (ModelCombo)widget;
-						if(event.getValue() instanceof Row){
-							Row rowValue = (Row)event.getValue();
+					if (widget instanceof ModelCombo) {
+						ModelCombo mCombo = (ModelCombo) widget;
+						if (event.getValue() instanceof Row) {
+							Row rowValue = (Row) event.getValue();
 							Object lookupValue = mCombo.lookupRowValue(rowValue);
 							entity.getRowset().updateObject(getColIndex(), lookupValue);
-						}else{
+						} else {
 							entity.getRowset().updateObject(getColIndex(), event.getValue());
 						}
-					}else{
+					} else {
 						entity.getRowset().updateObject(getColIndex(), event.getValue());
 					}
 					Object afterValue = entity.getRowset().getObject(getColIndex());
@@ -112,12 +112,9 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 				if (eRowset != null && !eRowset.isBeforeFirst() && !eRowset.isAfterLast()) {
 					value = eRowset.getObject(getColIndex());
 				}
-				if (value == null) {
-					value = entity.getSubstituteRowsetObject(fieldName);
-				}
-				if(widget instanceof ModelCombo){
-					((ModelCombo)widget).setJsValue(value, false);
-				}else{
+				if (widget instanceof ModelCombo) {
+					((ModelCombo) widget).setJsValue(value, false);
+				} else {
 					widget.setValue(converter.convert(value), false);
 				}
 			} catch (Exception ex) {

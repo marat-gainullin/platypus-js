@@ -9,6 +9,7 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.converters.RowRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.CrossUpdater;
 import com.eas.client.form.combo.ValueLookup;
 import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.PlatypusLookupEditorCell;
@@ -21,6 +22,8 @@ import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.bearsoft.rowset.events.RowsetEvent;
+import com.google.gwt.core.client.Callback;
 
 public class LookupModelGridColumn extends ModelGridColumn<Row> {
 
@@ -29,13 +32,24 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	protected ModelElementRef lookupValueRef;
 	protected ModelElementRef displayValueRef;
 	protected boolean list = true;
+	protected CrossUpdater crossUpdater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
+
+		@Override
+		public void onFailure(RowsetEvent reason) {
+		}
+
+		@Override
+		public void onSuccess(RowsetEvent result) {
+			if (grid != null)
+				grid.redraw();
+		}
+
+	});
 
 	public LookupModelGridColumn(String aName) {
 		super(new TreeExpandableCell<Row, Row>(new PlatypusLookupEditorCell()), aName, null, null, new RowRowValueConverter());
-		// TODO: fill the editor, test for data changes in lookup and value
-		// rowsets
 		setEditor(new ModelCombo());
-		((ModelCombo)getEditor()).setForceRedraw(true);
+		((ModelCombo) getEditor()).setForceRedraw(true);
 		((PlatypusLookupEditorCell) getTargetCell()).setRenderer(new CellRenderer<Row>() {
 
 			@Override
@@ -47,7 +61,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 						PublishedStyle styleToRender = null;
 						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 						String toRender = String.valueOf(value); // TODO: change
-																 // to lookup
+						                                         // to lookup
 						PublishedCell cellToRender = calcContextPublishedCell(column.getPublished(), onRender, context, column.getColumnModelRef(), toRender, rowsEntity);
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();
@@ -59,13 +73,13 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						String decorId = ControlsUtils.renderDecorated(lsb, aId,  styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, aId, styleToRender, sb);
 						if (cellToRender != null) {
-							if(context instanceof RenderedCellContext){
-								((RenderedCellContext)context).setStyle(styleToRender);
+							if (context instanceof RenderedCellContext) {
+								((RenderedCellContext) context).setStyle(styleToRender);
 							}
 							LookupModelGridColumn.this.bindGridDisplayCallback(decorId, cellToRender);
-							if(cellToRender.getStyle() != null){
+							if (cellToRender.getStyle() != null) {
 								ModelGridColumn.bindIconCallback(cellToRender.getStyle(), decorId);
 							}
 						}
@@ -101,8 +115,14 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	}
 
 	public void setLookupValueRef(ModelElementRef aValue) {
-		lookupValueRef = aValue;
-		((ModelCombo) getEditor()).setValueElement(lookupValueRef);
+		if (lookupValueRef != aValue) {
+			if (lookupValueRef != null)
+				crossUpdater.remove(lookupValueRef.entity);
+			lookupValueRef = aValue;
+			((ModelCombo) getEditor()).setValueElement(lookupValueRef);
+			if (lookupValueRef != null)
+				crossUpdater.add(lookupValueRef.entity);
+		}
 	}
 
 	public ModelElementRef getDisplayValueRef() {
@@ -110,8 +130,14 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	}
 
 	public void setDisplayValueRef(ModelElementRef aValue) {
-		displayValueRef = aValue;
-		((ModelCombo) getEditor()).setDisplayElement(displayValueRef);
+		if (displayValueRef != aValue) {
+			if (displayValueRef != null)
+				crossUpdater.remove(displayValueRef.entity);
+			displayValueRef = aValue;
+			((ModelCombo) getEditor()).setDisplayElement(displayValueRef);
+			if (displayValueRef != null)
+				crossUpdater.add(displayValueRef.entity);
+		}
 	}
 
 	protected void init() {
@@ -192,11 +218,11 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 		}
 	}
 
-	public String getEmptyText(){
-		return ((ModelCombo)getEditor()).getEmptyText();
+	public String getEmptyText() {
+		return ((ModelCombo) getEditor()).getEmptyText();
 	}
-	
+
 	public void setEmptyText(String aValue) {
-		((ModelCombo)getEditor()).setEmptyText(aValue);
-    }
+		((ModelCombo) getEditor()).setEmptyText(aValue);
+	}
 }

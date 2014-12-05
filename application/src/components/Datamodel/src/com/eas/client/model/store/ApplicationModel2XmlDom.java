@@ -38,7 +38,7 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<M, ?, E>, M ext
     public void writeModel(M aModel) {
         super.writeModel(aModel);
         if (aModel != null && aModel.getReferenceRelations() != null) {
-            aModel.getReferenceRelations().stream().forEach((relation) -> {
+            aModel.getReferenceRelations().stream().forEach((ReferenceRelation relation) -> {
                 relation.accept(this);
             });
         }

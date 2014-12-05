@@ -39,6 +39,7 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -470,6 +471,12 @@ public class ControlsUtils {
 			while (wIt.hasNext()) {
 				walk(wIt.next(), aObserver);
 			}
+		}
+	}
+	
+	public static void focus(Widget aWidget) {
+		if(aWidget instanceof Focusable){
+			((Focusable)aWidget).setFocus(true);
 		}
 	}
 }

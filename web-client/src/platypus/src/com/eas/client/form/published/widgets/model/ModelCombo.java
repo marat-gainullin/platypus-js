@@ -37,6 +37,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.bearsoft.rowset.events.RowChangeEvent;
 
 public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText, HasActionHandlers {
+	
 
 	protected CrossUpdater updater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
 
@@ -47,23 +48,30 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		@Override
 		public void onSuccess(RowsetEvent result) {
 			if (displayElement != null && displayElement.isCorrect() && valueElement != null && valueElement.isCorrect()) {
-				Rowset displayRowset = displayElement.entity != null ? displayElement.entity.getRowset() : null;
-				Rowset valueRowset = valueElement.entity != null ? valueElement.entity.getRowset() : null;
-				RowsetEvent event = (RowsetEvent) result;
-				if (event != null && (event.getRowset() == displayRowset || event.getRowset() == valueRowset)) {
-					if (event instanceof RowChangeEvent) {
-						RowChangeEvent change = (RowChangeEvent) event;
-						if (change.getOldRowCount() == change.getNewRowCount()) {
-							if (change.getRowset() == displayRowset && change.getFieldIndex() == displayElement.getColIndex() || change.getRowset() == valueRowset
-							        && change.getFieldIndex() == valueElement.getColIndex()) {
+				try {
+					Rowset displayRowset = displayElement.entity != null ? displayElement.entity.getRowset() : null;
+					Rowset valueRowset = valueElement.entity != null ? valueElement.entity.getRowset() : null;
+					RowsetEvent event = (RowsetEvent) result;
+					if (event != null && (event.getRowset() == displayRowset || event.getRowset() == valueRowset)) {
+						if (event instanceof RowChangeEvent) {
+							RowChangeEvent change = (RowChangeEvent) event;
+							if (change.getOldRowCount() == change.getNewRowCount()) {
+								if (change.getRowset() == displayRowset && change.getFieldIndex() == displayElement.getColIndex() || change.getRowset() == valueRowset
+								        && change.getFieldIndex() == valueElement.getColIndex()) {
+									setValue(lookup.lookupRow(valueKey), true);
+									redraw();
+								}
+							} else {
+								setValue(lookup.lookupRow(valueKey), true);
 								redraw();
 							}
 						} else {
+							setValue(lookup.lookupRow(valueKey), true);
 							redraw();
 						}
-					} else {
-						redraw();
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -78,6 +86,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	protected ValueLookup lookup;
 	protected Map<Row, Integer> rowsLocator = new HashMap<>();
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
+	protected Object valueKey;
 	protected boolean forceRedraw;
 
 	protected boolean list = true;
@@ -381,9 +390,9 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public Object getJsValue() throws Exception {
-		Row row = getValue();
-		Object key = lookupRowValue(row);
-		return Utils.toJs(key);
+		//Row row = getValue();
+		//Object key = lookupRowValue(row);
+		return Utils.toJs(valueKey);
 	}
 
 	public void setJsValue(Object aValue) throws Exception {
@@ -391,9 +400,9 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public void setJsValue(Object aValue, boolean fireEvents) throws Exception {
-		Object key = Utils.toJava(aValue);
+		valueKey = Utils.toJava(aValue);
 		if (lookup != null) {
-			setValue(lookup.lookupRow(key), fireEvents);
+			setValue(lookup.lookupRow(valueKey), fireEvents);
 		}
 	}
 
