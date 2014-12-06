@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form.translate;
+package com.eas.dbcontrols.designer;
 
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.RADButtonGroup;

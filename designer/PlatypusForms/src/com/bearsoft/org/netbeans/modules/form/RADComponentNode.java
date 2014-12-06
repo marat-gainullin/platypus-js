@@ -99,7 +99,7 @@ public class RADComponentNode extends FormNode
     }
 
     final void updateName() {
-        String compClassName = FormUtils.getPlatypusControlClass(component.getBeanClass()).getSimpleName();
+        String compClassName = component.getBeanClass().getSimpleName();
         if (component == component.getFormModel().getTopRADComponent()) {
             setDisplayName(nodeNoNameFormat.format(
                     new Object[]{compClassName}));

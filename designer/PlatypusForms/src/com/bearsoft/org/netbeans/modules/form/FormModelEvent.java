@@ -46,7 +46,7 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,8 +132,8 @@ public class FormModelEvent extends EventObject {
 
     void setColumnView(
             RADModelGridColumn aRadColumn,
-            RADColumnView<? super ModelWidget> oldView,
-            RADColumnView<? super ModelWidget> newView) {
+            RADColumnView<? super ModelComponentDecorator> oldView,
+            RADColumnView<? super ModelComponentDecorator> newView) {
         component = aRadColumn;
         container = aRadColumn;
         oldPropertyValue = oldView;
@@ -154,8 +154,8 @@ public class FormModelEvent extends EventObject {
                 && container instanceof RADVisualContainer<?>) {
             componentIndex = container.getIndexOf(component);
             if (componentIndex >= 0) {
-                LayoutSupportManager laysup =
-                        ((RADVisualContainer<?>) container).getLayoutSupport();
+                LayoutSupportManager laysup
+                        = ((RADVisualContainer<?>) container).getLayoutSupport();
                 if (laysup != null) {
                     constraints = laysup.getConstraints(componentIndex);
                 }
@@ -174,8 +174,8 @@ public class FormModelEvent extends EventObject {
 
         if (radComp instanceof RADVisualComponent<?>
                 && radCont instanceof RADVisualContainer<?>) {
-            LayoutSupportManager laysup =
-                    ((RADVisualContainer<?>) radCont).getLayoutSupport();
+            LayoutSupportManager laysup
+                    = ((RADVisualContainer<?>) radCont).getLayoutSupport();
             constraints = laysup == null ? null
                     : laysup.getStoredConstraints((RADVisualComponent<?>) radComp);
         }
@@ -268,7 +268,7 @@ public class FormModelEvent extends EventObject {
 
     public final RADProperty<?> getComponentProperty() {
         return component != null && propertyName != null
-                ? component.<RADProperty<?>>getRADProperty(propertyName) : null;
+                ? component.<RADProperty<?>>getProperty(propertyName) : null;
     }
 
     public final Object getOldPropertyValue() {
@@ -287,12 +287,12 @@ public class FormModelEvent extends EventObject {
         return (LayoutSupportDelegate) newPropertyValue;
     }
 
-    public final RADColumnView<? super ModelWidget> getOldColumnView() {
-        return (RADColumnView<? super ModelWidget>) oldPropertyValue;
+    public final RADColumnView<? super ModelComponentDecorator> getOldColumnView() {
+        return (RADColumnView<? super ModelComponentDecorator>) oldPropertyValue;
     }
 
-    public final RADColumnView<? super ModelWidget> getNewColumnView() {
-        return (RADColumnView<? super ModelWidget>) newPropertyValue;
+    public final RADColumnView<? super ModelComponentDecorator> getNewColumnView() {
+        return (RADColumnView<? super ModelComponentDecorator>) newPropertyValue;
     }
 
     public final int[] getReordering() {
@@ -318,7 +318,7 @@ public class FormModelEvent extends EventObject {
     public final String getNewEventHandlerContent() {
         return changeType == EVENT_HANDLER_ADDED
                 || changeType == EVENT_HANDLER_REMOVED
-                ? (String) newPropertyValue : null;
+                        ? (String) newPropertyValue : null;
     }
 
     public final String getNewEventHandlerAnnotation() {
@@ -378,7 +378,6 @@ public class FormModelEvent extends EventObject {
     // ----------
     // methods for events interested in additional events occured
     // (used for undo/redo processing of event handlers)
-    
     private static void addToInterestList(FormModelEvent ev) {
         if (interestList == null) {
             interestList = new ArrayList<>();
@@ -459,7 +458,7 @@ public class FormModelEvent extends EventObject {
                     break;
                 case TOP_DESIGN_COMPONENT_CHANGED:
                     FormModel.t("UNDO: top design component changed"); // NOI18N
-                    getFormModel().setTopDesignComponent((RADVisualContainer<?>)oldPropertyValue);
+                    getFormModel().setTopDesignComponent((RADVisualContainer<?>) oldPropertyValue);
                     break;
                 case SYNTHETIC_PROPERTY_CHANGED:
                     FormModel.t("UNDO: synthetic proprty change"); // NOI18N
@@ -521,7 +520,7 @@ public class FormModelEvent extends EventObject {
                     break;
                 case TOP_DESIGN_COMPONENT_CHANGED:
                     FormModel.t("REDO: top design component changed"); // NOI18N
-                    getFormModel().setTopDesignComponent((RADVisualContainer<?>)newPropertyValue);
+                    getFormModel().setTopDesignComponent((RADVisualContainer<?>) newPropertyValue);
                     break;
                 case SYNTHETIC_PROPERTY_CHANGED:
                     FormModel.t("REDO: synthetic proprty change"); // NOI18N
@@ -616,7 +615,7 @@ public class FormModelEvent extends EventObject {
         private void undoComponentLayoutChange() {
             if (getComponent() instanceof RADVisualComponent<?>) {
                 ((RADVisualComponent<?>) getComponent()).getConstraintsProperties();
-                FormProperty<Object> prop = getComponent().<FormProperty<Object>>getProperty(getPropertyName());
+                RADProperty<Object> prop = getComponent().<RADProperty<Object>>getProperty(getPropertyName());
                 if (prop != null) {
                     try {
                         prop.setValue(getOldPropertyValue());
@@ -630,7 +629,7 @@ public class FormModelEvent extends EventObject {
         private void redoComponentLayoutChange() {
             if (getComponent() instanceof RADVisualComponent<?>) {
                 ((RADVisualComponent<?>) getComponent()).getConstraintsProperties();
-                FormProperty<Object> prop = getComponent().<FormProperty<Object>>getProperty(getPropertyName());
+                RADProperty<Object> prop = getComponent().<RADProperty<Object>>getProperty(getPropertyName());
                 if (prop != null) {
                     try {
                         prop.setValue(getNewPropertyValue());
@@ -644,7 +643,7 @@ public class FormModelEvent extends EventObject {
         // -------------
         private void undoColumnViewExchange() {
             try {
-                RADColumnView<? super ModelWidget> columnView = getOldColumnView();
+                RADColumnView<? super ModelComponentDecorator> columnView = getOldColumnView();
                 if (columnView != null) {
                     getFormModel().setColumnViewImpl(
                             getColumn(), columnView);
@@ -656,7 +655,7 @@ public class FormModelEvent extends EventObject {
 
         private void redoColumnViewExchange() {
             try {
-                RADColumnView<? super ModelWidget> columnView = getNewColumnView();
+                RADColumnView<? super ModelComponentDecorator> columnView = getNewColumnView();
                 if (columnView != null) {
                     getFormModel().setColumnViewImpl(
                             getColumn(), columnView);
@@ -686,8 +685,8 @@ public class FormModelEvent extends EventObject {
             RADComponent<?> component = getComponent();
             ComponentContainer container = getContainer();
             RADComponent<?>[] currentSubComps = container.getSubBeans();
-            RADComponent<?>[] undoneSubComps =
-                    new RADComponent<?>[currentSubComps.length + 1];
+            RADComponent<?>[] undoneSubComps
+                    = new RADComponent<?>[currentSubComps.length + 1];
 
             if (componentIndex < 0) {
                 componentIndex = currentSubComps.length;
@@ -712,8 +711,8 @@ public class FormModelEvent extends EventObject {
 
             if (component instanceof RADVisualComponent<?>) {
                 if (container instanceof RADVisualContainer<?>) {
-                    LayoutSupportManager layoutSupport =
-                            ((RADVisualContainer<?>) container).getLayoutSupport();
+                    LayoutSupportManager layoutSupport
+                            = ((RADVisualContainer<?>) container).getLayoutSupport();
                     if (layoutSupport != null) {
                         layoutSupport.addComponents(
                                 new RADVisualComponent<?>[]{(RADVisualComponent<?>) component},
@@ -753,7 +752,7 @@ public class FormModelEvent extends EventObject {
         }
 
         private void undoComponentPropertyChange() {
-            FormProperty<Object> prop = getComponent().<FormProperty<Object>>getProperty(getPropertyName());
+            RADProperty<Object> prop = getComponent().<RADProperty<Object>>getProperty(getPropertyName());
             if (prop != null) {
                 try {
                     prop.setValue(getOldPropertyValue());
@@ -764,7 +763,7 @@ public class FormModelEvent extends EventObject {
         }
 
         private void redoComponentPropertyChange() {
-            FormProperty<Object> prop = getComponent().<FormProperty<Object>>getProperty(getPropertyName());
+            RADProperty<Object> prop = getComponent().<RADProperty<Object>>getProperty(getPropertyName());
             if (prop != null) {
                 try {
                     prop.setValue(getNewPropertyValue());
@@ -797,7 +796,7 @@ public class FormModelEvent extends EventObject {
             removeFromInterestList(FormModelEvent.this);
 
             // hack: reset the event property to update the property sheet
-            FormProperty<?> prop = getComponent().<FormProperty<?>>getProperty(event.getId());
+            RADProperty<?> prop = getComponent().<RADProperty<?>>getProperty(event.getId());
             if (prop != null) {
                 try {
                     if (getEventHandler().equals(prop.getValue())) {

@@ -44,21 +44,16 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
-import com.eas.client.forms.api.containers.*;
-import com.eas.client.forms.api.events.MouseEvent;
-import com.eas.client.model.ModelElementRef;
-import com.eas.dbcontrols.check.DbCheck;
-import com.eas.dbcontrols.combo.DbCombo;
-import com.eas.dbcontrols.date.DbDate;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.image.DbImage;
-import com.eas.dbcontrols.label.DbLabel;
-import com.eas.dbcontrols.map.DbMap;
-import com.eas.dbcontrols.scheme.DbScheme;
-import com.eas.dbcontrols.spin.DbSpin;
-import com.eas.dbcontrols.text.DbText;
-import com.eas.designer.application.module.ModuleUtils;
-import com.eas.gui.JDropDownButton;
+import com.eas.client.forms.containers.AnchorsPane;
+import com.eas.client.forms.containers.BorderPane;
+import com.eas.client.forms.containers.BoxPane;
+import com.eas.client.forms.containers.CardPane;
+import com.eas.client.forms.containers.FlowPane;
+import com.eas.client.forms.containers.GridPane;
+import com.eas.client.forms.events.MouseEvent;
+import com.eas.client.forms.layouts.BoxLayout;
+import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.forms.layouts.CardLayout;
 import java.awt.*;
 import java.beans.*;
 import java.io.*;
@@ -67,35 +62,9 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JEditorPane;
-import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.border.TitledBorder;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
-import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.api.editor.DialogBinding;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
@@ -121,476 +90,12 @@ public class FormUtils {
     public static final int DISABLE_CHANGE_FIRING = 2;
     public static final int PASS_DESIGN_VALUES = 4;
     public static final int DONT_CLONE_VALUES = 8;
-    private static final Object CLASS_EXACTLY = new Object();
-    private static final Object CLASS_AND_SUBCLASSES = new Object();
-    private static final Object CLASS_AND_SWING_SUBCLASSES = new Object();
-    static final Object PROP_PREFERRED = new Object();
-    static final Object PROP_NORMAL = new Object();
-    static final Object PROP_EXPERT = new Object();
-    static final Object PROP_HIDDEN = new Object();
     static final String PROP_REQUIRES_PARENT = "thisPropertyRequiresParent"; // NOI18N
     static final String PROP_REQUIRES_CHILDREN = "thisPropertyRequiresChildren"; // NOI18N
     static final String ACTION_PERFORMED_EVENT_HANDLER_NAME = "onActionPerformed";//NOI18N
     static final String ON_MOUSE_CLICKED_EVENT_HANDLER_NAME = "onMouseClicked";//NOI18N
     private static final Map<String, Class<?>> eventsNames2scriptEventsClasses = new HashMap<>();
     
-    /**
-     * Table defining categories of properties. It overrides original Swing
-     * definition from beaninfo (which is often inadequate).
-     */
-    private static Object[][] propertyCategories = {
-        {"java.awt.Component", CLASS_AND_SUBCLASSES,
-            "UI", PROP_HIDDEN,
-            "locale", PROP_HIDDEN,
-            "locationOnScreen", PROP_HIDDEN,
-            "alignmentX", PROP_HIDDEN,
-            "alignmentY", PROP_HIDDEN,
-            "minimumSize", PROP_HIDDEN,
-            "maximumSize", PROP_HIDDEN,
-            "margin", PROP_HIDDEN,
-            "nextFocusableComponent", PROP_HIDDEN,
-            "preferredSize", PROP_HIDDEN,
-            "locationOnScreen", PROP_HIDDEN,
-            "inheritsPopupMenu", PROP_HIDDEN,
-            "visible", PROP_NORMAL,
-            "showing", PROP_HIDDEN},
-        {"java.awt.Component", CLASS_AND_SWING_SUBCLASSES,
-            "accessibleContext", PROP_HIDDEN,
-            "components", PROP_HIDDEN,
-            "containerListeners", PROP_HIDDEN,
-            "focusTraversalPolicySet", PROP_HIDDEN,
-            "focusCycleRootAncestor", PROP_HIDDEN,
-            "focusOwner", PROP_HIDDEN},
-        {"java.awt.Container", CLASS_AND_SUBCLASSES,
-            "focusTraversalPolicy", PROP_HIDDEN,
-            "focusTraversalPolicyProvider", PROP_HIDDEN,
-            "focusCycleRoot", PROP_HIDDEN,
-            "componentCount", PROP_HIDDEN,
-            "layout", PROP_HIDDEN},
-        {"javax.swing.JComponent", CLASS_AND_SUBCLASSES,
-            "autoscrolls", PROP_HIDDEN,
-            "debugGraphicsOptions", PROP_HIDDEN,
-            "doubleBuffered", PROP_HIDDEN,
-            "componentPopupMenu", PROP_NORMAL,
-            "actionMap", PROP_HIDDEN,
-            "inputVerifier", PROP_HIDDEN,
-            "verifyInputWhenFocusTarget", PROP_HIDDEN,
-            "requestFocusEnabled", PROP_HIDDEN,
-            "model", PROP_HIDDEN,
-            "published", PROP_HIDDEN,
-            "designInfo", PROP_HIDDEN},
-        {"javax.swing.JComponent", CLASS_AND_SWING_SUBCLASSES,
-            "graphics", PROP_HIDDEN,
-            "height", PROP_HIDDEN,
-            "inputMap", PROP_HIDDEN,
-            "maximumSizeSet", PROP_HIDDEN,
-            "minimumSizeSet", PROP_HIDDEN,
-            "preferredSizeSet", PROP_HIDDEN,
-            "registeredKeyStrokes", PROP_HIDDEN,
-            "rootPane", PROP_HIDDEN,
-            "topLevelAncestor", PROP_HIDDEN,
-            "validateRoot", PROP_HIDDEN,
-            "visibleRect", PROP_HIDDEN,
-            "width", PROP_HIDDEN,
-            "x", PROP_HIDDEN,
-            "y", PROP_HIDDEN,
-            "ancestorListeners", PROP_HIDDEN,
-            "propertyChangeListeners", PROP_HIDDEN,
-            "vetoableChangeListeners", PROP_HIDDEN,
-            "actionListeners", PROP_HIDDEN,
-            "changeListeners", PROP_HIDDEN,
-            "itemListeners", PROP_HIDDEN,
-            "managingFocus", PROP_HIDDEN,
-            "optimizedDrawingEnabled", PROP_HIDDEN,
-            "paintingTile", PROP_HIDDEN},
-        {"com.eas.dbcontrols.DbControl", CLASS_AND_SUBCLASSES,
-            "value", PROP_HIDDEN,
-            "align", PROP_HIDDEN,
-            "selectOnly", PROP_HIDDEN,
-            "scriptScope", PROP_HIDDEN,
-            "onRender", PROP_HIDDEN,
-            "onSelect", PROP_HIDDEN,
-            "published", PROP_HIDDEN
-        },
-        {"com.eas.dbcontrols.RowsetDbControl", CLASS_AND_SUBCLASSES,
-            "published", PROP_HIDDEN
-        },
-        {"com.eas.dbcontrols.RowsetsDbControl", CLASS_AND_SUBCLASSES,
-            "published", PROP_HIDDEN
-        },
-        {"java.awt.Window", CLASS_AND_SUBCLASSES,
-            "focusCycleRootAncestor", PROP_HIDDEN,
-            "focusOwner", PROP_HIDDEN,
-            "active", PROP_HIDDEN,
-            "alignmentX", PROP_HIDDEN,
-            "alignmentY", PROP_HIDDEN,
-            "bufferStrategy", PROP_HIDDEN,
-            "focused", PROP_HIDDEN,
-            "graphicsConfiguration", PROP_HIDDEN,
-            "mostRecentFocusOwner", PROP_HIDDEN,
-            "inputContext", PROP_HIDDEN,
-            "ownedWindows", PROP_HIDDEN,
-            "owner", PROP_HIDDEN,
-            "windowFocusListeners", PROP_HIDDEN,
-            "windowListeners", PROP_HIDDEN,
-            "windowStateListeners", PROP_HIDDEN,
-            "warningString", PROP_HIDDEN,
-            "toolkit", PROP_HIDDEN,
-            "focusableWindow", PROP_HIDDEN,
-            "locationRelativeTo", PROP_HIDDEN,
-            "shape", PROP_HIDDEN,
-            "modalExclusionType", PROP_HIDDEN,
-            "menuBar", PROP_HIDDEN,
-            "type", PROP_HIDDEN},
-        {"javax.swing.text.JTextComponent", CLASS_AND_SUBCLASSES,
-            "document", PROP_HIDDEN,
-            "styledDocument", PROP_HIDDEN,
-            "action", PROP_HIDDEN,
-            "columns", PROP_HIDDEN,
-            "text", PROP_PREFERRED,
-            "editable", PROP_PREFERRED,
-            "disabledTextColor", PROP_NORMAL,
-            "selectedTextColor", PROP_NORMAL,
-            "selectionColor", PROP_NORMAL,
-            "caret", PROP_HIDDEN,
-            "caretPosition", PROP_HIDDEN,
-            "caretListeners", PROP_HIDDEN,
-            "disabledTextColor", PROP_HIDDEN,
-            "dragEnabled", PROP_HIDDEN,
-            "dropMode", PROP_HIDDEN,
-            "focusAccelerator", PROP_HIDDEN,
-            "highlighter", PROP_HIDDEN,
-            "keymap", PROP_HIDDEN,
-            "navigationFilter", PROP_HIDDEN,
-            "scrollOffset", PROP_HIDDEN,
-            "focusLostBehavior", PROP_HIDDEN,
-            "selectedTextColor", PROP_HIDDEN,
-            "selectionColor", PROP_HIDDEN,
-            "selectionStart", PROP_HIDDEN,
-            "selectionEnd", PROP_HIDDEN,
-            "caretColor", PROP_HIDDEN},
-        {"javax.swing.text.JTextComponent", CLASS_AND_SWING_SUBCLASSES,
-            "actions", PROP_HIDDEN,
-            "inputMethodRequests", PROP_HIDDEN},
-        {"javax.swing.JTextField", CLASS_AND_SWING_SUBCLASSES,
-            "horizontalVisibility", PROP_HIDDEN},
-        {"javax.swing.JFormattedTextField", CLASS_EXACTLY,
-            "value", PROP_HIDDEN,
-            "formatter", PROP_HIDDEN},
-        {"javax.swing.JPasswordField", CLASS_EXACTLY,
-            "password", PROP_HIDDEN,
-            "echoChar", PROP_HIDDEN},
-        {"javax.swing.JTextArea", CLASS_AND_SUBCLASSES,
-            "rows", PROP_HIDDEN,
-            "lineWrap", PROP_PREFERRED,
-            "wrapStyleWord", PROP_PREFERRED},
-        {"javax.swing.JEditorPane", CLASS_AND_SUBCLASSES,
-            "border", PROP_PREFERRED,
-            "font", PROP_PREFERRED,
-            "contentType", PROP_PREFERRED,
-            "editorKit", PROP_HIDDEN},
-        {"javax.swing.JEditorPane", CLASS_AND_SWING_SUBCLASSES,
-            "hyperlinkListeners", PROP_HIDDEN,
-            "contentType", PROP_HIDDEN},
-        {"javax.swing.JTextPane", CLASS_EXACTLY,
-            "characterAttributes", PROP_HIDDEN,
-            "paragraphAttributes", PROP_HIDDEN},
-        {"javax.swing.JTree", CLASS_AND_SUBCLASSES,
-            "border", PROP_PREFERRED,
-            "model", PROP_PREFERRED},
-        {"javax.swing.JTree", CLASS_EXACTLY,
-            "editing", PROP_HIDDEN,
-            "editingPath", PROP_HIDDEN,
-            "selectionCount", PROP_HIDDEN,
-            "selectionEmpty", PROP_HIDDEN,
-            "lastSelectedPathComponent", PROP_HIDDEN,
-            "leadSelectionRow", PROP_HIDDEN,
-            "maxSelectionRow", PROP_HIDDEN,
-            "minSelectionRow", PROP_HIDDEN,
-            "treeExpansionListeners", PROP_HIDDEN,
-            "treeSelectionListeners", PROP_HIDDEN,
-            "treeWillExpandListeners", PROP_HIDDEN},
-        {"javax.swing.AbstractButton", CLASS_AND_SUBCLASSES,
-            "horizontalAlignment", PROP_HIDDEN,
-            "verticalAlignment", PROP_HIDDEN,
-            "mnemonic", PROP_HIDDEN,
-            "action", PROP_HIDDEN,
-            "label", PROP_HIDDEN,
-            "actionCommand", PROP_HIDDEN,
-            "model", PROP_HIDDEN,
-            "multiClickThreshhold", PROP_HIDDEN,
-            "borderPainted", PROP_HIDDEN,
-            "contentAreaFilled", PROP_HIDDEN,
-            "defaultCapable", PROP_HIDDEN,
-            "disabledIcon", PROP_HIDDEN,
-            "disabledSelectedIcon", PROP_HIDDEN,
-            "displayedMnemonicIndex", PROP_HIDDEN,
-            "focusPainted", PROP_HIDDEN,
-            "hideActionText", PROP_HIDDEN,
-            "pressedIcon", PROP_HIDDEN,
-            "rolloverEnabled", PROP_HIDDEN,
-            "rolloverIcon", PROP_HIDDEN,
-            "rolloverSelectedIcon", PROP_HIDDEN,
-            "selectedIcon", PROP_HIDDEN,
-            "selectedObjects", PROP_HIDDEN},
-        {"javax.swing.JToggleButton", CLASS_AND_SUBCLASSES,
-            "icon", PROP_PREFERRED,
-            "selected", PROP_PREFERRED,
-            "buttonGroup", PROP_PREFERRED},
-        {"javax.swing.JButton", CLASS_AND_SUBCLASSES,
-            "icon", PROP_PREFERRED,
-            "buttonGroup", PROP_HIDDEN,
-            "defaultButton", PROP_HIDDEN},
-        {"javax.swing.JCheckBox", CLASS_EXACTLY,
-            "icon", PROP_NORMAL,
-            "buttonGroup", PROP_HIDDEN,
-            "borderPaintedFlat", PROP_HIDDEN},
-        {"javax.swing.JRadioButton", CLASS_EXACTLY,
-            "icon", PROP_NORMAL,
-            "buttonGroup", PROP_PREFERRED},
-        {"javax.swing.JMenuItem", CLASS_AND_SUBCLASSES,
-            "accelerator", PROP_HIDDEN,
-            "icon", PROP_PREFERRED},
-        {"javax.swing.JMenuItem", CLASS_AND_SWING_SUBCLASSES,
-            "menuDragMouseListeners", PROP_HIDDEN,
-            "menuKeyListeners", PROP_HIDDEN},
-        {"javax.swing.JCheckBoxMenuItem", CLASS_AND_SUBCLASSES,
-            "selected", PROP_PREFERRED,
-            "buttonGroup", PROP_HIDDEN,
-            "icon", PROP_NORMAL},
-        {"javax.swing.JRadioButtonMenuItem", CLASS_AND_SUBCLASSES,
-            "selected", PROP_PREFERRED,
-            "buttonGroup", PROP_PREFERRED,
-            "icon", PROP_NORMAL},
-        {"javax.swing.JTabbedPane", CLASS_EXACTLY,
-            "selectedComponent", PROP_EXPERT,
-            "selectedIndex", PROP_HIDDEN,
-            "model", PROP_HIDDEN},
-        {"javax.swing.JScrollPane", CLASS_AND_SUBCLASSES,
-            "viewport", PROP_HIDDEN,
-            "viewportBorder", PROP_HIDDEN,
-            "verticalScrollBar", PROP_HIDDEN,
-            "horizontalScrollBar", PROP_HIDDEN,
-            "rowHeader", PROP_HIDDEN,
-            "columnHeader", PROP_HIDDEN,
-            "cursor", PROP_HIDDEN,
-            "focusable", PROP_HIDDEN,
-            "font", PROP_HIDDEN,
-            "wheelScrollingEnabled", PROP_HIDDEN,
-            "componentPopupMenu", PROP_HIDDEN},
-        {"javax.swing.JSplitPane", CLASS_AND_SUBCLASSES,
-            "dividerLocation", PROP_PREFERRED,
-            "dividerSize", PROP_PREFERRED,
-            "orientation", PROP_PREFERRED,
-            "resizeWeight", PROP_HIDDEN,
-            "lastDividerLocation", PROP_HIDDEN,},
-        {"javax.swing.JSplitPane", CLASS_EXACTLY,
-            "leftComponent", PROP_HIDDEN,
-            "rightComponent", PROP_HIDDEN,
-            "topComponent", PROP_HIDDEN,
-            "bottomComponent", PROP_HIDDEN},
-        {"javax.swing.JDesktopPane", CLASS_AND_SUBCLASSES,
-            "dragMode", PROP_HIDDEN,
-            "desktopManager", PROP_HIDDEN,
-            "selectedFrame", PROP_HIDDEN},
-        {"javax.swing.JSlider", CLASS_AND_SUBCLASSES,
-            "majorTickSpacing", PROP_PREFERRED,
-            "minorTickSpacing", PROP_PREFERRED,
-            "paintLabels", PROP_PREFERRED,
-            "paintTicks", PROP_PREFERRED,
-            "paintTrack", PROP_PREFERRED,
-            "snapToTicks", PROP_PREFERRED},
-        {"javax.swing.JLabel", CLASS_AND_SUBCLASSES,
-            "horizontalAlignment", PROP_PREFERRED,
-            "verticalAlignment", PROP_PREFERRED,
-            "displayedMnemonic", PROP_HIDDEN,
-            "displayedMnemonicIndex", PROP_HIDDEN,
-            "disabledIcon", PROP_HIDDEN,
-            "labelFor", PROP_HIDDEN},
-        {"javax.swing.JList", CLASS_AND_SUBCLASSES,
-            "model", PROP_PREFERRED,
-            "border", PROP_PREFERRED,
-            "selectionMode", PROP_PREFERRED},
-        {"javax.swing.JList", CLASS_AND_SWING_SUBCLASSES,
-            "listData", PROP_HIDDEN},
-        {"javax.swing.JComboBox", CLASS_AND_SUBCLASSES,
-            "model", PROP_PREFERRED},
-        {"javax.swing.JComboBox", CLASS_EXACTLY,
-            "popupVisible", PROP_HIDDEN,
-            "popupMenuListeners", PROP_HIDDEN,
-            "selectedObjects", PROP_HIDDEN},
-        {"javax.swing.Scrollable", CLASS_AND_SWING_SUBCLASSES,
-            "preferredScrollableViewportSize", PROP_HIDDEN,
-            "scrollableTracksViewportWidth", PROP_HIDDEN,
-            "scrollableTracksViewportHeight", PROP_HIDDEN},
-        {"javax.swing.JScrollBar", CLASS_EXACTLY,
-            "adjustmentListeners", PROP_HIDDEN},
-        {"javax.swing.JTable", CLASS_AND_SUBCLASSES,
-            "model", PROP_PREFERRED,
-            "border", PROP_PREFERRED,
-            "autoCreateColumnsFromModel", PROP_PREFERRED},
-        {"javax.swing.JTable", CLASS_EXACTLY,
-            "editing", PROP_HIDDEN,
-            "editorComponent", PROP_HIDDEN,
-            "selectedColumn", PROP_HIDDEN,
-            "selectedColumnCount", PROP_HIDDEN,
-            "selectedColumns", PROP_HIDDEN,
-            "selectedRow", PROP_HIDDEN,
-            "selectedRowCount", PROP_HIDDEN,
-            "selectedRows", PROP_HIDDEN},
-        {"javax.swing.JSeparator", CLASS_EXACTLY,
-            "orientation", PROP_HIDDEN,
-            "border", PROP_HIDDEN,
-            "componentPopupMenu", PROP_HIDDEN,
-            "focusable", PROP_HIDDEN,
-            "border", PROP_HIDDEN,
-            "font", PROP_HIDDEN},
-        {"javax.swing.JInternalFrame", CLASS_AND_SUBCLASSES,
-            "defaultCloseOperation", PROP_PREFERRED},
-        {"javax.swing.JInternalFrame", CLASS_EXACTLY,
-            "menuBar", PROP_HIDDEN,
-            "JMenuBar", PROP_HIDDEN,
-            "desktopPane", PROP_HIDDEN,
-            "internalFrameListeners", PROP_HIDDEN,
-            "mostRecentFocusOwner", PROP_HIDDEN,
-            "warningString", PROP_HIDDEN,
-            "closed", PROP_HIDDEN},
-        {"javax.swing.JMenu", CLASS_EXACTLY,
-            "accelerator", PROP_HIDDEN,
-            "delay", PROP_HIDDEN,
-            "tearOff", PROP_HIDDEN,
-            "menuComponents", PROP_HIDDEN,
-            "menuListeners", PROP_HIDDEN,
-            "popupMenu", PROP_HIDDEN,
-            "topLevelMenu", PROP_HIDDEN},
-        {"javax.swing.JPopupMenu", CLASS_AND_SWING_SUBCLASSES,
-            "popupMenuListeners", PROP_HIDDEN,
-            "border", PROP_HIDDEN,
-            "borderPainted", PROP_HIDDEN,
-            "invoker", PROP_HIDDEN,
-            "selectionModel", PROP_HIDDEN,
-            "nextFocusableComponent", PROP_HIDDEN,
-            "focusable", PROP_HIDDEN,
-            "componentPopupMenu", PROP_HIDDEN,
-            "lightWeightPopupEnabled", PROP_HIDDEN,
-            "visible", PROP_HIDDEN},
-        {"java.awt.Frame", CLASS_AND_SWING_SUBCLASSES,
-            "cursorType", PROP_HIDDEN,
-            "menuBar", PROP_HIDDEN},
-        {"javax.swing.JFrame", CLASS_AND_SUBCLASSES,
-            "state", PROP_HIDDEN,
-            "extendedState", PROP_HIDDEN,
-            "autoRequestFocus", PROP_HIDDEN,
-            "focusableWindowState", PROP_HIDDEN,
-            "iconImages", PROP_HIDDEN,
-            "maximizedBounds", PROP_HIDDEN,
-            "title", PROP_PREFERRED},
-        {"javax.swing.JFrame", CLASS_EXACTLY,
-            "menuBar", PROP_HIDDEN,
-            "layout", PROP_HIDDEN},
-        {"javax.swing.JDialog", CLASS_AND_SUBCLASSES,
-            "title", PROP_PREFERRED},
-        {"javax.swing.JDialog", CLASS_EXACTLY,
-            "layout", PROP_HIDDEN},
-        {"javax.swing.MenuElement", CLASS_AND_SWING_SUBCLASSES,
-            "component", PROP_HIDDEN,
-            "subElements", PROP_HIDDEN},
-        {"javax.swing.JMenuBar", CLASS_EXACTLY,
-            "helpMenu", PROP_HIDDEN,
-            "menuCount", PROP_HIDDEN,
-            "border", PROP_HIDDEN,
-            "borderPainted", PROP_HIDDEN,
-            "focusable", PROP_HIDDEN,
-            "nextFocusableComponent", PROP_HIDDEN,
-            "selectionModel", PROP_HIDDEN,
-            "selected", PROP_HIDDEN},
-        {"javax.swing.JProgressBar", CLASS_AND_SUBCLASSES,
-            "indeterminate", PROP_HIDDEN,
-            "string", PROP_HIDDEN,
-            "stringPainted", PROP_HIDDEN},
-        {"javax.swing.JSpinner", CLASS_AND_SUBCLASSES,
-            "model", PROP_PREFERRED},
-        {"javax.swing.JSpinner", CLASS_AND_SWING_SUBCLASSES,
-            "foreground", PROP_HIDDEN,
-            "background", PROP_HIDDEN},
-        {"java.applet.Applet", CLASS_AND_SUBCLASSES,
-            "appletContext", PROP_HIDDEN,
-            "codeBase", PROP_HIDDEN,
-            "documentBase", PROP_HIDDEN},
-        {"javax.swing.JFileChooser", CLASS_EXACTLY,
-            "acceptAllFileFilter", PROP_HIDDEN,
-            "choosableFileFilters", PROP_HIDDEN}
-    };
-    /**
-     * Table with explicit changes to propeties accessibility. E.g. some
-     * properties needs to be restricted to "detached write".
-     */
-    private static Object[][] propertiesAccess = {
-        {"javax.swing.JFrame", CLASS_AND_SUBCLASSES,
-            "defaultCloseOperation", new Integer(FormProperty.DETACHED_WRITE)}
-    };
-    /**
-     * Table of properties that need the component to be added in the parent, or
-     * child components in the container before the property can be set. [We use
-     * one table though these are two distinct categories - it's fine until
-     * there is a property requiring both conditions.]
-     */
-    private static Object[][] propertyContainerDeps = {
-        {"javax.swing.JTabbedPane", CLASS_AND_SUBCLASSES,
-            "selectedIndex", PROP_REQUIRES_CHILDREN,
-            "selectedComponent", PROP_REQUIRES_CHILDREN},
-        {"javax.swing.JInternalFrame", CLASS_AND_SUBCLASSES,
-            "maximum", PROP_REQUIRES_PARENT,
-            "icon", PROP_REQUIRES_PARENT},
-        // columnModel can be set by binding property
-        {"javax.swing.JTable", CLASS_AND_SUBCLASSES,
-            "columnModel", PROP_REQUIRES_PARENT}
-    };
-    /**
-     * Table defining order of dependent properties.
-     */
-    private static Object[][] propertyOrder = {
-        {"javax.swing.text.JTextComponent",
-            "document", "text"},
-        {"javax.swing.JSpinner",
-            "model", "editor"},
-        {"javax.swing.AbstractButton",
-            "action", "actionCommand",
-            "action", "enabled",
-            "action", "mnemonic",
-            "action", "icon",
-            "action", "text",
-            "action", "toolTipText"},
-        {"javax.swing.JMenuItem",
-            "action", "accelerator"},
-        {"javax.swing.JList",
-            "model", "selectedIndex",
-            "model", "selectedValues"},
-        {"javax.swing.JComboBox",
-            "model", "selectedIndex",
-            "model", "selectedItem"},
-        {"java.awt.TextComponent",
-            "text", "selectionStart",
-            "text", "selectionEnd"},
-        {"javax.swing.JEditorPane",
-            "contentType", "text",
-            "editorKit", "text"},
-        {"javax.swing.JTable",
-            "autoCreateColumnsFromModel", "model"},
-        {"javax.swing.JCheckBox",
-            "model", "mnemonic",
-            "model", "text"},
-        {"javax.swing.JRadioButton",
-            "model", "buttonGroup"}
-    };
-    /**
-     * Table enumerating properties that can hold HTML text.
-     */
-    private static Object[][] swingTextProperties = {
-        {"javax.swing.JComponent", FormUtils.CLASS_AND_SUBCLASSES,
-            "text", Boolean.TRUE,
-            "toolTipText", Boolean.TRUE}
-    };
     /**
      * List of components that should never be containers; some of them are not
      * specified in original Swing beaninfos.
@@ -619,156 +124,44 @@ public class FormUtils {
         javax.swing.JOptionPane.class.getName(), // NOI18N
         javax.swing.JColorChooser.class.getName(), // NOI18N
         javax.swing.JFileChooser.class.getName(), // NOI18N
-        com.eas.dbcontrols.DbControlPanel.class.getName(), // NOI18N
-        com.eas.dbcontrols.map.DbMap.class.getName(), // NOI18N
-        com.eas.dbcontrols.grid.DbGrid.class.getName() // NOI18N
+        com.eas.client.forms.components.model.ModelComponentDecorator.class.getName(), // NOI18N
+        com.eas.client.forms.components.model.grid.ModelGrid.class.getName() // NOI18N
     };
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
-    private static Class[] apiClasses = {
-        com.eas.client.forms.api.components.Label.class,
-        com.eas.client.forms.api.components.Button.class,
-        com.eas.client.forms.api.components.CheckBox.class,
-        com.eas.client.forms.api.components.DesktopPane.class,
-        com.eas.client.forms.api.components.DropDownButton.class,
-        com.eas.client.forms.api.components.PasswordField.class,
-        com.eas.client.forms.api.components.FormattedField.class,
-        com.eas.client.forms.api.components.ProgressBar.class,
-        com.eas.client.forms.api.components.RadioButton.class,
-        com.eas.client.forms.api.components.Slider.class,
-        com.eas.client.forms.api.components.TextArea.class,
-        com.eas.client.forms.api.components.HtmlArea.class,
-        com.eas.client.forms.api.components.TextField.class,
-        com.eas.client.forms.api.components.ToggleButton.class,
-        com.eas.client.forms.api.components.model.ModelCheckBox.class,
-        com.eas.client.forms.api.components.model.ModelDate.class,
-        com.eas.client.forms.api.components.model.ModelGrid.class,
-        com.eas.client.forms.api.components.model.ModelImage.class,
-        com.eas.client.forms.api.components.model.ModelMap.class,
-        com.eas.client.forms.api.components.model.ModelScheme.class,
-        com.eas.client.forms.api.components.model.ModelSpin.class,
-        com.eas.client.forms.api.components.model.ModelFormattedField.class,
-        com.eas.client.forms.api.components.model.ModelCombo.class,
-        com.eas.client.forms.api.containers.AbsolutePane.class,
-        com.eas.client.forms.api.containers.AnchorsPane.class,
-        com.eas.client.forms.api.containers.BorderPane.class,
-        com.eas.client.forms.api.containers.BoxPane.class,
-        com.eas.client.forms.api.containers.ButtonGroup.class,
-        com.eas.client.forms.api.containers.CardPane.class,
-        com.eas.client.forms.api.containers.FlowPane.class,
-        com.eas.client.forms.api.containers.GridPane.class,
-        com.eas.client.forms.api.containers.ScrollPane.class,
-        com.eas.client.forms.api.containers.SplitPane.class,
-        com.eas.client.forms.api.containers.TabbedPane.class,
-        com.eas.client.forms.api.containers.ToolBar.class,
-        com.eas.client.forms.api.menu.CheckMenuItem.class,
-        com.eas.client.forms.api.menu.Menu.class,
-        com.eas.client.forms.api.menu.MenuBar.class,
-        com.eas.client.forms.api.menu.MenuItem.class,
-        PopupMenu.class,
-        com.eas.client.forms.api.menu.RadioMenuItem.class,
-        com.eas.gui.CascadedStyle.class,
-        com.eas.client.forms.IconResources.class,
-        com.eas.client.forms.Form.class,
-        com.eas.gui.Font.class,
-        com.eas.gui.FontStyle.class,
-        com.eas.gui.Cursor.class,
-        com.eas.gui.ScriptColor.class,
-        com.eas.client.forms.api.Anchors.class,
-        com.eas.client.forms.api.VerticalPosition.class,
-        com.eas.client.forms.api.HorizontalPosition.class,
-        com.eas.client.forms.api.Orientation.class
-    };
 
-    private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
-    private static final Map<Class<?>, Class<?>> swingClasses2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> layoutClasses2PlatypusContainerClasses = new HashMap<>();
     private static final Map<Class<?>, String> componentClasses2DefaultEventHandlers = new HashMap<>();
     
-    private static class Panel extends com.eas.client.forms.api.Container<JPanel> {
-
-        @Override
-        public JSObject getPublished() {
-            throw new UnsupportedOperationException("Dummt implementation for reflection only!");
-        }
-        
-    }
-
     static {
-        initScriptNames2PlatypusApiClasses();
         initLayoutClasses2PlatypusContainerClasses();
-        intitEventsNames2ScriptEventClasses();
         initComponentClasses2DefaultEventHandlers();
-        swingClasses2PlatypusApiClasses.put(JLabel.class, com.eas.client.forms.api.components.Label.class);
-        swingClasses2PlatypusApiClasses.put(JButton.class, com.eas.client.forms.api.components.Button.class);
-        swingClasses2PlatypusApiClasses.put(JCheckBox.class, com.eas.client.forms.api.components.CheckBox.class);
-        swingClasses2PlatypusApiClasses.put(JDesktopPane.class, com.eas.client.forms.api.components.DesktopPane.class);
-        swingClasses2PlatypusApiClasses.put(JDropDownButton.class, com.eas.client.forms.api.components.DropDownButton.class);
-        swingClasses2PlatypusApiClasses.put(JPasswordField.class, com.eas.client.forms.api.components.PasswordField.class);
-        swingClasses2PlatypusApiClasses.put(JFormattedTextField.class, com.eas.client.forms.api.components.FormattedField.class);
-        swingClasses2PlatypusApiClasses.put(JProgressBar.class, com.eas.client.forms.api.components.ProgressBar.class);
-        swingClasses2PlatypusApiClasses.put(JRadioButton.class, com.eas.client.forms.api.components.RadioButton.class);
-        swingClasses2PlatypusApiClasses.put(JSlider.class, com.eas.client.forms.api.components.Slider.class);
-        swingClasses2PlatypusApiClasses.put(JTextPane.class, com.eas.client.forms.api.components.TextArea.class);
-        swingClasses2PlatypusApiClasses.put(JEditorPane.class, com.eas.client.forms.api.components.HtmlArea.class);
-        swingClasses2PlatypusApiClasses.put(JTextField.class, com.eas.client.forms.api.components.TextField.class);
-        swingClasses2PlatypusApiClasses.put(JToggleButton.class, com.eas.client.forms.api.components.ToggleButton.class);
-        //
-        swingClasses2PlatypusApiClasses.put(DbCheck.class, com.eas.client.forms.api.components.model.ModelCheckBox.class);
-        swingClasses2PlatypusApiClasses.put(DbDate.class, com.eas.client.forms.api.components.model.ModelDate.class);
-        swingClasses2PlatypusApiClasses.put(DbGrid.class, com.eas.client.forms.api.components.model.ModelGrid.class);
-        swingClasses2PlatypusApiClasses.put(DbImage.class, com.eas.client.forms.api.components.model.ModelImage.class);
-        swingClasses2PlatypusApiClasses.put(DbMap.class, com.eas.client.forms.api.components.model.ModelMap.class);
-        swingClasses2PlatypusApiClasses.put(DbScheme.class, com.eas.client.forms.api.components.model.ModelScheme.class);
-        swingClasses2PlatypusApiClasses.put(DbSpin.class, com.eas.client.forms.api.components.model.ModelSpin.class);
-        swingClasses2PlatypusApiClasses.put(DbLabel.class, com.eas.client.forms.api.components.model.ModelFormattedField.class);
-        swingClasses2PlatypusApiClasses.put(DbText.class, com.eas.client.forms.api.components.model.ModelTextArea.class);
-        swingClasses2PlatypusApiClasses.put(DbCombo.class, com.eas.client.forms.api.components.model.ModelCombo.class);
-        //
-        swingClasses2PlatypusApiClasses.put(JPanel.class, Panel.class);
-        swingClasses2PlatypusApiClasses.put(JScrollPane.class, com.eas.client.forms.api.containers.ScrollPane.class);
-        swingClasses2PlatypusApiClasses.put(JSplitPane.class, com.eas.client.forms.api.containers.SplitPane.class);
-        swingClasses2PlatypusApiClasses.put(JTabbedPane.class, com.eas.client.forms.api.containers.TabbedPane.class);
-        swingClasses2PlatypusApiClasses.put(JToolBar.class, com.eas.client.forms.api.containers.ToolBar.class);
-        //
-        swingClasses2PlatypusApiClasses.put(JCheckBoxMenuItem.class, com.eas.client.forms.api.menu.CheckMenuItem.class);
-        swingClasses2PlatypusApiClasses.put(JMenu.class, com.eas.client.forms.api.menu.Menu.class);
-        swingClasses2PlatypusApiClasses.put(JMenuBar.class, com.eas.client.forms.api.menu.MenuBar.class);
-        swingClasses2PlatypusApiClasses.put(JMenuItem.class, com.eas.client.forms.api.menu.MenuItem.class);
-        swingClasses2PlatypusApiClasses.put(JPopupMenu.class, PopupMenu.class);
-        swingClasses2PlatypusApiClasses.put(JRadioButtonMenuItem.class, com.eas.client.forms.api.menu.RadioMenuItem.class);
+        initEventsNames2ScriptEventClasses();
     }
 
-    private static void initScriptNames2PlatypusApiClasses() {
-        for (Class<?> clazz : apiClasses) {
-            scriptNames2PlatypusApiClasses.put(ModuleUtils.getScriptConstructorName(clazz), clazz);
-        }
-    }
-    
     private static void initLayoutClasses2PlatypusContainerClasses() {
-        layoutClasses2PlatypusContainerClasses.put(com.eas.controls.layouts.margin.MarginLayout.class, AnchorsPane.class);
-        layoutClasses2PlatypusContainerClasses.put(java.awt.BorderLayout.class, BorderPane.class);
-        layoutClasses2PlatypusContainerClasses.put(com.eas.controls.layouts.box.BoxLayout.class, BoxPane.class);
-        layoutClasses2PlatypusContainerClasses.put(org.netbeans.lib.awtextra.AbsoluteLayout.class, AbsolutePane.class); 
+        layoutClasses2PlatypusContainerClasses.put(MarginLayout.class, AnchorsPane.class);
+        layoutClasses2PlatypusContainerClasses.put(BorderLayout.class, BorderPane.class);
+        layoutClasses2PlatypusContainerClasses.put(BoxLayout.class, BoxPane.class);
         layoutClasses2PlatypusContainerClasses.put(java.awt.FlowLayout.class, FlowPane.class);
-        layoutClasses2PlatypusContainerClasses.put(java.awt.CardLayout.class, CardPane.class);
+        layoutClasses2PlatypusContainerClasses.put(CardLayout.class, CardPane.class);
         layoutClasses2PlatypusContainerClasses.put(java.awt.GridLayout.class, GridPane.class);
     }
 
-    private static void intitEventsNames2ScriptEventClasses() {
+    private static void initEventsNames2ScriptEventClasses() {
         eventsNames2scriptEventsClasses.put(ON_MOUSE_CLICKED_EVENT_HANDLER_NAME, MouseEvent.class);
     }
     
     private static void initComponentClasses2DefaultEventHandlers() {
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.Button.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.ToggleButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.DropDownButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.CheckBox.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.RadioButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.TextField.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.MenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.CheckMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.menu.RadioMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
-        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.api.components.Label.class, ON_MOUSE_CLICKED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.Button.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.ToggleButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.DropDownButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.CheckBox.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.RadioButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.TextField.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.menu.MenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.menu.CheckMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.menu.RadioMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
+        componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.Label.class, ON_MOUSE_CLICKED_EVENT_HANDLER_NAME);
         
     }
     
@@ -821,17 +214,6 @@ public class FormUtils {
         if (o.getClass() == Font.class) {
             return o;
         }
-        // Issue 49973 & 169933
-        if (o.getClass() == TitledBorder.class) {
-            TitledBorder border = (TitledBorder) o;
-            return new TitledBorder(
-                    border.getBorder(),
-                    border.getTitle(),
-                    border.getTitleJustification(),
-                    border.getTitlePosition(),
-                    border.getTitleFont(),
-                    border.getTitleColor());
-        }
         if (o instanceof Dimension) {
             return new Dimension((Dimension) o);
         }
@@ -845,9 +227,6 @@ public class FormUtils {
             return ((Insets) o).clone();
         }
         if (o instanceof Paint) {
-            return o;
-        }
-        if (o instanceof ModelElementRef) {
             return o;
         }
         if (o instanceof Serializable) {
@@ -1233,14 +612,12 @@ public class FormUtils {
             if (desc != null) {
                 isContainerValue = desc.getValue("isContainer"); // NOI18N
             }
-        } catch (Exception ex) { // ignore failure
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        } catch (Error ex) { // Issue 74002
+        } catch (Exception | Error ex) { // ignore failure
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
         }
 
         if (isContainerValue instanceof Boolean) {
-            return ((Boolean) isContainerValue).booleanValue() ? 1 : 0;
+            return ((Boolean) isContainerValue) ? 1 : 0;
         }
         return -1; // "isContainer" attribute not specified
     }
@@ -1296,177 +673,8 @@ public class FormUtils {
     }
     // ---------
 
-    /**
-     * Returns explicit property category classification (defined in
-     * propertyCategories table) for properties of given class. The returned
-     * array can be used in getPropertyCategory method to get category for
-     * individual property. Used for SWING components to correct their default
-     * (insufficient) classification.
-     *
-     * @return Object[] array of property categories for given bean class, or
-     * null if nothing specified for the class
-     */
-    static Object[] getPropertiesCategoryClsf(Class<?> beanClass,
-            BeanDescriptor beanDescriptor) {
-        List<Object> reClsf = null;
-//        Class<?> beanClass = beanInfo.getBeanDescriptor().getBeanClass();
-
-        // some magic with JComponents first...
-        if (javax.swing.JComponent.class.isAssignableFrom(beanClass)) {
-            reClsf = new ArrayList<>(8);
-            Object isContainerValue = beanDescriptor.getValue("isContainer"); // NOI18N
-            if (isContainerValue == null || Boolean.TRUE.equals(isContainerValue)) {
-                reClsf.add("font"); // NOI18N
-                reClsf.add(PROP_NORMAL);
-            } else {
-                reClsf.add("border"); // NOI18N
-                reClsf.add(PROP_NORMAL); // NOI18N
-            }
-        }
-
-        return collectPropertiesClsf(beanClass, propertyCategories, reClsf);
-    }
-
-    /**
-     * Returns type of property (PROP_PREFERRED, PROP_NORMAL, PROP_EXPERT or
-     * PROP_HIDDEN) based on PropertyDescriptor and definitions in properties
-     * classification for given bean class (returned from
-     * getPropertiesCategoryClsf method).
-     */
-    static Object getPropertyCategory(FeatureDescriptor pd,
-            Object[] propsClsf) {
-        Object cat = findPropertyClsf(pd.getName(), propsClsf);
-        if (cat != null) {
-            return cat;
-        }
-        if (pd.isHidden()) {
-            return PROP_HIDDEN;
-        }
-        if (pd.isExpert()) {
-            return PROP_EXPERT;
-        }
-        if (pd.isPreferred() || Boolean.TRUE.equals(pd.getValue("preferred"))) // NOI18N
-        {
-            return PROP_PREFERRED;
-        }
-        return PROP_NORMAL;
-    }
-
-    /**
-     * Returns explicit property access type classification for properties of
-     * given class (defined in propertiesAccess table). The returned array can
-     * be used in getPropertyAccess method to get the access type for individual
-     * property.
-     */
-    static Object[] getPropertiesAccessClsf(Class<?> beanClass) {
-        return collectPropertiesClsf(beanClass, propertiesAccess, null);
-    }
-
-    /**
-     * Returns access type for given property (as FormProperty constant). 0 if
-     * no restriction is explicitly defined.
-     */
-    static int getPropertyAccess(PropertyDescriptor pd,
-            Object[] propsClsf) {
-        Object access = findPropertyClsf(pd.getName(), propsClsf);
-        return access == null ? 0 : ((Integer) access).intValue();
-    }
-
-    static Object[] getPropertiesParentChildDepsClsf(Class<?> beanClass) {
-        return collectPropertiesClsf(beanClass, propertyContainerDeps, null);
-    }
-
-    static String getPropertyParentChildDependency(PropertyDescriptor pd,
-            Object[] propClsf) {
-        return (String) findPropertyClsf(pd.getName(), propClsf);
-    }
-
-    /**
-     * Finds out if given property can hold text with <html> prefix. Basically
-     * it must be a text property of a Swing component. Used by String property
-     * editor.
-     *
-     * @param property property to check.
-     * @return true if the property can hold <html> text
-     */
-    public static boolean isHTMLTextProperty(FormProperty<?> property) {
-        if (property.getValueType() == String.class) {
-            if (property instanceof RADProperty<?>) {
-                Class<?> beanClass = ((RADProperty<?>) property).getRADComponent().getBeanClass();
-                Object[] clsf = collectPropertiesClsf(beanClass, swingTextProperties, null);
-                return findPropertyClsf(property.getName(), clsf) != null;
-            } else if (property.getName().equals("TabConstraints.tabTitle")) { // NOI18N
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Object[] collectPropertiesClsf(Class<?> beanClass,
-            Object[][] table,
-            java.util.List<Object> list) {
-        // Set of names of super classes of the bean and interfaces implemented by the bean.
-        Set<String> superClasses = superClasses(beanClass);
-
-        for (int i = 0; i < table.length; i++) {
-            Object[] clsf = table[i];
-            String refClass = (String) clsf[0];
-            Object subclasses = clsf[1];
-
-            if (refClass.equals(beanClass.getName())
-                    || (subclasses == CLASS_AND_SUBCLASSES
-                    && superClasses.contains(refClass))
-                    || (subclasses == CLASS_AND_SWING_SUBCLASSES
-                    && superClasses.contains(refClass)
-                    && beanClass.getName().startsWith("javax.swing."))) { // NOI18N
-                if (list == null) {
-                    list = new ArrayList<>(8);
-                }
-                for (int j = 2; j < clsf.length; j++) {
-                    list.add(clsf[j]);
-                }
-            }
-        }
-
-        if (list != null) {
-            Object[] array = new Object[list.size()];
-            list.toArray(array);
-            return array;
-        }
-        return null;
-    }
-
-    public static Class<?> getPlatypusApiClassByName(String name) {
-        return scriptNames2PlatypusApiClasses.get(name);
-    }
-
-    public static Class[] getPlatypusApiClasses() {
-        return apiClasses;
-    }
-    
-    public static Class<?> getPlatypusControlClass(Class<?> aBeanClass) {
-        if (swingClasses2PlatypusApiClasses.containsKey(aBeanClass)) {
-            return swingClasses2PlatypusApiClasses.get(aBeanClass);
-        } else {
-            return aBeanClass;
-        }
-    }
-
     public static Class<?> getPlatypusConainerClass(Class<?> aLayoutClass) {
         return layoutClasses2PlatypusContainerClasses.get(aLayoutClass);
-    }
-
-    private static Object findPropertyClsf(String name, Object[] clsf) {
-        if (clsf != null) {
-            int i = clsf.length;
-            while (i > 0) {
-                if (clsf[i - 2].equals(name)) {
-                    return clsf[i - 1];
-                }
-                i -= 2;
-            }
-        }
-        return null;
     }
 
     static boolean isMarkedParentDependentProperty(FormProperty<?> prop) {
@@ -1569,28 +777,6 @@ public class FormUtils {
         });
     }
 
-    static void reorderProperties(Class<?> beanClass, RADProperty<?>[] properties) {
-        sortProperties(properties);
-        Object[] order = collectPropertiesOrder(beanClass, propertyOrder);
-        for (int i = 0; i < order.length / 2; i++) {
-            updatePropertiesOrder(properties, (String) order[2 * i], (String) order[2 * i + 1]);
-        }
-    }
-
-    private static void updatePropertiesOrder(RADProperty<?>[] properties,
-            String firstProp, String secondProp) {
-        int firstIndex = findPropertyIndex(properties, firstProp);
-        int secondIndex = findPropertyIndex(properties, secondProp);
-        if ((firstIndex != -1) && (secondIndex != -1) && (firstIndex > secondIndex)) {
-            // Move the first one before the second
-            RADProperty<?> first = properties[firstIndex];
-            for (int i = firstIndex; i > secondIndex; i--) {
-                properties[i] = properties[i - 1];
-            }
-            properties[secondIndex] = first;
-        }
-    }
-
     private static int findPropertyIndex(RADProperty<?>[] properties, String property) {
         int index = -1;
         for (int i = 0; i < properties.length; i++) {
@@ -1600,24 +786,6 @@ public class FormUtils {
             }
         }
         return index;
-    }
-
-    private static Object[] collectPropertiesOrder(Class<?> beanClass, Object[][] table) {
-        // Set of names of super classes of the bean and interfaces implemented by the bean.
-        Set<String> superClasses = superClasses(beanClass);
-
-        java.util.List<Object> list = new ArrayList<>();
-        for (int i = 0; i < table.length; i++) {
-            Object[] order = table[i];
-            String refClass = (String) order[0];
-
-            if (superClasses.contains(refClass)) {
-                for (int j = 1; j < order.length; j++) {
-                    list.add(order[j]);
-                }
-            }
-        }
-        return list.toArray();
     }
 
     /**

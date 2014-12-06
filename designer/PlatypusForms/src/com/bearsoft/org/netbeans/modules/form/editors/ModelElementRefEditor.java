@@ -10,7 +10,6 @@ import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SQLUtils;
@@ -66,7 +65,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
         try {
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
-            element = lookupGridOrMapLayerRowsSource(element);
+            element = lookupGridRowsSource(element);
             ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
@@ -91,7 +90,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
         try {
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
-            element = lookupGridOrMapLayerRowsSource(element);
+            element = lookupGridRowsSource(element);
             ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
@@ -296,7 +295,8 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
         property = (FormProperty<Object>) aProperty;
     }
 
-    protected ModelElementRef lookupGridOrMapLayerRowsSource(ModelElementRef element) {
+    protected ModelElementRef lookupGridRowsSource(ModelElementRef element) {
+        /*
         if ((element == null || (element.getEntityId() == null && element.getField() == null)) && property instanceof RADProperty<?>) {
             RADProperty<?> radProperty = (RADProperty<?>) property;
             if (radProperty.getComponent() instanceof RADModelGrid) {
@@ -306,11 +306,9 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                 RADModelGridColumn radColumn = (RADModelGridColumn) radProperty.getComponent();
                 RADModelGrid radGrid = radColumn.lookupGrid();
                 element = radGrid.getBeanInstance().getRowsDatasource();
-            } else if (radProperty.getComponent() instanceof RADModelMapLayer) {
-                RADModelMapLayer radMapLayer = (RADModelMapLayer) radProperty.getComponent();
-                element = radMapLayer.getBeanInstance().getRef();
             }
         }
+        */
         return element;
     }
 }

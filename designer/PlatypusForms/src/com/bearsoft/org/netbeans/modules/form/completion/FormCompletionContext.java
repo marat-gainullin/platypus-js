@@ -10,10 +10,8 @@ import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.RADVisualFormContainer;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
 import com.eas.client.forms.Form;
-import com.eas.client.forms.api.components.model.ModelGrid;
-import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
@@ -56,11 +54,10 @@ public class FormCompletionContext extends CompletionContext {
         }
         RADComponent<?> comp = getComponentByName(token.name);
         if (comp != null) {
-            Class<?> platypusControlClass = FormUtils.getPlatypusControlClass(comp.getBeanClass());
-            if (!ModelGrid.class.isAssignableFrom(platypusControlClass)) {
-                return new CompletionContext(platypusControlClass);
+            if (ModelGrid.class.isAssignableFrom(comp.getBeanClass())) {
+                return new ModelGridCompletionContext((ModelGrid) comp.getBeanInstance());
             } else {
-                return new DbGridCompletionContext((DbGrid) comp.getBeanInstance());
+                return new CompletionContext(comp.getBeanClass());
             }
         }
         return null;
@@ -74,14 +71,14 @@ public class FormCompletionContext extends CompletionContext {
     protected void fillComponents(CompletionPoint point, CompletionResultSet resultSet) {
         FormModel fm = getFormModel();
         for (RADComponent<?> comp : fm.getOrderedComponentList()) {
-            if (!(comp instanceof RADModelGridColumn) && !(comp instanceof RADModelMapLayer) && comp.getName() != null && !comp.getName().isEmpty()) {
+            if (!(comp instanceof RADModelGridColumn) && comp.getName() != null && !comp.getName().isEmpty()) {
                 // <comp>
                 if (point.getFilter() == null || point.getFilter().isEmpty() || comp.getName().toLowerCase().startsWith(point.getFilter().toLowerCase())) {
                     String compName = comp.getName();
                     if (RADVisualFormContainer.FORM_NAME.equals(compName)) {
                         continue;
                     }
-                    addItem(resultSet, point.getFilter(), new BeanCompletionItem(FormUtils.getPlatypusControlClass(comp.getBeanClass()), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+                    addItem(resultSet, point.getFilter(), new BeanCompletionItem(comp.getBeanClass(), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
                 }
             }
         }
@@ -93,7 +90,7 @@ public class FormCompletionContext extends CompletionContext {
 
     protected RADComponent<?> getComponentByName(String aName) {
         RADComponent<?> comp = getFormModel().getRADComponent(aName);
-        if (!(comp instanceof RADModelGridColumn) && !(comp instanceof RADModelMapLayer)) {
+        if (!(comp instanceof RADModelGridColumn)) {
             return comp;
         } else {
             return null;

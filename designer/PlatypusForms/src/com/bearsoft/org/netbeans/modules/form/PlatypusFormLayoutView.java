@@ -1121,7 +1121,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                             break; // NOI18N
                     }
                 } else if (bean instanceof JRadioButton) {
-                    FormProperty<?> property = radComp.<FormProperty<?>>getProperty("buttonGroup"); // NOI18N
+                    RADProperty<?> property = radComp.<RADProperty<?>>getProperty("buttonGroup"); // NOI18N
                     try {
                         if ((property != null) && (property.getValue() == null)) {
                             context = "buttonGroup"; // NOI18N
@@ -1439,16 +1439,16 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 notifyCannotEditInPlace();
                 return;
             }
-            FormProperty<String> property = null;
+            RADProperty<String> property = null;
             if (JTabbedPane.class.isAssignableFrom(radComp.getBeanClass())) {
                 JTabbedPane tabbedPane = (JTabbedPane) comp;
                 int index = tabbedPane.getSelectedIndex();
                 RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
                 RADVisualComponent<?> tabComp = radCont.getSubComponent(index);
-                FormProperty<?>[] props = tabComp.getConstraintsProperties();
+                RADProperty<?>[] props = tabComp.getConstraintsProperties();
                 for (int i = 0; i < props.length; i++) {
                     if (props[i].getName().equals("TabConstraints.tabTitle")) { // NOI18N
-                        property = (FormProperty<String>) props[i];
+                        property = (RADProperty<String>) props[i];
                         break;
                     }
                 }
@@ -1456,7 +1456,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     return;
                 }
             } else {
-                property = radComp.<FormProperty<String>>getRADProperty("text"); // NOI18N
+                property = radComp.<RADProperty<String>>getProperty("text"); // NOI18N
                 if (property == null) {
                     return; // should not happen
                 }
@@ -2056,7 +2056,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 if (action != null && action.isEnabled()) {
                     try {
                         mAlign.align(dimension, alignment);
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    } catch (Exception ex) {
                         ErrorManager.getDefault().notify(ex);
                     }
                 }
@@ -2183,7 +2183,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             if (mAlign.canResize()) {
                 try {
                     mAlign.resize(dimension);
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
             }

@@ -2,21 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form.translate;
+package com.eas.dbcontrols.designer;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import com.bearsoft.org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
-import com.bearsoft.org.netbeans.modules.form.editors.NbBorder;
-import com.eas.controls.DesignInfo;
-import com.eas.controls.borders.BorderDesignInfo;
-import com.eas.controls.borders.CompoundBorderDesignInfo;
-import com.eas.controls.borders.MatteBorderDesignInfo;
-import com.eas.controls.borders.TitledBorderDesignInfo;
-import com.eas.controls.plain.FormattedFieldDesignInfo;
-import com.eas.controls.visitors.SwingBorderFactory;
-import com.eas.dbcontrols.label.DbLabelDesignInfo;
-import com.eas.store.Object2Dom;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -87,9 +77,6 @@ public class RadInitializer {
                                     String iconName = (String) res;
                                     radProp.setValue(IconEditor.iconFromResourceName(component.getFormModel().getDataObject(), iconName));
                                 }
-                            } else if (res instanceof BorderDesignInfo) {
-                                NbBorder converted = convertBorderDesignInfoToNbBorder(radProp, (BorderDesignInfo) res);
-                                radProp.setValue(converted);
                             } else if (res instanceof Integer && "cursor".equals(radProp.getName())) {
                                 radProp.setValue(Cursor.getPredefinedCursor((Integer) res));
                             }
@@ -163,52 +150,5 @@ public class RadInitializer {
             }
         }
         return getters;
-    }
-
-    private NbBorder convertBorderDesignInfoToNbBorder(FormProperty<?> aProp, BorderDesignInfo aInfo) throws Exception {
-        if (aInfo != null) {
-            SwingBorderFactory bFactory = new SwingBorderFactory(null);
-            aInfo.accept(bFactory);
-            NbBorder nbBorder = new NbBorder(bFactory.getBorder());
-            nbBorder.setPropertyContext(new FormPropertyContext.SubProperty(aProp));
-            IconEditor.NbImageIcon wasMatteIconValue = null;
-            FormProperty<Color> matteColorProperty = null;
-            FormProperty<IconEditor.NbImageIcon> matteIconProperty = null;
-            if (aInfo instanceof MatteBorderDesignInfo) {
-                MatteBorderDesignInfo mbdi = (MatteBorderDesignInfo) aInfo;
-                matteColorProperty = nbBorder.<FormProperty<Color>>getPropertyOfName("matteColor");
-                matteIconProperty = nbBorder.<FormProperty<IconEditor.NbImageIcon>>getPropertyOfName("tileIcon");
-                if (mbdi.getTileIcon() != null && !mbdi.getTileIcon().isEmpty()) {
-                    wasMatteIconValue = IconEditor.iconFromResourceName(component.getFormModel().getDataObject(), mbdi.getTileIcon());
-                } else {
-                    matteColorProperty.setValue(mbdi.getMatteColor());
-                }
-            } else if (aInfo instanceof CompoundBorderDesignInfo) {
-                CompoundBorderDesignInfo cbdi = (CompoundBorderDesignInfo) aInfo;
-                FormProperty<NbBorder> insideBorderProperty = nbBorder.<FormProperty<NbBorder>>getPropertyOfName("insideBorder");
-                insideBorderProperty.setValue(convertBorderDesignInfoToNbBorder((FormProperty<?>) insideBorderProperty, cbdi.getInsideBorder()));
-                FormProperty<NbBorder> outsideBorderProperty = nbBorder.<FormProperty<NbBorder>>getPropertyOfName("outsideBorder");
-                outsideBorderProperty.setValue(convertBorderDesignInfoToNbBorder((FormProperty<?>) outsideBorderProperty, cbdi.getOutsideBorder()));
-            } else if (aInfo instanceof TitledBorderDesignInfo) {
-                TitledBorderDesignInfo tbdi = (TitledBorderDesignInfo) aInfo;
-                FormProperty<NbBorder> borderProperty = nbBorder.<FormProperty<NbBorder>>getPropertyOfName("border");
-                borderProperty.setValue(convertBorderDesignInfoToNbBorder((FormProperty<?>) borderProperty, tbdi.getBorder()));
-            }
-            for (FormProperty<?> prop : nbBorder.getProperties()) {
-                prop.setChanged(true);
-            }
-            if (matteIconProperty != null) {
-                if (wasMatteIconValue != null) {
-                    matteColorProperty.setChanged(false);
-                    matteIconProperty.setChanged(true);
-                    matteIconProperty.setValue(wasMatteIconValue);
-                } else {
-                    matteIconProperty.setChanged(false);
-                }
-            }
-            return nbBorder;
-        } else {
-            return null;
-        }
     }
 }

@@ -67,7 +67,7 @@ public class LayoutSupportRegistry {
     public static final String DEFAULT_SUPPORT = "<default>"; // NOI18N
     private static FileChangeListener paletteListener;
     private static Map<FormModel, LayoutSupportRegistry> instanceMap;
-    private Reference<FormModel> formModelRef;
+    private final Reference<FormModel> formModelRef;
 
     // -------
     private LayoutSupportRegistry(FormModel formModel) {

@@ -47,7 +47,14 @@ import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.FormPropertyContext;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import java.awt.*;
+import com.eas.client.forms.layouts.CardLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Point;
 
 /**
  * Support class for CardLayout. This support uses fictive layout constraints
@@ -75,9 +82,8 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
      * level, no real components but their CodeExpression representations are
      * added.
      *
-     * @param compExpressions array of CodeExpression objects representing the
-     * components to be accepted
-     * @param constraints array of layout constraints of the components
+     * @param newComps
+     * @param newConstraints
      * @param index position at which the components should be added (inserted);
      * if -1, the components should be added at the end
      */

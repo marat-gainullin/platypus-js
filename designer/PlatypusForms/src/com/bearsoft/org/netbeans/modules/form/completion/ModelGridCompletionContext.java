@@ -4,27 +4,27 @@
  */
 package com.bearsoft.org.netbeans.modules.form.completion;
 
-import com.eas.client.forms.api.components.model.ModelGrid;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.grid.rt.columns.ScriptableColumn;
+import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import javax.swing.table.TableColumn;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
  *
  * @author vv
  */
-public class DbGridCompletionContext extends CompletionContext {
+public class ModelGridCompletionContext extends CompletionContext {
 
-    DbGrid grid;
+    ModelGrid grid;
 
-    public DbGridCompletionContext(DbGrid aDbGrid) {
+    public ModelGridCompletionContext(ModelGrid aDbGrid) {
         super(ModelGrid.class);
         grid = aDbGrid;
     }
@@ -32,40 +32,26 @@ public class DbGridCompletionContext extends CompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);    
-        List<DbGridColumn> linearColumns = new ArrayList<>();
-        enumerateColumns(grid.getHeader(), linearColumns);
+        List<ModelColumn> linearColumns = new ArrayList<>();
         fillColumns(linearColumns, resultSet, point);
     }
 
     @Override
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
-        List<DbGridColumn> linearColumns = new ArrayList<>();
-        enumerateColumns(grid.getHeader(), linearColumns);
-        DbGridColumn targetCol = null;
-        for (DbGridColumn col : linearColumns) {
+        Enumeration<TableColumn> tCols = grid.getColumnModel().getColumns();
+        while(tCols.hasMoreElements()){
+            ModelColumn col = (ModelColumn)tCols.nextElement();
             if (col.getName() != null && !col.getName().isEmpty() && col.getName().equals(token.name)) {
-                targetCol = col;
+            return new CompletionContext(ModelColumn.class);
             }
-        }
-        if (targetCol != null) {
-            return new CompletionContext(ScriptableColumn.class);
         }
         return null;
     }
 
-    protected void enumerateColumns(List<DbGridColumn> columns, List<DbGridColumn> res) {
-        for (DbGridColumn dCol : columns) {
-            res.add(dCol);
-            if (dCol.hasChildren()) {
-                enumerateColumns(dCol.getChildren(), res);
-            }
-        }
-    }
-
-    protected void fillColumns(List<DbGridColumn> columns, CompletionResultSet resultSet, CompletionPoint point) {
-        for (DbGridColumn dCol : columns) {
-            if (dCol.getName() != null && !dCol.getName().isEmpty()) {
-                addItem(resultSet, point.getFilter(), new BeanCompletionItem(dCol.getClass(), dCol.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+    protected void fillColumns(List<ModelColumn> columns, CompletionResultSet resultSet, CompletionPoint point) {
+        for (ModelColumn mCol : columns) {
+            if (mCol.getName() != null && !mCol.getName().isEmpty()) {
+                addItem(resultSet, point.getFilter(), new BeanCompletionItem(mCol.getClass(), mCol.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
             }
         }
     }

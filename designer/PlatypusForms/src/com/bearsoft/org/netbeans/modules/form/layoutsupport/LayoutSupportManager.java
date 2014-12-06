@@ -44,7 +44,6 @@
 package com.bearsoft.org.netbeans.modules.form.layoutsupport;
 
 import com.bearsoft.org.netbeans.modules.form.*;
-import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport;
 import java.awt.*;
 import java.beans.*;
 import java.util.*;
@@ -116,9 +115,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                 if (contDel.getComponentCount() == 0) {
                     // we can still handle only empty containers ...
                     lmInstance = contDel.getLayout();
-                    delegate = lmInstance != null
-                            ? layoutRegistry.createSupportForLayout(lmInstance.getClass())
-                            : new NullLayoutSupport();
+                    delegate = layoutRegistry.createSupportForLayout(lmInstance.getClass());
                 } else {
                     RuntimeException ex = new IllegalArgumentException();
                     org.openide.ErrorManager.getDefault().annotate(
@@ -372,8 +369,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         }
 
         java.util.List<FormProperty<?>> allPropsList = new ArrayList<>();
-        for (int i = 0; i < propertySets.length; i++) {
-            FormProperty<?>[] props = (FormProperty<?>[]) propertySets[i].getProperties();
+        for (Node.PropertySet propertySet : propertySets) {
+            FormProperty<?>[] props = (FormProperty<?>[]) propertySet.getProperties();
             allPropsList.addAll(Arrays.asList(props));
         }
 
@@ -430,8 +427,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         layoutDelegate.addComponents(components, aConstraints, index);
 
-        for (int i = 0; i < components.length; i++) {
-            components[i].resetConstraintsProperties();
+        for (RADVisualComponent<?> component : components) {
+            component.resetConstraintsProperties();
         }
 
         layoutDelegate.addComponentsToContainer(getPrimaryContainer(),

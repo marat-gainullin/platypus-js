@@ -45,7 +45,7 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.eas.controls.layouts.box.BoxLayout;
+import com.eas.client.forms.layouts.BoxLayout;
 import java.awt.*;
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
@@ -479,22 +479,16 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     public static final class BoxAxisEditor extends PropertyEditorSupport {
 
         private final String[] tags = {
-            getBundle().getString("VALUE_axis_line"), // NOI18N
-            getBundle().getString("VALUE_axis_page"), // NOI18N
             getBundle().getString("VALUE_axis_x"), // NOI18N
             getBundle().getString("VALUE_axis_y") // NOI18N
         };
         private final Integer[] values = {
-            BoxLayout.LINE_AXIS,
-            BoxLayout.PAGE_AXIS,
             BoxLayout.X_AXIS,
             BoxLayout.Y_AXIS
         };
         private final String[] javaInitStrings = {
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".LINE_AXIS", // NOI18N
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".PAGE_AXIS", // NOI18N
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".X_AXIS", // NOI18N
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".Y_AXIS" // NOI18N
+            BoxLayout.class.getName() + ".X_AXIS", // NOI18N
+            BoxLayout.class.getName() + ".Y_AXIS" // NOI18N
         };
 
         @Override

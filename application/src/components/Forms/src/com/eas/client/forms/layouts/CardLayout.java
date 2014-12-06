@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.layouts;
 
-import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.ItemSelectable;
@@ -20,12 +19,12 @@ import java.util.Set;
  *
  * @author mg
  */
-public class PlatypusCardLayout extends CardLayout {
+public class CardLayout extends java.awt.CardLayout {
 
     protected Set<ItemListener> changeListeners = new HashSet<>();
     protected Map<String, Component> comps = new HashMap<>();
 
-    public PlatypusCardLayout(int hgap, int vgap) {
+    public CardLayout(int hgap, int vgap) {
         super(hgap, vgap);
     }
 

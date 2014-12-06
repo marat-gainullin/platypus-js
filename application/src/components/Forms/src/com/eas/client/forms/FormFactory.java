@@ -2,14 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.events.factories;
+package com.eas.client.forms;
 
 import com.bearsoft.gui.grid.header.GridColumnsGroup;
-import com.eas.client.forms.Form;
-import com.eas.client.forms.HorizontalPosition;
-import com.eas.client.forms.IconResources;
-import com.eas.client.forms.Orientation;
-import com.eas.client.forms.VerticalPosition;
 import com.eas.client.forms.components.Button;
 import com.eas.client.forms.components.CheckBox;
 import com.eas.client.forms.components.DesktopPane;
@@ -38,7 +33,6 @@ import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.HasGroup;
-import com.eas.client.forms.containers.AbsolutePane;
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
 import com.eas.client.forms.containers.BoxPane;
@@ -572,7 +566,6 @@ public class FormFactory {
                 return new GridPane(rows, columns, hgap, vgap);
             }
             case "AbsoluteLayoutDesignInfo":
-                return new AbsolutePane();
             case "MarginLayoutDesignInfo":
                 return new AnchorsPane();
             default:
@@ -760,10 +753,6 @@ public class FormFactory {
             ((FlowPane) parent).add(aTarget);
         } else if (parent instanceof GridPane) {
             ((GridPane) parent).add(aTarget);
-        } else if (parent instanceof AbsolutePane) {
-            AbsolutePane absolute = (AbsolutePane) parent;
-            MarginConstraints constraints = readMarginConstraints(constraintsElement);
-            absolute.add(aTarget, constraints);
         } else if (parent instanceof AnchorsPane) {
             AnchorsPane anchors = (AnchorsPane) parent;
             MarginConstraints constraints = readMarginConstraints(constraintsElement);

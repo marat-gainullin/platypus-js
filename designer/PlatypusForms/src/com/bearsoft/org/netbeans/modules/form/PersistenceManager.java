@@ -45,7 +45,6 @@ package com.bearsoft.org.netbeans.modules.form;
 
 import java.util.*;
 import org.openide.*;
-import org.openide.util.Lookup;
 
 /**
  * An abstract class which defines interface for persistence managers (being
@@ -101,51 +100,6 @@ public abstract class PersistenceManager {
             List<Throwable> nonfatalErrors)
             throws PersistenceException;
     // ------------
-    // static registry [provisional only]
-    private static List<PersistenceManager> managers;
-    private static List<String> managersByName;
-
-    public static void registerManager(PersistenceManager manager) {
-        getManagersList().add(manager);
-    }
-
-    public static void unregisterManager(PersistenceManager manager) {
-        getManagersList().remove(manager);
-    }
-
-    static void registerManager(String managerClassName) {
-        getManagersNamesList().add(managerClassName);
-    }
-
-    public static List<PersistenceManager> getManagers() {
-        ClassLoader classLoader = Lookup.getDefault().lookup(ClassLoader.class);
-        for (String pmClassName : getManagersNamesList()) { // create managers registered by name
-            try {
-                PersistenceManager manager = (PersistenceManager) classLoader.loadClass(pmClassName).newInstance();
-                getManagersList().add(manager);
-            } catch (Exception | LinkageError ex1) {
-                notifyError(ex1, pmClassName);
-            }
-        }
-        getManagersNamesList().clear(); // [is it OK to lose unsuccessful managers?]
-
-        return getManagersList();
-    }
-
-    private static List<PersistenceManager> getManagersList() {
-        if (managers == null) {
-            managers = new ArrayList<>();
-            managers.add(new PlatypusPersistenceManager());
-        }
-        return managers;
-    }
-
-    private static List<String> getManagersNamesList() {
-        if (managersByName == null) {
-            managersByName = new ArrayList<>();
-        }
-        return managersByName;
-    }
 
     private static void notifyError(Throwable th, String pmClassName) {
         String msg = FormUtils.getFormattedBundleString(

@@ -48,9 +48,7 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
-import com.bearsoft.org.netbeans.modules.form.editors.NbBorder;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.AbsoluteLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.eas.client.forms.components.HtmlArea;
 import com.eas.client.forms.components.TextArea;
@@ -70,7 +68,6 @@ import java.awt.TextField;
 import java.awt.Window;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.border.Border;
 import org.openide.*;
 import org.openide.util.Mutex;
 import org.openide.util.NbBundle;
@@ -88,7 +85,7 @@ public class RADComponentCreator {
 
     private enum TargetType {
 
-        LAYOUT, BORDER, VISUAL, OTHER
+        LAYOUT, VISUAL, OTHER
     }
 
     private enum ComponentType {
@@ -211,9 +208,7 @@ public class RADComponentCreator {
 
     public static boolean canApplyComponent(Class<?> beanClass, RADComponent<?> targetComp) {
         TargetInfo target = getTargetInfo(beanClass, targetComp, false, false);
-        return target != null
-                && (target.targetType == TargetType.BORDER
-                || target.targetType == TargetType.LAYOUT);
+        return target != null && target.targetType == TargetType.LAYOUT;
     }
 
     // --------
@@ -240,14 +235,10 @@ public class RADComponentCreator {
         }
 
         try { // Look&Feel UI defaults remapping needed
-            FormLAF.<RADVisualComponent<?>>executeWithLookAndFeel(formModel,
-                    new Mutex.ExceptionAction<RADVisualComponent<?>>() {
-                        @Override
-                        public RADVisualComponent<?> run() throws Exception {
-                            preRadComp = createVisualComponent(compClass);
-                            return preRadComp;
-                        }
-                    });
+            FormLAF.<RADVisualComponent<?>>executeWithLookAndFeel(formModel, () -> {
+                preRadComp = createVisualComponent(compClass);
+                return preRadComp;
+            });
             return preRadComp;
         } catch (Exception ex) { // should not happen
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -319,10 +310,7 @@ public class RADComponentCreator {
         RADComponent<?> targetComp = target.targetComponent;
         if (target.targetType == TargetType.LAYOUT) {
             return setContainerLayout((Class<LayoutManager>) compClass, targetComp);
-        }
-        if (target.targetType == TargetType.BORDER & targetComp instanceof RADVisualComponent<?>) {
-            return setComponentBorder((Class<Border>) compClass, (RADVisualComponent<?>) targetComp);
-        }
+        }else{
         RADComponent<?> newRadComp = null;
         if (target.componentType == ComponentType.VISUAL) {
             newRadComp = addVisualComponent((Class<? extends Component>) compClass, targetComp, -1, aConstraints);
@@ -334,6 +322,7 @@ public class RADComponentCreator {
             }
         }
         return newRadComp;
+        }
     }
 
     private RADComponent<?> copyComponent2(RADComponent<?> sourceComp,
@@ -344,8 +333,6 @@ public class RADComponentCreator {
         // apply the cloned instance, but don't copy the meta component
         if (target.targetType == TargetType.LAYOUT) {
             return copyAndApplyLayout(sourceComp, targetComp);
-        } else if (target.targetType == TargetType.BORDER) {
-            return copyAndApplyBorder(sourceComp, (RADVisualComponent<?>) targetComp);
         } else {
             // in other cases we need a copy of the source radcomponent
             if (sourceComp instanceof RADVisualComponent<?>) {
@@ -412,13 +399,6 @@ public class RADComponentCreator {
                 RADVisualContainer<?> targetCont = getVisualContainer(targetComp, canUseParent);
                 if (targetCont != null && !targetCont.hasDedicatedLayoutSupport()) {
                     target.targetType = TargetType.LAYOUT;
-                } else {
-                    return null;
-                }
-            } else if (Border.class.isAssignableFrom(beanClass)) { // border
-                if (targetComp instanceof RADVisualComponent
-                        && JComponent.class.isAssignableFrom(targetComp.getBeanClass())) {
-                    target.targetType = TargetType.BORDER;
                 } else {
                     return null;
                 }
@@ -585,7 +565,7 @@ public class RADComponentCreator {
         if (formModel == sourceComp.getFormModel()) {
             copyMode |= FormUtils.PASS_DESIGN_VALUES;
         }
-        java.util.List<RADProperty<?>> filtered = sourceComp.getBeanProperties(COPIED_PROPERTY_FILTER, false);
+        java.util.List<RADProperty<?>> filtered = sourceComp.getBeanProperties(COPIED_PROPERTY_FILTER);
         java.util.List<String> filteredNames = new ArrayList<>();
         for (RADProperty<?> prop : filtered) {
             filteredNames.add(prop.getName());
@@ -605,10 +585,6 @@ public class RADComponentCreator {
             for (Map.Entry<String, LayoutConstraints<?>> entry : constraints.entrySet()) {
                 String layoutClassName = entry.getKey();
                 LayoutConstraints<?> clonedConstr = entry.getValue().cloneConstraints();
-                if (clonedConstr instanceof AbsoluteLayoutSupport.AbsoluteLayoutConstraints) {
-                    AbsoluteLayoutSupport.AbsoluteLayoutConstraints ac = (AbsoluteLayoutSupport.AbsoluteLayoutConstraints) clonedConstr;
-                    ac.offset(10, 10);
-                }
                 if (clonedConstr instanceof MarginLayoutSupport.MarginLayoutConstraints) {
                     // We assume, that component has a parent and it is not the root container
                     // because it has a constraints
@@ -877,73 +853,6 @@ public class RADComponentCreator {
         }
 
         return targetComp;
-    }
-
-    private RADComponent<?> setComponentBorder(Class<? extends Border> borderClass,
-            RADVisualComponent<?> targetComp) {
-        FormProperty<NbBorder> prop = getBorderProperty(targetComp);
-        if (prop != null) {
-            try { // set border property
-                Border border = CreationFactory.<Border>createInstance(borderClass);
-                prop.setValue(new NbBorder(border));
-            } catch (Exception | LinkageError ex) {
-                showInstErrorMessage(ex);
-                return null;
-            }
-            return targetComp;
-        } else {
-            return null;
-        }
-    }
-
-    private void setComponentBorderProperty(NbBorder borderInstance,
-            RADVisualComponent<?> targetComp) {
-        FormProperty<NbBorder> prop = getBorderProperty(targetComp);
-        if (prop != null) {
-            try { // set border property
-                prop.setValue(borderInstance);
-            } catch (Exception ex) { // should not happen
-                ErrorManager.getDefault().notify(ex);
-            }
-        }
-    }
-
-    private RADComponent<?> copyAndApplyBorder(RADComponent<?> sourceComp,
-            RADVisualComponent<?> targetComp) {
-        try {
-            Border borderInstance = (Border) sourceComp.createBeanInstance();
-            NbBorder designBorder = new NbBorder(borderInstance);
-
-            FormProperty<?>[] sourceProps = sourceComp.getKnownBeanProperties();
-            FormProperty<?>[] targetProps = designBorder.getProperties();
-            int copyMode = FormUtils.CHANGED_ONLY | FormUtils.DISABLE_CHANGE_FIRING;
-            if (formModel == sourceComp.getFormModel()) {
-                copyMode |= FormUtils.PASS_DESIGN_VALUES;
-            }
-
-            FormUtils.copyProperties(sourceProps, targetProps, copyMode);
-
-            setComponentBorderProperty(designBorder, targetComp);
-        } catch (Exception | LinkageError ex) { // ignore
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-
-        return targetComp;
-    }
-
-    private FormProperty<NbBorder> getBorderProperty(RADComponent<?> targetComp) {
-        FormProperty<NbBorder> prop;
-        if (JComponent.class.isAssignableFrom(targetComp.getBeanClass())
-                && (prop = targetComp.<FormProperty<NbBorder>>getRADProperty("border")) != null) // NOI18N
-        {
-            return prop;
-        }
-
-        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(
-                FormUtils.getBundleString("MSG_BorderNotApplicable"), // NOI18N
-                NotifyDescriptor.INFORMATION_MESSAGE));
-
-        return null;
     }
 
     // --------

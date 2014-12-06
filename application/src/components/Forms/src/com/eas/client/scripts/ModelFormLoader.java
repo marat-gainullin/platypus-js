@@ -7,7 +7,7 @@ package com.eas.client.scripts;
 
 import com.eas.client.Application;
 import com.eas.client.forms.Form;
-import com.eas.client.forms.events.factories.FormFactory;
+import com.eas.client.forms.FormFactory;
 import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
 

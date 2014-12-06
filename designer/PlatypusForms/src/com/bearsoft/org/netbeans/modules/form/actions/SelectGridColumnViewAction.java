@@ -11,8 +11,8 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.ScalarDbControl;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.ModelWidget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.BeanInfo;
@@ -88,7 +88,7 @@ public final class SelectGridColumnViewAction extends CookieAction {
         PaletteItem[] allItems = PaletteUtils.getAllItems();
         java.util.List<PaletteItem> layoutsList = new ArrayList<>();
         for (int i = 0; i < allItems.length; i++) {
-            if (allItems[i] != null && allItems[i].getComponentClass() != null && ScalarDbControl.class.isAssignableFrom(allItems[i].getComponentClass())) {
+            if (allItems[i] != null && allItems[i].getComponentClass() != null && ModelWidget.class.isAssignableFrom(allItems[i].getComponentClass())) {
                 assert allItems[i].isVisual();
                 layoutsList.add(allItems[i]);
             }
@@ -164,9 +164,9 @@ public final class SelectGridColumnViewAction extends CookieAction {
             RADModelGridColumn radColumn = getSelectedColumn();
             if (radColumn != null && radColumn.getViewControl() != null) {
                 try {
-                    RADColumnView<? super DbControlPanel> viewControl = new RADColumnView<>();
+                    RADColumnView<? super ModelComponentDecorator> viewControl = new RADColumnView<>();
                     viewControl.initialize(radColumn.getFormModel());
-                    viewControl.setInstance((DbControlPanel) paletteItem.getComponentClass().newInstance());
+                    viewControl.setInstance((ModelComponentDecorator) paletteItem.getComponentClass().newInstance());
                     radColumn.getFormModel().setColumnViewImpl(radColumn, viewControl);
                 } catch (InstantiationException | IllegalAccessException ex) {
                     Logger.getLogger(SelectGridColumnViewAction.class.getName()).log(Level.SEVERE, null, ex);

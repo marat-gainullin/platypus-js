@@ -35,7 +35,7 @@ public class ModelEntityParameterRefEditor extends ModelElementRefEditor {
         try {
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
-            element = lookupGridOrMapLayerRowsSource(element);
+            element = lookupGridRowsSource(element);
             ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
@@ -60,7 +60,7 @@ public class ModelEntityParameterRefEditor extends ModelElementRefEditor {
         try {
             assert getValue() == null || getValue() instanceof ModelElementRef;
             ModelElementRef element = (ModelElementRef) getValue();
-            element = lookupGridOrMapLayerRowsSource(element);
+            element = lookupGridRowsSource(element);
             ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());

@@ -14,7 +14,7 @@ import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
-import com.eas.client.forms.layouts.PlatypusCardLayout;
+import com.eas.client.forms.layouts.CardLayout;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -72,8 +72,8 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public CardPane(int hgap, int vgap) {
-        super(new PlatypusCardLayout(hgap, vgap));
-        PlatypusCardLayout layout = (PlatypusCardLayout) super.getLayout();
+        super(new CardLayout(hgap, vgap));
+        CardLayout layout = (CardLayout) super.getLayout();
         layout.addChangeListener(cardsChangeListener);
         super.addContainerListener(invalidatorListener);
     }
@@ -412,7 +412,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
             + " * @return the child component.\n"
             + "*/", params = {"cardName"})
     public JComponent child(String aCardName) {
-        PlatypusCardLayout layout = (PlatypusCardLayout) super.getLayout();
+        CardLayout layout = (CardLayout) super.getLayout();
         return (JComponent) layout.getComponent(aCardName);
     }
 
@@ -424,7 +424,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
 
     @ScriptFunction(jsDoc = SHOW_JSDOC, params = {"name"})
     public void show(String aCardName) {
-        PlatypusCardLayout layout = (PlatypusCardLayout) super.getLayout();
+        CardLayout layout = (CardLayout) super.getLayout();
         layout.show(this, aCardName);
     }
 

@@ -53,11 +53,12 @@ import org.openide.nodes.*;
 /**
  *
  * @author Ian Formanek
+ * @param <C>
  */
 public class RADVisualComponent<C extends Component> extends RADComponent<C> {
 
-    private Map<String, LayoutConstraints<?>> constraints = new HashMap<>();
-    private FormProperty<?>[] constraintsProperties;
+    private final Map<String, LayoutConstraints<?>> constraints = new HashMap<>();
+    private RADProperty<?>[] constraintsProperties;
     private ConstraintsListenerConvertor constraintsListener;
 
     enum MenuType {
@@ -164,7 +165,6 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
     @Override
     protected synchronized void createPropertySets(List<Node.PropertySet> propSets) {
         super.createPropertySets(propSets);
-        if (!SUPPRESS_PROPERTY_TABS) {
             if (constraintsProperties == null) {
                 createConstraintsProperties();
             }
@@ -181,7 +181,6 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
                             }
                         });
             }
-        }
     }
 
     @Override
@@ -193,7 +192,7 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
 
     // ---------
     // constraints properties
-    public synchronized FormProperty<?>[] getConstraintsProperties() {
+    public synchronized RADProperty<?>[] getConstraintsProperties() {
         if (constraintsProperties == null) {
             createConstraintsProperties();
         }

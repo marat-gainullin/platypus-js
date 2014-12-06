@@ -10,8 +10,8 @@ import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstants;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport.MarginLayoutConstraints;
-import com.eas.controls.layouts.margin.Margin;
-import com.eas.controls.layouts.margin.MarginConstraints;
+import com.eas.client.forms.layouts.Margin;
+import com.eas.client.forms.layouts.MarginConstraints;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -21,12 +21,12 @@ import java.util.List;
 
 /**
  *
- * @author lkolesnikov
+ * @author lkolesnikov, mg
  */
 public class MarginLayoutOperations {
 
-    private List<RADVisualComponent<?>> selected;          //выбранные компоненты
-    private RADVisualContainer<?> container;               //контейнер
+    private final List<RADVisualComponent<?>> selected;          //выбранные компоненты
+    private final RADVisualContainer<?> container;               //контейнер
     private List<MarginLayoutConstraints> selectedConstraints;   //Constraints выбранных компонентов
     final static private String DATA_MISSING_MSG = "Data for calculating missing {0}";
 
@@ -69,8 +69,9 @@ public class MarginLayoutOperations {
      *
      * @param dimension направление выравнивания
      * @param alignment требуемое выравнивание
+     * @throws java.lang.Exception
      */
-    public void align(int dimension, int alignment) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public void align(int dimension, int alignment) throws Exception {
         if (selected != null && selected.size() > 1) {//выбрано по крайней мере 2 компонента
             assert selected.size() == selectedConstraints.size();
             assert container != null;
@@ -303,6 +304,8 @@ public class MarginLayoutOperations {
     /**
      * Возвращает самый левый компонент
      *
+     * @param aContainerWidth
+     * @return 
      */
     public MarginConstraints findLeftCompConstraints(int aContainerWidth) {
         MarginConstraints leftConstraints = null;
@@ -321,6 +324,8 @@ public class MarginLayoutOperations {
 
     /**
      * Возвращает самый верхний компонент
+     * @param aContainerHeight
+     * @return 
      */
     public MarginConstraints findTopCompConstraints(int aContainerHeight) {
         MarginConstraints topConstraints = null;
@@ -339,6 +344,8 @@ public class MarginLayoutOperations {
 
     /**
      * Возвращает самый правый компонент
+     * @param aContainerWidth
+     * @return 
      */
     public MarginConstraints findRightCompConstraints(int aContainerWidth) {
         MarginConstraints rightConstraints = null;
@@ -356,6 +363,8 @@ public class MarginLayoutOperations {
 
     /**
      * Возвращает самый нижний компонент
+     * @param aContainerHeight
+     * @return 
      */
     public MarginConstraints findBottomCompConstraints(int aContainerHeight) {
         MarginConstraints bottomConstraints = null;
@@ -382,9 +391,10 @@ public class MarginLayoutOperations {
      * Установка или сброс ширины/высоты компонента
      *
      * @param dimension направление: 0 - ширина, 1 - высота
+     * @throws java.lang.Exception
      *
      */
-    public void resize(int dimension) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public void resize(int dimension) throws Exception {
         if (selectedConstraints != null && !selectedConstraints.isEmpty()) {//выбрано по крайней мере 1 компонент
             assert selectedConstraints.size() == selected.size();
             for (int i = 0; i < selectedConstraints.size(); i++) {
@@ -459,11 +469,14 @@ public class MarginLayoutOperations {
      * должно существовать две.
      *
      * Параметры: mc - MarginConstraints w1/h1 - ширина или высота контейнера
+     * @param aConstraints
+     * @param aWidth
+     * @return 
      */
-    public int calcWidth(MarginConstraints mc, int aWidth) {
+    public int calcWidth(MarginConstraints aConstraints, int aWidth) {
         int w = 0;
-        if (mc.getWidth() != null) {
-            Margin mrg = mc.getWidth();
+        if (aConstraints.getWidth() != null) {
+            Margin mrg = aConstraints.getWidth();
             if (!mrg.absolute) {//параметр в %
                 float k = ((float) mrg.value) / 100;
                 w = Math.round(k * aWidth);
@@ -471,8 +484,8 @@ public class MarginLayoutOperations {
                 w = mrg.value;
             }
         } else {
-            if (mc.getLeft() != null && mc.getRight() != null) {
-                w = aWidth - calcLeft(mc, aWidth) - calcRight(mc, aWidth);
+            if (aConstraints.getLeft() != null && aConstraints.getRight() != null) {
+                w = aWidth - calcLeft(aConstraints, aWidth) - calcRight(aConstraints, aWidth);
             } else {
                 throw new IllegalStateException(String.format(DATA_MISSING_MSG, "ширины"));
             }
@@ -591,39 +604,19 @@ public class MarginLayoutOperations {
 
     //Групповые операции для Якоря
     public boolean isAllLeft() {
-        for (MarginLayoutConstraints mlc : selectedConstraints) {
-            if (mlc.getConstraintsObject().getLeft() == null) {
-                return false;
-            }
-        }
-        return true;
+        return selectedConstraints.stream().allMatch((mlc) -> (mlc.getConstraintsObject().getLeft() != null));
     }
 
     public boolean isAllTop() {
-        for (MarginLayoutConstraints mlc : selectedConstraints) {
-            if (mlc.getConstraintsObject().getTop() == null) {
-                return false;
-            }
-        }
-        return true;
+        return selectedConstraints.stream().allMatch((mlc) -> (mlc.getConstraintsObject().getTop() != null));
     }
 
     public boolean isAllRight() {
-        for (MarginLayoutConstraints mlc : selectedConstraints) {
-            if (mlc.getConstraintsObject().getRight() == null) {
-                return false;
-            }
-        }
-        return true;
+        return selectedConstraints.stream().allMatch((mlc) -> (mlc.getConstraintsObject().getRight() != null));
     }
 
     public boolean isAllBottom() {
-        for (MarginLayoutConstraints mlc : selectedConstraints) {
-            if (mlc.getConstraintsObject().getBottom() == null) {
-                return false;
-            }
-        }
-        return true;
+        return selectedConstraints.stream().allMatch((mlc) -> (mlc.getConstraintsObject().getBottom() != null));
     }
 
     public void setAllLeft() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {

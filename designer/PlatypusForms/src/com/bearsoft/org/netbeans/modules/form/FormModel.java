@@ -50,7 +50,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
-import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
 import java.awt.Container;
 import java.beans.Introspector;
 import java.util.*;
@@ -106,7 +106,7 @@ public class FormModel {
     }
 
     public String findFreeComponentName(Class<?> compClass) {
-        return findFreeComponentName(FormUtils.getPlatypusControlClass(compClass).getSimpleName());
+        return findFreeComponentName(compClass.getSimpleName());
     }
 
     public String findFreeComponentName(String baseName) {
@@ -508,9 +508,9 @@ public class FormModel {
         return undoRedoManager;
     }
 
-    public void setColumnViewImpl(RADModelGridColumn aColumn, RADColumnView<? super ModelWidget> aView) {
+    public void setColumnViewImpl(RADModelGridColumn aColumn, RADColumnView<? super ModelComponentDecorator> aView) {
         if (aColumn.getViewControl() != null) {
-            RADColumnView<? super ModelWidget> oldView = aColumn.getViewControl();
+            RADColumnView<? super ModelComponentDecorator> oldView = aColumn.getViewControl();
             aColumn.setViewControl(aView);
             fireColumnViewExchanged(aColumn, oldView, aView);
         }
@@ -740,8 +740,8 @@ public class FormModel {
      */
     public FormModelEvent fireColumnViewExchanged(
             RADModelGridColumn aRadColumn,
-            RADColumnView<? super ModelWidget> oldView,
-            RADColumnView<? super ModelWidget> newView) {
+            RADColumnView<? super ModelComponentDecorator> oldView,
+            RADColumnView<? super ModelComponentDecorator> newView) {
         t("firing column view exchange, column: " // NOI18N
                 + (aRadColumn != null ? aRadColumn.getName() : "null")); // NOI18N
 

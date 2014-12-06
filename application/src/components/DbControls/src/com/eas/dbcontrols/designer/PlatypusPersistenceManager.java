@@ -2,29 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form;
+package com.eas.dbcontrols.designer;
 
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MenuFakeSupport;
 import com.bearsoft.org.netbeans.modules.form.translate.*;
-import com.eas.client.forms.DbFormDesignInfo;
 import com.eas.client.geo.RowsetFeatureDescriptor;
-import com.eas.controls.ContainerDesignInfo;
-import com.eas.controls.ControlDesignInfo;
-import com.eas.controls.DesignInfo;
-import com.eas.controls.FormDesignInfo;
-import com.eas.controls.layouts.GridBagLayoutDesignInfo;
-import com.eas.controls.layouts.GroupLayoutDesignInfo;
-import com.eas.controls.layouts.LayoutDesignInfo;
-import com.eas.controls.layouts.MarginLayoutDesignInfo;
-import com.eas.controls.menus.MenubarDesignInfo;
-import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlDesignInfo;
-import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.design.Designable;
 import com.eas.designer.application.PlatypusUtils;
-import com.eas.store.Object2Dom;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.Image;
@@ -245,7 +231,7 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                 }
                 // Factory will take care of applying right classes.
                 DesignInfo di = DesignInfoFactory.create(comp.getBeanClass());
-                if (di == null) {// columns and layers
+                if (di == null) {// columns
                     if (comp.getBeanInstance() instanceof DbGridColumn) {
                         assert comp instanceof RADModelGridColumn;
                         RADModelGridColumn radColumn = (RADModelGridColumn) comp;
@@ -262,16 +248,14 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                         } else {
                             column.setControlInfo((DbControlDesignInfo) viewDi);
                         }
-                    } else if (comp.getBeanInstance() instanceof RowsetFeatureDescriptor) {
-                        di = (RowsetFeatureDescriptor) comp.getBeanInstance();
                     }
                 }
                 if (di instanceof ControlDesignInfo) {
                     ControlDesignInfo controlDi = (ControlDesignInfo) di;
                     involvedDesignInfos.put(comp.getName(), controlDi);
-                    // Let's take care of properties and events.
+                    // Let's take care of properties.
                     // Factory initWithComponent method will take care about
-                    // properties, events and simple component references.
+                    // properties and simple component references.
                     DesignInfoFactory.initWithComponent(controlDi, comp);
                     // Toss design info by visual/non-visual basis
                     if (comp.getParentComponent() != null) {

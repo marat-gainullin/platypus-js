@@ -43,10 +43,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.eas.controls.HtmlContentEditorKit;
-import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.client.forms.components.rt.HtmlContentEditorKit;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -167,27 +165,10 @@ public class VisualReplicator {
         }
     }
 
-    /**
-     * Intended for updating semi-visual components aka DbGrid. DbGrid is the
-     * only such component.
-     * @param aRadCont
-     */
-    protected void checkModelGridCloneUpdate(ComponentContainer aRadCont) {
-        if (aRadCont instanceof RADModelGrid) {
-            RADModelGrid radGrid = (RADModelGrid) aRadCont;
-            Object oGrid = getClonedComponent(radGrid);
-            if (oGrid instanceof DbGrid) {
-                DbGrid clonedGrid = (DbGrid) oGrid;
-                clonedGrid.initializeDesign();
-            }
-        }
-    }
-
     public void reorderComponents(ComponentContainer radCont) {
         if (radCont instanceof RADVisualContainer<?>) {
             updateContainerLayout((RADVisualContainer<?>) radCont);
         }
-        checkModelGridCloneUpdate(radCont);
     }
 
     public void updateContainerLayout(RADVisualContainer<?> radCont) {
@@ -258,7 +239,6 @@ public class VisualReplicator {
                     }
                 }
             }
-            checkModelGridCloneUpdate(radCont);
         }
     }
 
@@ -346,7 +326,6 @@ public class VisualReplicator {
                 }
                 removeMapping(radComp);
             }
-            checkModelGridCloneUpdate(radCont);
         }
     }
 
