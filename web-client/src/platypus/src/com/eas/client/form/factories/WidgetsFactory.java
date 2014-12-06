@@ -56,7 +56,6 @@ import com.eas.client.form.published.widgets.PlatypusSplitButton;
 import com.eas.client.form.published.widgets.PlatypusTextArea;
 import com.eas.client.form.published.widgets.PlatypusTextField;
 import com.eas.client.form.published.widgets.PlatypusToggleButton;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.touch.client.Point;
@@ -326,12 +325,9 @@ public class WidgetsFactory {
 				component.setText(text);
 			}
 		}
-		if (aTag.hasAttribute("iconTextGap"))
-			component.setIconTextGap(Utils.getIntegerAttribute(aTag, "iconTextGap", 4));
-		if (aTag.hasAttribute("horizontalTextPosition"))
-			component.setHorizontalTextPosition(Utils.getIntegerAttribute(aTag, "horizontalTextPosition", PlatypusLabel.RIGHT));
-		if (aTag.hasAttribute("verticalTextPosition"))
-			component.setVerticalTextPosition(Utils.getIntegerAttribute(aTag, "verticalTextPosition", PlatypusLabel.RIGHT));
+		component.setIconTextGap(Utils.getIntegerAttribute(aTag, "iconTextGap", 4));
+		component.setHorizontalTextPosition(Utils.getIntegerAttribute(aTag, "horizontalTextPosition", PlatypusLabel.RIGHT));
+		component.setVerticalTextPosition(Utils.getIntegerAttribute(aTag, "verticalTextPosition", PlatypusLabel.CENTER));
 		if (aTag.hasAttribute("icon")) {
 			PlatypusImageResource.load(aTag.getAttribute("icon"), new CallbackAdapter<ImageResource, String>(){
 				@Override
@@ -745,14 +741,8 @@ public class WidgetsFactory {
 			if (fontTag.hasAttribute("name")) {
 				fontFamily = fontTag.getAttribute("name");
 			}
-			int fontSize = 0;
-			if (fontTag.hasAttribute("size")) {
-				fontSize = Utils.getIntegerAttribute(fontTag, "size", 10);
-			}
-			int fontStyle = 0;
-			if (fontTag.hasAttribute("style")) {
-				fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
-			}
+			int fontSize = Utils.getIntegerAttribute(fontTag, "size", 10);
+			int fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
 			return PublishedFont.create(fontFamily, fontStyle, fontSize);
 		} else {
 			return null;
