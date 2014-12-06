@@ -197,6 +197,7 @@
                 </test-type>
             </test-dependencies>
             <public-packages>
+                <package>com.bearsoft.gui.grid.header</package>
                 <package>com.bearsoft.routing</package>
                 <package>com.bearsoft.routing.graph</package>
                 <package>com.bearsoft.routing.gui</package>
@@ -223,7 +224,6 @@
                 <package>com.eas.client.forms.components.rt</package>
                 <package>com.eas.client.forms.containers</package>
                 <package>com.eas.client.forms.events</package>
-                <package>com.eas.client.forms.events.factories</package>
                 <package>com.eas.client.forms.events.rt</package>
                 <package>com.eas.client.forms.layouts</package>
                 <package>com.eas.client.forms.menu</package>

@@ -55,7 +55,7 @@ import org.openide.nodes.Node;
  */
 public class RADLayout extends RADComponent<LayoutManager> {
 
-    private AbstractLayoutSupport abstLayoutDelegate;
+    private final AbstractLayoutSupport abstLayoutDelegate;
 
     public RADLayout(AbstractLayoutSupport layoutDelegate,
             LayoutManager lmInstance) {

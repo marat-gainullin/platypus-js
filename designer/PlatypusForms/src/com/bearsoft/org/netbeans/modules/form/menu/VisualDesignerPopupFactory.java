@@ -100,7 +100,7 @@ class VisualDesignerPopupFactory extends PopupFactory {
         canvas.validate();
         canvas.setVisible(true);
         final JPanel fcont = cont;
-        SwingUtilities.invokeLater(new Runnable() {
+        java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 setLocationFromMenu(menu, fcont);

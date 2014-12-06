@@ -58,7 +58,7 @@ import org.openide.nodes.*;
 public class RADVisualComponent<C extends Component> extends RADComponent<C> {
 
     private final Map<String, LayoutConstraints<?>> constraints = new HashMap<>();
-    private RADProperty<?>[] constraintsProperties;
+    private FormProperty<?>[] constraintsProperties;
     private ConstraintsListenerConvertor constraintsListener;
 
     enum MenuType {
@@ -165,22 +165,22 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
     @Override
     protected synchronized void createPropertySets(List<Node.PropertySet> propSets) {
         super.createPropertySets(propSets);
-            if (constraintsProperties == null) {
-                createConstraintsProperties();
-            }
-            if (constraintsProperties != null && constraintsProperties.length > 0) {
-                propSets.add(propSets.size() - 1,
-                        new Node.PropertySet("layout", // NOI18N
-                        FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
-                        FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
-                        {
-                            @Override
-                            public FormProperty<?>[] getProperties() {
-                                FormProperty<?>[] props = getConstraintsProperties();
-                                return (props == null) ? NO_PROPERTIES : props;
-                            }
-                        });
-            }
+        if (constraintsProperties == null) {
+            createConstraintsProperties();
+        }
+        if (constraintsProperties != null && constraintsProperties.length > 0) {
+            propSets.add(propSets.size() - 1,
+                    new Node.PropertySet("layout", // NOI18N
+                            FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
+                            FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
+                    {
+                        @Override
+                        public FormProperty<?>[] getProperties() {
+                            FormProperty<?>[] props = getConstraintsProperties();
+                            return (props == null) ? NO_PROPERTIES : props;
+                        }
+                    });
+        }
     }
 
     @Override
@@ -192,7 +192,7 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
 
     // ---------
     // constraints properties
-    public synchronized RADProperty<?>[] getConstraintsProperties() {
+    public synchronized FormProperty<?>[] getConstraintsProperties() {
         if (constraintsProperties == null) {
             createConstraintsProperties();
         }
@@ -239,7 +239,6 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
                         int type = constraintsProperties[i].getAccessType() | FormProperty.NO_WRITE;
                         constraintsProperties[i].setAccessType(type);
                     }
-                    nameToProperty.put(constraintsProperties[i].getName(), constraintsProperties[i]);
                 }
             }
         }
@@ -263,8 +262,8 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
             if (FormProperty.PROP_VALUE.equals(eventName)) {
                 LayoutSupportManager layoutSupport = getParentLayoutSupport();
                 int index = getComponentIndex();
-                LayoutConstraints<?> constraints =
-                        layoutSupport.getConstraints(index);
+                LayoutConstraints<?> constraints
+                        = layoutSupport.getConstraints(index);
 
                 ev = new PropertyChangeEvent(constraints,
                         ((FormProperty<?>) source).getName(),

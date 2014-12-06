@@ -72,7 +72,7 @@ public class InsertMenuAction extends NodeAction {
                 Class<?> clazz = item.getComponentClass();
                 if (clazz != null && JMenu.class.isAssignableFrom(clazz)) {
                     final PaletteItem it = item;
-                    SwingUtilities.invokeLater(new Runnable() {
+                    java.awt.EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             try {

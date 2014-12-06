@@ -420,7 +420,7 @@ public abstract class RADComponent<C> {
      * @param name name of the property.
      * @return bean or event property
      */
-    public <P extends RADProperty<?>> P getProperty(String name) {
+    public <P extends FormProperty<?>> P getProperty(String name) {
         return (P) nameToProperty.get(name);
     }
 
@@ -627,6 +627,10 @@ public abstract class RADComponent<C> {
         if (propertyListener != null) {
             property.addPropertyChangeListener(propertyListener);
         }
+    }
+
+    public RADProperty<?>[] getBeanProperties() {
+        return nameToProperty.values().toArray(new RADProperty<?>[]{});
     }
 
     /**

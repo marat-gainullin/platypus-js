@@ -40,13 +40,14 @@ public class RADColumnView<M extends ModelComponentDecorator> extends RADModelSc
     
     public RADColumnView() {
         super();
+        setInModel(false);
         setStoredName("view");
     }
 
     @Override
-    protected RADProperty createBeanProperty(PropertyDescriptor desc, Object[] propAccessClsf, Object[] propParentChildDepClsf) {
+    protected RADProperty createBeanProperty(PropertyDescriptor desc) {
         if (!hiddenProps.contains(desc.getName())) {
-            return super.createBeanProperty(desc, propAccessClsf, propParentChildDepClsf);
+            return super.createBeanProperty(desc);
         } else {
             return null;
         }

@@ -103,9 +103,9 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
     }
 
     @Override
-    protected RADProperty<?> createBeanProperty(PropertyDescriptor desc, Object[] propAccessClsf, Object[] propParentChildDepClsf) {
+    protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
         if (!"visible".equals(desc.getName())) {
-            return super.createBeanProperty(desc, propAccessClsf, propParentChildDepClsf);
+            return super.createBeanProperty(desc);
         } else {
             return null;
         }
@@ -307,11 +307,11 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
         @Override
         public void setAsText(String str) {
             if (names[0].equals(str)) {
-                setValue(new Integer(0));
+                setValue(0);
             } else if (names[1].equals(str)) {
-                setValue(new Integer(1));
+                setValue(1);
             } else if (names[2].equals(str)) {
-                setValue(new Integer(2));
+                setValue(2);
             }
         }
     }

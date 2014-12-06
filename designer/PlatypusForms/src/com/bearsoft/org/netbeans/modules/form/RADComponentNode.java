@@ -226,13 +226,6 @@ public class RADComponentNode extends FormNode
                 }
                 lactions.add(null);
 
-                java.util.List<RADProperty<?>> actionProps = component.getActionProperties();
-                for (RADProperty<?> prop : actionProps) {
-                    Action action = PropertyAction.createIfEditable(prop);
-                    if (action != null) {
-                        lactions.add(action);
-                    }
-                }
                 addSeparator(lactions);
 
                 if (component instanceof ComponentContainer) {
@@ -422,27 +415,24 @@ public class RADComponentNode extends FormNode
                 customizer.setObject(component.getBeanInstance());
                 if (customizerObject instanceof FormAwareEditor) {
                     // Hack - returns some property
-                    FormProperty<?> prop = (FormProperty<?>) component.getProperties()[0].getProperties()[0];
+                    RADProperty<?> prop = (RADProperty<?>) component.getProperties()[0].getProperties()[0];
                     ((FormAwareEditor) customizerObject).setContext(component.getFormModel(), (FormProperty<?>) prop);
                 }
-                customizer.addPropertyChangeListener(new PropertyChangeListener() {
-                    @Override
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        FormProperty<?>[] properties;
-                        if (evt.getPropertyName() != null) {
-                            FormProperty<?> changedProperty
-                                    = component.<FormProperty<?>>getRADProperty(evt.getPropertyName());
-                            if (changedProperty != null) {
-                                properties = new FormProperty<?>[]{changedProperty};
-                            } else {
-                                return; // non-existing property?
-                            }
+                customizer.addPropertyChangeListener((PropertyChangeEvent evt) -> {
+                    RADProperty<?>[] properties;
+                    if (evt.getPropertyName() != null) {
+                        RADProperty<?> changedProperty
+                                = component.<RADProperty<?>>getProperty(evt.getPropertyName());
+                        if (changedProperty != null) {
+                            properties = new RADProperty<?>[]{changedProperty};
                         } else {
-                            properties = component.getAllBeanProperties();
-                            evt = null;
+                            return; // non-existing property?
                         }
-                        updatePropertiesFromCustomizer(properties, evt);
+                    } else {
+                        properties = component.getBeanProperties();
+                        evt = null;
                     }
+                    updatePropertiesFromCustomizer(properties, evt);
                 });
                 // [undo/redo for customizer probably does not work...]
                 return (Component) customizerObject;
@@ -459,22 +449,19 @@ public class RADComponentNode extends FormNode
             final PropertyChangeEvent evt) {
         // we run this as privileged to avoid security problems - because
         // the property change is fired from untrusted bean customizer code
-        AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                Object oldValue = evt != null ? evt.getOldValue() : null;
-                Object newValue = evt != null ? evt.getNewValue() : null;
-
-                for (int i = 0; i < properties.length; i++) {
-                    FormProperty<Object> prop = (FormProperty<Object>) properties[i];
-                    try {
-                        prop.propertyValueChanged(oldValue, newValue);
-                    } catch (Exception ex) { // unlikely to happen
-                        ErrorManager.getDefault().notify(ex);
-                    }
+        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            Object oldValue = evt != null ? evt.getOldValue() : null;
+            Object newValue = evt != null ? evt.getNewValue() : null;
+            
+            for (int i = 0; i < properties.length; i++) {
+                FormProperty<Object> prop = (FormProperty<Object>) properties[i];
+                try {
+                    prop.propertyValueChanged(oldValue, newValue);
+                } catch (Exception ex) { // unlikely to happen
+                    ErrorManager.getDefault().notify(ex);
                 }
-                return null;
             }
+            return null;
         });
     }
 
@@ -556,7 +543,7 @@ public class RADComponentNode extends FormNode
     // FormPropertyCookie implementation
     @Override
     public FormProperty<?> getProperty(String name) {
-        return component.getPropertyByName(name, FormProperty.class, true);
+        return component.getProperty(name);
     }
 
     // -----------------------------------------------------------------------------

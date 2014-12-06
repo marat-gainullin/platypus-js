@@ -422,31 +422,28 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     private void attachSettingsListener() {
         if (settingsListener == null) {
-            settingsListener = new PreferenceChangeListener() {
-                @Override
-                public void preferenceChange(PreferenceChangeEvent evt) {
-                    String propName = evt.getKey();
-                    switch (propName) {
-                        case FormLoaderSettings.PROP_ASSISTANT_SHOWN:
-                            updateAssistant();
-                            break;
-                        case FormLoaderSettings.PROP_SELECTION_BORDER_SIZE:
-                        case FormLoaderSettings.PROP_SELECTION_BORDER_COLOR:
-                        case FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR:
-                        case FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR:
-                        case FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR: {
-                            updateVisualSettings();
-                            break;
-                        }
-                        case FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR: {
-                            getFormToolBar().showPaletteButton(FormLoaderSettings.getInstance().isPaletteInToolBar());
-                            break;
-                        }
-                        case FormLoaderSettings.PROP_GRID_X:
-                        case FormLoaderSettings.PROP_GRID_Y:
-                            updateVisualSettings();
-                            break;
+            settingsListener = (PreferenceChangeEvent evt) -> {
+                String propName = evt.getKey();
+                switch (propName) {
+                    case FormLoaderSettings.PROP_ASSISTANT_SHOWN:
+                        updateAssistant();
+                        break;
+                    case FormLoaderSettings.PROP_SELECTION_BORDER_SIZE:
+                    case FormLoaderSettings.PROP_SELECTION_BORDER_COLOR:
+                    case FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR:
+                    case FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR:
+                    case FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR: {
+                        updateVisualSettings();
+                        break;
                     }
+                    case FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR: {
+                        getFormToolBar().showPaletteButton(FormLoaderSettings.getInstance().isPaletteInToolBar());
+                        break;
+                    }
+                    case FormLoaderSettings.PROP_GRID_X:
+                    case FormLoaderSettings.PROP_GRID_Y:
+                        updateVisualSettings();
+                        break;
                 }
             };
             FormLoaderSettings.getPreferences().addPreferenceChangeListener(settingsListener);
@@ -462,24 +459,21 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     private void attachPaletteListener() {
         if (paletteListener == null) {
-            paletteListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (PaletteController.PROP_SELECTED_ITEM.equals(evt.getPropertyName())) {
-                        if (formModel != null && formModel.isFormLoaded() && !formModel.isReadOnly()) {
-                            // PENDING should be done for all cloned designers
-                            if (evt.getNewValue() == null) {
-                                if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
-                                    setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
-                                }
-                            } else {
-                                if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
-                                    // Change in the selected palette item means unselection
-                                    // of the old item and selection of the new one
-                                    setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
-                                }
-                                setDesignerMode(PlatypusFormLayoutView.MODE_ADD);
+            paletteListener = (PropertyChangeEvent evt) -> {
+                if (PaletteController.PROP_SELECTED_ITEM.equals(evt.getPropertyName())) {
+                    if (formModel != null && formModel.isFormLoaded() && !formModel.isReadOnly()) {
+                        // PENDING should be done for all cloned designers
+                        if (evt.getNewValue() == null) {
+                            if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
+                                setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
                             }
+                        } else {
+                            if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
+                                // Change in the selected palette item means unselection
+                                // of the old item and selection of the new one
+                                setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
+                            }
+                            setDesignerMode(PlatypusFormLayoutView.MODE_ADD);
                         }
                     }
                 }
@@ -533,8 +527,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                                 // Copy components from the original layered pane into our one
                                 JLayeredPane oldPane = rootPane.getLayeredPane();
                                 Component[] comps = oldPane.getComponents();
-                                for (int i = 0; i < comps.length; i++) {
-                                    newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
+                                for (Component comp : comps) {
+                                    newPane.add(comp, Integer.valueOf(oldPane.getLayer(comp)));
                                 }
                                 // Use our layered pane that knows about LAF switching
                                 rootPane.setLayeredPane(newPane);
@@ -778,11 +772,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     public void setSelectedComponents(RADComponent<?>[] radComps) {
         clearSelectionImpl();
-
-        for (int i = 0; i < radComps.length; i++) {
-            addComponentToSelectionImpl(radComps[i]);
+        for (RADComponent<?> radComp : radComps) {
+            addComponentToSelectionImpl(radComp);
         }
-
         repaintSelection();
         updateNodesSelection();
     }
@@ -815,8 +807,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     }
 
     void addComponentsToSelection(RADVisualComponent<?>[] radComps) {
-        for (int i = 0; i < radComps.length; i++) {
-            addComponentToSelectionImpl(radComps[i]);
+        for (RADVisualComponent<?> radComp : radComps) {
+            addComponentToSelectionImpl(radComp);
         }
         repaintSelection();
         updateNodesSelection();
@@ -1331,9 +1323,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
      */
     Collection<String> selectedLayoutComponentNames() {
         List<String> selectedIds = new ArrayList<>();
-        for (RADComponent<?> radComp : getSelectedLayoutComponents()) {
+        getSelectedLayoutComponents().stream().forEach((radComp) -> {
             selectedIds.add(radComp.getName());
-        }
+        });
         return selectedIds;
     }
 
@@ -1381,7 +1373,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             Node[] empty = new Node[]{};
             explorerManager.setSelectedNodes(empty);
             setActivatedNodes(empty);
-                // Hack. When multi-view element with no any activated node is activated,
+            // Hack. When multi-view element with no any activated node is activated,
             // NetBeans' property sheet stay with a node from previous multi-view element.
             // So, we need to simulate non-empty activated nodes.
             if (activated == null || activated.length <= 0) {
@@ -1439,16 +1431,16 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 notifyCannotEditInPlace();
                 return;
             }
-            RADProperty<String> property = null;
+            FormProperty<String> property = null;
             if (JTabbedPane.class.isAssignableFrom(radComp.getBeanClass())) {
                 JTabbedPane tabbedPane = (JTabbedPane) comp;
                 int index = tabbedPane.getSelectedIndex();
                 RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
                 RADVisualComponent<?> tabComp = radCont.getSubComponent(index);
-                RADProperty<?>[] props = tabComp.getConstraintsProperties();
+                FormProperty<?>[] props = tabComp.getConstraintsProperties();
                 for (int i = 0; i < props.length; i++) {
                     if (props[i].getName().equals("TabConstraints.tabTitle")) { // NOI18N
-                        property = (RADProperty<String>) props[i];
+                        property = (FormProperty<String>) props[i];
                         break;
                     }
                 }
@@ -1462,27 +1454,17 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 }
             }
 
-            String editText;
-            try {
-                editText = property.getValue();
-            } catch (Exception ex) { // should not happen
-                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                return;
-            }
-
             editedProperty = property;
 
             getInPlaceEditLayer();
             try {
-                textEditLayer.setEditedComponent(comp, editText);
-            } catch (IllegalArgumentException ex) {
+                textEditLayer.setEditedComponent(comp, property.getValue());
+                textEditLayer.setVisible(true);
+                handleLayer.setVisible(false);
+                textEditLayer.requestFocus();
+            } catch (Exception ex) {
                 notifyCannotEditInPlace();
-                return;
             }
-
-            textEditLayer.setVisible(true);
-            handleLayer.setVisible(false);
-            textEditLayer.requestFocus();
         }
     }
 
@@ -1672,14 +1654,11 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             PlatypusFormSupport.checkFormGroupVisibility();
             // hack: after IDE starts, if some form is opened but not active in
             // winsys, we need to select it in FormInspector
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (formEditor != null && formEditor.isFormLoaded()
-                            && FormInspector.exists()
-                            && FormInspector.getInstance().getFocusedForm() == null) {
-                        FormInspector.getInstance().focusForm(PlatypusFormLayoutView.this);
-                    }
+            EventQueue.invokeLater(() -> {
+                if (formEditor != null && formEditor.isFormLoaded()
+                        && FormInspector.exists()
+                        && FormInspector.getInstance().getFocusedForm() == null) {
+                    FormInspector.getInstance().focusForm(PlatypusFormLayoutView.this);
                 }
             });
         }
@@ -1696,11 +1675,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         super.componentOpened();
         if ((formEditor == null) && (multiViewObserver != null)) { // Issue 67879
             multiViewObserver.getTopComponent().close();
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    PlatypusFormSupport.checkFormGroupVisibility();
-                }
+            EventQueue.invokeLater(() -> {
+                PlatypusFormSupport.checkFormGroupVisibility();
             });
         }
     }
@@ -1776,11 +1752,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         @Override
         public void formChanged(final FormModelEvent[] events) {
             if (!EventQueue.isDispatchThread()) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        processEvents(events);
-                    }
+                EventQueue.invokeLater(() -> {
+                    processEvents(events);
                 });
             } else {
                 processEvents(events);
@@ -1996,15 +1969,15 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         /**
          * Dimension to align in.
          */
-        private int dimension;
+        private final int dimension;
         /**
          * Requested alignment.
          */
-        private int alignment;
+        private final int alignment;
         /**
          * Group/Align action.
          */
-        private boolean closed;
+        private final boolean closed;
 
         /**
          * Creates action that aligns selected components in the specified
@@ -2155,7 +2128,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         /**
          * Dimension of resizability.
          */
-        private int dimension;
+        private final int dimension;
 
         /**
          * Creates action that changes the resizability of the component.

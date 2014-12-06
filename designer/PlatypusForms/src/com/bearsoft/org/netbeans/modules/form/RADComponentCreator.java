@@ -99,7 +99,6 @@ public class RADComponentCreator {
         private ComponentType componentType; // type of radcomponent to be added/applied
         private RADComponent<?> targetComponent; // actual target component (after adjustments)
     }
-    private static final FormProperty.Filter COPIED_PROPERTY_FILTER = (FormProperty<?> property) -> !property.isDefaultValue() && !"name".equals(property.getName()); // don't copy name property
     private final FormModel formModel;
     private RADVisualComponent<?> preRadComp;
 
@@ -154,13 +153,7 @@ public class RADComponentCreator {
         }
 
         try { // Look&Feel UI defaults remapping needed
-            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel,
-                    new Mutex.ExceptionAction<RADComponent<?>>() {
-                        @Override
-                        public RADComponent<?> run() throws Exception {
-                            return copyComponent2(sourceComp, null, target);
-                        }
-                    });
+            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel, () -> copyComponent2(sourceComp, null, target));
         } catch (Exception ex) { // should not happen
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
             return null;
@@ -291,13 +284,7 @@ public class RADComponentCreator {
         }
 
         try { // Look&Feel UI defaults remapping needed
-            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel,
-                    new Mutex.ExceptionAction<RADComponent<?>>() {
-                        @Override
-                        public RADComponent<?> run() throws Exception {
-                            return createAndAddComponent2(compClass, target, aConstraints);
-                        }
-                    });
+            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel, () -> createAndAddComponent2(compClass, target, aConstraints));
         } catch (Exception ex) { // should not happen
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
             return null;
@@ -310,18 +297,18 @@ public class RADComponentCreator {
         RADComponent<?> targetComp = target.targetComponent;
         if (target.targetType == TargetType.LAYOUT) {
             return setContainerLayout((Class<LayoutManager>) compClass, targetComp);
-        }else{
-        RADComponent<?> newRadComp = null;
-        if (target.componentType == ComponentType.VISUAL) {
-            newRadComp = addVisualComponent((Class<? extends Component>) compClass, targetComp, -1, aConstraints);
         } else {
-            if (ButtonGroup.class.isAssignableFrom(compClass)) {
-                newRadComp = addButtonGroup((Class<ButtonGroup>) compClass, targetComp);
-            } else if (GridColumnsGroup.class.isAssignableFrom(compClass)) {
-                newRadComp = addGridColumn((Class<GridColumnsGroup>) compClass, targetComp);
+            RADComponent<?> newRadComp = null;
+            if (target.componentType == ComponentType.VISUAL) {
+                newRadComp = addVisualComponent((Class<? extends Component>) compClass, targetComp, -1, aConstraints);
+            } else {
+                if (ButtonGroup.class.isAssignableFrom(compClass)) {
+                    newRadComp = addButtonGroup((Class<ButtonGroup>) compClass, targetComp);
+                } else if (GridColumnsGroup.class.isAssignableFrom(compClass)) {
+                    newRadComp = addGridColumn((Class<GridColumnsGroup>) compClass, targetComp);
+                }
             }
-        }
-        return newRadComp;
+            return newRadComp;
         }
     }
 
@@ -404,10 +391,9 @@ public class RADComponentCreator {
                 }
             } else if (FormUtils.isVisualizableClass(beanClass)) {
                 // visual component
-                if (targetComp != null
-                        && (java.awt.Window.class.isAssignableFrom(beanClass)
+                if (java.awt.Window.class.isAssignableFrom(beanClass)
                         || java.applet.Applet.class.isAssignableFrom(beanClass)
-                        || !java.awt.Component.class.isAssignableFrom(beanClass))) {
+                        || !java.awt.Component.class.isAssignableFrom(beanClass)) {
                     // visual component that cna't have a parent
                     if (defaultToOthers) {
                         targetComp = null; // will go to Other Components
@@ -531,12 +517,12 @@ public class RADComponentCreator {
 
             // 2nd - clone layout support
             if (sourceComp instanceof RADVisualContainer<?>) {
-                RADVisualComponent<?>[] newComps =
-                        new RADVisualComponent<?>[newSubs.length];
+                RADVisualComponent<?>[] newComps
+                        = new RADVisualComponent<?>[newSubs.length];
                 System.arraycopy(newSubs, 0, newComps, 0, newSubs.length);
 
-                LayoutSupportManager sourceLayout =
-                        ((RADVisualContainer<?>) sourceComp).getLayoutSupport();
+                LayoutSupportManager sourceLayout
+                        = ((RADVisualContainer<?>) sourceComp).getLayoutSupport();
 
                 if (sourceLayout != null) {
                     RADVisualContainer<?> newCont = (RADVisualContainer<?>) newComp;
@@ -565,11 +551,16 @@ public class RADComponentCreator {
         if (formModel == sourceComp.getFormModel()) {
             copyMode |= FormUtils.PASS_DESIGN_VALUES;
         }
-        java.util.List<RADProperty<?>> filtered = sourceComp.getBeanProperties(COPIED_PROPERTY_FILTER);
-        java.util.List<String> filteredNames = new ArrayList<>();
-        for (RADProperty<?> prop : filtered) {
-            filteredNames.add(prop.getName());
+        java.util.List<RADProperty<?>> filtered = new ArrayList<>();
+        for (RADProperty<?> prop : sourceComp.getBeanProperties()) {
+            if (!prop.isDefaultValue()) {
+                filtered.add(prop);
+            }
         }
+        java.util.List<String> filteredNames = new ArrayList<>();
+        filtered.stream().forEach((prop) -> {
+            filteredNames.add(prop.getName());
+        });
         RADProperty<?>[] sourceProps = filtered.toArray(new RADProperty<?>[]{});
         RADProperty<?>[] newProps = newComp.getBeanProperties(filteredNames.toArray(new String[]{}));
         assert sourceProps.length == newProps.length;
@@ -728,10 +719,10 @@ public class RADComponentCreator {
     private void addButtonGroup(RADButtonGroup newRadComp,
             RADComponent<?> targetComp,
             boolean newlyAdded) {
-        ComponentContainer targetCont =
-                targetComp instanceof ComponentContainer
+        ComponentContainer targetCont
+                = targetComp instanceof ComponentContainer
                 && !(targetComp instanceof RADVisualContainer<?>)
-                ? (ComponentContainer) targetComp : null;
+                        ? (ComponentContainer) targetComp : null;
         if (newlyAdded) {
             newRadComp.setStoredName(formModel.findFreeComponentName(ButtonGroup.class));
         }
@@ -754,10 +745,10 @@ public class RADComponentCreator {
     private void addGridColumn(RADModelGridColumn newComp,
             RADComponent<?> targetComp,
             boolean newlyAdded) {
-        ComponentContainer targetCont =
-                targetComp instanceof RADModelGrid
+        ComponentContainer targetCont
+                = targetComp instanceof RADModelGrid
                 || targetComp instanceof RADModelGridColumn
-                ? (ComponentContainer) targetComp : null;
+                        ? (ComponentContainer) targetComp : null;
         if (newlyAdded) {
             if (!newComp.isInModel() || formModel.getRADComponent(newComp.getName()) != newComp) {
                 newComp.setStoredName(formModel.findFreeComponentName("Column"));
@@ -806,10 +797,10 @@ public class RADComponentCreator {
         if (layoutDelegate == null) {
             DialogDisplayer.getDefault().notify(
                     new NotifyDescriptor.Message(
-                    FormUtils.getFormattedBundleString(
-                    "FMT_ERR_LayoutNotFound", // NOI18N
-                    new Object[]{layoutClass.getName()}),
-                    NotifyDescriptor.WARNING_MESSAGE));
+                            FormUtils.getFormattedBundleString(
+                                    "FMT_ERR_LayoutNotFound", // NOI18N
+                                    new Object[]{layoutClass.getName()}),
+                            NotifyDescriptor.WARNING_MESSAGE));
 
             return null;
         }
@@ -838,9 +829,9 @@ public class RADComponentCreator {
             RADVisualContainer<?> targetCont = (RADVisualContainer<?>) setContainerLayout((Class<LayoutManager>) sourceComp.getBeanClass(), targetComp);
 
             // copy properties additionally to handle design values
-            FormProperty<?>[] sourceProps = sourceComp.getKnownBeanProperties();
-            FormProperty<?>[] targetProps =
-                    targetCont.getLayoutSupport().getAllProperties();
+            FormProperty<?>[] sourceProps = sourceComp.getBeanProperties();
+            FormProperty<?>[] targetProps
+                    = targetCont.getLayoutSupport().getAllProperties();
             int copyMode = FormUtils.CHANGED_ONLY
                     | FormUtils.DISABLE_CHANGE_FIRING;
             if (formModel == sourceComp.getFormModel()) {
@@ -975,8 +966,8 @@ public class RADComponentCreator {
                 String prefix = NbBundle.getMessage(RADComponentCreator.class, "FMT_CreatorComboBoxItem"); // NOI18N
                 prefix += ' ';
                 ComboBoxModel<String> propValue = new DefaultComboBoxModel<>(new String[]{
-                            prefix + 1, prefix + 2, prefix + 3, prefix + 4
-                        });
+                    prefix + 1, prefix + 2, prefix + 3, prefix + 4
+                });
                 changes.put("model", propValue); // NOI18N
             }
 
@@ -1009,7 +1000,7 @@ public class RADComponentCreator {
         for (Map.Entry<String, Object> change : changes.entrySet()) {
             String propName = change.getKey();
             Object propValue = change.getValue();
-            FormProperty<Object> prop = newRadComp.<FormProperty<Object>>getRADProperty(propName);
+            RADProperty<Object> prop = newRadComp.<RADProperty<Object>>getProperty(propName);
             if (prop != null) {
                 try {
                     prop.setChangeFiring(false);
@@ -1042,7 +1033,7 @@ public class RADComponentCreator {
             RADVisualComponent<?> menuComp = createVisualComponent(JMenu.class);
             menuComp.setStoredName(formModel.findFreeComponentName("mnuFile"));
             try {
-                (menuComp.<RADProperty<String>>getRADProperty("text")) // NOI18N
+                (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultFileMenu")); // NOI18N
             } catch (Exception ex) {
                 // nevermind, ignore
@@ -1055,7 +1046,7 @@ public class RADComponentCreator {
             menuComp = createVisualComponent(JMenu.class);
             menuComp.setStoredName(formModel.findFreeComponentName("mnuEdit"));
             try {
-                (menuComp.<RADProperty<String>>getRADProperty("text")) // NOI18N
+                (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultEditMenu")); // NOI18N
             } catch (Exception ex) {
                 // never mind, ignore
@@ -1115,7 +1106,7 @@ public class RADComponentCreator {
 
         if (changes != null) {
             for (Map.Entry<String, Object> e : changes.entrySet()) {
-                FormProperty<Object> prop = radComp.<FormProperty<Object>>getRADProperty(e.getKey());
+                RADProperty<Object> prop = radComp.<RADProperty<Object>>getProperty(e.getKey());
                 if (prop != null) {
                     try {
                         prop.setChangeFiring(false);

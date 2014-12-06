@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.beaninfo.swing;
 
-import java.awt.CardLayout;
+import com.eas.client.forms.layouts.CardLayout;
 import java.beans.*;
 
 public class CardLayoutBeanInfo extends BISupport {

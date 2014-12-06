@@ -9,7 +9,6 @@ import com.eas.client.geo.datastore.DatamodelDataStore;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.ModelEntityRef;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.controls.DesignInfo;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.store.Serial;
@@ -25,7 +24,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class RowsetFeatureDescriptor extends DesignInfo {
+public class RowsetFeatureDescriptor {
 
     public static final String ACTIVE = "active";
     public static final String CRSWKT = "crsWkt";
@@ -71,7 +70,6 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         super();
     }
 
-    @Override
     public RowsetFeatureDescriptor copy() {
         RowsetFeatureDescriptor copy = new RowsetFeatureDescriptor();
         copy.assign(this);
@@ -119,8 +117,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         changeSupport.firePropertyChange(GEOMETRYBINDING, old, aValue);
     }
 
-    @Override
-    public void assign(DesignInfo aInfo) {
+    public void assign(RowsetFeatureDescriptor aInfo) {
         RowsetFeatureDescriptor source = (RowsetFeatureDescriptor) aInfo;
         active = source.active;
         crsWkt = source.crsWkt;
@@ -138,7 +135,6 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         entity = source.entity;
     }
 
-    @Override
     public boolean isEqual(Object o) {
         if (this == o) {
             return true;

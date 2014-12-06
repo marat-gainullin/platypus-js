@@ -417,14 +417,13 @@ public class VisualReplicator {
 
                 java.util.List<RADProperty<?>> applyProperties;
                 if (oClone instanceof Window) { // some properties should not be set to Window, e.g. visible
-                    applyProperties = radComp.getBeanProperties(new FormProperty.Filter() {
-                        @Override
-                        public boolean accept(FormProperty<?> property) {
-                            return !"visible".equals(property.getName()); // NOI18N
-                        }
-                    }, false);
+                    applyProperties = new ArrayList<>();
+                    for(RADProperty<?> prop : radComp.getBeanProperties()){
+                        if(!"visible".equals(prop.getName()))
+                            applyProperties.add(prop);
+                    }
                 } else {
-                    applyProperties = Arrays.asList(radComp.getKnownBeanProperties());
+                    applyProperties = Arrays.asList(radComp.getBeanProperties());
                 }
                 FormUtils.copyPropertiesToBean(applyProperties,
                         compClone != null ? compClone : oClone,

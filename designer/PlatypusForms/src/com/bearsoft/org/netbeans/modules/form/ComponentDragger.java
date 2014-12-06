@@ -422,7 +422,7 @@ class ComponentDragger {
                 formModel.setUndoRedoRecording(true);
             }
             // select dropped components in designer (after everything updates)
-            SwingUtilities.invokeLater(new Runnable() {
+            EventQueue.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     formDesigner.setSelectedComponents(selectedComponents);

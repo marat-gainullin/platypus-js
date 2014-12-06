@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.layoutsupport;
 
-import com.bearsoft.org.netbeans.modules.form.RADProperty;
+import com.bearsoft.org.netbeans.modules.form.FormProperty;
 
 /**
  * This interface represents one layout constraints object describing position
@@ -64,7 +64,7 @@ public interface LayoutConstraints<T> {
      *
      * @return properties of these constraints
      */
-    RADProperty<?>[] getProperties();
+    FormProperty<?>[] getProperties();
 
     /**
      * Gets the real (reference) constraints object behind this metaobject. This

@@ -57,11 +57,12 @@ import org.openide.ErrorManager;
  * provides read and write methods to get and set property values.
  *
  * @author Tomas Pavek
+ * @param <T>
  */
 public class RADProperty<T> extends FormProperty<T> {
 
-    private RADComponent<?> component;
-    private PropertyDescriptor desc;
+    private final RADComponent<?> component;
+    private final PropertyDescriptor desc;
     private T defaultValue;
 
     public RADProperty(RADComponent<?> aRadComp, PropertyDescriptor propdesc) throws IllegalAccessException, InvocationTargetException {
