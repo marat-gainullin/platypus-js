@@ -46,7 +46,7 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.components.model.ModelWidget;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,8 +132,8 @@ public class FormModelEvent extends EventObject {
 
     void setColumnView(
             RADModelGridColumn aRadColumn,
-            RADColumnView<? super DbControlPanel> oldView,
-            RADColumnView<? super DbControlPanel> newView) {
+            RADColumnView<? super ModelWidget> oldView,
+            RADColumnView<? super ModelWidget> newView) {
         component = aRadColumn;
         container = aRadColumn;
         oldPropertyValue = oldView;
@@ -287,12 +287,12 @@ public class FormModelEvent extends EventObject {
         return (LayoutSupportDelegate) newPropertyValue;
     }
 
-    public final RADColumnView<? super DbControlPanel> getOldColumnView() {
-        return (RADColumnView<? super DbControlPanel>) oldPropertyValue;
+    public final RADColumnView<? super ModelWidget> getOldColumnView() {
+        return (RADColumnView<? super ModelWidget>) oldPropertyValue;
     }
 
-    public final RADColumnView<? super DbControlPanel> getNewColumnView() {
-        return (RADColumnView<? super DbControlPanel>) newPropertyValue;
+    public final RADColumnView<? super ModelWidget> getNewColumnView() {
+        return (RADColumnView<? super ModelWidget>) newPropertyValue;
     }
 
     public final int[] getReordering() {
@@ -644,7 +644,7 @@ public class FormModelEvent extends EventObject {
         // -------------
         private void undoColumnViewExchange() {
             try {
-                RADColumnView<? super DbControlPanel> columnView = getOldColumnView();
+                RADColumnView<? super ModelWidget> columnView = getOldColumnView();
                 if (columnView != null) {
                     getFormModel().setColumnViewImpl(
                             getColumn(), columnView);
@@ -656,7 +656,7 @@ public class FormModelEvent extends EventObject {
 
         private void redoColumnViewExchange() {
             try {
-                RADColumnView<? super DbControlPanel> columnView = getNewColumnView();
+                RADColumnView<? super ModelWidget> columnView = getNewColumnView();
                 if (columnView != null) {
                     getFormModel().setColumnViewImpl(
                             getColumn(), columnView);

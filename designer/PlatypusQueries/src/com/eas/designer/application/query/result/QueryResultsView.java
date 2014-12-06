@@ -20,12 +20,11 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
-import com.eas.client.model.Relation;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.ScriptedQueryFactory;
-import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
@@ -72,7 +71,7 @@ import org.openide.util.RequestProcessor;
 public class QueryResultsView extends javax.swing.JPanel {
 
     private QuerySetupView querySetupView;
-    private DbGrid dbGrid;
+    private ModelGrid grid;
     private final DatabasesClient basesProxy;
     private String queryText;
     private Parameters parameters;
@@ -229,24 +228,18 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void showInfo(final String aText) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                messageLabel.setForeground(UIManager.getColor(DEFAULT_TEXT_COLOR_KEY));
-                messageLabel.setText(aText);
-                messageLabel.setCaretPosition(0);
-            }
+        SwingUtilities.invokeLater(() -> {
+            messageLabel.setForeground(UIManager.getColor(DEFAULT_TEXT_COLOR_KEY));
+            messageLabel.setText(aText);
+            messageLabel.setCaretPosition(0);
         });
     }
 
     private void showWarning(final String aText) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                messageLabel.setForeground(Color.RED.darker());
-                messageLabel.setText(aText);
-                messageLabel.setCaretPosition(0);
-            }
+        SwingUtilities.invokeLater(() -> {
+            messageLabel.setForeground(Color.RED.darker());
+            messageLabel.setText(aText);
+            messageLabel.setCaretPosition(0);
         });
     }
 
@@ -404,24 +397,21 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         if (model != null) {
-            RequestProcessor.getDefault().execute(new Runnable() {
-                @Override
-                public void run() {
-                    final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
-                    ph.start();
-                    try {
-                        if (dataEntity.getQuery().isCommand()) {
-                            int rowsAffected = basesProxy.executeUpdate(dataEntity.getQuery().compile(), null, null);
-                            showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
-                        } else {
-                            model.requery();
-                            showQueryResultsMessage();
-                        }
-                    } catch (Exception ex) {
-                        showWarning(ex.getMessage()); //NO1I18N
-                    } finally {
-                        ph.finish();
+            RequestProcessor.getDefault().execute(() -> {
+                final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
+                ph.start();
+                try {
+                    if (dataEntity.getQuery().isCommand()) {
+                        int rowsAffected = basesProxy.executeUpdate(dataEntity.getQuery().compile(), null, null);
+                        showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
+                    } else {
+                        model.requery();
+                        showQueryResultsMessage();
                     }
+                } catch (Exception ex) {
+                    showWarning(ex.getMessage()); //NO1I18N
+                } finally {
+                    ph.finish();
                 }
             });
 
@@ -478,11 +468,11 @@ public class QueryResultsView extends javax.swing.JPanel {
     }//GEN-LAST:event_nextPageButtonActionPerformed
 
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
-        dbGrid.insertRow();
+        grid.insertRow();
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        dbGrid.deleteRow();
+        grid.deleteRow();
     }//GEN-LAST:event_deleteButtonActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
@@ -535,11 +525,8 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void requestExecuteQuery() {
-        RequestProcessor.getDefault().execute(new Runnable() {
-            @Override
-            public void run() {
-                execute();
-            }
+        RequestProcessor.getDefault().execute(() -> {
+            execute();
         });
     }
 
@@ -567,65 +554,44 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void enableRunQueryButton(final boolean enable) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                runButton.setEnabled(enable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            runButton.setEnabled(enable);
         });
     }
 
     private void enableRefreshQueryButton(final boolean enable) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                refreshButton.setEnabled(enable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            refreshButton.setEnabled(enable);
         });
     }
 
     private void enableCommitQueryButton(final boolean enable) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                commitButton.setEnabled(enable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            commitButton.setEnabled(enable);
         });
     }
 
     private void hintCommitQueryButton(final String aHintText) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                commitButton.setToolTipText(aHintText);
-            }
+        SwingUtilities.invokeLater(() -> {
+            commitButton.setToolTipText(aHintText);
         });
     }
 
     private void enableNextPageButton(final boolean enable) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                nextPageButton.setEnabled(enable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            nextPageButton.setEnabled(enable);
         });
     }
 
     private void enableAddButton(final boolean enable) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                addButton.setEnabled(enable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            addButton.setEnabled(enable);
         });
     }
 
     private void enableDeleteButton(final boolean enable) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                deleteButton.setEnabled(enable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            deleteButton.setEnabled(enable);
         });
     }
 
@@ -646,13 +612,13 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void initDbGrid() throws Exception {
         gridPanel.removeAll();
-        dbGrid = new DbGrid();
-        dbGrid.setModel(model);
-        gridPanel.add(dbGrid);
-        DbGrid.fillByEntity(dataEntity, dbGrid, 120);
+        grid = new ModelGrid();
+        gridPanel.add(grid);
+        // TODO: revive following code after widgets refactoring
+        //DbGrid.fillByEntity(dataEntity, grid, 120);
         List<Field> pks = dataEntity.getRowset().getFields().getPrimaryKeys();
-        dbGrid.setEditable(pks != null && !pks.isEmpty());
-        dbGrid.setDeletable(pks != null && !pks.isEmpty());
+        grid.setEditable(pks != null && !pks.isEmpty());
+        grid.setDeletable(pks != null && !pks.isEmpty());
         deleteButton.setEnabled(pks != null && !pks.isEmpty());
         showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), dataEntity.getEntityId()));
         dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {
@@ -763,13 +729,10 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void initCopyMessage() {
         final JPopupMenu menu = new JPopupMenu();
         final JMenuItem copyItem = new JMenuItem(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.copyMessage")); //NOI18N
-        copyItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StringSelection stringSelection = new StringSelection(messageLabel.getText());
-                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clipboard.setContents(stringSelection, null);
-            }
+        copyItem.addActionListener((ActionEvent e) -> {
+            StringSelection stringSelection = new StringSelection(messageLabel.getText());
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
         });
         menu.add(copyItem);
         messageLabel.addMouseListener(new MouseAdapter() {
@@ -825,7 +788,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     public static class PageSizeItem {
 
-        private Integer pageSize;
+        private final Integer pageSize;
 
         public PageSizeItem(int aPageSize) {
             pageSize = aPageSize;

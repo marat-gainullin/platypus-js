@@ -43,27 +43,31 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMap;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
 import com.bearsoft.org.netbeans.modules.form.editors.NbBorder;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.AbsoluteLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
-import com.eas.client.geo.RowsetFeatureDescriptor;
-import com.eas.controls.HtmlContentEditorKit;
-import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.ScalarDbControl;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.image.DbImage;
-import com.eas.dbcontrols.map.DbMap;
-import com.eas.dbcontrols.text.DbText;
-import java.awt.*;
+import com.eas.client.forms.components.HtmlArea;
+import com.eas.client.forms.components.TextArea;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.ModelTextArea;
+import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.rt.HtmlContentEditorKit;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Label;
+import java.awt.LayoutManager;
+import java.awt.TextField;
+import java.awt.Window;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -98,14 +102,8 @@ public class RADComponentCreator {
         private ComponentType componentType; // type of radcomponent to be added/applied
         private RADComponent<?> targetComponent; // actual target component (after adjustments)
     }
-    private static final FormProperty.Filter COPIED_PROPERTY_FILTER = new FormProperty.Filter() {
-        @Override
-        public boolean accept(FormProperty<?> property) {
-            // don't copy name property
-            return !property.isDefaultValue() && !"name".equals(property.getName());
-        }
-    };
-    private FormModel formModel;
+    private static final FormProperty.Filter COPIED_PROPERTY_FILTER = (FormProperty<?> property) -> !property.isDefaultValue() && !"name".equals(property.getName()); // don't copy name property
+    private final FormModel formModel;
     private RADVisualComponent<?> preRadComp;
 
     RADComponentCreator(FormModel model) {
@@ -331,10 +329,8 @@ public class RADComponentCreator {
         } else {
             if (ButtonGroup.class.isAssignableFrom(compClass)) {
                 newRadComp = addButtonGroup((Class<ButtonGroup>) compClass, targetComp);
-            } else if (DbGridColumn.class.isAssignableFrom(compClass)) {
-                newRadComp = addGridColumn((Class<DbGridColumn>) compClass, targetComp);
-            } else if (RowsetFeatureDescriptor.class.isAssignableFrom(compClass)) {
-                newRadComp = addMapLayer((Class<RowsetFeatureDescriptor>) compClass, targetComp);
+            } else if (GridColumnsGroup.class.isAssignableFrom(compClass)) {
+                newRadComp = addGridColumn((Class<GridColumnsGroup>) compClass, targetComp);
             }
         }
         return newRadComp;
@@ -384,8 +380,6 @@ public class RADComponentCreator {
             } else if (target.targetType == TargetType.OTHER) {
                 if (copiedComp instanceof RADButtonGroup) {
                     addButtonGroup((RADButtonGroup) copiedComp, targetComp, newlyAdded);
-                } else if (copiedComp instanceof RADModelMapLayer) {
-                    addMapLayer((RADModelMapLayer) copiedComp, targetComp, newlyAdded);
                 } else if (copiedComp instanceof RADModelGridColumn) {
                     addGridColumn((RADModelGridColumn) copiedComp, targetComp, newlyAdded);
                 }
@@ -466,7 +460,7 @@ public class RADComponentCreator {
         if (targetComp == null) {
             target.targetType = TargetType.OTHER;
         } else {
-            if (targetComp instanceof RADModelMap || targetComp instanceof RADModelGrid) {
+            if (targetComp instanceof RADModelGrid) {
                 target.targetType = TargetType.OTHER;
             } else if (targetComp instanceof RADModelGridColumn) {
                 target.targetType = TargetType.OTHER;
@@ -513,16 +507,12 @@ public class RADComponentCreator {
                 }
             } else if (sourceComp instanceof RADModelGrid) {
                 newComp = new RADModelGrid();
-            } else if (sourceComp instanceof RADModelMap) {
-                newComp = new RADModelMap();
             } else {
                 newComp = new RADVisualComponent<>();
             }
         } else {
             if (sourceComp instanceof RADModelGridColumn) {
                 newComp = new RADModelGridColumn();
-            } else if (sourceComp instanceof RADModelMapLayer) {
-                newComp = new RADModelMapLayer();
             } else if (sourceComp instanceof RADButtonGroup) {
                 newComp = new RADButtonGroup();
             }
@@ -579,10 +569,9 @@ public class RADComponentCreator {
                 assert newComp instanceof RADModelGridColumn;
                 RADModelGridColumn sourceColumn = (RADModelGridColumn) sourceComp;
                 RADModelGridColumn newColumn = (RADModelGridColumn) newComp;
-                RADColumnView<? super DbControlPanel> newColumnView = (RADColumnView<? super DbControlPanel>) makeCopy(sourceColumn.getViewControl());
+                RADColumnView<? super ModelComponentDecorator> newColumnView = (RADColumnView<? super ModelComponentDecorator>) makeCopy(sourceColumn.getViewControl());
                 // Let's revoke some work, obsolete for column view component
                 newColumnView.setInModel(false);
-                newColumnView.getBeanInstance().setModel(null);
                 if (newColumnView.getConstraints() != null) {
                     newColumnView.getConstraints().clear();
                 }
@@ -606,16 +595,8 @@ public class RADComponentCreator {
         assert sourceProps.length == newProps.length;
 
         FormUtils.copyProperties(sourceProps, newProps, copyMode);
-        // 5th - make model-aware controls aware of our model
-        if (sourceComp.getBeanInstance() instanceof DbControl) {
-            assert newComp.getBeanInstance() instanceof DbControl;
-            DbControl destDbControl = (DbControl) newComp.getBeanInstance();
-            if (formModel.getDataObject().getBasesProxy() != null) {
-                destDbControl.setModel(formModel.getDataObject().getModel());
-            }
-        }
 
-        // 6th - copy layout constraints
+        // 5th - copy layout constraints
         if (sourceComp instanceof RADVisualComponent<?>
                 && newComp instanceof RADVisualComponent<?>) {
             Map<String, LayoutConstraints<?>> constraints = ((RADVisualComponent<?>) sourceComp).getConstraints();
@@ -662,11 +643,9 @@ public class RADComponentCreator {
         RADVisualComponent<?> newRadComp = null;
         RADVisualContainer<?> newRadCont = FormUtils.isContainer(compClass) ? new RADVisualContainer<>() : null;
         // initialize radcomponent and its bean instance
-        if (DbGrid.class.isAssignableFrom(compClass)) {
+        if (ModelGrid.class.isAssignableFrom(compClass)) {
             newRadComp = new RADModelGrid();
-        } else if (DbMap.class.isAssignableFrom(compClass)) {
-            newRadComp = new RADModelMap();
-        } else if (ScalarDbControl.class.isAssignableFrom(compClass)) {
+        } else if (ModelWidget.class.isAssignableFrom(compClass)) {
             newRadComp = new RADModelScalarComponent<>();
         } else {
             newRadComp = newRadCont == null ? new RADVisualComponent<>() : newRadCont;
@@ -755,13 +734,6 @@ public class RADComponentCreator {
         } else {
             formModel.addComponent(newRadComp, null, newlyAdded);
         }
-
-        if (newRadComp.getBeanInstance() instanceof DbControl) {
-            DbControl dbControl = (DbControl) newRadComp.getBeanInstance();
-            if (formModel.getDataObject().getBasesProxy() != null) {
-                dbControl.setModel(formModel.getDataObject().getModel());
-            }
-        }
         return newRadComp;
     }
 
@@ -790,9 +762,9 @@ public class RADComponentCreator {
         formModel.addComponent(newRadComp, targetCont, newlyAdded);
     }
 
-    private RADModelGridColumn addGridColumn(Class<DbGridColumn> compClass,
+    private RADModelGridColumn addGridColumn(Class<GridColumnsGroup> compClass,
             RADComponent<?> targetComp) throws Exception {
-        assert DbGridColumn.class.isAssignableFrom(compClass);
+        assert GridColumnsGroup.class.isAssignableFrom(compClass);
         RADModelGridColumn newRadComp = new RADModelGridColumn();
         newRadComp.initialize(formModel);
         if (initComponentInstance(newRadComp, compClass)) {
@@ -813,33 +785,6 @@ public class RADComponentCreator {
         if (newlyAdded) {
             if (!newComp.isInModel() || formModel.getRADComponent(newComp.getName()) != newComp) {
                 newComp.setStoredName(formModel.findFreeComponentName("Column"));
-            }
-        }
-        formModel.addComponent(newComp, targetCont, newlyAdded);
-    }
-
-    private RADModelMapLayer addMapLayer(Class<RowsetFeatureDescriptor> compClass,
-            RADComponent<?> targetComp) throws Exception {
-        assert RowsetFeatureDescriptor.class.isAssignableFrom(compClass);
-        RADModelMapLayer newRadComp = new RADModelMapLayer();
-        newRadComp.initialize(formModel);
-        if (initComponentInstance(newRadComp, compClass)) {
-            addMapLayer(newRadComp, targetComp, true);
-            return newRadComp;
-        } else {
-            return null;
-        }
-    }
-
-    private void addMapLayer(RADModelMapLayer newComp,
-            RADComponent<?> targetComp,
-            boolean newlyAdded) {
-        ComponentContainer targetCont =
-                targetComp instanceof RADModelMap
-                ? (ComponentContainer) targetComp : null;
-        if (newlyAdded) {
-            if (!newComp.isInModel() || formModel.getRADComponent(newComp.getName()) != newComp) {
-                newComp.setStoredName(formModel.findFreeComponentName("Layer"));
             }
         }
         formModel.addComponent(newComp, targetCont, newlyAdded);
@@ -1140,10 +1085,10 @@ public class RADComponentCreator {
         } else if (comp instanceof JTextArea) {
             JTextArea textArea = (JTextArea) comp;
             if (textArea.getRows() == 0) {
-                changes.put("rows", new Integer(5)); // NOI18N
+                changes.put("rows", 5); // NOI18N
             }
             if (textArea.getColumns() == 0) {
-                changes.put("columns", new Integer(20)); // NOI18N
+                changes.put("columns", 20); // NOI18N
             }
         } else if (comp instanceof JTextPane) {
             ((JTextPane) comp).setContentType("text/plain");
@@ -1191,7 +1136,7 @@ public class RADComponentCreator {
                 (menuComp.<RADProperty<String>>getRADProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultFileMenu")); // NOI18N
             } catch (Exception ex) {
-                // never mind, ignore
+                // nevermind, ignore
             }
             Component menu = (Component) menuComp.getBeanInstance();
             menuCont.add(menuComp);
@@ -1292,10 +1237,7 @@ public class RADComponentCreator {
         } else if (comp instanceof JSeparator) {
             width = 50;
             height = 10;
-        } else if (comp instanceof DbImage) {
-            width = 100;
-            height = 100;
-        } else if (comp instanceof DbText) {
+        } else if (comp instanceof TextArea || comp instanceof ModelTextArea || comp instanceof HtmlArea) {
             width = 100;
             height = 100;
         }

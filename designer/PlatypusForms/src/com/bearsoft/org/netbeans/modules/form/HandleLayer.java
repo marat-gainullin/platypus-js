@@ -43,9 +43,9 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.org.netbeans.modules.form.assistant.AssistantModel;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMap;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
@@ -55,6 +55,7 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.swing.*;
@@ -649,7 +650,7 @@ public class HandleLayer extends JPanel {
                         } else {
                             return null;
                         }
-                    } catch (Exception ex) {
+                    } catch (IllegalAccessException | InvocationTargetException ex) {
                         ErrorManager.getDefault().notify(ex);
                     }
                 }
@@ -1939,17 +1940,13 @@ public class HandleLayer extends JPanel {
             } else {
                 comps = cont.getComponents();
             }
-            for (int i = 0; i < comps.length; i++) {
-                Component comp = comps[i];
-                Rectangle bounds = convertRectangleFromComponent(
-                        comps[i].getBounds(), cont);
+            for (Component comp : comps) {
+                Rectangle bounds = convertRectangleFromComponent(comp.getBounds(), cont);
                 boolean intersects = selRect.intersects(bounds);
-
                 RADComponent<?> radComp = formDesigner.getRadComponent(comp);
                 if (radComp != null && intersects && radComp instanceof RADVisualComponent<?>) {
                     toSelect.add((RADVisualComponent<?>) radComp);
                 }
-
                 if (intersects && comp instanceof Container) {
                     subContainers.add(comp);
                 }
@@ -2664,8 +2661,7 @@ public class HandleLayer extends JPanel {
                     int mode = ((modifiers & InputEvent.ALT_MASK) != 0) ? COMP_SELECTED : COMP_DEEPEST;
                     RADComponent<?> hittedComponent = HandleLayer.this.getRadComponentAt(p, mode);
                     if (javax.swing.border.Border.class.isAssignableFrom(paletteItem.getComponentClass())
-                            || (hittedComponent instanceof RADModelGrid && com.eas.dbcontrols.grid.DbGridColumn.class.isAssignableFrom(paletteItem.getComponentClass()))
-                            || (hittedComponent instanceof RADModelMap && com.eas.client.geo.RowsetFeatureDescriptor.class.isAssignableFrom(paletteItem.getComponentClass()))) {
+                            || (hittedComponent instanceof RADModelGrid && GridColumnsGroup.class.isAssignableFrom(paletteItem.getComponentClass()))) {
                         targetComponent = hittedComponent;
                     }
                     addedComponent = getComponentCreator().createComponent(

@@ -13,7 +13,7 @@ package com.eas.client.forms.components.model.grid;
 import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.gui.grid.rendering.InsettedRenderer;
 import com.bearsoft.gui.grid.rows.TabularRowsSorter;
-import com.eas.client.forms.Form;
+import com.eas.client.forms.Forms;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -207,7 +207,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
         public FindAction() {
             super();
-            putValue(Action.NAME, Form.getLocalizedString("btnFind"));
+            putValue(Action.NAME, Forms.getLocalizedString("btnFind"));
             setEnabled(false);
         }
 
@@ -248,7 +248,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
                 if (findNext(txtText2Find.getText())) {
                     makeVisible();
                 } else {
-                    JOptionPane.showMessageDialog(GridSearchView.this, Form.getLocalizedString("notFound"), Form.getLocalizedString("Search"), JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(GridSearchView.this, Forms.getLocalizedString("notFound"), Forms.getLocalizedString("Search"), JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }
@@ -258,13 +258,14 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
         public CloseAction() {
             super();
-            putValue(Action.NAME, Form.getLocalizedString("btnClose"));
+            putValue(Action.NAME, Forms.getLocalizedString("btnClose"));
         }
 
         public void checkEnabled() {
             setEnabled(isEnabled());
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Window w = SwingUtilities.getWindowAncestor(GridSearchView.this);
             if (w != null) {
@@ -323,22 +324,22 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
         setMinimumSize(new java.awt.Dimension(330, 100));
 
-        btnFind.setText(Form.getLocalizedString("btnFind")); // NOI18N
+        btnFind.setText(Forms.getLocalizedString("btnFind")); // NOI18N
         btnFind.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-        btnClose.setText(Form.getLocalizedString("btnClose")); // NOI18N
+        btnClose.setText(Forms.getLocalizedString("btnClose")); // NOI18N
         btnClose.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-        lblFind.setText(Form.getLocalizedString("lblFind")); // NOI18N
+        lblFind.setText(Forms.getLocalizedString("lblFind")); // NOI18N
 
-        chkCase.setText(Form.getLocalizedString("chkCase")); // NOI18N
+        chkCase.setText(Forms.getLocalizedString("chkCase")); // NOI18N
         chkCase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkCaseActionPerformed(evt);
             }
         });
 
-        chkWhole.setText(Form.getLocalizedString("chkWhole")); // NOI18N
+        chkWhole.setText(Forms.getLocalizedString("chkWhole")); // NOI18N
         chkWhole.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkWholeActionPerformed(evt);

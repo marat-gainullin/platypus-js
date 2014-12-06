@@ -4,73 +4,36 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
+import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
-import com.bearsoft.org.netbeans.modules.form.editors.EnumEditor;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.ModelElementRef;
-import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.dbcontrols.DbControlDesignInfo;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.date.DbDate;
-import com.eas.dbcontrols.date.DbDateDesignInfo;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
-import com.eas.dbcontrols.visitors.DbSwingFactory;
-import com.eas.util.StringUtils;
-import java.beans.PropertyDescriptor;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author mg
  */
-public class RADModelGrid extends RADVisualComponent<DbGrid> implements ComponentContainer {
-
-    public interface ModelGridListener extends ModelControlListener {
-
-        public Object onRender(Object evt);
-    }
+public class RADModelGrid extends RADVisualComponent<ModelGrid> implements ComponentContainer {
 
     protected List<RADModelGridColumn> columns = new ArrayList<>();
     protected boolean fireRawColumnsChanges = true;
 
     public void fireRawColumnsChanged() {
         if (fireRawColumnsChanges) {
-            getBeanInstance().initializeDesign();
+            //getBeanInstance().initializeDesign();
         }
     }
 
     @Override
-    public DbGrid cloneBeanInstance(Collection<RADProperty<?>> relativeProperties) {
-        DbGrid clonedGrid = super.cloneBeanInstance(relativeProperties);
+    public ModelGrid cloneBeanInstance(Collection<RADProperty<?>> relativeProperties) {
+        ModelGrid clonedGrid = super.cloneBeanInstance(relativeProperties);
         clonedGrid.setHeader(getBeanInstance().getHeader());
-        clonedGrid.initializeDesign();
         return clonedGrid;
-    }
-
-    @Override
-    protected RADProperty<?> createBeanProperty(PropertyDescriptor desc, Object[] propAccessClsf, Object[] propParentChildDepClsf) {
-        if (desc != null && "rowsHeaderType".equals(desc.getName())) {
-            desc.setValue(EnumEditor.ENUMERATION_VALUES_KEY, new Object[]{
-                        "Usual", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL",
-                        "CheckBoxes", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX",
-                        "RadioButtons", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON",
-                        "None", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE"
-                    });
-        }
-        RADProperty<?> prop = super.createBeanProperty(desc, propAccessClsf, propParentChildDepClsf);
-        return prop;
     }
 
     @Override
@@ -95,9 +58,9 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
 
     @Override
     public void reorderSubComponents(int[] perm) {
-        DbGrid modelGrid = getBeanInstance();
+        ModelGrid modelGrid = getBeanInstance();
         RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        DbGridColumn[] oldRawColumns = modelGrid.getHeader().toArray(new DbGridColumn[]{});
+        GridColumnsGroup[] oldRawColumns = modelGrid.getHeader().toArray(new GridColumnsGroup[]{});
         assert perm.length == oldColumns.length;
         assert perm.length == oldRawColumns.length;
         for (int i = 0; i < columns.size(); i++) {
@@ -145,6 +108,7 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
     }
 
     public void fillColumns() throws Exception {
+        /*
         ApplicationDbModel model = (ApplicationDbModel)getBeanInstance().getModel();
         if (model != null) {
             if (getBeanInstance().getRowsDatasource() != null
@@ -210,5 +174,6 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
                 }
             }
         }
+        */
     }
 }

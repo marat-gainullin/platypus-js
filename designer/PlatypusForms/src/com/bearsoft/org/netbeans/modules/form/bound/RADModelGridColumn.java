@@ -4,39 +4,26 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
+import com.bearsoft.gui.grid.header.GridColumnsGroup;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.label.DbLabel;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.ModelFormattedField;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This class represents a standard form editor wrapper for model-aware
- * non-visual component - DbGridColumn.
+ * non-visual component - GridColumnsGroup.
  *
  * @author mg
  * @see RADModelMapLayer
  */
-public class RADModelGridColumn extends RADComponent<DbGridColumn> implements ComponentContainer {
+public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implements ComponentContainer {
 
-    public interface ValueHostListener extends ModelControlListener {
-
-        public Object onSelect(Object aField);
-
-        public Object onRender(Object evt);
-    }
-    /*
-    public interface ValueHostListener extends ModelControlListener {
-
-        public Object onSelect(Object aField);
-
-        public Object onRender(Object aRowId, Object aColumnId, Object aCell, Object aRow);
-    }
-    */ 
-    protected RADColumnView<? super DbControlPanel> viewControl;
+    protected RADColumnView<? super ModelComponentDecorator> viewControl;
     protected List<RADModelGridColumn> columns = new ArrayList<>();
 
     public RADModelGridColumn() {
@@ -47,15 +34,15 @@ public class RADModelGridColumn extends RADComponent<DbGridColumn> implements Co
     public boolean initialize(FormModel aFormModel) {
         viewControl = new RADColumnView<>();
         viewControl.initialize(aFormModel);
-        viewControl.setInstance(new DbLabel());
+        viewControl.setInstance(new ModelFormattedField());
         return super.initialize(aFormModel);
     }
 
-    public RADColumnView<? super DbControlPanel> getViewControl() {
+    public RADColumnView<? super ModelComponentDecorator> getViewControl() {
         return viewControl;
     }
 
-    public void setViewControl(RADColumnView<? super DbControlPanel> aValue) {
+    public void setViewControl(RADColumnView<? super ModelComponentDecorator> aValue) {
         viewControl = aValue;
     }
 
@@ -81,18 +68,16 @@ public class RADModelGridColumn extends RADComponent<DbGridColumn> implements Co
     public void setStoredName(String name) {
         super.setStoredName(name);
         if (getBeanInstance() != null) {
-            getBeanInstance().setName(name);
+            ((ModelColumn)getBeanInstance().getTableColumn()).setName(name);
         }
     }
 
     @Override
-    protected void setBeanInstance(DbGridColumn aBeanInstance) {
-        //DbGridColumn oldColumn = getBeanInstance();
+    protected void setBeanInstance(GridColumnsGroup aBeanInstance) {
         super.setBeanInstance(aBeanInstance);
         if (getBeanInstance() != null) {
-            getBeanInstance().setName(getName());
+            ((ModelColumn)getBeanInstance().getTableColumn()).setName(getName());
         }
-        //DbGridColumn newColumn = getBeanInstance();
     }
 
     @Override
@@ -119,7 +104,7 @@ public class RADModelGridColumn extends RADComponent<DbGridColumn> implements Co
     @Override
     public void reorderSubComponents(int[] perm) {
         RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        DbGridColumn[] oldRawColumns = getBeanInstance().getChildren().toArray(new DbGridColumn[]{});
+        GridColumnsGroup[] oldRawColumns = getBeanInstance().getChildren().toArray(new GridColumnsGroup[]{});
         assert perm.length == oldColumns.length;
         assert perm.length == oldRawColumns.length;
         for (int i = 0; i < columns.size(); i++) {

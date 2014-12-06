@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.layouts.MarginLayout;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;

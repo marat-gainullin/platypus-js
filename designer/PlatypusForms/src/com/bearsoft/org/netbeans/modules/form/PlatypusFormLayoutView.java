@@ -53,7 +53,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport.MarginLayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
-import com.eas.controls.layouts.margin.MarginConstraints;
+import com.eas.client.forms.layouts.MarginConstraints;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;

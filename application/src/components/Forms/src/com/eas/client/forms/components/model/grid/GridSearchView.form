@@ -71,7 +71,7 @@
     <Component class="javax.swing.JButton" name="btnFind">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="btnFind" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="btnFind" replaceFormat="Forms.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[2, 2, 2, 2]"/>
@@ -81,7 +81,7 @@
     <Component class="javax.swing.JButton" name="btnClose">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="btnClose" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="btnClose" replaceFormat="Forms.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
           <Insets value="[2, 2, 2, 2]"/>
@@ -91,7 +91,7 @@
     <Component class="javax.swing.JLabel" name="lblFind">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="lblFind" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="lblFind" replaceFormat="Forms.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -100,7 +100,7 @@
     <Component class="javax.swing.JCheckBox" name="chkCase">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="chkCase" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="chkCase" replaceFormat="Forms.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -110,7 +110,7 @@
     <Component class="javax.swing.JCheckBox" name="chkWhole">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="chkWhole" replaceFormat="Form.getLocalizedString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/forms/Bundle.properties" key="chkWhole" replaceFormat="Forms.getLocalizedString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>

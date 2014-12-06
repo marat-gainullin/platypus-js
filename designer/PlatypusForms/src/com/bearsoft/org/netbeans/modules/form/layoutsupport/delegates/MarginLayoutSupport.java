@@ -51,10 +51,9 @@ import com.bearsoft.org.netbeans.modules.form.RADComponentCreator;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.AbstractLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
-import com.eas.controls.layouts.constraints.MarginConstraintsDesignInfo;
-import com.eas.controls.layouts.margin.Margin;
-import com.eas.controls.layouts.margin.MarginConstraints;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.layouts.Margin;
+import com.eas.client.forms.layouts.MarginConstraints;
+import com.eas.client.forms.layouts.MarginLayout;
 import java.awt.*;
 import java.beans.BeanInfo;
 import java.beans.PropertyChangeEvent;
@@ -81,14 +80,14 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
     /**
      * The icon for AbsoluteLayout.
      */
-    private static String iconURL =
+    private static final String iconURL =
             "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif"; // NOI18N
     /**
      * The icon for AbsoluteLayout.
      */
-    private static String icon32URL =
+    private static final String icon32URL =
             "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif"; // NOI18N
-    private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
+    private static final FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
     final static private String stateIllegalMessage = "Отсутствуют необходимые значения для вычисления  {0}";
 
     /**
@@ -175,8 +174,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
      * container (or just for mouse cursor being moved over container, without
      * any component).
      *
-     * @param container instance of a real container over/in which the component
-     * is dragged
+     * @param aContainer
      * @param aContainerDelegate effective container delegate of the container
      * (for layout managers we always use container delegate instead of the
      * container)
@@ -278,12 +276,9 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
      * any component). For AbsoluteLayout, it simply paints a rectangle
      * corresponding to the component position and size.
      *
-     * @param container instance of a real container over/in which the component
-     * is dragged
-     * @param containerDelegate effective container delegate of the container
-     * (for layout managers we always use container delegate instead of the
-     * container)
+     * @param aContainer
      * @param component the real component being dragged, can be null
+     * @param aContainerDelegate
      * @param newConstraints component layout constraints to be presented
      * @param newIndex component's index position to be presented; not used for
      * AbsoluteLayout
@@ -353,12 +348,11 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
      * This method should calculate layout constraints for a component being
      * resized.
      *
-     * @param container instance of a real container in which the component is
-     * resized
-     * @param containerDelegate effective container delegate of the container
-     * (e.g. like content pane of JFrame)
+     * @param aContainer
      * @param component real component being resized
+     * @param aContainerDelegate
      * @param index position of the component in its container
+     * @param originalBounds
      * @param sizeChanges Insets object with size differences
      * @param posInCont position of mouse in the container delegate
      * @return component layout constraints for resized component; null if
@@ -756,8 +750,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
         Rectangle minh = null, minw = null, minwh = null;
         Pair pminh = null, pminw = null, pminwh = null;
         Rectangle rrH = null, rrW = null, rrHH = null, rrWW = null;
-        for (int i = 0; i < compsBounds.size(); i++) {
-            Rectangle neighbourBounds = compsBounds.get(i);
+        for (Rectangle neighbourBounds : compsBounds) {
             Pair pret = getDistance(g, aContainer, compBounds, neighbourBounds);
             if (pret != null) {
                 if (pret.p1.x < pret.p2.x && pret.p1.y < pret.p2.y) {//направление слева-направо
@@ -1338,7 +1331,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
 
         @Override
         public void setAsText(String text) throws IllegalArgumentException {
-            Margin m = MarginConstraintsDesignInfo.parseMargin(text);
+            Margin m = Margin.parse(text);
             setValue(m);
         }
 

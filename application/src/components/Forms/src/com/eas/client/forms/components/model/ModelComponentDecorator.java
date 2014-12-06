@@ -6,7 +6,7 @@ package com.eas.client.forms.components.model;
 
 import com.bearsoft.rowset.RowsetConverter;
 import com.eas.client.forms.ModelCellEditingListener;
-import com.eas.client.forms.Form;
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.IconCache;
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.components.rt.VSpinner;
@@ -96,7 +96,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected JLabel gapLabel = new JLabel(" ");
     protected Icon icon;
     protected boolean selectOnly;
-    private boolean design;
     // Model interacting
     protected JSObject published;
     protected static final Color WDIGETS_BORDER_COLOR = controlsBorderColor();
@@ -175,25 +174,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         return new Dimension(width, height);
     }
 
-    protected void initializeDesign() {
-        design = true;
-        setAlignmentX(0.0f);
-        setLayout(new BorderLayout());
-        Font f = getFont();
-        if (f != null && prefSizeCalculator != null) {
-            prefSizeCalculator.setFont(f);
-        }
-    }
-
-    @Override
-    public Dimension getMaximumSize() {
-        if (design) {
-            return getPreferredSize();
-        } else {
-            return super.getMaximumSize();
-        }
-    }
-
     public ModelComponentDecorator() {
         super();
         setOpaque(true);
@@ -221,8 +201,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         add(extraTools, BorderLayout.EAST);
         //
         setBorder(new LineBorder(WDIGETS_BORDER_COLOR));
-        //
-        initializeDesign();
     }
 
     public void fireCellEditingCompleted() {
@@ -839,7 +817,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         NullerAction() {
             super();
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(NullerAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(NullerAction.class.getSimpleName()));
             putValue(Action.SMALL_ICON, IconCache.getIcon("16x16/delete.png"));
         }
 
@@ -860,7 +838,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         ValueSelectorAction(JSObject aSelector) {
             super();
             putValue(Action.NAME, "...");
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(ValueSelectorAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(ValueSelectorAction.class.getSimpleName()));
             selector = aSelector;
         }
 

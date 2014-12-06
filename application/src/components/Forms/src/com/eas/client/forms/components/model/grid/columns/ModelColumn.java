@@ -328,6 +328,10 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
         return name;
     }
 
+    public void setName(String aValue) {
+        name = aValue;
+    }
+
     @Override
     public JSObject getPublished() {
         if (published == null) {

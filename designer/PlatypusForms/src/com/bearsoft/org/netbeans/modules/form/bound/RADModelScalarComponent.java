@@ -5,7 +5,7 @@
 package com.bearsoft.org.netbeans.modules.form.bound;
 
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
 
 /**
  * @author mg
@@ -14,11 +14,5 @@ import com.eas.dbcontrols.DbControlPanel;
  * visual component.
  * @see RADModelMapLayer
  */
-public class RADModelScalarComponent<M extends DbControlPanel> extends RADVisualComponent<M> {
-    public interface ValueHostListener extends ModelControlListener {
-
-        public Object onSelect(Object aField);
-
-        public Object onRender(Object evt);
-    }
+public class RADModelScalarComponent<M extends ModelComponentDecorator> extends RADVisualComponent<M> {
 }

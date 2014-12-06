@@ -19,7 +19,7 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
-import com.eas.client.forms.Form;
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
@@ -2068,8 +2068,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
         DbGridFindSomethingAction() {
             super();
-            putValue(Action.NAME, Form.getLocalizedString(DbGridFindSomethingAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridFindSomethingAction.class.getSimpleName()));
+            putValue(Action.NAME, Forms.getLocalizedString(DbGridFindSomethingAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(DbGridFindSomethingAction.class.getSimpleName()));
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK));
             setEnabled(true);
         }
@@ -2083,7 +2083,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 if (findFrame == null) {
-                    findFrame = new JFrame(Form.getLocalizedString("Find"));
+                    findFrame = new JFrame(Forms.getLocalizedString("Find"));
                     findFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                     findFrame.getContentPane().setLayout(new BorderLayout());
                     findFrame.getContentPane().add(new GridSearchView(ModelGrid.this), BorderLayout.CENTER);

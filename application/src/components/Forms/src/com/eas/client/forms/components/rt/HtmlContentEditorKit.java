@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.controls;
+package com.eas.client.forms.components.rt;
 
 import java.io.IOException;
 import java.io.Writer;
