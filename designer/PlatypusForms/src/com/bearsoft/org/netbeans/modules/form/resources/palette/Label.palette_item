@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <palette_item version="1.0">
-  <component classname="java.awt.Label" type="visual" />
+  <component classname="com.eas.client.forms.components.Label" type="visual" />
   <icon16 urlvalue="nbres:/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/label.gif" />
   <icon32 urlvalue="nbres:/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/label32.gif" />
   <description localizing-bundle="com.bearsoft.org.netbeans.modules.form.resources.Bundle"
-               display-name-key="NAME_java-awt-Label"
-               tooltip-key="HINT_java-awt-Label" />
+               display-name-key="NAME_Label"
+               tooltip-key="HINT_Label" />
 </palette_item>

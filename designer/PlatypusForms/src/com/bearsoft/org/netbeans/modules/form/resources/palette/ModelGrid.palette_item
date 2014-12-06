@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<palette_item version="1.0">
+  <component classname="com.eas.client.forms.components.model.grid.ModelGrid" type="visual" />
+  <icon16 urlvalue="nbres:/com/bearsoft/org/netbeans/modules/form/beaninfo/platypus/small/grid.png" />
+  <icon32 urlvalue="nbres:/com/bearsoft/org/netbeans/modules/form/beaninfo/platypus/big/grid.png" />
+  <description localizing-bundle="com.bearsoft.org.netbeans.modules.form.resources.Bundle"
+               display-name-key="NAME_ModelGrid"
+               tooltip-key="HINT_ModelGrid" />
+</palette_item>
