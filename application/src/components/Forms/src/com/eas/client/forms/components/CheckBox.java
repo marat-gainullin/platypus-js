@@ -48,6 +48,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super(aText, aSelected);
+        super.setOpaque(false);
         setOnActionPerformed(aActionPerformedHandler);
     }
 

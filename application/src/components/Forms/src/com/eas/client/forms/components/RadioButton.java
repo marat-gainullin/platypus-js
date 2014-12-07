@@ -49,6 +49,7 @@ public class RadioButton extends VRadioButton implements HasPublished, HasCompon
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public RadioButton(String aText, boolean aSelected, JSObject aActionPerformedHandler) {
         super(aText, aSelected);
+        super.setOpaque(false);
         setOnActionPerformed(aActionPerformedHandler);
     }
 

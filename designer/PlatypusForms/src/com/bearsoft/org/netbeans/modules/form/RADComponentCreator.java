@@ -57,7 +57,6 @@ import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.components.rt.HtmlContentEditorKit;
-import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Component;
 import java.awt.Container;
@@ -911,17 +910,11 @@ public class RADComponentCreator {
 
         changes.put("name", varName);
         if (comp instanceof JLabel) {
-            if ("".equals(((JLabel) comp).getText())) { // NOI18N
                 changes.put("text", varName); // NOI18N
-            }
         } else if (comp instanceof JTextField) {
-            if ("".equals(((JTextField) comp).getText())) { // NOI18N
                 changes.put("text", varName); // NOI18N
-            }
         } else if (comp instanceof JMenuItem) {
-            if ("".equals(((JMenuItem) comp).getText())) { // NOI18N
                 changes.put("text", varName); // NOI18N
-            }
             if (comp instanceof JCheckBoxMenuItem) {
                 changes.put("selected", Boolean.TRUE); // NOI18N
             }
@@ -929,59 +922,15 @@ public class RADComponentCreator {
                 changes.put("selected", Boolean.TRUE); // NOI18N
             }
         } else if (comp instanceof AbstractButton) { // JButton, JToggleButton, JCheckBox, JRadioButton
-            String txt = ((AbstractButton) comp).getText();
-            if ((txt == null) || "".equals(txt)) { // NOI18N
                 changes.put("text", varName); // NOI18N
-            }
-//            if (comp instanceof JCheckBox || comp instanceof JRadioButton) {
-//                if (((JToggleButton)comp).getBorder() instanceof javax.swing.plaf.UIResource) {
-//                    changes.put("border", BorderFactory.createEmptyBorder()); // NOI18N
-//                    changes.put("margin", new Insets(0, 0, 0, 0)); // NOI18N
-//                }
-//            }
-        } else if (comp instanceof JTable) {
         } else if (comp instanceof JToolBar) {
             changes.put("rollover", true); // NOI18N
-        } else if (comp instanceof JInternalFrame) {
-            changes.put("visible", true); // NOI18N
-        } else if (comp instanceof Button) {
-            if ("".equals(((Button) comp).getLabel())) { // NOI18N
-                changes.put("label", varName); // NOI18N
-            }
         } else if (comp instanceof Checkbox) {
-            if ("".equals(((Checkbox) comp).getLabel())) { // NOI18N
-                changes.put("label", varName); // NOI18N
-            }
+                changes.put("text", varName); // NOI18N
         } else if (comp instanceof Label) {
-            if ("".equals(((Label) comp).getText())) { // NOI18N
                 changes.put("text", varName); // NOI18N
-            }
         } else if (comp instanceof TextField) {
-            if ("".equals(((TextField) comp).getText())) { // NOI18N
                 changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JComboBox<?>) {
-            ComboBoxModel<String> model = ((JComboBox<String>) comp).getModel();
-            if ((model == null) || (model.getSize() == 0)) {
-                String prefix = NbBundle.getMessage(RADComponentCreator.class, "FMT_CreatorComboBoxItem"); // NOI18N
-                prefix += ' ';
-                ComboBoxModel<String> propValue = new DefaultComboBoxModel<>(new String[]{
-                    prefix + 1, prefix + 2, prefix + 3, prefix + 4
-                });
-                changes.put("model", propValue); // NOI18N
-            }
-
-        } else if (comp instanceof JList<?>) {
-            ListModel<String> model = ((JList<String>) comp).getModel();
-            if ((model == null) || (model.getSize() == 0)) {
-                String prefix = NbBundle.getMessage(RADComponentCreator.class, "FMT_CreatorListItem"); // NOI18N
-                prefix += ' ';
-                DefaultListModel<String> defaultModel = new DefaultListModel<>();
-                for (int i = 1; i < 6; i++) {
-                    defaultModel.addElement(prefix + i); // NOI18N
-                }
-                changes.put("model", defaultModel); // NOI18N
-            }
         } else if (comp instanceof JTextArea) {
             JTextArea textArea = (JTextArea) comp;
             if (textArea.getRows() == 0) {
@@ -1123,9 +1072,12 @@ public class RADComponentCreator {
     public static Dimension prepareDefaultLayoutSize(Component comp, boolean isContainer) {
         int width = -1;
         int height = -1;
-        if (comp instanceof JToolBar || comp instanceof JMenuBar) {
+        if(comp instanceof JLabel || comp instanceof AbstractButton){
+            width = 70;
+            height = 20;
+        }else if (comp instanceof JToolBar || comp instanceof JMenuBar) {
             width = 100;
-            height = 25;
+            height = 20;
         } else if (isContainer) {
             if (comp instanceof Window || comp instanceof java.applet.Applet) {
                 width = 400;

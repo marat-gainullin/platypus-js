@@ -87,6 +87,10 @@ public class ScriptUtils {
         }
     }
 
+    public static boolean isInitialized(){
+        return engine != null;
+    }
+    
     public static void initServices(int aMaxThreads) {
         services.setCorePoolSize(aMaxThreads);
         services.setMaximumPoolSize(aMaxThreads);

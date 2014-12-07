@@ -421,6 +421,8 @@ public abstract class RADComponent<C> {
      * @return bean or event property
      */
     public <P extends FormProperty<?>> P getProperty(String name) {
+        if(nameToProperty == null)
+            createBeanProperties();
         return (P) nameToProperty.get(name);
     }
 
@@ -630,6 +632,8 @@ public abstract class RADComponent<C> {
     }
 
     public RADProperty<?>[] getBeanProperties() {
+        if(nameToProperty == null)
+            createBeanProperties();
         return nameToProperty.values().toArray(new RADProperty<?>[]{});
     }
 
