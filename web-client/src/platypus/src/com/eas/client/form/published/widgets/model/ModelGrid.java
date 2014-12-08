@@ -176,7 +176,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_F) {
+				if ((event.isMetaKeyDown() || event.isControlKeyDown()) && event.getNativeKeyCode() == KeyCodes.KEY_F) {
 					event.stopPropagation();
 					event.preventDefault();
 					ModelGrid.this.find();

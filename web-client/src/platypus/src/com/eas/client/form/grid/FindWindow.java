@@ -10,6 +10,8 @@ import com.bearsoft.gwt.ui.containers.window.WindowPanel;
 import com.bearsoft.gwt.ui.containers.window.WindowPopupPanel;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.rowset.Row;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -59,7 +61,7 @@ public class FindWindow extends WindowPanel {
 
 	@Override
 	protected Widget getMovableTarget() {
-		return popup;
+		return popup != null ? popup : this;
 	}
 
 	private void initComponents() {
@@ -224,7 +226,13 @@ public class FindWindow extends WindowPanel {
 		col = 0;
 		popup.center();
 		activate();
-		field.setFocus(true);
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			
+			@Override
+			public void execute() {
+				field.setFocus(true);
+			}
+		});
 	}
 
 }

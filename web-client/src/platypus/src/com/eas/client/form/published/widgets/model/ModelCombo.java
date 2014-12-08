@@ -35,6 +35,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.bearsoft.rowset.events.RowChangeEvent;
+import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 
 public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText, HasActionHandlers {
 
@@ -95,6 +96,19 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 	public ModelCombo() {
 		super(new StyledListBox<Row>());
+	}
+
+	@Override
+	protected void fireValueChangeEvent() {
+		if (!settingValue) {
+			Row value = super.getValue();
+			try {
+				valueKey = value != null && valueElement != null ? value.getColumnObject(valueElement.getColIndex()) : null;
+			} catch (InvalidColIndexException e) {
+				e.printStackTrace();
+			}
+		}
+		super.fireValueChangeEvent();
 	}
 
 	protected int actionHandlers;

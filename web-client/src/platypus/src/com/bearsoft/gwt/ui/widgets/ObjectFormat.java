@@ -220,10 +220,7 @@ public class ObjectFormat {
 			else
 				return null;
 		} else if (bypassFormat != null) {
-			if (aValue instanceof String)
-				return bypassFormat.format((String) aValue);
-			else
-				return null;
+			return aValue != null ? bypassFormat.format(String.valueOf(aValue)) : null;
 		} else {
 			return aValue != null ? aValue.toString() : null;
 		}
