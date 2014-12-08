@@ -47,6 +47,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
 import com.eas.client.forms.containers.BoxPane;
+import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.containers.CardPane;
 import com.eas.client.forms.containers.FlowPane;
 import com.eas.client.forms.containers.GridPane;
@@ -623,7 +624,7 @@ public class FormUtils {
     }
 
     public static boolean isVisualizableClass(Class<?> cls) {
-        if (java.awt.Component.class.isAssignableFrom(cls)) {
+        if (java.awt.Component.class.isAssignableFrom(cls) && !ButtonGroup.class.isAssignableFrom(cls)) {
             return true;
         }
         for (ViewConverter c : getViewConverters()) {

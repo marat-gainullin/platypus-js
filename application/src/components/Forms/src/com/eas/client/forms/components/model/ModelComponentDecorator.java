@@ -148,12 +148,14 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     public void setDecorated(D aComponent) {
         if (decorated != null) {
             decorated.removePropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
+            remove(decorated);
         }
         decorated = aComponent;
         if (decorated != null) {
             decorated.setOpaque(true);
             decorated.setBorder(null);
             decorated.setInheritsPopupMenu(true);
+            add(decorated, BorderLayout.CENTER);
             checkEvents(decorated);
             decorated.addPropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
         }
@@ -176,6 +178,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     public ModelComponentDecorator() {
         super();
+        setLayout(new BorderLayout());
         setOpaque(true);
         iconLabel.setOpaque(false);
         iconLabel.setBorder(null);

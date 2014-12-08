@@ -4,7 +4,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import javax.swing.ButtonGroup;
+import com.eas.client.forms.containers.ButtonGroup;
+
 
 /**
  *

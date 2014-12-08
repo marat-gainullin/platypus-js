@@ -44,6 +44,8 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
+import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.components.rt.HtmlContentEditorKit;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -363,13 +365,8 @@ public class VisualReplicator {
                                 // special case - add button to button group
                                 AbstractButton button = (AbstractButton) targetComp;
                                 // remove from the old group
-                                ButtonModel model = button.getModel();
-                                if (model instanceof DefaultButtonModel) {
-                                    DefaultButtonModel buttonModel = (DefaultButtonModel) model;
-                                    ButtonGroup group = buttonModel.getGroup();
-                                    if (group != null) {
-                                        group.remove(button);
-                                    }
+                                if (button instanceof HasGroup) {
+                                    ((HasGroup)button).setButtonGroup(null);
                                 }
                                 // add to the new group
                                 if (clonedValue instanceof ButtonGroup) {

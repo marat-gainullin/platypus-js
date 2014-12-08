@@ -46,6 +46,7 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
     public Slider(int aOrientation, int min, int max, int value) {
         super(aOrientation, min, max, value);
+        setOpaque(false);
     }
 
     public Slider() {

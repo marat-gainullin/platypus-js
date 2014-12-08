@@ -56,6 +56,7 @@ import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.components.rt.HtmlContentEditorKit;
 import java.awt.Checkbox;
 import java.awt.Component;
@@ -278,14 +279,15 @@ public class RADComponentCreator {
 
         final TargetInfo target = getTargetInfo(compClass, targetComp,
                 !exactTargetMatch, !exactTargetMatch);
-        if (target == null) {
-            return null;
-        }
+        if (target != null) {
 
-        try { // Look&Feel UI defaults remapping needed
-            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel, () -> createAndAddComponent2(compClass, target, aConstraints));
-        } catch (Exception ex) { // should not happen
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+            try { // Look&Feel UI defaults remapping needed
+                return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel, () -> createAndAddComponent2(compClass, target, aConstraints));
+            } catch (Exception ex) { // should not happen
+                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                return null;
+            }
+        } else {
             return null;
         }
     }
@@ -705,7 +707,7 @@ public class RADComponentCreator {
 
     private RADButtonGroup addButtonGroup(Class<ButtonGroup> compClass,
             RADComponent<?> targetComp) throws Exception {
-        assert javax.swing.ButtonGroup.class.isAssignableFrom(compClass);
+        assert ButtonGroup.class.isAssignableFrom(compClass);
         RADButtonGroup newRadComp = new RADButtonGroup();
         newRadComp.initialize(formModel);
         if (!initComponentInstance(newRadComp, compClass)) {
@@ -910,11 +912,11 @@ public class RADComponentCreator {
 
         changes.put("name", varName);
         if (comp instanceof JLabel) {
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof JTextField) {
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof JMenuItem) {
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
             if (comp instanceof JCheckBoxMenuItem) {
                 changes.put("selected", Boolean.TRUE); // NOI18N
             }
@@ -922,15 +924,15 @@ public class RADComponentCreator {
                 changes.put("selected", Boolean.TRUE); // NOI18N
             }
         } else if (comp instanceof AbstractButton) { // JButton, JToggleButton, JCheckBox, JRadioButton
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof JToolBar) {
             changes.put("rollover", true); // NOI18N
         } else if (comp instanceof Checkbox) {
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof Label) {
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof TextField) {
-                changes.put("text", varName); // NOI18N
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof JTextArea) {
             JTextArea textArea = (JTextArea) comp;
             if (textArea.getRows() == 0) {
@@ -1072,10 +1074,10 @@ public class RADComponentCreator {
     public static Dimension prepareDefaultLayoutSize(Component comp, boolean isContainer) {
         int width = -1;
         int height = -1;
-        if(comp instanceof JLabel || comp instanceof AbstractButton){
+        if (comp instanceof JLabel || comp instanceof AbstractButton) {
             width = 70;
             height = 20;
-        }else if (comp instanceof JToolBar || comp instanceof JMenuBar) {
+        } else if (comp instanceof JToolBar || comp instanceof JMenuBar) {
             width = 100;
             height = 20;
         } else if (isContainer) {

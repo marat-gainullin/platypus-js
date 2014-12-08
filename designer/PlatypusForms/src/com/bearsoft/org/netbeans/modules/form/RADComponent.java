@@ -45,6 +45,7 @@ package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.script.ScriptFunction;
@@ -55,7 +56,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
 import org.openide.ErrorManager;
 import org.openide.nodes.*;
 import org.openide.util.NbBundle;
@@ -421,8 +421,9 @@ public abstract class RADComponent<C> {
      * @return bean or event property
      */
     public <P extends FormProperty<?>> P getProperty(String name) {
-        if(nameToProperty == null)
+        if (nameToProperty == null) {
             createBeanProperties();
+        }
         return (P) nameToProperty.get(name);
     }
 
@@ -632,8 +633,9 @@ public abstract class RADComponent<C> {
     }
 
     public RADProperty<?>[] getBeanProperties() {
-        if(nameToProperty == null)
+        if (nameToProperty == null) {
             createBeanProperties();
+        }
         return nameToProperty.values().toArray(new RADProperty<?>[]{});
     }
 
@@ -800,18 +802,7 @@ public abstract class RADComponent<C> {
             }
             if (newGroup != null) {
                 // add button to new buttongroup
-                // try to find button inside buttongroup
-                boolean add = true;
-                for (Enumeration<AbstractButton> e = newGroup.getElements(); e.hasMoreElements();) {
-                    if (button.equals(e.nextElement())) {
-                        add = false;
-                        break;
-                    }
-                }
-                // button not found inside group, add it
-                if (add) {
-                    newGroup.add(button);
-                }
+                newGroup.add(button);
             }
         }
 
@@ -854,7 +845,7 @@ public abstract class RADComponent<C> {
 
         public ButtonGroupPropertyEditor() {
             super();
-            setBeanTypes(new Class<?>[]{javax.swing.ButtonGroup.class});
+            setBeanTypes(new Class<?>[]{ButtonGroup.class});
             setComponentCategory(NONVISUAL_COMPONENTS);
         }
 

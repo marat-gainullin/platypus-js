@@ -51,6 +51,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import com.eas.client.forms.containers.ButtonGroup;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
@@ -142,8 +143,8 @@ public class HandleLayer extends JPanel {
                 if (null != item) {
                     StatusDisplayer.getDefault().setStatusText(
                             FormUtils.getFormattedBundleString(
-                            "FMT_MSG_AddingComponent", // NOI18N
-                            new String[]{item.getNode().getDisplayName()}));
+                                    "FMT_MSG_AddingComponent", // NOI18N
+                                    new String[]{item.getNode().getDisplayName()}));
                 }
             }
         }
@@ -231,9 +232,9 @@ public class HandleLayer extends JPanel {
                     if (!viewOnly
                             && !e.isControlDown() && (!e.isShiftDown() || e.isAltDown())
                             && (resizeType != 0 || lastLeftMousePoint.distance(p) > 6)) {   // start component dragging
-                        RADVisualComponent<?>[] draggedComps =
-                                (resizeType & DESIGNER_RESIZING) == 0 ? getComponentsToDrag()
-                                : new RADVisualComponent<?>[]{formDesigner.getTopDesignComponent()};
+                        RADVisualComponent<?>[] draggedComps
+                                = (resizeType & DESIGNER_RESIZING) == 0 ? getComponentsToDrag()
+                                        : new RADVisualComponent<?>[]{formDesigner.getTopDesignComponent()};
                         if (draggedComps != null) {
                             if (resizeType == 0) {
                                 componentDrag = new ExistingComponentDrag(
@@ -355,15 +356,15 @@ public class HandleLayer extends JPanel {
         Set<AWTKeyStroke> keys = new HashSet<>();
         keys.add(
                 AWTKeyStroke.getAWTKeyStroke(9,
-                InputEvent.CTRL_DOWN_MASK,
-                true));
+                        InputEvent.CTRL_DOWN_MASK,
+                        true));
         setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
                 keys);
         keys.clear();
         keys.add(
                 AWTKeyStroke.getAWTKeyStroke(9,
-                InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK,
-                true));
+                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK,
+                        true));
         setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
                 keys);
 
@@ -563,8 +564,7 @@ public class HandleLayer extends JPanel {
         }
     }
     /**
-     * Length of the (shortest) lines in
-     * <code>ButtonGroup</code> visualization.
+     * Length of the (shortest) lines in <code>ButtonGroup</code> visualization.
      */
     private static final int BUTTON_GROUP_OFFSET = 5;
     /**
@@ -574,8 +574,7 @@ public class HandleLayer extends JPanel {
     private static final boolean BUTTON_GROUP_COLUMNS_FIRST = false;
 
     /**
-     * Visualization of
-     * <code>ButtonGroup</code>s.
+     * Visualization of <code>ButtonGroup</code>s.
      *
      * @param g graphics object.
      */
@@ -1560,7 +1559,7 @@ public class HandleLayer extends JPanel {
 
                     String hint = mf.format(
                             new Object[]{new Integer(size.width),
-                        new Integer(size.height)});
+                                new Integer(size.height)});
                     setToolTipText(hint);
                     ToolTipManager.sharedInstance().mouseEntered(e);
                 }
@@ -2037,7 +2036,7 @@ public class HandleLayer extends JPanel {
         final RADVisualContainer<?> getSourceContainer() {
             return movingComponents != null && movingComponents.length > 0
                     && formDesigner.getTopDesignComponent() != movingComponents[0]
-                    ? movingComponents[0].getParentComponent() : null;
+                            ? movingComponents[0].getParentComponent() : null;
         }
 
         final boolean isTopComponent() {
@@ -2312,7 +2311,7 @@ public class HandleLayer extends JPanel {
                 // restricted dragging - within the same container, or one level up
                 fixedTarget = (modifiers & InputEvent.SHIFT_MASK) != 0
                         || formDesigner.getTopDesignComponent() == radCont
-                        ? radCont : radCont.getParentComponent();
+                                ? radCont : radCont.getParentComponent();
             }
 
             // layout component dragger requires coordinates related to HandleLayer
@@ -2548,9 +2547,9 @@ public class HandleLayer extends JPanel {
 
         @Override
         final void init() { // can be re-inited
-            RADVisualComponent<?> precreated =
-                    getComponentCreator().precreateVisualComponent(
-                    paletteItem.getComponentClassSource());
+            RADVisualComponent<?> precreated
+                    = getComponentCreator().precreateVisualComponent(
+                            paletteItem.getComponentClassSource());
             if (precreated != null) {
                 if (movingComponents == null) {
                     setMovingComponents(new RADVisualComponent<?>[]{precreated});
@@ -2660,29 +2659,13 @@ public class HandleLayer extends JPanel {
                     RADComponent<?> targetComponent = targetContainer;
                     int mode = ((modifiers & InputEvent.ALT_MASK) != 0) ? COMP_SELECTED : COMP_DEEPEST;
                     RADComponent<?> hittedComponent = HandleLayer.this.getRadComponentAt(p, mode);
-                    if (javax.swing.border.Border.class.isAssignableFrom(paletteItem.getComponentClass())
-                            || (hittedComponent instanceof RADModelGrid && GridColumnsGroup.class.isAssignableFrom(paletteItem.getComponentClass()))) {
+                    if ((hittedComponent instanceof RADModelGrid && GridColumnsGroup.class.isAssignableFrom(paletteItem.getComponentClass()))) {
                         targetComponent = hittedComponent;
                     }
                     addedComponent = getComponentCreator().createComponent(
                             paletteItem.getComponentClassSource(), targetComponent, null, false);
                     if (addedComponent == null) {
                         repaint();
-                    }
-                }
-                if (addedComponent != null) {
-                    java.beans.BeanDescriptor bDesc = addedComponent.getBeanInfo().getBeanDescriptor();
-                    if ((bDesc != null) && (bDesc.getValue("customizeOnCreation") != null)) { // NOI18N
-                        modifiers &= ~InputEvent.SHIFT_MASK;
-                        EventQueue.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                RADComponentNode node = addedComponent.getNodeReference();
-                                if (node.hasCustomizer()) {
-                                    org.openide.nodes.NodeOperation.getDefault().customize(node);
-                                }
-                            }
-                        });
                     }
                 }
                 if ((modifiers & InputEvent.SHIFT_MASK) != 0) {
