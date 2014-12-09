@@ -18,6 +18,7 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> {
         super();
         setDecorated(new VCheckBox());
         setOpaque(false);
+        setBorder(null);
     }
 
     private static final String CONSTRUCTOR_JSDOC = ""

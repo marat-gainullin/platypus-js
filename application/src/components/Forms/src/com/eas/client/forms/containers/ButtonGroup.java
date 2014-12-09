@@ -418,10 +418,12 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     }
 
     private void fireItemSelected() {
-        try {
-            onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(new javax.swing.event.ChangeEvent(this)).getPublished()});
-        } catch (Exception ex) {
-            Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
+        if (onItemSelected != null) {
+            try {
+                onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(new javax.swing.event.ChangeEvent(this)).getPublished()});
+            } catch (Exception ex) {
+                Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

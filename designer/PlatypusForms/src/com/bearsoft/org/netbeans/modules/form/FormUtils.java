@@ -126,7 +126,11 @@ public class FormUtils {
         javax.swing.JColorChooser.class.getName(), // NOI18N
         javax.swing.JFileChooser.class.getName(), // NOI18N
         com.eas.client.forms.components.model.ModelComponentDecorator.class.getName(), // NOI18N
-        com.eas.client.forms.components.model.grid.ModelGrid.class.getName() // NOI18N
+        com.eas.client.forms.components.model.grid.ModelGrid.class.getName(), // NOI18N
+        com.eas.client.forms.menu.MenuItem.class.getName(), // NOI18N
+        com.eas.client.forms.menu.CheckMenuItem.class.getName(), // NOI18N
+        com.eas.client.forms.menu.RadioMenuItem.class.getName(), // NOI18N
+        com.eas.client.forms.menu.MenuSeparator.class.getName() // NOI18N
     };
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
 

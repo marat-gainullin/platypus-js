@@ -523,13 +523,11 @@ public abstract class RADComponent<C> {
                 }
             }
         }
-        //
-        addMagicProperties();
-        //
         propsByCategories = new TreeMap<>();
         _propsByCategories.entrySet().stream().forEach((entry) -> {
             propsByCategories.put(entry.getKey(), entry.getValue().toArray(new RADProperty<?>[]{}));
         });
+        addMagicProperties();
     }
 
     protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
@@ -581,6 +579,7 @@ public abstract class RADComponent<C> {
      * Properties may be added, removed etc. - due to specific needs.
      */
     protected void addMagicProperties() {
+        Map<String, RADProperty<?>> magicProps = new HashMap<>();
         // Issue 171445 - missing cursor property
         if ((getBeanInstance() instanceof java.awt.Component) && (nameToProperty.get("cursor") == null)) { // NOI18N
             try {
@@ -588,6 +587,7 @@ public abstract class RADComponent<C> {
                 RADProperty<?> prop = createBeanProperty(pd);
                 if (prop != null) {
                     nameToProperty.put("cursor", prop); // NOI18N
+                    magicProps.put(prop.getName(), prop);
                 }
             } catch (IntrospectionException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
@@ -601,6 +601,7 @@ public abstract class RADComponent<C> {
                 ButtonGroupProperty prop = new ButtonGroupProperty(this);
                 setPropertyListener(prop);
                 nameToProperty.put(prop.getName(), prop);
+                magicProps.put(prop.getName(), prop);
             } catch (InvocationTargetException | IllegalAccessException | IntrospectionException ex) {
                 ErrorManager.getDefault().notify(ex);
             }
@@ -612,11 +613,19 @@ public abstract class RADComponent<C> {
                 RADProperty<?> prop = createBeanProperty(pd);
                 if (prop != null) {
                     nameToProperty.put("emptyText", prop); // NOI18N
+                    magicProps.put(prop.getName(), prop);
                 }
             } catch (IntrospectionException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
             }
         }
+        propsByCategories.entrySet().stream().forEach((Map.Entry<String, RADProperty<?>[]> aEntry) -> {
+            for (int i = 0; i < aEntry.getValue().length; i++) {
+                if (magicProps.containsKey(aEntry.getValue()[i].getName())) {
+                    aEntry.getValue()[i] = magicProps.get(aEntry.getValue()[i].getName());
+                }
+            }
+        });
     }
 
     protected PropertyChangeListener createPropertyListener() {

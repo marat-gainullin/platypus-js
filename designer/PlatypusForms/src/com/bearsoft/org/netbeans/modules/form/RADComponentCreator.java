@@ -215,8 +215,6 @@ public class RADComponentCreator {
 
         // no preview component if this is a window, applet, or not visual
         if (compClass == null
-                || java.awt.Window.class.isAssignableFrom(compClass)
-                || java.applet.Applet.class.isAssignableFrom(compClass)
                 // JPopupMenu can't be used as a visual component (added to a container)
                 || javax.swing.JPopupMenu.class.isAssignableFrom(compClass)
                 || !FormUtils.isVisualizableClass(compClass)) {
