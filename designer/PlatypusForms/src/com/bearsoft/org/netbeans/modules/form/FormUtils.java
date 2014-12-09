@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
+import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
 import com.eas.client.forms.containers.BoxPane;
@@ -64,6 +65,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
 import org.netbeans.api.editor.DialogBinding;
@@ -97,41 +99,6 @@ public class FormUtils {
     static final String ON_MOUSE_CLICKED_EVENT_HANDLER_NAME = "onMouseClicked";//NOI18N
     private static final Map<String, Class<?>> eventsNames2scriptEventsClasses = new HashMap<>();
     
-    /**
-     * List of components that should never be containers; some of them are not
-     * specified in original Swing beaninfos.
-     */
-    private static String[] forbiddenContainers = {
-        javax.swing.JLabel.class.getName(), // NOI18N
-        javax.swing.JButton.class.getName(), // NOI18N
-        javax.swing.JToggleButton.class.getName(), // NOI18N
-        javax.swing.JCheckBox.class.getName(), // NOI18N
-        javax.swing.JRadioButton.class.getName(), // NOI18N
-        javax.swing.JComboBox.class.getName(), // NOI18N
-        javax.swing.JList.class.getName(), // NOI18N
-        javax.swing.JTextField.class.getName(), // NOI18N
-        javax.swing.JTextArea.class.getName(), // NOI18N
-        javax.swing.JScrollBar.class.getName(), // NOI18N
-        javax.swing.JSlider.class.getName(), // NOI18N
-        javax.swing.JProgressBar.class.getName(), // NOI18N
-        javax.swing.JFormattedTextField.class.getName(), // NOI18N
-        javax.swing.JPasswordField.class.getName(), // NOI18N
-        javax.swing.JSpinner.class.getName(), // NOI18N
-        javax.swing.JSeparator.class.getName(), // NOI18N
-        javax.swing.JTextPane.class.getName(), // NOI18N
-        javax.swing.JEditorPane.class.getName(), // NOI18N
-        javax.swing.JTree.class.getName(), // NOI18N
-        javax.swing.JTable.class.getName(), // NOI18N
-        javax.swing.JOptionPane.class.getName(), // NOI18N
-        javax.swing.JColorChooser.class.getName(), // NOI18N
-        javax.swing.JFileChooser.class.getName(), // NOI18N
-        com.eas.client.forms.components.model.ModelComponentDecorator.class.getName(), // NOI18N
-        com.eas.client.forms.components.model.grid.ModelGrid.class.getName(), // NOI18N
-        com.eas.client.forms.menu.MenuItem.class.getName(), // NOI18N
-        com.eas.client.forms.menu.CheckMenuItem.class.getName(), // NOI18N
-        com.eas.client.forms.menu.RadioMenuItem.class.getName(), // NOI18N
-        com.eas.client.forms.menu.MenuSeparator.class.getName() // NOI18N
-    };
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
 
     private static final Map<Class<?>, Class<?>> layoutClasses2PlatypusContainerClasses = new HashMap<>();
@@ -561,71 +528,8 @@ public class FormUtils {
     }
 
     public static boolean isContainer(Class<?> beanClass) {
-        // not registered
-        int containerStatus = canBeContainer(beanClass);
-        if (containerStatus == -1) { // "isContainer" attribute not specified
-            containerStatus = 1;
-            Class<?> cls = beanClass.getSuperclass();
-            while (cls != null
-                    && !cls.equals(java.awt.Container.class)) {
-                String beanClassName = cls.getName();
-                int i;
-                for (i = 0; i < forbiddenContainers.length; i++) {
-                    if (beanClassName.equals(forbiddenContainers[i])) {
-                        break; // superclass cannot be container
-                    }
-                }
-                if (i < forbiddenContainers.length) {
-                    containerStatus = 0;
-                    break;
-                }
-
-                cls = cls.getSuperclass();
-            }
-        }
-
-        return containerStatus == 1;
-    }
-
-    /**
-     * Determines whether instances of the given class can serve as containers.
-     *
-     * @param beanClass class to check.
-     * @return 1 if the class is explicitly specified as container in BeanInfo;
-     * 0 if the class is explicitly enumerated in forbiddenContainers or
-     * specified as non-container in its BeanInfo; -1 if the class is not
-     * forbidden nor specified in BeanInfo at all
-     */
-    public static int canBeContainer(Class<?> beanClass) {
-        if (beanClass == null
-                || !java.awt.Container.class.isAssignableFrom(beanClass)) {
-            return 0;
-        }
-
-        String beanClassName = beanClass.getName();
-        if ("javax.swing.JPopupMenu".equals(beanClassName)) { // NOI18N
-            return 1;
-        }
-        for (int i = 0; i < forbiddenContainers.length; i++) {
-            if (beanClassName.equals(forbiddenContainers[i])) {
-                return 0; // cannot be container
-            }
-        }
-        Object isContainerValue = null;
-        try {
-            BeanDescriptor desc = Utilities.getBeanInfo(beanClass).getBeanDescriptor();
-            if (desc != null) {
-                isContainerValue = desc.getValue("isContainer"); // NOI18N
-            }
-        } catch (Exception | Error ex) { // ignore failure
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-
-        if (isContainerValue instanceof Boolean) {
-            return ((Boolean) isContainerValue) ? 1 : 0;
-        }
-        return -1; // "isContainer" attribute not specified
-    }
+        return HasChildren.class.isAssignableFrom(beanClass) || JPanel.class.isAssignableFrom(beanClass);
+ }
 
     public static boolean isVisualizableClass(Class<?> cls) {
         if (java.awt.Component.class.isAssignableFrom(cls) && !ButtonGroup.class.isAssignableFrom(cls)) {

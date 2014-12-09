@@ -415,9 +415,9 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         columnModel = new DefaultTableColumnModel();
         columnModel.setSelectionModel(columnsSelectionModel);
         columnModel.setColumnSelectionAllowed(true);
-        rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         // rows configuration
         rowsSelectionModel = new DefaultListSelectionModel();
+        rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         generalSelectionChangesReflector = new GeneralSelectionChangesReflector();
         rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);

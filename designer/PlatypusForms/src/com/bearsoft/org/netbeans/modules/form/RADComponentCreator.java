@@ -58,6 +58,7 @@ import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.components.rt.HtmlContentEditorKit;
+import com.eas.client.forms.containers.ScrollPane;
 import java.awt.Checkbox;
 import java.awt.Component;
 import java.awt.Container;
@@ -69,8 +70,6 @@ import java.awt.Window;
 import java.util.*;
 import javax.swing.*;
 import org.openide.*;
-import org.openide.util.Mutex;
-import org.openide.util.NbBundle;
 
 /**
  * This class represents an access point for adding new components to FormModel.
@@ -774,10 +773,10 @@ public class RADComponentCreator {
         try {
             if (LayoutManager.class.isAssignableFrom(layoutClass)) {
                 // LayoutManager -> find LayoutSupportDelegate for it
-                layoutDelegate = LayoutSupportRegistry.getRegistry(formModel).createSupportForLayout(layoutClass);
+                layoutDelegate = LayoutSupportRegistry.createSupportForLayout(layoutClass);
             } else if (LayoutSupportDelegate.class.isAssignableFrom(layoutClass)) {
                 // LayoutSupportDelegate -> use it directly
-                layoutDelegate = LayoutSupportRegistry.createSupportInstance(layoutClass);
+                layoutDelegate = (LayoutSupportDelegate) layoutClass.newInstance();
             }
         } catch (Exception | LinkageError ex) {
             t = ex;
@@ -965,7 +964,7 @@ public class RADComponentCreator {
         if (shouldEncloseByScrollPane(newRadComp.getBeanInstance())) {
             // hack: automatically enclose some components into scroll pane
             // [PENDING check for undo/redo!]
-            RADVisualContainer<?> radScroll = (RADVisualContainer<?>) createVisualComponent(JScrollPane.class);
+            RADVisualContainer<?> radScroll = (RADVisualContainer<?>) createVisualComponent(ScrollPane.class);
             // Mark this scroll pane as automatically created.
             // Some action (e.g. delete) behave differently on
             // components in such scroll panes.
@@ -1079,17 +1078,12 @@ public class RADComponentCreator {
             width = 100;
             height = 20;
         } else if (isContainer) {
-            if (comp instanceof Window || comp instanceof java.applet.Applet) {
-                width = 400;
-                height = 300;
-            } else {
-                width = 100;
-                height = 100;
-            }
-        } else if (comp instanceof JSeparator) {
-            width = 50;
-            height = 10;
-        } else if (comp instanceof TextArea || comp instanceof ModelTextArea || comp instanceof HtmlArea) {
+            width = 100;
+            height = 100;
+        } else if (comp instanceof TextArea
+                || comp instanceof ModelTextArea
+                || comp instanceof HtmlArea
+                || comp instanceof ModelGrid) {
             width = 100;
             height = 100;
         }

@@ -157,7 +157,7 @@ public class FormModel {
         if (formBaseClass != null) {
             throw new IllegalStateException("Form type already initialized."); // NOI18N
         }
-        if (FormUtils.isVisualizableClass(formClass) && FormUtils.isContainer(formClass)) {
+        if (FormUtils.isVisualizableClass(formClass)) {
             RADVisualContainer<?> topComp = new RADVisualFormContainer();
             topRADComponent = topComp;
             topDesignComponent = topRADComponent;

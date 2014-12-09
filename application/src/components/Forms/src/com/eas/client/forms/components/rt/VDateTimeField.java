@@ -61,14 +61,14 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
     }
 
     private boolean isOnlyTimeFormat() {
-        Matcher timeMatcher = TIME_PATTERN.matcher(dateFormat);
-        Matcher noTimeMatcher = NO_TIME_PATTERN.matcher(dateFormat);
+        Matcher timeMatcher = TIME_PATTERN.matcher(dateFormat != null ? dateFormat : "");
+        Matcher noTimeMatcher = NO_TIME_PATTERN.matcher(dateFormat != null ? dateFormat : "");
         return timeMatcher.find() && !noTimeMatcher.find();
     }
 
     private boolean isOnlyDateFormat() {
-        Matcher timeMatcher = TIME_PATTERN.matcher(dateFormat);
-        Matcher noTimeMatcher = NO_TIME_PATTERN.matcher(dateFormat);
+        Matcher timeMatcher = TIME_PATTERN.matcher(dateFormat != null ? dateFormat : "");
+        Matcher noTimeMatcher = NO_TIME_PATTERN.matcher(dateFormat != null ? dateFormat : "");
         return !timeMatcher.find() && noTimeMatcher.find();
     }
 

@@ -84,25 +84,22 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     /**
      * Creation and initialization of a layout delegate for a new container.
      *
+     * @param initialize
      * @return false if suitable layout delegate is not found
+     * @throws java.lang.Exception
      * @throw IllegalArgumentException if the container instance is not empty
      */
-    public boolean prepareLayoutDelegate(boolean initialize)
-            throws Exception {
+    public boolean prepareLayoutDelegate(boolean initialize) throws Exception {
         LayoutSupportDelegate delegate = null;
         LayoutManager lmInstance = null;
 
-        FormModel formModel = radContainer.getFormModel();
-        LayoutSupportRegistry layoutRegistry =
-                LayoutSupportRegistry.getRegistry(formModel);
-
         // first try to find a dedicated layout delegate (for the container)
-        Class<?> layoutDelegateClass = layoutRegistry.getSupportClassForContainer(
+        Class<?> layoutDelegateClass = LayoutSupportRegistry.getSupportClassForContainer(
                 radContainer.getBeanClass());
 
         if (layoutDelegateClass != null) {
-            delegate = LayoutSupportRegistry.createSupportInstance(layoutDelegateClass);
-            if (/*!fromCode && */!delegate.checkEmptyContainer(getPrimaryContainer())) {
+            delegate = (LayoutSupportDelegate)layoutDelegateClass.newInstance();
+            if (!delegate.checkEmptyContainer(getPrimaryContainer())) {
                 RuntimeException ex = new IllegalArgumentException();
                 org.openide.ErrorManager.getDefault().annotate(
                         ex, AbstractLayoutSupport.getBundle().getString(
@@ -115,7 +112,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                 if (contDel.getComponentCount() == 0) {
                     // we can still handle only empty containers ...
                     lmInstance = contDel.getLayout();
-                    delegate = layoutRegistry.createSupportForLayout(lmInstance.getClass());
+                    delegate = LayoutSupportRegistry.createSupportForLayout(lmInstance.getClass());
                 } else {
                     RuntimeException ex = new IllegalArgumentException();
                     org.openide.ErrorManager.getDefault().annotate(
