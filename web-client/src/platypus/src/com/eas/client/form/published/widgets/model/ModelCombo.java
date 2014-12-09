@@ -164,8 +164,12 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 	@Override
 	protected void clearValue() {
-		super.clearValue();
-		ActionEvent.fire(this, this);
+		try {
+	        setJsValue(null, true);
+			ActionEvent.fire(this, this);
+        } catch (Exception e) {
+	        e.printStackTrace();
+        }
 	}
 
 	public boolean isValidBindings() {

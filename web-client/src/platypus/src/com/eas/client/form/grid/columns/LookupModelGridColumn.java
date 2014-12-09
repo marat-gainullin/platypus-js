@@ -60,8 +60,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 					try {
 						PublishedStyle styleToRender = null;
 						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
-						String toRender = String.valueOf(value); // TODO: change
-						                                         // to lookup
+						String toRender = value != null ? ((ModelCombo) getEditor()).getConverter().convert(value.getColumnObject(displayValueRef.getColIndex())) : ""; 
 						PublishedCell cellToRender = calcContextPublishedCell(column.getPublished(), onRender, context, column.getColumnModelRef(), toRender, rowsEntity);
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();

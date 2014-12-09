@@ -84,18 +84,10 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 		public static DynamicCellStyles INSTANCE = GWT.create(DynamicCellStyles.class);
 
-		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;" + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};"
-		        + "}")
+		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;" + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};}")
 		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
 
-		@Template(".{0}{" + "position: relative;" + "padding-left: " + LEFT_RIGHT_CELL_PADDING + "px; padding-right: " + LEFT_RIGHT_CELL_PADDING + "px;" + "height: {1}px;" /*
-																																											 * +
-																																											 * "text-overflow: ellipsis;"
-																																											 * +
-																																											 * "overflow: hidden;"
-																																											 * +
-																																											 * "white-space: nowrap;"
-																																											 */+ "}")
+		@Template(".{0}{" + "position: relative;" + "padding-left: " + LEFT_RIGHT_CELL_PADDING + "px; padding-right: " + LEFT_RIGHT_CELL_PADDING + "px;" + "height: {1}px;}")
 		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
 	}
 

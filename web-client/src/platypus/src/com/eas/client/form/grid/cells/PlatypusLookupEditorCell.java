@@ -33,13 +33,7 @@ public class PlatypusLookupEditorCell extends RenderedEditorCell<Row> {
 			try {
 				ModelCombo combo = (ModelCombo) getEditor();
 				if (combo.isValidBindings()) {
-					Rowset valuesRowset = combo.getValueElement().entity.getRowset();
-					Rowset displaysRowset = combo.getDisplayElement().entity.getRowset();
 					Row displayRow = valuesRow;
-					if (valuesRowset != displaysRowset) {
-						combo.getValueElement().entity.scrollTo(valuesRow);
-						displayRow = displaysRowset.getCurrentRow();
-					}
 					String label = displayRow != null ? combo.getConverter().convert(displayRow.getColumnObject(combo.getDisplayElement().getColIndex())) : "";
 					sb.appendEscaped(label);
 				}
