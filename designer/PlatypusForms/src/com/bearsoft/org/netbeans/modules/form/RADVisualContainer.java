@@ -48,12 +48,22 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutNode;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import java.awt.*;
+import com.eas.client.forms.containers.ScrollPane;
+import com.eas.client.forms.menu.CheckMenuItem;
+import com.eas.client.forms.menu.Menu;
+import com.eas.client.forms.menu.MenuBar;
+import com.eas.client.forms.menu.MenuItem;
+import com.eas.client.forms.menu.MenuSeparator;
+import com.eas.client.forms.menu.RadioMenuItem;
+import java.awt.Component;
+import java.awt.Container;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JRootPane;
+import javax.swing.RootPaneContainer;
 import org.openide.ErrorManager;
 
 public class RADVisualContainer<C extends Container> extends RADVisualComponent<C> implements ComponentContainer {
@@ -142,15 +152,15 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
 
         JComponent containerDelegate = (JComponent) container;
         // Do not attempt to find container delegate if the classes
-        // don't match. This can happen when ViewConverter was used.
+        // don't match. This can happen when ViewConverter was used. 
         // Happens for JApplet, for example.
         if (getBeanClass().isAssignableFrom(container.getClass())) {
             Method m = getContainerDelegateMethod();
             if (m != null) {
                 try {
                     containerDelegate = (JComponent) m.invoke(container, new Object[0]);
-                    if ((containerDelegate == null) && (container instanceof JScrollPane)) {
-                        JScrollPane scrollPane = (JScrollPane) container;
+                    if ((containerDelegate == null) && (container instanceof ScrollPane)) {
+                        ScrollPane scrollPane = (ScrollPane) container;
                         scrollPane.setViewportView(null); // force recreation of viewport
                         containerDelegate = (JComponent) m.invoke(container, new Object[0]);
                     }
@@ -219,15 +229,15 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
                 }
             }
             return false;
-        } else if (getMenuType(compClass) != null && !JMenuBar.class.isAssignableFrom(getBeanClass())) {
+        } else if (getMenuType(compClass) != null && !MenuBar.class.isAssignableFrom(getBeanClass())) {
             // otherwise don't accept menu components
             return false;
         } else if (Component.class.isAssignableFrom(compClass)) {
             // visual component can be added to visual container
             // exception: avoid adding components to scroll pane that already contains something
-            if (JScrollPane.class.isAssignableFrom(getBeanClass())
-                    && (((JScrollPane) getBeanInstance()).getViewport() != null)
-                    && (((JScrollPane) getBeanInstance()).getViewport().getView() != null)) {
+            if (ScrollPane.class.isAssignableFrom(getBeanClass())
+                    && (((ScrollPane) getBeanInstance()).getViewport() != null)
+                    && (((ScrollPane) getBeanInstance()).getViewport().getView() != null)) {
                 return false;
             }
             return true;
@@ -236,28 +246,25 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
     }
 
     boolean canHaveMenu(Class<?> menuClass) {
-        return (JMenuBar.class.isAssignableFrom(menuClass)
-                && RootPaneContainer.class.isAssignableFrom(getBeanClass()))
-                || (MenuBar.class.isAssignableFrom(menuClass)
-                && Frame.class.isAssignableFrom(getBeanClass())
-                && !JFrame.class.isAssignableFrom(getBeanClass()));
+        return MenuBar.class.isAssignableFrom(menuClass)
+                && RootPaneContainer.class.isAssignableFrom(getBeanClass());
     }
 
     private static Class<?>[] getPossibleSubmenus(MenuType menuContainerType) {
         if (supportedMenus == null) {
             supportedMenus = new EnumMap<>(MenuType.class);
             supportedMenus.put(MenuType.JMenu,
-                    new Class<?>[]{JMenuItem.class,
-                        JCheckBoxMenuItem.class,
-                        JRadioButtonMenuItem.class,
-                        JMenu.class,
-                        JSeparator.class});
+                    new Class<?>[]{MenuItem.class,
+                        CheckMenuItem.class,
+                        RadioMenuItem.class,
+                        Menu.class,
+                        MenuSeparator.class});
             supportedMenus.put(MenuType.JPopupMenu,
-                    new Class<?>[]{JMenuItem.class,
-                        JCheckBoxMenuItem.class,
-                        JRadioButtonMenuItem.class,
-                        JMenu.class,
-                        JSeparator.class});
+                    new Class<?>[]{MenuItem.class,
+                        CheckMenuItem.class,
+                        RadioMenuItem.class,
+                        Menu.class,
+                        MenuSeparator.class});
         }
         return supportedMenus.get(menuContainerType);
     }

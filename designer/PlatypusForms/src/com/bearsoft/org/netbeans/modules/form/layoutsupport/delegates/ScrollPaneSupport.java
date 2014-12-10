@@ -44,9 +44,14 @@
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import java.awt.*;
-import java.lang.reflect.Method;
-import javax.swing.*;
+import com.eas.client.forms.containers.ScrollPane;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Point;
+import javax.swing.JViewport;
 
 /**
  * Dedicated layout support class for JScrollPane.
@@ -64,7 +69,7 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
      */
     @Override
     public Class<?> getSupportedClass() {
-        return JScrollPane.class;
+        return ScrollPane.class;
     }
 
     /**
@@ -78,8 +83,8 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
     @Override
     public boolean checkEmptyContainer(Container cont) {
         boolean empty = false;
-        if (cont instanceof JScrollPane) {
-            JScrollPane scrollPane = (JScrollPane) cont;
+        if (cont instanceof ScrollPane) {
+            ScrollPane scrollPane = (ScrollPane) cont;
             JViewport viewport = scrollPane.getViewport();
             empty = (viewport == null) || (viewport.getView() == null);
         }
@@ -172,8 +177,8 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
             return;
         }
 
-        if (container instanceof JScrollPane) {
-            ((JScrollPane) container).setViewportView(components[0]);
+        if (container instanceof ScrollPane) {
+            ((ScrollPane) container).setViewportView(components[0]);
         }
     }
 
@@ -204,8 +209,8 @@ public class ScrollPaneSupport extends AbstractLayoutSupport {
     @Override
     public boolean clearContainer(Container container,
             Container containerDelegate) {
-        if (container instanceof JScrollPane) {
-            JScrollPane scrollPane = (JScrollPane) container;
+        if (container instanceof ScrollPane) {
+            ScrollPane scrollPane = (ScrollPane) container;
             if (scrollPane.getViewport() != null) {
                 Component comp = scrollPane.getViewport().getView();
                 if (comp != null) {

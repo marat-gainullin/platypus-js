@@ -50,25 +50,42 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
+import com.eas.client.forms.components.Button;
+import com.eas.client.forms.components.CheckBox;
+import com.eas.client.forms.components.DesktopPane;
+import com.eas.client.forms.components.FormattedField;
 import com.eas.client.forms.components.HtmlArea;
+import com.eas.client.forms.components.Label;
+import com.eas.client.forms.components.PasswordField;
+import com.eas.client.forms.components.ProgressBar;
+import com.eas.client.forms.components.RadioButton;
+import com.eas.client.forms.components.Slider;
 import com.eas.client.forms.components.TextArea;
+import com.eas.client.forms.components.TextField;
+import com.eas.client.forms.components.ToggleButton;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.containers.ButtonGroup;
-import com.eas.client.forms.components.rt.HtmlContentEditorKit;
 import com.eas.client.forms.containers.ScrollPane;
-import java.awt.Checkbox;
+import com.eas.client.forms.containers.ToolBar;
+import com.eas.client.forms.menu.CheckMenuItem;
+import com.eas.client.forms.menu.Menu;
+import com.eas.client.forms.menu.MenuBar;
+import com.eas.client.forms.menu.MenuItem;
+import com.eas.client.forms.menu.MenuSeparator;
+import com.eas.client.forms.menu.PopupMenu;
+import com.eas.client.forms.menu.RadioMenuItem;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Label;
 import java.awt.LayoutManager;
-import java.awt.TextField;
-import java.awt.Window;
 import java.util.*;
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.JComponent;
+import javax.swing.SwingConstants;
 import org.openide.*;
 
 /**
@@ -453,7 +470,7 @@ public class RADComponentCreator {
 
     static boolean isTransparentLayoutComponent(RADComponent<?> radComp) {
         return radComp != null
-                && radComp.getBeanClass() == JScrollPane.class; // NOI18N
+                && radComp.getBeanClass() == ScrollPane.class; // NOI18N
     }
 
     // ---------
@@ -667,9 +684,9 @@ public class RADComponentCreator {
             LayoutConstraints<?> aConstraints,
             boolean newlyAdded) throws Exception {
         // Issue 65254: beware of nested JScrollPanes
-        if ((targetComp != null) && JScrollPane.class.isAssignableFrom(targetComp.getBeanClass())) {
+        if ((targetComp != null) && ScrollPane.class.isAssignableFrom(targetComp.getBeanClass())) {
             Object bean = newRadComp.getBeanInstance();
-            if (bean instanceof JScrollPane) {
+            if (bean instanceof ScrollPane) {
                 RADVisualContainer<?> radCont = (RADVisualContainer<?>) newRadComp;
                 newRadComp = radCont.getSubComponent(0);
             }
@@ -908,41 +925,28 @@ public class RADComponentCreator {
         Map<String, Object> changes = new HashMap<>();
 
         changes.put("name", varName);
-        if (comp instanceof JLabel) {
+        if (comp instanceof MenuItem) {
             changes.put("text", varName); // NOI18N
-        } else if (comp instanceof JTextField) {
-            changes.put("text", varName); // NOI18N
-        } else if (comp instanceof JMenuItem) {
-            changes.put("text", varName); // NOI18N
-            if (comp instanceof JCheckBoxMenuItem) {
+            if (comp instanceof CheckMenuItem) {
                 changes.put("selected", Boolean.TRUE); // NOI18N
             }
-            if (comp instanceof JRadioButtonMenuItem) {
+            if (comp instanceof RadioMenuItem) {
                 changes.put("selected", Boolean.TRUE); // NOI18N
             }
-        } else if (comp instanceof AbstractButton) { // JButton, JToggleButton, JCheckBox, JRadioButton
+        } else if (comp instanceof Label
+                || comp instanceof Button
+                || comp instanceof ToggleButton
+                || comp instanceof RadioButton
+                || comp instanceof CheckBox
+                || comp instanceof Label
+                || comp instanceof TextField
+                || comp instanceof PasswordField
+                || comp instanceof FormattedField
+                || comp instanceof TextArea
+                || comp instanceof HtmlArea
+                || comp instanceof ModelTextArea
+                || comp instanceof ModelFormattedField) {
             changes.put("text", varName); // NOI18N
-        } else if (comp instanceof JToolBar) {
-            changes.put("rollover", true); // NOI18N
-        } else if (comp instanceof Checkbox) {
-            changes.put("text", varName); // NOI18N
-        } else if (comp instanceof Label) {
-            changes.put("text", varName); // NOI18N
-        } else if (comp instanceof TextField) {
-            changes.put("text", varName); // NOI18N
-        } else if (comp instanceof JTextArea) {
-            JTextArea textArea = (JTextArea) comp;
-            if (textArea.getRows() == 0) {
-                changes.put("rows", 5); // NOI18N
-            }
-            if (textArea.getColumns() == 0) {
-                changes.put("columns", 20); // NOI18N
-            }
-        } else if (comp instanceof JTextPane) {
-            ((JTextPane) comp).setContentType("text/plain");
-        } else if (comp instanceof JEditorPane) {
-            ((JEditorPane) comp).setEditorKitForContentType("text/html", new HtmlContentEditorKit());
-            ((JEditorPane) comp).setContentType("text/html");
         }
 
         for (Map.Entry<String, Object> change : changes.entrySet()) {
@@ -974,11 +978,11 @@ public class RADComponentCreator {
             radScroll.getLayoutSupport().addComponentsToContainer(
                     scroll, scroll, new Component[]{inScroll}, 0);
             newRadComp = radScroll;
-        } else if (newRadComp instanceof RADVisualContainer<?> && newRadComp.getBeanInstance() instanceof JMenuBar) {
+        } else if (newRadComp instanceof RADVisualContainer<?> && newRadComp.getBeanInstance() instanceof MenuBar) {
             // for menubars create initial menu [temporary?]
             RADVisualContainer<?> menuCont = (RADVisualContainer<?>) newRadComp;
             Container menuBar = (Container) menuCont.getBeanInstance();
-            RADVisualComponent<?> menuComp = createVisualComponent(JMenu.class);
+            RADVisualComponent<?> menuComp = createVisualComponent(Menu.class);
             menuComp.setStoredName(formModel.findFreeComponentName("mnuFile"));
             try {
                 (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
@@ -991,7 +995,7 @@ public class RADComponentCreator {
             menuCont.getLayoutSupport().addComponentsToContainer(
                     menuBar, menuBar, new Component[]{menu}, 0);
 
-            menuComp = createVisualComponent(JMenu.class);
+            menuComp = createVisualComponent(Menu.class);
             menuComp.setStoredName(formModel.findFreeComponentName("mnuEdit"));
             try {
                 (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
@@ -1008,9 +1012,8 @@ public class RADComponentCreator {
     }
 
     private static boolean shouldEncloseByScrollPane(Object bean) {
-        return (bean instanceof JList) || (bean instanceof JTable)
-                || (bean instanceof JTree) || (bean instanceof JTextArea)
-                || (bean instanceof JTextPane) || (bean instanceof JEditorPane);
+        return bean instanceof TextArea
+                || bean instanceof HtmlArea || bean instanceof ModelTextArea;
     }
 
     /**
@@ -1021,18 +1024,10 @@ public class RADComponentCreator {
     private static void defaultTargetInit(RADComponent<?> radComp, RADComponent<?> target) {
         Object targetComp = target != null ? target.getBeanInstance() : null;
 
-        if (radComp.getBeanClass().equals(JSeparator.class)) {
-            if (targetComp instanceof JToolBar) {
-                // hack: change JSeparator to JToolBar.Separator
+        if (radComp.getBeanClass().equals(MenuSeparator.class)) {
+            if (targetComp instanceof Menu || targetComp instanceof PopupMenu) {
                 try {
-                    radComp.initInstance(JToolBar.Separator.class);
-                } catch (Exception ex) {
-                } // should not fail with JDK class
-                return;
-            } else if (targetComp instanceof JMenu || targetComp instanceof JPopupMenu) {
-                // hack: change JSeparator to JPopupMenu.Separator
-                try {
-                    radComp.initInstance(JPopupMenu.Separator.class);
+                    radComp.initInstance(MenuSeparator.class);
                 } catch (Exception ex) {
                 } // should not fail with JDK class
                 return;
@@ -1043,7 +1038,7 @@ public class RADComponentCreator {
         Object comp = radComp.getBeanInstance();
         Map<String, Object> changes = null;
 
-        if (comp instanceof AbstractButton && targetComp instanceof JToolBar) {
+        if (comp instanceof AbstractButton && targetComp instanceof ToolBar) {
             if (changes == null) {
                 changes = new HashMap<>();
             }
@@ -1071,11 +1066,14 @@ public class RADComponentCreator {
     public static Dimension prepareDefaultLayoutSize(Component comp, boolean isContainer) {
         int width = -1;
         int height = -1;
-        if (comp instanceof JLabel || comp instanceof AbstractButton) {
+        if (comp instanceof Label || comp instanceof AbstractButton) {
             width = 70;
             height = 20;
-        } else if (comp instanceof JToolBar || comp instanceof JMenuBar) {
+        } else if (comp instanceof ToolBar || comp instanceof MenuBar) {
             width = 100;
+            height = 20;
+        } else if (comp instanceof ProgressBar || comp instanceof Slider) {
+            width = 130;
             height = 20;
         } else if (isContainer) {
             width = 100;
@@ -1083,7 +1081,8 @@ public class RADComponentCreator {
         } else if (comp instanceof TextArea
                 || comp instanceof ModelTextArea
                 || comp instanceof HtmlArea
-                || comp instanceof ModelGrid) {
+                || comp instanceof ModelGrid
+                || comp instanceof DesktopPane) {
             width = 100;
             height = 100;
         }

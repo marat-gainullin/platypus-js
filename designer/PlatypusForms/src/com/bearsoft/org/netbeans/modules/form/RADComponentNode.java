@@ -128,38 +128,30 @@ public class RADComponentNode extends FormNode
         if (icon != null) {
             return icon;
         }
-
         // try to get a special icon
-        icon = BeanSupport.getBeanIcon(component.getBeanClass(), iconType);
+        if (!iconsInitialized) {
+            // getIconForClass invokes getNodes(true) which cannot be called in Mutex
+            EventQueue.invokeLater(() -> {
+                Image icon1 = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, true);
+                iconsInitialized = true;
+                if (icon1 != null) {
+                    img.put(iconType, icon1);
+                    fireIconChange();
+                }
+            });
+        } else {
+            icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, false);
+        }
+
         if (icon == null) {
-            if (!iconsInitialized) {
-                // getIconForClass invokes getNodes(true) which cannot be called in Mutex
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Image icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, true);
-                        iconsInitialized = true;
-                        if (icon != null) {
-                            img.put(iconType, icon);
-                            fireIconChange();
-                        }
-                    }
-                });
-            } else {
-                icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, false);
+            // get icon from BeanInfo
+            java.beans.BeanInfo bi = component.getBeanInfo();
+            if (bi != null) {
+                icon = bi.getIcon(iconType);
             }
-
             if (icon == null) {
-                // get icon from BeanInfo
-                java.beans.BeanInfo bi = component.getBeanInfo();
-                if (bi != null) {
-                    icon = bi.getIcon(iconType);
-                }
-
-                if (icon == null) {
-                    // use default icon
-                    icon = super.getIcon(iconType);
-                }
+                // use default icon
+                icon = super.getIcon(iconType);
             }
         }
         img.put(iconType, icon);
@@ -190,7 +182,7 @@ public class RADComponentNode extends FormNode
     public NewType[] getNewTypes() {
         return component.getNewTypes();
     }
-    
+
     @Override
     public Action getPreferredAction() {
         return DEFAULT_ACTION;
@@ -452,7 +444,7 @@ public class RADComponentNode extends FormNode
         AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
             Object oldValue = evt != null ? evt.getOldValue() : null;
             Object newValue = evt != null ? evt.getNewValue() : null;
-            
+
             for (int i = 0; i < properties.length; i++) {
                 FormProperty<Object> prop = (FormProperty<Object>) properties[i];
                 try {

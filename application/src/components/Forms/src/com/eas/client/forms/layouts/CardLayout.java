@@ -24,6 +24,10 @@ public class CardLayout extends java.awt.CardLayout {
     protected Set<ItemListener> changeListeners = new HashSet<>();
     protected Map<String, Component> comps = new HashMap<>();
 
+    public CardLayout() {
+        this(0, 0);
+    }
+    
     public CardLayout(int hgap, int vgap) {
         super(hgap, vgap);
     }

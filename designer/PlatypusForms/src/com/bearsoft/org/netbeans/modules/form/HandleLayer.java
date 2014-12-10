@@ -51,15 +51,50 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import com.eas.client.forms.components.CheckBox;
+import com.eas.client.forms.components.RadioButton;
 import com.eas.client.forms.containers.ButtonGroup;
-import java.awt.*;
+import com.eas.client.forms.containers.ScrollPane;
+import com.eas.client.forms.containers.TabbedPane;
+import com.eas.client.forms.menu.MenuBar;
+import java.awt.AWTKeyStroke;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Composite;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.*;
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
@@ -750,12 +785,7 @@ public class HandleLayer extends JPanel {
                             Rectangle bound = compBounds.get(button);
                             cutOrder.add(new int[]{columns ? bound.x : bound.y, j});
                         }
-                        Collections.sort(cutOrder, new Comparator<int[]>() {
-                            @Override
-                            public int compare(int[] i1, int[] i2) {
-                                return (i1[0] == i2[0]) ? (i1[1] - i2[1]) : (i1[0] - i2[0]);
-                            }
-                        });
+                        Collections.sort(cutOrder, (int[] i1, int[] i2) -> (i1[0] == i2[0]) ? (i1[1] - i2[1]) : (i1[0] - i2[0]));
                         cuts = new ArrayList<>(buttons.size());
                         groups = (java.util.List<AbstractButton>[]) new java.util.List<?>[buttons.size()];
                         for (int[] ii : cutOrder) {
@@ -786,13 +816,13 @@ public class HandleLayer extends JPanel {
             if (groups[count].size() == 1) {
                 AbstractButton button = groups[count].get(0);
                 Rectangle bound = compBounds.get(button);
-                if ((button instanceof JRadioButton) || (button instanceof JCheckBox)) {
+                if ((button instanceof RadioButton) || (button instanceof CheckBox)) {
                     Dimension dim = button.getPreferredSize();
                     Insets insets = button.getInsets();
                     int textPos = columns ? button.getHorizontalTextPosition() : button.getVerticalTextPosition();
                     Icon icon = button.getIcon();
                     if (icon == null) {
-                        icon = UIManager.getIcon((button instanceof JRadioButton) ? "RadioButton.icon" : "CheckBox.icon"); // NOI18N
+                        icon = UIManager.getIcon((button instanceof RadioButton) ? "RadioButton.icon" : "CheckBox.icon"); // NOI18N
                     }
                     if (icon != null) {
                         off = columns ? icon.getIconWidth() : icon.getIconHeight();
@@ -1187,7 +1217,7 @@ public class HandleLayer extends JPanel {
                 && hitRadComp instanceof RADVisualContainer<?>) {
             RADVisualComponent<?>[] sub = ((RADVisualContainer<?>) hitRadComp).getSubComponents();
             Component scroll = formDesigner.getComponent(hitRadComp);
-            if (sub.length > 0 && scroll instanceof JScrollPane) {
+            if (sub.length > 0 && scroll instanceof ScrollPane) {
                 Point p = e.getPoint();
                 convertPointToComponent(p, scroll);
                 Component clicked = SwingUtilities.getDeepestComponentAt(scroll, p.x, p.y);
@@ -1808,7 +1838,7 @@ public class HandleLayer extends JPanel {
 
     private static boolean substituteForContainer(RADVisualContainer<?> radCont) {
         return radCont != null
-                && radCont.getBeanClass().isAssignableFrom(JScrollPane.class)
+                && radCont.getBeanClass().isAssignableFrom(ScrollPane.class)
                 && radCont.getSubComponents().length > 0;
     }
 
@@ -1933,8 +1963,8 @@ public class HandleLayer extends JPanel {
             java.util.List<Component> subContainers = new ArrayList<>();
 
             Component[] comps;
-            if (cont instanceof JTabbedPane) {
-                Component selectedTab = ((JTabbedPane) cont).getSelectedComponent();
+            if (cont instanceof TabbedPane) {
+                Component selectedTab = ((TabbedPane) cont).getSelectedComponent();
                 comps = (selectedTab == null) ? new Component[0] : new Component[]{selectedTab};
             } else {
                 comps = cont.getComponents();
@@ -2199,12 +2229,9 @@ public class HandleLayer extends JPanel {
                 showingComponents = null;
             } else {
                 // re-init in next AWT round - to have the designer updated
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        init();
-                        move(e);
-                    }
+                EventQueue.invokeLater(() -> {
+                    init();
+                    move(e);
                 });
             }
             return retVal;
@@ -2756,7 +2783,7 @@ public class HandleLayer extends JPanel {
                 }
                 //switch to the menu layer if this is a menu component other than JMenuBar
                 if (item != null && MenuEditLayer.isMenuRelatedComponentClass(item.getComponentClass())
-                        && !JMenuBar.class.isAssignableFrom(item.getComponentClass())) {
+                        && !MenuBar.class.isAssignableFrom(item.getComponentClass())) {
                     if (!formDesigner.getMenuEditLayer().isDragProxying()) {
                         formDesigner.getMenuEditLayer().startNewMenuComponentDragAndDrop(item);
                         return;

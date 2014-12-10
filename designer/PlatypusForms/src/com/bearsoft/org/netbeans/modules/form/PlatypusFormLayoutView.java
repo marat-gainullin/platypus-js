@@ -843,7 +843,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             RADVisualComponent<?> visualComp = (RADVisualComponent<?>) radComp;
             if (!visualComp.isMenuComponent()) {
                 RADVisualContainer<?> radCont = visualComp.getParentComponent();
-                if ((radCont != null) && JScrollPane.class.isAssignableFrom(radCont.getBeanInstance().getClass())
+                if ((radCont != null) && ScrollPane.class.isAssignableFrom(radCont.getBeanInstance().getClass())
                         && isInDesigner(radCont)) {   // substitute with scroll pane...
                     return radCont;
                 }
@@ -1123,12 +1123,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     }
                 } else if ((bean instanceof JPanel) && (getTopDesignComponent() != radComp) && (Math.random() < 0.2)) {
                     context = "designThisContainer"; // NOI18N
-                } else if ((bean instanceof JComboBox) && (Math.random() < 0.4)) {
-                    context = "comboBoxModel"; // NOI18N
-                } else if ((bean instanceof JList) && (Math.random() < 0.4)) {
-                    context = "listModel"; // NOI18N
-                } else if ((bean instanceof JTable) && (Math.random() < 0.4)) {
-                    context = "tableModel"; // NOI18N
                 } else if (bean instanceof JScrollPane) {
                     JScrollPane scrollPane = (JScrollPane) bean;
                     if ((scrollPane.getViewport() != null)

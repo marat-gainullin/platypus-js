@@ -45,6 +45,7 @@ package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.eas.client.forms.HasChildren;
+import com.eas.client.forms.Widget;
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
 import com.eas.client.forms.containers.BoxPane;
@@ -52,11 +53,21 @@ import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.containers.CardPane;
 import com.eas.client.forms.containers.FlowPane;
 import com.eas.client.forms.containers.GridPane;
+import com.eas.client.forms.containers.ScrollPane;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.client.forms.layouts.CardLayout;
-import java.awt.*;
+import com.eas.script.ScriptFunction;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Paint;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.beans.*;
 import java.io.*;
 import java.lang.reflect.*;
@@ -66,6 +77,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
 import org.netbeans.api.editor.DialogBinding;
@@ -86,6 +98,236 @@ import org.openide.util.Utilities;
  */
 public class FormUtils {
 
+    public static class Panel extends JPanel implements Widget {
+
+        public Panel() {
+            super(new MarginLayout());
+        }
+
+        @ScriptFunction(jsDoc = "Js name of the widget")
+        @Override
+        public String getName() {
+            return super.getName();
+        }
+
+        @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
+        @Override
+        public JComponent getNextFocusableComponent() {
+            return (JComponent) super.getNextFocusableComponent();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setNextFocusableComponent(JComponent aValue) {
+            super.setNextFocusableComponent(aValue);
+        }
+
+        protected String errorMessage;
+
+        @ScriptFunction(jsDoc = ERROR_JSDOC)
+        @Override
+        public String getError() {
+            return errorMessage;
+        }
+
+        @ScriptFunction
+        @Override
+        public void setError(String aValue) {
+            errorMessage = aValue;
+        }
+
+        @ScriptFunction(jsDoc = BACKGROUND_JSDOC)
+        @Override
+        public Color getBackground() {
+            return super.getBackground();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setBackground(Color aValue) {
+            super.setBackground(aValue);
+        }
+
+        @ScriptFunction(jsDoc = FOREGROUND_JSDOC)
+        @Override
+        public Color getForeground() {
+            return super.getForeground();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setForeground(Color aValue) {
+            super.setForeground(aValue);
+        }
+
+        @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+        @Override
+        public boolean getVisible() {
+            return super.isVisible();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setVisible(boolean aValue) {
+            super.setVisible(aValue);
+        }
+
+        @ScriptFunction(jsDoc = FOCUSABLE_JSDOC)
+        @Override
+        public boolean getFocusable() {
+            return super.isFocusable();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setFocusable(boolean aValue) {
+            super.setFocusable(aValue);
+        }
+
+        @ScriptFunction(jsDoc = ENABLED_JSDOC)
+        @Override
+        public boolean getEnabled() {
+            return super.isEnabled();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setEnabled(boolean aValue) {
+            super.setEnabled(aValue);
+        }
+
+        @ScriptFunction(jsDoc = TOOLTIP_TEXT_JSDOC)
+        @Override
+        public String getToolTipText() {
+            return super.getToolTipText();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setToolTipText(String aValue) {
+            super.setToolTipText(aValue);
+        }
+
+        @ScriptFunction(jsDoc = OPAQUE_TEXT_JSDOC)
+        @Override
+        public boolean getOpaque() {
+            return super.isOpaque();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setOpaque(boolean aValue) {
+            super.setOpaque(aValue);
+        }
+
+        @ScriptFunction(jsDoc = COMPONENT_POPUP_MENU_JSDOC)
+        @Override
+        public JPopupMenu getComponentPopupMenu() {
+            return super.getComponentPopupMenu();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setComponentPopupMenu(JPopupMenu aMenu) {
+            super.setComponentPopupMenu(aMenu);
+        }
+
+        @ScriptFunction(jsDoc = FONT_JSDOC)
+        @Override
+        public Font getFont() {
+            return super.getFont();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setFont(Font aFont) {
+            super.setFont(aFont);
+        }
+
+        @ScriptFunction(jsDoc = CURSOR_JSDOC)
+        @Override
+        public Cursor getCursor() {
+            return super.getCursor();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setCursor(Cursor aCursor) {
+            super.setCursor(aCursor);
+        }
+
+        @ScriptFunction(jsDoc = LEFT_JSDOC)
+        @Override
+        public int getLeft() {
+            return super.getLocation().x;
+        }
+
+        @ScriptFunction
+        @Override
+        public void setLeft(int aValue) {
+            if (super.getParent() != null && super.getParent().getLayout() instanceof MarginLayout) {
+                MarginLayout.ajustLeft(this, aValue);
+            }
+            super.setLocation(aValue, getTop());
+        }
+
+        @ScriptFunction(jsDoc = TOP_JSDOC)
+        @Override
+        public int getTop() {
+            return super.getLocation().y;
+        }
+
+        @ScriptFunction
+        @Override
+        public void setTop(int aValue) {
+            if (super.getParent() != null && super.getParent().getLayout() instanceof MarginLayout) {
+                MarginLayout.ajustTop(this, aValue);
+            }
+            super.setLocation(getLeft(), aValue);
+        }
+
+        @ScriptFunction(jsDoc = WIDTH_JSDOC)
+        @Override
+        public int getWidth() {
+            return super.getWidth();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setWidth(int aValue) {
+            Widget.setWidth(this, aValue);
+        }
+
+        @ScriptFunction(jsDoc = HEIGHT_JSDOC)
+        @Override
+        public int getHeight() {
+            return super.getHeight();
+        }
+
+        @ScriptFunction
+        @Override
+        public void setHeight(int aValue) {
+            Widget.setHeight(this, aValue);
+        }
+
+        @ScriptFunction(jsDoc = FOCUS_JSDOC)
+        @Override
+        public void focus() {
+            super.requestFocus();
+        }
+
+        @Override
+        public Object getElement() {
+            return null;
+        }
+
+        @Override
+        public JComponent getComponent() {
+            return this;
+        }
+
+    }
+
     public static final Logger LOGGER = Logger.getLogger("com.bearsoft.org.netbeans.modules.form"); // NOI18N
     private static final RequestProcessor RP = new RequestProcessor("GUI Builder", 10, false); // NOI18N
     // constants for CopyProperties method
@@ -98,12 +340,12 @@ public class FormUtils {
     static final String ACTION_PERFORMED_EVENT_HANDLER_NAME = "onActionPerformed";//NOI18N
     static final String ON_MOUSE_CLICKED_EVENT_HANDLER_NAME = "onMouseClicked";//NOI18N
     private static final Map<String, Class<?>> eventsNames2scriptEventsClasses = new HashMap<>();
-    
+
     private static Map<Class<?>, Map<String, DefaultValueDeviation>> defaultValueDeviations;
 
     private static final Map<Class<?>, Class<?>> layoutClasses2PlatypusContainerClasses = new HashMap<>();
     private static final Map<Class<?>, String> componentClasses2DefaultEventHandlers = new HashMap<>();
-    
+
     static {
         initLayoutClasses2PlatypusContainerClasses();
         initComponentClasses2DefaultEventHandlers();
@@ -122,7 +364,7 @@ public class FormUtils {
     private static void initEventsNames2ScriptEventClasses() {
         eventsNames2scriptEventsClasses.put(ON_MOUSE_CLICKED_EVENT_HANDLER_NAME, MouseEvent.class);
     }
-    
+
     private static void initComponentClasses2DefaultEventHandlers() {
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.Button.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.ToggleButton.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
@@ -134,9 +376,9 @@ public class FormUtils {
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.menu.CheckMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.menu.RadioMenuItem.class, ACTION_PERFORMED_EVENT_HANDLER_NAME);
         componentClasses2DefaultEventHandlers.put(com.eas.client.forms.components.Label.class, ON_MOUSE_CLICKED_EVENT_HANDLER_NAME);
-        
+
     }
-    
+
     // -----------------------------------------------------------------------------
     // Utility methods
     public static ResourceBundle getBundle() {
@@ -152,10 +394,10 @@ public class FormUtils {
         return NbBundle.getMessage(FormUtils.class, key, arguments);
     }
 
-    public static  String getDefaultEventPropertyName(Class<?> componentClass) {
+    public static String getDefaultEventPropertyName(Class<?> componentClass) {
         return componentClasses2DefaultEventHandlers.get(componentClass);
     }
-    
+
     /**
      * Utility method that tries to clone an object. Objects of explicitly
      * specified types are constructed directly, other are serialized and
@@ -524,12 +766,12 @@ public class FormUtils {
         editor.putClientProperty(
                 "HighlightsLayerExcludes", //NOI18N
                 "^org\\.netbeans\\.modules\\.editor\\.lib2\\.highlighting\\.CaretRowHighlighting$" //NOI18N
-                );
+        );
     }
 
     public static boolean isContainer(Class<?> beanClass) {
-        return HasChildren.class.isAssignableFrom(beanClass) || JPanel.class.isAssignableFrom(beanClass);
- }
+        return HasChildren.class.isAssignableFrom(beanClass) || Panel.class.isAssignableFrom(beanClass);
+    }
 
     public static boolean isVisualizableClass(Class<?> cls) {
         if (java.awt.Component.class.isAssignableFrom(cls) && !ButtonGroup.class.isAssignableFrom(cls)) {
@@ -622,12 +864,12 @@ public class FormUtils {
                 deviationMap = new HashMap<>();
                 deviationMap.put("background", // NOI18N
                         new DefaultValueDeviation(values) {
-                    @Override
-                    Object getValue(Object beanInstance) {
-                        return ((javax.swing.JTextField) beanInstance).isEditable()
-                                ? this.values[0] : this.values[1];
-                    }
-                });
+                            @Override
+                            Object getValue(Object beanInstance) {
+                                return ((javax.swing.JTextField) beanInstance).isEditable()
+                                        ? this.values[0] : this.values[1];
+                            }
+                        });
                 defaultValueDeviations.put(bean.getClass(), deviationMap);
             }
         }
@@ -755,7 +997,7 @@ public class FormUtils {
                     if ((radComp instanceof RADVisualComponent<?>)) {
                         RADVisualComponent<?> visComp = (RADVisualComponent<?>) radComp;
                         RADVisualContainer<?> visCont = visComp.getParentComponent();
-                        if ((visCont != null) && javax.swing.JScrollPane.class.isAssignableFrom(visCont.getBeanInstance().getClass())) {
+                        if ((visCont != null) && ScrollPane.class.isAssignableFrom(visCont.getBeanInstance().getClass())) {
                             visComp = visCont;
                             visCont = visCont.getParentComponent();
                         }
@@ -848,9 +1090,7 @@ public class FormUtils {
         private Map<String, TypeHelper> actualTypeArgs;
 
         /**
-         * Creates
-         * <code>TypeHelper</code> that represents
-         * <code>Object</code>.
+         * Creates <code>TypeHelper</code> that represents <code>Object</code>.
          */
         public TypeHelper() {
             this(Object.class, null);
@@ -866,9 +1106,8 @@ public class FormUtils {
         }
 
         /**
-         * Creates
-         * <code>TypeHelper</code> that represents given type with no type
-         * arguments set.
+         * Creates <code>TypeHelper</code> that represents given type with no
+         * type arguments set.
          *
          * @param type type.
          */
@@ -877,9 +1116,8 @@ public class FormUtils {
         }
 
         /**
-         * Creates
-         * <code>TypeHelper</code> that represents given type with some type
-         * arguments set.
+         * Creates <code>TypeHelper</code> that represents given type with some
+         * type arguments set.
          *
          * @param type type.
          * @param actualTypeArgs type parameters that has been set.
@@ -1061,7 +1299,7 @@ public class FormUtils {
     public static Class<?> getScriptEventClassByName(String anEventName) {
         return eventsNames2scriptEventsClasses.get(anEventName);
     }
-    
+
     public static RequestProcessor getRequestProcessor() {
         return RP;
     }

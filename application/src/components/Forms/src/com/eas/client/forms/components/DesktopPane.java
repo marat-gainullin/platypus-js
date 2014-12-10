@@ -44,6 +44,7 @@ public class DesktopPane extends JDesktopPane implements HasPublished, HasCompon
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public DesktopPane() {
         super();
+        setBackground(Color.GRAY.brighter());
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)

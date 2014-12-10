@@ -297,9 +297,9 @@ public class MenuItem extends JMenuItem implements HasPublished, HasComponentEve
             + "* The parent container.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = PARENT_JSDOC)
+    @ScriptFunction(name="parent", jsDoc = PARENT_JSDOC)
     @Override
-    public java.awt.Container getParent() {
+    public java.awt.Container getWidgetParent() {
         java.awt.Container parent = super.getParent();
         if (parent instanceof JPopupMenu && ((JPopupMenu) parent).getInvoker() instanceof JMenu) {
             parent = (java.awt.Container) ((JPopupMenu) parent).getInvoker();

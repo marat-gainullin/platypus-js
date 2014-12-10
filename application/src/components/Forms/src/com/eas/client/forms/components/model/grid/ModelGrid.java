@@ -460,12 +460,14 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         // left header setup
         lheader = new MultiLevelHeader();
         lheader.setTable(tlTable);
+        lheader.setColumnModel(tlTable.getColumnModel());
         tlTable.getTableHeader().setResizingAllowed(true);
         lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
         lheader.setRowSorter(rowSorter);
         // right header setup
         rheader = new MultiLevelHeader();
         rheader.setTable(trTable);
+        rheader.setColumnModel(trTable.getColumnModel());
         trTable.getTableHeader().setResizingAllowed(true);
         rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
         rheader.setRowSorter(rowSorter);

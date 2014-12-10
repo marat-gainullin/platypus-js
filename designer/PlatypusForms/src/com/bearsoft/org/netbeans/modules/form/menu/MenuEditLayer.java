@@ -48,6 +48,7 @@ import com.bearsoft.org.netbeans.modules.form.actions.PropertyAction;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import com.eas.client.forms.menu.MenuItem;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -1281,8 +1282,8 @@ public class MenuEditLayer extends JPanel {
     private void updateIcon(RADComponent<?> rad) {
         try {
             Component comp = formDesigner.getComponent(rad);
-            if (comp instanceof JMenuItem) {
-                JMenuItem item = (JMenuItem) comp;
+            if (comp instanceof MenuItem) {
+                MenuItem item = (MenuItem) comp;
                 RADProperty<?> icon_prop = rad.<RADProperty<?>>getProperty("icon");
                 Object value = icon_prop.getValue();
                 // extract the new value

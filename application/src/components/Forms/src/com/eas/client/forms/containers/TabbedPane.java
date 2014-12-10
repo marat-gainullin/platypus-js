@@ -54,10 +54,12 @@ public class TabbedPane extends JTabbedPane implements HasPublished, HasContaine
     protected JSObject onItemSelected;
 
     protected ChangeListener tabsChangeListener = (javax.swing.event.ChangeEvent e) -> {
-        try {
-            onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(e).getPublished()});
-        } catch (Exception ex) {
-            Logger.getLogger(TabbedPane.class.getName()).log(Level.SEVERE, null, ex);
+        if (onItemSelected != null) {
+            try {
+                onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(e).getPublished()});
+            } catch (Exception ex) {
+                Logger.getLogger(TabbedPane.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     };
 
