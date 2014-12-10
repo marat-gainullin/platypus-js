@@ -74,7 +74,7 @@ public class JsModuleEndPoint {
     @OnError
     public void errorInSession(Session websocketSession, Throwable aError) {
         JSObject errorEvent = ScriptUtils.makeObj();
-        errorEvent.setMember("data", aError.getMessage());
+        errorEvent.setMember("message", aError.getMessage());
         executeSessionFacadeMethod(websocketSession, WS_ON_ERROR, new Object[]{errorEvent});
     }
 
