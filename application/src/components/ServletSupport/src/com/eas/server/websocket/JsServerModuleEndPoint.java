@@ -26,8 +26,8 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-@ServerEndpoint(value = "/{module-name}", configurator = JsModuleEndPointConfigurator.class)
-public class JsModuleEndPoint {
+@ServerEndpoint(value = "/{module-name}", configurator = JsServerModuleEndPointConfigurator.class)
+public class JsServerModuleEndPoint {
 
     private static final String PLATYPUS_SESSION_ATTR_NAME = "platypus-session";
     private static final String WS_SCRIPT_FACADE = "ws-session-script-facade";
@@ -37,7 +37,7 @@ public class JsModuleEndPoint {
     private static final String WS_ON_CLOSE = "onclose";
     private static final String WS_ON_ERROR = "onerror";
 
-    public JsModuleEndPoint() {
+    public JsServerModuleEndPoint() {
         super();
     }
 
@@ -45,16 +45,16 @@ public class JsModuleEndPoint {
     public void sessionOpened(Session websocketSession, @PathParam("module-name") String aModuleName) throws Exception {
         PlatypusServerCore serverCore = lookupPlaypusServerCore();
         com.eas.server.Session session = lookupPlatypusSession(websocketSession, serverCore);
-        WebSocketSession facade = new WebSocketSession(websocketSession, session);
+        WebSocketServerSession facade = new WebSocketServerSession(websocketSession, session);
         websocketSession.getUserProperties().put(WS_SCRIPT_FACADE, facade);
 
         PlatypusPrincipal.setInstance(session.getPrincipal());
         ScriptUtils.setSession(session);
         try {
             serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, session, (Object aResult) -> {
-                Logger.getLogger(JsModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
             }, (Exception ex) -> {
-                Logger.getLogger(JsModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
             }, (Object aLock) -> {
                 facade.setLock(aLock);
             });
@@ -89,41 +89,49 @@ public class JsModuleEndPoint {
         String platypusSessionId = (String) websocketSession.getUserProperties().get(PLATYPUS_SESSION_ATTR_NAME);
         PlatypusServerCore serverCore = lookupPlaypusServerCore();
         serverCore.getSessionManager().remove(platypusSessionId);
-        Logger.getLogger(JsModuleEndPoint.class.getName()).log(Level.INFO, "Platypus session closed id: {0}", platypusSessionId);
+        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "Platypus session closed id: {0}", platypusSessionId);
 
         websocketSession.getUserProperties().remove(PLATYPUS_SESSION_ATTR_NAME);
         websocketSession.getUserProperties().remove(WS_SCRIPT_FACADE);
-        websocketSession.getUserProperties().remove(JsModuleEndPointConfigurator.HANDSHAKE_REQUEST);
+        websocketSession.getUserProperties().remove(JsServerModuleEndPointConfigurator.HANDSHAKE_REQUEST);
     }
 
     protected void executeSessionFacadeMethod(Session websocketSession, String methodName, Object[] args) {
         try {
-            WebSocketSession facade = (WebSocketSession) websocketSession.getUserProperties().get(WS_SCRIPT_FACADE);
+            WebSocketServerSession facade = (WebSocketServerSession) websocketSession.getUserProperties().get(WS_SCRIPT_FACADE);
             Object oFun = facade.getPublished().getMember(methodName);
             if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                 JSObject callable = (JSObject) oFun;
                 final Object lock = facade.getLock();
-                ScriptUtils.setLock(lock);
-                ScriptUtils.setSession(facade.getPlatypusSession());
-                PlatypusPrincipal.setInstance(facade.getPlatypusSession().getPrincipal());
-                try {
-                    if (lock != null) {
-                        synchronized (lock) {
-                            callable.call(facade, args);
+                if (ScriptUtils.getLock() == null) {
+                    ScriptUtils.setLock(lock);
+                    ScriptUtils.setSession(facade.getPlatypusSession());
+                    PlatypusPrincipal.setInstance(facade.getPlatypusSession().getPrincipal());
+                    ScriptUtils.setRequest(facade.getRequest());
+                    ScriptUtils.setResponse(facade.getResponse());
+                    try {
+                        if (lock != null) {
+                            synchronized (lock) {
+                                callable.call(facade, args);
+                            }
+                        } else {
+                            throw new IllegalStateException("Can't obtain a lock for web socket session callback: " + methodName);
                         }
-                    } else {
-                        throw new IllegalStateException("Can't obtain a lock for web socket session callback: " + methodName);
+                    } finally {
+                        ScriptUtils.setLock(null);
+                        ScriptUtils.setSession(null);
+                        PlatypusPrincipal.setInstance(null);
+                        ScriptUtils.setRequest(null);
+                        ScriptUtils.setResponse(null);
                     }
-                } finally {
-                    ScriptUtils.setLock(null);
-                    ScriptUtils.setSession(null);
-                    PlatypusPrincipal.setInstance(null);
+                } else {
+                    callable.call(facade, args);
                 }
             } else {
-                Logger.getLogger(JsModuleEndPoint.class.getName()).log(Level.WARNING, "No method {0} found in {1}", new Object[]{methodName, WebSocketSession.class.getSimpleName()});
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "No method {0} found in {1}", new Object[]{methodName, WebSocketServerSession.class.getSimpleName()});
             }
         } catch (Exception ex) {
-            Logger.getLogger(JsModuleEndPoint.class.getName()).log(Level.WARNING, ex.getMessage());
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, null, ex);
         }
     }
 
@@ -136,7 +144,7 @@ public class JsModuleEndPoint {
     }
 
     protected com.eas.server.Session lookupPlatypusSession(Session websocketSession, PlatypusServerCore serverCore) throws Exception, IllegalStateException {
-        HandshakeRequest handshake = (HandshakeRequest) websocketSession.getUserProperties().get(JsModuleEndPointConfigurator.HANDSHAKE_REQUEST);
+        HandshakeRequest handshake = (HandshakeRequest) websocketSession.getUserProperties().get(JsServerModuleEndPointConfigurator.HANDSHAKE_REQUEST);
         PlatypusPrincipal principal = endpointRequestPrincipal(handshake, websocketSession);
         com.eas.server.Session session = platypusSessionByWebSocketSession(websocketSession, serverCore, principal);
         assert session != null : "Platypus session missing";

@@ -61,7 +61,8 @@ try {
 }
 
 try {
-    load('classpath:servlet-support/web-socket-session.js');
+    load('classpath:servlet-support/web-socket-client-session.js');
+    load('classpath:servlet-support/web-socket-server-session.js');
     printf('servlet-support API loaded.');
 } catch (e) {
     printf('servlet-support API skipped.');

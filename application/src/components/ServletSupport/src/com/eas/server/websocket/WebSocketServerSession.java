@@ -9,6 +9,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import javax.websocket.CloseReason;
 import javax.websocket.Session;
 import jdk.nashorn.api.scripting.JSObject;
@@ -17,21 +18,25 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class WebSocketSession implements HasPublished {
+public class WebSocketServerSession implements HasPublished {
 
     protected JSObject published;
     protected Session session;
     protected com.eas.server.Session platypusSession;
     protected Object lock;
+    protected Object request;
+    protected Object response;
     //
     protected JSObject onClose;
     protected JSObject onError;
     protected JSObject onMessage;
 
-    public WebSocketSession(Session aSession, com.eas.server.Session aPlatypusSession) {
+    public WebSocketServerSession(Session aSession, com.eas.server.Session aPlatypusSession) {
         super();
         session = aSession;
         platypusSession = aPlatypusSession;
+        request = ScriptUtils.getRequest();
+        response = ScriptUtils.getResponse();
     }
 
     public com.eas.server.Session getPlatypusSession() {
@@ -44,6 +49,14 @@ public class WebSocketSession implements HasPublished {
 
     public void setLock(Object aValue) {
         lock = aValue;
+    }
+
+    public Object getRequest() {
+        return request;
+    }
+
+    public Object getResponse() {
+        return response;
     }
 
     @ScriptFunction

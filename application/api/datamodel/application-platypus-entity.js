@@ -329,6 +329,32 @@
         };
 
         /**
+         * Sets the array cursor to the specified object.
+         * @param object the object to position the entity cursor on.
+         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
+         * @method scrollTo
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row) {
+            var delegate = this.unwrap();
+            var value = delegate.scrollTo(P.boxAsJava(row));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds row by its key. Key must a single property.
+         * @param key the unique identifier of the row.
+         * @return a row object or <code>null</code> if nothing is found.
+         * @method findById
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.findById = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findById(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
          * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
          * @return a comparator object.
@@ -351,32 +377,6 @@
         P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
             var value = delegate.createSorting(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds row by its key. Key must a single property.
-         * @param key the unique identifier of the row.
-         * @return a row object or <code>null</code> if nothing is found.
-         * @method findById
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.findById = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Sets the array cursor to the specified object.
-         * @param object the object to position the entity cursor on.
-         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
-         * @method scrollTo
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row) {
-            var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
             return P.boxAsJs(value);
         };
 
