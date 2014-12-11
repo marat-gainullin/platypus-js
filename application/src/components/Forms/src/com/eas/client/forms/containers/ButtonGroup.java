@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.containers;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HasContainerEvents;
 import com.eas.client.forms.components.rt.HasGroup;
@@ -16,6 +17,7 @@ import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.components.rt.ButtonGroupWrapper;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -275,12 +277,14 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
 
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
     @Override
     public JComponent getComponent() {
         return this;
     }
 
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
     @Override
     public Object getElement() {
         return null;
@@ -355,6 +359,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     }
 
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
+    @Undesignable
     @Override
     public JComponent[] getChildren() {
         List<JComponent> ch = new ArrayList<>();
@@ -373,6 +378,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     }
 
     @ScriptFunction(jsDoc = COUNT_JSDOC)
+    @Undesignable
     @Override
     public int getCount() {
         return super.getComponentCount();
@@ -714,6 +720,12 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     @Override
     public void setOnComponentRemoved(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.componentRemoved, aValue);
+    }
+    
+    // published parent
+    @Override
+    public Widget getParentWidget() {
+        return Forms.lookupPublishedParent(this);
     }
 
     @Override

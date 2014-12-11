@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
@@ -130,7 +131,6 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
-    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -618,5 +618,11 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
     @Override
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
+    }
+    
+    // published parent
+    @Override
+    public Widget getParentWidget() {
+        return Forms.lookupPublishedParent(this);
     }
 }

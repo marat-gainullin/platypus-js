@@ -63,6 +63,7 @@ import com.eas.client.forms.components.Slider;
 import com.eas.client.forms.components.TextArea;
 import com.eas.client.forms.components.TextField;
 import com.eas.client.forms.components.ToggleButton;
+import com.eas.client.forms.components.model.ModelCheckBox;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelTextArea;
@@ -927,17 +928,20 @@ public class RADComponentCreator {
         changes.put("name", varName);
         if (comp instanceof MenuItem) {
             changes.put("text", varName); // NOI18N
-            if (comp instanceof CheckMenuItem) {
-                changes.put("selected", Boolean.TRUE); // NOI18N
-            }
-            if (comp instanceof RadioMenuItem) {
-                changes.put("selected", Boolean.TRUE); // NOI18N
-            }
+        } else if (comp instanceof CheckMenuItem) {
+            changes.put("text", varName); // NOI18N
+            changes.put("selected", Boolean.TRUE); // NOI18N
+        } else if (comp instanceof RadioMenuItem) {
+            changes.put("text", varName); // NOI18N
+            changes.put("selected", Boolean.TRUE); // NOI18N
+        } else if (comp instanceof Menu) {
+            changes.put("text", varName); // NOI18N
         } else if (comp instanceof Label
                 || comp instanceof Button
                 || comp instanceof ToggleButton
                 || comp instanceof RadioButton
                 || comp instanceof CheckBox
+                || comp instanceof ModelCheckBox
                 || comp instanceof Label
                 || comp instanceof TextField
                 || comp instanceof PasswordField

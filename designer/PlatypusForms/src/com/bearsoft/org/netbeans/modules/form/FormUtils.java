@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.containers.AnchorsPane;
@@ -102,6 +103,11 @@ public class FormUtils {
 
         public Panel() {
             super(new MarginLayout());
+        }
+
+        @Override
+        public Widget getParentWidget() {
+            return Forms.lookupPublishedParent(this);
         }
 
         @ScriptFunction(jsDoc = "Js name of the widget")

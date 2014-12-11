@@ -20,6 +20,12 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.eas.client.forms.Forms;
+import com.eas.client.forms.HasComponentEvents;
+import com.eas.client.forms.Widget;
+import static com.eas.client.forms.Widget.HEIGHT_JSDOC;
+import static com.eas.client.forms.Widget.LEFT_JSDOC;
+import static com.eas.client.forms.Widget.TOP_JSDOC;
+import static com.eas.client.forms.Widget.WIDTH_JSDOC;
 import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
@@ -28,10 +34,15 @@ import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
 import com.eas.client.forms.components.model.grid.models.ArrayModel;
 import com.eas.client.forms.components.model.grid.models.ArrayTableModel;
 import com.eas.client.forms.components.model.grid.models.ArrayTreedModel;
+import com.eas.client.forms.events.rt.ControlEventsIProxy;
+import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.*;
 import java.awt.event.*;
@@ -52,11 +63,11 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer {
+public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer, HasComponentEvents, Widget, HasPublished {
 
-    protected Object published;
+    protected JSObject published;
 
-    public void injectPublished(Object aValue) {
+    public void injectPublished(JSObject aValue) {
         published = aValue;
     }
 
@@ -174,6 +185,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      * @return Index if row.
      * @throws RowsetException
      */
+    @ScriptFunction
     public int row2Index(JSObject anElement) throws RowsetException {
         int idx = -1;
         if (deepModel instanceof TableFront2TreedModel<?>) {
@@ -194,6 +206,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      * @return Row's index;
      * @throws RowsetException
      */
+    @ScriptFunction
     public JSObject index2Row(int aIdx) throws RowsetException {
         JSObject element = null;
         if (deepModel instanceof TableFront2TreedModel<?>) {
@@ -301,10 +314,13 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
+    @Designable(category = "model")
     public String getParentField() {
         return parentField;
     }
 
+    @ScriptFunction
     public void setParentField(String aValue) {
         if (parentField == null ? aValue != null : !parentField.equals(aValue)) {
             boolean wasTree = isTreeConfigured();
@@ -316,10 +332,13 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
+    @Designable(category = "model")
     public String getChildrenField() {
         return childrenField;
     }
 
+    @ScriptFunction
     public void setChildrenField(String aValue) {
         if (childrenField == null ? aValue != null : !childrenField.equals(aValue)) {
             boolean wasTree = isTreeConfigured();
@@ -565,6 +584,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
     @EventMethod(eventClass = CellRenderEvent.class)
+    @Undesignable
     public JSObject getOnRender() {
         return generalOnRender;
     }
@@ -572,6 +592,9 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     @ScriptFunction
     public void setOnRender(JSObject aValue) {
         generalOnRender = aValue;
+        if (rowsModel != null) {
+            rowsModel.setGeneralOnRender(aValue);
+        }
     }
 
     @ScriptFunction
@@ -683,19 +706,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     @ScriptFunction
-    @Override
-    public boolean isEnabled() {
-        return super.isEnabled();
-    }
-
-    @ScriptFunction
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        applyEnabled();
-    }
-
-    @ScriptFunction
     public void setEditable(boolean aValue) {
         editable = aValue;
         applyEditable();
@@ -781,12 +791,20 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         return selectedRows;
     }
 
+    @ScriptFunction
+    @Override
+    public JPopupMenu getComponentPopupMenu() {
+        return super.getComponentPopupMenu();
+    }
+
+    @ScriptFunction
     @Override
     public void setComponentPopupMenu(JPopupMenu aPopup) {
         super.setComponentPopupMenu(aPopup);
         applyComponentPopupMenu();
     }
 
+    @ScriptFunction
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
@@ -811,6 +829,33 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
+    @Override
+    public JComponent getNextFocusableComponent() {
+        return (JComponent) super.getNextFocusableComponent();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setNextFocusableComponent(JComponent aValue) {
+        super.setNextFocusableComponent(aValue);
+    }
+
+    protected String errorMessage;
+
+    @ScriptFunction(jsDoc = ERROR_JSDOC)
+    @Override
+    public String getError() {
+        return errorMessage;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setError(String aValue) {
+        errorMessage = aValue;
+    }
+
+    @ScriptFunction
     @Override
     public Color getBackground() {
         if (style != null) {
@@ -820,6 +865,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     @Override
     public void setForeground(Color fg) {
         super.setForeground(fg);
@@ -844,6 +890,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     @Override
     public Color getForeground() {
         if (style != null) {
@@ -853,6 +900,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     @Override
     public void setFont(Font font) {
         super.setFont(font);
@@ -877,6 +925,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     @Override
     public Font getFont() {
         if (style != null) {
@@ -886,6 +935,110 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction(jsDoc = LEFT_JSDOC)
+    @Override
+    public int getLeft() {
+        return super.getLocation().x;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setLeft(int aValue) {
+        if (super.getParent() != null && super.getParent().getLayout() instanceof MarginLayout) {
+            MarginLayout.ajustLeft(this, aValue);
+        }
+        super.setLocation(aValue, getTop());
+    }
+
+    @ScriptFunction(jsDoc = TOP_JSDOC)
+    @Override
+    public int getTop() {
+        return super.getLocation().y;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setTop(int aValue) {
+        if (super.getParent() != null && super.getParent().getLayout() instanceof MarginLayout) {
+            MarginLayout.ajustTop(this, aValue);
+        }
+        super.setLocation(getLeft(), aValue);
+    }
+
+    @ScriptFunction(jsDoc = WIDTH_JSDOC)
+    @Override
+    public int getWidth() {
+        return super.getWidth();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setWidth(int aValue) {
+        Widget.setWidth(this, aValue);
+    }
+
+    @ScriptFunction(jsDoc = HEIGHT_JSDOC)
+    @Override
+    public int getHeight() {
+        return super.getHeight();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setHeight(int aValue) {
+        Widget.setHeight(this, aValue);
+    }
+
+    @ScriptFunction(jsDoc = FOCUS_JSDOC)
+    @Override
+    public void focus() {
+        super.requestFocus();
+    }
+
+    @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+    @Override
+    public boolean getVisible() {
+        return super.isVisible();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setVisible(boolean aValue) {
+        super.setVisible(aValue);
+    }
+
+    @ScriptFunction(jsDoc = FOCUSABLE_JSDOC)
+    @Override
+    public boolean getFocusable() {
+        return super.isFocusable();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setFocusable(boolean aValue) {
+        super.setFocusable(aValue);
+    }
+
+    @ScriptFunction(jsDoc = ENABLED_JSDOC)
+    @Override
+    public boolean getEnabled() {
+        return super.isEnabled();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        applyEnabled();
+    }
+
+    @ScriptFunction
+    @Override
+    public String getToolTipText() {
+        return super.getToolTipText();
+    }
+
+    @ScriptFunction
     @Override
     public void setToolTipText(String aValue) {
         if (aValue != null && aValue.isEmpty()) {
@@ -895,11 +1048,25 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         applyToolTipText();
     }
 
+    @ScriptFunction(jsDoc = OPAQUE_TEXT_JSDOC)
+    @Override
+    public boolean getOpaque() {
+        return super.isOpaque();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOpaque(boolean aValue) {
+        super.setOpaque(aValue);
+    }
+
+    @ScriptFunction
     @Designable(category = "appearance")
     public int getFrozenColumns() {
         return frozenColumns;
     }
 
+    @ScriptFunction
     public void setFrozenColumns(int aValue) {
         if (frozenColumns != aValue) {
             frozenColumns = aValue;
@@ -908,11 +1075,13 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     @Designable(category = "appearance")
     public int getFrozenRows() {
         return frozenRows;
     }
 
+    @ScriptFunction
     public void setFrozenRows(int aValue) {
         if (frozenRows != aValue) {
             frozenRows = aValue;
@@ -1012,17 +1181,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      unaryLinkField = aValue;
      }
      */
-    @Undesignable
-    public JSObject getGeneralOnRender() {
-        return generalOnRender;
-    }
-
-    public void setGeneralOnRender(JSObject aValue) {
-        generalOnRender = aValue;
-        if (rowsModel != null) {
-            rowsModel.setGeneralOnRender(aValue);
-        }
-    }
 
     public void insertRow() {
         /*
@@ -1162,14 +1320,17 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     public void addColumn(ModelColumn aColumn) {
         addColumn(columnModel.getColumnCount(), aColumn);
     }
 
+    @ScriptFunction
     public void removeColumn(int aIndex) {
-        removeColumn((ModelColumn)columnModel.getColumn(aIndex));
+        removeColumn((ModelColumn) columnModel.getColumn(aIndex));
     }
 
+    @ScriptFunction
     public void addColumn(int aIndex, ModelColumn aColumn) {
         columnModel.addColumn(aColumn);
         columnModel.moveColumn(columnModel.getColumnCount() - 1, aIndex);
@@ -1179,6 +1340,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         applyHeader();
     }
 
+    @ScriptFunction
     public void removeColumn(ModelColumn aColumn) {
         columnModel.removeColumn(aColumn);
         // edit header...
@@ -1243,6 +1405,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
     @Override
     public boolean try2StopAnyEditing() {
         boolean res = true;
@@ -1261,6 +1424,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         return res;
     }
 
+    @ScriptFunction
     @Override
     public boolean try2CancelAnyEditing() {
         if (tlTable.getCellEditor() != null) {
@@ -2064,14 +2228,14 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      }
      */
 
-    protected class DbGridFindSomethingAction extends AbstractAction {
+    protected class ModelGridFindSomethingAction extends AbstractAction {
 
         protected JFrame findFrame;
 
-        DbGridFindSomethingAction() {
+        ModelGridFindSomethingAction() {
             super();
-            putValue(Action.NAME, Forms.getLocalizedString(DbGridFindSomethingAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(DbGridFindSomethingAction.class.getSimpleName()));
+            putValue(Action.NAME, Forms.getLocalizedString(ModelGridFindSomethingAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(ModelGridFindSomethingAction.class.getSimpleName()));
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK));
             setEnabled(true);
         }
@@ -2104,7 +2268,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         Action deleteAction = null;
         Action insertAction = null;
         Action insertChildAction = null;
-        findSomethingAction = new DbGridFindSomethingAction();
+        findSomethingAction = new ModelGridFindSomethingAction();
         putAction(findSomethingAction);
         /*
          deleteAction = new DbGridDeleteSelectedAction();
@@ -2142,7 +2306,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    protected void checkDbGridActions() {
+    protected void checkModelGridActions() {
         ActionMap actionMap = getActionMap();
         if (actionMap != null) {
             for (Object lkey : actionMap.keys()) {
@@ -2156,5 +2320,305 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     public CascadedStyle getStyle() {
         return style;
+    }
+    
+    // Native API
+    @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
+    @Override
+    public JComponent getComponent() {
+        return this;
+    }
+
+    @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
+    @Override
+    public Object getElement() {
+        return null;
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(JSObject aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
+    protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
+
+    @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseClicked() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseClicked);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseClicked(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseClicked, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseDragged() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseDragged);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseDragged(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseDragged, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseEntered() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseEntered);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseEntered(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseEntered, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseExited() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseExited);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseExited(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseExited, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseMoved() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseMoved);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseMoved(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseMoved, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMousePressed() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mousePressed);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMousePressed(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mousePressed, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseReleased() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseReleased);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseReleased(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseReleased, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.MouseEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnMouseWheelMoved() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseWheelMoved);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnMouseWheelMoved(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.ActionEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnActionPerformed() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.actionPerformed);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnActionPerformed(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.actionPerformed, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.ComponentEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnComponentHidden() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentHidden);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentHidden(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentHidden, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.ComponentEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnComponentMoved() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentMoved);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentMoved(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentMoved, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.ComponentEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnComponentResized() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentResized);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentResized(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentResized, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
+    @EventMethod(eventClass = com.eas.client.forms.events.ComponentEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnComponentShown() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.componentShown);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnComponentShown(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.componentShown, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
+    @EventMethod(eventClass = FocusEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnFocusGained() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.focusGained);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnFocusGained(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.focusGained, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
+    @EventMethod(eventClass = FocusEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnFocusLost() {
+        return eventsProxy != null ? eventsProxy.getHandlers().get(ControlEventsIProxy.focusLost) : null;
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnFocusLost(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.focusLost, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnKeyPressed() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.keyPressed);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnKeyPressed(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.keyPressed, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnKeyReleased() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.keyReleased);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnKeyReleased(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.keyReleased, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnKeyTyped() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.keyTyped);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnKeyTyped(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
+    }
+    
+    // published parent
+    @Override
+    public Widget getParentWidget() {
+        return Forms.lookupPublishedParent(this);
     }
 }

@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.HasJsName;
@@ -109,7 +110,6 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
-    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -390,6 +390,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseClicked() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseClicked);
@@ -403,6 +404,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseDragged() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseDragged);
@@ -416,6 +418,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseEntered() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseEntered);
@@ -429,6 +432,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseExited() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseExited);
@@ -442,6 +446,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseMoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseMoved);
@@ -455,6 +460,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMousePressed() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mousePressed);
@@ -468,6 +474,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseReleased() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseReleased);
@@ -481,6 +488,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseWheelMoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseWheelMoved);
@@ -494,6 +502,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
     @EventMethod(eventClass = ActionEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnActionPerformed() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.actionPerformed);
@@ -507,6 +516,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentHidden() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentHidden);
@@ -520,6 +530,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentMoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentMoved);
@@ -533,6 +544,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentResized() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentResized);
@@ -546,6 +558,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentShown() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentShown);
@@ -559,6 +572,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnFocusGained() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.focusGained);
@@ -572,6 +586,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnFocusLost() {
         return eventsProxy != null ? eventsProxy.getHandlers().get(ControlEventsIProxy.focusLost) : null;
@@ -585,6 +600,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnKeyPressed() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.keyPressed);
@@ -598,6 +614,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnKeyReleased() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.keyReleased);
@@ -611,6 +628,7 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnKeyTyped() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.keyTyped);
@@ -620,5 +638,11 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
     @Override
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
+    }
+    
+    // published parent
+    @Override
+    public Widget getParentWidget() {
+        return Forms.lookupPublishedParent(this);
     }
 }

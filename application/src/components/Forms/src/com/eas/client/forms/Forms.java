@@ -66,7 +66,7 @@ public class Forms {
         }
     }
     
-    public Widget lookupPublishedParent(JComponent aWidget){
+    public static Widget lookupPublishedParent(JComponent aWidget){
         java.awt.Component cur = aWidget.getParent();
         while(cur != null && !(cur instanceof HasPublished)){
             cur = cur.getParent();

@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
@@ -128,7 +129,6 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
-    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -441,7 +441,6 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
     }
 
     @ScriptFunction
-    @Undesignable
     @Override
     public void setOnMouseDragged(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.mouseDragged, aValue);
@@ -669,5 +668,11 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
     @Override
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
+    }
+    
+    // published parent
+    @Override
+    public Widget getParentWidget() {
+        return Forms.lookupPublishedParent(this);
     }
 }
