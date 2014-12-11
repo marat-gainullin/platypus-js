@@ -13,6 +13,7 @@ import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.components.rt.VProgressBar;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -110,6 +111,7 @@ public class ProgressBar extends VProgressBar implements HasPublished, HasCompon
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -272,12 +274,14 @@ public class ProgressBar extends VProgressBar implements HasPublished, HasCompon
 
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
     @Override
     public JComponent getComponent() {
         return this;
     }
 
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
     @Override
     public Object getElement() {
         return null;
@@ -317,6 +321,7 @@ public class ProgressBar extends VProgressBar implements HasPublished, HasCompon
             + "/**\n"
             + " * The current value of the progress bar.\n"
             + " */")
+    @Undesignable
     @Override
     public int getValue() {
         return super.getValue();

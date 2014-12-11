@@ -306,19 +306,14 @@ public class RadioMenuItem extends VRadioButtonMenuItem implements HasPublished,
         return null;
     }
 
-    private static final String PARENT_JSDOC = ""
-            + "/**\n"
-            + "* The parent container.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = PARENT_JSDOC)
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
-    public java.awt.Container getParent() {
+    public Widget getParentWidget() {
         java.awt.Container parent = super.getParent();
         if (parent instanceof JPopupMenu && ((JPopupMenu) parent).getInvoker() instanceof JMenu) {
             parent = (java.awt.Container) ((JPopupMenu) parent).getInvoker();
         }
-        return parent instanceof HasChildren ? parent : null;
+        return parent instanceof HasChildren ? (Widget) parent : null;
     }
 
     private static final String TEXT_JSDOC = ""

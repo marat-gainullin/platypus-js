@@ -13,6 +13,7 @@ import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.components.rt.VCheckBox;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -61,6 +62,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
     }
 
     @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @Undesignable
     @Override
     public Boolean getValue() {
         return super.getValue();
@@ -128,6 +130,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -290,12 +293,14 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
     @Override
     public JComponent getComponent() {
         return this;
     }
 
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
     @Override
     public Object getElement() {
         return null;
@@ -365,6 +370,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseClicked() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseClicked);
@@ -378,6 +384,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseDragged() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseDragged);
@@ -391,6 +398,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseEntered() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseEntered);
@@ -404,6 +412,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseExited() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseExited);
@@ -417,6 +426,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseMoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseMoved);
@@ -430,6 +440,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMousePressed() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mousePressed);
@@ -443,6 +454,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseReleased() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseReleased);
@@ -456,6 +468,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnMouseWheelMoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseWheelMoved);
@@ -469,6 +482,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
     @EventMethod(eventClass = ActionEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnActionPerformed() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.actionPerformed);
@@ -482,6 +496,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentHidden() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentHidden);
@@ -495,6 +510,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentMoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentMoved);
@@ -508,6 +524,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentResized() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentResized);
@@ -521,6 +538,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentShown() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentShown);
@@ -534,6 +552,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnFocusGained() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.focusGained);
@@ -547,6 +566,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnFocusLost() {
         return eventsProxy != null ? eventsProxy.getHandlers().get(ControlEventsIProxy.focusLost) : null;
@@ -560,6 +580,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnKeyPressed() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.keyPressed);
@@ -573,6 +594,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnKeyReleased() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.keyReleased);
@@ -586,6 +608,7 @@ public class CheckBox extends VCheckBox implements HasPublished, HasComponentEve
 
     @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnKeyTyped() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.keyTyped);

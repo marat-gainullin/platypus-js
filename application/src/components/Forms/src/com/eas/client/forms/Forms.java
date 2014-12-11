@@ -12,7 +12,9 @@ import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.script.HasPublished;
 import java.util.ResourceBundle;
+import javax.swing.JComponent;
 
 /**
  *
@@ -62,5 +64,13 @@ public class Forms {
             default:
                 return new ModelTextArea();
         }
+    }
+    
+    public Widget lookupPublishedParent(JComponent aWidget){
+        java.awt.Component cur = aWidget.getParent();
+        while(cur != null && !(cur instanceof HasPublished)){
+            cur = cur.getParent();
+        }
+        return (Widget)cur;
     }
 }

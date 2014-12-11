@@ -17,6 +17,7 @@ import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.client.forms.layouts.Margin;
 import com.eas.client.forms.layouts.MarginConstraints;
+import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -272,12 +273,14 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
 
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
     @Override
     public JComponent getComponent() {
         return this;
     }
 
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
     @Override
     public Object getElement() {
         return null;
@@ -350,6 +353,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
     }
 
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
+    @Undesignable
     @Override
     public JComponent[] getChildren() {
         List<JComponent> ch = new ArrayList<>();
@@ -376,6 +380,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
     }
 
     @ScriptFunction(jsDoc = COUNT_JSDOC)
+    @Undesignable
     @Override
     public int getCount() {
         return super.getComponentCount();

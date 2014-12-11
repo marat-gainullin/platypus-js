@@ -20,7 +20,6 @@ import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.ContainerAdapter;
@@ -285,19 +284,14 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
         return null;
     }
 
-    private static final String PARENT_JSDOC = ""
-            + "/**\n"
-            + "* The parent container.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = PARENT_JSDOC)
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
-    public Container getParent() {
-        Container parent = super.getParent();
+    public Widget getParentWidget() {
+        java.awt.Container parent = super.getParent();
         if (parent instanceof JPopupMenu && ((JPopupMenu) parent).getInvoker() instanceof JMenu) {
-            parent = (Container) ((JPopupMenu) parent).getInvoker();
+            parent = (java.awt.Container) ((JPopupMenu) parent).getInvoker();
         }
-        return parent instanceof HasChildren ? parent : null;
+        return parent instanceof HasChildren ? (Widget) parent : null;
     }
 
     private static final String TEXT_JSDOC = ""

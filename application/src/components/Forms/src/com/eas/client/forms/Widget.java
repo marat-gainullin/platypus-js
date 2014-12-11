@@ -60,6 +60,12 @@ public interface Widget {
         aTarget.setSize(aTarget.getWidth(), aValue);
     }
     
+    public static final String PARENT_JSDOC = ""
+            + "/**\n"
+            + "* Parent container of this widget.\n"
+            + "*/";
+    public Widget getParentWidget();
+    
     public static final String LEFT_JSDOC = ""
             + "/**\n"
             + "* Horizontal coordinate of the component.\n"

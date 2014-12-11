@@ -50,6 +50,12 @@ public class PopupMenu extends JPopupMenu implements HasPublished, HasContainerE
         super();
         super.addContainerListener(invalidatorListener);
     }
+
+    @Override
+    public Widget getParentWidget() {
+        return null;
+    }
+
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override
     public String getName() {
@@ -274,7 +280,7 @@ public class PopupMenu extends JPopupMenu implements HasPublished, HasContainerE
     public Object getElement() {
         return null;
     }
-    
+
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Adds the item to the menu.\n"

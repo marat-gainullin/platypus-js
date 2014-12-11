@@ -12,6 +12,7 @@ import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.design.Undesignable;
 import com.eas.gui.JDropDownButton;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -127,6 +128,7 @@ public class DropDownButton extends JDropDownButton implements HasPublished, Has
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -289,12 +291,14 @@ public class DropDownButton extends JDropDownButton implements HasPublished, Has
 
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
     @Override
     public JComponent getComponent() {
         return this;
     }
 
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
     @Override
     public Object getElement() {
         return null;

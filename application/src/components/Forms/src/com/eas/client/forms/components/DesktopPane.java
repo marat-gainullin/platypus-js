@@ -10,6 +10,7 @@ import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -104,6 +105,7 @@ public class DesktopPane extends JDesktopPane implements HasPublished, HasCompon
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
+    @Undesignable
     @Override
     public boolean getVisible() {
         return super.isVisible();
@@ -266,12 +268,14 @@ public class DesktopPane extends JDesktopPane implements HasPublished, HasCompon
 
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
+    @Undesignable
     @Override
     public JComponent getComponent() {
         return this;
     }
 
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
+    @Undesignable
     @Override
     public Object getElement() {
         return null;
@@ -343,6 +347,7 @@ public class DesktopPane extends JDesktopPane implements HasPublished, HasCompon
             + "*/";
 
     @ScriptFunction(jsDoc = FORMS_JSDOC)
+    @Undesignable
     public Form[] getForms() {
         List<Form> forms = new ArrayList<>();
         for (JInternalFrame f : getAllFrames()) {
