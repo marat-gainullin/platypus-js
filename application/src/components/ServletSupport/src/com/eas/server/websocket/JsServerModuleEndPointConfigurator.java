@@ -13,11 +13,11 @@ import javax.websocket.server.ServerEndpointConfig;
  *
  * @author mg
  */
-public class JsModuleEndPointConfigurator extends ServerEndpointConfig.Configurator {
+public class JsServerModuleEndPointConfigurator extends ServerEndpointConfig.Configurator {
 
     public static final String HANDSHAKE_REQUEST = "handshake-request";
     
-    public JsModuleEndPointConfigurator() {
+    public JsServerModuleEndPointConfigurator() {
         super();
     }
 
@@ -26,4 +26,5 @@ public class JsModuleEndPointConfigurator extends ServerEndpointConfig.Configura
         sec.getUserProperties().put(HANDSHAKE_REQUEST, request);
         super.modifyHandshake(sec, request, response);      
     }
+    
 }

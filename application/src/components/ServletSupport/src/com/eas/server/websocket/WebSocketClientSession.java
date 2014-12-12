@@ -10,6 +10,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
 import java.net.URI;
 import javax.websocket.CloseReason;
@@ -21,29 +22,32 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class WebSocket implements HasPublished {
+@ScriptObj(name = "WebSocket")
+public class WebSocketClientSession implements HasPublished {
 
     protected JSObject published;
     protected Session webSocketSession;
-    protected Object lock;
-    protected Object request;
-    protected Object reqponse;
-    protected Object platypusSession;
-    protected PlatypusPrincipal principal;
+    protected final Object lock;
+    protected final Object request;
+    protected final Object reqponse;
+    protected final Object platypusSession;
+    protected final PlatypusPrincipal principal;
     //
     protected JsClientEndPoint endPoint = new JsClientEndPoint(this);
 
-    public WebSocket(String aUri) throws Exception {
+    @ScriptFunction(params = {"uri"})
+    public WebSocketClientSession(String aUri) throws Exception {
         super();
-        webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
         lock = ScriptUtils.getLock();
         if (lock == null) {
-            throw new IllegalStateException("Web socket contructor must be called valid context (Platypus Async IO attributes must present).");
+            throw new IllegalStateException("Web socket contructor must be called in valid context (Platypus Async IO attributes must present).");
         }
         request = ScriptUtils.getRequest();
         reqponse = ScriptUtils.getResponse();
         platypusSession = ScriptUtils.getSession();
         principal = PlatypusPrincipal.getInstance();
+        
+        webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
     }
 
     public void inContext(Runnable anActor) {
@@ -56,7 +60,9 @@ public class WebSocket implements HasPublished {
         ScriptUtils.setSession(platypusSession);
         PlatypusPrincipal.setInstance(principal);
         try {
-            anActor.run();
+            synchronized (lock) {
+                anActor.run();
+            }
         } finally {
             ScriptUtils.setLock(null);
             ScriptUtils.setRequest(null);

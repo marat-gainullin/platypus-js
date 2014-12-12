@@ -100,9 +100,19 @@ public class Classes2Scripts {
             + " * Contains the basic dependencies loading.\n"//NOI18N
             + " */\n";//NOI18N
 
+    private String checkScriptObject(Class clazz, String name) {
+        ScriptObj ann = (ScriptObj) clazz.getAnnotation(ScriptObj.class);
+        if (ann != null && ann.name() != null && !ann.name().isEmpty()) {
+            return ann.name();
+        } else {
+            return name;
+        }
+    }
+
     protected static class MethodedPropBox extends PropertiesUtils.PropBox {
 
         public Method method;
+        public String apiName;
         public boolean invalidatable;
 
         public MethodedPropBox() {
@@ -272,12 +282,17 @@ public class Classes2Scripts {
         Map<String, MethodedPropBox> props = new HashMap<>();
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(ScriptFunction.class)) {
+                ScriptFunction propAnn = method.getAnnotation(ScriptFunction.class);
                 if (PropertiesUtils.isBeanPatternMethod(method)) {
                     String propName = PropertiesUtils.getPropertyName(method.getName());
                     MethodedPropBox pb = props.get(propName);
                     if (pb == null) {
                         pb = new MethodedPropBox();
                         pb.name = propName;
+                        if(propAnn.name() != null && !propAnn.name().isEmpty())
+                            pb.apiName = propAnn.name();
+                        else
+                            pb.apiName = propName;
                         pb.method = method;
                         pb.invalidatable = invalidatable;
                         props.put(pb.name, pb);
@@ -285,7 +300,7 @@ public class Classes2Scripts {
                     PropertiesUtils.setPropertyAccessStatus(pb, method.getName());
                     PropertiesUtils.setPropertyReturnType(pb, method);
                     if (pb.jsDoc == null || pb.jsDoc.isEmpty()) {
-                        pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
+                        pb.jsDoc = propAnn.jsDoc();
                     }
                 } else {
                     methods.add(method);
@@ -297,14 +312,14 @@ public class Classes2Scripts {
         String js = CONSTRUCTOR_TEMPLATE
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
-                .replace(NAME_TAG, ci.name)
+                .replace(NAME_TAG, checkScriptObject(clazz, ci.name))
                 .replace(NULL_PARAMS_TAG, ci.getNullParamsStr())
                 .replace(PARAMS_TAG, ci.getParamsStr())
                 .replace(DELEGATE_TAG, DELEGATE_OBJECT)
                 .replace(UNWRAPPED_PARAMS_TAG, ci.getUnwrappedParamsStr(3))
                 .replace(MAX_ARGS_TAG, Integer.toString(ci.params.length))
-                .replace(PROPERTIES_TAG, getPropsPart(ci, props.values(), CONSTRUCTOR_IDENT_LEVEL + 1))
-                .replace(METHODS_TAG, getMethodsPart(ci, methods, CONSTRUCTOR_IDENT_LEVEL));
+                .replace(PROPERTIES_TAG, getPropsPart(clazz, ci, props.values(), CONSTRUCTOR_IDENT_LEVEL + 1))
+                .replace(METHODS_TAG, getMethodsPart(clazz, ci, methods, CONSTRUCTOR_IDENT_LEVEL));
         if (HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz)) {
             js = js.replace(BODY_TAG, INVALIDATOR_PART);
         } else {
@@ -410,7 +425,7 @@ public class Classes2Scripts {
                 }
             }
         } catch (Exception ex) {
-            //NO-OP
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
         return null;
     }
@@ -443,7 +458,7 @@ public class Classes2Scripts {
         StringBuilder sb = new StringBuilder();
         int i = ident;
         sb.append(getIndentStr(i));
-        sb.append("Object.defineProperty(").append("this, \"").append(property.name).append("\", {\n");
+        sb.append("Object.defineProperty(").append("this, \"").append(property.apiName).append("\", {\n");
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
@@ -476,7 +491,7 @@ public class Classes2Scripts {
         sb.append("});\n");
         sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
         sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
-        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(property.name).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
+        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(property.apiName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
         sb.append(getIndentStr(--i)).append("}");
         return sb.toString();
     }
@@ -597,23 +612,23 @@ public class Classes2Scripts {
         return sb.toString();
     }
 
-    private String getPropsPart(FunctionInfo ci, Collection<MethodedPropBox> props, int ident) {
+    private String getPropsPart(Class clazz, FunctionInfo ci, Collection<MethodedPropBox> props, int ident) {
         StringBuilder sb = new StringBuilder();
         for (MethodedPropBox property : props) {
-            sb.append(getPropertyPart(ci.name, property, ident));
+            sb.append(getPropertyPart(checkScriptObject(clazz, ci.name), property, ident));
             sb.append("\n");//NOI18N
         }
         return sb.toString();
     }
 
-    private String getMethodsPart(FunctionInfo ci, Collection<Method> methods, int ident) {
+    private String getMethodsPart(Class clazz, FunctionInfo ci, Collection<Method> methods, int ident) {
         StringBuilder sb = new StringBuilder();
         Set<String> generatedMethods = new HashSet<>();
         for (Method method : methods) {
             if (generatedMethods.contains(method.getName())) {
                 throw new IllegalStateException("API Method \"" + method + "\" is duplicated.");
             }
-            sb.append(getMethodPart(ci.name, method, ident));
+            sb.append(getMethodPart(checkScriptObject(clazz, ci.name), method, ident));
             sb.append("\n");//NOI18N
             generatedMethods.add(method.getName());
         }
