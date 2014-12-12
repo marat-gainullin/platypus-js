@@ -210,11 +210,12 @@ public class AppClient {
 							if (aProgresssCallback != null) {
 								Utils.executeScriptEventVoid(aProgresssCallback, aProgresssCallback, aResult);
 							}
-							if (aResult.isComplete()) {
-								completed = true;
-								if (aCompleteCallback != null) {
-									Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, Utils.toJs("uploaded"));
-								}
+							
+								if (aResult.isComplete() && aResult.getRequest() != null ) {
+									completed = true;
+									if (aCompleteCallback != null) {
+										Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, aResult.getRequest().getResponseText());
+									}
 							}
 						}
 					} catch (Exception ex) {
@@ -255,7 +256,7 @@ public class AppClient {
 			public void onLoadEnd(XMLHttpRequest xhr) {
 				try {
 					if (aCallback != null)
-						aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize()));
+						aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize(), null));
 				} catch (Exception ex) {
 					Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -313,7 +314,7 @@ public class AppClient {
 					if (xhr.getStatus() == Response.SC_OK) {
 						try {
 							if (aCallback != null)
-								aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize()));
+								aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize(), xhr));
 						} catch (Exception ex) {
 							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
 						}
