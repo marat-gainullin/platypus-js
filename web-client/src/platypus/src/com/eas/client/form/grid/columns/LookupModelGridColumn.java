@@ -1,16 +1,12 @@
 package com.eas.client.form.grid.columns;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.eas.client.converters.RowRowValueConverter;
+import com.bearsoft.rowset.events.RowsetEvent;
+import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.CrossUpdater;
-import com.eas.client.form.combo.ValueLookup;
 import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.PlatypusLookupEditorCell;
 import com.eas.client.form.published.PublishedCell;
@@ -19,15 +15,12 @@ import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.bearsoft.rowset.events.RowsetEvent;
-import com.google.gwt.core.client.Callback;
 
-public class LookupModelGridColumn extends ModelGridColumn<Row> {
-
-	protected ValueLookup lookup;
+public class LookupModelGridColumn extends ModelGridColumn<Object> {
 
 	protected ModelElementRef lookupValueRef;
 	protected ModelElementRef displayValueRef;
@@ -47,20 +40,23 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	});
 
 	public LookupModelGridColumn(String aName) {
-		super(new TreeExpandableCell<Row, Row>(new PlatypusLookupEditorCell()), aName, null, null, new RowRowValueConverter());
+		super(new TreeExpandableCell<Row, Object>(new PlatypusLookupEditorCell()), aName, null, null, new ObjectRowValueConverter());
 		setEditor(new ModelCombo());
-		((ModelCombo) getEditor()).setForceRedraw(true);
-		((PlatypusLookupEditorCell) getTargetCell()).setRenderer(new CellRenderer<Row>() {
+		final ModelCombo editor = (ModelCombo) getEditor();
+		editor.setForceRedraw(true);
+		editor.setList(list);
+		((PlatypusLookupEditorCell) getTargetCell()).setRenderer(new CellRenderer<Object>() {
 
 			@Override
-			public boolean render(Context context, String aId, Row value, SafeHtmlBuilder sb) {
+			public boolean render(Context context, String aId, Object value, SafeHtmlBuilder sb) {
 				LookupModelGridColumn column = LookupModelGridColumn.this;
 				JavaScriptObject onRender = column.getOnRender() != null ? column.getOnRender() : column.getGrid().getOnRender();
 				if (onRender != null) {
 					try {
 						PublishedStyle styleToRender = null;
 						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
-						String toRender = value != null ? ((ModelCombo) getEditor()).getConverter().convert(value.getColumnObject(displayValueRef.getColIndex())) : ""; 
+						Row valueRow = editor.getLookup().lookupRow(value);
+						String toRender = valueRow != null ? ((ModelCombo) getEditor()).getConverter().convert(valueRow.getColumnObject(displayValueRef.getColIndex())) : "";
 						PublishedCell cellToRender = calcContextPublishedCell(column.getPublished(), onRender, context, column.getColumnModelRef(), toRender, rowsEntity);
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();
@@ -93,7 +89,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	}
 
 	@Override
-	public void setEditor(PublishedDecoratorBox<Row> aEditor) {
+	public void setEditor(PublishedDecoratorBox<Object> aEditor) {
 		super.setEditor(aEditor);
 		((PlatypusLookupEditorCell) getTargetCell()).setEditor(aEditor);
 	}
@@ -139,82 +135,10 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 		}
 	}
 
-	protected void init() {
-		if (lookup == null)
-			lookup = new ValueLookup(lookupValueRef);
-	}
-
-	public ValueLookup getLookup() {
-		init();
-		return lookup;
-	}
-
-	public boolean tryInit() {
-		if (columnModelRef.entity.getRowset() != null && lookupValueRef.entity.getRowset() != null && displayValueRef.entity.getRowset() != null) {
-			ValueLookup lookup = getLookup();
-			return lookup != null && lookup.tryInit();
-		}
-		return false;
-	}
-
-	public boolean isChanged(Row aRow) {
-		init();
-		if (aRow != null && columnModelRef.getColIndex() > 0)
-			try {
-				if (rowsEntity == columnModelRef.entity) {
-					return aRow.isColumnUpdated(columnModelRef.getColIndex());
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						Row lRow = columnModelRef.entity.getRowset().getCurrentRow();
-						return lRow.isColumnUpdated(columnModelRef.getColIndex());
-					}
-				}
-			} catch (Exception e) {
-				Logger.getLogger(LookupModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
-			}
-		return false;
-	}
-
 	@Override
-	public Row getValue(Row aRow) {
-		init();
-		if (aRow != null && columnModelRef.getColIndex() > 0)
-			try {
-				if (rowsEntity == columnModelRef.entity) {
-					Object lookupKeyValue = aRow != null ? aRow.getColumnObject(columnModelRef.getColIndex()) : null;
-					return lookup.lookupRow(lookupKeyValue);
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						Rowset columnRowset = columnModelRef.entity.getRowset();
-						Row colRowsetRow = columnRowset.getCurrentRow();
-						Object lookupKeyValue = colRowsetRow != null ? colRowsetRow.getColumnObject(columnModelRef.getColIndex()) : null;
-						return lookup.lookupRow(lookupKeyValue);
-					}
-				}
-			} catch (Exception e) {
-				Logger.getLogger(LookupModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
-			}
-		return null;
-	}
-
-	@Override
-	public void update(int aIndex, Row aRow, Row value) {
-		init();
-		if (aRow != null && columnModelRef.getColIndex() > 0) {
-			try {
-				if (rowsEntity == columnModelRef.entity) {
-					Object lookupKeyValue = value != null ? value.getColumnObject(lookup.getLookupValueRef().getColIndex()) : null;
-					aRow.setColumnObject(columnModelRef.getColIndex(), lookupKeyValue);
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						Object lookupKeyValue = value != null ? columnModelRef.entity.getRowset().getObject(lookup.getLookupValueRef().getColIndex()) : null;
-						columnModelRef.entity.getRowset().updateObject(columnModelRef.getColIndex(), lookupKeyValue);
-					}
-				}
-			} catch (Exception e) {
-				Logger.getLogger(LookupModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
-			}
-		}
+	public void setOnRender(JavaScriptObject aValue) {
+		super.setOnRender(aValue);
+		((ModelCombo) getEditor()).setOnRender(aValue);
 	}
 
 	public String getEmptyText() {

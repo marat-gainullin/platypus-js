@@ -57,7 +57,7 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 		setSelectButtonVisible(false);
 		setClearButtonVisible(true);
 	}
-
+	
 	@Override
 	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
 		return addHandler(handler, ResizeEvent.getType());

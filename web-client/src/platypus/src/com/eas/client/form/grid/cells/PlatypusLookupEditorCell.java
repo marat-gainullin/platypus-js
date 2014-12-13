@@ -8,7 +8,6 @@ package com.eas.client.form.grid.cells;
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
 import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,10 +16,10 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class PlatypusLookupEditorCell extends RenderedEditorCell<Row> {
+public class PlatypusLookupEditorCell extends RenderedEditorCell<Object> {
 
 	public PlatypusLookupEditorCell() {
-		super(new StyledListBox<Row>());
+		super(new StyledListBox<Object>());
 	}
 
 	public PlatypusLookupEditorCell(Widget aEditor) {
@@ -28,12 +27,12 @@ public class PlatypusLookupEditorCell extends RenderedEditorCell<Row> {
 	}
 
 	@Override
-	protected void renderCell(Context context, Row valuesRow, SafeHtmlBuilder sb) {
+	protected void renderCell(Context context, Object value, SafeHtmlBuilder sb) {
 		if (getEditor() instanceof ModelCombo) {
 			try {
 				ModelCombo combo = (ModelCombo) getEditor();
 				if (combo.isValidBindings()) {
-					Row displayRow = valuesRow;
+					Row displayRow = combo.getLookup().lookupRow(value);
 					String label = displayRow != null ? combo.getConverter().convert(displayRow.getColumnObject(combo.getDisplayElement().getColIndex())) : "";
 					sb.appendEscaped(label);
 				}
@@ -41,7 +40,7 @@ public class PlatypusLookupEditorCell extends RenderedEditorCell<Row> {
 				sb.appendEscaped(e.getMessage());
 			}
 		} else {
-			sb.appendEscaped(String.valueOf(valuesRow));
+			sb.appendEscaped(String.valueOf(value));
 		}
 	}
 }

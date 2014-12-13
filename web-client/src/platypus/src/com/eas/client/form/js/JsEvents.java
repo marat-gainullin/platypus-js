@@ -428,7 +428,7 @@ public class JsEvents {
 	}-*/;
 	
 	public native static JavaScriptObject publish(ActionEvent aEvent)/*-{
-		return new $wnd.P.ContainerEvent(aEvent, false);
+		return new $wnd.P.ActionEvent(aEvent);
 	}-*/;
 
 }

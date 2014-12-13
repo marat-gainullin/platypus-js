@@ -247,14 +247,17 @@
     background: transparent;
 }
 
-.gwt-ListBox{
-    border: 0 !important;  /*Removes border*/
+.combo-field-custom-dropdown{
     -webkit-appearance: none;  /*Removes default chrome and safari style*/
     -moz-appearance: none; /* Removes Default Firefox style*/
     background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
     background-position: right;  /*Position of the background-image*/
     text-indent: 0.01px; /* Removes default arrow from firefox*/
     text-overflow: "";  /*Removes default arrow from firefox*/
+}
+
+.gwt-ListBox{
+    border: 0 !important;  /*Removes border*/
 }
 
 .gwt-ListBox::-ms-expand {
