@@ -44,7 +44,7 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
 
     @Override
     public int getRowCount() {
-        int rowCount = JSType.toInteger(elements.getMember("length"));
+        int rowCount = elements != null ? JSType.toInteger(elements.getMember("length")) : 0;
         return rowCount > 0 && rowCount != Integer.MAX_VALUE ? rowCount : 0;
     }
 

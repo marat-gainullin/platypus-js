@@ -1,7 +1,9 @@
 package com.bearsoft.gui.grid.header;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HeaderSplitter {
 
@@ -9,6 +11,7 @@ public class HeaderSplitter {
     protected int minLeave;
     protected int maxLeave;
     // processing
+    protected List<GridColumnsGroup> splittedLeaves = new ArrayList<>();
     protected int leaveIndex = -1;
 
     protected HeaderSplitter(int aMinLeave, int aMaxLeave) {
@@ -19,28 +22,52 @@ public class HeaderSplitter {
 
     public static List<GridColumnsGroup> split(List<GridColumnsGroup> toBeSplitted, int aMinLeave, int aMaxLeave) {
         HeaderSplitter splitter = new HeaderSplitter(aMinLeave, aMaxLeave);
-        List<GridColumnsGroup> result = new ArrayList<>();
-        splitter.process(toBeSplitted, result, null);
-        return result;
+        splitter.process(toBeSplitted, null);
+        return splitter.toRoots();
     }
 
-    protected void process(List<GridColumnsGroup> toBeSplitted, List<GridColumnsGroup> result, GridColumnsGroup aClonedParent) {
-        for (int i = 0; i < toBeSplitted.size(); i++) {
-            if (leaveIndex == maxLeave - 1) {
-                break;
+    protected List<GridColumnsGroup> toRoots() {
+        List<GridColumnsGroup> res = new ArrayList<>();
+        Set<GridColumnsGroup> met = new HashSet<>();
+        for (int i = 0; i < splittedLeaves.size(); i++) {
+            GridColumnsGroup leaf = splittedLeaves.get(i);
+            GridColumnsGroup parent = leaf;
+            while (parent.getParent() != null) {
+                parent = parent.getParent();
             }
+            if (!met.contains(parent)) {
+                met.add(parent);
+                res.add(parent);
+            }
+        }
+        return res;
+    }
+
+    protected boolean process(List<GridColumnsGroup> toBeSplitted, GridColumnsGroup aClonedParent) {
+        boolean res = false;
+        for (int i = 0; i < toBeSplitted.size(); i++) {
             GridColumnsGroup n = toBeSplitted.get(i);
             GridColumnsGroup nc = new GridColumnsGroup(n.getTitle());
             nc.setStyle(n.getStyle());
             if (n.getChildren().isEmpty()) {
                 leaveIndex++;
+                if (leaveIndex >= minLeave && leaveIndex <= maxLeave) {
+                    res = true;
+                    splittedLeaves.add(nc);
+                    if (aClonedParent != null) {
+                        aClonedParent.addChild(nc);
+                    }
+                }
             } else {
-                process(n.getChildren(), nc.getChildren(), nc);
-            }
-            if (leaveIndex >= minLeave && leaveIndex < maxLeave) {
-                result.add(nc);
-                nc.setParent(aClonedParent);
+                boolean isGoodLeaveIndex = process(n.getChildren(), nc);
+                if (isGoodLeaveIndex) {
+                    res = true;
+                    if (aClonedParent != null) {
+                        aClonedParent.addChild(nc);
+                    }
+                }
             }
         }
+        return res;
     }
 }

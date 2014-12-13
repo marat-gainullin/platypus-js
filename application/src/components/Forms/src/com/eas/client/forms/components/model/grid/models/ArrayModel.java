@@ -26,15 +26,24 @@ public abstract class ArrayModel {
     protected JSObject generalOnRender;
     protected JSObject elements;
 
-    public ArrayModel(TableColumnModel aColumns, JSObject aElement, JSObject aGeneralOnRender) {
+    public ArrayModel(TableColumnModel aColumns, JSObject aElements, JSObject aGeneralOnRender) {
         super();
         columns = aColumns;
-        elements = aElement;
+        elements = aElements;
         generalOnRender = aGeneralOnRender;
     }
 
     public JSObject getElements() {
         return elements;
+    }
+
+    public void setElements(JSObject aValue) {
+        if (elements != aValue) {
+            // TODO: remove luisteners from old object
+            elements = aValue;
+            // TODO: add listeners to new object
+            fireElementsDataChanged();
+        }
     }
 
     public int getColumnCount() {

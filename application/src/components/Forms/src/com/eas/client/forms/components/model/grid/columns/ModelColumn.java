@@ -77,6 +77,7 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
         super.setCellRenderer(aView);
         editor = aEditor;
         super.setCellEditor(editor);
+        super.setWidth(50);
 
         tempWidth = super.getWidth();
         tempMinWidth = super.getMinWidth();
@@ -246,7 +247,7 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
             super.setWidth(aValue);
             /*
              if (header != null) {
-             List<GridColumnsGroup> leaves = new ArrayList<>();
+             List<ModelColumnsGroup> leaves = new ArrayList<>();
              MultiLevelHeader.achieveLeaves(group, leaves);
              header.setResizingColGroup(group);
              try {

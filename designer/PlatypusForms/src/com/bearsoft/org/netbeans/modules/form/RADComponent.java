@@ -471,12 +471,15 @@ public abstract class RADComponent<C> {
         if (isValid()) {
             for (Map.Entry<String, RADProperty<?>[]> entry : propsByCategories.entrySet()) {
                 final String category = entry.getKey();
-                propSets.add(new Node.PropertySet(category, bundle.getString("CTL_" + category), bundle.getString("CTL_" + category + "Hint")) {
-                    @Override
-                    public FormProperty<?>[] getProperties() {
-                        return propsByCategories.get(category);
-                    }
-                });
+                final RADProperty<?>[] props = propsByCategories.get(category);
+                if (props.length > 0) {
+                    propSets.add(new Node.PropertySet(category, bundle.getString("CTL_" + category), bundle.getString("CTL_" + category + "Hint")) {
+                        @Override
+                        public FormProperty<?>[] getProperties() {
+                            return props;
+                        }
+                    });
+                }
             }
         }
     }

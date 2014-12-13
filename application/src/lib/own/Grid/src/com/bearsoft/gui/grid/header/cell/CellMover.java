@@ -108,8 +108,8 @@ public class CellMover extends MouseAdapter {
                 }
                 int targetTableColumnIndex = calcTargetColumnIndex(columnModel);
                 // Actual work. It will produce events, but we have to disable them
-                header.getColumnModelListener().setEventsEnabled(false);
-                try {
+                //header.getColumnModelListener().setEventsEnabled(false);
+                //try {
                     for (int i = 0; i < movingColumns.size(); i++) {
                         if (movingTableColumnIndex > targetTableColumnIndex) {
                             columnModel.moveColumn(movingTableColumnIndex + i, targetTableColumnIndex + i);
@@ -117,9 +117,9 @@ public class CellMover extends MouseAdapter {
                             columnModel.moveColumn(movingTableColumnIndex, targetTableColumnIndex - 1);
                         }
                     }
-                } finally {
-                    header.getColumnModelListener().setEventsEnabled(true);
-                }
+//                } finally {
+//                    header.getColumnModelListener().setEventsEnabled(true);
+//                }
                 if (selfIndex < targetIndex) {
                     moveColGroup(selfIndex, targetIndex - 1);
                 } else {

@@ -19,7 +19,6 @@ import java.util.List;
  * non-visual component - GridColumnsGroup.
  *
  * @author mg
- * @see RADModelMapLayer
  */
 public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implements ComponentContainer {
 
@@ -35,6 +34,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
         viewControl = new RADColumnView<>();
         viewControl.initialize(aFormModel);
         viewControl.setInstance(new ModelFormattedField());
+        viewControl.setInModel(false);
         return super.initialize(aFormModel);
     }
 
@@ -57,10 +57,10 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
         return null;
     }
 
-    public void fireRawColumnsChanged() {
+    public void resetGridColumnsAndHeader() {
         RADModelGrid grid = lookupGrid();
         if (grid != null) {
-            grid.fireRawColumnsChanged();
+            grid.resetBeanColumnsAndHeader();
         }
     }
 
@@ -76,7 +76,10 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
     protected void setBeanInstance(GridColumnsGroup aBeanInstance) {
         super.setBeanInstance(aBeanInstance);
         if (getBeanInstance() != null) {
+            if(getBeanInstance().getTableColumn() == null)
+                getBeanInstance().setTableColumn(new ModelColumn());
             ((ModelColumn)getBeanInstance().getTableColumn()).setName(getName());
+            ((ModelColumn)getBeanInstance().getTableColumn()).setTitle(getName());
         }
     }
 
@@ -98,7 +101,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
                 radColumn.getBeanInstance().setParent(getBeanInstance());
             }
         }
-        fireRawColumnsChanged();
+        resetGridColumnsAndHeader();
     }
 
     @Override
@@ -113,7 +116,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
         for (int i = 0; i < getBeanInstance().getChildren().size(); i++) {
             getBeanInstance().getChildren().set(perm[i], oldRawColumns[i]);
         }
-        fireRawColumnsChanged();
+        resetGridColumnsAndHeader();
     }
 
     @Override
@@ -126,7 +129,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
                 getBeanInstance().getChildren().add(radColumn.getBeanInstance());
                 radColumn.getBeanInstance().setParent(getBeanInstance());
             }
-            fireRawColumnsChanged();
+            resetGridColumnsAndHeader();
         }
     }
 
@@ -137,7 +140,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
             columns.remove(radColumn);
             getBeanInstance().getChildren().remove(radColumn.getBeanInstance());
             radColumn.getBeanInstance().setParent(null);
-            fireRawColumnsChanged();
+            resetGridColumnsAndHeader();
         }
     }
 

@@ -5,6 +5,7 @@
 package com.bearsoft.gui.grid.header;
 
 import com.eas.gui.CascadedStyle;
+import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -346,6 +347,7 @@ public class GridColumnsGroup {
         return colg;
     }
 
+    @ScriptFunction
     public int getWidth() {
         if (tableColumn != null) {
             return tableColumn.getWidth();
@@ -358,6 +360,7 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
     public int getPreferredWidth() {
         if (tableColumn != null) {
             return tableColumn.getPreferredWidth();
@@ -370,12 +373,14 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
     public void setWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setWidth(aValue);
         }
     }
 
+    @ScriptFunction
     public int getMinWidth() {
         if (tableColumn != null) {
             return tableColumn.getMinWidth();
@@ -384,6 +389,7 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
     public void setMinWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setMinWidth(aValue);
@@ -392,6 +398,7 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
     public int getMaxWidth() {
         if (tableColumn != null) {
             return tableColumn.getMaxWidth();
@@ -400,6 +407,7 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
     public void setMaxWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setMaxWidth(aValue);
@@ -453,54 +461,67 @@ public class GridColumnsGroup {
         readonly = aValue;
     }
 
+    @ScriptFunction
     public boolean isEditable() {
         return !readonly;
     }
 
+    @ScriptFunction
     public void setEditable(boolean aValue) {
         readonly = !aValue;
     }
 
+    @ScriptFunction
     public boolean isEnabled() {
         return enabled;
     }
 
+    @ScriptFunction
     public void setEnabled(boolean aValue) {
         enabled = aValue;
     }
 
+    @ScriptFunction
     public boolean isVisible() {
         return visible;
     }
 
+    @ScriptFunction
     public void setVisible(boolean aValue) {
         visible = aValue;
     }
 
+    @ScriptFunction
     public boolean isMovable() {
         return movable;
     }
 
+    @ScriptFunction
     public void setMovable(boolean aValue) {
         movable = aValue;
     }
 
+    @ScriptFunction
     public boolean isResizable() {
         return resizable;
     }
 
+    @ScriptFunction
     public void setResizable(boolean aValue) {
         resizable = aValue;
     }
 
+    @ScriptFunction
     public boolean isSortable() {
         return sortable;
     }
 
+    @ScriptFunction
     public void setSortable(boolean aValue) {
         sortable = aValue;
     }
 
+    @ScriptFunction
     public String getTitle() {
         if (tableColumn != null) {
             if (tableColumn.getHeaderValue() instanceof String) {
@@ -513,6 +534,7 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
     public void setTitle(String aTitle) {
         if (title == null ? aTitle != null : !title.equals(aTitle)) {
             String oldTtile = title;
@@ -530,10 +552,12 @@ public class GridColumnsGroup {
      }
      */
 
+    @ScriptFunction
     public Color getBackground() {
         return style.getBackground();
     }
 
+    @ScriptFunction
     public void setBackground(Color background) {
         style.setBackground(background);
     }
@@ -565,6 +589,12 @@ public class GridColumnsGroup {
         }
     }
 
+    @ScriptFunction
+    public Color getForeground() {
+        return style.getForeground();
+    }
+
+    @ScriptFunction
     public void setForeground(Color aColor) {
         style.setForeground(aColor);
     }

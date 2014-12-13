@@ -32,7 +32,7 @@ public class MultiLevelHeader extends JPanel {
     // design data
     protected TableColumnModel columnModel;
     protected RowSorter<? extends TableModel> rowSorter;
-    protected InnerColumnsListener columnModelListner;
+    //protected InnerColumnsListener columnModelListner;
     protected RowSorterListener sorterListener;
     protected JTable table;
     // calculated data
@@ -70,10 +70,12 @@ public class MultiLevelHeader extends JPanel {
 
     public final void setColumnModel(TableColumnModel aModel) {
         columnModel = aModel;
+        /*
         columnModelListner = new InnerColumnsListener(this);
         if (columnModel != null) {
             columnModel.addColumnModelListener(columnModelListner);
         }
+                */
     }
 
     public RowSorter<? extends TableModel> getRowSorter() {
@@ -95,11 +97,11 @@ public class MultiLevelHeader extends JPanel {
     public void setTable(JTable aValue) {
         table = aValue;
     }
-
+/*
     public InnerColumnsListener getColumnModelListener() {
         return columnModelListner;
     }
-
+*/
     public GridColumnsGroup getPressed4ResizeColGroup() {
         return pressed4ResizeColGroup;
     }

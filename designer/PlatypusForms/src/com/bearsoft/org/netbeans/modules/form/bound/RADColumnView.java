@@ -26,7 +26,7 @@ public class RADColumnView<M extends ModelComponentDecorator> extends RADModelSc
         "text",
         "selected",
         "model",
-        "datamodelElement",
+        "field",
         "componentPopupMenu",
         "cursor",
         "editable",
@@ -34,6 +34,11 @@ public class RADColumnView<M extends ModelComponentDecorator> extends RADModelSc
         "focusable",
         "font",
         "icon",
+        "left",
+        "top",
+        "width",
+        "height",
+        "error",
         "nextFocusableComponent",
         "opaque"
     }));

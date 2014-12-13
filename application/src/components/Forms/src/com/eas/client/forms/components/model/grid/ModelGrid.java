@@ -377,6 +377,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected TableModel deepModel;
     protected TabularRowsSorter<? extends TableModel> rowSorter;
     protected Set<JSObject> processedRows = new HashSet<>();
+    protected JSObject data;
     // tree info
     protected String parentField;
     protected String childrenField;
@@ -391,6 +392,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected ListSelectionModel columnsSelectionModel;
     protected GeneralSelectionChangesReflector generalSelectionChangesReflector;
     // visual components
+    protected LinearConstraint topRowsConstraint = new LinearConstraint(0, -1);
+    protected LinearConstraint bottomRowsConstraint = new LinearConstraint(0, Integer.MAX_VALUE);
     protected JLabel progressIndicator;
     protected JScrollPane gridScroll;
     protected MultiLevelHeader lheader;
@@ -399,6 +402,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected GridTable trTable;
     protected GridTable blTable;
     protected GridTable brTable;
+    protected JPanel tlPanel = new JPanel(new BorderLayout());
+    protected JPanel trPanel = new JPanel(new BorderLayout());
+    protected JPanel blPanel = new JPanel(new BorderLayout());
+    protected JPanel brPanel;
     /*
      protected RowsetListener scrollReflector = new RowsetAdapter() {
      protected void repaintRowHeader() {
@@ -446,6 +453,12 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         trTable = new GridTable(null, this);
         blTable = new GridTable(tlTable, this);
         brTable = new GridTable(trTable, this);
+        brPanel = new GridTableScrollablePanel(brTable);
+
+        tlTable.setOpaque(false);
+        trTable.setOpaque(false);
+        blTable.setOpaque(false);
+        brTable.setOpaque(false);
 
         tlTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         trTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -493,25 +506,22 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
         // Tables are enclosed in panels to avoid table's stupid efforts
         // to configure it's parent scroll pane.
-        JPanel tlPanel = new JPanel(new BorderLayout());
         tlPanel.add(lheader, BorderLayout.NORTH);
         tlPanel.add(tlTable, BorderLayout.CENTER);
-        JPanel trPanel = new JPanel(new BorderLayout());
         trPanel.add(rheader, BorderLayout.NORTH);
         trPanel.add(trTable, BorderLayout.CENTER);
-        JPanel blPanel = new JPanel(new BorderLayout());
         blPanel.add(blTable, BorderLayout.CENTER);
-        JPanel brPanel = new GridTableScrollablePanel(brTable);
         //brPanel.add(brTable, BorderLayout.CENTER);
-
-        boolean needOutlineCols = frozenColumns > 0;
-        tlPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
-        trPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, 0, FIXED_COLOR));
-        blPanel.setBorder(new MatteBorder(0, 0, 0, needOutlineCols ? 1 : 0, FIXED_COLOR));
+        tlPanel.setOpaque(false);
+        trPanel.setOpaque(false);
+        blPanel.setOpaque(false);
+        brPanel.setOpaque(false);
 
         progressIndicator = new JLabel(processIcon);
+        progressIndicator.setOpaque(false);
         progressIndicator.setVisible(false);
         gridScroll = new JScrollPane();
+        gridScroll.setOpaque(false);
         gridScroll.setCorner(JScrollPane.UPPER_LEFT_CORNER, tlPanel);
         gridScroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, progressIndicator);
         gridScroll.setColumnHeaderView(trPanel);
@@ -519,6 +529,9 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         gridScroll.setRowHeaderView(blPanel);
         gridScroll.getRowHeader().addChangeListener(new RowHeaderScroller(gridScroll.getRowHeader(), gridScroll.getViewport()));
         gridScroll.setViewportView(brPanel);
+        gridScroll.getViewport().setOpaque(false);
+        gridScroll.getColumnHeader().setOpaque(false);
+        gridScroll.getRowHeader().setOpaque(false);
 
         setLayout(new BorderLayout());
         add(gridScroll, BorderLayout.CENTER);
@@ -526,6 +539,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         lheader.setNeightbour(rheader);
         rheader.setNeightbour(lheader);
 
+        applyColumns();
+        applyRows();
         configureActions();
         applyEnabled();
         applyFont();
@@ -1072,6 +1087,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
             frozenColumns = aValue;
             applyColumns();
             applyHeader();
+            applyFrozenDecor();
         }
     }
 
@@ -1085,25 +1101,59 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     public void setFrozenRows(int aValue) {
         if (frozenRows != aValue) {
             frozenRows = aValue;
-            applyRows();
+            // lightweight apply
+            topRowsConstraint.setMax(frozenRows - 1);
+            bottomRowsConstraint.setMin(frozenRows);
+            // heavy apply
+            //applyRows();
+            applyFrozenDecor();
+        }
+    }
+
+    public JSObject getData() {
+        return data;
+    }
+
+    public void setData(JSObject aValue) {
+        if (data != aValue) {
+            data = aValue;
+            if (rowsModel != null) {
+                rowsModel.setElements(data);
+            }
         }
     }
 
     protected void applyRows() {
+        if (rowsModel != null) {
+            rowsModel.setElements(null);
+        }
         if (isTreeConfigured()) {
-            rowsModel = new ArrayTreedModel(columnModel, null, parentField, childrenField, generalOnRender);
+            rowsModel = new ArrayTreedModel(columnModel, data, parentField, childrenField, generalOnRender);
             deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
             rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
         } else {
-            rowsModel = new ArrayTableModel(columnModel, null, generalOnRender);
+            rowsModel = new ArrayTableModel(columnModel, data, generalOnRender);
             deepModel = (TableModel) rowsModel;
             rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
         }
         TableModel generalModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
 
         // rows constraints setup
-        LinearConstraint topRowsConstraint = new LinearConstraint(0, frozenRows - 1);
-        LinearConstraint bottomRowsConstraint = new LinearConstraint(frozenRows, Integer.MAX_VALUE);
+        topRowsConstraint = new LinearConstraint(0, frozenRows - 1);
+        bottomRowsConstraint = new LinearConstraint(frozenRows, Integer.MAX_VALUE);
+        tlTable.setSelectionModel(new DefaultListSelectionModel());
+        trTable.setSelectionModel(new DefaultListSelectionModel());
+        blTable.setSelectionModel(new DefaultListSelectionModel());
+        brTable.setSelectionModel(new DefaultListSelectionModel());
+        tlTable.setRowSorter(null);
+        trTable.setRowSorter(null);
+        blTable.setRowSorter(null);
+        brTable.setRowSorter(null);
+        tlTable.setModel(new DefaultTableModel());
+        trTable.setModel(new DefaultTableModel());
+        blTable.setModel(new DefaultTableModel());
+        brTable.setModel(new DefaultTableModel());
+
         tlTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
         trTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, topRowsConstraint));
         blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
@@ -1113,11 +1163,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         trTable.setModel(generalModel);
         blTable.setModel(generalModel);
         brTable.setModel(generalModel);
+
         tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
         trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
-
         blTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
-
         brTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, bottomRowsConstraint));
         configureTreedView();
     }
@@ -1132,6 +1181,12 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
             header = aValue;
             applyHeader();
         }
+    }
+
+    protected void applyFrozenDecor() {
+        tlPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, frozenColumns > 0 ? 1 : 0, FIXED_COLOR));
+        trPanel.setBorder(new MatteBorder(0, 0, frozenRows > 0 ? 1 : 0, 0, FIXED_COLOR));
+        blPanel.setBorder(new MatteBorder(0, 0, 0, frozenColumns > 0 ? 1 : 0, FIXED_COLOR));
     }
 
     protected void applyColumns() {
@@ -1181,7 +1236,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      unaryLinkField = aValue;
      }
      */
-
     public void insertRow() {
         /*
          try {
@@ -1347,25 +1401,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         // apply changes        
         applyColumns();
         applyHeader();
-    }
-
-    // Cleanup
-    protected void cleanup() throws Exception {
-        removeAll();
-        if (columnModel != null) {
-            for (int i = columnModel.getColumnCount() - 1; i >= 0; i--) {
-                columnModel.removeColumn(columnModel.getColumn(i));
-            }
-            columnModel = null;
-        }
-        rowsModel = null;
-        deepModel = null;
-        rowSorter = null;
-        tlTable = null;
-        trTable = null;
-        blTable = null;
-        brTable = null;
-        gridScroll = null;
     }
 
     @Override
@@ -1537,6 +1572,32 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     public void clearSelection() {
         columnsSelectionModel.clearSelection();
         rowsSelectionModel.clearSelection();
+    }
+
+    public void clearColumns() {
+        Collections.list(columnModel.getColumns()).stream().forEach((TableColumn aColumn) -> {
+            columnModel.removeColumn(aColumn);
+        });
+    }
+
+    public void addColumns(ModelColumn[] aColumns) {
+        for (ModelColumn col : aColumns) {
+            columnModel.addColumn(col);
+        }
+        applyColumns();
+    }
+
+    public void setColumns(ModelColumn[] aColumns) {
+        clearColumns();
+        addColumns(aColumns);
+    }
+
+    public ModelColumn[] getColumns() {
+        ModelColumn[] res = new ModelColumn[columnModel.getColumnCount()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = (ModelColumn) columnModel.getColumn(i);
+        }
+        return res;
     }
 
     private static final String FIND_SOMETHING_JSDOC = ""
@@ -2321,7 +2382,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     public CascadedStyle getStyle() {
         return style;
     }
-    
+
     // Native API
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
     @Undesignable
@@ -2615,7 +2676,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
     }
-    
+
     // published parent
     @Override
     public Widget getParentWidget() {

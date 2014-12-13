@@ -43,7 +43,10 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.components.rt.HtmlContentEditorKit;
@@ -170,6 +173,8 @@ public class VisualReplicator {
     public void reorderComponents(ComponentContainer radCont) {
         if (radCont instanceof RADVisualContainer<?>) {
             updateContainerLayout((RADVisualContainer<?>) radCont);
+        } else {
+            checkModelGridOperation(radCont);
         }
     }
 
@@ -247,28 +252,44 @@ public class VisualReplicator {
     // for adding just one component, for adding more components use
     // updateAddedComponents
     public void addComponent(RADComponent<?> radComp) {
-        if (radComp != null && radComp instanceof RADVisualComponent<?> && getClonedComponent(radComp) == null) {
-            Object clone = createClone(radComp);
-            if (clone instanceof Component) {
-                RADVisualContainer<?> radCnt = (RADVisualContainer<?>) radComp.getParentComponent();
-                if (radCnt != null) {
-                    Container cont = (Container) getClonedComponent(radCnt);
-                    if (radCnt.isMenuTypeComponent()) {
-                        addToMenu(cont, clone);
-                    } else {
-                        LayoutSupportManager laysup = radCnt.getLayoutSupport();
-                        if (laysup != null && cont != null) { // layout support
-                            Container contDelegate = radCnt.getContainerDelegate(cont);
-                            laysup.addComponentsToContainer(
-                                    cont,
-                                    contDelegate,
-                                    new Component[]{(Component) clone},
-                                    ((RADVisualComponent<?>) radComp).getComponentIndex());
-                            laysup.arrangeContainer(cont, contDelegate);
+        if (radComp != null && getClonedComponent(radComp) == null) {
+            if (radComp instanceof RADVisualComponent<?>) {
+                Object clone = createClone(radComp);
+                if (clone instanceof Component) {
+                    RADVisualContainer<?> radCnt = (RADVisualContainer<?>) radComp.getParentComponent();
+                    if (radCnt != null) {
+                        Container cont = (Container) getClonedComponent(radCnt);
+                        if (radCnt.isMenuTypeComponent()) {
+                            addToMenu(cont, clone);
+                        } else {
+                            LayoutSupportManager laysup = radCnt.getLayoutSupport();
+                            if (laysup != null && cont != null) { // layout support
+                                Container contDelegate = radCnt.getContainerDelegate(cont);
+                                laysup.addComponentsToContainer(
+                                        cont,
+                                        contDelegate,
+                                        new Component[]{(Component) clone},
+                                        ((RADVisualComponent<?>) radComp).getComponentIndex());
+                                laysup.arrangeContainer(cont, contDelegate);
+                            }
                         }
                     }
                 }
+            } else if (radComp instanceof RADModelGridColumn) {
+                checkModelGridOperation(radComp.getParent());
             }
+        }
+    }
+
+    protected void checkModelGridOperation(ComponentContainer columnContainer) {
+        while (columnContainer instanceof RADComponent<?> && !(columnContainer instanceof RADModelGrid)) {
+            columnContainer = ((RADComponent<?>) columnContainer).getParent();
+        }
+        if (columnContainer instanceof RADModelGrid) {
+            RADModelGrid grid = (RADModelGrid) columnContainer;
+            ModelGrid clonedGrid = (ModelGrid) getClonedComponent(grid);
+            clonedGrid.setColumns(grid.getBeanInstance().getColumns());
+            clonedGrid.setHeader(grid.getBeanInstance().getHeader());
         }
     }
 
@@ -279,9 +300,9 @@ public class VisualReplicator {
                 if (clone instanceof Component) { // visual meta component was removed
                     Component comp = (Component) clone;
                     // do we know the parent container of the removed meta component?
-                    RADVisualContainer<?> parentCont =
-                            radCont instanceof RADVisualContainer
-                            ? (RADVisualContainer<?>) radCont : null;
+                    RADVisualContainer<?> parentCont
+                            = radCont instanceof RADVisualContainer
+                                    ? (RADVisualContainer<?>) radCont : null;
                     Container cont = parentCont != null
                             ? (Container) getClonedComponent(parentCont) : null;
 
@@ -327,6 +348,8 @@ public class VisualReplicator {
                     }
                 }
                 removeMapping(radComp);
+            } else if (radComp instanceof RADModelGridColumn) {
+                checkModelGridOperation(radComp.getParent());
             }
         }
     }
@@ -366,7 +389,7 @@ public class VisualReplicator {
                                 AbstractButton button = (AbstractButton) targetComp;
                                 // remove from the old group
                                 if (button instanceof HasGroup) {
-                                    ((HasGroup)button).setButtonGroup(null);
+                                    ((HasGroup) button).setButtonGroup(null);
                                 }
                                 // add to the new group
                                 if (clonedValue instanceof ButtonGroup) {
@@ -375,8 +398,6 @@ public class VisualReplicator {
                             } else {
                                 if (!"visible".equals(property.getName())) {
                                     writeMethod.invoke(targetComp, new Object[]{clonedValue});
-                                } else {
-                                    //targetComp.setVisible(true);
                                 }
                             }
                             if (targetComp instanceof Component) {
@@ -415,9 +436,10 @@ public class VisualReplicator {
                 java.util.List<RADProperty<?>> applyProperties;
                 if (oClone instanceof Window) { // some properties should not be set to Window, e.g. visible
                     applyProperties = new ArrayList<>();
-                    for(RADProperty<?> prop : radComp.getBeanProperties()){
-                        if(!"visible".equals(prop.getName()))
+                    for (RADProperty<?> prop : radComp.getBeanProperties()) {
+                        if (!"visible".equals(prop.getName())) {
                             applyProperties.add(prop);
+                        }
                     }
                 } else {
                     applyProperties = Arrays.asList(radComp.getBeanProperties());
@@ -602,8 +624,8 @@ public class VisualReplicator {
                     Object clonedValue = clonedComp;
 
                     // target component of the property
-                    Object targetComp =
-                            getClonedComponent(property.getRADComponent());
+                    Object targetComp
+                            = getClonedComponent(property.getRADComponent());
 
                     Method writeMethod = FormUtils.getPropertyWriteMethod(property, targetComp.getClass());
                     if (writeMethod != null) {
