@@ -55,11 +55,6 @@ public class GridColumnsTest {
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
-        col.setSubstitute(!col.isSubstitute());
-        assertFalse(col.isEqual(col1));
-        col.assign(col1);
-        assertTrue(col.isEqual(col1));
-
         col.setTitle("some title");
         assertFalse(col.isEqual(col1));
         col.assign(col1);

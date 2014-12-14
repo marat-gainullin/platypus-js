@@ -68,7 +68,10 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
     public void setStoredName(String name) {
         super.setStoredName(name);
         if (getBeanInstance() != null) {
-            ((ModelColumn)getBeanInstance().getTableColumn()).setName(name);
+            ((ModelColumn) getBeanInstance().getTableColumn()).setName(name);
+            if (getBeanInstance().getTitle() == null) {
+                getBeanInstance().setTitle(getName());
+            }
         }
     }
 
@@ -76,10 +79,11 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
     protected void setBeanInstance(GridColumnsGroup aBeanInstance) {
         super.setBeanInstance(aBeanInstance);
         if (getBeanInstance() != null) {
-            if(getBeanInstance().getTableColumn() == null)
+            if (getBeanInstance().getTableColumn() == null) {
                 getBeanInstance().setTableColumn(new ModelColumn());
-            ((ModelColumn)getBeanInstance().getTableColumn()).setName(getName());
-            ((ModelColumn)getBeanInstance().getTableColumn()).setTitle(getName());
+            }
+            ((ModelColumn) getBeanInstance().getTableColumn()).setName(getName());
+            getBeanInstance().setTitle(getName());
         }
     }
 

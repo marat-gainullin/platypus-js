@@ -7,6 +7,7 @@ package com.bearsoft.gui.grid.header;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
+import java.awt.Font;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -31,8 +32,6 @@ public class GridColumnsGroup {
     protected boolean visible = true;
     protected String title;
     protected String name;
-    // flag indicating whether this column should remain in place or be substituted by it's flipping сhildren
-    protected boolean substitute;
     protected boolean selectOnly;
     protected CascadedStyle style = new CascadedStyle();
     protected List<GridColumnsGroup> children = new ArrayList<>();
@@ -126,8 +125,8 @@ public class GridColumnsGroup {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if ("headerValue".equals(evt.getPropertyName())
-                    && evt.getNewValue() instanceof String) {
-                setTitle((String) evt.getNewValue());
+                    && (evt.getNewValue() == null || evt.getNewValue() instanceof String)) {
+                title = (String) evt.getNewValue();
             } else if ("width".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
                 changeSupport.firePropertyChange("width", evt.getOldValue(), evt.getNewValue());
             } else if ("minWidth".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
@@ -141,6 +140,7 @@ public class GridColumnsGroup {
             } else if ("sortable".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Boolean) {
                 sortable = (Boolean) evt.getNewValue();
             }
+            changeSupport.firePropertyChange("headerValue".equals(evt.getPropertyName()) ? "title" : evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
         }
     };
 
@@ -168,7 +168,6 @@ public class GridColumnsGroup {
             maxWidth = aSource.getMaxWidth();
             readonly = aSource.isReadonly();
             visible = aSource.isVisible();
-            substitute = aSource.isSubstitute();
             selectOnly = aSource.isSelectOnly();
             movable = aSource.isMovable();
             resizable = aSource.isResizable();
@@ -184,7 +183,6 @@ public class GridColumnsGroup {
             readonly = false;
             enabled = true;
             visible = true;
-            substitute = false;
             title = null;
             name = null;
             selectOnly = false;
@@ -217,9 +215,6 @@ public class GridColumnsGroup {
             return false;
         }
         if (this.visible != other.visible) {
-            return false;
-        }
-        if (this.substitute != other.substitute) {
             return false;
         }
         if (this.selectOnly != other.selectOnly) {
@@ -273,7 +268,6 @@ public class GridColumnsGroup {
         hash = 37 * hash + (this.visible ? 1 : 0);
         hash = 37 * hash + (this.title != null ? this.title.hashCode() : 0);
         hash = 37 * hash + (this.name != null ? this.name.hashCode() : 0);
-        hash = 37 * hash + (this.substitute ? 1 : 0);
         hash = 37 * hash + (this.selectOnly ? 1 : 0);
         hash = 37 * hash + (this.style != null ? this.style.hashCode() : 0);
         return hash;
@@ -445,14 +439,6 @@ public class GridColumnsGroup {
         selectOnly = aValue;
     }
 
-    public boolean isSubstitute() {
-        return substitute;
-    }
-
-    public void setSubstitute(boolean aValue) {
-        substitute = aValue;
-    }
-
     public boolean isReadonly() {
         return readonly;
     }
@@ -536,10 +522,14 @@ public class GridColumnsGroup {
 
     @ScriptFunction
     public void setTitle(String aTitle) {
-        if (title == null ? aTitle != null : !title.equals(aTitle)) {
-            String oldTtile = title;
-            title = aTitle;
-            changeSupport.firePropertyChange("title", oldTtile, title);
+        if (tableColumn != null) {
+            tableColumn.setHeaderValue(aTitle);
+        } else {
+            if (title == null ? aTitle != null : !title.equals(aTitle)) {
+                String oldTtile = title;
+                title = aTitle;
+                changeSupport.firePropertyChange("title", oldTtile, title);
+            }
         }
     }
     /*
@@ -597,6 +587,16 @@ public class GridColumnsGroup {
     @ScriptFunction
     public void setForeground(Color aColor) {
         style.setForeground(aColor);
+    }
+
+    @ScriptFunction
+    public Font getFont() {
+        return style.getFont();
+    }
+
+    @ScriptFunction
+    public void setFont(Font aValue) {
+        style.setFont(aValue);
     }
 
     public boolean isLeaf() {

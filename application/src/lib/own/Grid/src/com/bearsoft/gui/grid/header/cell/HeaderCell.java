@@ -72,7 +72,7 @@ public class HeaderCell extends JEditorPane {
             if ("style".equals(evt.getPropertyName())) {
                 applyStyle();
             } else if ("title".equals(evt.getPropertyName())
-                    && evt.getNewValue() instanceof String) {
+                    && (evt.getNewValue() == null || evt.getNewValue() instanceof String)) {
                 applyTitle();
             } else if ("width".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
                 invalidate();
@@ -104,10 +104,14 @@ public class HeaderCell extends JEditorPane {
         updateUIData();
         setDoubleBuffered(true);
         setOpaque(false);
+        putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
     }
 
     protected void applyTitle() {
-        setText(String.format(HTML_TEMPLATE, getFont().getFamily(), getFont().getSize(), getFont().isBold() ? "bold" : "normal", colGroup.getTitle()));
+        if (colGroup != null) {
+            String title = colGroup.getTitle();
+            setText(String.format(HTML_TEMPLATE, getFont().getFamily(), getFont().getSize(), getFont().isBold() ? "bold" : "normal", title != null ? title : ""));
+        }
     }
 
     protected void applyStyle() {
@@ -118,6 +122,17 @@ public class HeaderCell extends JEditorPane {
             setForeground(colGroup.getStyle().getForeground());
         }
         setFont(colGroup.getStyle().getFont());
+    }
+
+    @Override
+    public void setFont(Font font) {
+        super.setFont(font);
+        applyTitle();
+    }
+
+    @Override
+    public void setForeground(Color fg) {
+        super.setForeground(fg);
     }
 
     public static java.awt.Font toNativeFont(com.eas.gui.Font aFont) {

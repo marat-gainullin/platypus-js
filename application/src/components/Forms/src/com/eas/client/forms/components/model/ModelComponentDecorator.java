@@ -87,7 +87,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <D>
  * @param <V>
  */
-public abstract class ModelComponentDecorator<D extends JComponent, V> extends JComponent implements Widget, ModelWidget<V>, HasComponentEvents {
+public abstract class ModelComponentDecorator<D extends JComponent, V> extends JPanel implements Widget, ModelWidget<V>, HasComponentEvents {
 
     public static final int EXTRA_BUTTON_WIDTH = 18;
 
@@ -158,7 +158,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
         decorated = aComponent;
         if (decorated != null) {
-            decorated.setOpaque(true);
+            decorated.setOpaque(false);
             decorated.setBorder(null);
             decorated.setInheritsPopupMenu(true);
             add(decorated, BorderLayout.CENTER);
@@ -372,18 +372,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                     }
                 }
             });
-        }
-    }
-
-    @Override
-    public void updateUI() {
-        Color bkCol = getBackground();
-        Color fgCol = getForeground();
-        try {
-            super.updateUI();
-        } finally {
-            setBackground(bkCol);
-            setForeground(fgCol);
         }
     }
 
@@ -741,7 +729,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         if (error == null ? aValue != null : !error.equals(aValue)) {
             error = aValue;
             remove(errorPanel);
-            if (aValue != null) {
+            if (error != null) {
                 errorPanel.setBackground(Color.red);
                 errorPanel.setToolTipText(aValue);
                 errorPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 2));
@@ -751,7 +739,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             repaint();
         }
     }
-
 
     @ScriptFunction(jsDoc = BACKGROUND_JSDOC)
     @Override
@@ -932,7 +919,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setFont(Font aValue) {
         super.setFont(aValue);
-        decorated.setFont(aValue);
         Font f = getFont();
         if (f != null && prefSizeCalculator != null) {
             prefSizeCalculator.setFont(f);
@@ -1070,7 +1056,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             super.repaint(tm, x, y, width, height);
         }
     }
-    
+
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
@@ -1324,7 +1310,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
     }
-    
+
     // published parent
     @Override
     public Widget getParentWidget() {

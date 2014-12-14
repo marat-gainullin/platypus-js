@@ -71,11 +71,11 @@ public class MultiLevelHeader extends JPanel {
     public final void setColumnModel(TableColumnModel aModel) {
         columnModel = aModel;
         /*
-        columnModelListner = new InnerColumnsListener(this);
-        if (columnModel != null) {
-            columnModel.addColumnModelListener(columnModelListner);
-        }
-                */
+         columnModelListner = new InnerColumnsListener(this);
+         if (columnModel != null) {
+         columnModel.addColumnModelListener(columnModelListner);
+         }
+         */
     }
 
     public RowSorter<? extends TableModel> getRowSorter() {
@@ -97,11 +97,12 @@ public class MultiLevelHeader extends JPanel {
     public void setTable(JTable aValue) {
         table = aValue;
     }
-/*
-    public InnerColumnsListener getColumnModelListener() {
-        return columnModelListner;
-    }
-*/
+    /*
+     public InnerColumnsListener getColumnModelListener() {
+     return columnModelListner;
+     }
+     */
+
     public GridColumnsGroup getPressed4ResizeColGroup() {
         return pressed4ResizeColGroup;
     }
@@ -209,7 +210,7 @@ public class MultiLevelHeader extends JPanel {
             GridColumnsGroup group = aGroups.get(0);
             GridBagConstraints constraints = group2Constraints.get(group);
             assert constraints != null;
-            if (group.getParent() != null && !group.getParent().isSubstitute()) {
+            if (group.getParent() != null) {
                 GridBagConstraints parentConstraints = group2Constraints.get(group.getParent());
                 assert parentConstraints != null;
                 constraints.gridx = parentConstraints.gridx;
@@ -248,9 +249,7 @@ public class MultiLevelHeader extends JPanel {
         GridColumnsGroup rGroup = aGroup;
         while (cGroup.getParent() != null) {
             cGroup = cGroup.getParent();
-            if (!cGroup.isSubstitute()) {
-                rGroup = cGroup;
-            }
+            rGroup = cGroup;
         }
         return rGroup;
     }
