@@ -158,6 +158,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
         decorated = aComponent;
         if (decorated != null) {
+            decorated.setForeground(getForeground());
+            decorated.setFont(getFont());
             decorated.setOpaque(false);
             decorated.setBorder(null);
             decorated.setInheritsPopupMenu(true);
@@ -762,6 +764,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setForeground(Color aValue) {
         super.setForeground(aValue);
+        if (gapLabel != null) {
+            gapLabel.setForeground(aValue);
+        }
+        if (iconLabel != null) {
+            iconLabel.setForeground(aValue);
+        }
+        if (extraTools != null) {
+            extraTools.setForeground(aValue);
+        }
+        if (decorated != null) {
+            decorated.setForeground(aValue);
+        }
     }
 
     private static final String REDRAW_JSDOC = ""
@@ -919,6 +933,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setFont(Font aValue) {
         super.setFont(aValue);
+        if (gapLabel != null) {
+            gapLabel.setFont(aValue);
+        }
+        if (iconLabel != null) {
+            iconLabel.setFont(aValue);
+        }
+        if (extraTools != null) {
+            extraTools.setFont(aValue);
+        }
+        if (decorated != null) {
+            decorated.setFont(aValue);
+        }
         Font f = getFont();
         if (f != null && prefSizeCalculator != null) {
             prefSizeCalculator.setFont(f);
