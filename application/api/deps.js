@@ -132,3 +132,18 @@ try {
 } catch (e) {
     printf('rowsets API skipped.');
 }
+
+try {
+    load('classpath:server/session.js');
+    printf('server API loaded.');
+} catch (e) {
+    printf('server API skipped.');
+}
+
+try {
+    load('classpath:servlet-support/web-socket-client-session.js');
+    load('classpath:servlet-support/web-socket-server-session.js');
+    printf('servlet-support API loaded.');
+} catch (e) {
+    printf('servlet-support API skipped.');
+}

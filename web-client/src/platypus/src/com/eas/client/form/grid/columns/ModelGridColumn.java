@@ -172,13 +172,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	public boolean isChanged(Row aRow) {
 		if (aRow != null && columnModelRef != null && columnModelRef.getColIndex() > 0) {
 			try {
-				if (rowsEntity == columnModelRef.entity) {
-					return aRow.isColumnUpdated(columnModelRef.getColIndex());
-				} else {
-					if (rowsEntity.scrollTo(aRow) && columnModelRef.entity.getRowset() != null) {
-						return columnModelRef.entity.getRowset().getCurrentRow().isColumnUpdated(columnModelRef.getColIndex());
-					}
-				}
+				return aRow.isColumnUpdated(columnModelRef.getColIndex());
 			} catch (Exception e) {
 				Logger.getLogger(ModelGridColumn.class.getName()).log(Level.SEVERE, e.getMessage());
 			}

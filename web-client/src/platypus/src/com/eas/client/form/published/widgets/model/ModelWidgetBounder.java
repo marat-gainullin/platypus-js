@@ -3,7 +3,6 @@ package com.eas.client.form.published.widgets.model;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
@@ -81,18 +80,7 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 			try {
 				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast()) {
 					Object prevValue = entity.getRowset().getObject(getColIndex());
-					if (widget instanceof ModelCombo) {
-						ModelCombo mCombo = (ModelCombo) widget;
-						if (event.getValue() instanceof Row) {
-							Row rowValue = (Row) event.getValue();
-							Object lookupValue = mCombo.lookupRowValue(rowValue);
-							entity.getRowset().updateObject(getColIndex(), lookupValue);
-						} else {
-							entity.getRowset().updateObject(getColIndex(), event.getValue());
-						}
-					} else {
-						entity.getRowset().updateObject(getColIndex(), event.getValue());
-					}
+					entity.getRowset().updateObject(getColIndex(), event.getValue());
 					Object afterValue = entity.getRowset().getObject(getColIndex());
 					if (prevValue == null ? afterValue == null : prevValue.equals(afterValue)) {
 						setValueToControl();

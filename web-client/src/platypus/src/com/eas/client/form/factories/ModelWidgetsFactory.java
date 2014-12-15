@@ -148,7 +148,7 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 			} else if ("DbComboDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aTag, "valueField"), model);
 				final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aTag, "displayField"), model);
-				final ModelWidgetBounder<Row> modelElement = modelElementTag != null ? new ModelWidgetBounder<Row>(modelElementTag, model, new RowRowValueConverter()) : null;
+				final ModelWidgetBounder<Object> modelElement = modelElementTag != null ? new ModelWidgetBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
 				boolean list = Utils.getBooleanAttribute(aTag, "list", true);
 
 				ModelCombo mCombo = new ModelCombo();

@@ -12,6 +12,7 @@ import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText, HasActionHandlers {
@@ -54,6 +55,11 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 		};
 	}
 
+	@Override
+	protected HandlerManager createHandlerManager() {
+	    return super.createHandlerManager();
+	}
+	
 	@Override
 	public String getEmptyText() {
 		return emptyText;

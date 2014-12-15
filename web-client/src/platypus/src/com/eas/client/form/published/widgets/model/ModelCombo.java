@@ -1,7 +1,5 @@
 package com.eas.client.form.published.widgets.model;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,11 +7,12 @@ import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetEvent;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.converters.RowRowValueConverter;
+import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.CrossUpdater;
@@ -23,21 +22,20 @@ import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
+import com.eas.client.form.published.PublishedCell;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.bearsoft.rowset.events.RowChangeEvent;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.Widget;
 
-public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText, HasActionHandlers {
+public class ModelCombo extends PublishedDecoratorBox<Object> implements HasEmptyText, HasActionHandlers {
 
 	protected CrossUpdater updater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
 
@@ -58,19 +56,13 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 							if (change.getOldRowCount() == change.getNewRowCount()) {
 								if (change.getRowset() == displayRowset && change.getFieldIndex() == displayElement.getColIndex() || change.getRowset() == valueRowset
 								        && change.getFieldIndex() == valueElement.getColIndex()) {
-									setValue(lookup.lookupRow(valueKey), true);
-									if (list)
-										redraw();
+									redraw();
 								}
 							} else {
-								setValue(lookup.lookupRow(valueKey), true);
-								if (list)
-									redraw();
+								redraw();
 							}
 						} else {
-							setValue(lookup.lookupRow(valueKey), true);
-							if (list)
-								redraw();
+							redraw();
 						}
 					}
 				} catch (Exception e) {
@@ -81,34 +73,23 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 	});
 
+	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected RowKeyProvider rowKeyProvider = new RowKeyProvider();
 	protected String emptyText;
 	protected ModelElementRef valueElement;
 	protected ModelElementRef displayElement;
 	protected StringRowValueConverter converter = new StringRowValueConverter();
 	protected ValueLookup lookup;
-	protected Map<Row, Integer> rowsLocator = new HashMap<>();
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
-	protected Object valueKey;
 	protected boolean forceRedraw;
 
 	protected boolean list = true;
 
 	public ModelCombo() {
-		super(new StyledListBox<Row>());
-	}
-
-	@Override
-	protected void fireValueChangeEvent() {
-		if (!settingValue) {
-			Row value = super.getValue();
-			try {
-				valueKey = value != null && valueElement != null ? value.getColumnObject(valueElement.getColIndex()) : null;
-			} catch (InvalidColIndexException e) {
-				e.printStackTrace();
-			}
-		}
-		super.fireValueChangeEvent();
+		super(new StyledListBox<Object>());
+		StyledListBox<Object> box = (StyledListBox<Object>) decorated;
+		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
 	}
 
 	protected int actionHandlers;
@@ -118,10 +99,10 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Row>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Object>() {
 
 				@Override
-				public void onValueChange(ValueChangeEvent<Row> event) {
+				public void onValueChange(ValueChangeEvent<Object> event) {
 					if (!settingValue)
 						ActionEvent.fire(ModelCombo.this, ModelCombo.this);
 				}
@@ -151,12 +132,10 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 		return converter;
 	}
 
-	public void setValue(Row value, boolean fireEvents) {
+	public void setValue(Object value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 		try {
-			if (!list) {
-				redraw();
-			}
+			redraw();
 		} catch (Exception e) {
 			Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, null, e);
 		}
@@ -165,11 +144,11 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	@Override
 	protected void clearValue() {
 		try {
-	        setJsValue(null, true);
+			setJsValue(null, true);
 			ActionEvent.fire(this, this);
-        } catch (Exception e) {
-	        e.printStackTrace();
-        }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isValidBindings() {
@@ -187,51 +166,61 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 	public void redraw() {
 		try {
-			if (decorated instanceof StyledListBox<?> && (((Widget) decorated).isAttached() || forceRedraw)) {
-				Row valueRow = getValue();
-				StyledListBox<Row> box = (StyledListBox<Row>) decorated;
+			if ((((Widget) decorated).isAttached() || forceRedraw)) {
+				StyledListBox<Object> box = (StyledListBox<Object>) decorated;
 				box.clear();
 				box.setSelectedIndex(-1);
-				rowsLocator.clear();
+				Object _value = getValue();
+				String label = null;
+				Rowset valuesRowset = null;
+				Row valueRow = null;
 				if (isValidBindings()) {
-					Rowset valuesRowset = valueElement.entity.getRowset();
-					box.addItem(emptyText != null ? emptyText : "", emptyValueKey, null, "");
-					OptionElement option = box.getItem(box.getItemCount() - 1);
-					option.getStyle().setDisplay(Style.Display.NONE);
+					valuesRowset = valueElement.entity.getRowset();
+					valueRow = lookup.lookupRow(_value);
+					label = valueRow != null ? converter.convert(valueRow.getColumnObject(displayElement.getColIndex())) : null;
+				}
+				PublishedCell cell = ControlsUtils.calcValuedPublishedCell(published, onRender, _value, label, null);
+				if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
+					label = cell.getDisplay();
+				}
+				if (_value != null) {
+					box.addItem(label != null ? label : "", _value.toString(), _value, "");
+				} else {
+					if (label == null)
+						label = emptyText;
+					box.addItem(label != null ? label : "", emptyValueKey, null, "");
+					OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
+					if(list){
+						emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
+					}
+					box.setSelectedIndex(0);
+				}
+				if (valuesRowset != null) {
 					if (ModelCombo.this.list) {
 						for (Row row : valuesRowset.getCurrent()) {
 							Row displayRow = row;
-							String label = displayRow != null ? converter.convert(displayRow.getColumnObject(displayElement.getColIndex())) : "";
-							box.addItem(label, String.valueOf(row.getColumnObject(valueElement.getColIndex())), row, "");
+							if (displayRow != valueRow) {// avoid duplication of
+								                         // list's items
+								String _label = converter.convert(displayRow.getColumnObject(displayElement.getColIndex()));
+								Object _listedValue = row.getColumnObject(valueElement.getColIndex());
+								box.addItem(_label, String.valueOf(_listedValue), _listedValue, "");
+							}
 						}
 					}
-					box.setSelectedIndex(-1);
-					checkNonListValue(valueRow, false);
 				}
+				super.setValue(_value, false);
 			}
 		} catch (Exception e) {
 			Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
 
-	protected void checkNonListValue(Row valueRow, boolean fireEvents) throws Exception {
-		StyledListBox<Row> box = (StyledListBox<Row>) decorated;
-		if (box.getSelectedIndex() == -1 && isValidBindings()) {
-			if (valueRow != null) {
-				Row displayRow = valueRow;
-				String label = displayRow != null ? converter.convert(displayRow.getColumnObject(displayElement.getColIndex())) : "";
-				box.addItem(label, String.valueOf(valueRow.getColumnObject(valueElement.getColIndex())), valueRow, "");
-			}
-			super.setValue(valueRow, fireEvents);
-		}
-	}
-
-	protected HasValue<Row> getDecorated() {
+	protected HasValue<Object> getDecorated() {
 		return decorated;
 	}
 
 	public String getText() {
-		return ((StyledListBox<Row>) decorated).getText();
+		return ((StyledListBox<Object>) decorated).getText();
 	}
 
 	@Override
@@ -253,62 +242,62 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	private native static void publish(ModelCombo aWidget, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(aPublished, "emptyText", {
-			get : function() {
-				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-			}
-		});
-		Object.defineProperty(aPublished, "value", {
-			get : function() {
-				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());
-			},
-			set : function(aValue) {
-				if (aValue != null) {
-					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
-				} else {
-					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)(null);
-				}
-		   }
-		});
-		Object.defineProperty(aPublished, "text", {
-			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getText()();
-			}
-		});
-		Object.defineProperty(aPublished, "valueField", {
-			get : function() {
-				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getValueField()());
-			},
-			set : function(aValue) {
-				if (aValue != null)
-					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
-				else
-					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(null);
-		   }
-		});
-		Object.defineProperty(aPublished, "displayField", {
-			get : function() {
-				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getDisplayField()());
-			},
-			set : function(aValue) {
-				if (aValue != null)
-					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
-				else
-					aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(null);
-		   }
-		});
-		Object.defineProperty(aPublished, "list", {
-			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::isList()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setList(Z)(false != aValue);
-			}
-		});
-	}-*/;
+       Object.defineProperty(aPublished, "emptyText", {
+       get : function() {
+       return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+       },
+       set : function(aValue) {
+       aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+       }
+       });
+       Object.defineProperty(aPublished, "value", {
+       get : function() {
+       return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());
+       },
+       set : function(aValue) {
+       if (aValue != null) {
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+       } else {
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setJsValue(Ljava/lang/Object;)(null);
+       }
+       }
+       });
+       Object.defineProperty(aPublished, "text", {
+       get : function() {
+       return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getText()();
+       }
+       });
+       Object.defineProperty(aPublished, "valueField", {
+       get : function() {
+       return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getValueField()());
+       },
+       set : function(aValue) {
+       if (aValue != null)
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
+       else
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setValueField(Lcom/bearsoft/rowset/metadata/Field;)(null);
+       }
+       });
+       Object.defineProperty(aPublished, "displayField", {
+       get : function() {
+       return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getDisplayField()());
+       },
+       set : function(aValue) {
+       if (aValue != null)
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
+       else
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Lcom/bearsoft/rowset/metadata/Field;)(null);
+       }
+       });
+       Object.defineProperty(aPublished, "list", {
+       get : function() {
+       return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::isList()();
+       },
+       set : function(aValue) {
+       aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setList(Z)(false != aValue);
+       }
+       });
+    }-*/;
 
 	public ModelElementRef getValueElement() {
 		return valueElement;
@@ -343,7 +332,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 
 	@Override
 	public void setBinding(Field aField) throws Exception {
-		super.setBinding(aField, new RowRowValueConverter());
+		super.setBinding(aField, new ObjectRowValueConverter());
 	}
 
 	public com.bearsoft.rowset.metadata.Field getValueField() throws Exception {
@@ -389,19 +378,19 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	public void setList(boolean aValue) {
 		if (list != aValue) {
 			list = aValue;
+			StyledListBox<Object> box = (StyledListBox<Object>) decorated;
+			box.setMultipleSelect(!list);
+			if (list)
+				box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
+			else
+				box.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
 			// target.setReadOnly(!editable || selectOnly || !list);
 			redraw();
 		}
 	}
 
-	public Object lookupRowValue(Row aRow) throws Exception {
-		return aRow != null ? aRow.getColumnObject(valueElement.getColIndex()) : null;
-	}
-
 	public Object getJsValue() throws Exception {
-		// Row row = getValue();
-		// Object key = lookupRowValue(row);
-		return Utils.toJs(valueKey);
+		return Utils.toJs(getValue());
 	}
 
 	public void setJsValue(Object aValue) throws Exception {
@@ -409,13 +398,10 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 	}
 
 	public void setJsValue(Object aValue, boolean fireEvents) throws Exception {
-		valueKey = Utils.toJava(aValue);
-		if (lookup != null) {
-			setValue(lookup.lookupRow(valueKey), fireEvents);
-		}
+		setValue(Utils.toJava(aValue), fireEvents);
 	}
 
 	public void clear() {
-		((StyledListBox<Row>) decorated).clear();
+		((StyledListBox<Object>) decorated).clear();
 	}
 }

@@ -50,7 +50,7 @@ public class StringEditorCell extends RenderedEditorCell<String> {
 				sb.appendEscaped(e.getMessage());
 			}
 		} else {
-			sb.appendEscaped(value);
+			sb.appendEscaped(value != null ? value : "");
 		}
 	}
 }

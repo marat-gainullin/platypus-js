@@ -21,6 +21,8 @@ import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.view.client.ListDataProvider;
 
 public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOfProvider<Row> {
@@ -98,6 +100,20 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 	 */
 
 	protected class RowsetReflector extends RowsetAdapter {
+
+		public int pingCounter;
+		
+		protected void 				pingGWT(){
+			Scheduler.get().scheduleDeferred(new ScheduledCommand(){
+
+				@Override
+                public void execute() {
+					pingCounter = 0;
+					pingCounter++;
+                }
+				
+			});
+		}
 		
 		@Override
 		public void rowsetFiltered(RowsetFilterEvent event) {
@@ -106,6 +122,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 			invalidate();
 			if (onResize != null)
 				onResize.run();
+			pingGWT();
 		}
 
 		@Override
@@ -115,6 +132,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 			invalidate();
 			if (onResize != null)
 				onResize.run();
+			pingGWT();
 		}
 
 		@Override
@@ -124,6 +142,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 			invalidate();
 			if (onResize != null)
 				onResize.run();
+			pingGWT();
 		}
 
 		@Override
@@ -133,6 +152,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 			invalidate();
 			if (onResize != null)
 				onResize.run();
+			pingGWT();
 		}
 
 		@Override
@@ -200,6 +220,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 				invalidate();
 				if (onResize != null)
 					onResize.run();
+				pingGWT();
 			}
 		}
 
@@ -211,11 +232,13 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 				invalidate();
 				if (onResize != null)
 					onResize.run();
+				pingGWT();
 			} else if (!getList().isEmpty()) {
 				validate();
 				Integer index = indicies.get(event.getChangedRow());
 				assert index != null;
 				getList().set(index, event.getChangedRow());
+				pingGWT();
 			}
 		}
 
@@ -244,6 +267,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 					if (onResize != null)
 						onResize.run();
 				}
+				pingGWT();
 			}
 		}
 

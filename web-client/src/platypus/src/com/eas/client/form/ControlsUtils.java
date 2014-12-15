@@ -291,17 +291,25 @@ public class ControlsUtils {
 					for (int i = 0; i < rowIds.length; i++)
 						rowIds[i] = Utils.toJs(rowIds[i]);
 				}
-				Boolean res = Utils.executeScriptEventBoolean(
+				Utils.executeScriptEventVoid(
 				        aEventThis,
 				        cellFunction,
 				        JsEvents.publishOnRenderEvent(aEventThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
 				                Entity.publishRowFacade(aRow, aModelElement.entity, null), cell));
-				if (res != null && res) {
-					return cell;
-				}
+				return cell;
 			}
 		}
 		return null;
+	}
+
+	public static PublishedCell calcValuedPublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Object aValue, String aDisplay, PublishedCell aAlreadyCell) throws Exception {
+		if (aEventThis != null && cellFunction != null) {
+			PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aValue), aDisplay);
+			Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, null, cell));
+			return cell;
+		} else {
+			return null;
+		}
 	}
 
 	protected static void walkChildren(XElement aRoot, XElement.Observer aCallback) {
@@ -473,10 +481,10 @@ public class ControlsUtils {
 			}
 		}
 	}
-	
+
 	public static void focus(Widget aWidget) {
-		if(aWidget instanceof Focusable){
-			((Focusable)aWidget).setFocus(true);
+		if (aWidget instanceof Focusable) {
+			((Focusable) aWidget).setFocus(true);
 		}
 	}
 }
