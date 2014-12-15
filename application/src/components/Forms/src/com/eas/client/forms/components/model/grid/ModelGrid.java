@@ -6,7 +6,7 @@ import com.bearsoft.gui.grid.constraints.LinearConstraint;
 import com.bearsoft.gui.grid.data.CachingTableModel;
 import com.bearsoft.gui.grid.data.TableFront2TreedModel;
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.HeaderSplitter;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
@@ -38,7 +38,6 @@ import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
-import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -231,8 +230,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     private void configureTreedView() {
         if (rowsModel instanceof ArrayTreedModel && columnModel.getColumnCount() > 0) {
             TableColumn tCol = columnModel.getColumn(0);
-            tCol.setCellRenderer(new InsettedTreeRenderer<>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, style, false)));
-            tCol.setCellEditor(new InsettedTreeEditor<>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
+            tCol.setCellRenderer(new InsettedTreeRenderer<>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, false, closedFolderIcon, openFolderIcon, leafIcon)));
+            tCol.setCellEditor(new InsettedTreeEditor<>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, true, closedFolderIcon, openFolderIcon, leafIcon)));
         }
     }
 
@@ -361,7 +360,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected TablesFocusManager tablesFocusManager = new TablesFocusManager();
     protected TablesMousePropagator tablesMousePropagator = new TablesMousePropagator();
     // design
-    protected List<GridColumnsGroup> header = new ArrayList<>();
+    protected Icon openFolderIcon;
+    protected Icon closedFolderIcon;
+    protected Icon leafIcon;
+    protected List<GridColumnsNode> header = new ArrayList<>();
     protected int rowsHeight = 20;
     protected boolean showVerticalLines = true;
     protected boolean showHorizontalLines = true;
@@ -371,7 +373,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected boolean deletable = true;
     protected Color oddRowsColor;
     protected Color gridColor;
-    protected CascadedStyle style = new CascadedStyle();
     // data
     protected ArrayModel rowsModel;
     protected TableModel deepModel;
@@ -562,32 +563,29 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     protected final void setupStyle() {
         JTable tbl = new JTable();
         gridColor = tbl.getGridColor();
-        style = new CascadedStyle(null);
-        style.setAlign(SwingConstants.LEFT);
-        style.setFont(tbl.getFont());
+        setFont(tbl.getFont());
         Color uiColor = tbl.getBackground();
-        style.setBackground(new Color(uiColor.getRed(), uiColor.getGreen(), uiColor.getBlue(), uiColor.getAlpha()));
+        setBackground(new Color(uiColor.getRed(), uiColor.getGreen(), uiColor.getBlue(), uiColor.getAlpha()));
         uiColor = tbl.getForeground();
-        style.setForeground(new Color(uiColor.getRed(), uiColor.getGreen(), uiColor.getBlue(), uiColor.getAlpha()));
-        style.setIconName(null);
+        setForeground(new Color(uiColor.getRed(), uiColor.getGreen(), uiColor.getBlue(), uiColor.getAlpha()));
 
-        Object openedIcon = UIManager.get("Tree.openIcon");
-        Object closedIcon = UIManager.get("Tree.closedIcon");
-        Object leafIcon = UIManager.get("Tree.leafIcon");
-        if (openedIcon instanceof Icon) {
-            style.setOpenFolderIcon((Icon) openedIcon);
+        Object uiOpenedIcon = UIManager.get("Tree.openIcon");
+        Object uiClosedIcon = UIManager.get("Tree.closedIcon");
+        Object uiLeafIcon = UIManager.get("Tree.leafIcon");
+        if (uiOpenedIcon instanceof Icon) {
+            openFolderIcon = (Icon) uiOpenedIcon;
         } else {
-            style.setOpenFolderIconName("folder-horizontal-open.png");
+            openFolderIcon = IconCache.getIcon("16x16/folder-horizontal-open.png");
         }
-        if (closedIcon instanceof Icon) {
-            style.setFolderIcon((Icon) closedIcon);
+        if (uiClosedIcon instanceof Icon) {
+            closedFolderIcon = (Icon) uiClosedIcon;
         } else {
-            style.setFolderIconName("folder-horizontal.png");
+            closedFolderIcon = IconCache.getIcon("16x16/folder-horizontal.png");
         }
-        if (leafIcon instanceof Icon) {
-            style.setLeafIcon((Icon) leafIcon);
+        if (uiLeafIcon instanceof Icon) {
+            leafIcon = (Icon) uiLeafIcon;
         } else {
-            style.setLeafIconName("status-offline.png");
+            leafIcon = IconCache.getIcon("16x16/status-offline.png");
         }
     }
 
@@ -821,11 +819,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     @ScriptFunction
     @Override
-    public void setBackground(Color bg) {
-        super.setBackground(bg);
-        if (style != null) {
-            style.setBackground(bg);
-        }
+    public void setBackground(Color aValue) {
+        super.setBackground(aValue);
         applyBackground();
     }
 
@@ -873,20 +868,13 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     @ScriptFunction
     @Override
     public Color getBackground() {
-        if (style != null) {
-            return style.getBackground();
-        } else {
-            return super.getBackground();
-        }
+        return super.getBackground();
     }
 
     @ScriptFunction
     @Override
-    public void setForeground(Color fg) {
-        super.setForeground(fg);
-        if (style != null) {
-            style.setForeground(fg);
-        }
+    public void setForeground(Color aValue) {
+        super.setForeground(aValue);
         applyForeground();
     }
 
@@ -908,20 +896,13 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     @ScriptFunction
     @Override
     public Color getForeground() {
-        if (style != null) {
-            return style.getForeground();
-        } else {
-            return super.getForeground();
-        }
+        return super.getForeground();
     }
 
     @ScriptFunction
     @Override
-    public void setFont(Font font) {
-        super.setFont(font);
-        if (style != null) {
-            style.setFont(font);
-        }
+    public void setFont(Font aValue) {
+        super.setFont(aValue);
         applyFont();
     }
 
@@ -943,11 +924,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     @ScriptFunction
     @Override
     public Font getFont() {
-        if (style != null) {
-            return style.getFont();
-        } else {
-            return super.getFont();
-        }
+        return super.getFont();
     }
 
     @ScriptFunction(jsDoc = LEFT_JSDOC)
@@ -1172,11 +1149,11 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     @Undesignable
-    public List<GridColumnsGroup> getHeader() {
+    public List<GridColumnsNode> getHeader() {
         return header;
     }
 
-    public void setHeader(List<GridColumnsGroup> aValue) {
+    public void setHeader(List<GridColumnsNode> aValue) {
         if (header != aValue) {
             header = aValue;
             applyHeader();
@@ -1209,8 +1186,8 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     protected void applyHeader() {
         // set header
-        List<GridColumnsGroup> lgroups = HeaderSplitter.split(header, 0, frozenColumns - 1);
-        List<GridColumnsGroup> rgroups = HeaderSplitter.split(header, frozenColumns, Integer.MAX_VALUE);
+        List<GridColumnsNode> lgroups = HeaderSplitter.split(header, 0, frozenColumns - 1);
+        List<GridColumnsNode> rgroups = HeaderSplitter.split(header, frozenColumns, Integer.MAX_VALUE);
         lheader.setRoots(lgroups);
         rheader.setRoots(rgroups);
         lheader.regenerate();
@@ -2377,10 +2354,6 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                 }
             }
         }
-    }
-
-    public CascadedStyle getStyle() {
-        return style;
     }
 
     // Native API

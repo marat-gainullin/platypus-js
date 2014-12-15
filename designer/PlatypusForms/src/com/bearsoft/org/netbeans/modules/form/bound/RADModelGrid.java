@@ -4,7 +4,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
@@ -50,7 +50,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
             List<ModelColumn> beanColumns = new ArrayList<>();
             scanLeaves(beanColumns, columns.toArray(new RADModelGridColumn[]{}));
             getBeanInstance().setColumns(beanColumns.toArray(new ModelColumn[]{}));
-            List<GridColumnsGroup> headerRoots = new ArrayList<>();
+            List<GridColumnsNode> headerRoots = new ArrayList<>();
             columns.stream().forEach((RADModelGridColumn aDesignColumn) -> {
                 headerRoots.add(aDesignColumn.getBeanInstance());
             });
@@ -95,7 +95,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
     public void reorderSubComponents(int[] perm) {
         ModelGrid modelGrid = getBeanInstance();
         RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        GridColumnsGroup[] oldRawColumns = modelGrid.getHeader().toArray(new GridColumnsGroup[]{});
+        GridColumnsNode[] oldRawColumns = modelGrid.getHeader().toArray(new GridColumnsNode[]{});
         assert perm.length == oldColumns.length;
         assert perm.length == oldRawColumns.length;
         for (int i = 0; i < columns.size(); i++) {

@@ -4,8 +4,6 @@
  */
 package com.bearsoft.gui.grid.header;
 
-import com.eas.design.Designable;
-import com.eas.gui.CascadedStyle;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
@@ -20,9 +18,12 @@ import javax.swing.table.TableColumn;
  *
  * @author mg
  */
-public class GridColumnsGroup {
+public class GridColumnsNode {
 
-    protected GridColumnsGroup parent;
+    protected Color background;
+    protected Color foreground;
+    protected Font font;
+    protected GridColumnsNode parent;
     protected int minWidth = 0;
     protected int maxWidth = Integer.MAX_VALUE / 2;
     protected boolean movable = true;
@@ -32,27 +33,17 @@ public class GridColumnsGroup {
     protected boolean enabled = true;
     protected boolean visible = true;
     protected String title;
-    protected String name;
     protected boolean selectOnly;
-    protected CascadedStyle style = new CascadedStyle();
-    protected List<GridColumnsGroup> children = new ArrayList<>();
+    protected List<GridColumnsNode> children = new ArrayList<>();
     protected TableColumn tableColumn;
     //
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-    // style listener
-    protected PropertyChangeListener styleListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            changeSupport.firePropertyChange("style", null, style);
-        }
-    };
 
-    public GridColumnsGroup() {
+    public GridColumnsNode() {
         super();
-        style.getChangeSupport().addPropertyChangeListener(styleListener);
     }
 
-    public GridColumnsGroup(String aTitle) {
+    public GridColumnsNode(String aTitle) {
         this();
         title = aTitle;
     }
@@ -62,7 +53,7 @@ public class GridColumnsGroup {
      *
      * @param aParent Parent group, the new group is to be added to;
      */
-    public GridColumnsGroup(GridColumnsGroup aParent) {
+    public GridColumnsNode(GridColumnsNode aParent) {
         this();
         setParent(aParent);
     }
@@ -75,7 +66,7 @@ public class GridColumnsGroup {
      * @see TableColumn
      * @see GridColumnsGroup
      */
-    public GridColumnsGroup(TableColumn aCol) {
+    public GridColumnsNode(TableColumn aCol) {
         this();
         setTableColumn(aCol);
     }
@@ -84,36 +75,15 @@ public class GridColumnsGroup {
         return changeSupport;
     }
 
-    public final void setParent(GridColumnsGroup aParent) {
+    public final void setParent(GridColumnsNode aParent) {
         parent = aParent;
-        if (parent != null && style != null) {
-            style.setParent(parent.getStyle());
-        }
     }
 
-    public CascadedStyle getStyle() {
-        return style;
-    }
-
-    public void setStyle(CascadedStyle aValue) {
-        if (style != aValue) {
-            CascadedStyle oldValue = style;
-            if (style != null) {
-                style.getChangeSupport().removePropertyChangeListener(styleListener);
-            }
-            style = aValue;
-            if (style != null) {
-                style.getChangeSupport().addPropertyChangeListener(styleListener);
-            }
-            changeSupport.firePropertyChange("style", oldValue, style);
-        }
-    }
-
-    public boolean containsInChildren(GridColumnsGroup aChild) {
+    public boolean containsInChildren(GridColumnsNode aChild) {
         return children != null && children.indexOf(aChild) != -1;
     }
 
-    public GridColumnsGroup getParent() {
+    public GridColumnsNode getParent() {
         return parent;
     }
 
@@ -162,7 +132,7 @@ public class GridColumnsGroup {
         }
     }
 
-    public void lightAssign(GridColumnsGroup aSource) {
+    public void lightAssign(GridColumnsNode aSource) {
         if (aSource != null) {
             enabled = aSource.isEnabled();
             minWidth = aSource.getMinWidth();
@@ -174,23 +144,21 @@ public class GridColumnsGroup {
             resizable = aSource.isResizable();
             sortable = aSource.isSortable();
             title = aSource.getTitle();
-            //name = aSource.getName();
-            if (aSource.getStyle() != null) {
-                style = aSource.getStyle().copy();
-            } else {
-                style = null;
-            }
+            background = aSource.getBackground();
+            foreground = aSource.getForeground();
+            font = aSource.getFont();
         } else {
             readonly = false;
             enabled = true;
             visible = true;
             title = null;
-            name = null;
             selectOnly = false;
-            style = null;
             movable = true;
             resizable = true;
             sortable = true;
+            background = null;
+            foreground = null;
+            font = null;
         }
     }
 
@@ -201,7 +169,7 @@ public class GridColumnsGroup {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final GridColumnsGroup other = (GridColumnsGroup) obj;
+        final GridColumnsNode other = (GridColumnsNode) obj;
 
         if (this.minWidth != other.minWidth) {
             return false;
@@ -233,10 +201,13 @@ public class GridColumnsGroup {
         if ((this.title == null) ? (other.title != null) : !this.title.equals(other.title)) {
             return false;
         }
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+        if ((this.background == null) ? (other.background != null) : !this.background.equals(other.background)) {
             return false;
         }
-        if (this.style != other.style && (this.style == null || !this.style.isEqual(other.style))) {
+        if ((this.foreground == null) ? (other.foreground != null) : !this.foreground.equals(other.foreground)) {
+            return false;
+        }
+        if ((this.font == null) ? (other.font != null) : !this.font.equals(other.font)) {
             return false;
         }
         return true;
@@ -252,7 +223,7 @@ public class GridColumnsGroup {
         if (!lightEquals(obj)) {
             return false;
         }
-        final GridColumnsGroup other = (GridColumnsGroup) obj;
+        final GridColumnsNode other = (GridColumnsNode) obj;
         if (this.children != other.children && (this.children == null || !isColumnsEquals(this.children, other.children))) {
             return false;
         }
@@ -268,9 +239,10 @@ public class GridColumnsGroup {
         hash = 37 * hash + (this.enabled ? 1 : 0);
         hash = 37 * hash + (this.visible ? 1 : 0);
         hash = 37 * hash + (this.title != null ? this.title.hashCode() : 0);
-        hash = 37 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 37 * hash + (this.background != null ? this.background.hashCode() : 0);
+        hash = 37 * hash + (this.foreground != null ? this.foreground.hashCode() : 0);
+        hash = 37 * hash + (this.font != null ? this.font.hashCode() : 0);
         hash = 37 * hash + (this.selectOnly ? 1 : 0);
-        hash = 37 * hash + (this.style != null ? this.style.hashCode() : 0);
         return hash;
     }
 
@@ -285,13 +257,13 @@ public class GridColumnsGroup {
         return super.equals(obj);
     }
 
-    public static boolean isColumnsEquals(List<GridColumnsGroup> first, List<GridColumnsGroup> second) {
+    public static boolean isColumnsEquals(List<GridColumnsNode> first, List<GridColumnsNode> second) {
         if (first != second) {
             if (first != null && second != null) {
                 if (first.size() == second.size()) {
                     for (int i = 0; i < first.size(); i++) {
-                        GridColumnsGroup fColumn = first.get(i);
-                        GridColumnsGroup sColumn = second.get(i);
+                        GridColumnsNode fColumn = first.get(i);
+                        GridColumnsNode sColumn = second.get(i);
                         if (fColumn != sColumn) {
                             if (fColumn != null && sColumn != null) {
                                 if (!fColumn.equals(sColumn)) {
@@ -312,14 +284,14 @@ public class GridColumnsGroup {
         return true;
     }
 
-    public void assign(GridColumnsGroup aSource) {
+    public void assign(GridColumnsNode aSource) {
         lightAssign(aSource);
         children = new ArrayList<>();
         if (aSource != null && aSource.getChildren() != null) {
-            List<GridColumnsGroup> lchildren = aSource.getChildren();
+            List<GridColumnsNode> lchildren = aSource.getChildren();
             for (int i = 0; i < lchildren.size(); i++) {
                 if (lchildren.get(i) != null) {
-                    GridColumnsGroup newCol = lchildren.get(i).copy();
+                    GridColumnsNode newCol = lchildren.get(i).copy();
                     children.add(newCol);
                     newCol.setParent(this);
                 } else {
@@ -330,14 +302,14 @@ public class GridColumnsGroup {
         }
     }
 
-    public GridColumnsGroup lightCopy() {
-        GridColumnsGroup colg = new GridColumnsGroup();
+    public GridColumnsNode lightCopy() {
+        GridColumnsNode colg = new GridColumnsNode();
         colg.lightAssign(this);
         return colg;
     }
 
-    public GridColumnsGroup copy() {
-        GridColumnsGroup colg = new GridColumnsGroup();
+    public GridColumnsNode copy() {
+        GridColumnsNode colg = new GridColumnsNode();
         colg.assign(this);
         return colg;
     }
@@ -428,14 +400,14 @@ public class GridColumnsGroup {
         }
     }
 
-    public List<GridColumnsGroup> getChildren() {
+    public List<GridColumnsNode> getChildren() {
         return children;
     }
 
-    public void setChildren(List<GridColumnsGroup> aChildren) {
+    public void setChildren(List<GridColumnsNode> aChildren) {
         children = aChildren;
         if (children != null) {
-            for (GridColumnsGroup lcol : children) {
+            for (GridColumnsNode lcol : children) {
                 if (lcol != null) {
                     lcol.setParent(this);
                 }
@@ -550,33 +522,26 @@ public class GridColumnsGroup {
             }
         }
     }
-    /*
-     public String getName() {
-     return name;
-     }
-
-     public void setName(String aName) {
-     name = aName;
-     }
-     */
 
     @ScriptFunction
     public Color getBackground() {
-        return style.getBackground();
+        return background;
     }
 
     @ScriptFunction
-    public void setBackground(Color background) {
-        style.setBackground(background);
+    public void setBackground(Color aValue) {
+        Color oldValue = background;
+        background = aValue;
+        changeSupport.firePropertyChange("background", oldValue, aValue);
     }
 
-    public void removeChild(GridColumnsGroup aCol) {
+    public void removeChild(GridColumnsNode aCol) {
         if (children != null) {
             children.remove(aCol);
         }
     }
 
-    public void addChild(GridColumnsGroup aGroup) {
+    public void addChild(GridColumnsNode aGroup) {
         if (children == null) {
             children = new ArrayList<>();
         }
@@ -586,7 +551,7 @@ public class GridColumnsGroup {
         }
     }
 
-    public void addChild(int atIndex, GridColumnsGroup aGroup) {
+    public void addChild(int atIndex, GridColumnsNode aGroup) {
         if (children == null) {
             children = new ArrayList<>();
         }
@@ -599,22 +564,26 @@ public class GridColumnsGroup {
 
     @ScriptFunction
     public Color getForeground() {
-        return style.getForeground();
+        return foreground;
     }
 
     @ScriptFunction
-    public void setForeground(Color aColor) {
-        style.setForeground(aColor);
+    public void setForeground(Color aValue) {
+        Color oldValue = foreground;
+        foreground = aValue;
+        changeSupport.firePropertyChange("foreground", oldValue, aValue);
     }
 
     @ScriptFunction
     public Font getFont() {
-        return style.getFont();
+        return font;
     }
 
     @ScriptFunction
     public void setFont(Font aValue) {
-        style.setFont(aValue);
+        Font oldValue = font;
+        font = aValue;
+        changeSupport.firePropertyChange("font", oldValue, aValue);
     }
 
     public boolean isLeaf() {

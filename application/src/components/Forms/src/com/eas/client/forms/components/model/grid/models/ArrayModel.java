@@ -65,7 +65,7 @@ public abstract class ArrayModel {
                 return getObjectsData(column.getField(), anElement);
             } catch (Exception ex) {
                 severe(ex.getMessage());
-                return new CellData(null, null, null);
+                return null;
             }
         }
         return null;

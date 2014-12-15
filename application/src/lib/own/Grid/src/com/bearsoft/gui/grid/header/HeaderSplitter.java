@@ -11,7 +11,7 @@ public class HeaderSplitter {
     protected int minLeave;
     protected int maxLeave;
     // processing
-    protected List<GridColumnsGroup> splittedLeaves = new ArrayList<>();
+    protected List<GridColumnsNode> splittedLeaves = new ArrayList<>();
     protected int leaveIndex = -1;
 
     protected HeaderSplitter(int aMinLeave, int aMaxLeave) {
@@ -20,18 +20,18 @@ public class HeaderSplitter {
         maxLeave = aMaxLeave;
     }
 
-    public static List<GridColumnsGroup> split(List<GridColumnsGroup> toBeSplitted, int aMinLeave, int aMaxLeave) {
+    public static List<GridColumnsNode> split(List<GridColumnsNode> toBeSplitted, int aMinLeave, int aMaxLeave) {
         HeaderSplitter splitter = new HeaderSplitter(aMinLeave, aMaxLeave);
         splitter.process(toBeSplitted, null);
         return splitter.toRoots();
     }
 
-    protected List<GridColumnsGroup> toRoots() {
-        List<GridColumnsGroup> res = new ArrayList<>();
-        Set<GridColumnsGroup> met = new HashSet<>();
+    protected List<GridColumnsNode> toRoots() {
+        List<GridColumnsNode> res = new ArrayList<>();
+        Set<GridColumnsNode> met = new HashSet<>();
         for (int i = 0; i < splittedLeaves.size(); i++) {
-            GridColumnsGroup leaf = splittedLeaves.get(i);
-            GridColumnsGroup parent = leaf;
+            GridColumnsNode leaf = splittedLeaves.get(i);
+            GridColumnsNode parent = leaf;
             while (parent.getParent() != null) {
                 parent = parent.getParent();
             }
@@ -43,12 +43,14 @@ public class HeaderSplitter {
         return res;
     }
 
-    protected boolean process(List<GridColumnsGroup> toBeSplitted, GridColumnsGroup aClonedParent) {
+    protected boolean process(List<GridColumnsNode> toBeSplitted, GridColumnsNode aClonedParent) {
         boolean res = false;
         for (int i = 0; i < toBeSplitted.size(); i++) {
-            GridColumnsGroup n = toBeSplitted.get(i);
-            GridColumnsGroup nc = new GridColumnsGroup(n.getTitle());
-            nc.setStyle(n.getStyle());
+            GridColumnsNode n = toBeSplitted.get(i);
+            GridColumnsNode nc = new GridColumnsNode(n.getTitle());
+            nc.setBackground(n.getBackground());
+            nc.setForeground(n.getForeground());
+            nc.setFont(n.getFont());
             if (n.getChildren().isEmpty()) {
                 leaveIndex++;
                 if (leaveIndex >= minLeave && leaveIndex <= maxLeave) {

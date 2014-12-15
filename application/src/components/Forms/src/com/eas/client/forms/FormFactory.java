@@ -4,7 +4,7 @@
  */
 package com.eas.client.forms;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.eas.client.forms.components.Button;
 import com.eas.client.forms.components.CheckBox;
 import com.eas.client.forms.components.DesktopPane;
@@ -415,7 +415,7 @@ public class FormFactory {
                     String childrenFieldPath = anElement.getAttribute("childrenField");
                     grid.setChildrenField(childrenFieldPath);
                 }
-                List<GridColumnsGroup> columnsRoots = readColumns(grid, XmlDomUtils.elementsByTagName(anElement, "column"));
+                List<GridColumnsNode> columnsRoots = readColumns(grid, XmlDomUtils.elementsByTagName(anElement, "column"));
                 grid.setHeader(columnsRoots);
                 return grid;
             // containers   
@@ -783,10 +783,10 @@ public class FormFactory {
         return result;
     }
 
-    private List<GridColumnsGroup> readColumns(ModelGrid grid, List<Element> columnsElements) {
-        List<GridColumnsGroup> groups = new ArrayList<>();
+    private List<GridColumnsNode> readColumns(ModelGrid grid, List<Element> columnsElements) {
+        List<GridColumnsNode> groups = new ArrayList<>();
         columnsElements.stream().sequential().forEach((columnElement) -> {
-            GridColumnsGroup group = new GridColumnsGroup();
+            GridColumnsNode group = new GridColumnsNode();
             groups.add(group);
             List<Element> subColumnsElements = XmlDomUtils.elementsByTagName(columnElement, "column");
             if (subColumnsElements.isEmpty() || forceColumns) {
@@ -796,8 +796,8 @@ public class FormFactory {
                 grid.addColumn(col);
             }
             if(!subColumnsElements.isEmpty()){
-                List<GridColumnsGroup> subGroups = readColumns(grid, subColumnsElements);
-                subGroups.stream().sequential().forEach((GridColumnsGroup aGroup) -> {
+                List<GridColumnsNode> subGroups = readColumns(grid, subColumnsElements);
+                subGroups.stream().sequential().forEach((GridColumnsNode aGroup) -> {
                     group.addChild(aGroup);
                 });
             }

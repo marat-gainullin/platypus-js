@@ -17,7 +17,6 @@ import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
-import com.eas.gui.CascadedStyle;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
@@ -374,16 +373,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                     }
                 }
             });
-        }
-    }
-
-    public void applyStyle(CascadedStyle aStyle) {
-        if (aStyle != null) {
-            setFont(aStyle.getFont());
-            setBackground(aStyle.getBackground());
-            setForeground(aStyle.getForeground());
-            setIcon(aStyle.getIcon());
-            setAlign(aStyle.getAlign());
         }
     }
 

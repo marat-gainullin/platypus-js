@@ -33,7 +33,7 @@ public class MultiLevelHeaderTest {
     // source column model
     protected DefaultTableColumnModel columns = new DefaultTableColumnModel();
     // ethalon roots
-    protected List<GridColumnsGroup> roots = new ArrayList<>();
+    protected List<GridColumnsNode> roots = new ArrayList<>();
     // target multi level header
     protected MultiLevelHeader header;
 
@@ -51,32 +51,32 @@ public class MultiLevelHeaderTest {
         }
 
         header.setColumnModel(columns);
-        GridColumnsGroup g11;
-        GridColumnsGroup g12;
-        GridColumnsGroup g21;
-        GridColumnsGroup g22;
-        GridColumnsGroup g23;
-        GridColumnsGroup g24;
-        GridColumnsGroup g33;
-        GridColumnsGroup g34;
+        GridColumnsNode g11;
+        GridColumnsNode g12;
+        GridColumnsNode g21;
+        GridColumnsNode g22;
+        GridColumnsNode g23;
+        GridColumnsNode g24;
+        GridColumnsNode g33;
+        GridColumnsNode g34;
 
-        g11 = new GridColumnsGroup("g11 hhhhhhhhhh test test");
+        g11 = new GridColumnsNode("g11 hhhhhhhhhh test test");
         {
-            g21 = new GridColumnsGroup(columns.getColumn(0)); // col 0
-            g22 = new GridColumnsGroup(columns.getColumn(1)); // col 1
+            g21 = new GridColumnsNode(columns.getColumn(0)); // col 0
+            g22 = new GridColumnsNode(columns.getColumn(1)); // col 1
             g11.addChild(g21);
             g11.addChild(g22);
         }
 
-        g12 = new GridColumnsGroup("g12 hhhhhhhhhh test test");
+        g12 = new GridColumnsNode("g12 hhhhhhhhhh test test");
         {
-            g23 = new GridColumnsGroup("g23 hhhhhhhhhh test test");
-            g24 = new GridColumnsGroup(columns.getColumn(4)); // col 4
+            g23 = new GridColumnsNode("g23 hhhhhhhhhh test test");
+            g24 = new GridColumnsNode(columns.getColumn(4)); // col 4
             g12.addChild(g23);
             g12.addChild(g24);
             {
-                g33 = new GridColumnsGroup(columns.getColumn(2)); // col 2
-                g34 = new GridColumnsGroup(columns.getColumn(3)); // col 3
+                g33 = new GridColumnsNode(columns.getColumn(2)); // col 2
+                g34 = new GridColumnsNode(columns.getColumn(3)); // col 3
                 g23.addChild(g33);
                 g23.addChild(g34);
             }
@@ -89,7 +89,7 @@ public class MultiLevelHeaderTest {
 
     @Test
     public void leafsToRootsTest() {
-        List<GridColumnsGroup> lroots = header.wrapColumnsCalculateRoots();
+        List<GridColumnsNode> lroots = header.wrapColumnsCalculateRoots();
         assertEquals(roots.size(), lroots.size());
         for (int i = 0; i < lroots.size(); i++) {
             assertTrue(lroots.get(i).isEqual(roots.get(i)));
@@ -100,16 +100,16 @@ public class MultiLevelHeaderTest {
     public void tree2GridCalculationsTest() {
         header.regenerate();
 
-        GridColumnsGroup g11 = header.roots.get(0);
-        GridColumnsGroup g12 = header.roots.get(1);
+        GridColumnsNode g11 = header.roots.get(0);
+        GridColumnsNode g12 = header.roots.get(1);
 
-        GridColumnsGroup g21 = g11.getChildren().get(0);
-        GridColumnsGroup g22 = g11.getChildren().get(1);
-        GridColumnsGroup g23 = g12.getChildren().get(0);
-        GridColumnsGroup g24 = g12.getChildren().get(1);
+        GridColumnsNode g21 = g11.getChildren().get(0);
+        GridColumnsNode g22 = g11.getChildren().get(1);
+        GridColumnsNode g23 = g12.getChildren().get(0);
+        GridColumnsNode g24 = g12.getChildren().get(1);
 
-        GridColumnsGroup g33 = g23.getChildren().get(0);
-        GridColumnsGroup g34 = g23.getChildren().get(1);
+        GridColumnsNode g33 = g23.getChildren().get(0);
+        GridColumnsNode g34 = g23.getChildren().get(1);
 
         GridBagConstraints g11Constraints = header.group2Constraints.get(g11);
         GridBagConstraints g12Constraints = header.group2Constraints.get(g12);

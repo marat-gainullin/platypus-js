@@ -9,7 +9,7 @@ import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
-import com.eas.gui.CascadedStyle;
+import com.eas.gui.ScriptColor;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
@@ -113,8 +113,8 @@ public class GridTable extends JTable implements ModelCellEditingListener {
                         res.setBackground(oddRowsColor);
                     } else {
                         Color aColor = getBackground().equals(Color.WHITE)
-                                ? CascadedStyle.darkerColor(getBackground(), 0.95)
-                                : CascadedStyle.brighterColor(getBackground(), 0.95);
+                                ? ScriptColor.darker(getBackground(), 0.95)
+                                : ScriptColor.brighter(getBackground(), 0.95);
                         res.setBackground(aColor);
                     }
                 }

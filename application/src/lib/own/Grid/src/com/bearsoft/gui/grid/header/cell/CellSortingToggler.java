@@ -4,7 +4,7 @@
  */
 package com.bearsoft.gui.grid.header.cell;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class CellSortingToggler extends MouseAdapter {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        GridColumnsGroup colGroup = cell.getColGroup();
+        GridColumnsNode colGroup = cell.getColGroup();
         if (colGroup.isLeaf() && colGroup.isSortable() && colGroup.getTableColumn() != null
                 && cell.getHeader().getRowSorter() != null) {
             int modelIndex = colGroup.getTableColumn().getModelIndex();

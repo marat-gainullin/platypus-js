@@ -47,9 +47,6 @@ import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
-import com.eas.resources.images.IconCache;
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.beans.*;
@@ -93,8 +90,8 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     public static final String RESOURCES_IMAGES_ANCHOR = "thumbs.cp";
     //
     private static String[] currentFiles;
-    private static Node rootNode;
-    private static FileObject currentFolder;
+    //private static Node rootNode;
+    //private static FileObject currentFolder;
     //
     private PropertyEnv env;
     private PlatypusFormDataObject dataObject;
@@ -148,7 +145,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         @Override
         protected Node[] createNodes(String key) {
             try {
-                return new Node[]{new ImageNode(getJarResourceFolder().getFileObject(key))};
+                return new Node[]{new ImageNode(getProjectSrcFolder().getFileObject(key))};
             } catch (Exception ex) {
                 return new Node[]{};
             }
@@ -228,22 +225,6 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         }
     }
 
-    /**
-     * Returns the "current folder" which is used to resolve short file names,
-     * its content is offered via getTags(), and it is also selected in the
-     * custom editor.
-     *
-     * @return the current folder used to pick image files from preferentially
-     */
-    public static FileObject getJarResourceFolder() throws Exception {
-        if (currentFolder == null) {
-            URL url = IconCache.getImageUrl(RESOURCES_IMAGES_ANCHOR);
-            FileSystem jfs = new JarFileSystem(FileUtil.archiveOrDirForURL(FileUtil.getArchiveFile(url)));
-            currentFolder = jfs.findResource("/" + IconCache.class.getPackage().getName().replace(".", "/"));
-        }
-        return currentFolder;
-    }
-
     public static FileObject getProjectSrcFolder(PlatypusFormDataObject dataObject) throws Exception {
         return dataObject.getProject().getSrcRoot();
     }
@@ -251,14 +232,14 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     public FileObject getProjectSrcFolder() throws Exception {
         return dataObject.getProject().getSrcRoot();
     }
-    
+/*    
     private Node getCurrentRootNode() throws Exception {
         if (rootNode == null) {
             rootNode = new AbstractNode(new FileChildren());
         }
         return rootNode;
     }
-
+*/
     /**
      * @return names of files (without path) available in current folder
      */
@@ -307,7 +288,6 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
             return new NbImageIcon(TYPE_URL, resName, new ImageIcon(new URL(resName)));
         } else {
             FileObject fo = getProjectSrcFolder(dataObject).getFileObject(resName);
-            fo = fo != null ? fo : getJarResourceFolder().getFileObject(resName);
             if (fo != null) {
                 try {
                     try {

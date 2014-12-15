@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.assistant.AssistantModel;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
@@ -2686,7 +2686,7 @@ public class HandleLayer extends JPanel {
                     RADComponent<?> targetComponent = targetContainer;
                     int mode = ((modifiers & InputEvent.ALT_MASK) != 0) ? COMP_SELECTED : COMP_DEEPEST;
                     RADComponent<?> hittedComponent = HandleLayer.this.getRadComponentAt(p, mode);
-                    if ((hittedComponent instanceof RADModelGrid && GridColumnsGroup.class.isAssignableFrom(paletteItem.getComponentClass()))) {
+                    if ((hittedComponent instanceof RADModelGrid && GridColumnsNode.class.isAssignableFrom(paletteItem.getComponentClass()))) {
                         targetComponent = hittedComponent;
                     }
                     addedComponent = getComponentCreator().createComponent(

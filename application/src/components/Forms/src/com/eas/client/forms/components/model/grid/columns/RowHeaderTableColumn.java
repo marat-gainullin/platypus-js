@@ -16,7 +16,7 @@ public class RowHeaderTableColumn extends ModelColumn {
     public static final int ROWS_HEADER_TYPE_RADIOBUTTON = 3;
     
     public RowHeaderTableColumn(int aWidth) {
-        super("rows-header", null, null, true, null, null, null);
+        super("rows-header", null, null, true, null, null);
         setWidth(aWidth);
     }
 }

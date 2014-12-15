@@ -4,8 +4,6 @@
  */
 package com.bearsoft.gui.grid.rendering;
 
-import com.bearsoft.gui.grid.data.CellData;
-import com.eas.gui.CascadedStyle;
 import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -13,6 +11,7 @@ import javax.swing.table.TableCellRenderer;
 /**
  *
  * @author Gala
+ * @param <T>
  */
 public class InsettedTreeRenderer<T> extends InsettedRenderer {
 
@@ -21,7 +20,9 @@ public class InsettedTreeRenderer<T> extends InsettedRenderer {
 
     /**
      * Creates a new instance of InsettedRenderer.
-     * @param aDelegate TableCellRenderer instance we have delegate all significant work to.
+     *
+     * @param aDelegate TableCellRenderer instance we have delegate all
+     * significant work to.
      * @see InsettedRenderer
      * @see TableCellRenderer
      */
@@ -31,8 +32,11 @@ public class InsettedTreeRenderer<T> extends InsettedRenderer {
 
     /**
      * Creates a new instance of InsettedRenderer.
-     * @param aDelegate TableCellRenderer instance we have delegate all significant work to.
-     * @param aLeadingComponent Component that will be rendered on the left side of table cell.
+     *
+     * @param aDelegate TableCellRenderer instance we have delegate all
+     * significant work to.
+     * @param aLeadingComponent Component that will be rendered on the left side
+     * of table cell.
      * @see InsettedRenderer
      * @see TableCellRenderer
      */
@@ -44,9 +48,13 @@ public class InsettedTreeRenderer<T> extends InsettedRenderer {
 
     /**
      * Creates a new instance of InsettedRenderer.
-     * @param aDelegate TableCellRenderer instance we have delegate all significant work to.
-     * @param aLeadingComponent Component that will be rendered on the left side of table cell.
-     * @param aTrailingComponent  Component that will be rendered on the right side of table cell.
+     *
+     * @param aDelegate TableCellRenderer instance we have delegate all
+     * significant work to.
+     * @param aLeadingComponent Component that will be rendered on the left side
+     * of table cell.
+     * @param aTrailingComponent Component that will be rendered on the right
+     * side of table cell.
      * @see InsettedRenderer
      * @see TableCellRenderer
      */
@@ -67,17 +75,7 @@ public class InsettedTreeRenderer<T> extends InsettedRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        if (value instanceof CellData && ((CellData) value).getStyle() != null) {
-            CascadedStyle oldStyle = treeLeadingComponent.getStyle();
-            treeLeadingComponent.setStyle(((CellData) value).getStyle());
-            try {
-                treeLeadingComponent.prepareRow(table.convertRowIndexToModel(row));
-            } finally {
-                treeLeadingComponent.setStyle(oldStyle);
-            }
-        } else {
-            treeLeadingComponent.prepareRow(table.convertRowIndexToModel(row));
-        }
+        treeLeadingComponent.prepareRow(table.convertRowIndexToModel(row));
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
 }

@@ -4,7 +4,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author mg
  */
-public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implements ComponentContainer {
+public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements ComponentContainer {
 
     protected RADColumnView<? super ModelComponentDecorator> viewControl;
     protected List<RADModelGridColumn> columns = new ArrayList<>();
@@ -76,7 +76,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
     }
 
     @Override
-    protected void setBeanInstance(GridColumnsGroup aBeanInstance) {
+    protected void setBeanInstance(GridColumnsNode aBeanInstance) {
         super.setBeanInstance(aBeanInstance);
         if (getBeanInstance() != null) {
             if (getBeanInstance().getTableColumn() == null) {
@@ -111,7 +111,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsGroup> implement
     @Override
     public void reorderSubComponents(int[] perm) {
         RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        GridColumnsGroup[] oldRawColumns = getBeanInstance().getChildren().toArray(new GridColumnsGroup[]{});
+        GridColumnsNode[] oldRawColumns = getBeanInstance().getChildren().toArray(new GridColumnsNode[]{});
         assert perm.length == oldColumns.length;
         assert perm.length == oldRawColumns.length;
         for (int i = 0; i < columns.size(); i++) {

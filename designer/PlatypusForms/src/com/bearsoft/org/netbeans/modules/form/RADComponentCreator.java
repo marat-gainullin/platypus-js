@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
@@ -320,8 +320,8 @@ public class RADComponentCreator {
             } else {
                 if (ButtonGroup.class.isAssignableFrom(compClass)) {
                     newRadComp = addButtonGroup((Class<ButtonGroup>) compClass, targetComp);
-                } else if (GridColumnsGroup.class.isAssignableFrom(compClass)) {
-                    newRadComp = addGridColumn((Class<GridColumnsGroup>) compClass, targetComp);
+                } else if (GridColumnsNode.class.isAssignableFrom(compClass)) {
+                    newRadComp = addGridColumn((Class<GridColumnsNode>) compClass, targetComp);
                 }
             }
             return newRadComp;
@@ -745,9 +745,9 @@ public class RADComponentCreator {
         formModel.addComponent(newRadComp, targetCont, newlyAdded);
     }
 
-    private RADModelGridColumn addGridColumn(Class<GridColumnsGroup> compClass,
+    private RADModelGridColumn addGridColumn(Class<GridColumnsNode> compClass,
             RADComponent<?> targetComp) throws Exception {
-        assert GridColumnsGroup.class.isAssignableFrom(compClass);
+        assert GridColumnsNode.class.isAssignableFrom(compClass);
         RADModelGridColumn newRadComp = new RADModelGridColumn();
         newRadComp.initialize(formModel);
         if (initComponentInstance(newRadComp, compClass)) {

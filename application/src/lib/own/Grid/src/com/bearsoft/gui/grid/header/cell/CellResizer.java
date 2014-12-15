@@ -4,7 +4,7 @@
  */
 package com.bearsoft.gui.grid.header.cell;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -74,7 +74,7 @@ public class CellResizer extends MouseAdapter {
         if (rightPt != null) {
             Point newRightPt = e.getPoint();
             int dWidth = newRightPt.x - rightPt.x;
-            List<GridColumnsGroup> leaves = new ArrayList<>();
+            List<GridColumnsNode> leaves = new ArrayList<>();
             MultiLevelHeader.achieveLeaves(cell.getColGroup(), leaves);
             assert !leaves.isEmpty();
             if (Math.abs(dWidth) > leaves.size()) {

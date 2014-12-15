@@ -6,8 +6,6 @@ package com.eas.client.forms.components.model.grid.columns;
 
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.eas.client.forms.components.model.ModelWidget;
-import com.eas.client.forms.components.model.grid.HasStyle;
-import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -26,7 +24,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
+public class ModelColumn extends TableColumn implements HasPublished {
 
     private static JSObject publisher;
     //
@@ -41,7 +39,6 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
     protected JSObject onRender;
     protected JSObject onSelect;
     protected boolean readOnly;
-    protected HasStyle styleHost;
     protected JSObject published;
     protected ModelWidget view;
     protected ModelWidget editor;
@@ -62,17 +59,15 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
      * @param aOnRender
      * @param aOnSelect
      * @param aReadOnly
-     * @param aStyleHost
      * @param aView
      * @param aEditor
      */
-    public ModelColumn(String aName, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, HasStyle aStyleHost, ModelWidget aView, ModelWidget aEditor) {
+    public ModelColumn(String aName, JSObject aOnRender, JSObject aOnSelect, boolean aReadOnly, ModelWidget aView, ModelWidget aEditor) {
         super();
         name = aName;
         onRender = aOnRender;
         onSelect = aOnSelect;
         readOnly = aReadOnly;
-        styleHost = aStyleHost;
         view = aView;
         super.setCellRenderer(aView);
         editor = aEditor;
@@ -106,7 +101,7 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
     }
 
     public ModelColumn() {
-        this("column", null, null, false, null, null, null);
+        this("column", null, null, false, null, null);
     }
 
     /**
@@ -143,11 +138,6 @@ public class ModelColumn extends TableColumn implements HasStyle, HasPublished {
             editor.setOnSelect(onSelect);
             super.setCellEditor(editor);
         }
-    }
-
-    @Override
-    public CascadedStyle getStyle() {
-        return styleHost != null ? styleHost.getStyle() : null;
     }
 
     /**
