@@ -827,8 +827,8 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	@Override
 	protected void onDetach() {
-		super.onDetach();
 		orphan(columnsChevron);
+		super.onDetach();
 	}
 
 	@Override

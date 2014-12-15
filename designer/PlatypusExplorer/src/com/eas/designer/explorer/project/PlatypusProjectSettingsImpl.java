@@ -57,16 +57,22 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + " * Platypus Application Designer.\n"//NOI18N
             + " */\n"
             + "// this === global\n"
-            + "if(!this.P)\n"
-            + "    this.P = {};\n"
-            + "P.ready = function() {\n"//NOI18N
-            + "    P.require(['%s'], function(){\n"//NOI18N
-            + "%s"//NOI18N
-            + "%s"//NOI18N
-            + "    }, function(e){\n"
-            + "        P.Logger.severe(e);\n"
-            + "    });\n"//NOI18N
-            + "};\n";//NOI18N
+            + "(function () {\n"
+            + "    function ready() {\n"
+            + "        P.require(['%s'], function(){\n"//NOI18N
+            + "    %s"//NOI18N
+            + "    %s"//NOI18N
+            + "        }, function(e){\n"
+            + "            P.Logger.severe(e);\n"
+            + "        });\n"//NOI18N
+            + "    }\n"//NOI18N
+            + "    if(!this.P) {\n"
+            + "        this.P = {};\n"
+            + "        P.ready = ready;\n"
+            + "    } else {\n"
+            + "        ready();\n"
+            + "    }\n"
+            + "})();\n";
 
     protected final FileObject projectDir;
     protected final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);

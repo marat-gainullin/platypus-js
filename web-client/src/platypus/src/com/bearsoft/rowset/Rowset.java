@@ -278,6 +278,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 	public void setActiveFilter(Filter aValue) {
 		activeFilter = aValue;
 	}
+
 	/**
 	 * Retruns this rowset's modified status.
 	 * 
@@ -344,50 +345,50 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 		if (flow != null) {
 			if (rowsetChangeSupport.fireWillRequeryEvent()) {
 				rowsetChangeSupport.fireBeforeRequery();
-				if(aCallback != null){
-					return flow.refresh(aParams, new CallbackAdapter<Rowset, String>() {
-	
-						@Override
-						protected void doWork(Rowset aRowset) throws Exception {
-							if (aRowset != null) {
-								if (activeFilter != null && activeFilter.isApplied()) {
-									activeFilter.deactivate(); // No implicit calls
-									                           // to setCurrent and
-									                           // etc.
-									activeFilter = null;
-								}
-								if (fields == null) {
-									setFields(aRowset.getFields());
-								}
-								List<Row> rows = aRowset.getCurrent();
-								aRowset.setCurrent(new ArrayList<Row>());
-	                            aRowset.currentToOriginal();
-								setCurrent(rows);
-								currentToOriginal();
-								invalidateFilters();
-	                            // silent first
-	                            if (!current.isEmpty()) {
-	                                currentRowPos = 1;
-	                            }
-	                            rowsetChangeSupport.fireRequeriedEvent();
-	                            aCallback.onSuccess(Rowset.this);
-							} else {
-								throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
+				return flow.refresh(aParams, new CallbackAdapter<Rowset, String>() {
+
+					@Override
+					protected void doWork(Rowset aRowset) throws Exception {
+						if (aRowset != null) {
+							if (activeFilter != null && activeFilter.isApplied()) {
+								activeFilter.deactivate(); // No implicit calls
+								                           // to setCurrent and
+								                           // etc.
+								activeFilter = null;
 							}
+							if (fields == null) {
+								setFields(aRowset.getFields());
+							}
+							List<Row> rows = aRowset.getCurrent();
+							aRowset.setCurrent(new ArrayList<Row>());
+							aRowset.currentToOriginal();
+							setCurrent(rows);
+							currentToOriginal();
+							invalidateFilters();
+							// silent first
+							if (!current.isEmpty()) {
+								currentRowPos = 1;
+							}
+							rowsetChangeSupport.fireRequeriedEvent();
+							if (aCallback != null) {
+								aCallback.onSuccess(Rowset.this);
+							}
+						} else {
+							throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
 						}
-						
-						@Override
-						public void onFailure(String reason) {
-							if (reason == null)
-								reason = "Unknown network error. May be cancelled.";
-							rowsetChangeSupport.fireNetErrorEvent(reason);
+					}
+
+					@Override
+					public void onFailure(String reason) {
+						if (reason == null)
+							reason = "Unknown network error. May be cancelled.";
+						rowsetChangeSupport.fireNetErrorEvent(reason);
+						if (aCallback != null) {
 							aCallback.onFailure(reason);
 						}
-	
-					});
-				}else{
-					
-				}
+					}
+
+				});
 			}
 			return null;
 		} else {
@@ -968,7 +969,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 			row.setFields(fields);
 			insert(row, false, initingValues);
 			return row;
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -993,7 +994,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 			row.setFields(fields);
 			insertAt(row, false, insertAt, initingValues);
 			return row;
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -1147,7 +1148,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 						Field field = null;
 						int colIndex = 0;
 						if (values[i] instanceof String) {
-							colIndex = fields.find((String)values[i]);
+							colIndex = fields.find((String) values[i]);
 							field = fields.get(colIndex);
 						} else if (values[i] instanceof Field) {
 							field = (Field) values[i];
