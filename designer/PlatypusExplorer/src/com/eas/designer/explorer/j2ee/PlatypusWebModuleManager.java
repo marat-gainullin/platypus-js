@@ -172,7 +172,7 @@ public class PlatypusWebModuleManager {
         webContentDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
         webInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.META_INF_DIRECTORY);
-        publicDir = createFolderIfNotExists(webContentDir, PlatypusWebModule.PUBLIC_DIRECTORY);
+        publicDir = createFolderIfNotExists(projectDir, PlatypusWebModule.PUBLIC_DIRECTORY);
         prepareJars();
         preparePlatypusWebClient();
         prepareResources();
