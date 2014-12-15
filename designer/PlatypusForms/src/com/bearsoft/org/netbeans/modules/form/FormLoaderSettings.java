@@ -277,7 +277,7 @@ public class FormLoaderSettings implements HelpCtx.Provider {
      * @return size of horizontal grid.
      */
     public int getGridX() {
-        return getPreferences().getInt(PROP_GRID_X, 12);
+        return getPreferences().getInt(PROP_GRID_X, 10);
     }
 
     /**
@@ -298,7 +298,7 @@ public class FormLoaderSettings implements HelpCtx.Provider {
      * @return size of vertical grid.
      */
     public int getGridY() {
-        return getPreferences().getInt(PROP_GRID_Y, 12);
+        return getPreferences().getInt(PROP_GRID_Y, 10);
     }
 
     /**

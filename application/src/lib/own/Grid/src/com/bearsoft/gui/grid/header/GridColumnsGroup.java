@@ -4,6 +4,7 @@
  */
 package com.bearsoft.gui.grid.header;
 
+import com.eas.design.Designable;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
@@ -355,22 +356,39 @@ public class GridColumnsGroup {
     }
 
     @ScriptFunction
-    public int getPreferredWidth() {
+    public void setWidth(int aValue) {
         if (tableColumn != null) {
-            return tableColumn.getPreferredWidth();
-        } else {
-            int pWidth = 0;
-            for (int i = 0; i < children.size(); i++) {
-                pWidth += children.get(i).getPreferredWidth();
-            }
-            return pWidth;
+            tableColumn.setWidth(aValue);
         }
     }
 
     @ScriptFunction
-    public void setWidth(int aValue) {
+    public int getPreferredWidth() {
         if (tableColumn != null) {
-            tableColumn.setWidth(aValue);
+            return tableColumn.getPreferredWidth();
+        } else {
+            return 0;
+        }
+        /*
+         if (children.isEmpty()) {
+         if (tableColumn != null) {
+         return tableColumn.getPreferredWidth();
+         }else
+         return 0;
+         } else {
+         int pWidth = 0;
+         for (int i = 0; i < children.size(); i++) {
+         pWidth += children.get(i).getPreferredWidth();
+         }
+         return pWidth;
+         }
+         */
+    }
+
+    @ScriptFunction
+    public void setPreferredWidth(int aValue) {
+        if (tableColumn != null) {
+            tableColumn.setPreferredWidth(aValue);
         }
     }
 

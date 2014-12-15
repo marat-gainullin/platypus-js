@@ -65,8 +65,8 @@ import org.openide.util.NbBundle;
  */
 class ComponentLayer extends JPanel {
 
-    private static final int HORIZONTAL_MARGIN = 12;
-    private static final int VERTICAL_MARGIN = 12;
+    private static final int HORIZONTAL_MARGIN = 10;
+    private static final int VERTICAL_MARGIN = 10;
     private static final Color BLACK_TRANSPARENT_COLOR = new Color(0, 0, 0, 0);
     private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
     /**

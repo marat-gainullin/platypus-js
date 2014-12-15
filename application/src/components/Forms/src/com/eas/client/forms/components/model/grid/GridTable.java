@@ -185,7 +185,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         return (tableHeader == null) ? null
                 : tableHeader.getResizingColumn();
     }
-
+/*
     @Override
     public void doLayout() {
         TableColumn resizingColumn = getResizingColumn();
@@ -207,7 +207,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         for (int i = rightColumns.size() - 1; i >= 0; i--) {
             TableColumn tCol = rightColumns.get(i);
             rightWidth += tCol.getWidth();
-            if (tCol instanceof RowHeaderTableColumn 
+            if (tCol instanceof RowHeaderTableColumn
                     || !tCol.getResizable()) {
                 rightColumns.remove(i);
                 rightWidthRemoved += tCol.getWidth();
@@ -238,7 +238,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
             }
         }
     }
-
+*/
     private void silentSetWidth2Column(TableColumn tCol, int newWidth) {
         PropertyChangeListener[] listeners = tCol.getPropertyChangeListeners();
         for (PropertyChangeListener pcl : listeners) {
