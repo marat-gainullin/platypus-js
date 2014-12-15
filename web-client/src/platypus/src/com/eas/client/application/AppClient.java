@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.w3c.dom.Element;
-
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
@@ -50,7 +48,6 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
