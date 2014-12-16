@@ -31,8 +31,9 @@ public class WebAppManagerFactory {
     /**
      * Creates a new configurator instance.
      * @param aProject
-     * @param aServerId
+     * @param aJmp
      * @return 
+     * @throws org.netbeans.modules.j2ee.deployment.devmodules.api.InstanceRemovedException 
      */
     public WebAppManager createWebAppManager(PlatypusProjectImpl aProject, J2eeModuleProvider aJmp) throws InstanceRemovedException {
         WebAppManager webAppConfigurator = null;
