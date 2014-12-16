@@ -5,7 +5,6 @@
  */
 package com.eas.designer.application.module;
 
-import com.eas.client.model.application.ApplicationDbEntity;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
 /**

@@ -4,13 +4,23 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.eas.design.Designable;
-import com.eas.script.ScriptFunction;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
+import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.eas.gui.ScriptColor;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Image;
+import java.awt.Font;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import javax.swing.JFrame;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -18,131 +28,13 @@ import javax.swing.JFrame;
  */
 public class PlatypusPersistenceManager extends PersistenceManager {
 
+    // setup documents framework
+    protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     static final String XML_FORM = "layout"; // NOI18N
 
     @Override
     public boolean canLoadForm(PlatypusFormDataObject formObject) throws PersistenceException {
         return false;
-    }
-
-    public static class PlatypusFrame extends JFrame {
-
-        protected boolean minimizable = true;
-        protected boolean maximizable = true;
-        protected boolean resizable = true;
-
-        public PlatypusFrame() {
-            super();
-        }
-
-        @ScriptFunction
-        @Override
-        public Color getBackground() {
-            return super.getBackground();
-        }
-
-        @ScriptFunction
-        @Override
-        public void setBackground(Color bgColor) {
-            super.setBackground(bgColor);
-        }
-
-        @ScriptFunction
-        @Override
-        public String getTitle() {
-            return super.getTitle();
-        }
-
-        @ScriptFunction
-        @Override
-        public void setTitle(String title) {
-            super.setTitle(title);
-        }
-
-        @ScriptFunction
-        @Override
-        public boolean isUndecorated() {
-            return super.isUndecorated();
-        }
-
-        @ScriptFunction
-        @Override
-        public void setUndecorated(boolean undecorated) {
-            super.setUndecorated(undecorated);
-        }
-
-        @ScriptFunction
-        @Override
-        public float getOpacity() {
-            return super.getOpacity();
-        }
-
-        @ScriptFunction
-        @Override
-        public void setOpacity(float opacity) {
-            super.setOpacity(opacity);
-        }
-
-        @Override
-        @Designable(displayName = "icon", description = "Window's icon")
-        @ScriptFunction
-        public Image getIconImage() {
-            return super.getIconImage();
-        }
-
-        @ScriptFunction
-        public boolean isMinimizable() {
-            return minimizable;
-        }
-
-        @ScriptFunction
-        public void setMinimizable(boolean aValue) {
-            minimizable = aValue;
-        }
-
-        @ScriptFunction
-        public boolean isMaximizable() {
-            return maximizable;
-        }
-
-        @ScriptFunction
-        public void setMaximizable(boolean aValue) {
-            maximizable = aValue;
-        }
-
-        @ScriptFunction
-        @Override
-        public boolean isResizable() {
-            return super.isResizable();
-        }
-
-        @ScriptFunction
-        @Override
-        public void setResizable(boolean resizable) {
-            super.setResizable(resizable);
-        }
-
-        @ScriptFunction
-        @Override
-        public int getWidth() {
-            return super.getWidth();
-        }
-
-        @ScriptFunction
-        public void setWidth(int aValue) {
-            super.setSize(new Dimension(aValue, getHeight()));
-        }
-
-        @ScriptFunction
-        @Override
-        public int getHeight() {
-            return super.getHeight();
-        }
-
-        @ScriptFunction
-        public void setHeight(int aValue) {
-            super.setSize(new Dimension(getWidth(), aValue));
-        }
     }
 
     @Override
@@ -160,5 +52,97 @@ public class PlatypusPersistenceManager extends PersistenceManager {
 
     @Override
     public void saveForm(PlatypusFormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors) throws PersistenceException {
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.newDocument();
+            doc.setXmlStandalone(true);
+            Element root = doc.createElement(XML_FORM);
+            doc.appendChild(root);
+            formModel.getAllComponents().forEach((RADComponent<?> aComp) -> {
+                Element widgetElement = doc.createElement("widget");
+                root.appendChild(widgetElement);
+                widgetElement.setAttribute("type", aComp.getBeanClass().getSimpleName());
+                widgetElement.setAttribute("name", aComp.getName());
+                writeProperties(aComp.getBeanProperties(), doc, widgetElement);
+                if (aComp instanceof RADVisualContainer<?>) {
+                    Element layoutElement = doc.createElement("layout");
+                    widgetElement.appendChild(layoutElement);
+                    RADVisualContainer<?> radCont = (RADVisualContainer<?>) aComp;
+                    writeProperties(radCont.getLayoutSupport().getAllProperties(), doc, layoutElement);
+                }
+                if (aComp instanceof RADVisualComponent<?>) {
+                    RADVisualComponent<?> visComp = (RADVisualComponent<?>) aComp;
+                    Element constraintsElement = doc.createElement("constraints");
+                    widgetElement.appendChild(constraintsElement);
+                    writeProperties(visComp.getConstraintsProperties(), doc, constraintsElement);
+                    if (aComp instanceof RADModelGrid) {
+                        RADModelGrid grid = (RADModelGrid) aComp;
+                        writeSubBeans(grid, doc, widgetElement);
+                    }
+                }
+                if (aComp.getParent() instanceof RADVisualComponent<?>) {
+                    RADVisualComponent<?> visParent = (RADVisualComponent<?>) aComp.getParent();
+                    widgetElement.setAttribute("parent", visParent.getName());
+                }
+            });
+        } catch (ParserConfigurationException ex) {
+            throw new PersistenceException(ex);
+        }
+    }
+
+    private void writeSubBeans(ComponentContainer aColumnsContainer, Document doc, Element targetElement) throws DOMException {
+        for (RADComponent<?> subBean : aColumnsContainer.getSubBeans()) {
+            Element columnElement = doc.createElement("column");
+            targetElement.appendChild(columnElement);
+            writeProperties(subBean.getBeanProperties(), doc, columnElement);
+            if (subBean instanceof RADModelGridColumn) {
+                RADModelGridColumn radColumn = (RADModelGridColumn) subBean;
+                Element viewElement = doc.createElement("view");
+                columnElement.appendChild(viewElement);
+                writeProperties(radColumn.getViewControl().getBeanProperties(), doc, viewElement);
+            }
+            if (subBean instanceof ComponentContainer) {
+                writeSubBeans((ComponentContainer) subBean, doc, columnElement);
+            }
+        }
+    }
+
+    private void writeProperties(FormProperty<?>[] aProperties, Document doc, Element targetElement) throws DOMException {
+        for (FormProperty<?> radProp : aProperties) {
+            if (!radProp.getName().equals("type")) {
+                if (!radProp.isDefaultValue()) {
+                    try {
+                        Object propValue = radProp.getValue();
+                        if (propValue != null) {
+                            if (propValue instanceof ComponentReference<?>) {
+                                ComponentReference<?> compRef = (ComponentReference<?>) propValue;
+                                if (compRef.getComponent() != null) {
+                                    targetElement.setAttribute(radProp.getName(), compRef.getComponent().getName());
+                                }
+                            } else if (propValue instanceof IconEditor.NbImageIcon) {
+                                targetElement.setAttribute(radProp.getName(), ((IconEditor.NbImageIcon) propValue).getName());
+                            } else if (propValue instanceof java.awt.Cursor) {
+                                targetElement.setAttribute(radProp.getName(), String.valueOf(((java.awt.Cursor) propValue).getType()));
+                            } else if (propValue instanceof Color) {
+                                targetElement.setAttribute(radProp.getName(), ScriptColor.encode( (Color)propValue ));
+                            } else if (propValue instanceof Font) {
+                                Font fontValue = (Font)propValue;
+                                Element fontElement = doc.createElement("font");
+                                targetElement.appendChild(fontElement);
+                                fontElement.setAttribute("family", fontValue.getFamily());
+                                fontElement.setAttribute("size", String.valueOf(fontValue.getSize()));
+                                fontElement.setAttribute("style", String.valueOf(fontValue.getStyle()));
+                            } else {
+                                targetElement.setAttribute(radProp.getName(), String.valueOf(propValue));
+                            }
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            } else {
+                Logger.getLogger(PlatypusPersistenceManager.class.getName()).log(Level.WARNING, "Prohibited property name \"type\" occured while saving a form.");
+            }
+        }
     }
 }

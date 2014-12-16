@@ -44,9 +44,9 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
     // setup documents framework
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     // declaring documents framework
-    protected DocumentBuilder builder = null;
-    protected Document doc = null;
-    protected Node currentNode = null;
+    protected DocumentBuilder builder;
+    protected Document doc;
+    protected Node currentNode;
 
     protected Model2XmlDom() {
         super();
@@ -65,7 +65,6 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
             doc.setXmlStandalone(true);
             currentNode = doc;
             aModel.accept((ModelVisitor<E, Model<E, ?>>)this);
-            doc.setXmlStandalone(true);
             return doc;
         }
         return null;
