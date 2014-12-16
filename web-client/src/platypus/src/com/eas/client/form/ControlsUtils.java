@@ -105,7 +105,7 @@ public class ControlsUtils {
 		}-*/;
 	}
 
-	public static void jsSelectFile(final JavaScriptObject aCallback) {
+	public static void jsSelectFile(final JavaScriptObject aCallback,final String aFileTypes) {
 		if (aCallback != null) {
 			selectFile(new Callback<JavaScriptObject, String>() {
 
@@ -122,13 +122,16 @@ public class ControlsUtils {
 				public void onFailure(String reason) {
 				}
 
-			});
+			},aFileTypes);
 		}
 	}
 
-	public static void selectFile(final Callback<JavaScriptObject, String> aCallback) {
+	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
 		final XFileUploadField fu = new XFileUploadField();
 		fu.getElement().getStyle().setDisplay(Style.Display.NONE);
+		if (aFileTypes != null){
+			fu.getElement().setAttribute("accept", aFileTypes);
+		}
 		RootPanel.get().add(fu);
 		fu.addChangeHandler(new ChangeHandler() {
 			@Override
