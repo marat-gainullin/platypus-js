@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form.bound;
+package com.eas.designer.application.module;
 
+import com.eas.client.model.application.ApplicationDbEntity;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
 /**

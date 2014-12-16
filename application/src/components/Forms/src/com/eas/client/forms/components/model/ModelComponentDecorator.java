@@ -605,8 +605,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected String field;
     private static final String FIELD_JSDOC = ""
             + "/**\n"
-            + "* Model binding field.\n"
-            + "*/";
+            + " * Model binding field.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FIELD_JSDOC)
     @Designable(category = "model")
@@ -623,6 +623,20 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             revalidate();
             repaint();
         }
+    }
+
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * Object, bound to the widget.\n"
+            + " */")
+    @Designable(category = "model")
+    public JSObject getData() {
+        return data;
+    }
+
+    @ScriptFunction
+    public void setData(JSObject aValue) {
+        data = aValue;
     }
 
     private static final String ON_SELECT_JSDOC = ""

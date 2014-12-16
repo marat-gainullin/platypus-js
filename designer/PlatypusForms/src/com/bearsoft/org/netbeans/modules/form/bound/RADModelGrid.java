@@ -40,9 +40,6 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
         if(bean != null)
             bean.setData(null);
         super.setBeanInstance(aBeanInstance);
-        bean = super.getBeanInstance();
-        if(bean != null)
-            bean.setData(new GridDataArray());
     }
 
     public void resetBeanColumnsAndHeader() {

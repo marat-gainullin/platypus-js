@@ -7,9 +7,6 @@ package com.bearsoft.org.netbeans.modules.form.editors;
 import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
-import com.bearsoft.org.netbeans.modules.form.RADProperty;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SQLUtils;
@@ -26,7 +23,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyEditorSupport;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -40,15 +36,15 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-public class ModelElementRefEditor extends PropertyEditorSupport implements FormAwareEditor {
+public class ModelObjectPropertyEditor extends PropertyEditorSupport implements FormAwareEditor {
 
     protected int selectionSubject = ModelElementSelector.FIELD_SELECTION_SUBJECT;
-    protected String dialogTitle = NbBundle.getMessage(ModelElementRefEditor.class, "CTL_SelectField");
+    protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyEditor.class, "CTL_SelectField");
     protected FormModel formModel;
     protected FormProperty<Object> property;
     protected IconsListCellRenderer renderer;
 
-    public ModelElementRefEditor() {
+    public ModelObjectPropertyEditor() {
         super();
     }
 
@@ -81,7 +77,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelElementRefEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModelObjectPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -109,7 +105,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                 return super.getTags();
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelElementRefEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModelObjectPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
             return super.getTags();
         }
     }
@@ -139,7 +135,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                 property.setValue(value);
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelElementRefEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModelObjectPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -227,12 +223,12 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                     renderer.setText("<>");
                 }
             } else {
-                renderer.setText(NbBundle.getMessage(ModelElementRefEditor.class, "CTL_ModelUnavailable"));
+                renderer.setText(NbBundle.getMessage(ModelObjectPropertyEditor.class, "CTL_ModelUnavailable"));
             }
             renderer.setSize(box.getSize());
             renderer.paint(gfx);
         } catch (Exception ex) {
-            Logger.getLogger(ModelElementRefEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModelObjectPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -267,24 +263,19 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
             if (model != null) {
                 final ModelElementRef selected = new ModelElementRef();
-                return ModelElementSelector.prepareDialog(
-                        model,
+                return ModelElementSelector.prepareDialog(model,
                         dialogTitle,
                         selected,
                         selectionSubject,
                         null,
-                        (ModelElementRef) getValue(),
-                        new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                setValue(selected);
-                            }
-                        });
+                        (ModelElementRef) getValue(), (ActionEvent e) -> {
+                            setValue(selected);
+                });
             } else {
                 return super.getCustomEditor();
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelElementRefEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModelObjectPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
             return super.getCustomEditor();
         }
     }

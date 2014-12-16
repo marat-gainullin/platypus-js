@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.eas.designer.application.module.ModelJSObject;
 import java.awt.Cursor;
 import java.beans.Beans;
 import java.beans.Introspector;
@@ -81,14 +82,8 @@ public class FormEditorModule extends ModuleInstall {
                 javax.swing.JFormattedTextField.AbstractFormatterFactory.class,
                 com.bearsoft.org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor.class);
         FormPropertyEditorManager.registerEditor(
-                com.eas.client.model.ModelElementRef.class,
-                com.bearsoft.org.netbeans.modules.form.editors.ModelElementRefEditor.class);
-        FormPropertyEditorManager.registerEditor(
-                com.eas.client.model.ModelEntityRef.class,
-                com.bearsoft.org.netbeans.modules.form.editors.ModelEntityRefEditor.class);
-        FormPropertyEditorManager.registerEditor(
-                com.eas.client.model.ModelEntityParameterRef.class,
-                com.bearsoft.org.netbeans.modules.form.editors.ModelEntityParameterRefEditor.class);
+                jdk.nashorn.api.scripting.JSObject.class,
+                com.bearsoft.org.netbeans.modules.form.editors.ModelObjectEditor.class);
         
         // Add beaninfo search path.
         String[] sp = Introspector.getBeanInfoSearchPath();

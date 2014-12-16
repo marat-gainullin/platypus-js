@@ -56,6 +56,7 @@ import org.openide.explorer.propertysheet.PropertyEnv;
  * editors to be used with one currently selected.
  *
  * @author Ian Formanek
+ * @param <T>
  */
 public class FormPropertyEditor<T> implements PropertyEditor,
         PropertyChangeListener,
@@ -63,7 +64,7 @@ public class FormPropertyEditor<T> implements PropertyEditor,
 
     private T value;
     private boolean valueEdited;
-    private FormProperty<T> property;
+    private final FormProperty<T> property;
     private WeakReference<PropertyEnv> propertyEnv;
     private PropertyEditor[] allEditors;
     private PropertyEditor currentEditor;

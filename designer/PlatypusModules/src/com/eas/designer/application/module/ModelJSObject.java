@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form.bound;
+package com.eas.designer.application.module;
 
+import com.eas.client.model.application.ApplicationDbEntity;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -12,17 +13,23 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class GridDataArray extends AbstractJSObject {
+public class ModelJSObject extends AbstractJSObject {
 
+    protected ApplicationDbEntity entity;
     protected JSObject cursor;
     protected JSObject[] elements = new JSObject[20];
 
-    public GridDataArray() {
+    public ModelJSObject(ApplicationDbEntity aEntity) {
         super();
+        entity = aEntity;
         for (int i = 0; i < elements.length; i++) {
             elements[i] = new FakeJSObject();
         }
         cursor = elements[0];
+    }
+
+    public ApplicationDbEntity getEntity() {
+        return entity;
     }
 
     @Override
