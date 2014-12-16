@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components.model.grid.columns;
 
+import com.bearsoft.gui.grid.header.BindedColumn;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.script.AlreadyPublishedException;
@@ -24,7 +25,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelColumn extends TableColumn implements HasPublished {
+public class ModelColumn extends TableColumn implements HasPublished, BindedColumn {
 
     private static JSObject publisher;
     //
@@ -79,8 +80,8 @@ public class ModelColumn extends TableColumn implements HasPublished {
         tempMaxWidth = super.getMaxWidth();
         tempResizable = super.getResizable();
         tempMoveable = moveable;
-        
-        super.addPropertyChangeListener((PropertyChangeEvent evt)->{
+
+        super.addPropertyChangeListener((PropertyChangeEvent evt) -> {
             changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
         });
     }
@@ -105,16 +106,19 @@ public class ModelColumn extends TableColumn implements HasPublished {
     }
 
     /**
-     * Returns a column number, bounded to this model column.
      *
-     * @return Rowset's column number. 1-based.
+     * @return 
      */
+    @Override
     public String getField() {
         return field;
     }
 
+    @Override
     public void setField(String aValue) {
-        field = aValue;
+        if (field == null ? aValue != null : !field.equals(aValue)) {
+            field = aValue;
+        }
     }
 
     public ModelWidget getView() {

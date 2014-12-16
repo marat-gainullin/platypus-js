@@ -245,6 +245,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
      * FormPropertyEditor class. There are other methods for controling the
      * FormPropertyEditor class here - see: getCurrentEditor(),
      * setCurrentEditor(...) and getExpliciteEditor().
+     * @return 
      */
     @Override
     public PropertyEditor getPropertyEditor() {

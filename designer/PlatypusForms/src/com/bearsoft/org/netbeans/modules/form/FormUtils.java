@@ -81,6 +81,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
+import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.api.editor.DialogBinding;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
@@ -452,6 +453,8 @@ public class FormUtils {
         if (o instanceof Serializable) {
             return cloneBeanInstance(o, null, formModel);
         }
+        if(o instanceof JSObject)
+            return o;
         throw new CloneNotSupportedException();
     }
 

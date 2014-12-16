@@ -7,6 +7,7 @@ package com.eas.client.forms.components.model;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VComboBox;
+import com.eas.design.Designable;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
@@ -24,7 +25,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
             + " * A model component that combines a button or editable field and a drop-down list.\n"
             + " */";
 
-    protected String valueField;
+    protected JSObject displayList;
     protected JSObject values;
     protected String displayField;
 
@@ -34,20 +35,21 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
         setDecorated(new VComboBox());
     }
 
-    private static final String VALUE_FIELD_JSDOC = ""
+    private static final String DISPLAY_LIST_JSDOC = ""
             + "/**\n"
-            + "* Value field of the component.\n"
+            + "* List of displayed options in a dropdown list of the component.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = VALUE_FIELD_JSDOC)
-    public String getValueField() {
-        return valueField;
+    @ScriptFunction(jsDoc = DISPLAY_LIST_JSDOC)
+    @Designable(category = "model")
+    public JSObject getDisplayList() {
+        return displayList;
     }
 
     @ScriptFunction
-    public void setValueField(String aField) throws Exception {
-        if (valueField == null ? aField != null : !valueField.equals(aField)) {
-            valueField = aField;
+    public void setDisplayList(JSObject aValue) throws Exception {
+        if (displayList != aValue) {
+            displayList = aValue;
             decorated.revalidate();
             decorated.repaint();
         }
@@ -59,6 +61,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
             + "*/";
 
     @ScriptFunction(jsDoc = DISPLAY_FIELD_JSDOC)
+    @Designable(category = "model")
     public String getDisplayField() {
         return displayField;
     }

@@ -4,6 +4,7 @@
  */
 package com.bearsoft.gui.grid.header;
 
+import com.eas.design.Designable;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
@@ -34,6 +35,7 @@ public class GridColumnsNode {
     protected boolean visible = true;
     protected String title;
     protected boolean selectOnly;
+    protected String field;
     protected List<GridColumnsNode> children = new ArrayList<>();
     protected TableColumn tableColumn;
     //
@@ -419,6 +421,22 @@ public class GridColumnsNode {
 
     public boolean hasChildren() {
         return children != null && !children.isEmpty();
+    }
+
+    @ScriptFunction
+    @Designable(category = "model")
+    public String getField() {
+        return field;
+    }
+
+    @ScriptFunction
+    public void setField(String aValue) {
+        if (field != aValue) {
+            field = aValue;
+            if (tableColumn instanceof BindedColumn) {
+                ((BindedColumn) tableColumn).setField(field);
+            }
+        }
     }
 
     public boolean isSelectOnly() {

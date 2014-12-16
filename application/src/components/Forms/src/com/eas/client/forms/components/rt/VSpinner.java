@@ -16,11 +16,12 @@ import javax.swing.JSpinner;
  */
 public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
 
-    protected SpinnerDoubleModel model = new SpinnerDoubleModel(0.0d, 0.0d, 100.0d, 1.0d);
+    protected SpinnerDoubleModel model;
 
     public VSpinner() {
-        super();
-        setModel(model);
+        super(new SpinnerDoubleModel(0.0d, 0.0d, 100.0d, 1.0d));
+        model = (SpinnerDoubleModel)super.getModel();
+        model.addValueChangeListener(valueChangedAlerter);
     }
 
     protected PropertyChangeListener valueChangedAlerter = (PropertyChangeEvent evt) -> {

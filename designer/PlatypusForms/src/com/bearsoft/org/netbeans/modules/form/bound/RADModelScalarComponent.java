@@ -4,8 +4,14 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
+import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
+import com.bearsoft.org.netbeans.modules.form.editors.ModelObjectPropertyPropertyEditor;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author mg
@@ -15,4 +21,21 @@ import com.eas.client.forms.components.model.ModelComponentDecorator;
  * @see RADModelMapLayer
  */
 public class RADModelScalarComponent<M extends ModelComponentDecorator> extends RADVisualComponent<M> {
+
+    public RADModelScalarComponent() {
+        super();
+    }
+
+    @Override
+    protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
+        switch (desc.getName()) {
+            case "field":
+                return new ModelObjectPropertyProperty(this, desc, "cursor.");
+            case "displayField":// only ModelCombo case
+                return new ModelObjectPropertyProperty(this, desc, "");
+            default:
+                return super.createCheckedBeanProperty(desc);
+        }
+    }
+
 }

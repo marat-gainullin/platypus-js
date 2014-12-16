@@ -8,9 +8,12 @@ import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +41,14 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
         return super.initialize(aFormModel);
     }
 
+    @Override
+    protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
+        if ("field".equals(desc.getName())) {
+            return new ModelObjectPropertyProperty(this, desc, "");
+        } else {
+            return super.createCheckedBeanProperty(desc);
+        }
+    }
     public RADColumnView<? super ModelComponentDecorator> getViewControl() {
         return viewControl;
     }

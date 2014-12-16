@@ -30,7 +30,7 @@ import org.openide.util.NbBundle;
 public class ModelObjectEditor extends PropertyEditorSupport implements FormAwareEditor {
 
     protected int selectionSubject = ModelElementSelector.DATASOURCE_SELECTION_SUBJECT;
-    protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyEditor.class, "CTL_SelectField");
+    protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyPropertyEditor.class, "CTL_SelectField");
     protected FormModel formModel;
     protected FormProperty<Object> property;
     protected IconsListCellRenderer renderer;
@@ -68,7 +68,7 @@ public class ModelObjectEditor extends PropertyEditorSupport implements FormAwar
                 return super.getCustomEditor();
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelObjectPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModelObjectPropertyPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
             return super.getCustomEditor();
         }
     }

@@ -11,6 +11,8 @@ import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -132,6 +134,15 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
         fireRawColumnsChanges = aValue;
     }
 
+    @Override
+    protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
+        if ("parentField".equals(desc.getName()) || "childrenField".equals(desc.getName())) {
+            return new ModelObjectPropertyProperty(this, desc, "");
+        } else {
+            return super.createCheckedBeanProperty(desc);
+        }
+    }
+    
     public void fillColumns() throws Exception {
         /*
          ApplicationDbModel model = (ApplicationDbModel)getBeanInstance().getModel();

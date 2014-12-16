@@ -1087,10 +1087,13 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    @ScriptFunction
+    @Designable(category = "model")
     public JSObject getData() {
         return data;
     }
 
+    @ScriptFunction
     public void setData(JSObject aValue) {
         if (data != aValue) {
             data = aValue;

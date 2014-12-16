@@ -58,7 +58,6 @@ import java.util.logging.Logger;
 import javax.swing.AbstractButton;
 import org.openide.ErrorManager;
 import org.openide.nodes.*;
-import org.openide.util.NbBundle;
 import org.openide.util.datatransfer.NewType;
 
 /**
@@ -534,47 +533,50 @@ public abstract class RADComponent<C> {
     }
 
     protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
-        if (desc.getPropertyType() == null || (desc.getReadMethod() != null && desc.getReadMethod().getAnnotation(Undesignable.class) != null)
-                || (desc.getWriteMethod() != null && desc.getWriteMethod().getAnnotation(Undesignable.class) != null)) {
-            return null;
-        }
-
-        RADProperty<?> prop = null;
-        try {
-            if (desc instanceof FakePropertyDescriptor) {
-                prop = new FakeRADProperty<>(this, (FakePropertyDescriptor) desc);
-            } else {
-                if (java.awt.Component.class.isAssignableFrom(desc.getPropertyType())
-                        && !(ButtonGroup.class.isAssignableFrom(desc.getPropertyType()))) {
-                    prop = new ComponentProperty(this, desc);
-                } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType()) || java.awt.Image.class.isAssignableFrom(desc.getPropertyType())) {
-                    prop = new IconProperty(this, desc);
-                } else {
-                    prop = new RADProperty<>(this, desc);
+        if (desc.getPropertyType() != null && desc.getReadMethod() != null && desc.getWriteMethod() != null
+                && !desc.getReadMethod().isAnnotationPresent(Undesignable.class)
+                && !desc.getWriteMethod().isAnnotationPresent(Undesignable.class)) {
+            try {
+                RADProperty<?> prop = createCheckedBeanProperty(desc);
+                Designable ann = null;
+                if (desc.getReadMethod().isAnnotationPresent(Designable.class)) {
+                    ann = desc.getReadMethod().getAnnotation(Designable.class);
+                } else if (desc.getWriteMethod().isAnnotationPresent(Designable.class)) {
+                    ann = desc.getWriteMethod().getAnnotation(Designable.class);
                 }
+                if (ann != null) {
+                    if (ann.displayName() != null && !ann.displayName().isEmpty()) {
+                        prop.setDisplayName(ann.displayName());
+                    }
+                    if (ann.description() != null && !ann.description().isEmpty()) {
+                        prop.setShortDescription(ann.description());
+                    }
+                }
+                setPropertyListener(prop);
+                nameToProperty.put(desc.getName(), prop);
+                return prop;
+            } catch (InvocationTargetException | IllegalAccessException ex) { // should not happen
+                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                return null;
             }
-        } catch (InvocationTargetException | IllegalAccessException ex) { // should not happen
-            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+        } else {
             return null;
         }
+    }
 
-        Designable ann = null;
-        if (desc.getReadMethod() != null && desc.getReadMethod().getAnnotation(Designable.class) != null) {
-            ann = desc.getReadMethod().getAnnotation(Designable.class);
-        } else if (desc.getWriteMethod() != null && desc.getWriteMethod().getAnnotation(Designable.class) != null) {
-            ann = desc.getWriteMethod().getAnnotation(Designable.class);
-        }
-        if (ann != null) {
-            if (ann.displayName() != null && !ann.displayName().isEmpty()) {
-                prop.setDisplayName(ann.displayName());
+    protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
+        if (desc instanceof FakePropertyDescriptor) {
+            return new FakeRADProperty<>(this, (FakePropertyDescriptor) desc);
+        } else {
+            if (java.awt.Component.class.isAssignableFrom(desc.getPropertyType())
+                    && !(ButtonGroup.class.isAssignableFrom(desc.getPropertyType()))) {
+                return new ComponentProperty(this, desc);
+            } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType()) || java.awt.Image.class.isAssignableFrom(desc.getPropertyType())) {
+                return new IconProperty(this, desc);
+            } else {
+                return new RADProperty<>(this, desc);
             }
-            if (ann.description() != null && !ann.description().isEmpty()) {
-                prop.setShortDescription(ann.description());
-            }
         }
-        setPropertyListener(prop);
-        nameToProperty.put(desc.getName(), prop);
-        return prop;
     }
 
     /**
@@ -851,21 +853,22 @@ public abstract class RADComponent<C> {
             }
         }
     }
+    /*
+     // property editor for selecting ButtonGroup (for ButtonGroupProperty)
+     public static class ButtonGroupPropertyEditor extends ComponentChooserEditor {
 
-    // property editor for selecting ButtonGroup (for ButtonGroupProperty)
-    public static class ButtonGroupPropertyEditor extends ComponentChooserEditor {
+     public ButtonGroupPropertyEditor() {
+     super();
+     setBeanTypes(new Class<?>[]{ButtonGroup.class});
+     setComponentCategory(NONVISUAL_COMPONENTS);
+     }
 
-        public ButtonGroupPropertyEditor() {
-            super();
-            setBeanTypes(new Class<?>[]{ButtonGroup.class});
-            setComponentCategory(NONVISUAL_COMPONENTS);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return NbBundle.getMessage(getClass(), "CTL_ButtonGroupPropertyEditor_DisplayName"); // NOI18N
-        }
-    }
+     @Override
+     public String getDisplayName() {
+     return NbBundle.getMessage(getClass(), "CTL_ButtonGroupPropertyEditor_DisplayName"); // NOI18N
+     }
+     }
+     */
 
     public void setValid(boolean aValue) {
         valid = aValue;
