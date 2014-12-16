@@ -152,6 +152,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 		rowsetChangeSupport.setRowsetListeners(null);
 		try {
 			originalToCurrent();
+            if (currentRowPos > current.size() + 1) {
+                currentRowPos = current.size() + 1;
+            } else if (currentRowPos < 0) {
+                currentRowPos = 0;
+            }
+            if (current.isEmpty()) {
+                currentRowPos = 0;
+            }
 		} finally {
 			rowsetChangeSupport.setRowsetListeners(lrowsetListeners);
 		}
