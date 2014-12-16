@@ -103,7 +103,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 
 		public int pingCounter;
 		
-		protected void 				pingGWT(){
+		protected void pingGWT(){
 			Scheduler.get().scheduleDeferred(new ScheduledCommand(){
 
 				@Override
@@ -130,6 +130,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
 			invalidate();
+			// onResize works as success handler too
 			if (onResize != null)
 				onResize.run();
 			pingGWT();

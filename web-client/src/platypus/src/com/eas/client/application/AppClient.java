@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +42,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
@@ -116,8 +116,16 @@ public class AppClient {
 	}
 
 	public static String relativeUri() {
-		String pageUrl = GWT.getHostPageBaseURL();
-		return pageUrl.substring(0, pageUrl.length() - 1);
+		NodeList<com.google.gwt.dom.client.Element> metas = com.google.gwt.dom.client.Document.get().getHead().getElementsByTagName("meta");
+		for(int i=0;i<metas.getLength();i++){
+			com.google.gwt.dom.client.Element meta = metas.getItem(i);
+			if("platypus-server".equalsIgnoreCase(meta.getAttribute("name"))){
+				return meta.getAttribute("content");				
+			}
+		}
+		String pageUrl = GWT.getHostPageBaseURL();		
+		pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
+		return pageUrl;
 	}
 
 	public static void init() {
@@ -200,7 +208,7 @@ public class AppClient {
 	public static JavaScriptObject jsUpload(PublishedFile aFile, String aName, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback,
 	        final JavaScriptObject aErrorCallback) {
 		if (aFile != null) {
-			Cancellable cancellable = requestUpload(aFile, aName, new Callback<ProgressEvent, String>() {
+			Cancellable cancellable = AppClient.getInstance().startUploadRequest(aFile, aName, new Callback<ProgressEvent, String>() {
 
 				protected boolean completed;
 
@@ -239,9 +247,9 @@ public class AppClient {
 			return null;
 	}
 
-	public static Cancellable requestUpload(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
+	public Cancellable startUploadRequest(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		req.open("post", AppClient.getInstance().getApiUrl());
+		req.open("post", apiUrl);
 		final ProgressHandler handler = new ProgressHandlerAdapter() {
 			@Override
 			public void onProgress(ProgressEvent aEvent) {
@@ -391,10 +399,6 @@ public class AppClient {
 	public AppClient(String aApiUrl) {
 		super();
 		apiUrl = aApiUrl;
-	}
-
-	public String getApiUrl() {
-		return apiUrl;
 	}
 
 	public String getPrincipal() {
@@ -573,7 +577,7 @@ public class AppClient {
 			}
 		});
 		String query = "";
-		for (Entry<String, String> ent : aParams.entrySet()) {
+		for (Map.Entry<String, String> ent : aParams.entrySet()) {
 			query += param(ent.getKey(), ent.getValue()) + "&";
 		}
 		query += param(PlatypusHttpRequestParams.TYPE, String.valueOf(aRequestType));
@@ -589,7 +593,7 @@ public class AppClient {
 			throw new Exception(req.getStatus() + " " + req.getStatusText());
 	}
 
-	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
+	public XMLHttpRequest2 syncApiRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
 		String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + "?" + aUrlQuery;
 		final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
 		if (req.getStatus() == Response.SC_OK)
@@ -863,7 +867,7 @@ public class AppClient {
 			});
 			return null;
 		} else {
-			XMLHttpRequest2 executed = syncRequest(null, query, ResponseType.Default);
+			XMLHttpRequest2 executed = syncApiRequest(null, query, ResponseType.Default);
 			if (executed != null) {
 				if (executed.getStatus() == Response.SC_OK) {
 					String responseType = executed.getResponseHeader("content-type");
