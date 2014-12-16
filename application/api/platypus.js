@@ -152,6 +152,7 @@
         var KeyEventClass = Java.type("java.awt.event.KeyEvent");
         var SwingUtilitiesClass = Java.type("javax.swing.SwingUtilities");
         var FileChooserClass = Java.type("javax.swing.JFileChooser");
+        var FileFilter = Java.type("javax.swing.filechooser.FileNameExtensionFilter");
         var ColorChooserClass = Java.type("javax.swing.JColorChooser");
         var OptionPaneClass = Java.type("javax.swing.JOptionPane");
         var ColorClass = Java.type("com.eas.gui.ScriptColor");
@@ -247,13 +248,21 @@
          * @param save flag tells whether this is a save dialog or not
          * @return selected file or else null
          */
-        function fileDialog(curDir, save) {
+        function fileDialog(curDir, save, aFileFilter) {
             var result;
             function _fileDialog() {
                 if (!curDir) {
                     curDir = ".";
                 }
                 var dialog = new FileChooserClass(new FileClass(curDir));
+                if (aFileFilter){
+                    var name = aFileFilter;
+                    aFileFilter = aFileFilter.replace(/ /g,"");
+                    aFileFilter = aFileFilter.replace(/\./g,"");
+                    var array = [];
+                    array = aFileFilter.split(",");
+                    dialog.setFileFilter(new FileFilter(name, array));
+                }
                 var res = save ? dialog.showSaveDialog(null) :
                         dialog.showOpenDialog(null);
                 if (res === FileChooserClass.APPROVE_OPTION) {
@@ -264,20 +273,32 @@
             }
 
             _fileDialog();
-            return result !== null ? result.getPath() : null;
+            return result !== null ? result : null;
         }
         fileDialog.docString = "show a file dialog box";
 
-        function selectFile(curDir, aCallback) {
-            if (aCallback) {
+        /**
+         * Opens a Select file dialog box 
+         *
+         * @param Callback
+         * @param file name filter string
+         * @param curDir current directory [optional]
+         * @return selected file or else null
+         */
+        function selectFile(aCallback,aFileFilter, curDir) {
+//            if (aCallback) {
                 invokeLater(function () {
-                    var file = fileDialog(curDir, false);
-                    aCallback(file);
+                    var file = fileDialog(curDir, false, aFileFilter);
+                    if (file){
+                        aCallback(file);
+                    }
                 });
-            } else {
-                return fileDialog(curDir, false);
-            }
+//            } else {
+//                return fileDialog(curDir, false, aFileFilter);
+//            }
         }
+        
+        
         Object.defineProperty(P, "selectFile", {
             value: selectFile
         });

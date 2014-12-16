@@ -154,8 +154,8 @@ public class Application {
             return invokeDelayed;
         }});
         
-		function selectFile(aCallback) {
-			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+		function selectFile(aCallback, aFileFilter) {
+			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;)(aCallback, aFileFilter);
 		}
 		
         Object.defineProperty($wnd.P, "selectFile", {get: function () {
