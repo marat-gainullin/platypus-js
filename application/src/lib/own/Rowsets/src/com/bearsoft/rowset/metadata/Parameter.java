@@ -242,7 +242,6 @@ public class Parameter extends Field {
      *
      * @return Parameter's value.
      */
-    @ScriptFunction(jsDoc = "The value of the parameter.")
     public Object getValue() {
         return value;
     }
@@ -252,7 +251,6 @@ public class Parameter extends Field {
      *
      * @param aValue A value to be set as the parameter's value.
      */
-    @ScriptFunction
     public void setValue(Object aValue) {
         Object oldValue = value;
         if (!readonly) {
@@ -264,6 +262,17 @@ public class Parameter extends Field {
         }
     }
 
+    @ScriptFunction(name = "value", jsDoc = "The value of the parameter.")
+    public Object getJsValue(){
+        Object oValue = getValue();
+        return oValue == RowsetUtils.UNDEFINED_SQL_VALUE ? null : oValue;
+    }
+    
+    @ScriptFunction
+    public void setJsValue(Object aValue){
+        setValue(aValue);
+    }
+    
     /**
      * Gets parameter's value as a String, whether it feasible. The result
      * exists only for non-null values and some simple types.

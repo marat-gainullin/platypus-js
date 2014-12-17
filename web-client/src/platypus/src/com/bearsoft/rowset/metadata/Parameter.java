@@ -10,6 +10,7 @@
 package com.bearsoft.rowset.metadata;
 
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.utils.RowsetUtils;
 
 import java.sql.ParameterMetaData;
 
@@ -248,7 +249,8 @@ public class Parameter extends Field {
 	}
 
 	public Object getJsValue() {
-		return Utils.toJs(getValue());
+		Object oValue = getValue();
+		return Utils.toJs(oValue == RowsetUtils.UNDEFINED_SQL_VALUE ? null : oValue);
 	}
 
 	public void setJsValue(Object aValue) throws Exception {

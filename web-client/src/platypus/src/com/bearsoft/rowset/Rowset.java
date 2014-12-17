@@ -152,14 +152,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 		rowsetChangeSupport.setRowsetListeners(null);
 		try {
 			originalToCurrent();
-            if (currentRowPos > current.size() + 1) {
-                currentRowPos = current.size() + 1;
-            } else if (currentRowPos < 0) {
-                currentRowPos = 0;
-            }
-            if (current.isEmpty()) {
-                currentRowPos = 0;
-            }
+			if (currentRowPos > current.size() + 1) {
+				currentRowPos = current.size() + 1;
+			} else if (currentRowPos < 0) {
+				currentRowPos = 0;
+			}
+			if (current.isEmpty()) {
+				currentRowPos = 0;
+			}
 		} finally {
 			rowsetChangeSupport.setRowsetListeners(lrowsetListeners);
 		}
@@ -370,6 +370,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
 							List<Row> rows = aRowset.getCurrent();
 							aRowset.setCurrent(new ArrayList<Row>());
 							aRowset.currentToOriginal();
+							for (int r = 0; r < current.size(); r++) {
+								Row checked = current.get(r);
+								if (checked.isInserted() || checked.isUpdated()) {
+									rows.add(checked);
+								}
+							}
 							setCurrent(rows);
 							currentToOriginal();
 							invalidateFilters();

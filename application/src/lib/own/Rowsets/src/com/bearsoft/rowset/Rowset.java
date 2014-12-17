@@ -445,6 +445,9 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 List<Row> rows = aRowset.getCurrent();
                                 aRowset.setCurrent(new ArrayList<>());
                                 aRowset.currentToOriginal();
+                                current.stream().filter((checked) -> (checked.isInserted() || checked.isUpdated())).forEach((checked) -> {
+                                    rows.add(checked);
+                                });
                                 setCurrent(rows);
                                 currentToOriginal();
                                 invalidateFilters();
@@ -487,6 +490,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                         }
                         List<Row> rows = rowset.getCurrent();
                         rowset.setCurrent(new ArrayList<>());
+                        rowset.currentToOriginal();
+                        current.stream().filter((checked) -> (checked.isInserted() || checked.isUpdated())).forEach((checked) -> {
+                            rows.add(checked);
+                        });
                         setCurrent(rows);
                         currentToOriginal();
                         invalidateFilters();

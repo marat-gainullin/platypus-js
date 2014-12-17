@@ -1094,10 +1094,10 @@
                     var nParameter = ncParameters[p];
                     var pDesc = {
                         get: function () {
-                            return boxAsJs(nParameter.value);
+                            return boxAsJs(nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/);
                         },
                         set: function (aValue) {
-                            nParameter.value = boxAsJava(aValue);
+                            nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/ = boxAsJava(aValue);
                         }
                     };
                     Object.defineProperty(pParams, nParameter.name, pDesc);
