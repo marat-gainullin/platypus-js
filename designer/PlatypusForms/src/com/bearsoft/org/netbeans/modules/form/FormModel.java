@@ -49,9 +49,7 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
-import java.awt.Container;
 import java.beans.Introspector;
 import java.util.*;
 import java.util.logging.Level;
@@ -142,7 +140,6 @@ public class FormModel {
     private boolean firing;
     private RADComponentCreator metaCreator;
     private final FormSettings settings = new FormSettings();
-    private boolean freeDesignDefaultLayout;
 
     /**
      * This methods sets the form base class (which is in fact the superclass of
@@ -153,6 +150,7 @@ public class FormModel {
      * @param formClass form base class.
      * @throws java.lang.Exception if anything goes wrong.
      */
+    /*
     public void setFormBaseClass(Class<? extends Container> formClass) throws Exception {
         if (formBaseClass != null) {
             throw new IllegalStateException("Form type already initialized."); // NOI18N
@@ -172,7 +170,7 @@ public class FormModel {
     public Class<?> getFormBaseClass() {
         return formBaseClass;
     }
-
+*/
     final void setName(String name) {
         formName = name;
     }
@@ -514,6 +512,11 @@ public class FormModel {
             aColumn.setViewControl(aView);
             fireColumnViewExchanged(aColumn, oldView, aView);
         }
+    }
+
+    void initFormComponent(RADVisualFormContainer formComp) {
+        topRADComponent = formComp;
+        topDesignComponent = formComp;
     }
 
     // [Undo manager performing undo/redo in AWT event thread should not be
@@ -1132,14 +1135,6 @@ public class FormModel {
         for (FormModelListener l : targets) {
             l.formChanged(events);
         }
-    }
-
-    public boolean isFreeDesignDefaultLayout() {
-        return freeDesignDefaultLayout;
-    }
-
-    void setFreeDesignDefaultLayout(boolean aValue) {
-        freeDesignDefaultLayout = aValue;
     }
 
     // ---------------

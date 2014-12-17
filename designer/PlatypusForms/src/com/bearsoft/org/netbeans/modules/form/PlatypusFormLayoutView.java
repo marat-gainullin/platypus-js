@@ -677,11 +677,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     private void setupDesignerSize() {
         if (topDesignComponent instanceof RADVisualFormContainer) {
-            Dimension size = null;
-            size = ((RADVisualFormContainer) topDesignComponent).getDesignerSize();
-            if (size == null
-                    && (!formModel.isFreeDesignDefaultLayout()
-                    || topDesignComponent == formModel.getTopRADComponent())) {   // use default size if no stored size is available and
+            Dimension size = ((RADVisualFormContainer) topDesignComponent).getDesignerSize();
+            if (size == null) {   // use default size if no stored size is available and
                 // layout form or top design comp is root in the form (but not a container)
                 size = new Dimension(400, 300);
             }
@@ -689,7 +686,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             storeDesignerSize(setSize);
         }
     }
-
+/*
     private void checkDesignerSize() {
         if (formModel.isFreeDesignDefaultLayout()
                 && topDesignComponent instanceof RADVisualComponent
@@ -738,7 +735,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             }
         }
     }
-
+*/
     // ---------
     // components selection
     public java.util.List<RADComponent<?>> getSelectedComponents() {
@@ -1801,7 +1798,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     componentLayer.setTopDesignComponent(formClone);
                     if (originalSize != null) {
                         componentLayer.setDesignerSize(originalSize);
-                        checkDesignerSize();
+                        //checkDesignerSize();
                     } else {
                         setupDesignerSize();
                     }
@@ -1945,10 +1942,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     setSelectedNode(nodeToSelect);
                 }
 
+                /*
                 if (updateDone) {
                     // check if not smaller than minimum size
                     checkDesignerSize();
                 }
+                */
             }
         }
     }

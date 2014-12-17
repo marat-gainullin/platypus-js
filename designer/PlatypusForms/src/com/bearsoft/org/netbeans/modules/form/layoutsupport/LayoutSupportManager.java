@@ -98,28 +98,26 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                 radContainer.getBeanClass());
 
         if (layoutDelegateClass != null) {
-            delegate = (LayoutSupportDelegate)layoutDelegateClass.newInstance();
+            delegate = (LayoutSupportDelegate) layoutDelegateClass.newInstance();
             if (!delegate.checkEmptyContainer(getPrimaryContainer())) {
                 RuntimeException ex = new IllegalArgumentException();
                 org.openide.ErrorManager.getDefault().annotate(
                         ex, AbstractLayoutSupport.getBundle().getString(
-                        "MSG_ERR_NonEmptyContainer")); // NOI18N
+                                "MSG_ERR_NonEmptyContainer")); // NOI18N
                 throw ex;
             }
         } else {
-            if (delegate == null) { // initialization from LayoutManager instance
-                Container contDel = getPrimaryContainerDelegate();
-                if (contDel.getComponentCount() == 0) {
-                    // we can still handle only empty containers ...
-                    lmInstance = contDel.getLayout();
-                    delegate = LayoutSupportRegistry.createSupportForLayout(lmInstance.getClass());
-                } else {
-                    RuntimeException ex = new IllegalArgumentException();
-                    org.openide.ErrorManager.getDefault().annotate(
-                            ex, AbstractLayoutSupport.getBundle().getString(
-                            "MSG_ERR_NonEmptyContainer")); // NOI18N
-                    throw ex;
-                }
+            Container contDel = getPrimaryContainerDelegate();
+            if (contDel.getComponentCount() == 0) {
+                // we can still handle only empty containers ...
+                lmInstance = contDel.getLayout();
+                delegate = LayoutSupportRegistry.createSupportForLayout(lmInstance.getClass());
+            } else {
+                RuntimeException ex = new IllegalArgumentException();
+                org.openide.ErrorManager.getDefault().annotate(
+                        ex, AbstractLayoutSupport.getBundle().getString(
+                                "MSG_ERR_NonEmptyContainer")); // NOI18N
+                throw ex;
             }
         }
 
@@ -149,7 +147,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     }
 
     public void setLayoutDelegate(LayoutSupportDelegate newDelegate/*,
-             boolean fromCode*/)
+     boolean fromCode*/)
             throws Exception {
         LayoutConstraints<?>[] oldConstraints;
         LayoutSupportDelegate oldDelegate = layoutDelegate;
@@ -210,8 +208,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     public void copyLayoutDelegateFrom(
             LayoutSupportManager sourceLayoutSupport,
             RADVisualComponent<?>[] newRadComps) {
-        LayoutSupportDelegate sourceDelegate =
-                sourceLayoutSupport.getLayoutDelegate();
+        LayoutSupportDelegate sourceDelegate
+                = sourceLayoutSupport.getLayoutDelegate();
 
         int componentCount = sourceDelegate.getComponentCount();
 
@@ -229,8 +227,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             primaryComps[i] = (Component) radComp.getBeanInstance();
         }
 
-        LayoutSupportDelegate newDelegate =
-                sourceDelegate.cloneLayoutSupport(this, newRadComps);
+        LayoutSupportDelegate newDelegate
+                = sourceDelegate.cloneLayoutSupport(this, newRadComps);
 
         newDelegate.setLayoutToContainer(cont, contDel);
         newDelegate.addComponentsToContainer(cont, contDel, primaryComps, 0);
@@ -473,8 +471,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         // first store constraints in meta components
         RADVisualComponent<?>[] components = radContainer.getSubComponents();
         for (int i = 0; i < components.length; i++) {
-            LayoutConstraints<?> constr =
-                    layoutDelegate.getConstraints(i);
+            LayoutConstraints<?> constr
+                    = layoutDelegate.getConstraints(i);
             if (constr != null) {
                 components[i].setLayoutConstraints(layoutDelegate.getClass(),
                         constr);
@@ -488,8 +486,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
     public boolean isLayoutChanged() {
         Container defaultContainer = (Container) BeanSupport.getDefaultInstance(radContainer.getBeanClass());
-        Container defaultContDelegate =
-                radContainer.getContainerDelegate(defaultContainer);
+        Container defaultContDelegate
+                = radContainer.getContainerDelegate(defaultContainer);
 
         return layoutDelegate.isLayoutChanged(defaultContainer, defaultContDelegate);
     }
@@ -653,8 +651,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         Container defCont = (Container) radContainer.getBeanInstance();
         if (primaryContainerDelegate == null || primaryContainer != defCont) {
             primaryContainer = defCont;
-            primaryContainerDelegate =
-                    radContainer.getContainerDelegate(defCont);
+            primaryContainerDelegate
+                    = radContainer.getContainerDelegate(defCont);
         }
         return primaryContainerDelegate;
     }

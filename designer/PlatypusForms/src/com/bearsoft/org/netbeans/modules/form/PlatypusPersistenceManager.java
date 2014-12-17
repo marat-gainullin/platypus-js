@@ -4,24 +4,36 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportRegistry;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.FormFactory;
 import com.eas.client.forms.HasChildren;
+import com.eas.client.forms.HorizontalPosition;
+import com.eas.client.forms.Orientation;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.layouts.BoxLayout;
+import com.eas.client.forms.layouts.CardLayout;
+import com.eas.client.forms.layouts.MarginConstraints;
+import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.Source2XmlDom;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -56,11 +68,7 @@ public class PlatypusPersistenceManager extends PersistenceManager {
     @Override
     public void loadForm(PlatypusFormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
-            formModel.setFormBaseClass(PlatypusFrame.class); //Only for design purposes. At runtime it will be any of swing top-level containers
             formModel.setName(formObject.getName());
-            RADComponent<?> topComp = formModel.getTopRADComponent();
-            assert topComp instanceof RADVisualFormContainer;
-            RADVisualFormContainer formComp = (RADVisualFormContainer) topComp;
             String formContent = formObject.getFormFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
             Document doc = Source2XmlDom.transform(formContent);
             FormFactory formFactory = new FormFactory(doc.getDocumentElement(), formModel.getDataObject().getModel().getPublished()) {
@@ -76,9 +84,98 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                     }
                 }
 
+                @Override
+                protected JComponent createAnchorsPane() {
+                    return new FormUtils.Panel(new MarginLayout());
+                }
+
+                @Override
+                protected JComponent createBorderPane(int hgap, int vgap) {
+                    return new FormUtils.Panel(new BorderLayout(hgap, vgap));
+                }
+
+                @Override
+                protected JComponent createBoxPane(int axis, int hgap, int vgap) {
+                    JComponent res = new FormUtils.Panel();
+                    res.setLayout(new BoxLayout(res, axis, hgap, vgap));
+                    return res;
+                }
+
+                @Override
+                protected JComponent createCardPane(int hgap, int vgap) {
+                    return new FormUtils.Panel(new CardLayout(hgap, vgap));
+                }
+
+                @Override
+                protected JComponent createFlowPane(int hgap, int vgap) {
+                    return new FormUtils.Panel(new FlowLayout(FlowLayout.LEFT, hgap, vgap));
+                }
+
+                @Override
+                protected JComponent createGridPane(int rows, int columns, int hgap, int vgap) {
+                    return new FormUtils.Panel(new GridLayout(rows, columns, hgap, vgap));
+                }
+
+                @Override
+                protected void addToAnchorsPane(JComponent parent, JComponent aTarget, MarginConstraints constraints) {
+                    parent.add(aTarget, constraints);
+                }
+
+                @Override
+                protected void addToBorderPane(JComponent parent, JComponent aComp, Integer aPlace, Integer aSize) {
+                    aPlace = aPlace != null ? aPlace : HorizontalPosition.CENTER;
+                    if (aPlace != HorizontalPosition.CENTER && aSize != null) {
+                        Dimension prefSize = aComp.getPreferredSize();
+                        if (aPlace == HorizontalPosition.LEFT || aPlace == HorizontalPosition.RIGHT) {
+                            aComp.setPreferredSize(new Dimension(aSize, prefSize.height));
+                        } else {
+                            aComp.setPreferredSize(new Dimension(prefSize.width, aSize));
+                        }
+                    }
+                    parent.add(aComp, aPlace);
+                }
+
+                @Override
+                protected void addToBoxPane(JComponent parent, JComponent aTarget, Dimension prefSize) {
+                    if (((BoxLayout) parent.getLayout()).getAxis() == Orientation.HORIZONTAL) {
+                        parent.add(aTarget, prefSize.width);
+                    } else {
+                        parent.add(aTarget, prefSize.height);
+                    }
+                }
+
+                @Override
+                protected void addToCardPane(JComponent parent, JComponent aTarget, String cardName) {
+                    parent.add(aTarget, cardName);
+                }
+
+                @Override
+                protected void addToFlowPane(JComponent parent, JComponent aTarget) {
+                    parent.add(aTarget);
+                }
+
+                @Override
+                protected void addToGridPane(JComponent parent, JComponent aTarget) {
+                    parent.add(aTarget);
+                }
+
             };
             formFactory.parse();
             Form form = formFactory.getForm();
+
+            // Let's take care of top level container
+            RADVisualFormContainer formComp = new RADVisualFormContainer();
+            formComp.initialize(formModel);
+            formModel.initFormComponent(formComp);
+            formComp.setBeanInstance(form.getViewWidget());
+            for (RADProperty<?> radProp : formComp.getBeanProperties()) {
+                radProp.setChanged(!radProp.isDefaultValue());
+            }
+            formComp.checkLayoutSupport();
+            LayoutSupportDelegate layoutSupportDelegate = LayoutSupportRegistry.createSupportForLayout(((Container) formComp.getBeanInstance()).getLayout().getClass());
+            formComp.getLayoutSupport().setLayoutDelegate(layoutSupportDelegate);
+            formComp.setInModel(true);
+
             Map<String, RADComponent<?>> radComps = new HashMap<>();
             formFactory.getWidgets().entrySet().stream().forEach((Map.Entry<String, JComponent> aEntry) -> {
                 try {
@@ -255,14 +352,16 @@ public class PlatypusPersistenceManager extends PersistenceManager {
         radComp.initialize(aFormModel);
         radComp.setStoredName(aWidget.getName());
         ((RADComponent<JComponent>) radComp).setBeanInstance(aWidget);
-        radComp.setInModel(true);
         for (RADProperty<?> radProp : radComp.getBeanProperties()) {
             radProp.setChanged(!radProp.isDefaultValue());
         }
-        if(radComp instanceof RADVisualContainer<?>){
-            RADVisualContainer<?> radCont = (RADVisualContainer<?>)radComp;
+        if (radComp instanceof RADVisualContainer<?>) {
+            RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
             radCont.checkLayoutSupport();
+            LayoutSupportDelegate layoutSupportDelegate = LayoutSupportRegistry.createSupportForLayout(radCont.getBeanInstance().getLayout().getClass());
+            radCont.getLayoutSupport().setLayoutDelegate(layoutSupportDelegate);
         }
+        radComp.setInModel(true);
         return radComp;
     }
 }

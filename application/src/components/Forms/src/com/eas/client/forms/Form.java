@@ -171,6 +171,10 @@ public class Form implements HasPublished {
         this(null, aFormKey);
     }
 
+    public Form(JComponent aView) throws Exception {
+        this(aView, "form-" + IDGenerator.genID());
+    }
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Creates a form.\n"
@@ -325,10 +329,10 @@ public class Form implements HasPublished {
         }
     }
 
-    public JComponent getViewWidget(){
+    public JComponent getViewWidget() {
         return view;
     }
-    
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Top level widget of a form.\n"

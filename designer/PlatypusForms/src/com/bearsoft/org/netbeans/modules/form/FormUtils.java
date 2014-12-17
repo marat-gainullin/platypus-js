@@ -66,6 +66,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.LayoutManager;
 import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -106,6 +107,10 @@ public class FormUtils {
             super(new MarginLayout());
         }
 
+        public Panel(LayoutManager aLayout) {
+            super(aLayout);
+        }
+        
         @Override
         public Widget getParentWidget() {
             return Forms.lookupPublishedParent(this);

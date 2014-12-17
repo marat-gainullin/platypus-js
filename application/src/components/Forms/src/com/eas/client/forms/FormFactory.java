@@ -45,8 +45,10 @@ import com.eas.client.forms.containers.SplitPane;
 import com.eas.client.forms.containers.TabbedPane;
 import com.eas.client.forms.containers.ToolBar;
 import com.eas.client.forms.layouts.BoxLayout;
+import com.eas.client.forms.layouts.CardLayout;
 import com.eas.client.forms.layouts.Margin;
 import com.eas.client.forms.layouts.MarginConstraints;
+import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.client.forms.menu.CheckMenuItem;
 import com.eas.client.forms.menu.Menu;
 import com.eas.client.forms.menu.MenuBar;
@@ -58,7 +60,9 @@ import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.XmlDomUtils;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -115,7 +119,9 @@ public class FormFactory {
         Element layoutTag = XmlDomUtils.getElementByTagName(element, "layout");
         assert layoutTag != null : "tag layout is required for panel containers.";
 
-        form = new Form();
+        JComponent viewWidget = readLayoutedContainer(layoutTag);
+        readGeneralProps(element, viewWidget);
+        form = new Form(viewWidget);
         form.setDefaultCloseOperation(XmlDomUtils.readIntegerAttribute(element, "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
         form.setIcon(resolveIcon(element.getAttribute("icon")));
         form.setTitle(element.getAttribute("title"));
@@ -124,6 +130,7 @@ public class FormFactory {
         form.setOpacity(XmlDomUtils.readFloatAttribute(element, "opacity", 1.0f));
         form.setAlwaysOnTop(XmlDomUtils.readBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
         form.setLocationByPlatform(XmlDomUtils.readBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
+        
         Dimension prefSize = readPrefSize(element);
         form.setDesignedViewSize(prefSize);
         List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
@@ -548,37 +555,61 @@ public class FormFactory {
         button.setVerticalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "verticalTextPosition", Button.CENTER));
     }
 
-    private JComponent readLayoutedContainer(Element aLayoutElement) {
+    protected JComponent readLayoutedContainer(Element aLayoutElement) {
         String type = aLayoutElement.getAttribute("type");
         assert type != null && !type.isEmpty() : "type attribute is required for layouts to be read from a file";
         int hgap = XmlDomUtils.readIntegerAttribute(aLayoutElement, "hgap", 0);
         int vgap = XmlDomUtils.readIntegerAttribute(aLayoutElement, "vgap", 0);
         switch (type) {
             case "BorderLayoutDesignInfo": {
-                return new BorderPane(hgap, vgap);
+                return createBorderPane(hgap, vgap);
             }
             case "BoxLayoutDesignInfo": {
                 int axis = XmlDomUtils.readIntegerAttribute(aLayoutElement, "axis", BoxLayout.LINE_AXIS);
-                return new BoxPane(axis, hgap, vgap);
+                return createBoxPane(axis, hgap, vgap);
             }
             case "CardLayoutDesignInfo": {
-                return new CardPane(hgap, vgap);
+                return createCardPane(hgap, vgap);
             }
             case "FlowLayoutDesignInfo": {
                 int alignment = XmlDomUtils.readIntegerAttribute(aLayoutElement, "alignment", 0);
-                return new FlowPane(hgap, vgap);
+                return createFlowPane(hgap, vgap);
             }
             case "GridLayoutDesignInfo": {
                 int rows = XmlDomUtils.readIntegerAttribute(aLayoutElement, "rows", 0);
                 int columns = XmlDomUtils.readIntegerAttribute(aLayoutElement, "columns", 0);
-                return new GridPane(rows, columns, hgap, vgap);
+                return createGridPane(rows, columns, hgap, vgap);
             }
             case "AbsoluteLayoutDesignInfo":
             case "MarginLayoutDesignInfo":
-                return new AnchorsPane();
+                return createAnchorsPane();
             default:
                 return null;
         }
+    }
+
+    protected JComponent createAnchorsPane() {
+        return new AnchorsPane();
+    }
+
+    protected JComponent createGridPane(int rows, int columns, int hgap, int vgap) {
+        return new GridPane(rows, columns, hgap, vgap);
+    }
+
+    protected JComponent createFlowPane(int hgap, int vgap) {
+        return new FlowPane(hgap, vgap);
+    }
+
+    protected JComponent createCardPane(int hgap, int vgap) {
+        return new CardPane(hgap, vgap);
+    }
+
+    protected JComponent createBoxPane(int axis, int hgap, int vgap) {
+        return new BoxPane(axis, hgap, vgap);
+    }
+
+    protected JComponent createBorderPane(int hgap, int vgap) {
+        return new BorderPane(hgap, vgap);
     }
 
     private void readGeneralProps(Element anElement, JComponent aTarget) {
@@ -713,7 +744,7 @@ public class FormFactory {
             Dimension prefSize = readPrefSize(anElement);
             aTarget.setPreferredSize(prefSize);
             scroll.setView(aTarget);
-        } else if (parent instanceof BorderPane) {
+        } else if (parent != null && parent.getLayout() instanceof BorderLayout) {
             Dimension prefSize = readPrefSize(anElement);
             Integer place = HorizontalPosition.CENTER;
             Integer size = null;
@@ -743,29 +774,53 @@ public class FormFactory {
                         place = HorizontalPosition.CENTER;
                 }
             }
-            ((BorderPane) parent).add(aTarget, place, size);
-        } else if (parent instanceof BoxPane) {
+            addToBorderPane(parent, aTarget, place, size);
+        } else if (parent != null && parent.getLayout() instanceof BoxLayout) {
             Dimension prefSize = readPrefSize(anElement);
-            BoxPane box = (BoxPane) parent;
-            if (box.getOrientation() == Orientation.HORIZONTAL) {
-                box.add(aTarget, prefSize.width);
-            } else {
-                box.add(aTarget, prefSize.height);
-            }
-        } else if (parent instanceof CardPane) {
+            addToBoxPane(parent, aTarget, prefSize);
+        } else if (parent != null && parent.getLayout() instanceof CardLayout) {
             String cardName = constraintsElement.getAttribute("cardName");
-            ((CardPane) parent).add(aTarget, cardName);
-        } else if (parent instanceof FlowPane) {
+            addToCardPane(parent, aTarget, cardName);
+        } else if (parent != null && parent.getLayout() instanceof FlowLayout) {
             Dimension prefSize = readPrefSize(anElement);
             aTarget.setPreferredSize(prefSize);
-            ((FlowPane) parent).add(aTarget);
-        } else if (parent instanceof GridPane) {
-            ((GridPane) parent).add(aTarget);
-        } else if (parent instanceof AnchorsPane) {
-            AnchorsPane anchors = (AnchorsPane) parent;
+            addToFlowPane(parent, aTarget);
+        } else if (parent != null && parent.getLayout() instanceof GridLayout) {
+            addToGridPane(parent, aTarget);
+        } else if (parent != null && parent.getLayout() instanceof MarginLayout) {
             MarginConstraints constraints = readMarginConstraints(constraintsElement);
-            anchors.add(aTarget, constraints);
+            addToAnchorsPane(parent, aTarget, constraints);
         }
+    }
+
+    protected void addToAnchorsPane(JComponent parent, JComponent aTarget, MarginConstraints constraints) {
+        AnchorsPane anchors = (AnchorsPane) parent;
+        anchors.add(aTarget, constraints);
+    }
+
+    protected void addToGridPane(JComponent parent, JComponent aTarget) {
+        ((GridPane) parent).add(aTarget);
+    }
+
+    protected void addToFlowPane(JComponent parent, JComponent aTarget) {
+        ((FlowPane) parent).add(aTarget);
+    }
+
+    protected void addToCardPane(JComponent parent, JComponent aTarget, String cardName) {
+        ((CardPane) parent).add(aTarget, cardName);
+    }
+
+    protected void addToBoxPane(JComponent parent, JComponent aTarget, Dimension prefSize) {
+        BoxPane box = (BoxPane) parent;
+        if (box.getOrientation() == Orientation.HORIZONTAL) {
+            box.add(aTarget, prefSize.width);
+        } else {
+            box.add(aTarget, prefSize.height);
+        }
+    }
+
+    protected void addToBorderPane(JComponent parent, JComponent aTarget, Integer place, Integer size) {
+        ((BorderPane) parent).add(aTarget, place, size);
     }
 
     private static MarginConstraints readMarginConstraints(Element anElement) {
