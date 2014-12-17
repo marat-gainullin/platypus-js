@@ -51,25 +51,12 @@ package com.bearsoft.org.netbeans.modules.form;
  */
 public class PersistenceException extends Exception {
 
-    private Throwable originalException;
-
-    public PersistenceException() {
-    }
-
     public PersistenceException(String s) {
         super(s);
     }
 
     public PersistenceException(Throwable t) {
-        originalException = t;
+        super(t);
     }
 
-    public PersistenceException(Throwable t, String s) {
-        super(s);
-        originalException = t;
-    }
-
-    public Throwable getOriginalException() {
-        return originalException;
-    }
 }

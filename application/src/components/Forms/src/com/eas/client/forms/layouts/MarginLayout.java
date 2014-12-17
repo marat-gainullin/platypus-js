@@ -2,7 +2,7 @@ package com.eas.client.forms.layouts;
 
 /**
  *
- * @author lkolesnikov
+ * @author mg
  */
 import java.awt.*;
 import java.util.HashMap;

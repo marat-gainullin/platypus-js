@@ -295,6 +295,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         modelRead.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
             aEntity.setPublished(new ModelJSObject(aEntity));
         });
+        modelRead.setPublished(new ModelContentJSObject(modelRead));
         return modelRead;
     }
 

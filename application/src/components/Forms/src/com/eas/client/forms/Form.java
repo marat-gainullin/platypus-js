@@ -11,6 +11,7 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
+import com.eas.script.ScriptUtils;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
@@ -183,7 +184,9 @@ public class Form implements HasPublished {
         windowHandler = new WindowEventsIProxy();
         view = aView != null ? aView : new AnchorsPane();
         view.setName(VIEW_SCRIPT_NAME);
-        windowHandler.setEventThis(getPublished());
+        if (ScriptUtils.isInitialized()) {
+            windowHandler.setEventThis(getPublished());
+        }
     }
 
     @Override
@@ -322,6 +325,10 @@ public class Form implements HasPublished {
         }
     }
 
+    public JComponent getViewWidget(){
+        return view;
+    }
+    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Top level widget of a form.\n"

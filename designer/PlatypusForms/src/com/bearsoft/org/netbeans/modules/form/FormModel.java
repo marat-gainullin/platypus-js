@@ -126,7 +126,7 @@ public class FormModel {
     // the top radcomponent of the form (null if form is based on Object)
     private RADVisualContainer<?> topRADComponent;
     // other components - out of the main hierarchy under topRADComponent
-    private List<RADComponent<?>> otherComponents = new ArrayList<>(10);
+    private final List<RADComponent<?>> otherComponents = new ArrayList<>(10);
     // holds both topRADComponent and otherComponents
     private ModelContainer modelContainer;
     private final Map<String, RADComponent<?>> namesToComponents = new HashMap<>();

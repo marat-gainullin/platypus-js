@@ -44,10 +44,6 @@
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.AbstractLayoutSupport;
-import com.eas.client.forms.menu.CheckMenuItem;
-import com.eas.client.forms.menu.Menu;
-import com.eas.client.forms.menu.MenuItem;
-import com.eas.client.forms.menu.RadioMenuItem;
 import java.awt.Component;
 import java.awt.Container;
 import java.beans.PropertyChangeEvent;

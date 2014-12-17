@@ -80,16 +80,23 @@ import org.w3c.dom.Element;
  */
 public class FormFactory {
 
+    public static final String FORM_ROOT_CONTAINER_NAME = "Form";
     protected Element element;
     protected JSObject model;
     protected Form form;
+    protected Map<String, JComponent> widgets = new HashMap<>();
     protected boolean forceColumns;
     //
     protected List<Consumer<Map<String, JComponent>>> resolvers = new ArrayList<>();
 
     public FormFactory(Element anElement, JSObject aModel) {
         super();
+        element = anElement;
         model = aModel;
+    }
+
+    public Map<String, JComponent> getWidgets() {
+        return widgets;
     }
 
     public boolean isForceColumns() {
@@ -120,7 +127,8 @@ public class FormFactory {
         Dimension prefSize = readPrefSize(element);
         form.setDesignedViewSize(prefSize);
         List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
-        Map<String, JComponent> widgets = new HashMap<>();
+        List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
+        widgetsElements.addAll(legacyNonVisualElements);
         widgetsElements.stream().forEach((Element aElement) -> {
             JComponent widget = readWidget(aElement);
             String wName = widget.getName();
@@ -145,7 +153,7 @@ public class FormFactory {
         return prefSize;
     }
 
-    private ImageIcon resolveIcon(String aIconName) {
+    protected ImageIcon resolveIcon(String aIconName) {
         if (aIconName != null) {
             try {
                 return IconResources.load(aIconName, null, null);
@@ -658,7 +666,7 @@ public class FormFactory {
             String parentName = anElement.getAttribute("parent");
             if (!parentName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
-                    JComponent parent = aWidgets.get(parentName);
+                    JComponent parent = FORM_ROOT_CONTAINER_NAME.equalsIgnoreCase(parentName) ? form.getViewWidget() : aWidgets.get(parentName);
                     addToParent(anElement, aTarget, parent);
                 });
             }
@@ -795,7 +803,7 @@ public class FormFactory {
                 group.setTableColumn(col);
                 grid.addColumn(col);
             }
-            if(!subColumnsElements.isEmpty()){
+            if (!subColumnsElements.isEmpty()) {
                 List<GridColumnsNode> subGroups = readColumns(grid, subColumnsElements);
                 subGroups.stream().sequential().forEach((GridColumnsNode aGroup) -> {
                     group.addChild(aGroup);

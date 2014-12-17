@@ -254,7 +254,7 @@ public class FormEditor {
 
         for (Throwable t : persistenceErrors) {
             if (t instanceof PersistenceException) {
-                Throwable th = ((PersistenceException) t).getOriginalException();
+                Throwable th = ((PersistenceException) t).getCause();
                 if (th != null) {
                     t = th;
                 }
