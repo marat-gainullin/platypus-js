@@ -72,8 +72,8 @@ import org.openide.util.NbBundle;
  */
 public class CustomIconEditor extends javax.swing.JPanel {
 
-    private IconEditor propertyEditor;
-    private FileObject rootFolder;
+    private final IconEditor propertyEditor;
+    private final FileObject rootFolder;
     private FileObject selectedFolder;
     private FileObject selectedFile;
     private String selectedURL;
@@ -82,6 +82,7 @@ public class CustomIconEditor extends javax.swing.JPanel {
     private boolean ignoreCombo;
 
     public CustomIconEditor(IconEditor prEd) throws Exception {
+        super();
         propertyEditor = prEd;
         rootFolder = propertyEditor.getProjectSrcFolder();
         initComponents();
@@ -140,7 +141,7 @@ public class CustomIconEditor extends javax.swing.JPanel {
                 enableFileChoose(false);
                 break;
         }
-        previewLabel.setIcon(nbIcon.getIcon());
+        previewLabel.setIcon(nbIcon);
     }
 
     private void enableFileChoose(boolean enable) {
@@ -231,7 +232,7 @@ public class CustomIconEditor extends javax.swing.JPanel {
 
         ignoreSetValue = true;
         try {
-            propertyEditor.setValue(type != -1 ? new NbImageIcon(type, name, icon) : null);
+            propertyEditor.setAsText(name);
         } finally {
             ignoreSetValue = false;
         }

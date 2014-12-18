@@ -45,7 +45,6 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormLoaderSettings;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
-import com.bearsoft.org.netbeans.modules.form.FormPropertyContext;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentCreator;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
@@ -1093,10 +1092,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                }
             };
             mtop = new FormProperty<Margin>("mtop", // NOI18N
                     Margin.class,
@@ -1134,10 +1129,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 @Override
                 public Margin getDefaultValue() {
                     return null;
-                }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
                 }
             };
             mright = new FormProperty<Margin>("mright", // NOI18N
@@ -1177,10 +1168,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                }
             };
             mbottom = new FormProperty<Margin>("mbottom", // NOI18N
                     Margin.class,
@@ -1219,10 +1206,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                } // capabilities (compatibility with previous versions)
             };
             mwidth = new FormProperty<Margin>("mwidth", // NOI18N
                     Margin.class,
@@ -1261,10 +1244,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                } // capabilities (compatibility with previous versions)
             };
             mheight = new FormProperty<Margin>("mheight", // NOI18N
                     Margin.class,
@@ -1303,10 +1282,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                } // capabilities (compatibility with previous versions)
             };
             return new FormProperty<?>[]{mleft, mtop, mright, mbottom, mwidth, mheight};
         }

@@ -44,7 +44,6 @@
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
-import com.bearsoft.org.netbeans.modules.form.FormPropertyContext;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import java.awt.*;
 import java.beans.*;
@@ -490,10 +489,6 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
                             direction = value;
                             propertyValueChanged(oldValue, value);
                         }
-
-                        @Override
-                        public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                        } // capabilities (compatibility with previous versions)
                     }
                 };
                 properties[0].setValue("NOI18N", Boolean.TRUE); // NOI18N

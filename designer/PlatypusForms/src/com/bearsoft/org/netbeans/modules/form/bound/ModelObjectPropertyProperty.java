@@ -23,7 +23,9 @@ public class ModelObjectPropertyProperty extends RADProperty<String> {
     public ModelObjectPropertyProperty(RADComponent<?> aRadComp, PropertyDescriptor propdesc, String aPrefix) throws IllegalAccessException, InvocationTargetException {
         super(aRadComp, propdesc);
         editor = new ModelObjectPropertyPropertyEditor(aPrefix);
-        editor.setContext(aRadComp.getFormModel(), this);
+        editor.setFormModel(aRadComp.getFormModel());
+        editor.setProperty(this);
+        editor.setComp(aRadComp);
     }
 
     @Override

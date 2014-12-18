@@ -66,8 +66,7 @@ public class RADProperty<T> extends FormProperty<T> {
     private T defaultValue;
 
     public RADProperty(RADComponent<?> aRadComp, PropertyDescriptor propdesc) throws IllegalAccessException, InvocationTargetException {
-        super(new FormPropertyContext.Component(aRadComp),
-                propdesc.getName(),
+        super(propdesc.getName(),
                 (Class<T>) propdesc.getPropertyType(),
                 propdesc.getDisplayName(),
                 propdesc.getShortDescription());

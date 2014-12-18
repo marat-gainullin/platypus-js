@@ -41,13 +41,15 @@
  */
 package com.bearsoft.org.netbeans.modules.form.editors;
 
-import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
-import com.bearsoft.org.netbeans.modules.form.FormModel;
+import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import java.beans.PropertyEditorSupport;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import org.openide.explorer.propertysheet.ExPropertyEditor;
+import org.openide.explorer.propertysheet.PropertyEnv;
+import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
@@ -57,17 +59,16 @@ import org.openide.util.Utilities;
  * @author Jiri Vagner
  *
  */
-public class PrimitiveTypeArrayEditor extends PropertyEditorSupport
-        implements FormAwareEditor {
+public class PrimitiveTypeArrayEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
     private Class<?> valueType;    // type of edited form property
     private FormProperty<?> formProperty;  // edited form property
-    private static String ARR_BEGIN = "["; // NOI18N
-    private static String ARR_END = "]"; // NOI18N
-    private static String NULL_STR = "null"; // NOI18N    
+    private static final String ARR_BEGIN = "["; // NOI18N
+    private static final String ARR_END = "]"; // NOI18N
+    private static final String NULL_STR = "null"; // NOI18N    
     // arrays for easy converting escape sequences
-    private char[] escChars = {'\t', '\b', '\n', '\r', '\f', '\'', '\"', '\\'}; // NOI18N
-    private String[] escCharsStr = {"\\t", "\\b", "\\n", "\\r", "\\f", "\\'", "\\\"", "\\\\"}; // NOI18N
+    private final char[] escChars = {'\t', '\b', '\n', '\r', '\f', '\'', '\"', '\\'}; // NOI18N
+    private final String[] escCharsStr = {"\\t", "\\b", "\\n", "\\r", "\\f", "\\'", "\\\"", "\\\\"}; // NOI18N
 
     /**
      * Splits string from inplace editor into char array
@@ -268,8 +269,8 @@ public class PrimitiveTypeArrayEditor extends PropertyEditorSupport
      */
     @Override
     public String getAsText() {
-        if (this.getValue() != null) {
-            Object[] result = new Object[]{};
+        if (getValue() != null) {
+            Object[] result;
             if (valueType.equals(char[].class)) {
                 result = toCharObjectArray(this.getValue());
             } else {
@@ -298,13 +299,18 @@ public class PrimitiveTypeArrayEditor extends PropertyEditorSupport
         }
     }
 
-    /**
-     * Sets edited form property and value type
-     */
     @Override
-    public void setContext(FormModel aFormModel, FormProperty<?> aProperty) {
-        valueType = aProperty.getValueType();
-        formProperty = aProperty;
+    public void attachEnv(PropertyEnv aEnv) {
+        aEnv.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+        Object bean = aEnv.getBeans()[0];
+        if (bean instanceof Node) {
+            Node node = (Node) bean;
+            FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
+            if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
+                formProperty = (FormProperty<?>) aEnv.getFeatureDescriptor();
+                valueType = formProperty.getValueType();
+            }
+        }
     }
 
     @Override

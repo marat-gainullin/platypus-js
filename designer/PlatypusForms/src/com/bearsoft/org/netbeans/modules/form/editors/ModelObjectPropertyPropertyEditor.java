@@ -4,11 +4,13 @@
  */
 package com.bearsoft.org.netbeans.modules.form.editors;
 
-import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
+import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import com.bearsoft.org.netbeans.modules.form.RADComponentNode;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
+import com.bearsoft.org.netbeans.modules.form.bound.ModelObjectPropertyProperty;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.forms.components.model.ModelCombo;
@@ -25,6 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.explorer.propertysheet.ExPropertyEditor;
+import org.openide.explorer.propertysheet.PropertyEnv;
+import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
@@ -32,12 +37,13 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport implements FormAwareEditor {
+public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
     protected int selectionSubject = ModelElementSelector.FIELD_SELECTION_SUBJECT;
     protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyPropertyEditor.class, "CTL_SelectField");
     protected FormModel formModel;
-    protected FormProperty<Object> property;
+    protected ModelObjectPropertyProperty property;
+    protected RADComponent<?> comp;
     protected String prefix = "";
 
     public ModelObjectPropertyPropertyEditor() {
@@ -75,9 +81,8 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
 
     protected ApplicationDbEntity lookupDataEntity() {
         try {
-            RADComponent<?> comp = (RADComponent<?>) property.getPropertyContext().getOwner();
-            if(comp instanceof RADModelGridColumn){
-                RADModelGridColumn radCol = (RADModelGridColumn)comp;
+            if (comp instanceof RADModelGridColumn) {
+                RADModelGridColumn radCol = (RADModelGridColumn) comp;
                 comp = radCol.lookupGrid();
             }
             RADProperty<ModelJSObject> prop = comp.getProperty(ModelCombo.class.isAssignableFrom(comp.getBeanClass()) && "displayField".equals(property.getName()) ? "displayList" : "data");
@@ -247,8 +252,31 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
     }
 
     @Override
-    public void setContext(FormModel aFormModel, FormProperty<?> aProperty) {
+    public void attachEnv(PropertyEnv aEnv) {
+        aEnv.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+        Object bean = aEnv.getBeans()[0];
+        if (bean instanceof Node) {
+            Node node = (Node) bean;
+            FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
+            if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
+                formModel = formCookie.getFormModel();
+                property = (ModelObjectPropertyProperty) aEnv.getFeatureDescriptor();
+            }
+            if(node instanceof RADComponentNode){
+                comp = ((RADComponentNode)node).getRADComponent();
+            }
+        }
+    }
+
+    public void setFormModel(FormModel aFormModel) {
         formModel = aFormModel;
-        property = (FormProperty<Object>) aProperty;
+    }
+
+    public void setProperty(ModelObjectPropertyProperty aProperty) {
+        property = aProperty;
+    }
+
+    public void setComp(RADComponent<?> aComp) {
+        comp = aComp;
     }
 }

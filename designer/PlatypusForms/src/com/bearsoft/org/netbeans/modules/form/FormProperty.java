@@ -100,7 +100,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     // ------------------------
     // variables
     protected int accessType = NORMAL_RW;
-    protected FormPropertyContext propertyContext;
     boolean valueChanged = false; // non-default value that came in through setValue
     private PropertyChangeSupport changeSupport;
     private VetoableChangeSupport vetoableChangeSupport;
@@ -108,8 +107,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
 
     // ---------------------------
     // constructors
-    protected FormProperty(FormPropertyContext aPropertyContext,
-            String name, Class<T> type,
+    protected FormProperty(String name, Class<T> type,
             String displayName, String shortDescription) {
         super(type);
         setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
@@ -117,36 +115,12 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         setName(name);
         setDisplayName(displayName);
         setShortDescription(getDescriptionWithType(shortDescription, getValueType()));
-
-        propertyContext = aPropertyContext;
         setHidden("name".equals(name));
     }
 
-    protected FormProperty(FormPropertyContext aPropertyContext, Class<T> type) {
-        super(type);
-        setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
-        propertyContext = aPropertyContext;
-    }
-
-    // constructor of property without PropertyContext
-    // setPropertyContext(...) should be called explicitly then
-    protected FormProperty(String name, Class<T> type,
-            String displayName, String shortDescription) {
-        super(type);
-        setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
-        setName(name);
-        setDisplayName(displayName);
-        setShortDescription(getDescriptionWithType(shortDescription, getValueType()));
-        propertyContext = FormPropertyContext.EmptyImpl.getInstance();
-    }
-
-    // constructor of property without PropertyContext;
-    // setPropertyContext(...) must be called explicitly before the property
-    // is used first time
     protected FormProperty(Class<T> type) {
         super(type);
         setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
-        propertyContext = FormPropertyContext.EmptyImpl.getInstance();
     }
 
     static String getDescriptionWithType(String description, Class<?> valueType) {
@@ -223,14 +197,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
      */
     public void setChanged(boolean changed) {
         valueChanged = changed;
-    }
-
-    public FormPropertyContext getPropertyContext() {
-        return propertyContext;
-    }
-
-    public void setPropertyContext(FormPropertyContext aContext) {
-        propertyContext = aContext;
     }
 
     /**

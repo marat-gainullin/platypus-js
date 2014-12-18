@@ -695,19 +695,9 @@ public abstract class RADComponent<C> {
                 InvocationTargetException {
             IconEditor.NbImageIcon oldValue = getValue();
             value = aValue;
-            if (oldValue != value) {
-                setChanged(value != getDefaultValue());
-                Object innerValue = null;
-                if (value != null && (value.getIcon() != null || value.getImage() != null) && canWrite()) {
-                    if (java.awt.Image.class.isAssignableFrom(getPropertyDescriptor().getPropertyType())) {
-                        innerValue = value.getImage();
-                    } else {
-                        innerValue = value.getIcon();
-                    }
-                }
-                getPropertyDescriptor().getWriteMethod().invoke(getComponent().getBeanInstance(), new Object[]{innerValue});
-                propertyValueChanged(oldValue, value);
-            }
+            setChanged(!isDefaultValue());
+            getPropertyDescriptor().getWriteMethod().invoke(getComponent().getBeanInstance(), new Object[]{value});
+            propertyValueChanged(oldValue, value);
         }
     }
 

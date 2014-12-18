@@ -1292,7 +1292,7 @@ public class MenuEditLayer extends JPanel {
                     icon = (Icon) value;
                 }
                 if (value instanceof NbImageIcon) {
-                    icon = ((NbImageIcon) value).getIcon();
+                    icon = (NbImageIcon) value;
                 }
                 // do the actual update
                 if (!(item.getIcon() instanceof WrapperIcon) && !isTopLevelMenu(item)) {

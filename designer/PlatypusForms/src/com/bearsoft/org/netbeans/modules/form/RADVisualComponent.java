@@ -231,9 +231,6 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
                 for (int i = 0; i < constraintsProperties.length; i++) {
                     constraintsProperties[i].addVetoableChangeListener(getConstraintsListener());
                     constraintsProperties[i].addPropertyChangeListener(getConstraintsListener());
-
-                    constraintsProperties[i].setPropertyContext(new FormPropertyContext.Component(this));
-
                     if (isReadOnly() || !isValid()) {
                         int type = constraintsProperties[i].getAccessType() | FormProperty.NO_WRITE;
                         constraintsProperties[i].setAccessType(type);

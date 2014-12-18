@@ -4,7 +4,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.editors;
 
-import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
+import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.eas.designer.application.module.ModelJSObject;
@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.explorer.propertysheet.ExPropertyEditor;
+import org.openide.explorer.propertysheet.PropertyEnv;
+import org.openide.nodes.Node;
+import org.openide.nodes.PropertyEditorRegistration;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
@@ -27,7 +31,8 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-public class ModelObjectEditor extends PropertyEditorSupport implements FormAwareEditor {
+@PropertyEditorRegistration(targetType = ModelJSObject.class)
+public class ModelObjectEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
     protected int selectionSubject = ModelElementSelector.DATASOURCE_SELECTION_SUBJECT;
     protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyPropertyEditor.class, "CTL_SelectField");
@@ -74,9 +79,17 @@ public class ModelObjectEditor extends PropertyEditorSupport implements FormAwar
     }
 
     @Override
-    public void setContext(FormModel aFormModel, FormProperty<?> aProperty) {
-        formModel = aFormModel;
-        property = (FormProperty<Object>) aProperty;
+    public void attachEnv(PropertyEnv aEnv) {
+        aEnv.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+        Object bean = aEnv.getBeans()[0];
+        if (bean instanceof Node) {
+            Node node = (Node) bean;
+            FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
+            if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
+                formModel = formCookie.getFormModel();
+                property = (FormProperty<Object>) aEnv.getFeatureDescriptor();
+            }
+        }
     }
 
     @Override

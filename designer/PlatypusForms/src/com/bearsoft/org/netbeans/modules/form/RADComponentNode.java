@@ -57,12 +57,9 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.*;
-import java.beans.*;
-import java.security.*;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.swing.Action;
-import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.nodes.*;
 import org.openide.util.*;
@@ -381,8 +378,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     public boolean hasCustomizer() {
-        return !component.isReadOnly()
-                && ((component.getBeanInfo().getBeanDescriptor().getCustomizerClass() != null));
+        return false;
     }
 
     /**
@@ -392,69 +388,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     protected Component createCustomizer() {
-        Class<?> customizerClass = component.getBeanInfo().getBeanDescriptor().getCustomizerClass();
-        if (customizerClass != null) {
-            Object customizerObject;
-            try {
-                customizerObject = customizerClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                ErrorManager.getDefault().notify(ErrorManager.WARNING, e);
-                return null;
-            }
-
-            if (customizerObject instanceof Component && customizerObject instanceof Customizer) {
-                Customizer customizer = (Customizer) customizerObject;
-                customizer.setObject(component.getBeanInstance());
-                if (customizerObject instanceof FormAwareEditor) {
-                    // Hack - returns some property
-                    RADProperty<?> prop = (RADProperty<?>) component.getProperties()[0].getProperties()[0];
-                    ((FormAwareEditor) customizerObject).setContext(component.getFormModel(), (FormProperty<?>) prop);
-                }
-                customizer.addPropertyChangeListener((PropertyChangeEvent evt) -> {
-                    RADProperty<?>[] properties;
-                    if (evt.getPropertyName() != null) {
-                        RADProperty<?> changedProperty
-                                = component.<RADProperty<?>>getProperty(evt.getPropertyName());
-                        if (changedProperty != null) {
-                            properties = new RADProperty<?>[]{changedProperty};
-                        } else {
-                            return; // non-existing property?
-                        }
-                    } else {
-                        properties = component.getBeanProperties();
-                        evt = null;
-                    }
-                    updatePropertiesFromCustomizer(properties, evt);
-                });
-                // [undo/redo for customizer probably does not work...]
-                return (Component) customizerObject;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    private void updatePropertiesFromCustomizer(
-            final FormProperty<?>[] properties,
-            final PropertyChangeEvent evt) {
-        // we run this as privileged to avoid security problems - because
-        // the property change is fired from untrusted bean customizer code
-        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            Object oldValue = evt != null ? evt.getOldValue() : null;
-            Object newValue = evt != null ? evt.getNewValue() : null;
-
-            for (int i = 0; i < properties.length; i++) {
-                FormProperty<Object> prop = (FormProperty<Object>) properties[i];
-                try {
-                    prop.propertyValueChanged(oldValue, newValue);
-                } catch (Exception ex) { // unlikely to happen
-                    ErrorManager.getDefault().notify(ex);
-                }
-            }
-            return null;
-        });
+        return null;
     }
 
     // -----------------------------------------------------------------------------------------

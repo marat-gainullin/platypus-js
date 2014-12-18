@@ -416,12 +416,11 @@ public class FormUtils {
      * deserialized (if not serializable exception is thrown).
      *
      * @param o object to clone.
-     * @param formModel form model.
      * @return cloned of the given object.
      * @throws java.lang.CloneNotSupportedException when cloning was
      * unsuccessful.
      */
-    public static Object cloneObject(Object o, FormModel formModel) throws CloneNotSupportedException {
+    public static Object cloneObject(Object o) throws CloneNotSupportedException {
         if (o == null) {
             return null;
         }
@@ -452,11 +451,11 @@ public class FormUtils {
         if (o instanceof Insets) {
             return ((Insets) o).clone();
         }
+        if (o instanceof Cursor) {
+            return new com.eas.gui.Cursor(((Cursor) o).getType());
+        }
         if (o instanceof Paint) {
             return o;
-        }
-        if (o instanceof Serializable) {
-            return cloneBeanInstance(o, null, formModel);
         }
         if(o instanceof JSObject)
             return o;
@@ -531,7 +530,7 @@ public class FormUtils {
                     continue;
                 }
                 try {
-                    propertyValue = cloneObject(propertyValue, formModel);
+                    propertyValue = cloneObject(propertyValue);
                 } catch (Exception e2) { // ignore - do not clone property value
                 }
                 try {
@@ -694,8 +693,7 @@ public class FormUtils {
                 Object copiedValue = propertyValue;
                 if ((mode & DONT_CLONE_VALUES) == 0) {
                     try { // clone common property value                        
-                        FormModel formModel = (sfProp == null) ? null : sfProp.getPropertyContext().getFormModel();
-                        copiedValue = FormUtils.cloneObject(propertyValue, formModel);
+                        copiedValue = FormUtils.cloneObject(propertyValue);
                     } catch (CloneNotSupportedException ex) {
                     } // ignore, don't report
                 }
@@ -736,7 +734,7 @@ public class FormUtils {
                     // There are cases when properties values are not applicable to native swing components properties
                     // So we have to get value to clone directly from Swing Component
                     Object realValue = prop.getPropertyDescriptor().getReadMethod().invoke(prop.getComponent().getBeanInstance(), new Object[]{});
-                    realValue = FormUtils.cloneObject(realValue, prop.getPropertyContext().getFormModel());
+                    realValue = FormUtils.cloneObject(realValue);
                     writeMethod.invoke(targetBean, new Object[]{realValue});
                 }
             } catch (Exception ex) {
@@ -1287,15 +1285,19 @@ public class FormUtils {
      * @see java.beans.Introspector.getBeanInfo(Class)
      */
     public static BeanInfo getBeanInfo(Class<?> clazz) throws IntrospectionException {
+        return Introspector.getBeanInfo(clazz, java.beans.Introspector.IGNORE_ALL_BEANINFO);
+        /*
         try {
-            return Introspector.getBeanInfo(clazz, java.beans.Introspector.USE_ALL_BEANINFO);
+            return Introspector.getBeanInfo(clazz, java.beans.Introspector.IGNORE_ALL_BEANINFO);
         } catch (Exception | Error ex) {
             org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
             return getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
         }
+        */
     }
 
     // helper method for getBeanInfo(Class)
+    /*
     static BeanInfo getBeanInfo(Class<?> clazz, int mode) throws IntrospectionException {
         if (mode == Introspector.IGNORE_IMMEDIATE_BEANINFO) {
             try {
@@ -1309,7 +1311,7 @@ public class FormUtils {
             return Introspector.getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
         }
     }
-
+*/
     public static Class<?> getScriptEventClassByName(String anEventName) {
         return eventsNames2scriptEventsClasses.get(anEventName);
     }

@@ -84,7 +84,7 @@ public class FormEditor {
     /**
      * Persistence manager responsible for saving the form
      */
-    private PersistenceManager persistenceManager = new PlatypusPersistenceManager();
+    private PersistenceManager persistenceManager = new PersistenceManager();
     /**
      * An indicator whether the form has been loaded (from the .form file)
      */

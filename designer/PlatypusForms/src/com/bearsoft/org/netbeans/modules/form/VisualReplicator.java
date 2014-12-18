@@ -381,7 +381,7 @@ public class VisualReplicator {
                                 // There are cases when properties values are not applicable to native swing components properties
                                 // So we have to get value to clone directly from Swing Component
                                 Object realValue = property.getPropertyDescriptor().getReadMethod().invoke(radComp.getBeanInstance(), new Object[]{});
-                                clonedValue = FormUtils.cloneObject(realValue, property.getPropertyContext().getFormModel());
+                                clonedValue = FormUtils.cloneObject(realValue);
                             }
 
                             if (buttonGroup) {

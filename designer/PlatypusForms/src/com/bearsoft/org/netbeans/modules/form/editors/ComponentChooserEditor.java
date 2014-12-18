@@ -41,10 +41,23 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form;
+package com.bearsoft.org.netbeans.modules.form.editors;
 
+import com.bearsoft.org.netbeans.modules.form.ComponentReference;
+import com.bearsoft.org.netbeans.modules.form.FormCookie;
+import com.bearsoft.org.netbeans.modules.form.FormModel;
+import com.bearsoft.org.netbeans.modules.form.FormProperty;
+import com.bearsoft.org.netbeans.modules.form.FormUtils;
+import com.bearsoft.org.netbeans.modules.form.NamedPropertyEditor;
+import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import com.eas.client.forms.containers.ButtonGroup;
 import java.beans.*;
 import java.util.*;
+import javax.swing.JPopupMenu;
+import org.openide.explorer.propertysheet.ExPropertyEditor;
+import org.openide.explorer.propertysheet.PropertyEnv;
+import org.openide.nodes.Node;
+import org.openide.nodes.PropertyEditorRegistration;
 import org.openide.util.NbBundle;
 
 /**
@@ -53,8 +66,8 @@ import org.openide.util.NbBundle;
  *
  * @author Tomas Pavek
  */
-public class ComponentChooserEditor implements PropertyEditor,
-        FormAwareEditor,
+@PropertyEditorRegistration(targetType = {javax.swing.JComponent.class, JPopupMenu.class, ButtonGroup.class})
+public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
         NamedPropertyEditor {
 
     public static final int ALL_COMPONENTS = 0;
@@ -65,20 +78,16 @@ public class ComponentChooserEditor implements PropertyEditor,
     private static String invalidText = null;
     private static String defaultText = null;
     private FormModel formModel;
+    private FormProperty<?> prop;
     private List<RADComponent<?>> components = new ArrayList<>();
-    private Class<?>[] beanTypes = null;
-    private int componentCategory = 0;
+    private int componentCategory;
     private ComponentRef<?> value;
     private PropertyChangeSupport changeSupport;
 
     public ComponentChooserEditor() {
+        super();
     }
 
-    public ComponentChooserEditor(Class<?>[] componentTypes) {
-        beanTypes = componentTypes;
-    }
-
-    // --------------
     // PropertyEditor implementation
     @Override
     public void setValue(Object aValue) {
@@ -199,23 +208,22 @@ public class ComponentChooserEditor implements PropertyEditor,
         return false;
     }
 
-    // ----------------
-    // FormAwareEditor implementation
     @Override
-    public void setContext(FormModel model, FormProperty<?> prop) {
-        formModel = model;
+    public void attachEnv(PropertyEnv aEnv) {
+        aEnv.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+        Object bean = aEnv.getBeans()[0];
+        if (bean instanceof Node) {
+            Node node = (Node) bean;
+            FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
+            if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
+                formModel = formCookie.getFormModel();
+                prop = (FormProperty<?>) aEnv.getFeatureDescriptor();
+            }
+        }
     }
 
     public FormModel getFormModel() {
         return formModel;
-    }
-
-    public void setBeanTypes(Class<?>[] types) {
-        beanTypes = types;
-    }
-
-    public Class<?>[] getBeanTypes() {
-        return beanTypes;
     }
 
     public void setComponentCategory(int cat) {
@@ -247,14 +255,7 @@ public class ComponentChooserEditor implements PropertyEditor,
     }
 
     protected boolean acceptBean(RADComponent<?> comp) {
-        if (beanTypes == null) {
-            return true;
-        }
-        boolean match = false;
-        for (int i = 0; i < beanTypes.length && !match; i++) {
-            match = beanTypes[i].isAssignableFrom(comp.getBeanClass());
-        }
-        return match;
+        return prop.getValueType().isAssignableFrom((Class<?>) comp.getBeanClass());
     }
 
     protected String noneString() {

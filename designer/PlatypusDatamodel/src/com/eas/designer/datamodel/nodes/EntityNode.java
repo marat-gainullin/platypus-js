@@ -34,6 +34,7 @@ import org.openide.actions.RenameAction;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
+import org.openide.nodes.PropertyEditorRegistration;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;

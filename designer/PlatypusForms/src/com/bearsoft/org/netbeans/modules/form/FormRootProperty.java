@@ -21,7 +21,7 @@ class FormRootProperty<T> extends FormProperty<T> {
     protected Form form;
 
     public FormRootProperty(FormModel aFormModel, PropertyDescriptor aDescriptor) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        super(new FormPropertyContext.PropImpl(aFormModel), aDescriptor.getName(), (Class<T>) aDescriptor.getPropertyType(), aDescriptor.getDisplayName(), aDescriptor.getShortDescription());
+        super(aDescriptor.getName(), (Class<T>) aDescriptor.getPropertyType(), aDescriptor.getDisplayName(), aDescriptor.getShortDescription());
         desc = aDescriptor;
         form = aFormModel.getForm();
         if (desc.getReadMethod() != null) {
