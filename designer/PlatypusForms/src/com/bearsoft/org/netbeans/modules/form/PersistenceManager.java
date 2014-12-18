@@ -74,14 +74,13 @@ public abstract class PersistenceManager {
      * This method loads the form from given data object.
      *
      * @param formObject PlatypusFormDataObject representing the form files
-     * @param formModel FormModel to be filled with loaded data
      * @param nonfatalErrors List to be filled with errors occurred during
      * loading which are not fatal (but should be reported)
+     * @return 
      * @exception PersistenceException if some fatal problem occurred which
      * prevents loading the form
      */
-    public abstract void loadForm(PlatypusFormDataObject formObject,
-            FormModel formModel,
+    public abstract FormModel loadForm(PlatypusFormDataObject formObject,
             List<Throwable> nonfatalErrors)
             throws PersistenceException;
 

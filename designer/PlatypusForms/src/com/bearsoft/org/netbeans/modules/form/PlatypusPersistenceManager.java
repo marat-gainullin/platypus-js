@@ -66,17 +66,16 @@ public class PlatypusPersistenceManager extends PersistenceManager {
     }
 
     @Override
-    public void loadForm(PlatypusFormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors) throws PersistenceException {
+    public FormModel loadForm(PlatypusFormDataObject formDataObject, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
-            formModel.setName(formObject.getName());
-            String formContent = formObject.getFormFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
+            String formContent = formDataObject.getFormFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
             Document doc = Source2XmlDom.transform(formContent);
-            FormFactory formFactory = new FormFactory(doc.getDocumentElement(), formModel.getDataObject().getModel().getPublished()) {
+            FormFactory formFactory = new FormFactory(doc.getDocumentElement(), formDataObject.getModel().getPublished()) {
 
                 @Override
                 protected ImageIcon resolveIcon(String aIconName) {
                     try {
-                        NbImageIcon nbIcon = IconEditor.iconFromResourceName(formModel.getDataObject(), aIconName);
+                        NbImageIcon nbIcon = IconEditor.iconFromResourceName(formDataObject, aIconName);
                         return nbIcon != null ? (ImageIcon) nbIcon.getIcon() : null;
                     } catch (Exception ex) {
                         nonfatalErrors.add(ex);
@@ -162,6 +161,8 @@ public class PlatypusPersistenceManager extends PersistenceManager {
             };
             formFactory.parse();
             Form form = formFactory.getForm();
+            FormModel formModel = new FormModel(formDataObject, form);
+            formModel.setName(formDataObject.getName());
 
             // Let's take care of top level container
             RADVisualFormContainer formComp = new RADVisualFormContainer();
@@ -228,6 +229,7 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                     }
                 }
             }
+            return formModel;
         } catch (Exception ex) {
             throw new PersistenceException(ex);
         }

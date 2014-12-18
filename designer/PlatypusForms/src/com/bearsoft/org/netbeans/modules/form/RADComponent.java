@@ -492,36 +492,29 @@ public abstract class RADComponent<C> {
         //props = FormUtils.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO).getPropertyDescriptors();
         for (int i = 0; i < descriptors.length; i++) {
             PropertyDescriptor descriptor = descriptors[i];
-            if (descriptor.getReadMethod() == null || descriptor.getWriteMethod() == null) {
-                continue;
-            }
-            Designable designable = null;
-            ScriptFunction scriptFunction = null;
-            if (descriptor.getReadMethod() != null) {
-                designable = descriptor.getReadMethod().getAnnotation(Designable.class);
-                scriptFunction = descriptor.getReadMethod().getAnnotation(ScriptFunction.class);
-            }
-            if (descriptor.getWriteMethod() != null) {
+            if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
+                Designable designable = descriptor.getReadMethod().getAnnotation(Designable.class);
+                ScriptFunction scriptFunction = descriptor.getReadMethod().getAnnotation(ScriptFunction.class);
                 if (designable == null) {
                     designable = descriptor.getWriteMethod().getAnnotation(Designable.class);
                 }
                 if (scriptFunction == null) {
                     scriptFunction = descriptor.getWriteMethod().getAnnotation(ScriptFunction.class);
                 }
-            }
-            if (designable != null || scriptFunction != null) {
-                String category = "general"; // NOI18N
-                if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
-                    category = designable.category();
-                }
-                List<RADProperty<?>> listToAdd = _propsByCategories.get(category);
-                if (listToAdd == null) {
-                    listToAdd = new ArrayList<>();
-                    _propsByCategories.put(category, listToAdd);
-                }
-                RADProperty<?> prop = createBeanProperty(descriptor);
-                if (prop != null) {
-                    listToAdd.add(prop);
+                if (designable != null || scriptFunction != null) {
+                    String category = "general"; // NOI18N
+                    if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
+                        category = designable.category();
+                    }
+                    List<RADProperty<?>> listToAdd = _propsByCategories.get(category);
+                    if (listToAdd == null) {
+                        listToAdd = new ArrayList<>();
+                        _propsByCategories.put(category, listToAdd);
+                    }
+                    RADProperty<?> prop = createBeanProperty(descriptor);
+                    if (prop != null) {
+                        listToAdd.add(prop);
+                    }
                 }
             }
         }

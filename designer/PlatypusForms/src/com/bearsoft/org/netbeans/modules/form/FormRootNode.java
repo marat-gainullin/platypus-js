@@ -44,14 +44,26 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.actions.*;
+import com.eas.client.forms.Form;
+import com.eas.design.Designable;
+import com.eas.design.Undesignable;
+import com.eas.script.ScriptFunction;
 import java.awt.datatransfer.Transferable;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.TreeMap;
 import javax.swing.Action;
 import org.openide.actions.PasteAction;
 import org.openide.actions.ReorderAction;
 import org.openide.nodes.*;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
@@ -64,13 +76,70 @@ import org.openide.util.datatransfer.PasteType;
  */
 class FormRootNode extends FormNode {
 
-    private FormProperty<?>[] allProperties;
+    private List<PropertySet> propSets;
 
     public FormRootNode(FormModel formModel) {
         super(new RootChildren(formModel), formModel);
         setName("Form Root Node"); // NOI18N
         setIconBaseWithExtension("com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"); // NOI18N
         updateName(formModel.getName());
+    }
+
+    @Override
+    public PropertySet[] getPropertySets() {
+        checkPropertiesSets();
+        return propSets.toArray(new PropertySet[]{});
+    }
+
+    protected void checkPropertiesSets() {
+        if (propSets == null) {
+            try {
+                propSets = new ArrayList<>();
+                Map<String, List<Node.Property<?>>> propsByCategory = new TreeMap<>();
+                BeanInfo bi = Introspector.getBeanInfo(Form.class, java.beans.Introspector.IGNORE_ALL_BEANINFO);
+                for (PropertyDescriptor descriptor : bi.getPropertyDescriptors()) {
+                    if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
+                        Designable designable = descriptor.getReadMethod().getAnnotation(Designable.class);
+                        ScriptFunction scriptFunction = descriptor.getReadMethod().getAnnotation(ScriptFunction.class);
+                        if (designable == null) {
+                            designable = descriptor.getWriteMethod().getAnnotation(Designable.class);
+                        }
+                        if (scriptFunction == null) {
+                            scriptFunction = descriptor.getWriteMethod().getAnnotation(ScriptFunction.class);
+                        }
+                        if ((designable != null || scriptFunction != null)
+                                && !descriptor.getReadMethod().isAnnotationPresent(Undesignable.class) && !descriptor.getWriteMethod().isAnnotationPresent(Undesignable.class)) {
+                            String category = "general";
+                            if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
+                                category = designable.category();
+                            }
+                            List<Node.Property<?>> catProps = propsByCategory.get(category);
+                            if (catProps == null) {
+                                catProps = new ArrayList<>();
+                                propsByCategory.put(category, catProps);
+                            }
+                            Node.Property<?> prop = new PropertySupport.Reflection<>(formModel.getForm(), descriptor.getPropertyType(), descriptor.getReadMethod(), descriptor.getWriteMethod());
+                            catProps.add(prop);
+                        }
+                    }
+                }
+                final ResourceBundle bundle = FormUtils.getBundle();
+                propsByCategory.entrySet().stream().forEach((Map.Entry<String, List<Node.Property<?>>> aEntry) -> {
+                    final String category = aEntry.getKey();
+                    final List<Node.Property<?>> props = aEntry.getValue();
+                    if (props.size() > 0) {
+                        propSets.add(new Node.PropertySet(category, bundle.getString("CTL_" + category), bundle.getString("CTL_" + category + "Hint")) {
+                            @Override
+                            public Node.Property<?>[] getProperties() {
+                                return props.toArray(new Node.Property<?>[]{});
+                            }
+                        });
+                    }
+                });
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
     }
 
     @Override
@@ -109,10 +178,6 @@ class FormRootNode extends FormNode {
 
     FormOthersNode getOthersNode() {
         return ((RootChildren) getChildren()).othersNode;
-    }
-
-    FormProperty<?>[] getAllProperties() {
-        return allProperties;
     }
 
     @Override

@@ -145,29 +145,19 @@ public class FormEditor {
     public void loadForm() throws PersistenceException {
         if (!formLoaded) {
             resetPersistenceErrorLog(); // clear log of errors
-            // create and register new FormModel instance
-            formModel = new FormModel(formDataObject);
-
-            //openForms.put(formModel, this);
             Logger.getLogger("TIMER").log(Level.FINE, "FormModel", new Object[]{formDataObject.getPrimaryFile(), formModel}); // NOI18N
             // load the form data (FormModel) and report errors
             try {
-                FormLAF.<Object>executeWithLookAndFeel(formModel, () -> {
-                    persistenceManager.loadForm(formDataObject,
-                            formModel,
-                            persistenceErrors);
-                    formModel.setModified(false);
-                    return null;
-                });
+                formModel = persistenceManager.loadForm(formDataObject,
+                        persistenceErrors);
+                formModel.setModified(false);
             } catch (PersistenceException ex) { // some fatal error occurred
                 persistenceManager = null;
-                //openForms.remove(formModel);
                 formModel = null;
                 throw ex;
             } catch (Exception ex) { // should not happen, but for sure...
                 ErrorManager.getDefault().notify(ex);
                 persistenceManager = null;
-                //openForms.remove(formModel);
                 formModel = null;
                 return;
             }

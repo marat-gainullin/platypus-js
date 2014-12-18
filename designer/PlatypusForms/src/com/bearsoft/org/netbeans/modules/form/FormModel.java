@@ -49,6 +49,7 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
+import com.eas.client.forms.Form;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import java.beans.Introspector;
 import java.util.*;
@@ -74,15 +75,22 @@ public class FormModel {
 
     // name of the form is name of the DataObject
     private final PlatypusFormDataObject dataObject;
+    private final Form form;
     private RADVisualContainer<?> topDesignComponent;
     private final AssistantModel assistantModel = new AssistantModel();
     private String formName;
     private boolean readOnly;
 
-    public FormModel(PlatypusFormDataObject aDataObject) {
+    public FormModel(PlatypusFormDataObject aDataObject, Form aForm) {
+        super();
         dataObject = aDataObject;
+        form = aForm;
         setName(aDataObject.getName());
         setReadOnly(aDataObject.isReadOnly());
+    }
+
+    public Form getForm() {
+        return form;
     }
 
     public PlatypusFormDataObject getDataObject() {
@@ -119,8 +127,6 @@ public class FormModel {
         }
         return generatedName;
     }
-    // the class on which the form is based (which is extended in the java file)
-    private Class<?> formBaseClass;
     // the top radcomponent of the form (null if form is based on Object)
     private RADVisualContainer<?> topRADComponent;
     // other components - out of the main hierarchy under topRADComponent
@@ -151,26 +157,26 @@ public class FormModel {
      * @throws java.lang.Exception if anything goes wrong.
      */
     /*
-    public void setFormBaseClass(Class<? extends Container> formClass) throws Exception {
-        if (formBaseClass != null) {
-            throw new IllegalStateException("Form type already initialized."); // NOI18N
-        }
-        if (FormUtils.isVisualizableClass(formClass)) {
-            RADVisualContainer<?> topComp = new RADVisualFormContainer();
-            topRADComponent = topComp;
-            topDesignComponent = topRADComponent;
-            topComp.initialize(this);
-            topComp.initInstance(formClass);
-            ((RADVisualFormContainer) topComp).setLayoutSupportDelegate(new MarginLayoutSupport());
-            topComp.setInModel(true);
-            formBaseClass = formClass;
-        }
-    }
+     public void setFormBaseClass(Class<? extends Container> formClass) throws Exception {
+     if (formBaseClass != null) {
+     throw new IllegalStateException("Form type already initialized."); // NOI18N
+     }
+     if (FormUtils.isVisualizableClass(formClass)) {
+     RADVisualContainer<?> topComp = new RADVisualFormContainer();
+     topRADComponent = topComp;
+     topDesignComponent = topRADComponent;
+     topComp.initialize(this);
+     topComp.initInstance(formClass);
+     ((RADVisualFormContainer) topComp).setLayoutSupportDelegate(new MarginLayoutSupport());
+     topComp.setInModel(true);
+     formBaseClass = formClass;
+     }
+     }
 
-    public Class<?> getFormBaseClass() {
-        return formBaseClass;
-    }
-*/
+     public Class<?> getFormBaseClass() {
+     return formBaseClass;
+     }
+     */
     final void setName(String name) {
         formName = name;
     }

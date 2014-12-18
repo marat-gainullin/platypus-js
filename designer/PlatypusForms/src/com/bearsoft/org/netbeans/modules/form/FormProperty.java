@@ -78,16 +78,6 @@ import org.openide.nodes.Node;
  */
 public abstract class FormProperty<T> extends Node.Property<T> {
 
-    public static interface Filter {
-
-        public boolean accept(FormProperty<?> property);
-    }
-    public static final Filter CHANGED_PROPERTY_FILTER = new Filter() {
-        @Override
-        public boolean accept(FormProperty<?> property) {
-            return property.isChanged();
-        }
-    };
     // --------------------
     // constants
     public static final String PROP_VALUE = "propertyValue"; // NOI18N
