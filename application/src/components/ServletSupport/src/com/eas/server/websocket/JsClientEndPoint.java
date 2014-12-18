@@ -78,13 +78,21 @@ public class JsClientEndPoint {
 
     @OnError
     public void onError(Session websocketSession, Throwable aError) {
-        session.inContext(() -> {
+        Runnable actor = () -> {
             if (onerror != null) {
                 JSObject errorEvent = ScriptUtils.makeObj();
                 errorEvent.setMember("message", aError.getMessage());
                 onerror.call(session.getPublished(), new Object[]{errorEvent});
             }
-        });
+        };
+        if (ScriptUtils.getLock() == null) {
+            session.inContext(actor);
+        } else {// already in context
+            final Object lock = ScriptUtils.getLock();
+            synchronized (lock) {
+                actor.run();
+            }
+        }
     }
 
     public JSObject getOnopen() {

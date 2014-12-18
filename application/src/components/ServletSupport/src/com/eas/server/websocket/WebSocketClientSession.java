@@ -46,7 +46,7 @@ public class WebSocketClientSession implements HasPublished {
         reqponse = ScriptUtils.getResponse();
         platypusSession = ScriptUtils.getSession();
         principal = PlatypusPrincipal.getInstance();
-        
+
         webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
     }
 
@@ -80,7 +80,9 @@ public class WebSocketClientSession implements HasPublished {
         if (aReason == null) {
             aReason = "";
         }
-        webSocketSession.close(new CloseReason(CloseReason.CloseCodes.getCloseCode(opCode.intValue()), aReason));
+        if (webSocketSession.isOpen()) {
+            webSocketSession.close(new CloseReason(CloseReason.CloseCodes.getCloseCode(opCode.intValue()), aReason));
+        }
     }
 
     @ScriptFunction(params = "data")

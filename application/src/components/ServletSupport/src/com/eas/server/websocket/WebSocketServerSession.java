@@ -67,7 +67,9 @@ public class WebSocketServerSession implements HasPublished {
         if (aReason == null) {
             aReason = "";
         }
-        session.close(new CloseReason(CloseReason.CloseCodes.getCloseCode(opCode.intValue()), aReason));
+        if (session.isOpen()) {
+            session.close(new CloseReason(CloseReason.CloseCodes.getCloseCode(opCode.intValue()), aReason));
+        }
     }
 
     @ScriptFunction(params = "data")
