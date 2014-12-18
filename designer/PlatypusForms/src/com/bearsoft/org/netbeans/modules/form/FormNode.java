@@ -57,6 +57,7 @@ import org.openide.util.actions.SystemAction;
 public class FormNode extends AbstractNode {
 
     protected FormModel formModel;
+    
     private final FormCookie formCookie = new FormCookie() {
         @Override
         public FormModel getFormModel() {

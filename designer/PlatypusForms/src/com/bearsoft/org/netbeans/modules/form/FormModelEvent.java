@@ -66,23 +66,25 @@ public class FormModelEvent extends EventObject {
     public static final int FORM_LOADED = 1;
     public static final int FORM_TO_BE_SAVED = 2;
     public static final int FORM_TO_BE_CLOSED = 3;
-    public static final int CONTAINER_LAYOUT_EXCHANGED = 4;
-    public static final int CONTAINER_LAYOUT_CHANGED = 5;
-    public static final int COMPONENT_LAYOUT_CHANGED = 6;
-    public static final int COMPONENT_ADDED = 7;
-    public static final int COMPONENT_REMOVED = 8;
-    public static final int COMPONENTS_REORDERED = 9;
-    public static final int COMPONENT_PROPERTY_CHANGED = 10;
-    public static final int SYNTHETIC_PROPERTY_CHANGED = 11;
-    public static final int EVENT_HANDLER_ADDED = 12;
-    public static final int EVENT_HANDLER_REMOVED = 13;
-    public static final int EVENT_HANDLER_RENAMED = 14;
-    public static final int COLUMN_VIEW_EXCHANGED = 15;
-    public static final int TOP_DESIGN_COMPONENT_CHANGED = 16;
-    public static final int OTHER_CHANGE = 17;
+    public static final int FORM_PROPERTY_CHANGED = 4;
+    public static final int CONTAINER_LAYOUT_EXCHANGED = 5;
+    public static final int CONTAINER_LAYOUT_CHANGED = 6;
+    public static final int COMPONENT_LAYOUT_CHANGED = 7;
+    public static final int COMPONENT_ADDED = 8;
+    public static final int COMPONENT_REMOVED = 9;
+    public static final int COMPONENTS_REORDERED = 10;
+    public static final int COMPONENT_PROPERTY_CHANGED = 11;
+    public static final int SYNTHETIC_PROPERTY_CHANGED = 12;
+    public static final int EVENT_HANDLER_ADDED = 13;
+    public static final int EVENT_HANDLER_REMOVED = 14;
+    public static final int EVENT_HANDLER_RENAMED = 15;
+    public static final int COLUMN_VIEW_EXCHANGED = 16;
+    public static final int TOP_DESIGN_COMPONENT_CHANGED = 17;
+    public static final int OTHER_CHANGE = 18;
     // data about the change
     private int changeType;
     private boolean createdDeleted;
+    private FormRootNode formRootNode;
     private RADComponent<?> component;
     private ComponentContainer container;
     private LayoutConstraints<?> constraints;
@@ -113,6 +115,10 @@ public class FormModelEvent extends EventObject {
 
     void setSubProperty(String aPropertyName) {
         subPropertyName = aPropertyName;
+    }
+
+    void setFormRootNode(FormRootNode aFormRootNode) {
+        formRootNode = aFormRootNode;
     }
 
     void setComponentAndContainer(RADComponent<?> radComp,
@@ -240,6 +246,10 @@ public class FormModelEvent extends EventObject {
 
     public final ComponentContainer getContainer() {
         return container;
+    }
+
+    FormRootNode getFormRootNode() {
+        return formRootNode;
     }
 
     public final RADComponent<?> getComponent() {
@@ -452,6 +462,10 @@ public class FormModelEvent extends EventObject {
                     FormModel.t("UNDO: component property change"); // NOI18N
                     undoComponentPropertyChange();
                     break;
+                case FORM_PROPERTY_CHANGED:
+                    FormModel.t("UNDO: form property change"); // NOI18N
+                    undoFormPropertyChange();
+                    break;
                 case EVENT_HANDLER_ADDED:
                     FormModel.t("UNDO: event handler addition"); // NOI18N
                     undoEventHandlerAddition();
@@ -517,6 +531,10 @@ public class FormModelEvent extends EventObject {
                 case COMPONENT_PROPERTY_CHANGED:
                     FormModel.t("REDO: component property change"); // NOI18N
                     redoComponentPropertyChange();
+                    break;
+                case FORM_PROPERTY_CHANGED:
+                    FormModel.t("REDO: form property change"); // NOI18N
+                    redoFormPropertyChange();
                     break;
                 case TOP_DESIGN_COMPONENT_CHANGED:
                     FormModel.t("REDO: top design component changed"); // NOI18N
@@ -762,6 +780,17 @@ public class FormModelEvent extends EventObject {
             }
         }
 
+        private void undoFormPropertyChange() {
+            FormProperty<Object> prop = (FormProperty<Object>)formRootNode.getProperty(propertyName);
+            if (prop != null) {
+                try {
+                    prop.setValue(getOldPropertyValue());
+                } catch (Exception ex) { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
+        
         private void redoComponentPropertyChange() {
             RADProperty<Object> prop = getComponent().<RADProperty<Object>>getProperty(getPropertyName());
             if (prop != null) {
@@ -773,6 +802,17 @@ public class FormModelEvent extends EventObject {
             }
         }
 
+        private void redoFormPropertyChange() {
+            FormProperty<Object> prop = (FormProperty<Object>)formRootNode.getProperty(propertyName);
+            if (prop != null) {
+                try {
+                    prop.setValue(getNewPropertyValue());
+                } catch (Exception ex) { // should not happen
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                }
+            }
+        }
+        
         private void undoSyntheticPropertyChange() {
             if (PROP_DESIGNER_SIZE.equals(propertyName)) {
                 getFormModel().fireSyntheticPropertyChanged(component, FormModelEvent.PROP_DESIGNER_SIZE, newPropertyValue, oldPropertyValue);

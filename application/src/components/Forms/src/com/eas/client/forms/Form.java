@@ -883,6 +883,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = WIDTH_JSDOC)
+    @Undesignable
     public int getWidth() {
         if (surface != null) {
             return surface.getWidth() - windowDecorSize.width;
@@ -911,6 +912,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = HEIGHT_JSDOC)
+    @Undesignable
     public int getHeight() {
         if (surface != null) {
             return surface.getHeight() - windowDecorSize.height;
@@ -1132,6 +1134,7 @@ public class Form implements HasPublished {
             + " */";
 
     @ScriptFunction(jsDoc = ALWAYS_ON_TOP_JSDOC)
+    @Undesignable
     public boolean getAlwaysOnTop() {
         return alwaysOnTop;
     }

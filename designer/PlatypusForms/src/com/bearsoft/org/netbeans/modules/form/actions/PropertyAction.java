@@ -63,10 +63,11 @@ import org.openide.util.NbBundle;
  * @author Jan Stola
  */
 public class PropertyAction extends AbstractAction {
+
     private static final String OK_COMMAND = "OK"; // NOI18N
     private static final String CANCEL_COMMAND = "Cancel"; // NOI18N
     private static final String RESTORE_COMMAND = "Restore"; // NOI18N
-    private RADProperty<Object> property;
+    private final RADProperty<Object> property;
     private Dialog dialog;
 
     public static PropertyAction createIfEditable(RADProperty<?> property) {
@@ -77,8 +78,8 @@ public class PropertyAction extends AbstractAction {
 
     public PropertyAction(RADProperty<?> aProperty) {
         super();
-        property = (RADProperty<Object>)aProperty;
-        String name = (String)aProperty.getValue("actionName"); // NOI18N
+        property = (RADProperty<Object>) aProperty;
+        String name = (String) aProperty.getValue("actionName"); // NOI18N
         if (name == null) {
             StringBuilder sb = new StringBuilder(aProperty.getName());
             sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
@@ -95,26 +96,18 @@ public class PropertyAction extends AbstractAction {
             final Component custEditor = propEd.getCustomEditor();
             Object[] options = buttons();
             DialogDescriptor descriptor = new DialogDescriptor(
-                custEditor,
-                (String)getValue(Action.NAME),
-                true,
-                options,
-                DialogDescriptor.CANCEL_OPTION,
-                DialogDescriptor.DEFAULT_ALIGN,
-                HelpCtx.DEFAULT_HELP,
-                new ActionListener() {
-                @Override
-                    public void actionPerformed(ActionEvent e) {
+                    custEditor,
+                    (String) getValue(Action.NAME),
+                    true,
+                    options,
+                    DialogDescriptor.CANCEL_OPTION,
+                    DialogDescriptor.DEFAULT_ALIGN,
+                    HelpCtx.DEFAULT_HELP, (ActionEvent e1) -> {
                         try {
-                            String action = e.getActionCommand();
+                            String action = e1.getActionCommand();
                             switch (action) {
                                 case OK_COMMAND:
-                                    Object value;
-                                    if (custEditor instanceof FormCustomEditor) {
-                                        value = ((FormCustomEditor)custEditor).commitChanges();
-                                    } else {
-                                        value = property.getPropertyEditor().getValue();
-                                    }
+                                    Object value = property.getPropertyEditor().getValue();
                                     property.setValue(value);
                                     break;
                                 case RESTORE_COMMAND:
@@ -122,16 +115,12 @@ public class PropertyAction extends AbstractAction {
                                     break;
                             }
                             dialog.dispose();
-                        } catch (PropertyVetoException pve) {
-                            NotifyDescriptor descriptor = new NotifyDescriptor.Message(pve.getLocalizedMessage());
-                            DialogDisplayer.getDefault().notify(descriptor);
                         } catch (Exception ex) {
-                            NotifyDescriptor descriptor = new NotifyDescriptor.Message(
-                                NbBundle.getMessage(PropertyAction.class, "MSG_InvalidValue")); // NOI18N
-                            DialogDisplayer.getDefault().notify(descriptor);
+                            NotifyDescriptor descriptor2 = new NotifyDescriptor.Message(
+                                    NbBundle.getMessage(PropertyAction.class, "MSG_InvalidValue")); // NOI18N
+                            DialogDisplayer.getDefault().notify(descriptor2);
                         }
-                    }
-                });
+                    });
             descriptor.setClosingOptions(new Object[0]);
             dialog = DialogDisplayer.getDefault().createDialog(descriptor);
             dialog.setVisible(true);
@@ -140,10 +129,10 @@ public class PropertyAction extends AbstractAction {
             ErrorManager.getDefault().notify(ex);
         }
     }
-    
+
     private Object[] buttons() {
         ResourceBundle bundle = NbBundle.getBundle(PropertyAction.class);
-        JButton okButton = new JButton(); 
+        JButton okButton = new JButton();
         Mnemonics.setLocalizedText(okButton, bundle.getString("CTL_OK")); // NOI18N
         okButton.getAccessibleContext().setAccessibleDescription(bundle.getString("ACSD_CTL_OK")); // NOI18N
         okButton.setActionCommand(OK_COMMAND);
@@ -153,9 +142,9 @@ public class PropertyAction extends AbstractAction {
         cancelButton.setActionCommand(CANCEL_COMMAND);
         if (property.isDefaultValue()) {
             if ("Aqua".equals(UIManager.getLookAndFeel().getID())) {
-                return new Object[] { cancelButton, okButton };
+                return new Object[]{cancelButton, okButton};
             } else {
-                return new Object[] {okButton, cancelButton};
+                return new Object[]{okButton, cancelButton};
             }
         } else {
             JButton restoreButton = new JButton();
@@ -163,9 +152,9 @@ public class PropertyAction extends AbstractAction {
             restoreButton.getAccessibleContext().setAccessibleDescription(bundle.getString("ACSD_CTL_RestoreDefault")); // NOI18N
             restoreButton.setActionCommand(RESTORE_COMMAND);
             if ("Aqua".equals(UIManager.getLookAndFeel().getID())) {
-                return new Object[] { restoreButton, cancelButton, okButton };
+                return new Object[]{restoreButton, cancelButton, okButton};
             } else {
-                return new Object[] {okButton, restoreButton, cancelButton};
+                return new Object[]{okButton, restoreButton, cancelButton};
             }
         }
     }

@@ -116,47 +116,11 @@ public class RADProperty<T> extends FormProperty<T> {
         }
 
         Object beanInstance = component.getBeanInstance();
-        try {
-            // invoke the setter method
-            T oldValue = getValue();
-            writeMethod.invoke(beanInstance, new Object[]{value});
-            setChanged(defaultValue != value);
-            propertyValueChanged(oldValue, value);
-        } catch (InvocationTargetException ex) {
-            // annotate exception
-            String message = FormUtils.getFormattedBundleString(
-                    "MSG_ERR_WRITING_TO_PROPERTY", // NOI18N
-                    new Object[]{getDisplayName()});
-
-            Throwable tex = ex.getTargetException();
-            if (tex instanceof IllegalArgumentException) {
-                ErrorManager.getDefault().annotate(
-                        tex, ErrorManager.WARNING, null,
-                        message, null, null);
-                // Issue 73627
-                if ("contentType".equals(getName()) && (beanInstance instanceof javax.swing.JTextPane)) { // NOI18N
-                    return;
-                }
-                throw (IllegalArgumentException) tex;
-            } else if (tex instanceof IllegalAccessException) {
-                ErrorManager.getDefault().annotate(
-                        tex, ErrorManager.WARNING, null,
-                        message, null, null);
-                throw (IllegalAccessException) tex;
-            } else if (value == null && tex instanceof NullPointerException) {
-                IllegalArgumentException iae = new IllegalArgumentException();
-                ErrorManager.getDefault().annotate(
-                        iae, ErrorManager.WARNING, null,
-                        message, null, null);
-                throw iae;
-            }
-
-            ErrorManager.getDefault().annotate(
-                    ex, ErrorManager.WARNING, null,
-                    message, null, null);
-
-            throw ex;
-        }
+        // invoke the setter method
+        T oldValue = getValue();
+        writeMethod.invoke(beanInstance, new Object[]{value});
+        setChanged(!isDefaultValue());
+        propertyValueChanged(oldValue, value);
     }
 
     @Override

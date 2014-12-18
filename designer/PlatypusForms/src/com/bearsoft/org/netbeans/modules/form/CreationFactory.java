@@ -116,42 +116,8 @@ public class CreationFactory {
     private CreationFactory() {
     }
 
-    // -----------
     // creation methods
     public static <C> C createDefaultInstance(final Class<?> cls) throws Exception {
-        /*
-         Object cl = UIManager.get("ClassLoader"); // NOI18N
-         ClassLoader systemCl = org.openide.util.Lookup.getDefault().lookup(ClassLoader.class);
-         if (cl == systemCl) {
-         UIManager.put("ClassLoader", null); // NOI18N
-         }
-         Object instance;
-         if (LineBorder.class.isAssignableFrom(cls)) {
-         instance = new LineBorder(Color.black);
-         } else if (EtchedBorder.class.isAssignableFrom(cls)) {
-         instance = new EtchedBorder(Color.black, Color.black);
-         } else if (TitledBorder.class.isAssignableFrom(cls)) {
-         instance = new TitledBorder(new LineBorder(Color.black, 1), "", 0, 0, FormUtils.getDefaultAWTFont(), Color.black);
-         } else if (MatteBorder.class.isAssignableFrom(cls)) {
-         instance = new MatteBorder(0, 0, 0, 0, Color.black);
-         } else if (SoftBevelBorder.class.isAssignableFrom(cls)) {
-         instance = new SoftBevelBorder(SoftBevelBorder.LOWERED, Color.black, Color.black, Color.black, Color.black);
-         } else if (BevelBorder.class.isAssignableFrom(cls)) {
-         instance = new BevelBorder(BevelBorder.LOWERED, Color.black, Color.black, Color.black, Color.black);
-         } else if (EmptyBorder.class.isAssignableFrom(cls)) {
-         instance = new EmptyBorder(1, 1, 1, 1);
-         } else if (TabbedPane.class.isAssignableFrom(cls)) {
-         instance = new TabbedPane() {
-         @Override
-         public void setSelectedComponent(Component c) {
-         setSelectedIndex(indexOfComponent(c));
-         }
-         };
-         } else {
-         instance = cls.newInstance();
-         }
-         UIManager.put("ClassLoader", cl); // NOI18N
-         */
         Object instance = cls.newInstance();
         initAfterCreation(instance);
         return (C) instance;

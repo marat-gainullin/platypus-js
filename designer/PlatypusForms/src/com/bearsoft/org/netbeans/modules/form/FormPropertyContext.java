@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.eas.client.forms.Form;
 import java.beans.*;
 
 /**
@@ -51,19 +52,6 @@ import java.beans.*;
  * @author Tomas Pavek
  */
 public interface FormPropertyContext {
-
-    /**
-     * Describes whether the FormPropertyEditor can be used for editing
-     * properties. This property editor encapsulates multiple property editors
-     * which can be used for given property - this feature is not suitable e.g.
-     * for event properties, and sometimes not possible beacuase of restrictions
-     * in XML storage format (which must stay compatible with previous
-     * versions).
-     *
-     * @return true if multiple property editors can be used
-     * (FormPropertyEditor)
-     */
-    public boolean useMultipleEditors();
 
     /**
      * Initializes property editor for a property - property editors are usually
@@ -96,15 +84,11 @@ public interface FormPropertyContext {
      */
     public static class Component implements FormPropertyContext {
 
-        private RADComponent<?> component;
+        private final RADComponent<?> component;
 
         public Component(RADComponent<?> radComp) {
+            super();
             component = radComp;
-        }
-
-        @Override
-        public boolean useMultipleEditors() {
-            return true;
         }
 
         @Override
@@ -138,11 +122,6 @@ public interface FormPropertyContext {
         }
 
         @Override
-        public boolean useMultipleEditors() {
-            return parentProperty.getPropertyContext().useMultipleEditors();
-        }
-
-        @Override
         public void initPropertyEditor(PropertyEditor prEd, FormProperty<?> property) {
             parentProperty.getPropertyContext().initPropertyEditor(prEd, property);
         }
@@ -162,11 +141,6 @@ public interface FormPropertyContext {
      * "Empty" implementation of FormPropertyContext.
      */
     public static class EmptyImpl implements FormPropertyContext {
-
-        @Override
-        public boolean useMultipleEditors() {
-            return false;
-        }
 
         @Override
         public void initPropertyEditor(PropertyEditor prEd, FormProperty<?> property) {
@@ -193,5 +167,35 @@ public interface FormPropertyContext {
             return theInstance;
         }
         static private EmptyImpl theInstance = null;
+    }
+
+    /**
+     * "Simple property" implementation of FormPropertyContext.
+     */
+    public static class PropImpl implements FormPropertyContext {
+
+        protected FormModel model;
+
+        public PropImpl(FormModel aModel) {
+            super();
+            model = aModel;
+        }
+
+        @Override
+        public void initPropertyEditor(PropertyEditor prEd, FormProperty<?> property) {
+            if (prEd instanceof FormAwareEditor) {
+                ((FormAwareEditor) prEd).setContext(getFormModel(), property);
+            }
+        }
+
+        @Override
+        public FormModel getFormModel() {
+            return model;
+        }
+
+        @Override
+        public Form getOwner() {
+            return model.getForm();
+        }
     }
 }

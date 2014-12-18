@@ -82,10 +82,11 @@ public class RADLayout extends RADComponent<LayoutManager> {
     }
 
     @Override
-    protected PropertyChangeListener createPropertyListener() {
+    protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
+        RADProperty<?> res = super.createBeanProperty(desc);
         // cannot reuse RADComponent.PropertyListener, because this is not
         // a regular RADComponent (properties have a special meaning)
-        return null;
+        res.removePropertyChangeListener(propertyListener);
+        return res;
     }
-
 }

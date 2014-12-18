@@ -82,7 +82,7 @@ public abstract class RADComponent<C> {
     protected Node.PropertySet[] propertySets;
     private Map<String, RADProperty<?>[]> propsByCategories;
     protected Map<String, RADProperty<?>> nameToProperty;
-    private PropertyChangeListener propertyListener;
+    protected final PropertyChangeListener propertyListener = new PropertyChangesPropagator();
     private ComponentContainer parent;
     private FormModel formModel;
     private boolean inModel;
@@ -545,7 +545,7 @@ public abstract class RADComponent<C> {
                         prop.setShortDescription(ann.description());
                     }
                 }
-                setPropertyListener(prop);
+                prop.addPropertyChangeListener(propertyListener);
                 nameToProperty.put(desc.getName(), prop);
                 return prop;
             } catch (InvocationTargetException | IllegalAccessException ex) { // should not happen
@@ -597,7 +597,7 @@ public abstract class RADComponent<C> {
                 || getBeanInstance() instanceof javax.swing.JRadioButtonMenuItem) {
             try {
                 ButtonGroupProperty prop = new ButtonGroupProperty(this);
-                setPropertyListener(prop);
+                prop.addPropertyChangeListener(propertyListener);
                 nameToProperty.put(prop.getName(), prop);
                 magicProps.put(prop.getName(), prop);
             } catch (InvocationTargetException | IllegalAccessException | IntrospectionException ex) {
@@ -624,19 +624,6 @@ public abstract class RADComponent<C> {
                 }
             }
         });
-    }
-
-    protected PropertyChangeListener createPropertyListener() {
-        return new PropertyChangesPropagator();
-    }
-
-    public void setPropertyListener(FormProperty<?> property) {
-        if (propertyListener == null) {
-            propertyListener = createPropertyListener();
-        }
-        if (propertyListener != null) {
-            property.addPropertyChangeListener(propertyListener);
-        }
     }
 
     public RADProperty<?>[] getBeanProperties() {

@@ -50,8 +50,9 @@ import com.eas.design.Undesignable;
 import com.eas.script.ScriptFunction;
 import java.awt.datatransfer.Transferable;
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,15 +75,26 @@ import org.openide.util.datatransfer.PasteType;
  *
  * @author Tomas Pavek
  */
-class FormRootNode extends FormNode {
+public class FormRootNode extends FormNode {
 
+
+    private Map<String, FormProperty<?>> propsByName;
     private List<PropertySet> propSets;
+    private final PropertyChangeListener propsListener = (PropertyChangeEvent evt) -> {
+        if (evt.getSource() instanceof FormRootProperty<?> && FormProperty.PROP_VALUE.equals(evt.getPropertyName())) {
+            formModel.fireFormPropertyChanged(FormRootNode.this, ((FormRootProperty<?>)evt.getSource()).getName(), evt.getOldValue(), evt.getNewValue());
+        }
+    };
 
-    public FormRootNode(FormModel formModel) {
-        super(new RootChildren(formModel), formModel);
+    public FormRootNode(FormModel aFormModel) {
+        super(new RootChildren(aFormModel), aFormModel);
         setName("Form Root Node"); // NOI18N
         setIconBaseWithExtension("com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"); // NOI18N
         updateName(formModel.getName());
+    }
+
+    public FormProperty<?> getProperty(String propertyName) {
+        return propsByName.get(propertyName);
     }
 
     @Override
@@ -95,7 +107,8 @@ class FormRootNode extends FormNode {
         if (propSets == null) {
             try {
                 propSets = new ArrayList<>();
-                Map<String, List<Node.Property<?>>> propsByCategory = new TreeMap<>();
+                propsByName = new TreeMap<>();
+                Map<String, List<FormProperty<?>>> propsByCategory = new TreeMap<>();
                 BeanInfo bi = Introspector.getBeanInfo(Form.class, java.beans.Introspector.IGNORE_ALL_BEANINFO);
                 for (PropertyDescriptor descriptor : bi.getPropertyDescriptors()) {
                     if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
@@ -113,20 +126,22 @@ class FormRootNode extends FormNode {
                             if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
                                 category = designable.category();
                             }
-                            List<Node.Property<?>> catProps = propsByCategory.get(category);
+                            List<FormProperty<?>> catProps = propsByCategory.get(category);
                             if (catProps == null) {
                                 catProps = new ArrayList<>();
                                 propsByCategory.put(category, catProps);
                             }
-                            Node.Property<?> prop = new PropertySupport.Reflection<>(formModel.getForm(), descriptor.getPropertyType(), descriptor.getReadMethod(), descriptor.getWriteMethod());
+                            FormProperty<?> prop = new FormRootProperty<>(formModel, descriptor);
+                            prop.addPropertyChangeListener(propsListener);
                             catProps.add(prop);
+                            propsByName.put(prop.getName(), prop);
                         }
                     }
                 }
                 final ResourceBundle bundle = FormUtils.getBundle();
-                propsByCategory.entrySet().stream().forEach((Map.Entry<String, List<Node.Property<?>>> aEntry) -> {
+                propsByCategory.entrySet().stream().forEach((Map.Entry<String, List<FormProperty<?>>> aEntry) -> {
                     final String category = aEntry.getKey();
-                    final List<Node.Property<?>> props = aEntry.getValue();
+                    final List<FormProperty<?>> props = aEntry.getValue();
                     if (props.size() > 0) {
                         propSets.add(new Node.PropertySet(category, bundle.getString("CTL_" + category), bundle.getString("CTL_" + category + "Hint")) {
                             @Override

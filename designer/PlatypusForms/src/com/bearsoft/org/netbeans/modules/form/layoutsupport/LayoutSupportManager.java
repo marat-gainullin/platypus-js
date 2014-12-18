@@ -362,29 +362,30 @@ public final class LayoutSupportManager implements LayoutSupportContext {
         if (layoutDelegate instanceof AbstractLayoutSupport) {
             return ((AbstractLayoutSupport) layoutDelegate).getAllProperties();
         }
-
         java.util.List<FormProperty<?>> allPropsList = new ArrayList<>();
         for (Node.PropertySet propertySet : propertySets) {
             FormProperty<?>[] props = (FormProperty<?>[]) propertySet.getProperties();
             allPropsList.addAll(Arrays.asList(props));
         }
-
         FormProperty<?>[] allProperties = new FormProperty<?>[allPropsList.size()];
         allPropsList.toArray(allProperties);
         return allProperties;
     }
 
     public FormProperty<?> getLayoutProperty(String name) {
+        FormProperty<?> res = null;
         if (layoutDelegate instanceof AbstractLayoutSupport) {
-            return ((AbstractLayoutSupport) layoutDelegate).getProperty(name);
+            res = ((AbstractLayoutSupport) layoutDelegate).getProperty(name);
         }
-        FormProperty<?>[] properties = getAllProperties();
-        for (int i = 0; i < properties.length; i++) {
-            if (name.equals(properties[i].getName())) {
-                return properties[i];
+        if (res == null) {
+            FormProperty<?>[] properties = getAllProperties();
+            for (int i = 0; i < properties.length; i++) {
+                if (name.equals(properties[i].getName())) {
+                    res = properties[i];
+                }
             }
         }
-        return null;
+        return res;
     }
 
     public Class<?> getCustomizerClass() {

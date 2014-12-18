@@ -878,6 +878,34 @@ public class FormModel {
     }
 
     /**
+     * Fires an event informing about changing a property of a form. An
+     * undoable edit is created and registered automatically.
+     *
+     * @param aFormRootNode
+     * @param propName name of the changed property.
+     * @param oldValue old value of the property.
+     * @param newValue new value of the property.
+     * @return event that has been fired.
+     */
+    public FormModelEvent fireFormPropertyChanged(FormRootNode aFormRootNode,
+            String propName,
+            Object oldValue,
+            Object newValue) {
+        t("firing form property change, property: " + propName); // NOI18N
+
+        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.FORM_PROPERTY_CHANGED);
+        ev.setFormRootNode(aFormRootNode);
+        ev.setProperty(propName, oldValue, newValue);
+        sendEvent(ev);
+
+        if (undoRedoRecording && propName != null && oldValue != newValue) {
+            addUndoableEdit(ev.getUndoableEdit());
+        }
+
+        return ev;
+    }
+    
+    /**
      * Fires an event informing about changing a synthetic property of a
      * component. An undoable edit is created and registered automatically.
      *

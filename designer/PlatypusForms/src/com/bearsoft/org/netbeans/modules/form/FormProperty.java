@@ -100,9 +100,8 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     // ------------------------
     // variables
     protected int accessType = NORMAL_RW;
-    FormPropertyContext propertyContext;
+    protected FormPropertyContext propertyContext;
     boolean valueChanged = false; // non-default value that came in through setValue
-    FormPropertyEditor<?> formPropertyEditor;
     private PropertyChangeSupport changeSupport;
     private VetoableChangeSupport vetoableChangeSupport;
     private boolean fireChanges = true;
@@ -224,32 +223,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
      */
     public void setChanged(boolean changed) {
         valueChanged = changed;
-    }
-
-    // --------------------------------
-    // property editors
-    /**
-     * Gets a property editor for this property. This method implements
-     * Node.Property.getPropertyEditor() and need not be further overriden. It
-     * enables using of multiple individual editors by constructing
-     * FormPropertyEditor class. There are other methods for controling the
-     * FormPropertyEditor class here - see: getCurrentEditor(),
-     * setCurrentEditor(...) and getExpliciteEditor().
-     * @return 
-     */
-    @Override
-    public PropertyEditor getPropertyEditor() {
-        if (propertyContext.useMultipleEditors()) {
-            if (formPropertyEditor == null) {
-                try {
-                    formPropertyEditor = new FormPropertyEditor<>(this);
-                } catch (IllegalAccessException | InvocationTargetException ex) {
-                }
-            }
-            return formPropertyEditor;
-        } else {
-            return super.getPropertyEditor();
-        }
     }
 
     public FormPropertyContext getPropertyContext() {
