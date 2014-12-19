@@ -62,10 +62,11 @@ public class FormEvents {
     // CEDL: mapping listener method signature to list of Event
     //private Map<String,List<Event>> usedMethods = new HashMap<>();
     // event handlers: mapping event handler name to list of Event
-    private Map<String, List<Event>> eventHandlers = new HashMap<>();
-    private FormModel formModel;
+    private final Map<String, List<Event>> eventHandlers = new HashMap<>();
+    private final FormModel formModel;
 
     FormEvents(FormModel aModel) {
+        super();
         formModel = aModel;
     }
 

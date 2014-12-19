@@ -73,7 +73,7 @@ import org.openide.util.actions.CallableSystemAction;
  * @author Tomas Pavek, Jan Stola
  */
 @ActionID(id = "com.bearsoft.org.netbeans.modules.form.actions.TestAction", category = "Form")
-@ActionRegistration(displayName = "#ACT_TestMode", lazy=true)
+@ActionRegistration(displayName = "#ACT_TestMode", lazy = true)
 public class TestAction extends CallableSystemAction implements Runnable {
 
     private static String name;
@@ -150,9 +150,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
         }
 
         FormModel formModel = formDesigner.getFormModel();
-        RADVisualFormContainer formContainer =
-                topComp instanceof RADVisualFormContainer
-                ? (RADVisualFormContainer) topComp : null;
+        RADVisualFormContainer formContainer = (RADVisualFormContainer) topComp;
 
         try {
             if (selectedLaf == null) {
@@ -209,23 +207,16 @@ public class TestAction extends CallableSystemAction implements Runnable {
             }
 
             // set size
-            if (formContainer != null && formContainer.getGenerateSize()) {
-                Dimension size = formContainer.getDesignerSize();
-                Dimension diffSize = RADVisualFormContainer.getDecoratedWindowContentDimensionDiff();
-                size = new Dimension(size.width + diffSize.width, size.height + diffSize.height);
-                frame.setSize(size);
-            }
+            Dimension size = formContainer.getBeanInstance().getSize();
+            Dimension diffSize = RADVisualFormContainer.getDecoratedWindowContentDimensionDiff();
+            size = new Dimension(size.width + diffSize.width, size.height + diffSize.height);
+            frame.setSize(size);
             frame.setUndecorated(false);
             frame.setFocusableWindowState(true);
-
             // Issue 66594 and 12084
-            EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    frame.setBounds(org.openide.util.Utilities.findCenterBounds(frame.getSize()));
-                    frame.setVisible(true);
-                }
+            EventQueue.invokeLater(() -> {
+                frame.setBounds(org.openide.util.Utilities.findCenterBounds(frame.getSize()));
+                frame.setVisible(true);
             });
         } catch (Exception ex) {
             org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);

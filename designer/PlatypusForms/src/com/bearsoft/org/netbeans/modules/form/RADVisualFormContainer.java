@@ -44,12 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Point;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 
 /**
@@ -60,19 +55,7 @@ import java.beans.PropertyDescriptor;
  */
 public class RADVisualFormContainer extends RADVisualContainer<Container> {
 
-    public static final String PROP_FORM_SIZE = "formSize"; // NOI18N
-    public static final String PROP_FORM_POSITION = "formPosition"; // NOI18N
-    public static final String PROP_GENERATE_POSITION = "generatePosition"; // NOI18N
-    public static final String PROP_GENERATE_SIZE = "generateSize"; // NOI18N
-    public static final String PROP_GENERATE_CENTER = "generateCenter"; // NOI18N
     public static final String FORM_NAME = "Form";
-    // Synthetic properties of form
-    private Dimension designerSize;
-    private Dimension formSize;// = new Dimension(FormEditor.DEFAULT_FORM_WIDTH, FormEditor.DEFAULT_FORM_HEIGHT);
-    private Point formPosition;
-    private boolean generatePosition = true;
-    private boolean generateSize = true;
-    private boolean generateCenter = true;
 
     public RADVisualFormContainer() {
         super();
@@ -111,114 +94,6 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
         }
     }
 
-    public Point getFormPosition() {
-        if (formPosition == null) {
-            formPosition = new Point(0, 0);//topContainer.getLocation();
-        }
-        return formPosition;
-    }
-
-    public void setFormPosition(Point value) {
-        Object old = formPosition;
-        formPosition = value;
-        getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_POSITION,
-                old, value);
-    }
-
-    public Dimension getFormSize() {
-        return formSize;
-    }
-
-    public void setFormSize(Dimension value) {
-        Dimension old = setFormSizeImpl(value);
-
-        // this is called when the property is enabled for writing (i.e. policy
-        // is GEN_BOUNDS), but also when loading form (when policy might be not
-        // set yet) - so always propagate to designer size
-        Dimension ldesignerSize;
-        if (getBeanInstance() instanceof Dialog
-                || getBeanInstance() instanceof Frame) {
-            Dimension diffDim = getWindowContentDimensionDiff();
-            ldesignerSize = new Dimension(value.width - diffDim.width,
-                    value.height - diffDim.height);
-        } else {
-            ldesignerSize = value;
-        }
-        setDesignerSizeImpl(ldesignerSize);
-        getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_SIZE, old, value);
-        getFormModel().fireSyntheticPropertyChanged(this, FormModelEvent.PROP_DESIGNER_SIZE, null, null);
-    }
-
-    private Dimension setFormSizeImpl(Dimension value) {
-        Dimension old = formSize;
-        formSize = value;
-        if (getNodeReference() != null) { // propagate the change to node
-            getNodeReference().firePropertyChangeHelper(PROP_FORM_SIZE, old, value);
-        }
-        return old;
-    }
-
-    public Dimension getDesignerSize() {
-        return designerSize;
-    }
-
-    public void setDesignerSize(Dimension value) {
-        Dimension old = setDesignerSizeImpl(value);
-        Dimension lformSize;
-        if (getBeanInstance() instanceof Dialog
-                || getBeanInstance() instanceof Frame) {
-            Dimension diffDim = getWindowContentDimensionDiff();
-            lformSize = new Dimension(value.width + diffDim.width,
-                    value.height + diffDim.height);
-        } else {
-            lformSize = value;
-        }
-        setFormSizeImpl(lformSize);
-        getFormModel().fireSyntheticPropertyChanged(this, FormModelEvent.PROP_DESIGNER_SIZE, old, value);
-    }
-
-    Dimension setDesignerSizeImpl(Dimension value) {
-        Dimension old = designerSize;
-        designerSize = value;
-        if (getNodeReference() != null) { // propagate the change to node
-            getNodeReference().firePropertyChangeHelper(FormModelEvent.PROP_DESIGNER_SIZE, old, value);
-        }
-        return old;
-    }
-
-    public boolean getGeneratePosition() {
-        return generatePosition;
-    }
-
-    public void setGeneratePosition(boolean value) {
-        boolean old = generatePosition;
-        generatePosition = value;
-        getFormModel().fireSyntheticPropertyChanged(this, PROP_GENERATE_POSITION,
-                old ? Boolean.TRUE : Boolean.FALSE, value ? Boolean.TRUE : Boolean.FALSE);
-    }
-
-    public boolean getGenerateSize() {
-        return generateSize;
-    }
-
-    public void setGenerateSize(boolean value) {
-        boolean old = generateSize;
-        generateSize = value;
-        getFormModel().fireSyntheticPropertyChanged(this, PROP_GENERATE_SIZE,
-                old ? Boolean.TRUE : Boolean.FALSE, value ? Boolean.TRUE : Boolean.FALSE);
-    }
-
-    public boolean getGenerateCenter() {
-        return generateCenter;
-    }
-
-    public void setGenerateCenter(boolean value) {
-        boolean old = generateCenter;
-        generateCenter = value;
-        getFormModel().fireSyntheticPropertyChanged(this, PROP_GENERATE_CENTER,
-                old ? Boolean.TRUE : Boolean.FALSE, value ? Boolean.TRUE : Boolean.FALSE);
-    }
-
     // ---------
     // providing the difference of the whole frame/dialog size and the size
     // of the content pane
@@ -245,74 +120,5 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
                     new Dimension(d1.width - d2.width, d1.height - d2.height);
         }
         return windowContentDimensionDiff;
-    }
-
-    @Override
-    void setNodeReference(RADComponentNode node) {
-        super.setNodeReference(node);
-        if (node != null) {
-            Object beanInstance = getBeanInstance();
-            if ((beanInstance instanceof java.awt.Frame)
-                    || (beanInstance instanceof java.awt.Dialog)) {
-                // undecorated is not a bound property => it is not possible to
-                // listen on the beanInstance => we have to listen on the node
-                node.addPropertyChangeListener(new PropertyChangeListener() {
-                    @Override
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        if ("undecorated".equals(evt.getPropertyName())) { // NOI18N
-                            // Keep current designer size and force update of form size
-                            setDesignerSize(getDesignerSize());
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    // ------------------------------------------------------------------------------------------
-    // Innerclasses
-    final public static class SizePolicyEditor extends java.beans.PropertyEditorSupport {
-
-        /**
-         * Display Names for alignment.
-         */
-        private static final String[] names = {
-            FormUtils.getBundleString("VALUE_sizepolicy_full"), // NOI18N
-            FormUtils.getBundleString("VALUE_sizepolicy_pack"), // NOI18N
-            FormUtils.getBundleString("VALUE_sizepolicy_none"), // NOI18N
-        };
-
-        /**
-         * @return names of the possible directions
-         */
-        @Override
-        public String[] getTags() {
-            return names;
-        }
-
-        /**
-         * @return text for the current value
-         */
-        @Override
-        public String getAsText() {
-            int value = ((Integer) getValue()).intValue();
-            return names[value];
-        }
-
-        /**
-         * Setter.
-         *
-         * @param str string equal to one value from directions array
-         */
-        @Override
-        public void setAsText(String str) {
-            if (names[0].equals(str)) {
-                setValue(0);
-            } else if (names[1].equals(str)) {
-                setValue(1);
-            } else if (names[2].equals(str)) {
-                setValue(2);
-            }
-        }
     }
 }

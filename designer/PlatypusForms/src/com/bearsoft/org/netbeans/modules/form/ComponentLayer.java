@@ -68,7 +68,7 @@ class ComponentLayer extends JPanel {
     private static final int HORIZONTAL_MARGIN = 10;
     private static final int VERTICAL_MARGIN = 10;
     private static final Color BLACK_TRANSPARENT_COLOR = new Color(0, 0, 0, 0);
-    private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
+    private static final FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
     /**
      * The container holding the top visual component of the form.
      */
@@ -77,7 +77,7 @@ class ComponentLayer extends JPanel {
      * A panel (with a resizable border) positioning the component container in
      * the whole ComponentLayer area.
      */
-    private DesignerPanel designerPanel;
+    private final DesignerPanel designerPanel;
 
     ComponentLayer(FormModel aFormModel) {
         componentContainer = new JPanel() {
@@ -117,7 +117,7 @@ class ComponentLayer extends JPanel {
     }
 
     Rectangle getDesignerInnerBounds() {
-        Rectangle r = new Rectangle(designerPanel.getDesignerSize());
+        Rectangle r = new Rectangle(designerPanel.getSize());
         Insets i = designerPanel.getInsets();
         r.x = HORIZONTAL_MARGIN + i.left;
         r.y = VERTICAL_MARGIN + i.top;
@@ -130,20 +130,6 @@ class ComponentLayer extends JPanel {
 
     Insets getDesignerOutsets() {
         return designerPanel.getInsets();
-    }
-
-    Dimension getDesignerSize() {
-        return designerPanel.getDesignerSize();
-    }
-
-    Dimension setDesignerSize(Dimension size) {
-        if (size == null) {
-            size = componentContainer.getComponent(0).getPreferredSize();
-        }
-        if (!size.equals(designerPanel.getDesignerSize())) {
-            designerPanel.setDesignerSize(size);
-        }
-        return size;
     }
 
     protected void ensureBackgroundOpaque(JComponent aComponent) {
@@ -210,9 +196,8 @@ class ComponentLayer extends JPanel {
     // ---------
     private static class DesignerPanel extends JPanel {
 
-        private static int BORDER_THICKNESS = 4; // [could be changeable]
-        private Dimension designerSize = new Dimension(400, 300);
-        private FormModel formModel;
+        private static final int BORDER_THICKNESS = 4; // [could be changeable]
+        private final FormModel formModel;
 
         DesignerPanel(FormModel aModel) {
             super();
@@ -220,20 +205,13 @@ class ComponentLayer extends JPanel {
             updateBorder();
         }
 
-        void updateBorder() {
+        final void updateBorder() {
             setBorder(new javax.swing.border.LineBorder(
                     FormLoaderSettings.getInstance().getFormDesignerBorderColor(),
                     BORDER_THICKNESS));
         }
 
-        Dimension getDesignerSize() {
-            return designerSize;
-        }
-
-        void setDesignerSize(Dimension size) {
-            designerSize = size;
-        }
-
+        /*
         @Override
         public Dimension getPreferredSize() {
             Dimension size = new Dimension(designerSize);
@@ -242,6 +220,7 @@ class ComponentLayer extends JPanel {
             size.height += insets.top + insets.bottom;
             return size;
         }
+        */
 
         @Override
         public void paint(Graphics g) {

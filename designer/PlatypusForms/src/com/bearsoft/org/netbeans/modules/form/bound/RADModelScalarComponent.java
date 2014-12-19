@@ -4,13 +4,10 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
-import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
-import com.bearsoft.org.netbeans.modules.form.editors.ModelObjectPropertyPropertyEditor;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import java.beans.PropertyDescriptor;
-import java.beans.PropertyEditor;
 import java.lang.reflect.InvocationTargetException;
 
 /**

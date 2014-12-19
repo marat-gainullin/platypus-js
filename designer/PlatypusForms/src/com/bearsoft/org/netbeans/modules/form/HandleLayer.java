@@ -102,6 +102,7 @@ import org.openide.NotifyDescriptor;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
 import org.openide.nodes.NodeOp;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
@@ -138,12 +139,15 @@ public class HandleLayer extends JPanel {
                     if (formDesigner.getDesignerMode() == PlatypusFormLayoutView.MODE_SELECT
                             && !draggingEnded && !endDragging(e)) {   // there was no dragging, so mouse release may have other meaning
                         boolean modifier = e.isControlDown() || e.isAltDown() || e.isShiftDown();
-                        if ((resizeType & DESIGNER_RESIZING) != 0
-                                && e.getClickCount() == 2
-                                && !modifier
-                                && !viewOnly) {   // doubleclick on designer's resizing border
-                            setUserDesignerSize();
-                        } else if (prevLeftMousePoint != null
+                        /*
+                         if ((resizeType & DESIGNER_RESIZING) != 0
+                         && e.getClickCount() == 2
+                         && !modifier
+                         && !viewOnly) {   // doubleclick on designer's resizing border
+                         setUserDesignerSize();
+                         } else 
+                         */
+                        if (prevLeftMousePoint != null
                                 && prevLeftMousePoint.distance(e.getPoint()) <= 3
                                 && !modifier) {   // second click on the same place in a component
                             RADComponent<?> radComp = getRadComponentAt(e.getPoint(), COMP_SELECTED);
@@ -508,7 +512,7 @@ public class HandleLayer extends JPanel {
         Component component = formDesigner.getComponent(radComp);
         Container parent = component != null ? component.getParent() : null;
 
-        if (parent != null && component.isShowing()) {
+        if (parent != null && component != null && component.isShowing()) {
             Rectangle selRect = component.getBounds();
             Rectangle selParentRect = parent.getBounds();
             convertRectangleFromComponent(selRect, parent);
@@ -1570,7 +1574,7 @@ public class HandleLayer extends JPanel {
                         setToolTipText(null);
                     }
                 } else if (getToolTipText() == null) {
-                    Dimension size = formDesigner.getComponentLayer().getDesignerSize();
+                    Dimension size = formDesigner.getTopDesignComponent().getBeanInstance().getSize();
 
                     MessageFormat mf;
                     if (viewOnly) {
@@ -1790,38 +1794,39 @@ public class HandleLayer extends JPanel {
         }
         setCursor(cursor);
     }
+    /*
+     private void setUserDesignerSize() {
+     NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
+     FormUtils.getBundleString("CTL_SetDesignerSize_Label"), // NOI18N
+     FormUtils.getBundleString("CTL_SetDesignerSize_Title")); // NOI18N
+     Dimension size = formDesigner.getComponentLayer().getDesignerSize();
+     input.setInputText(Integer.toString(size.width) + ", " // NOI18N
+     + Integer.toString(size.height));
 
-    private void setUserDesignerSize() {
-        NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
-                FormUtils.getBundleString("CTL_SetDesignerSize_Label"), // NOI18N
-                FormUtils.getBundleString("CTL_SetDesignerSize_Title")); // NOI18N
-        Dimension size = formDesigner.getComponentLayer().getDesignerSize();
-        input.setInputText(Integer.toString(size.width) + ", " // NOI18N
-                + Integer.toString(size.height));
-
-        if (DialogDisplayer.getDefault().notify(input) == NotifyDescriptor.OK_OPTION) {
-            String txt = input.getInputText();
-            int i = txt.indexOf(',');
-            if (i > 0) {
-                int n = txt.length();
-                try {
-                    int w = Integer.parseInt(txt.substring(0, i));
-                    i++;
-                    while (i < n && txt.charAt(i) == ' ') {
-                        i++;
-                    }
-                    int h = Integer.parseInt(txt.substring(i, n));
-                    if (w >= 0 && h >= 0) {
-                        size = new Dimension(w, h);
-                        formDesigner.setDesignerSize(size, null);
-                        setToolTipText(null);
-                        setCursor(Cursor.getDefaultCursor());
-                    }
-                } catch (NumberFormatException ex) {
-                } // silently ignore, do nothing
-            }
-        }
-    }
+     if (DialogDisplayer.getDefault().notify(input) == NotifyDescriptor.OK_OPTION) {
+     String txt = input.getInputText();
+     int i = txt.indexOf(',');
+     if (i > 0) {
+     int n = txt.length();
+     try {
+     int w = Integer.parseInt(txt.substring(0, i));
+     i++;
+     while (i < n && txt.charAt(i) == ' ') {
+     i++;
+     }
+     int h = Integer.parseInt(txt.substring(i, n));
+     if (w >= 0 && h >= 0) {
+     size = new Dimension(w, h);
+     formDesigner.setDesignerSize(size, null);
+     setToolTipText(null);
+     setCursor(Cursor.getDefaultCursor());
+     }
+     } catch (NumberFormatException ex) {
+     } // silently ignore, do nothing
+     }
+     }
+     }
+     */
 
     private LayoutConstraints<?> getConstraintsAtPoint(RADVisualComponent<?> radComp, Point point, Point hotSpot) {
         RADVisualContainer<?> radCont = radComp instanceof RADVisualContainer
@@ -2423,7 +2428,7 @@ public class HandleLayer extends JPanel {
                 RADVisualContainer<?> formRootContainer = ((RADVisualContainer<?>) movingComponents[0]);
                 realDrag = formRootContainer.getLayoutSupport() != null && formRootContainer.getLayoutSupport().getLayoutDelegate() != null;
                 fixedTarget = null;
-                originalSize = formDesigner.getComponentLayer().getDesignerSize();
+                originalSize = formDesigner.getTopDesignComponent().getBeanInstance().getSize();
             } else if (sourceCont != null) {
                 realDrag = sourceCont.getLayoutSupport() != null;
                 fixedTarget = sourceCont;
@@ -2458,27 +2463,50 @@ public class HandleLayer extends JPanel {
                  */
                 if (isTopComponent()) {
                     Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                    if (formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
-                        formDesigner.setDesignerSize(newSize, originalSize);
-                    } else {
-                        formDesigner.getComponentLayer().setDesignerSize(newSize);
-                        getFormModel().fireSyntheticPropertyChanged(formDesigner.getTopDesignComponent(), FormModelEvent.PROP_DESIGNER_SIZE, originalSize, newSize);
-                    }
+                        formDesigner.getFormModel().fireComponentPropertyChanged(
+                                formDesigner.getTopDesignComponent(), "width", originalSize.width, newSize.width);
+                        formDesigner.getFormModel().fireComponentPropertyChanged(
+                                formDesigner.getTopDesignComponent(), "height", originalSize.height, newSize.height);
                 }
             } else { // resizing canceled
                 if (isTopComponent()) {
-                    // just revert ComponentLayer's designer size (don't need to go through PlatypusFormLayoutView)
-                    ComponentLayer compLayer = formDesigner.getComponentLayer();
-                    if (!compLayer.getDesignerSize().equals(originalSize)) {
-                        compLayer.setDesignerSize(originalSize);
-                        compLayer.revalidate();
-                    }
-                    compLayer.repaint();
+                    changeTopCompSize(originalSize);
+                    /*
+                     // just revert ComponentLayer's designer size (don't need to go through PlatypusFormLayoutView)
+                     ComponentLayer compLayer = formDesigner.getComponentLayer();
+                     if (!compLayer.getDesignerSize().equals(originalSize)) {
+                     compLayer.setDesignerSize(originalSize);
+                     compLayer.revalidate();
+                     }
+                     compLayer.repaint();
+                     */
                 } else { // add resized component back
                     formDesigner.updateContainerLayout(getSourceContainer()); //, false);
                 }
             }
             return true;
+        }
+
+        protected void changeTopCompSize(Dimension newSize) {
+            try {
+                formDesigner.getFormModel().setUndoRedoRecording(false);
+                try {
+                    formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("width").setValue(newSize.width);
+                    formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("height").setValue(newSize.height);
+                } finally {
+                    formDesigner.getFormModel().setUndoRedoRecording(true);
+                }
+                /*
+                 if (formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
+                 formDesigner.setDesignerSize(newSize, originalSize);
+                 } else {
+                 formDesigner.getComponentLayer().setDesignerSize(newSize);
+                 getFormModel().fireSyntheticPropertyChanged(formDesigner.getTopDesignComponent(), FormModelEvent.PROP_DESIGNER_SIZE, originalSize, newSize);
+                 }
+                 */
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
 
         @Override
@@ -2510,8 +2538,11 @@ public class HandleLayer extends JPanel {
                  */
                 if (isTopComponent()/* && formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer*/) {
                     Dimension size = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                    formDesigner.getComponentLayer().setDesignerSize(size);
-                    formDesigner.getComponentLayer().revalidate();
+                    changeTopCompSize(size);
+                    /*
+                     formDesigner.getComponentLayer().setDesignerSize(size);
+                     formDesigner.getComponentLayer().revalidate();
+                     */
                 }
             } else {
                 if (realDrag && targetContainer != null && targetContainer.getLayoutSupport() != null) {
