@@ -30,7 +30,7 @@ import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
-import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
+import com.eas.client.forms.components.model.grid.columns.RadioServiceColumn;
 import com.eas.client.forms.components.model.grid.models.ArrayModel;
 import com.eas.client.forms.components.model.grid.models.ArrayTableModel;
 import com.eas.client.forms.components.model.grid.models.ArrayTreedModel;
@@ -1984,7 +1984,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                         if (brTable != null && brTable.getColumnCount() > 0
                                 && blLeadIndex == blColCount - 1) {
                             int lColIndex = 0;
-                            if (!(brTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                            if (!(brTable.getColumnModel().getColumn(lColIndex) instanceof RadioServiceColumn)) {
                                 while (GridTable.skipableColumn(brTable.getColumnModel().getColumn(lColIndex))) {
                                     lColIndex++;
                                 }
@@ -2005,7 +2005,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                         }
                         if (trTable != null && trTable.getColumnCount() > 0 && (tlLeadIndex == tlColCount - 1)) {
                             int lColIndex = 0;
-                            if (!(trTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                            if (!(trTable.getColumnModel().getColumn(lColIndex) instanceof RadioServiceColumn)) {
                                 while (GridTable.skipableColumn(trTable.getColumnModel().getColumn(lColIndex))) {
                                     lColIndex++;
                                 }
@@ -2029,7 +2029,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                                 && trLeadIndex == 0) {
                             if (tlTable.getColumnModel().getColumnCount() > 0) {
                                 int lColIndex = tlTable.getColumnModel().getColumnCount() - 1;
-                                if (!(tlTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                                if (!(tlTable.getColumnModel().getColumn(lColIndex) instanceof RadioServiceColumn)) {
                                     while (GridTable.skipableColumn(tlTable.getColumnModel().getColumn(lColIndex))) {
                                         lColIndex--;
                                     }
@@ -2052,7 +2052,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                                 && brLeadIndex == 0) {
                             if (blTable.getColumnModel().getColumnCount() > 0) {
                                 int lColIndex = blTable.getColumnModel().getColumnCount() - 1;
-                                if (!(blTable.getColumnModel().getColumn(lColIndex) instanceof RowHeaderTableColumn)) {
+                                if (!(blTable.getColumnModel().getColumn(lColIndex) instanceof RadioServiceColumn)) {
                                     while (GridTable.skipableColumn(blTable.getColumnModel().getColumn(lColIndex))) {
                                         lColIndex--;
                                     }

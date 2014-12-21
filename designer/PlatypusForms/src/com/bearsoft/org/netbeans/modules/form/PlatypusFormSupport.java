@@ -43,12 +43,14 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.org.netbeans.modules.form.editors.ModelObjectEditor;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleDatamodelDescription;
 import com.eas.designer.application.module.PlatypusModuleSourceDescription;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.beans.PropertyEditorManager;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -64,6 +66,7 @@ import javax.swing.JPanel;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
+import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.core.api.multiview.MultiViewHandler;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.core.spi.multiview.*;
@@ -101,6 +104,10 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      */
     public static final String iconURL
             = "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
+
+    static {// because of crazy net beans class loaders
+        PropertyEditorManager.registerEditor(JSObject.class, ModelObjectEditor.class);
+    }
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;
 
@@ -268,7 +275,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
 
     // ------------
     // other interface methods
-
     /**
      * @return data object representing the form
      */

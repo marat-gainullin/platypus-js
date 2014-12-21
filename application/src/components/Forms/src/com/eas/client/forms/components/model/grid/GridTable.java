@@ -8,7 +8,7 @@ import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
-import com.eas.client.forms.components.model.grid.columns.RowHeaderTableColumn;
+import com.eas.client.forms.components.model.grid.columns.RadioServiceColumn;
 import com.eas.gui.ScriptColor;
 import java.awt.Color;
 import java.awt.Component;
@@ -64,7 +64,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
     protected boolean allowCellEdit(int row, int column) {
         TableColumn tCol = getColumnModel().getColumn(column);
         return (editable && !isColumnReadOnly(tCol))
-                || tCol instanceof RowHeaderTableColumn
+                || tCol instanceof RadioServiceColumn
                 || tCol.getCellEditor() instanceof InsettedTreeEditor;
     }
 
@@ -258,7 +258,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         boolean bad = processingKeyBinding && editingEndedWhileKeyBinding && getSelectionModel().getLeadSelectionIndex() == getRowCount() - 1 && rowIndex == 0;
         if (!bad) {
             TableColumn tc = getColumnModel().getColumn(columnIndex);
-            if (!(tc instanceof RowHeaderTableColumn)) {
+            if (!(tc instanceof RadioServiceColumn)) {
                 if (skipableColumn(tc)) {
                     int leadColumnIndex = getColumnModel().getSelectionModel().getLeadSelectionIndex();
                     if (columnIndex - 1 == leadColumnIndex) {

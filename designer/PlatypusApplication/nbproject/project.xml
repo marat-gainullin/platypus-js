@@ -197,7 +197,9 @@
                 </test-type>
             </test-dependencies>
             <public-packages>
+                <package>com.bearsoft.gui.grid.columns</package>
                 <package>com.bearsoft.gui.grid.header</package>
+                <package>com.bearsoft.gui.grid.header.cell</package>
                 <package>com.bearsoft.routing</package>
                 <package>com.bearsoft.routing.graph</package>
                 <package>com.bearsoft.routing.gui</package>
@@ -220,6 +222,7 @@
                 <package>com.eas.client.forms.components.model</package>
                 <package>com.eas.client.forms.components.model.grid</package>
                 <package>com.eas.client.forms.components.model.grid.columns</package>
+                <package>com.eas.client.forms.components.model.grid.header</package>
                 <package>com.eas.client.forms.components.model.grid.models</package>
                 <package>com.eas.client.forms.components.rt</package>
                 <package>com.eas.client.forms.containers</package>
@@ -255,7 +258,6 @@
                 <package>com.eas.designer.application.utils</package>
                 <package>com.eas.gui</package>
                 <package>com.eas.metadata</package>
-                <package>com.eas.resources.images</package>
                 <package>com.eas.script</package>
                 <package>com.eas.server</package>
                 <package>com.eas.server.httpservlet</package>

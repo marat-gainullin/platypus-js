@@ -316,7 +316,6 @@ public class GridColumnsNode {
         return colg;
     }
 
-    @ScriptFunction
     public int getWidth() {
         if (tableColumn != null) {
             return tableColumn.getWidth();
@@ -329,14 +328,12 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public void setWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setWidth(aValue);
         }
     }
 
-    @ScriptFunction
     public int getPreferredWidth() {
         if (tableColumn != null) {
             return tableColumn.getPreferredWidth();
@@ -359,14 +356,12 @@ public class GridColumnsNode {
          */
     }
 
-    @ScriptFunction
     public void setPreferredWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setPreferredWidth(aValue);
         }
     }
 
-    @ScriptFunction
     public int getMinWidth() {
         if (tableColumn != null) {
             return tableColumn.getMinWidth();
@@ -375,7 +370,6 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public void setMinWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setMinWidth(aValue);
@@ -384,7 +378,6 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public int getMaxWidth() {
         if (tableColumn != null) {
             return tableColumn.getMaxWidth();
@@ -393,7 +386,6 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public void setMaxWidth(int aValue) {
         if (tableColumn != null) {
             tableColumn.setMaxWidth(aValue);
@@ -423,15 +415,12 @@ public class GridColumnsNode {
         return children != null && !children.isEmpty();
     }
 
-    @ScriptFunction
-    @Designable(category = "model")
     public String getField() {
         return field;
     }
 
-    @ScriptFunction
     public void setField(String aValue) {
-        if (field != aValue) {
+        if (field == null ? aValue != null : !field.equals(aValue)) {
             field = aValue;
             if (tableColumn instanceof BindedColumn) {
                 ((BindedColumn) tableColumn).setField(field);
@@ -455,67 +444,54 @@ public class GridColumnsNode {
         readonly = aValue;
     }
 
-    @ScriptFunction
     public boolean isEditable() {
         return !readonly;
     }
 
-    @ScriptFunction
     public void setEditable(boolean aValue) {
         readonly = !aValue;
     }
 
-    @ScriptFunction
     public boolean isEnabled() {
         return enabled;
     }
 
-    @ScriptFunction
     public void setEnabled(boolean aValue) {
         enabled = aValue;
     }
 
-    @ScriptFunction
     public boolean isVisible() {
         return visible;
     }
 
-    @ScriptFunction
     public void setVisible(boolean aValue) {
         visible = aValue;
     }
 
-    @ScriptFunction
     public boolean isMovable() {
         return movable;
     }
 
-    @ScriptFunction
     public void setMovable(boolean aValue) {
         movable = aValue;
     }
 
-    @ScriptFunction
     public boolean isResizable() {
         return resizable;
     }
 
-    @ScriptFunction
     public void setResizable(boolean aValue) {
         resizable = aValue;
     }
 
-    @ScriptFunction
     public boolean isSortable() {
         return sortable;
     }
 
-    @ScriptFunction
     public void setSortable(boolean aValue) {
         sortable = aValue;
     }
 
-    @ScriptFunction
     public String getTitle() {
         if (tableColumn != null) {
             if (tableColumn.getHeaderValue() instanceof String) {
@@ -528,7 +504,6 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public void setTitle(String aTitle) {
         if (tableColumn != null) {
             tableColumn.setHeaderValue(aTitle);
@@ -541,12 +516,10 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public Color getBackground() {
         return background;
     }
 
-    @ScriptFunction
     public void setBackground(Color aValue) {
         Color oldValue = background;
         background = aValue;
@@ -580,24 +553,20 @@ public class GridColumnsNode {
         }
     }
 
-    @ScriptFunction
     public Color getForeground() {
         return foreground;
     }
 
-    @ScriptFunction
     public void setForeground(Color aValue) {
         Color oldValue = foreground;
         foreground = aValue;
         changeSupport.firePropertyChange("foreground", oldValue, aValue);
     }
 
-    @ScriptFunction
     public Font getFont() {
         return font;
     }
 
-    @ScriptFunction
     public void setFont(Font aValue) {
         Font oldValue = font;
         font = aValue;

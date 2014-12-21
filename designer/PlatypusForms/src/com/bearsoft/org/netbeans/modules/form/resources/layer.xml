@@ -101,9 +101,6 @@ made subject to such option by the copyright holder.
             <file name="ModelGrid.palette_item" url="palette/ModelGrid.palette_item">
                 <attr name="position" intvalue="400"/>
             </file>
-            <file name="ModelGridColumn.palette_item" url="palette/ModelGridColumn.palette_item">
-                <attr name="position" intvalue="450"/>
-            </file>
             <file name="ModelFormattedField.palette_item" url="palette/ModelFormattedField.palette_item">
                 <attr name="position" intvalue="600"/>
             </file>
@@ -114,7 +111,24 @@ made subject to such option by the copyright holder.
                 <attr name="position" intvalue="1000"/>
             </file>
         </folder>
+        <folder name="PlatypusColumns">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/PlatypusColumns"/>
+            <attr name="isExpanded" boolvalue="true"/>
 
+            <attr name="position" intvalue="160"/>
+            <file name="ModelGridColumn.palette_item" url="palette/ModelGridColumn.palette_item">
+                <attr name="position" intvalue="450"/>
+            </file>
+            <file name="ServiceGridColumn.palette_item" url="palette/ServiceGridColumn.palette_item">
+                <attr name="position" intvalue="460"/>
+            </file>
+            <file name="CheckServiceGridColumn.palette_item" url="palette/CheckServiceGridColumn.palette_item">
+                <attr name="position" intvalue="470"/>
+            </file>
+            <file name="RadioServiceGridColumn.palette_item" url="palette/RadioServiceGridColumn.palette_item">
+                <attr name="position" intvalue="480"/>
+            </file>
+        </folder>
         <folder name="SwingControls">
             <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/SwingControls"/>
             <attr name="isExpanded" boolvalue="true"/>

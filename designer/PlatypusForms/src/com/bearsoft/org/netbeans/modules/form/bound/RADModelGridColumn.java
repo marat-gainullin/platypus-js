@@ -90,9 +90,6 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
     protected void setBeanInstance(GridColumnsNode aBeanInstance) {
         super.setBeanInstance(aBeanInstance);
         if (getBeanInstance() != null) {
-            if (getBeanInstance().getTableColumn() == null) {
-                getBeanInstance().setTableColumn(new ModelColumn());
-            }
             ((ModelColumn) getBeanInstance().getTableColumn()).setName(getName());
             getBeanInstance().setTitle(getName());
         }

@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import org.openide.explorer.propertysheet.ExPropertyEditor;
 import org.openide.explorer.propertysheet.PropertyEnv;
 import org.openide.nodes.Node;
-import org.openide.nodes.PropertyEditorRegistration;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
@@ -31,7 +30,6 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-@PropertyEditorRegistration(targetType = ModelJSObject.class)
 public class ModelObjectEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
     protected int selectionSubject = ModelElementSelector.DATASOURCE_SELECTION_SUBJECT;
