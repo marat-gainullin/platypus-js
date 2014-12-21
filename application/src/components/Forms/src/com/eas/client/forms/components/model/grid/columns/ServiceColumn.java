@@ -13,7 +13,7 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ServiceColumn extends ModelColumn {
 
-    public static final int SERVICE_COLUMN_DEFAULT_WIDTH = 20;
+    public static final int SERVICE_COLUMN_DEFAULT_WIDTH = 22;
     
     public ServiceColumn() {
         this("rows-header-service", new ServiceCellRenderer(), new ServiceCellEditor());
