@@ -46,6 +46,9 @@ package com.bearsoft.org.netbeans.modules.form;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.beans.PropertyDescriptor;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * RADVisualFormContainer represents the top-level container of the form and the
@@ -56,6 +59,10 @@ import java.beans.PropertyDescriptor;
 public class RADVisualFormContainer extends RADVisualContainer<Container> {
 
     public static final String FORM_NAME = "Form";
+    protected static Set<String> hiddenProps = new HashSet<>(Arrays.asList(new String[]{
+        "visible",
+        "left",
+        "top"}));
 
     public RADVisualFormContainer() {
         super();
@@ -87,7 +94,7 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
 
     @Override
     protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
-        if (!"visible".equals(desc.getName())) {
+        if (!hiddenProps.contains(desc.getName())) {
             return super.createBeanProperty(desc);
         } else {
             return null;
@@ -116,8 +123,8 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
             frame.pack();
             Dimension d1 = frame.getSize();
             Dimension d2 = frame.getRootPane().getSize();
-            windowContentDimensionDiff =
-                    new Dimension(d1.width - d2.width, d1.height - d2.height);
+            windowContentDimensionDiff
+                    = new Dimension(d1.width - d2.width, d1.height - d2.height);
         }
         return windowContentDimensionDiff;
     }

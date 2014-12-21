@@ -83,6 +83,7 @@ public class PaletteMenuView extends JMenu {
     /**
      * popupMenu field should be set here because getPopupMenu() is called from
      * superclass constructor.
+     * @return 
      */
     @Override
     public JPopupMenu getPopupMenu() {

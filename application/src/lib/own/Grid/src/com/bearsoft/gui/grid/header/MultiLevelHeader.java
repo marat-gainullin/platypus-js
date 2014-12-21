@@ -180,13 +180,17 @@ public class MultiLevelHeader extends JPanel {
             GridBagConstraints constraints = group2Constraints.get(group);
             if (constraints == null) {
                 constraints = new GridBagConstraints();
+                constraints.weightx = 1;
+                /*
                 if (group.isLeaf()) {
                     constraints.weightx = 1;
                 } else {
                     constraints.weightx = 0;
                 }
+                */
                 constraints.weighty = 1;
-                constraints.anchor = GridBagConstraints.CENTER;
+                constraints.anchor = GridBagConstraints.WEST;
+                //constraints.anchor = GridBagConstraints.CENTER;
                 constraints.fill = GridBagConstraints.BOTH;
                 group2Constraints.put(group, constraints);
             }
@@ -341,7 +345,7 @@ public class MultiLevelHeader extends JPanel {
             assert leaves.get(i).getTableColumn() == columnModel.getColumn(i);
         }
     }
-
+/*
     public void setPreferredWidth2LeafColGroups(List<GridColumnsNode> aGroups, int oldWidth, int newWidth) {
         float fW = (float) (newWidth - oldWidth) / (float) aGroups.size();
         int totalWidth = 0;
@@ -359,7 +363,7 @@ public class MultiLevelHeader extends JPanel {
             //colGroup.getTableColumn().setPreferredWidth(newChildWidth);
         }
     }
-
+*/
     public static void simulateMouseEntered(HeaderCell aCell, MouseEvent e) {
         Point pt = e.getPoint();
         Component releasedComponent = aCell.getHeader().getComponentAt(new Point(aCell.getX() + pt.x, aCell.getY() + pt.y));

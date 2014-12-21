@@ -132,31 +132,31 @@ public final class PaletteUtils {
         try {
             PaletteFactory.createPalette("FormDesignerPalette", // NOI18N
                     new PaletteActions() {
-                @Override
-                public Action[] getImportActions() {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getImportActions() {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action[] getCustomPaletteActions() {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getCustomPaletteActions() {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action[] getCustomCategoryActions(Lookup category) {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getCustomCategoryActions(Lookup category) {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action[] getCustomItemActions(Lookup item) {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getCustomItemActions(Lookup item) {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action getPreferredAction(Lookup item) {
-                    return null;
-                }
-            },
+                        @Override
+                        public Action getPreferredAction(Lookup item) {
+                            return null;
+                        }
+                    },
                     new SwingPaletteFilter(),//(null), // filters out only invisible Layouts category
                     null).showCustomizer();
         } catch (IOException ex) {
@@ -230,7 +230,6 @@ public final class PaletteUtils {
          return null;
          }
          */
-
         ProjectPaletteInfo pInfo = palette;//palettes.get(project);
         if (pInfo == null) {
             //ClassPath classPath = ClassPath.getClassPath(context, ClassPath.BOOT);
@@ -327,31 +326,31 @@ public final class PaletteUtils {
         try {
             return PaletteFactory.createPalette("FormDesignerPalette", // NOI18N
                     new PaletteActions() {
-                @Override
-                public Action[] getImportActions() {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getImportActions() {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action[] getCustomPaletteActions() {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getCustomPaletteActions() {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action[] getCustomCategoryActions(Lookup category) {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getCustomCategoryActions(Lookup category) {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action[] getCustomItemActions(Lookup item) {
-                    return new Action[0];
-                }
+                        @Override
+                        public Action[] getCustomItemActions(Lookup item) {
+                            return new Action[0];
+                        }
 
-                @Override
-                public Action getPreferredAction(Lookup item) {
-                    return null;
-                }
-            },
+                        @Override
+                        public Action getPreferredAction(Lookup item) {
+                            return null;
+                        }
+                    },
                     filter,
                     null);
         } catch (IOException ex) {
@@ -432,9 +431,6 @@ public final class PaletteUtils {
     public static Image getIconForClass(String className, int type, boolean optimalResult) {
         Image img = null;
         for (PaletteItem item : getAllItems(optimalResult)) {
-            if (PaletteItem.TYPE_CHOOSE_BEAN.equals(item.getExplicitComponentType())) {
-                continue;
-            }
             if (className.equals(item.getComponentClassName())) {
                 Node node = item.getNode();
                 if (node != null) {
@@ -463,9 +459,7 @@ public final class PaletteUtils {
                     if (null == uniqueItems) {
                         uniqueItems = new HashSet<>();
                     }
-                    if (!PaletteItem.TYPE_CHOOSE_BEAN.equals(formItem.getExplicitComponentType())) {
-                        uniqueItems.add(formItem);
-                    }
+                    uniqueItems.add(formItem);
                 }
             }
         }

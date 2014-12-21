@@ -273,7 +273,6 @@ public class RADComponentNode extends FormNode
     private void addContainerActions(List<Action> actions) {
         if (component instanceof RADVisualContainer<?> && !((RADVisualContainer<?>) component).hasDedicatedLayoutSupport()) {
             actions.add(SystemAction.get(SelectLayoutAction.class));
-            actions.add(SystemAction.get(CustomizeLayoutAction.class));
         }
         if (MenuEditLayer.isMenuBarContainer(component)) {
             actions.add(SystemAction.get(InsertMenuAction.class));

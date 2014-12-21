@@ -57,21 +57,17 @@ import org.openide.nodes.Node;
  */
 public final class PaletteItem implements Node.Cookie {
 
-    public static final String TYPE_CHOOSE_BEAN = "chooseBean"; // NOI18N
     private PaletteItemDataObject itemDataObject;
     // raw data (as read from the item file - to be resolved lazily)
     String componentClassSource;
-//    Boolean isContainer_explicit;
     String componentType_explicit;
     Image icon;
     // resolved data (derived from the raw data)
     private Class<?> componentClass;
     private Throwable lastError; // error occurred when loading component class
-//    private Boolean componentIsContainer;
     private int componentType = -1;
     // type of component constants
     private static final int LAYOUT = 1;
-    private static final int BORDER = 2;
     private static final int VISUAL = 4; // bit flag
     private static final int MENU = 8; // bit flag
     private static final int TYPE_MASK = 15;
@@ -179,36 +175,6 @@ public final class PaletteItem implements Node.Cookie {
         return (componentType & TYPE_MASK) == LAYOUT;
     }
 
-    /**
-     * @return whether the component of this palette item is a border
-     * (javax.swing.border.Border implementation)
-     */
-    public boolean isBorder() {
-        if (componentType == -1) {
-            resolveComponentType();
-        }
-        return (componentType & TYPE_MASK) == BORDER;
-    }
-
-//    public boolean isContainer() {
-//        if (componentIsContainer == null) {
-//            if (isContainer_explicit != null)
-//                componentIsContainer = isContainer_explicit;
-//            else {
-//                Class<?> compClass = getComponentClass();
-//                if (compClass != null
-//                    && java.awt.Container.class.isAssignableFrom(compClass))
-//                {
-//                    BeanDescriptor bd = getBeanDescriptor();
-//                    componentIsContainer =
-//                        bd != null && Boolean.FALSE.equals(bd.getValue("isContainer")) ? // NOI18N
-//                            Boolean.FALSE : Boolean.TRUE;
-//                }
-//                else componentIsContainer = Boolean.FALSE;
-//            }
-//        }
-//        return componentIsContainer.booleanValue();
-//    }
     @Override
     public String toString() {
         return PaletteUtils.getItemComponentDescription(this);
@@ -239,7 +205,6 @@ public final class PaletteItem implements Node.Cookie {
     void reset() {
         componentClass = null;
         lastError = null;
-//        componentIsContainer = null; 
         componentType = -1;
 
         itemDataObject.displayName = null;
@@ -281,10 +246,9 @@ public final class PaletteItem implements Node.Cookie {
         if (compClass != null) {
             try {
                 return FormUtils.getBeanInfo(compClass).getBeanDescriptor();
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
+                // Issue 74002
             } // ignore failure
-            catch (Error er) {
-            } // Issue 74002
         }
         return null;
     }
@@ -297,39 +261,25 @@ public final class PaletteItem implements Node.Cookie {
             if (compClass == null) {
                 return;
             }
-
             if (java.awt.LayoutManager.class.isAssignableFrom(compClass)) {
                 // PENDING LayoutSupportDelegate - should have special entry in pallette item file?
                 componentType = LAYOUT;
                 return;
             }
-
-            if (javax.swing.border.Border.class.isAssignableFrom(compClass)) {
-                componentType = BORDER;
-                return;
-            }
-
             if (java.awt.Component.class.isAssignableFrom(compClass)) {
                 componentType |= VISUAL;
             }
-
             if (java.awt.MenuComponent.class.isAssignableFrom(compClass)
                     || javax.swing.JMenuItem.class.isAssignableFrom(compClass)
                     || javax.swing.JMenuBar.class.isAssignableFrom(compClass)
                     || javax.swing.JPopupMenu.class.isAssignableFrom(compClass)) {
                 componentType |= MENU;
             }
-        } else if ("visual".equalsIgnoreCase(componentType_explicit)) // NOI18N
-        {
+        } else if ("visual".equalsIgnoreCase(componentType_explicit)) {
             componentType = VISUAL;
-        } else if ("layout".equalsIgnoreCase(componentType_explicit)) // NOI18N
-        {
+        } else if ("layout".equalsIgnoreCase(componentType_explicit)) {
             componentType = LAYOUT;
-        } else if ("border".equalsIgnoreCase(componentType_explicit)) // NOI18N
-        {
-            componentType = BORDER;
-        } else if ("menu".equalsIgnoreCase(componentType_explicit)) // NOI18N
-        {
+        } else if ("menu".equalsIgnoreCase(componentType_explicit)) {
             componentType = MENU | VISUAL;
         } else {
             componentType = 0;

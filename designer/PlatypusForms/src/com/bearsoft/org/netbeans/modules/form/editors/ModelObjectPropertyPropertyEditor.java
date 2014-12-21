@@ -13,6 +13,7 @@ import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.bound.ModelObjectPropertyProperty;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.forms.components.model.ModelCombo;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -70,9 +71,12 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
         if (dataEntity != null) {
             List<String> tags = new ArrayList<>();
             tags.add("");
-            dataEntity.getFields().toCollection().stream().forEach((Field aField) -> {
-                tags.add(prefix + aField.getName());
-            });
+            Fields fields = dataEntity.getFields();
+            if (fields != null) {
+                fields.toCollection().stream().forEach((Field aField) -> {
+                    tags.add(prefix + aField.getName());
+                });
+            }
             return tags.toArray(new String[]{});
         } else {
             return super.getTags();
@@ -227,7 +231,7 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
             if (model != null) {
                 ApplicationDbEntity dataEntity = lookupDataEntity();
                 String oldValue = (String) getValue();
-                Field oldField = oldValue != null && dataEntity != null ? dataEntity.getFields().get(oldValue.startsWith(prefix) ? oldValue.substring(prefix.length()) : oldValue) : null;
+                Field oldField = oldValue != null && dataEntity != null && dataEntity.getFields() != null ? dataEntity.getFields().get(oldValue.startsWith(prefix) ? oldValue.substring(prefix.length()) : oldValue) : null;
                 final ModelElementRef oldRef = oldField != null && dataEntity != null ? new ModelElementRef(oldField, true, dataEntity.getEntityId()) : new ModelElementRef();
                 final ModelElementRef selectedRef = new ModelElementRef();
                 return ModelElementSelector.prepareDialog(model,
@@ -236,7 +240,7 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
                         selectionSubject,
                         null,
                         oldRef, (ActionEvent e) -> {
-                            if (dataEntity != null && selectedRef.entityId != null
+                            if (dataEntity != null && dataEntity.getFields() != null && selectedRef.entityId != null
                             && selectedRef.entityId.equals(dataEntity.getEntityId())) {
                                 Field newField = dataEntity.getFields().get(selectedRef.getFieldName());
                                 setValue(prefix + newField.getName());
@@ -262,8 +266,8 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
                 formModel = formCookie.getFormModel();
                 property = (ModelObjectPropertyProperty) aEnv.getFeatureDescriptor();
             }
-            if(node instanceof RADComponentNode){
-                comp = ((RADComponentNode)node).getRADComponent();
+            if (node instanceof RADComponentNode) {
+                comp = ((RADComponentNode) node).getRADComponent();
             }
         }
     }
