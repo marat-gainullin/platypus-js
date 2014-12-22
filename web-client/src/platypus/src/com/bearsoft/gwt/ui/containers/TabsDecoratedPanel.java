@@ -95,33 +95,32 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 			@Override
 			public void selectTab(final int index, boolean fireEvents) {
 				super.selectTab(index, fireEvents);
-				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-					@Override
-					public void execute() {
-						if (index >= 0 && index < getWidgetCount()) {
-							Widget w = getWidget(index);
-							if (w instanceof RequiresResize) {
-								((RequiresResize) w).onResize();
-							}
-						}
-					}
-
-				});
 			}
+
 		};
 		tabs.addSelectionHandler(new SelectionHandler<Integer>() {
 
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
 				selected = event.getSelectedItem() != -1 ? tabs.getWidget(event.getSelectedItem()) : null;
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						if (selected instanceof RequiresResize) {
+							((RequiresResize) selected).onResize();
+						}
+					}
+
+				});
 				SelectionEvent.fire(TabsDecoratedPanel.this, selected);
 			}
 
 		});
 		tabBar = tabBarContainer.getWidget(0);
 		tabsContent = tabBarContainer.getWidget(1);
-		tabs.setAnimationDuration(500);
+		// GWT Layout animations are deprecated because of CSS3 transitions
+		tabs.setAnimationDuration(0);
 		scrollLeft = new Button(template.classedDiv("tabs-chevron-left"), new ClickHandler() {
 
 			@Override
@@ -289,7 +288,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
 		int tabBarMostLeft = Math.min(tabBarParentWidth - rightMostX, 0);
 		int nextTabBarLeft = tabBar.getElement().getOffsetLeft() - 100;
-		if(nextTabBarLeft < tabBarMostLeft)
+		if (nextTabBarLeft < tabBarMostLeft)
 			nextTabBarLeft = tabBarMostLeft;
 		return nextTabBarLeft;
 	}
