@@ -232,18 +232,13 @@ public class ModelColumn extends TableColumn implements HasPublished {
     public void setWidth(int aValue) {
         if (isResizeable()) {
             super.setWidth(aValue);
-            /*
-             if (header != null) {
-             List<ModelColumnsGroup> leaves = new ArrayList<>();
-             MultiLevelHeader.achieveLeaves(group, leaves);
-             header.setResizingColGroup(group);
-             try {
-             header.setPreferredWidth2LeafColGroups(leaves, oldValue, aValue);
-             } finally {
-             header.setResizingColGroup(null);
-             }
-             }
-             */
+        }
+    }
+
+    @Override
+    public void setPreferredWidth(int preferredWidth) {
+        if (isResizeable()) {
+            super.setPreferredWidth(preferredWidth);
         }
     }
 

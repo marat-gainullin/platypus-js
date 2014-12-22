@@ -120,21 +120,6 @@ public class MultiLevelHeader extends JPanel {
     public void setResizingColGroup(GridColumnsNode aColGroup) {
         if (aColGroup == null || aColGroup.isResizable()) {
             resizingColGroup = aColGroup;
-            //postResizingColumn(resizingColGroup);
-        }
-    }
-
-    private void postResizingColumn(GridColumnsNode aColGroup) {
-        TableColumn tCol = null;
-        if (aColGroup != null) {
-            List<GridColumnsNode> leaves = new ArrayList<>();
-            MultiLevelHeader.achieveLeaves(aColGroup, leaves);
-            tCol = leaves.get(leaves.size() - 1).getTableColumn();
-        }
-        if (slaveHeaders != null) {
-            for (JTableHeader header : slaveHeaders) {
-                header.setResizingColumn(tCol);
-            }
         }
     }
 
@@ -360,30 +345,6 @@ public class MultiLevelHeader extends JPanel {
         assert leaves.size() == columnModel.getColumnCount();
         for (int i = 0; i < leaves.size(); i++) {
             assert leaves.get(i).getTableColumn() == columnModel.getColumn(i);
-        }
-    }
-
-    public void setPreferredWidth2LeafColGroups(List<GridColumnsNode> aGroups, int oldWidth, int newWidth) {
-        float fW = (float) (newWidth - oldWidth) / (float) aGroups.size();
-        int totalWidth = 0;
-        List<Integer> newWidths = new ArrayList<>();
-        for (int i = 0; i < aGroups.size(); i++) {
-            GridColumnsNode colGroup = aGroups.get(i);
-            assert colGroup.getChildren().isEmpty() : "setPreferredWidth2LeafColGroups is intended only for leaf column groups.";
-            assert colGroup.getTableColumn() != null : "Leaf column group without a table column found.";
-            int dW = Math.round(fW);
-            int newChildWidth = colGroup.getWidth() + dW;
-            totalWidth += newChildWidth;
-            if (i == aGroups.size() - 1 && totalWidth != newWidth) {
-                newChildWidth += newWidth - totalWidth;
-            }
-            newWidths.add(newChildWidth);
-        }
-        for (int i = 0; i < newWidths.size(); i++) {
-            int newChildWidth = newWidths.get(i);
-            GridColumnsNode colGroup = aGroups.get(i);
-            colGroup.setWidth(newChildWidth);
-            colGroup.getTableColumn().setPreferredWidth(newChildWidth);
         }
     }
 

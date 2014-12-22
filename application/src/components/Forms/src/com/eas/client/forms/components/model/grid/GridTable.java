@@ -13,9 +13,6 @@ import com.eas.gui.ScriptColor;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
@@ -179,78 +176,6 @@ public class GridTable extends JTable implements ModelCellEditingListener {
             editingEndedWhileKeyBinding = true;
         }
         super.editingCanceled(e);
-    }
-
-    private TableColumn getResizingColumn() {
-        return (tableHeader == null) ? null
-                : tableHeader.getResizingColumn();
-    }
-/*
-    @Override
-    public void doLayout() {
-        TableColumn resizingColumn = getResizingColumn();
-        boolean resizingColumnMet = false;
-        int leftWidth = 0;
-        List<TableColumn> rightColumns = new ArrayList<>();
-        for (int i = 0; i < getColumnModel().getColumnCount(); i++) {
-            if (resizingColumn == null || resizingColumnMet) {
-                rightColumns.add(getColumnModel().getColumn(i));
-            } else {
-                leftWidth += getColumnModel().getColumn(i).getWidth();
-            }
-            if (!resizingColumnMet && resizingColumn == getColumnModel().getColumn(i)) {
-                resizingColumnMet = true;
-            }
-        }
-        int rightWidthRemoved = 0;
-        int rightWidth = 0;
-        for (int i = rightColumns.size() - 1; i >= 0; i--) {
-            TableColumn tCol = rightColumns.get(i);
-            rightWidth += tCol.getWidth();
-            if (tCol instanceof RowHeaderTableColumn
-                    || !tCol.getResizable()) {
-                rightColumns.remove(i);
-                rightWidthRemoved += tCol.getWidth();
-            }
-        }
-        // There are cases, when this is very harmful.
-        // Furthermore, it seems, that accounting such border delta is useless
-        // Note! If you change this, than you must test all grid columns resising capabilities
-        // in synthetica LAFs, jtattoo LAFs and of course in metal LAF.
-        int borderDelta = 0;//getBorder() == null ? 0 : getBorder().getBorderInsets(this).left + getBorder().getBorderInsets(this).right;
-        int delta = (getWidth() - borderDelta) - (leftWidth + rightWidth);
-        if (delta != 0) {
-            for (int i = 0; i < rightColumns.size(); i++) {
-                TableColumn tCol = rightColumns.get(i);
-                float coef = (float) tCol.getWidth() / (float) (rightWidth - rightWidthRemoved);
-                int newWidth = tCol.getWidth() + Math.round(delta * coef);
-                silentSetWidth2Column(tCol, newWidth);
-            }
-            if ((getWidth() - borderDelta) != getColumnModel().getTotalColumnWidth() && getColumnModel().getColumnCount() > 0) {
-                TableColumn goatCol = resizingColumn;
-                if (goatCol == null) {
-                    goatCol = getColumnModel().getColumn(getColumnModel().getColumnCount() - 1);
-                }
-                if (goatCol.getResizable()) {
-                    int goatColNewWidth = goatCol.getWidth() + ((getWidth() - borderDelta) - getColumnModel().getTotalColumnWidth());
-                    silentSetWidth2Column(goatCol, goatColNewWidth);
-                }
-            }
-        }
-    }
-*/
-    private void silentSetWidth2Column(TableColumn tCol, int newWidth) {
-        PropertyChangeListener[] listeners = tCol.getPropertyChangeListeners();
-        for (PropertyChangeListener pcl : listeners) {
-            tCol.removePropertyChangeListener(pcl);
-        }
-        try {
-            tCol.setWidth(Math.max(tCol.getMinWidth(), newWidth));
-        } finally {
-            for (PropertyChangeListener pcl : listeners) {
-                tCol.addPropertyChangeListener(pcl);
-            }
-        }
     }
 
     @Override

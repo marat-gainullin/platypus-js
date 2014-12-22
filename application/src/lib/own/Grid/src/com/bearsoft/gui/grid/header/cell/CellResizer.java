@@ -65,8 +65,9 @@ public class CellResizer extends MouseAdapter {
     public void mouseReleased(MouseEvent e) {
         leftPt = null;
         rightPt = null;
-        cell.getHeader().setResizingColGroup(null);
-        cell.getHeader().setPressed4ResizeColGroup(null);
+        header.getTable().getTableHeader().setResizingColumn(null);
+         cell.getHeader().setResizingColGroup(null);
+         cell.getHeader().setPressed4ResizeColGroup(null);
     }
 
     @Override
@@ -78,18 +79,26 @@ public class CellResizer extends MouseAdapter {
             MultiLevelHeader.achieveLeaves(cell.getColGroup(), leaves);
             assert !leaves.isEmpty();
             if (Math.abs(dWidth) > leaves.size()) {
-                Dimension oldSize = cell.getSize();
-                Dimension newSize = cell.getSize();
-                newSize.width += dWidth;
-                if (newSize.width >= MultiLevelHeader.PICK_MARGIN_SIZE * 2
-                        && (HeaderCell.isValidCellBoundary(e.getComponent()) || dWidth > 0)) {
-                    cell.invalidate();
-                    header.setPreferredWidth2LeafColGroups(leaves, oldSize.width, newSize.width);
-                    if (oldSize.width != cell.getSize().width) {
-                        rightPt = newRightPt;
-                        int dX = cell.getSize().width - newSize.width;
-                        rightPt.x += dX;
+                int newWidth = newRightPt.x;
+                GridColumnsNode resizingNode = null;
+                for (int i = leaves.size() - 1; i >= 0; i--) {
+                    GridColumnsNode leaf = leaves.get(i);
+                    if (leaf.getTableColumn().getMinWidth() < leaf.getTableColumn().getMaxWidth()) {
+                        resizingNode = leaf;
+                    } else {
+                        newWidth -= leaf.getTableColumn().getWidth();
                     }
+                }
+                if (newWidth < 0) {
+                    newWidth = 0;
+                }
+                if (resizingNode != null && resizingNode.isResizable()) {
+                    header.setResizingColGroup(resizingNode);
+                    header.invalidate();
+                    header.repaint();
+                    header.getTable().getTableHeader().setResizingColumn(resizingNode.getTableColumn());
+                    resizingNode.getTableColumn().setWidth(newWidth);
+                    resizingNode.getTableColumn().setPreferredWidth(newWidth);
                 }
             }
         } else if (leftPt != null) {
