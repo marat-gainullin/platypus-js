@@ -28,7 +28,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
-import javax.swing.JSlider;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -52,7 +51,7 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
     }
 
     public Slider() {
-        super(Orientation.HORIZONTAL, 0, 0, 0);
+        this(0, 0, 0);
     }
 /*
     public Slider(int aOrientation) {
