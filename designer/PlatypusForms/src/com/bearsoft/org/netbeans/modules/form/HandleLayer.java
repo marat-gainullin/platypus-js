@@ -2451,16 +2451,6 @@ public class HandleLayer extends JPanel {
                 if (targetContainer != null) {
                     dragger.dropComponents(p, targetContainer);
                 }
-                /*
-                 * Will be returned to working code without RADVisualFormContainer when structural changes 
-                 * of replicants/real components in the form will be clear.
-                 * Also, we have to investigate undo/redo functioning.
-                 if (isTopComponent()) {
-                 Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                 formDesigner.setDesignerSize(newSize, originalSize);
-                 formDesigner.getComponentLayer().revalidate();
-                 }
-                 */
                 if (isTopComponent()) {
                     Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
                         formDesigner.getFormModel().fireComponentPropertyChanged(
@@ -2471,15 +2461,6 @@ public class HandleLayer extends JPanel {
             } else { // resizing canceled
                 if (isTopComponent()) {
                     changeTopCompSize(originalSize);
-                    /*
-                     // just revert ComponentLayer's designer size (don't need to go through PlatypusFormLayoutView)
-                     ComponentLayer compLayer = formDesigner.getComponentLayer();
-                     if (!compLayer.getDesignerSize().equals(originalSize)) {
-                     compLayer.setDesignerSize(originalSize);
-                     compLayer.revalidate();
-                     }
-                     compLayer.repaint();
-                     */
                 } else { // add resized component back
                     formDesigner.updateContainerLayout(getSourceContainer()); //, false);
                 }
@@ -2496,14 +2477,6 @@ public class HandleLayer extends JPanel {
                 } finally {
                     formDesigner.getFormModel().setUndoRedoRecording(true);
                 }
-                /*
-                 if (formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
-                 formDesigner.setDesignerSize(newSize, originalSize);
-                 } else {
-                 formDesigner.getComponentLayer().setDesignerSize(newSize);
-                 getFormModel().fireSyntheticPropertyChanged(formDesigner.getTopDesignComponent(), FormModelEvent.PROP_DESIGNER_SIZE, originalSize, newSize);
-                 }
-                 */
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -2514,7 +2487,7 @@ public class HandleLayer extends JPanel {
             targetContainer = getTargetContainer(p, modifiers);
 
             if (isTopComponent()) {
-                Rectangle r = formDesigner.getComponentLayer().getDesignerInnerBounds();
+                Rectangle r = formDesigner.getTopDesignComponent().getBeanInstance().getBounds();//formDesigner.getComponentLayer().getDesignerInnerBounds();
                 int w = r.width;
                 int h = r.height;
                 if ((resizeType & LayoutSupportManager.RESIZE_DOWN) != 0) {

@@ -166,16 +166,8 @@ public class MultiLevelHeader extends JPanel {
             if (constraints == null) {
                 constraints = new GridBagConstraints();
                 constraints.weightx = 0;
-                /*
-                 if (group.isLeaf()) {
-                 constraints.weightx = 1;
-                 } else {
-                 constraints.weightx = 0;
-                 }
-                 */
                 constraints.weighty = 1;
                 constraints.anchor = GridBagConstraints.WEST;
-                //constraints.anchor = GridBagConstraints.CENTER;
                 constraints.fill = GridBagConstraints.BOTH;
                 group2Constraints.put(group, constraints);
             }
