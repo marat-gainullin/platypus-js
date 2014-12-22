@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components.model.grid.columns;
 
-import com.bearsoft.gui.grid.header.BindedColumn;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.script.AlreadyPublishedException;
@@ -25,7 +24,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelColumn extends TableColumn implements HasPublished, BindedColumn {
+public class ModelColumn extends TableColumn implements HasPublished {
 
     private static JSObject publisher;
     //
@@ -105,16 +104,10 @@ public class ModelColumn extends TableColumn implements HasPublished, BindedColu
         this("column", null, null, false, null, null);
     }
 
-    /**
-     *
-     * @return 
-     */
-    @Override
     public String getField() {
         return field;
     }
 
-    @Override
     public void setField(String aValue) {
         if (field == null ? aValue != null : !field.equals(aValue)) {
             field = aValue;

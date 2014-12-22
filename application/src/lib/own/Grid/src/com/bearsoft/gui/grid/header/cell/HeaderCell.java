@@ -78,7 +78,8 @@ public class HeaderCell extends JEditorPane {
             } else if ("title".equals(evt.getPropertyName())
                     && (evt.getNewValue() == null || evt.getNewValue() instanceof String)) {
                 applyTitle();
-            } else if ("width".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
+            } else if ("width".equals(evt.getPropertyName()) || "preferredWidth".equals(evt.getPropertyName())
+                    || "maxWidth".equals(evt.getPropertyName()) || "minWidth".equals(evt.getPropertyName())) {
                 invalidate();
             }
         }
@@ -144,26 +145,41 @@ public class HeaderCell extends JEditorPane {
 
     @Override
     public Dimension getMinimumSize() {
-        Dimension d = super.getMinimumSize();
-        View view = getUI().getRootView(this);
-        if (view != null) {
-            d.width = Math.round(view.getMinimumSpan(View.X_AXIS));
+        if (colGroup.isLeaf()) {
+            Dimension d = super.getMinimumSize();
+            View view = getUI().getRootView(this);
+            if (view != null) {
+                d.width = Math.round(view.getMinimumSpan(View.X_AXIS));
+            }
+            return new Dimension(Math.max(d.width, colGroup.getMinWidth()), d.height);
+        } else {
+            Dimension d = super.getPreferredSize();
+            return new Dimension(0, d.height);
         }
-        return new Dimension(Math.max(d.width, colGroup.getMinWidth()), d.height);
     }
 
     @Override
     public Dimension getMaximumSize() {
-        Dimension d = super.getMaximumSize();
-        return new Dimension(Math.min(d.width, colGroup.getMaxWidth()), d.height);
+        if (colGroup.isLeaf()) {
+            Dimension d = super.getMaximumSize();
+            return new Dimension(Math.min(d.width, colGroup.getMaxWidth()), d.height);
+        } else {
+            Dimension d = super.getPreferredSize();
+            return new Dimension(Integer.MAX_VALUE, d.height);
+        }
     }
 
     @Override
     public Dimension getPreferredSize() {
-        int colGroupPWidth = colGroup.getWidth();
-        setSize(colGroupPWidth, Integer.MAX_VALUE / 2);
-        Dimension d = super.getPreferredSize();
-        return new Dimension(colGroupPWidth, d.height);
+        if (colGroup.isLeaf()) {
+            int colGroupPWidth = colGroup.getWidth();
+            setSize(colGroupPWidth, Integer.MAX_VALUE / 2);
+            Dimension d = super.getPreferredSize();
+            return new Dimension(colGroupPWidth, d.height);
+        } else {
+            Dimension d = super.getPreferredSize();
+            return new Dimension(0, d.height);
+        }
     }
 
     private int checkSortOrder() {

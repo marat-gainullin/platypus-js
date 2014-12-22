@@ -19,6 +19,8 @@ import javax.swing.table.TableColumn;
  */
 public class ModelGridColumn extends GridColumnsNode {
 
+    protected String field;
+    
     @ScriptFunction
     public ModelGridColumn() {
         super();
@@ -35,6 +37,20 @@ public class ModelGridColumn extends GridColumnsNode {
 
     protected ModelGridColumn(TableColumn aCol) {
         super(aCol);
+    }
+
+    @ScriptFunction
+    @Designable(category = "model")
+    public String getField() {
+        return field;
+    }
+
+    @ScriptFunction
+    public void setField(String aValue) {
+        if (field == null ? aValue != null : !field.equals(aValue)) {
+            field = aValue;
+            ((ModelColumn) tableColumn).setField(field);
+        }
     }
 
     @ScriptFunction
@@ -84,19 +100,6 @@ public class ModelGridColumn extends GridColumnsNode {
         super.setMaxWidth(aValue);
     }
     
-    @ScriptFunction
-    @Designable(category = "model")
-    @Override
-    public String getField() {
-        return super.getField();
-    }
-
-    @ScriptFunction
-    @Override
-    public void setField(String aValue) {
-        super.setField(aValue);
-    }
-
     @ScriptFunction
     @Override
     public boolean isEditable() {

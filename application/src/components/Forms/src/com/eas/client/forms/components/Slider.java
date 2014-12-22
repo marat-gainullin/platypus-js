@@ -46,23 +46,19 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
             + "*/";
     
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
-    public Slider(int aOrientation, int min, int max, int value) {
-        super(aOrientation, min, max, value);
+    public Slider(int min, int max, int value) {
+        super(Orientation.HORIZONTAL, min, max, value);
         setOpaque(false);
     }
 
     public Slider() {
-        this(Orientation.HORIZONTAL);
+        super(Orientation.HORIZONTAL, 0, 0, 0);
     }
-
+/*
     public Slider(int aOrientation) {
         this(aOrientation, 0, 0, 0);
     }
-
-    public Slider(int min, int max, int value) {
-        this(Orientation.HORIZONTAL, min, max, value);
-    }
-
+*/
     @ScriptFunction(jsDoc = ""
             + "/**"
             + " * Slider's value. Can't be null."
@@ -311,10 +307,11 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
         return null;
     }
 
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL\n"
-            + " */")
+//    @ScriptFunction(jsDoc = ""
+//            + "/**\n"
+//            + " * This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL\n"
+//            + " */")
+    /*
     @Override
     public int getOrientation() {
         if (super.getOrientation() == JSlider.HORIZONTAL) {
@@ -331,7 +328,7 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
     public void setOrientation(int aOrientation) {
         super.setOrientation(orientation);
     }
-
+*/
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * The minimum value supported by the slider.\n"

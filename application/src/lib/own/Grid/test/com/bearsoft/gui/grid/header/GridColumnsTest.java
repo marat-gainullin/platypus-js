@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class GridColumnsTest {
 
     @Test
-    public void equalsAssignTest() {
+    public void equalsAssignTest() throws Exception {
         GridColumnsNode col = new GridColumnsNode();
         GridColumnsNode col1 = new GridColumnsNode();
         GridColumnsNode childCol = new GridColumnsNode();

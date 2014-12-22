@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -44,7 +45,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
         super.setBeanInstance(aBeanInstance);
     }
 
-    public void resetBeanColumnsAndHeader() {
+    public void resetBeanColumnsAndHeader() throws Exception {
         if (fireRawColumnsChanges) {
             List<ModelColumn> beanColumns = new ArrayList<>();
             scanLeaves(beanColumns, columns.toArray(new RADModelGridColumn[]{}));
@@ -59,16 +60,21 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
 
     @Override
     public ModelGrid cloneBeanInstance(Collection<RADProperty<?>> relativeProperties) {
-        ModelGrid clonedGrid = super.cloneBeanInstance(relativeProperties);
-        ModelColumn[] targetColumns = new ModelColumn[getBeanInstance().getColumnModel().getColumnCount()];
-        for (int i = 0; i < targetColumns.length; i++) {
-            ModelColumn sourceCol = (ModelColumn) getBeanInstance().getColumnModel().getColumn(i);
-            targetColumns[i] = sourceCol;
+        try {
+            ModelGrid clonedGrid = super.cloneBeanInstance(relativeProperties);
+            ModelColumn[] targetColumns = new ModelColumn[getBeanInstance().getColumnModel().getColumnCount()];
+            for (int i = 0; i < targetColumns.length; i++) {
+                ModelColumn sourceCol = (ModelColumn) getBeanInstance().getColumnModel().getColumn(i);
+                targetColumns[i] = sourceCol;
+            }
+            clonedGrid.setColumns(targetColumns);
+            clonedGrid.setHeader(getBeanInstance().getHeader());
+            clonedGrid.setData(getBeanInstance().getData());
+            return clonedGrid;
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            return null;
         }
-        clonedGrid.setColumns(targetColumns);
-        clonedGrid.setHeader(getBeanInstance().getHeader());
-        clonedGrid.setData(getBeanInstance().getData());
-        return clonedGrid;
     }
 
     @Override
@@ -78,47 +84,63 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
 
     @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
-        columns.clear();
-        getBeanInstance().getHeader().clear();
-        for (int i = 0; i < initComponents.length; i++) {
-            if (initComponents[i] instanceof RADModelGridColumn) {
-                RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
-                radColumn.setParent(this);
-                columns.add(radColumn);
+        try {
+            columns.clear();
+            getBeanInstance().getHeader().clear();
+            for (int i = 0; i < initComponents.length; i++) {
+                if (initComponents[i] instanceof RADModelGridColumn) {
+                    RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
+                    radColumn.setParent(this);
+                    columns.add(radColumn);
+                }
             }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        resetBeanColumnsAndHeader();
     }
 
     @Override
     public void reorderSubComponents(int[] perm) {
-        ModelGrid modelGrid = getBeanInstance();
-        RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        GridColumnsNode[] oldRawColumns = modelGrid.getHeader().toArray(new GridColumnsNode[]{});
-        assert perm.length == oldColumns.length;
-        assert perm.length == oldRawColumns.length;
-        for (int i = 0; i < columns.size(); i++) {
-            columns.set(perm[i], oldColumns[i]);
+        try {
+            ModelGrid modelGrid = getBeanInstance();
+            RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
+            GridColumnsNode[] oldRawColumns = modelGrid.getHeader().toArray(new GridColumnsNode[]{});
+            assert perm.length == oldColumns.length;
+            assert perm.length == oldRawColumns.length;
+            for (int i = 0; i < columns.size(); i++) {
+                columns.set(perm[i], oldColumns[i]);
+            }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        resetBeanColumnsAndHeader();
     }
 
     @Override
     public void add(RADComponent<?> comp) {
-        if (comp instanceof RADModelGridColumn) {
-            RADModelGridColumn radColumn = (RADModelGridColumn) comp;
-            columns.add(radColumn);
+        try {
+            if (comp instanceof RADModelGridColumn) {
+                RADModelGridColumn radColumn = (RADModelGridColumn) comp;
+                columns.add(radColumn);
+            }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        resetBeanColumnsAndHeader();
     }
 
     @Override
     public void remove(RADComponent<?> comp) {
-        if (comp instanceof RADModelGridColumn) {
-            RADModelGridColumn radColumn = (RADModelGridColumn) comp;
-            columns.remove(radColumn);
+        try {
+            if (comp instanceof RADModelGridColumn) {
+                RADModelGridColumn radColumn = (RADModelGridColumn) comp;
+                columns.remove(radColumn);
+            }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        resetBeanColumnsAndHeader();
     }
 
     @Override

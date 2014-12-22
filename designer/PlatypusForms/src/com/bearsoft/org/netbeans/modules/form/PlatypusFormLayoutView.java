@@ -1836,8 +1836,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                         }
                         if (prevType != FormModelEvent.COMPONENT_ADDED
                                 || prevContainer != radContainer) {
-                            replicator.updateAddedComponents(radContainer);
-                            updateDone = true;
+                            try {
+                                replicator.updateAddedComponents(radContainer);
+                                updateDone = true;
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                         updateNodeChildren(radContainer);
                     } else if (type == FormModelEvent.COMPONENT_REMOVED) {
@@ -1866,21 +1870,33 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                             updateWholeDesigner();
                             return;
                         } else {
-                            replicator.removeComponent(ev.getComponent(), ev.getContainer());
-                            updateDone = true;
+                            try {
+                                replicator.removeComponent(ev.getComponent(), ev.getContainer());
+                                updateDone = true;
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                         updateNodeChildren(radContainer);
                     } else if (type == FormModelEvent.COMPONENTS_REORDERED) {
                         if (prevType != FormModelEvent.COMPONENTS_REORDERED
                                 || prevContainer != radContainer) {
-                            replicator.reorderComponents(radContainer);
-                            updateDone = true;
+                            try {
+                                replicator.reorderComponents(radContainer);
+                                updateDone = true;
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                         updateNodeChildren(radContainer);
                     } else if (type == FormModelEvent.COMPONENT_PROPERTY_CHANGED) {
-                        RADProperty<?> eventProperty = ev.getComponentProperty();
-                        replicator.updateComponentProperty(eventProperty);
-                        updateDone = true;
+                        try {
+                            RADProperty<?> eventProperty = ev.getComponentProperty();
+                            replicator.updateComponentProperty(eventProperty);
+                            updateDone = true;
+                        } catch (Exception ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
                     } else if (type == FormModelEvent.TOP_DESIGN_COMPONENT_CHANGED) {
                         setTopDesignComponent((RADVisualContainer<?>) ev.getComponent(), true);
                     } else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED) {
@@ -1897,14 +1913,18 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                              break;
                              */
                             case RADComponent.COMPONENT_NAME_PROP_NAME:
-                                String oldName = (String) ev.getOldPropertyValue();
-                                String newName = (String) ev.getNewPropertyValue();
-                                RADComponent<?> comp = ev.getComponent();
-                                comp.setStoredName(oldName);
-                                replicator.removeComponent(comp, null);
-                                comp.setStoredName(newName);
-                                replicator.addComponent(comp);
-                                updateDone = true;
+                                try {
+                                    String oldName = (String) ev.getOldPropertyValue();
+                                    String newName = (String) ev.getNewPropertyValue();
+                                    RADComponent<?> comp = ev.getComponent();
+                                    comp.setStoredName(oldName);
+                                    replicator.removeComponent(comp, null);
+                                    comp.setStoredName(newName);
+                                    replicator.addComponent(comp);
+                                    updateDone = true;
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
                                 break;
                         }
                     } else if (type == FormModelEvent.COLUMN_VIEW_EXCHANGED) {

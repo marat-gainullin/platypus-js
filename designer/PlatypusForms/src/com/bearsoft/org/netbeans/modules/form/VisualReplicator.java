@@ -170,7 +170,7 @@ public class VisualReplicator {
         }
     }
 
-    public void reorderComponents(ComponentContainer radCont) {
+    public void reorderComponents(ComponentContainer radCont) throws Exception {
         if (radCont instanceof RADVisualContainer<?>) {
             updateContainerLayout((RADVisualContainer<?>) radCont);
         } else {
@@ -216,7 +216,7 @@ public class VisualReplicator {
         }
     }
 
-    public void updateAddedComponents(ComponentContainer radCont) {
+    public void updateAddedComponents(ComponentContainer radCont) throws Exception {
         Container container = null;
         if (radCont instanceof RADComponent<?>) {
             Object contClone = getClonedComponent((RADComponent) radCont);
@@ -251,7 +251,7 @@ public class VisualReplicator {
 
     // for adding just one component, for adding more components use
     // updateAddedComponents
-    public void addComponent(RADComponent<?> radComp) {
+    public void addComponent(RADComponent<?> radComp) throws Exception {
         if (radComp != null && getClonedComponent(radComp) == null) {
             if (radComp instanceof RADVisualComponent<?>) {
                 Object clone = createClone(radComp);
@@ -281,7 +281,7 @@ public class VisualReplicator {
         }
     }
 
-    protected void checkModelGridOperation(ComponentContainer columnContainer) {
+    protected void checkModelGridOperation(ComponentContainer columnContainer) throws Exception {
         while (columnContainer instanceof RADComponent<?> && !(columnContainer instanceof RADModelGrid)) {
             columnContainer = ((RADComponent<?>) columnContainer).getParent();
         }
@@ -293,7 +293,7 @@ public class VisualReplicator {
         }
     }
 
-    public void removeComponent(RADComponent<?> radComp, ComponentContainer radCont) {
+    public void removeComponent(RADComponent<?> radComp, ComponentContainer radCont) throws Exception {
         if (radComp != null) {
             Object clone = getClonedComponent(radComp);
             if (clone != null) {
@@ -354,7 +354,7 @@ public class VisualReplicator {
         }
     }
 
-    public void updateComponentProperty(RADProperty<?> property) {
+    public void updateComponentProperty(RADProperty<?> property) throws Exception {
         if (property != null) {
             RADComponent<?> radComp = property.getRADComponent();
             // target component of the property

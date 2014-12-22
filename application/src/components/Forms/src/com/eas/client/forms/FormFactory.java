@@ -27,7 +27,6 @@ import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
-import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.rt.ButtonGroupWrapper;
 import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasEditable;
@@ -137,10 +136,14 @@ public class FormFactory {
         List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
         widgetsElements.addAll(legacyNonVisualElements);
         widgetsElements.stream().forEach((Element aElement) -> {
-            JComponent widget = readWidget(aElement);
-            String wName = widget.getName();
-            assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
-            widgets.put(wName, widget);
+            try {
+                JComponent widget = readWidget(aElement);
+                String wName = widget.getName();
+                assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
+                widgets.put(wName, widget);
+            } catch (Exception ex) {
+                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
         resolvers.stream().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
             aResolver.accept(widgets);
@@ -173,7 +176,7 @@ public class FormFactory {
         }
     }
 
-    private JComponent readWidget(Element anElement) {
+    private JComponent readWidget(Element anElement) throws Exception {
         String type = anElement.getAttribute("type");
         assert type != null && !type.isEmpty() : "type attribute is required for widgets to be read from a file";
         switch (type) {
@@ -847,24 +850,18 @@ public class FormFactory {
     }
 
     private List<GridColumnsNode> readColumns(ModelGrid grid, List<Element> columnsElements) {
-        List<GridColumnsNode> groups = new ArrayList<>();
+        List<GridColumnsNode> nodes = new ArrayList<>();
         columnsElements.stream().sequential().forEach((columnElement) -> {
-            GridColumnsNode group = new GridColumnsNode();
-            groups.add(group);
+            GridColumnsNode node = new GridColumnsNode();
+            nodes.add(node);
             List<Element> subColumnsElements = XmlDomUtils.elementsByTagName(columnElement, "column");
-            if (subColumnsElements.isEmpty() || forceColumns) {
-                // Leaf or design -> Both GridColumnsGroup and ModelColumn should be created
-                ModelColumn col = new ModelColumn();
-                group.setTableColumn(col);
-                grid.addColumn(col);
-            }
             if (!subColumnsElements.isEmpty()) {
                 List<GridColumnsNode> subGroups = readColumns(grid, subColumnsElements);
                 subGroups.stream().sequential().forEach((GridColumnsNode aGroup) -> {
-                    group.addChild(aGroup);
+                    node.addChild(aGroup);
                 });
             }
         });
-        return groups;
+        return nodes;
     }
 }

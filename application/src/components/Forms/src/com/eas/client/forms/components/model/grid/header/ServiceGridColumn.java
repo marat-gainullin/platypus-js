@@ -85,19 +85,6 @@ public class ServiceGridColumn extends GridColumnsNode {
     }
     
     @ScriptFunction
-    @Designable(category = "model")
-    @Override
-    public String getField() {
-        return super.getField();
-    }
-
-    @ScriptFunction
-    @Override
-    public void setField(String aValue) {
-        super.setField(aValue);
-    }
-
-    @ScriptFunction
     @Override
     public boolean isEditable() {
         return super.isEditable();

@@ -4,8 +4,6 @@
  */
 package com.bearsoft.gui.grid.header;
 
-import com.eas.design.Designable;
-import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
 import java.beans.PropertyChangeEvent;
@@ -35,9 +33,35 @@ public class GridColumnsNode {
     protected boolean visible = true;
     protected String title;
     protected boolean selectOnly;
-    protected String field;
     protected List<GridColumnsNode> children = new ArrayList<>();
+    // events sources
     protected TableColumn tableColumn;
+    protected GridColumnsNode styleSource;
+    // because of nodes cloning
+    protected PropertyChangeListener styleListener = new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            switch (evt.getPropertyName()) {
+                case "font":
+                    font = styleSource.getFont();
+                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                    break;
+                case "background":
+                    background = styleSource.getBackground();
+                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                    break;
+                case "foreground":
+                    foreground = styleSource.getForeground();
+                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                    break;
+                case "title":
+                    title = styleSource.getTitle();
+                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                    break;
+            }
+        }
+    };
     //
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
@@ -81,6 +105,22 @@ public class GridColumnsNode {
         parent = aParent;
     }
 
+    public GridColumnsNode getStyleSource() {
+        return styleSource;
+    }
+
+    public void setStyleSource(GridColumnsNode aValue) {
+        if (styleSource != aValue) {
+            if (styleSource != null) {
+                styleSource.getChangeSupport().removePropertyChangeListener(styleListener);
+            }
+            styleSource = aValue;
+            if (styleSource != null) {
+                styleSource.getChangeSupport().addPropertyChangeListener(styleListener);
+            }
+        }
+    }
+
     public boolean containsInChildren(GridColumnsNode aChild) {
         return children != null && children.indexOf(aChild) != -1;
     }
@@ -102,10 +142,14 @@ public class GridColumnsNode {
                 title = (String) evt.getNewValue();
             } else if ("width".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
                 changeSupport.firePropertyChange("width", evt.getOldValue(), evt.getNewValue());
+            } else if ("preferredWidth".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
+                changeSupport.firePropertyChange("preferredWidth", evt.getOldValue(), evt.getNewValue());
             } else if ("minWidth".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
                 minWidth = (Integer) evt.getNewValue();
+                changeSupport.firePropertyChange("minWidth", evt.getOldValue(), evt.getNewValue());
             } else if ("maxWidth".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
                 maxWidth = (Integer) evt.getNewValue();
+                changeSupport.firePropertyChange("maxWidth", evt.getOldValue(), evt.getNewValue());
             } else if ("movable".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Boolean) {
                 movable = (Boolean) evt.getNewValue();
             } else if ("resizable".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Boolean) {
@@ -286,7 +330,7 @@ public class GridColumnsNode {
         return true;
     }
 
-    public void assign(GridColumnsNode aSource) {
+    public void assign(GridColumnsNode aSource) throws Exception {
         lightAssign(aSource);
         children = new ArrayList<>();
         if (aSource != null && aSource.getChildren() != null) {
@@ -304,16 +348,16 @@ public class GridColumnsNode {
         }
     }
 
-    public GridColumnsNode lightCopy() {
-        GridColumnsNode colg = new GridColumnsNode();
-        colg.lightAssign(this);
-        return colg;
+    public GridColumnsNode lightCopy() throws Exception {
+        GridColumnsNode copied = getClass().newInstance();
+        copied.lightAssign(this);
+        return copied;
     }
 
-    public GridColumnsNode copy() {
-        GridColumnsNode colg = new GridColumnsNode();
-        colg.assign(this);
-        return colg;
+    public GridColumnsNode copy() throws Exception {
+        GridColumnsNode copied = getClass().newInstance();
+        copied.assign(this);
+        return copied;
     }
 
     public int getWidth() {
@@ -413,19 +457,6 @@ public class GridColumnsNode {
 
     public boolean hasChildren() {
         return children != null && !children.isEmpty();
-    }
-
-    public String getField() {
-        return field;
-    }
-
-    public void setField(String aValue) {
-        if (field == null ? aValue != null : !field.equals(aValue)) {
-            field = aValue;
-            if (tableColumn instanceof BindedColumn) {
-                ((BindedColumn) tableColumn).setField(field);
-            }
-        }
     }
 
     public boolean isSelectOnly() {

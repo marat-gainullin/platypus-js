@@ -16,6 +16,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import org.openide.util.Exceptions;
 
 /**
  * This class represents a standard form editor wrapper for model-aware
@@ -68,7 +69,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
         return null;
     }
 
-    public void resetGridColumnsAndHeader() {
+    public void resetGridColumnsAndHeader() throws Exception {
         RADModelGrid grid = lookupGrid();
         if (grid != null) {
             grid.resetBeanColumnsAndHeader();
@@ -102,57 +103,73 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
 
     @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
-        columns.clear();
-        getBeanInstance().getChildren().clear();
-        for (int i = 0; i < initComponents.length; i++) {
-            if (initComponents[i] instanceof RADModelGridColumn) {
-                RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
-                radColumn.setParent(this);
-                columns.add(radColumn);
-                getBeanInstance().getChildren().add(radColumn.getBeanInstance());
-                radColumn.getBeanInstance().setParent(getBeanInstance());
+        try {
+            columns.clear();
+            getBeanInstance().getChildren().clear();
+            for (int i = 0; i < initComponents.length; i++) {
+                if (initComponents[i] instanceof RADModelGridColumn) {
+                    RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
+                    radColumn.setParent(this);
+                    columns.add(radColumn);
+                    getBeanInstance().getChildren().add(radColumn.getBeanInstance());
+                    radColumn.getBeanInstance().setParent(getBeanInstance());
+                }
             }
+            resetGridColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        resetGridColumnsAndHeader();
     }
 
     @Override
     public void reorderSubComponents(int[] perm) {
-        RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        GridColumnsNode[] oldRawColumns = getBeanInstance().getChildren().toArray(new GridColumnsNode[]{});
-        assert perm.length == oldColumns.length;
-        assert perm.length == oldRawColumns.length;
-        for (int i = 0; i < columns.size(); i++) {
-            columns.set(perm[i], oldColumns[i]);
+        try {
+            RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
+            GridColumnsNode[] oldRawColumns = getBeanInstance().getChildren().toArray(new GridColumnsNode[]{});
+            assert perm.length == oldColumns.length;
+            assert perm.length == oldRawColumns.length;
+            for (int i = 0; i < columns.size(); i++) {
+                columns.set(perm[i], oldColumns[i]);
+            }
+            for (int i = 0; i < getBeanInstance().getChildren().size(); i++) {
+                getBeanInstance().getChildren().set(perm[i], oldRawColumns[i]);
+            }
+            resetGridColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        for (int i = 0; i < getBeanInstance().getChildren().size(); i++) {
-            getBeanInstance().getChildren().set(perm[i], oldRawColumns[i]);
-        }
-        resetGridColumnsAndHeader();
     }
 
     @Override
     public void add(RADComponent<?> comp) {
         if (comp instanceof RADModelGridColumn) {
-            RADModelGridColumn radColumn = (RADModelGridColumn) comp;
-            // TODO: check self-addition
-            columns.add(radColumn);
-            if (radColumn.isInModel()) {
-                getBeanInstance().getChildren().add(radColumn.getBeanInstance());
-                radColumn.getBeanInstance().setParent(getBeanInstance());
+            try {
+                RADModelGridColumn radColumn = (RADModelGridColumn) comp;
+                // TODO: check self-addition
+                columns.add(radColumn);
+                if (radColumn.isInModel()) {
+                    getBeanInstance().getChildren().add(radColumn.getBeanInstance());
+                    radColumn.getBeanInstance().setParent(getBeanInstance());
+                }
+                resetGridColumnsAndHeader();
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
-            resetGridColumnsAndHeader();
         }
     }
 
     @Override
     public void remove(RADComponent<?> comp) {
         if (comp instanceof RADModelGridColumn) {
-            RADModelGridColumn radColumn = (RADModelGridColumn) comp;
-            columns.remove(radColumn);
-            getBeanInstance().getChildren().remove(radColumn.getBeanInstance());
-            radColumn.getBeanInstance().setParent(null);
-            resetGridColumnsAndHeader();
+            try {
+                RADModelGridColumn radColumn = (RADModelGridColumn) comp;
+                columns.remove(radColumn);
+                getBeanInstance().getChildren().remove(radColumn.getBeanInstance());
+                radColumn.getBeanInstance().setParent(null);
+                resetGridColumnsAndHeader();
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 

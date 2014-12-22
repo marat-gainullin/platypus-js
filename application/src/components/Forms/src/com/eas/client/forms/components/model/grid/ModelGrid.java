@@ -1059,7 +1059,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     @ScriptFunction
-    public void setFrozenColumns(int aValue) {
+    public void setFrozenColumns(int aValue) throws Exception {
         if (frozenColumns != aValue) {
             frozenColumns = aValue;
             applyColumns();
@@ -1156,7 +1156,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         return header;
     }
 
-    public void setHeader(List<GridColumnsNode> aValue) {
+    public void setHeader(List<GridColumnsNode> aValue) throws Exception {
         if (header != aValue) {
             header = aValue;
             applyHeader();
@@ -1187,7 +1187,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         rheader.setColumnModel(trTable.getColumnModel());
     }
 
-    protected void applyHeader() {
+    protected void applyHeader() throws Exception {
         // set header
         List<GridColumnsNode> lgroups = HeaderSplitter.split(header, 0, frozenColumns - 1);
         List<GridColumnsNode> rgroups = HeaderSplitter.split(header, frozenColumns, Integer.MAX_VALUE);
@@ -1355,17 +1355,17 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     @ScriptFunction
-    public void addColumn(ModelColumn aColumn) {
+    public void addColumn(ModelColumn aColumn) throws Exception {
         addColumn(columnModel.getColumnCount(), aColumn);
     }
 
     @ScriptFunction
-    public void removeColumn(int aIndex) {
+    public void removeColumn(int aIndex) throws Exception {
         removeColumn((ModelColumn) columnModel.getColumn(aIndex));
     }
 
     @ScriptFunction
-    public void addColumn(int aIndex, ModelColumn aColumn) {
+    public void addColumn(int aIndex, ModelColumn aColumn) throws Exception {
         columnModel.addColumn(aColumn);
         columnModel.moveColumn(columnModel.getColumnCount() - 1, aIndex);
         // edit header...
@@ -1375,7 +1375,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     @ScriptFunction
-    public void removeColumn(ModelColumn aColumn) {
+    public void removeColumn(ModelColumn aColumn) throws Exception {
         columnModel.removeColumn(aColumn);
         // edit header...
         // apply changes        

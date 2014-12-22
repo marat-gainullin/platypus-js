@@ -84,7 +84,7 @@ public class CellResizer extends MouseAdapter {
                 if (newSize.width >= MultiLevelHeader.PICK_MARGIN_SIZE * 2
                         && (HeaderCell.isValidCellBoundary(e.getComponent()) || dWidth > 0)) {
                     cell.invalidate();
-                    //header.setPreferredWidth2LeafColGroups(leaves, oldSize.width, newSize.width);
+                    header.setPreferredWidth2LeafColGroups(leaves, oldSize.width, newSize.width);
                     if (oldSize.width != cell.getSize().width) {
                         rightPt = newRightPt;
                         int dX = cell.getSize().width - newSize.width;

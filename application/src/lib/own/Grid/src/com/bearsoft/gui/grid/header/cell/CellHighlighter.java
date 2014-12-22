@@ -123,8 +123,8 @@ public class CellHighlighter extends MouseAdapter {
         } else {
             Dimension d = cell.getSize();
             if (cell.contains(pt) && pt.x >= 0 && pt.x < MultiLevelHeader.PICK_MARGIN_SIZE) {
-                Container header = cell.getParent();
-                LayoutManager l = header.getLayout();
+                Container cellParent = cell.getParent();
+                LayoutManager l = cellParent.getLayout();
                 if (l instanceof GridBagLayout) {
                     GridBagLayout gl = (GridBagLayout) l;
                     GridBagConstraints c = gl.getConstraints(cell);
@@ -137,7 +137,7 @@ public class CellHighlighter extends MouseAdapter {
                     cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
                 }
             } else if (cell.contains(pt) && pt.x >= d.width - MultiLevelHeader.PICK_MARGIN_SIZE - 1 && pt.x < d.width) {
-                cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+                cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
             } else {
                 cell.getHeader().setCursor(Cursor.getDefaultCursor());
             }
