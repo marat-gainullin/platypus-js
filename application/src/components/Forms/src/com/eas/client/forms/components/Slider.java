@@ -51,7 +51,7 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
     }
 
     public Slider() {
-        this(0, 0, 0);
+        this(0, 100, 0);
     }
 /*
     public Slider(int aOrientation) {
