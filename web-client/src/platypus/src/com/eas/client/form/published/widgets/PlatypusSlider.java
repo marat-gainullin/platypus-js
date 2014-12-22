@@ -2,6 +2,9 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.progress.SliderBar;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.events.HasHideHandlers;
 import com.eas.client.form.events.HasShowHandlers;
 import com.eas.client.form.events.HideEvent;
@@ -14,18 +17,25 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class PlatypusSlider extends SliderBar implements HasJsFacade, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public class PlatypusSlider extends SliderBar implements HasJsFacade, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasActionHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected String name;	
+	protected String name;
+	//
+	protected boolean settingValue;
+	//
 	protected JavaScriptObject published;
 
 	public PlatypusSlider(double aMinValue, double aMaxValue, LabelFormatter aLabelFormatter) {
@@ -176,4 +186,35 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 			}
 		});
 	}-*/;
+
+	protected int actionHandlers;
+	protected HandlerRegistration valueChangeReg;
+	@Override
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Double>() {
+
+				@Override
+				public void onValueChange(ValueChangeEvent<Double> event) {
+					if (!settingValue)
+						ActionEvent.fire(PlatypusSlider.this, PlatypusSlider.this);
+				}
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusSlider";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
+				}
+			}
+		};
+	}
 }
