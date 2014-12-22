@@ -5,12 +5,13 @@
 package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.XElement;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.InsertPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -152,9 +153,16 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
                 oldWidget.setVisible(false);
             }
             checkButtonWidth();
-            if (visibleWidget instanceof RequiresResize) {
-                ((RequiresResize) visibleWidget).onResize();
-            }
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+				@Override
+				public void execute() {
+		            if (visibleWidget instanceof RequiresResize) {
+		                ((RequiresResize) visibleWidget).onResize();
+		            }
+				}
+
+			});
         }
     }
 

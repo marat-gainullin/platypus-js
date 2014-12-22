@@ -115,7 +115,7 @@ public class AppClient {
 		}
 	}
 
-	public static String relativeUri() {
+	public static String remoteApiUri() {
 		NodeList<com.google.gwt.dom.client.Element> metas = com.google.gwt.dom.client.Document.get().getHead().getElementsByTagName("meta");
 		for(int i=0;i<metas.getLength();i++){
 			com.google.gwt.dom.client.Element meta = metas.getItem(i);
@@ -123,6 +123,10 @@ public class AppClient {
 				return meta.getAttribute("content");				
 			}
 		}
+		return relativeUri();
+	}
+	
+	public static String relativeUri() {
 		String pageUrl = GWT.getHostPageBaseURL();		
 		pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
 		return pageUrl;
@@ -130,7 +134,7 @@ public class AppClient {
 
 	public static void init() {
 		if (appClient == null) {
-			appClient = new AppClient(relativeUri() + APPLICATION_URI);
+			appClient = new AppClient(remoteApiUri() + APPLICATION_URI);
 		}
 	}
 
@@ -148,16 +152,16 @@ public class AppClient {
 		appClient = aClient;
 	}
 
-	public SafeUri getResourceUri(final String imageName) {
+	public SafeUri getResourceUri(final String aResourceName) {
 		return new SafeUri() {
 
 			@Override
 			public String asString() {
-				MatchResult htppMatch = httpPrefixPattern.exec(imageName);
+				MatchResult htppMatch = httpPrefixPattern.exec(aResourceName);
 				if (htppMatch != null) {
-					return imageName;
+					return aResourceName;
 				} else {
-					return relativeUri() + APP_RESOURCE_PREFIX + imageName;
+					return relativeUri() + APP_RESOURCE_PREFIX + aResourceName;
 				}
 			}
 		};
@@ -349,7 +353,7 @@ public class AppClient {
 		aAction = (aAction != null ? aAction : "");
 		if (!aAction.startsWith("/"))
 			aAction = "/" + aAction;
-		String url = relativeUri() + aAction;
+		String url = apiUrl + aAction;
 		List<String> parameters = new ArrayList<String>();
 		for (String paramName : aFormData.keySet()) {
 			parameters.add(param(paramName, aFormData.get(paramName)));
